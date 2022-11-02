@@ -514,7 +514,7 @@ def chart_map_choices(choices) -> Dict:
 def chart_get_filtered_qs(
     obj,
     year,
-    business_area_slug_filter: Dict = None,
+    business_area_slug_filter: Optional[Dict] = None,
     additional_filters: Dict = None,
     year_filter_path: Optional[str] = None,
 ) -> QuerySet:

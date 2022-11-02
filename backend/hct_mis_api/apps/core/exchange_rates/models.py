@@ -78,7 +78,7 @@ class SingleExchangeRate:
 
 
 class ExchangeRates:
-    def __init__(self, with_history: bool = True, api_client: ExchangeRateAPI = None):
+    def __init__(self, with_history: bool = True, api_client: Optional[ExchangeRateAPI] = None):
         if api_client is None:
             api = ExchangeRateAPI()
         else:

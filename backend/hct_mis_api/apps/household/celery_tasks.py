@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional
 from uuid import UUID
 
 from concurrency.api import disable_concurrency
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_task(household_ids: list[UUID] = None):
+def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = None):
     try:
         from hct_mis_api.apps.household.models import Household, Individual
 

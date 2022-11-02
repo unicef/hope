@@ -129,7 +129,7 @@ class Query(NaturalKeyModel, models.Model):
             args = [{}]
         if not args:
             raise ValueError("No valid arguments provided")
-        results = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
+        results: Dict[str, str] = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
         with transaction.atomic():
             transaction.on_commit(lambda: self.update_results(results))
             for a in args:
@@ -137,7 +137,7 @@ class Query(NaturalKeyModel, models.Model):
                     dataset, __ = self.run(persist, a)
                     results[str(a)] = dataset.pk
                 except QueryRunError as e:
-                    results[str(a)] = e
+                    results[str(a)] = str(e)
             self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
