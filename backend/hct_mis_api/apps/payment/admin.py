@@ -90,9 +90,8 @@ class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEMo
 
     @button()
     def verifications(self, request, pk):
-        # TODO: check this
         list_url = reverse("admin:payment_paymentverification_changelist")
-        url = f"{list_url}?cash_plan_payment_verification__exact={pk}"
+        url = f"{list_url}?payment_verification_plan__exact={pk}"
         return HttpResponseRedirect(url)
 
     @button()
@@ -146,7 +145,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     raw_id_fields = ("payment_verification_plan",)
 
     def payment_plan_name(self, obj):
-        payment_plan = obj.payment_verification_plan.get_payment_plan
+        payment_plan = obj.payment_verification_plan.payment_plan_obj
         return getattr(payment_plan, "name", "~no name~")
 
     def household(self, obj):

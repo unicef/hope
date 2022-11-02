@@ -598,11 +598,10 @@ class PaginatedCashPlanAndPaymentPlanNode(graphene.ObjectType):
 
 
 class GenericPaymentPlanNode(graphene.ObjectType):
-    # TODO: add perms
-    # permission_classes = (
-    #     hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-    #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
-    # )
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
 
     id = graphene.String()
     obj_type = graphene.String()
