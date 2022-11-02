@@ -34,6 +34,7 @@ import {
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
@@ -205,11 +206,9 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${
-        (sampleSizesData?.sampleSize?.sampleSize /
-          sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100
-      })%`;
+      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
+        sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100})%`;
     }
     return ` (0%)`;
   };
@@ -217,6 +216,7 @@ export function EditVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <FormikEffect
             values={values}
             onChange={() => handleFormChange(values)}
