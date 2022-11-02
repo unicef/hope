@@ -516,7 +516,7 @@ def chart_get_filtered_qs(
     year,
     business_area_slug_filter: Dict = None,
     additional_filters: Dict = None,
-    year_filter_path: str = None,
+    year_filter_path: Optional[str] = None,
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}

@@ -56,7 +56,7 @@ class DateRangeField(Field):
 
 
 class BaseRangeFilter(Filter):
-    field_class = None
+    field_class: Optional[Field] = None
 
     def filter(self, qs, values):
         if values:
