@@ -313,7 +313,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_hh_doc(self, data):
+    def _add_hh_doc(self, data) -> None:
         doc_type = self.national_passport_document_type if data.get("type") == "passport" else self.other_document_type
 
         self.documents.append(
@@ -326,7 +326,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_tax_id_document(self, tax_id, individual_obj):
+    def _add_tax_id_document(self, tax_id, individual_obj) -> None:
         self.documents.append(
             ImportedDocument(
                 country=Country("UA"),
@@ -336,7 +336,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _get_document_types(self):
+    def _get_document_types(self) -> None:
         self.national_passport_document_type, _ = ImportedDocumentType.objects.get_or_create(
             type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         )
@@ -353,7 +353,7 @@ class RdiDiiaCreateTask:
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 
-    def tax_id_exists(self, tax_id):
+    def tax_id_exists(self, tax_id) -> bool:
         return (
             ImportedDocument.objects.filter(document_number=tax_id, type=self.imported_doc_type_for_tax_id).exists()
             or Document.objects.filter(document_number=tax_id, type=self.doc_type_for_tax_id).exists()

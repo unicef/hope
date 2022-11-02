@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -56,7 +56,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     that registration data import instance.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.image_loader = None
         self.business_area = None
         self.households = {}
@@ -166,7 +166,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "issuing_country": Country(value),
             }
 
-    def _handle_image_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+    def _handle_image_field(
+        self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs
+    ) -> Union[File, str, None]:
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
             file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -283,14 +285,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
             self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
-    def _create_bank_accounts_infos(self):
+    def _create_bank_accounts_infos(self) -> None:
         bank_accounts_infos_to_create = [
             ImportedBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
         ]
 
         ImportedBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
 
-    def _create_documents(self):
+    def _create_documents(self) -> None:
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
@@ -309,7 +311,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         ImportedDocument.objects.bulk_create(docs_to_create)
 
-    def _create_identities(self):
+    def _create_identities(self) -> None:
         idents_to_create = [
             ImportedIndividualIdentity(
                 agency=ImportedAgency.objects.get(country=ident_data["issuing_country"], type=ident_data["agency"]),
@@ -321,7 +323,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         ImportedIndividualIdentity.objects.bulk_create(idents_to_create)
 
-    def _create_collectors(self):
+    def _create_collectors(self) -> None:
         collectors_to_create = []
         for hh_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
@@ -330,7 +332,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     @staticmethod
-    def _validate_birth_date(obj_to_create):
+    def _validate_birth_date(obj_to_create) -> Any:
         birth_date = obj_to_create.birth_date
 
         if obj_to_create.birth_date < datetime(1923, 1, 1):
@@ -343,7 +345,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return obj_to_create
 
-    def _create_objects(self, sheet, registration_data_import):
+    def _create_objects(self, sheet, registration_data_import) -> None:
         complex_fields = {
             "individuals": {
                 "tax_id_no_i_c": self._handle_document_fields,

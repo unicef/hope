@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -114,9 +114,10 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data, business_area):
+def filter_by_owner(data: Union[List, Dict], business_area) -> Optional[Union[List, Dict]]:
     kobo_username = business_area.kobo_username
     if isinstance(data, list):
         return [element for element in data if element["owner__username"] == kobo_username]
     if data["owner__username"] == kobo_username:
         return data
+    return None

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from django_filters import (
     CharFilter,
@@ -145,7 +145,7 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-    def permissions_filter(self, qs, name, value):
+    def permissions_filter(self, qs, name, value) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
@@ -210,7 +210,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(fields=("id",))
 
-    def prepare_ticket_filters(self, lookup, obj):
+    def prepare_ticket_filters(self, lookup, obj) -> Q:
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
 
         q_obj = Q()

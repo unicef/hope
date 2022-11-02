@@ -332,20 +332,20 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         return tp.steficon_rule.rule
 
-    def set_to_ready_for_cash_assist(self):
+    def set_to_ready_for_cash_assist(self) -> None:
         self.status = self.STATUS_READY_FOR_CASH_ASSIST
         self.sent_to_datahub = True
 
-    def is_finalized(self):
+    def is_finalized(self) -> bool:
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
-    def is_locked(self):
+    def is_locked(self) -> bool:
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
-    def is_open(self):
+    def is_open(self) -> bool:
         return self.status in (self.STATUS_OPEN,)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
