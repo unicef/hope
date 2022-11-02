@@ -5,7 +5,7 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from typing import Any
+from typing import Any, List
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
@@ -25,7 +25,7 @@ class Interpreter:
     def __init__(self, init_string):
         self.init_string = init_string
 
-    def validate(self):
+    def validate(self) -> bool:
         try:
             self.execute()
             return True
@@ -163,8 +163,7 @@ def get_env(**options) -> Environment:
     return env
 
 
-interpreters = [
+interpreters: List[Interpreter] = [
     PythonExec,
-    # PythonFunction,
 ]
 mapping = {a.label.lower(): a for a in interpreters}

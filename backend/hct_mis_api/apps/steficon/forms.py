@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+from typing import Type
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -9,14 +10,14 @@ from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
 from .config import config
-from .interpreters import mapping
+from .interpreters import Interpreter, mapping
 from .models import Rule
 from .widget import ContentTypeChoiceField, PythonEditor
 
 logger = logging.getLogger(__name__)
 
 
-def format_code(code):
+def format_code(code) -> str:
     try:
         import black
 
@@ -74,7 +75,7 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     data = forms.CharField(widget=Textarea({"hidden": ""}))
     fields = forms.CharField(widget=HiddenInput)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
             # TODO: fields is CharField but used as dict?
@@ -106,7 +107,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
         to_field_name=None,
         limit_choices_to=None,
         **kwargs,
-    ):
+    ) -> None:
         from hct_mis_api.apps.targeting.models import TargetPopulation
 
         queryset = TargetPopulation.objects.all()
@@ -123,7 +124,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj):
+    def label_from_instance(self, obj) -> str:
         if obj and obj.business_area:
             return f"{obj.name} ({obj.business_area.name})"
         elif obj.name:
@@ -195,7 +196,8 @@ class RuleForm(forms.ModelForm):
         self._validate_unique = True
         code = self.cleaned_data.get("definition", "")
         language = self.cleaned_data["language"]
-        i = mapping[language](code)
+        interpreter: Type[Interpreter] = mapping[language]
+        i: Interpreter = interpreter(code)
         try:
             i.validate()
         except Exception as e:

@@ -1,5 +1,6 @@
 import json
 from datetime import date, timedelta
+from typing import Dict, Optional
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -19,7 +20,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
-def _clean_data_for_range_field(value, field):
+def _clean_data_for_range_field(value, field) -> Optional[Dict]:
     if value:
         clean_data = {}
         values = json.loads(value)

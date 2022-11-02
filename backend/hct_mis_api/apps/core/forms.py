@@ -30,7 +30,7 @@ class StorageFileForm(forms.Form):
 class ProgramForm(forms.Form):
     name = forms.CharField(max_length=255, label="Target population name")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.business_area_id = kwargs.pop("business_area_id")
         super().__init__(*args, **kwargs)
 

@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("business_area", type=str, default=None)
 
-    def load_batches(self, index, business_area_slug):
+    def load_batches(self, index, business_area_slug) -> None:
         if business_area_slug in ("afghanistan", "ukraine"):
             qs = Individual.objects.filter(business_area__slug=business_area_slug)
         else:
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             bulk(self.es, document_list, index=index)
             i += 1
 
-    def reindex_business_area(self, business_area_slug):
+    def reindex_business_area(self, business_area_slug) -> None:
         index = f"individuals_{business_area_slug}"
         if self.es.indices.exists(index=index):
             self.es.delete_by_query(index=index, body={"query": {"match_all": {}}})
@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"Documents for index: {index} created"))
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         business_area_slug = options.pop("business_area", None)
         indices_options = ("afghanistan", "ukraine", "others")
 
