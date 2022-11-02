@@ -87,7 +87,8 @@ class PaymentVerificationFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "payment__ca_id",
+            "payment__unicef_id",
+            "payment_record__ca_id",
             "payment_verification_plan__verification_channel",
             "payment_verification_plan__unicef_id",
             "status",
@@ -102,14 +103,13 @@ class PaymentVerificationFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        # TODO: fix filter; ''payment_record' and 'payment''
-        # payment_plan_id
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(payment__ca_id__istartswith=value)
+            q_obj |= Q(payment__unicef_id__istartswith=value)
+            q_obj |= Q(payment_record__ca_id__istartswith=value)
             q_obj |= Q(payment_verification_plan__unicef_id__istartswith=value)
-            q_obj |= Q(received__istartswith=value)
+            q_obj |= Q(received_amount__istartswith=value)
             q_obj |= Q(payment__household__unicef_id__istartswith=value)
             q_obj |= Q(payment__head_of_household__full_name__istartswith=value)
             q_obj |= Q(payment__head_of_household__given_name__istartswith=value)
@@ -117,6 +117,14 @@ class PaymentVerificationFilter(FilterSet):
             q_obj |= Q(payment__head_of_household__family_name__istartswith=value)
             q_obj |= Q(payment__head_of_household__phone_no__istartswith=value)
             q_obj |= Q(payment__head_of_household__phone_no_alternative__istartswith=value)
+            q_obj |= Q(payment_record__household__unicef_id__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__full_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__given_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__middle_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__family_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__phone_no__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__phone_no_alternative__istartswith=value)
+
         return qs.filter(q_obj)
 
     def payment_plan_filter(self, qs, name, value):
