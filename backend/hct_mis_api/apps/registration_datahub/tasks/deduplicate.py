@@ -600,7 +600,7 @@ class DeduplicateTask:
     @classmethod
     @transaction.atomic
     def deduplicate_individuals_from_other_source(
-            cls, individuals: QuerySet[Individual], business_area: BusinessArea
+        cls, individuals: QuerySet[Individual], business_area: BusinessArea
     ) -> None:
         wait_until_es_healthy()
         cls.set_thresholds(business_area)
