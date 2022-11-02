@@ -826,9 +826,6 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
-        # TODO: FIX error
-        # "'ExtendedQuerySetSequence' object has no attribute 'clone'"
-        # payment_qs = get_payment_items_sequence_qs().filter(id=OuterRef("payment_object_id"))
         payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
         payment_record_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
 
