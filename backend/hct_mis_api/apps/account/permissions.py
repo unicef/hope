@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Optional, Tuple, Type
+from typing import Iterable, Optional, Tuple, Type
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -364,12 +364,9 @@ class BaseMutationPermissionMixin:
         return True
 
     @classmethod
-    def has_permission(cls, info, permission, business_area_arg, raise_error=True) -> bool:
+    def has_permission(cls, info, permission: Iterable, business_area_arg, raise_error=True) -> bool:
         cls.is_authenticated(info)
-        if not isinstance(permission, list):
-            permissions = (permission,)
-        else:
-            permissions = permission
+        permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):
             business_area = business_area_arg
         else:

@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable
 
 from sentry_sdk import configure_scope
 
@@ -10,7 +10,7 @@ def sentry_tags(func: Callable) -> Callable:
     """
 
     @wraps(func)
-    def wrapper(*args: List, **kwargs: Any) -> Any:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         with configure_scope() as scope:
             scope.set_tag("celery", True)
             scope.set_tag("celery_task", func.__name__)

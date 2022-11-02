@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Type
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -77,7 +77,7 @@ class CheckAgainstSanctionListPreMergeTask:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        documents: Tuple[IndividualDocument] = (
+        documents: Tuple[Type[IndividualDocument]] = (
             (IndividualDocumentAfghanistan, IndividualDocumentUkraine, IndividualDocumentOthers)
             if registration_data_import is None
             else (get_individual_doc(registration_data_import.business_area.slug),)

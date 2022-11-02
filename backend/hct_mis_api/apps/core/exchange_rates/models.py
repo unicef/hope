@@ -102,7 +102,7 @@ class ExchangeRates:
     def get_exchange_rate_for_currency_code(
         self, currency_code: str, dispersion_date: Optional[datetime] = None
     ) -> Optional[float]:
-        currency: SingleExchangeRate = self.exchange_rates_dict.get(currency_code)
+        currency: Optional[SingleExchangeRate] = self.exchange_rates_dict.get(currency_code)
 
         if currency is None:
             return None

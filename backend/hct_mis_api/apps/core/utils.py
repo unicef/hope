@@ -515,7 +515,7 @@ def chart_get_filtered_qs(
     obj,
     year,
     business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Dict = None,
+    additional_filters: Optional[Dict] = None,
     year_filter_path: Optional[str] = None,
 ) -> QuerySet:
     if additional_filters is None:
@@ -604,11 +604,9 @@ def resolve_flex_fields_choices_to_string(parent) -> str:
             continue
 
         if flex_field in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
-            if isinstance(value, list):
-                new_value = [str(current_choice_value) for current_choice_value in value]
-            else:
-                new_value = str(value)
-            flex_fields_with_str_choices[flex_field_name] = new_value
+            flex_fields_with_str_choices[flex_field_name] = (
+                [str(current_choice_value) for current_choice_value in value] if isinstance(value, list) else str(value)
+            )
 
     return flex_fields_with_str_choices
 
