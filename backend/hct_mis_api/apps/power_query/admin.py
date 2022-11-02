@@ -91,7 +91,8 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button(visible=settings.DEBUG)
     def run(self, request, pk) -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
-        query: Query = self.get_object(request, pk)
+        if not (query := self.get_object(request, pk)):
+            raise Exception("Query not found")
         results = query.execute_matrix(persist=True)
         self.message_user(request, "Done", messages.SUCCESS)
         ctx["results"] = results

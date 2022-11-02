@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Tuple, Type
 
 import graphene
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType
+from backend.hct_mis_api.apps.account.permissions import BasePermission
 
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.account.permissions import (
@@ -115,7 +116,7 @@ class StatsObjectType(graphene.ObjectType):
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     """Defines an individual target population record."""
 
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission]] = (
         hopePermissionClass(
             Permissions.TARGETING_VIEW_DETAILS,
         ),

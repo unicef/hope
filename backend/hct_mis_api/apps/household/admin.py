@@ -211,7 +211,7 @@ class HouseholdAdmin(
         return False
 
     def _toggle_withdraw_status(
-        self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None
+        self, request, hh: Household, tickets: Optional[Iterable] = None, comment=None, tag=None
     ) -> HouseholdWithdraw:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 

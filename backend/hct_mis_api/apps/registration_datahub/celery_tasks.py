@@ -382,7 +382,8 @@ def check_and_set_taxid(queryset) -> Dict:
             results["processed"].append(record.pk)
 
         except Exception as e:
-            results[record.pk] = f"{e.__class__.__name__}: {str(e)}"
+            # TODO: the keys are: updated, processed and any pk?
+            results[record.pk] = f"{e.__class__.__name__}: {str(e)}"  # type: ignore
     return results
 
 
