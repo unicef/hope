@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -45,7 +46,7 @@ class Partner(models.Model):
         return self.name
 
     @classmethod
-    def get_partners_as_choices(cls):
+    def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
@@ -85,7 +86,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug):
+    def permissions_in_business_area(self, business_area_slug) -> List:
         all_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
@@ -197,12 +198,12 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
-    def get_roles_as_choices(cls):
+    def get_roles_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user, business_area, role):
+    def validate_user_role(self, user, business_area, role) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))

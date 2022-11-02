@@ -1,6 +1,7 @@
 import time
 from collections import OrderedDict
 from importlib import import_module
+from typing import Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -358,7 +359,7 @@ class Command(BaseCommand):
                 self.stdout.write("    Running deferred SQL...\n")
 
     @staticmethod
-    def describe_operation(operation, backwards):
+    def describe_operation(operation, backwards) -> Tuple[str, bool]:
         """Return a string that describes a migration operation for --plan."""
         prefix = ""
         is_error = False

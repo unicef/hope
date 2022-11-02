@@ -574,7 +574,7 @@ class DeduplicateTask:
 
     @classmethod
     @transaction.atomic
-    def deduplicate_individuals(cls, registration_data_import):
+    def deduplicate_individuals(cls, registration_data_import) -> None:
         wait_until_es_healthy()
         cls.set_thresholds(registration_data_import.business_area)
         individuals = evaluate_qs(
@@ -599,7 +599,9 @@ class DeduplicateTask:
 
     @classmethod
     @transaction.atomic
-    def deduplicate_individuals_from_other_source(cls, individuals: QuerySet[Individual], business_area: BusinessArea):
+    def deduplicate_individuals_from_other_source(
+            cls, individuals: QuerySet[Individual], business_area: BusinessArea
+    ) -> None:
         wait_until_es_healthy()
         cls.set_thresholds(business_area)
 

@@ -1,6 +1,7 @@
 import json
 from datetime import date, timedelta
 
+from django.db.models import QuerySet
 from django.forms import (
     CharField,
     DateField,
@@ -89,7 +90,7 @@ class DecimalRangeFilter(BaseRangeFilter):
     field_class = DecimalRangeField
 
 
-def filter_age(field_name, qs, min, max):
+def filter_age(field_name, qs, min, max) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
     values = None

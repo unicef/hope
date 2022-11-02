@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Dict
 
 from django.conf import settings
 from django.core.cache import cache
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExchangeRateAPI:
-    def __init__(self, api_key: str = None, api_url: str = None):
+    def __init__(self, api_key: str = None, api_url: str = None) -> None:
         self.api_key = api_key or os.getenv("EXCHANGE_RATES_API_KEY")
         self.api_url = api_url or os.getenv(
             "EXCHANGE_RATES_API_URL", "https://uniapis.unicef.org/biapi/v1/exchangerates"
@@ -26,7 +27,7 @@ class ExchangeRateAPI:
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
-    def fetch_exchange_rates(self, with_history: bool = True) -> dict:
+    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
         params = {}
 
         if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:

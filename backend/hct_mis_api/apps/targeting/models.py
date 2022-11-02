@@ -272,7 +272,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
         return queryset.distinct()
 
-    def refresh_stats(self):
+    def refresh_stats(self) -> None:
         households_ids = self.household_list.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
@@ -304,7 +304,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         try:
             return self.targeting_criteria.get_criteria_string()
         except Exception:

@@ -33,7 +33,7 @@ def fqn(o):
     return ".".join(parts)
 
 
-def to_dataset(result):
+def to_dataset(result) -> tablib.Dataset:
     if isinstance(result, QuerySet):
         data = tablib.Dataset()
         fields = result.__dict__["_fields"]

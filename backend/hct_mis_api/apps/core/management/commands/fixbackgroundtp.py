@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = "Fix background TP"
 
     @transaction.atomic
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         print("Fixing locked, sent TPs")
         locked_and_finished_tps = TargetPopulation.objects.filter(
             status__in=[

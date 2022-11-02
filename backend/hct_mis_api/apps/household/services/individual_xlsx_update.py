@@ -1,7 +1,7 @@
-from typing import Dict
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.forms.models import modelform_factory
 
 import openpyxl
@@ -27,7 +27,7 @@ class IndividualXlsxUpdate:
     STATUS_NO_MATCH = "NO_MATCH"
     STATUS_MULTIPLE_MATCH = "MULTIPLE_MATCH"
 
-    def __init__(self, xlsx_update_file):
+    def __init__(self, xlsx_update_file) -> None:
         our_attributes = FieldFactory.from_scopes([Scope.GLOBAL, Scope.INDIVIDUAL_XLSX_UPDATE])
         self.xlsx_update_file = xlsx_update_file
         self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in our_attributes}
@@ -42,7 +42,7 @@ class IndividualXlsxUpdate:
         self._validate_columns_names()
         self._build_helpers()
 
-    def get_matching_report(self):
+    def get_matching_report(self) -> Dict:
         report_dict = {
             IndividualXlsxUpdate.STATUS_UNIQUE: [],
             IndividualXlsxUpdate.STATUS_NO_MATCH: [],
@@ -54,7 +54,7 @@ class IndividualXlsxUpdate:
         self.report_dict = report_dict
         return report_dict
 
-    def update_individuals(self):
+    def update_individuals(self) -> None:
         self.get_matching_report()
 
         individuals = []
@@ -70,13 +70,14 @@ class IndividualXlsxUpdate:
         Individual.objects.bulk_update(individuals, columns)
 
     @staticmethod
-    def _column_name_by_attr(attr):
+    def _column_name_by_attr(attr) -> Optional[str]:
         if attr.get("associated_with") == _INDIVIDUAL:
             return f"individual__{attr.get('name')}"
         if attr.get("associated_with") == _HOUSEHOLD:
             return f"household__{attr.get('name')}"
+        return None
 
-    def _validate_columns_names(self):
+    def _validate_columns_names(self) -> None:
         first_row = self.individuals_ws[1]
 
         invalid_columns = [cell.value for cell in first_row if cell.value not in self.core_attr_by_names]
@@ -84,7 +85,7 @@ class IndividualXlsxUpdate:
         if invalid_columns:
             raise InvalidColumnsError(f"Invalid columns: {invalid_columns}")
 
-    def _build_helpers(self):
+    def _build_helpers(self) -> None:
         first_row = self.individuals_ws[1]
         self.columns_names = [cell.value for cell in first_row]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
@@ -92,7 +93,7 @@ class IndividualXlsxUpdate:
         self.columns_match_indexes = [self.columns_names_index_dict[col] for col in self.xlsx_match_columns]
         return self.columns_names
 
-    def _get_queryset(self):
+    def _get_queryset(self) -> QuerySet:
         queryset = Individual.objects.filter(business_area=self.xlsx_update_file.business_area)
 
         if self.xlsx_update_file.rdi:
@@ -100,10 +101,11 @@ class IndividualXlsxUpdate:
 
         return queryset
 
-    def _row_report_data(self, row):
+    def _row_report_data(self, row) -> Any:
         return row[0].row
 
-    def _get_matching_report_for_single_row(self, row):
+    def _get_matching_report_for_single_row(self, row) -> Any:
+        # TODO: refactor the output of this function
         q_object = Q()
         for match_col in self.xlsx_match_columns:
             attr = self.core_attr_by_names[match_col]
@@ -117,7 +119,7 @@ class IndividualXlsxUpdate:
             return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (self._row_report_data(row), individuals)
         return IndividualXlsxUpdate.STATUS_UNIQUE, (self._row_report_data(row), individuals[0])
 
-    def _update_single_individual(self, row, individual):
+    def _update_single_individual(self, row, individual) -> Individual:
         old_individual = copy_model_object(individual)
 
         updated = {}

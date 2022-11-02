@@ -305,7 +305,7 @@ def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwa
     return grievance_ticket
 
 
-def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
 
@@ -346,7 +346,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     return [grievance_ticket]
 
 
-def update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     household_data_update_new_extras = extras.get("household_data_update_issue_type_extras")
     household = ticket_details.household
@@ -476,7 +476,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     return [grievance_ticket]
 
 
-def update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_individual_data_update_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
 
     individual_data_update_extras = extras.get("individual_data_update_issue_type_extras")
@@ -570,7 +572,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     return grievance_ticket
 
 
-def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
 
@@ -586,7 +588,7 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     return [grievance_ticket]
 
 
-def save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
     household_encoded_id = household_data_update_issue_type_extras.get("household")
@@ -601,7 +603,7 @@ def save_household_delete_extras(root, info, input, grievance_ticket, extras, **
     return [grievance_ticket]
 
 
-def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     add_individual_issue_type_extras = data_change_extras.get("add_individual_issue_type_extras")
 
@@ -633,7 +635,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     return [grievance_ticket]
 
 
-def update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.add_individual_ticket_details
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
@@ -661,7 +663,7 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
 
 
 @transaction.atomic
-def close_add_individual_grievance_ticket(grievance_ticket, info):
+def close_add_individual_grievance_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.add_individual_ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
@@ -728,7 +730,7 @@ def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
 
 
 @transaction.atomic
-def close_update_individual_grievance_ticket(grievance_ticket, info):
+def close_update_individual_grievance_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
         return
@@ -865,7 +867,7 @@ def cast_flex_fields(flex_fields) -> None:
 
 
 @transaction.atomic
-def close_update_household_grievance_ticket(grievance_ticket, info):
+def close_update_household_grievance_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     if not ticket_details:
         return
@@ -912,7 +914,7 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
 
 
 @transaction.atomic
-def close_delete_individual_ticket(grievance_ticket, info):
+def close_delete_individual_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
@@ -937,7 +939,7 @@ def check_external_collector(household) -> None:
 
 
 @transaction.atomic
-def close_delete_household_ticket(grievance_ticket, info):
+def close_delete_household_ticket(grievance_ticket, info) -> None:
     from django.db.models import Q
 
     from hct_mis_api.apps.grievance.models import (

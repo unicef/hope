@@ -5,6 +5,7 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
@@ -32,7 +33,7 @@ class Interpreter:
             logger.exception(e)
             raise ValidationError(e)
 
-    def get_result(self):
+    def get_result(self) -> Any:
         return config.RESULT()
 
 

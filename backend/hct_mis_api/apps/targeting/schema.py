@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Any, Dict, List, Union
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, QuerySet
 
 import graphene
 from graphene import relay
@@ -56,7 +56,7 @@ def targeting_criteria_object_type_to_query(
     return targeting_criteria_querying.get_query()
 
 
-def prefetch_selections(qs, target_population=None):
+def prefetch_selections(qs, target_population=None) -> QuerySet:
     return qs.prefetch_related(
         Prefetch(
             "selections",
@@ -90,16 +90,17 @@ class Query(graphene.ObjectType):
     )
     target_population_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_target_population_status_choices(self, info, **kwargs):
+    def resolve_target_population_status_choices(self, info, **kwargs) -> List[Dict[str, Any]]:
         return [{"name": name, "value": value} for value, name in target_models.TargetPopulation.STATUS_CHOICES]
 
-    def resolve_target_population_households(parent, info, target_population, **kwargs):
+    def resolve_target_population_households(parent, info, target_population, **kwargs) -> QuerySet:
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        queryset = prefetch_selections(target_population_model.household_list, target_population_model)
-        return queryset
+        return prefetch_selections(target_population_model.household_list, target_population_model)
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(
+        parent, info, targeting_criteria, program, excluded_ids, **kwargs
+    ) -> QuerySet:
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(

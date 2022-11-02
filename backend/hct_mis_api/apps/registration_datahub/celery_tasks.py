@@ -1,5 +1,6 @@
 import logging
 from contextlib import contextmanager
+from typing import Any, Dict, List
 
 from django.core.cache import cache
 from django.db import transaction
@@ -21,7 +22,7 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id, e):
+def handle_rdi_exception(datahub_rdi_id, e) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -35,7 +36,7 @@ def handle_rdi_exception(datahub_rdi_id, e):
 
 
 @contextmanager
-def locked_cache(key):
+def locked_cache(key) -> Any:
     try:
         # ``blocking_timeout`` indicates the maximum amount of time in seconds to
         # spend trying to acquire the lock.
@@ -54,7 +55,7 @@ def locked_cache(key):
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
+def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -86,7 +87,7 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
+def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -119,7 +120,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_hourly_task():
+def registration_kobo_import_hourly_task() -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -152,7 +153,7 @@ def registration_kobo_import_hourly_task():
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_xlsx_import_hourly_task():
+def registration_xlsx_import_hourly_task() -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -185,7 +186,7 @@ def registration_xlsx_import_hourly_task():
 @app.task
 @log_start_and_end
 @sentry_tags
-def merge_registration_data_import_task(registration_data_import_id):
+def merge_registration_data_import_task(registration_data_import_id) -> None:
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
@@ -213,7 +214,7 @@ def merge_registration_data_import_task(registration_data_import_id):
 @app.task(queue="priority")
 @log_start_and_end
 @sentry_tags
-def rdi_deduplication_task(registration_data_import_id):
+def rdi_deduplication_task(registration_data_import_id) -> None:
 
     try:
         from hct_mis_api.apps.registration_datahub.models import (
@@ -240,7 +241,7 @@ def rdi_deduplication_task(registration_data_import_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def pull_kobo_submissions_task(import_data_id):
+def pull_kobo_submissions_task(import_data_id) -> Dict:
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
@@ -263,7 +264,7 @@ def pull_kobo_submissions_task(import_data_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def validate_xlsx_import_task(import_data_id):
+def validate_xlsx_import_task(import_data_id) -> Dict:
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
     import_data = ImportData.objects.get(id=import_data_id)
@@ -286,7 +287,7 @@ def validate_xlsx_import_task(import_data_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(rdi_id, records_ids):
+def process_flex_records_task(rdi_id, records_ids) -> None:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
@@ -297,7 +298,7 @@ def process_flex_records_task(rdi_id, records_ids):
 @app.task
 @log_start_and_end
 @sentry_tags
-def extract_records_task(max_records=500):
+def extract_records_task(max_records=500) -> None:
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
 
@@ -305,7 +306,7 @@ def extract_records_task(max_records=500):
 @app.task
 @log_start_and_end
 @sentry_tags
-def fresh_extract_records_task(records_ids=None):
+def fresh_extract_records_task(records_ids=None) -> None:
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
@@ -367,7 +368,7 @@ def automate_rdi_creation_task(
     return None
 
 
-def check_and_set_taxid(queryset):
+def check_and_set_taxid(queryset) -> Dict:
     qs = queryset.filter(unique_field__isnull=True)
     results = {"updated": [], "processed": []}
     for record in qs.all():
@@ -388,7 +389,9 @@ def check_and_set_taxid(queryset):
 @app.task
 @log_start_and_end
 @sentry_tags
-def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
+def automate_registration_diia_import_task(
+    page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters
+) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
@@ -413,7 +416,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
+def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
@@ -438,7 +441,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
 @app.task
 @log_start_and_end
 @sentry_tags
-def deduplicate_documents():
+def deduplicate_documents() -> None:
     with locked_cache(key="deduplicate_documents"):
         grouped_rdi = (
             Document.objects.filter(status=Document.STATUS_PENDING)

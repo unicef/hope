@@ -2,6 +2,7 @@ from typing import Any, Dict, Tuple
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
@@ -138,22 +139,22 @@ class APITokenAdmin(SmartModelAdmin):
             self.message_user(request, f"Unable to send notification email to {obj.user.email}", messages.ERROR)
 
     @button()
-    def resend_email(self, request, pk):
+    def resend_email(self, request, pk) -> None:
         obj = self.get_object(request, pk)
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None) -> HttpResponseRedirect:
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:
             self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
             return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))
 
-    def log_addition(self, request, object, message):
+    def log_addition(self, request, object, message) -> LogEntry:
         return super().log_addition(request, object, message)
 
     @atomic()
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request, obj, form, change) -> None:
         obj.save()
         obj.valid_for.set(BusinessArea.objects.filter(user_roles__user=obj.user))
         obj.save()
@@ -169,8 +170,8 @@ class APILogEntryAdmin(SmartModelAdmin):
     list_filter = (("token", AutoCompleteFilter),)
     date_hierarchy = "timestamp"
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         return False

@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List, Tuple
 
 from django.db import transaction
 from django.forms import model_to_dict
@@ -138,7 +139,7 @@ class RdiMergeTask:
         self,
         imported_household,
         household,
-    ):
+    ) -> None:
         admin1 = imported_household.admin1
         admin2 = imported_household.admin2
         try:
@@ -153,7 +154,7 @@ class RdiMergeTask:
         except Area.DoesNotExist as e:
             logger.exception(e)
 
-    def _prepare_households(self, imported_households, obj_hct):
+    def _prepare_households(self, imported_households, obj_hct) -> Dict:
         households_dict = {}
         countries = {}
         for imported_household in imported_households:
@@ -182,7 +183,7 @@ class RdiMergeTask:
 
         return households_dict
 
-    def _prepare_individual_documents_and_identities(self, imported_individual, individual):
+    def _prepare_individual_documents_and_identities(self, imported_individual, individual) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
@@ -212,7 +213,7 @@ class RdiMergeTask:
 
         return documents_to_create, identities_to_create
 
-    def _prepare_individuals(self, imported_individuals, households_dict, obj_hct):
+    def _prepare_individuals(self, imported_individuals, households_dict, obj_hct) -> Tuple[Dict, List, List]:
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
@@ -241,7 +242,7 @@ class RdiMergeTask:
 
         return individuals_dict, documents_to_create, identities_to_create
 
-    def _prepare_roles(self, imported_roles, households_dict, individuals_dict):
+    def _prepare_roles(self, imported_roles, households_dict, individuals_dict) -> List:
         roles_to_create = []
         for imported_role in imported_roles:
             role = IndividualRoleInHousehold(
@@ -253,7 +254,7 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _prepare_bank_account_info(self, imported_bank_account_infos, individuals_dict):
+    def _prepare_bank_account_info(self, imported_bank_account_infos, individuals_dict) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
             role = BankAccountInfo(
@@ -266,7 +267,7 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _update_individuals_and_households(self, individual_ids):
+    def _update_individuals_and_households(self, individual_ids) -> None:
         # update mis_unicef_id for ImportedIndividual
         individual_qs = Individual.objects.filter(id__in=individual_ids)
         for individual in individual_qs:
@@ -281,112 +282,111 @@ class RdiMergeTask:
     def execute(self, registration_data_import_id):
         individual_ids = []
         try:
-            with transaction.atomic(using="default"):
-                with transaction.atomic(using="registration_datahub"):
-                    obj_hct = RegistrationDataImport.objects.get(
-                        id=registration_data_import_id,
-                    )
+            with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+                obj_hct = RegistrationDataImport.objects.get(
+                    id=registration_data_import_id,
+                )
 
-                    obj_hub = RegistrationDataImportDatahub.objects.get(
-                        hct_id=registration_data_import_id,
-                    )
+                obj_hub = RegistrationDataImportDatahub.objects.get(
+                    hct_id=registration_data_import_id,
+                )
 
-                    old_obj_hct = copy_model_object(obj_hct)
-                    imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
-                    imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
-                        registration_data_import=obj_hub
-                    )
+                old_obj_hct = copy_model_object(obj_hct)
+                imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
+                imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
+                    registration_data_import=obj_hub
+                )
 
-                    imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
-                        household__in=imported_households,
-                        individual__in=imported_individuals,
-                    )
+                imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
+                    household__in=imported_households,
+                    individual__in=imported_individuals,
+                )
 
-                    imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(
-                        individual__in=imported_individuals
-                    )
+                imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(
+                    individual__in=imported_individuals
+                )
 
-                    households_dict = self._prepare_households(imported_households, obj_hct)
-                    (
-                        individuals_dict,
-                        documents_to_create,
-                        identities_to_create,
-                    ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
+                households_dict = self._prepare_households(imported_households, obj_hct)
+                (
+                    individuals_dict,
+                    documents_to_create,
+                    identities_to_create,
+                ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
 
-                    roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
-                    bank_account_infos_to_create = self._prepare_bank_account_info(
-                        imported_bank_account_infos, individuals_dict
-                    )
-                    Household.objects.bulk_create(households_dict.values())
-                    Individual.objects.bulk_create(individuals_dict.values())
-                    Document.objects.bulk_create(documents_to_create)
-                    IndividualIdentity.objects.bulk_create(identities_to_create)
-                    IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
-                    BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
+                roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
+                bank_account_infos_to_create = self._prepare_bank_account_info(
+                    imported_bank_account_infos, individuals_dict
+                )
+                Household.objects.bulk_create(households_dict.values())
+                Individual.objects.bulk_create(individuals_dict.values())
+                Document.objects.bulk_create(documents_to_create)
+                IndividualIdentity.objects.bulk_create(identities_to_create)
+                IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
+                BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
-                    individual_ids = [str(individual.id) for individual in individuals_dict.values()]
-                    household_ids = [str(household.id) for household in households_dict.values()]
+                individual_ids = [str(individual.id) for individual in individuals_dict.values()]
+                household_ids = [str(household.id) for household in households_dict.values()]
 
-                    recalculate_population_fields_task(household_ids)
+                recalculate_population_fields_task(household_ids)
 
-                    kobo_submissions = []
-                    for imported_household in imported_households:
-                        kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.kobo_asset_id
-                        kobo_submission_time = imported_household.kobo_submission_time
-                        if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
-                            submission = KoboImportedSubmission(
-                                kobo_submission_uuid=kobo_submission_uuid,
-                                kobo_asset_id=kobo_asset_id,
-                                kobo_submission_time=kobo_submission_time,
-                                registration_data_import=obj_hub,
-                                imported_household=imported_household,
-                            )
-                            kobo_submissions.append(submission)
-                    if kobo_submissions:
-                        KoboImportedSubmission.objects.bulk_create(kobo_submissions)
-
-                    # DEDUPLICATION
-
-                    populate_index(
-                        Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area.slug),
-                    )
-                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
-
-                    if not obj_hct.business_area.postpone_deduplication:
-                        DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
-
-                        golden_record_duplicates = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                kobo_submissions = []
+                for imported_household in imported_households:
+                    kobo_submission_uuid = imported_household.kobo_submission_uuid
+                    kobo_asset_id = imported_household.kobo_asset_id
+                    kobo_submission_time = imported_household.kobo_submission_time
+                    if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
+                        submission = KoboImportedSubmission(
+                            kobo_submission_uuid=kobo_submission_uuid,
+                            kobo_asset_id=kobo_asset_id,
+                            kobo_submission_time=kobo_submission_time,
+                            registration_data_import=obj_hub,
+                            imported_household=imported_household,
                         )
+                        kobo_submissions.append(submission)
+                if kobo_submissions:
+                    KoboImportedSubmission.objects.bulk_create(kobo_submissions)
 
-                        create_needs_adjudication_tickets(
-                            golden_record_duplicates,
-                            "duplicates",
-                            obj_hct.business_area,
-                            registration_data_import=obj_hct,
-                        )
+                # DEDUPLICATION
 
-                        needs_adjudication = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                        )
+                populate_index(
+                    Individual.objects.filter(registration_data_import=obj_hct),
+                    get_individual_doc(obj_hct.business_area.slug),
+                )
+                populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
 
-                        create_needs_adjudication_tickets(
-                            needs_adjudication,
-                            "possible_duplicates",
-                            obj_hct.business_area,
-                            registration_data_import=obj_hct,
-                        )
+                if not obj_hct.business_area.postpone_deduplication:
+                    DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
-                    # SANCTION LIST CHECK
-                    if obj_hct.should_check_against_sanction_list():
-                        CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                    golden_record_duplicates = Individual.objects.filter(
+                        registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                    )
 
-                    obj_hct.status = RegistrationDataImport.MERGED
-                    obj_hct.save()
-                    transaction.on_commit(lambda: deduplicate_documents.delay())
-                    log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+                    create_needs_adjudication_tickets(
+                        golden_record_duplicates,
+                        "duplicates",
+                        obj_hct.business_area,
+                        registration_data_import=obj_hct,
+                    )
+
+                    needs_adjudication = Individual.objects.filter(
+                        registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                    )
+
+                    create_needs_adjudication_tickets(
+                        needs_adjudication,
+                        "possible_duplicates",
+                        obj_hct.business_area,
+                        registration_data_import=obj_hct,
+                    )
+
+                # SANCTION LIST CHECK
+                if obj_hct.should_check_against_sanction_list():
+                    CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+
+                obj_hct.status = RegistrationDataImport.MERGED
+                obj_hct.save()
+                transaction.on_commit(lambda: deduplicate_documents.delay())
+                log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 
             self._update_individuals_and_households(individual_ids)
 
