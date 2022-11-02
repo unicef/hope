@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict
+from typing import Dict, Tuple, Type
 
 from django.core.files.storage import default_storage
 from django.db.models import Q
@@ -8,6 +8,7 @@ from django.db.models import Q
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
+from backend.hct_mis_api.apps.account.permissions import BasePermission
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -61,7 +62,7 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission]] = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER),

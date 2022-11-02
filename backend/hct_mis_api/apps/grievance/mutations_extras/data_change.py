@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -405,7 +405,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
     save_images(flex_fields, "individuals")
-    individual_data_with_approve_status = {
+    individual_data_with_approve_status: Dict[str, Any] = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
 
@@ -505,7 +505,7 @@ def update_individual_data_update_extras(
     verify_flex_fields(flex_fields, "individuals")
     save_images(flex_fields, "individuals")
 
-    individual_data_with_approve_status = {
+    individual_data_with_approve_status: Dict[str, Any] = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_individual_data.items()
     }
 

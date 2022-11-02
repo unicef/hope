@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Tuple, Type
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -72,7 +72,7 @@ class ValidatedMutation(PermissionMutation):
     object_validators = []
     permissions = None
 
-    model_class = None
+    model_class: Optional[Tuple[Type]] = None
 
     @classmethod
     @is_authenticated

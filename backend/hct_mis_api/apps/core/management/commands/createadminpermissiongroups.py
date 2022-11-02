@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Type
+from typing import Dict, List, Optional, Type
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -138,7 +138,7 @@ class Command(BaseCommand):
 
         for app, models in app_model_map.items():
             for model in models:
-                ct: Type = ContentType.objects.filter(app_label=app, model=model).first()
+                ct: Optional[ContentType] = ContentType.objects.filter(app_label=app, model=model).first()
 
                 if not ct:
                     print(f"Not found ContentType for {app} {model}")

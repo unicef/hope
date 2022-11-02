@@ -12,7 +12,7 @@ from django.utils.functional import cached_property
 from concurrency.fields import AutoIncVersionField
 
 from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
-from .interpreters import interpreters, mapping
+from .interpreters import Interpreter, interpreters, mapping
 from .result import Result
 from .validators import DoubleSpaceValidator, StartEndSpaceValidator
 
@@ -159,7 +159,7 @@ class Rule(models.Model):
 
     @cached_property
     def interpreter(self):
-        func: Callable = mapping[self.language]
+        func: Interpreter = mapping[self.language]
         return func(self.definition)
 
     def execute(self, context=None, only_release=True, only_enabled=True) -> Result:

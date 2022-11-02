@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 from django.conf import settings
 from django.core.cache import cache
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExchangeRateAPI:
-    def __init__(self, api_key: str = None, api_url: str = None) -> None:
+    def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
         self.api_key = api_key or os.getenv("EXCHANGE_RATES_API_KEY")
         self.api_url = api_url or os.getenv(
             "EXCHANGE_RATES_API_URL", "https://uniapis.unicef.org/biapi/v1/exchangerates"

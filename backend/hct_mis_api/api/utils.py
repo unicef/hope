@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Union
 
 
 def humanize_errors(errors: List) -> List:
@@ -12,6 +12,7 @@ def humanize_errors(errors: List) -> List:
             for i, h in enumerate(households, 1):
                 if h and isinstance(h, dict):
                     members = h.pop("members", [])
+                    mm_info: Union[List, Dict]
                     if isinstance(members, list) and len(members) == 1 and isinstance(members[0], str):
                         mm_info = members
                     else:

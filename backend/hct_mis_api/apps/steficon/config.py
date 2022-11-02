@@ -85,7 +85,7 @@ class Config:
 config = Config(None, DEFAULTS)
 
 
-def reload_config(*args: List, **kwargs: Dict[Any, str]) -> None:
+def reload_config(*args: List, **kwargs: Dict[str, str]) -> None:
     setting: str = kwargs["setting"]
     if setting == "STEFICON":
         config.reload()
