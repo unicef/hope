@@ -283,7 +283,7 @@ class KoboTemplateValidator:
             field_type = field_data["type"]
             field_choices = [choice["value"] for choice in field_data["choices"]]
 
-            if not (core_field_from_file := core_fields_in_file.get(core_field)):
+            if core_field not in core_fields_in_file:
                 validation_errors.append({"field": core_field, "message": "Field is missing"})
                 continue
 
