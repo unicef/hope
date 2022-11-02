@@ -78,7 +78,7 @@ class PaymentRecordFilter(FilterSet):
 class PaymentVerificationFilter(FilterSet):
     payment_plan_id = CharFilter(method="payment_plan_filter")
     search = CharFilter(method="search_filter")
-    business_area = CharFilter(field_name="payment__business_area__slug", required=True)
+    business_area = CharFilter(method="business_area_filter", required=True)
     verification_channel = CharFilter(field_name="payment_verification_plan__verification_channel")
 
     class Meta:
@@ -134,6 +134,12 @@ class PaymentVerificationFilter(FilterSet):
         return qs.filter(
             payment_verification_plan__payment_plan_object_id=obj_id,
             payment_verification_plan__payment_plan_content_type_id=ct_id,
+        )
+
+    def business_area_filter(self, qs, name, value):
+        return qs.filter(
+            Q(payment_verification_plan__payment_plan__business_area__slug=value)
+            | Q(payment_verification_plan__cash_plan__business_area__slug=value)
         )
 
 
