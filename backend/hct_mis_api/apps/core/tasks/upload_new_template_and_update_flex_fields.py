@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 class KoboRetriableError(Exception):
-    def __init__(self, xlsx_kobo_template_object):
+    def __init__(self, xlsx_kobo_template_object) -> None:
         self.xlsx_kobo_template_object = xlsx_kobo_template_object
 
 
 class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
-    def _save_message_status_template_id(self, xlsx_kobo_template_object, message, status, template_id=""):
+    def _save_message_status_template_id(self, xlsx_kobo_template_object, message, status, template_id="") -> None:
         xlsx_kobo_template_object.error_description = message
         xlsx_kobo_template_object.status = status
         xlsx_kobo_template_object.template_id = template_id

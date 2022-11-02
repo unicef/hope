@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 
@@ -71,7 +72,7 @@ class CommonValidator(BaseValidator):
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
-def prepare_choices_for_validation(choices_sheet):
+def prepare_choices_for_validation(choices_sheet) -> Dict[str, List[str]]:
     from collections import defaultdict
 
     import xlrd
@@ -150,7 +151,7 @@ class KoboTemplateValidator:
     )
 
     @classmethod
-    def _map_columns_numbers(cls, first_row):
+    def _map_columns_numbers(cls, first_row) -> Dict[str, int]:
         columns_names_and_numbers_mapping = {
             "type": None,
             "name": None,
@@ -169,7 +170,7 @@ class KoboTemplateValidator:
         return columns_names_and_numbers_mapping
 
     @classmethod
-    def _get_core_fields_from_file(cls, survey_sheet, choices_mapping, columns_names_and_numbers_mapping):
+    def _get_core_fields_from_file(cls, survey_sheet, choices_mapping, columns_names_and_numbers_mapping) -> Dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):
             field_name = row[columns_names_and_numbers_mapping["name"]].value
@@ -202,7 +203,7 @@ class KoboTemplateValidator:
         return core_fields_in_file
 
     @classmethod
-    def _get_core_fields_from_db(cls):
+    def _get_core_fields_from_db(cls) -> Dict:
         all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
         return {
             core_field_data["xlsx_field"]: {
@@ -215,16 +216,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_if_field_exists(cls, core_field, core_field_from_file):
-        if core_field_from_file is None:
-            return {
-                "field": core_field,
-                "message": "Field is missing",
-            }
-        return
-
-    @classmethod
-    def _check_field_type(cls, core_field, core_field_from_file, field_type):
+    def _check_field_type(cls, core_field, core_field_from_file, field_type) -> Optional[Dict]:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -233,7 +225,7 @@ class KoboTemplateValidator:
         return
 
     @classmethod
-    def _check_is_field_required(cls, core_field, core_field_from_file):
+    def _check_is_field_required(cls, core_field, core_field_from_file) -> Optional[Dict]:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":
@@ -244,7 +236,7 @@ class KoboTemplateValidator:
         return
 
     @classmethod
-    def _check_field_choices(cls, core_field, core_field_from_file, field_choices):
+    def _check_field_choices(cls, core_field, core_field_from_file, field_choices) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return
 
@@ -275,7 +267,7 @@ class KoboTemplateValidator:
         return errors
 
     @classmethod
-    def validate_kobo_template(cls, survey_sheet, choices_sheet):
+    def validate_kobo_template(cls, survey_sheet, choices_sheet) -> List[Dict[str, str]]:
         choices_mapping = prepare_choices_for_validation(choices_sheet)
 
         first_row = survey_sheet.row(0)
@@ -290,11 +282,9 @@ class KoboTemplateValidator:
         for core_field, field_data in core_fields_in_db.items():
             field_type = field_data["type"]
             field_choices = [choice["value"] for choice in field_data["choices"]]
-            core_field_from_file = core_fields_in_file.get(core_field)
 
-            field_exists_error = cls._check_if_field_exists(core_field, core_field_from_file)
-            if field_exists_error:
-                validation_errors.append(field_exists_error)
+            if not (core_field_from_file := core_fields_in_file.get(core_field)):
+                validation_errors.append({"field": core_field, "message": "Field is missing"})
                 continue
 
             field_required_error = cls._check_is_field_required(core_field, core_field_from_file)

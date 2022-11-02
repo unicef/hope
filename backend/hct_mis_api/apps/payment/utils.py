@@ -65,7 +65,7 @@ def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
     return received_amount
 
 
-def from_received_yes_no_to_status(received, received_amount, delivered_amount):
+def from_received_yes_no_to_status(received, received_amount, delivered_amount) -> str:
     received_bool = None
     if received == "YES":
         received_bool = True

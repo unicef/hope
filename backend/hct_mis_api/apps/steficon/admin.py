@@ -2,7 +2,7 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import List
+from typing import Dict, List
 
 from django import forms
 from django.conf import settings
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id"):
+    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id") -> None:
         self.model = model
         self.pk_field = pk_field
         self.admin_site = admin_site
@@ -57,10 +57,10 @@ class AutocompleteWidget(forms.Widget):
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
 
-    def get_url(self):
+    def get_url(self) -> str:
         return reverse("admin:autocomplete")
 
-    def get_context(self, name, value, attrs):
+    def get_context(self, name, value, attrs) -> Dict:
         context = {}
         context["widget"] = {
             "query_string": "",
@@ -313,7 +313,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     def render_delete_form(self, request, context):
         return super().render_delete_form(request, context)
 
-    def _get_csv_config(self, form):
+    def _get_csv_config(self, form) -> Dict:
         return dict(
             quoting=int(form.cleaned_data["quoting"]),
             delimiter=form.cleaned_data["delimiter"],

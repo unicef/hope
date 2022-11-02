@@ -57,7 +57,7 @@ class XlsxExportTargetingService:
         self._adjust_column_width_from_col(self.ws_individuals, 1, 1, self.current_header_column_index)
         return self.workbook
 
-    def _add_version(self):
+    def _add_version(self) -> None:
         self.ws_meta[
             XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES
         ] = XlsxExportTargetingService.VERSION_CELL_NAME
@@ -71,12 +71,12 @@ class XlsxExportTargetingService:
         self.ws_meta = workbook.create_sheet(XlsxExportTargetingService.META_SHEET)
         return workbook
 
-    def _add_standard_columns_headers(self):
+    def _add_standard_columns_headers(self) -> None:
         standard_columns_names = list(self.COLUMNS_MAPPING_DICT.keys())
         self.ws_individuals.append(standard_columns_names)
         self.current_header_column_index += len(standard_columns_names)
 
-    def _add_individual_row(self, individual: Individual):
+    def _add_individual_row(self, individual: Individual) -> None:
         individual_row = {}
         for index, field in enumerate(self.COLUMNS_MAPPING_DICT.values()):
             if callable(field):
@@ -96,7 +96,7 @@ class XlsxExportTargetingService:
             column_index = self._add_document_column_header(document)
             row[column_index + 1] = document.document_number
 
-    def _add_document_column_header(self, document):
+    def _add_document_column_header(self, document) -> int:
         type_string = str(document.type)
         if type_string in self.documents_columns_dict:
             return self.documents_columns_dict[type_string]
@@ -106,11 +106,11 @@ class XlsxExportTargetingService:
         self.current_header_column_index += 1
         return old_header_column_index
 
-    def _add_individuals_rows(self):
+    def _add_individuals_rows(self) -> None:
         for individual in self.individuals:
             self._add_individual_row(individual)
 
-    def _render_all_linked_households(self, individual):
+    def _render_all_linked_households(self, individual) -> str:
         roles_string_list = [
             f"{role.household.unicef_id} - {role.role}"
             for role in individual.households_and_roles.filter(household__in=self.households)
@@ -118,12 +118,12 @@ class XlsxExportTargetingService:
         return ",".join(roles_string_list)
 
     @staticmethod
-    def _bank_account_info(individual):
+    def _bank_account_info(individual) -> str:
         if individual.bank_account_info.exists():
             return ", ".join([str(bank_info) for bank_info in individual.bank_account_info.all()])
         return ""
 
-    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
+    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):

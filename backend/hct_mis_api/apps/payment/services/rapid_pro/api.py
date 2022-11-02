@@ -1,6 +1,6 @@
 import logging
 from decimal import Decimal, InvalidOperation
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -156,7 +156,7 @@ class RapidProAPI:
                 received_amount = 0
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
-    def test_connection_start_flow(self, flow_name, phone_number):
+    def test_connection_start_flow(self, flow_name, phone_number) -> Tuple[Optional[str], Optional[Dict]]:
         # find flow by name, get its uuid and start it
         # if no flow with that name is found, return error
         try:

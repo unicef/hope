@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import Any, List
 
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract(records_ids: List[int], raise_exception=False):
-    def _filter(d):
+    def _filter(d) -> Any:
         if isinstance(d, list):
             return [_filter(v) for v in d]
         elif isinstance(d, dict):
