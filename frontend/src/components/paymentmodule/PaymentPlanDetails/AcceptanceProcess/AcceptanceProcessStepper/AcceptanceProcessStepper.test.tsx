@@ -48,7 +48,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     await act(() => wait(0)); // wait for response
     expect(container).toMatchSnapshot();
   });
-  it('should render step Sent for Finance Review Date', async () => {
+  it('should render step Sent for Finance Release Date', async () => {
     const { container } = render(
       <AcceptanceProcessStepper
         acceptanceProcess={{
