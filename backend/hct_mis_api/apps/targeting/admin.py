@@ -1,3 +1,4 @@
+from typing import Optional
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -25,10 +26,6 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
         "sent_to_datahub",
         "business_area",
         "program",
-        # "candidate_list_total_households",
-        # "candidate_list_total_individuals",
-        # "final_list_total_households",
-        # "final_list_total_individuals",
     )
     date_hierarchy = "created_at"
     search_fields = ("name",)
@@ -68,10 +65,6 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
-    # @button()
-    # def download_xlsx(self, request, pk):
-    #     return redirect("admin-download-target-population", target_population_id=pk)
-
     @button(enabled=lambda b: b.context["original"].steficon_rule)
     def rerun_steficon(self, request, pk):
         def _rerun(request):
@@ -79,7 +72,9 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
 
-        obj: TargetPopulation = self.get_object(request, pk)
+        obj: Optional[TargetPopulation] = self.get_object(request, pk)
+        if not obj:
+            raise Exception("Target population not found")
         return confirm_action(
             self,
             request,
