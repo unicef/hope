@@ -7,7 +7,7 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
-from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
+from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
 from .models import ImportedIndividual
 
