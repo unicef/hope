@@ -2,6 +2,7 @@ import base64
 import os
 import random
 import sys
+from typing import Any
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.wsgi import WSGIRequest
@@ -46,19 +47,19 @@ class APITestCase(SnapshotTestTestCase):
                     print(f"Seed: {self.seed}", file=sys.stderr)
                     print("%s: %s\n%s" % (typ, self.id(), msg), file=sys.stderr)
 
-    def snapshot_graphql_request(self, request_string, context=None, variables=None):
+    def snapshot_graphql_request(self, request_string, context=None, variables=None) -> None:
         if context is None:
             context = {}
 
-        graphql_request = self.client.execute(
-            request_string,
-            variables=variables,
-            context=self.generate_context(**context),
+        self.assertMatchSnapshot(
+            self.client.execute(
+                request_string,
+                variables=variables,
+                context=self.generate_context(**context),
+            )
         )
 
-        self.assertMatchSnapshot(graphql_request)
-
-    def graphql_request(self, request_string, context=None, variables=None):
+    def graphql_request(self, request_string, context=None, variables=None) -> Any:
         if context is None:
             context = {}
 
@@ -85,7 +86,7 @@ class APITestCase(SnapshotTestTestCase):
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
     @staticmethod
-    def id_to_base64(object_id, name):
+    def id_to_base64(object_id, name) -> str:
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
     @staticmethod
@@ -95,7 +96,7 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def create_user_role_with_permissions(user, permissions, business_area):
+    def create_user_role_with_permissions(user, permissions, business_area) -> UserRole:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
