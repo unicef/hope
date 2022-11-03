@@ -31,7 +31,7 @@ export function VerificationRecordsTableRow({
     <TableRow hover role='checkbox' key={paymentVerification.id}>
       <TableCell align='left'>
         {canViewRecordDetails ? (
-          <BlackLink to={`/${businessArea}/verification-records/${paymentVerification.id}`}>
+          <BlackLink to={`/${businessArea}/verification-records/${paymentVerification.payment.id}`}>
             {paymentVerification.payment?.unicefId}
           </BlackLink>
         ) : (
