@@ -145,7 +145,7 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-    def permissions_filter(self, qs, name, value) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name, value) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value

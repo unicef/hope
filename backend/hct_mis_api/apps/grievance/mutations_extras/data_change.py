@@ -294,7 +294,9 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
     raise Exception("Invalid issue type")
 
 
-def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
+def update_data_change_extras(
+    root, info, input, grievance_ticket: GrievanceTicket, extras, **kwargs
+) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)

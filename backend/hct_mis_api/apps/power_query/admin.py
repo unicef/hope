@@ -75,7 +75,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
         return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_change_permission(self, request, obj: Optional[Query] = None) -> bool:
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
     @button()
@@ -155,13 +155,13 @@ class DatasetAdmin(HOPEModelAdminBase):
     def has_add_permission(self, request) -> bool:
         return False
 
-    def arguments(self, obj) -> str:
+    def arguments(self, obj: Dataset) -> Optional[str]:
         return obj.info.get("arguments")
 
-    def dataset_type(self, obj) -> str:
+    def dataset_type(self, obj: Dataset) -> Optional[str]:
         return obj.info.get("type")
 
-    def target_type(self, obj) -> str:
+    def target_type(self, obj: Dataset) -> str:
         return obj.query.target
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)

@@ -322,7 +322,7 @@ def build_arg_dict_from_dict(data_dict, mapping_dict) -> Dict:
 
 
 class CustomOrderingFilter(OrderingFilter):
-    def filter(self, qs, value) -> QuerySet:
+    def filter(self, qs: QuerySet, value) -> QuerySet:
         from django.db.models.functions import Lower
 
         from django_filters.constants import EMPTY_VALUES

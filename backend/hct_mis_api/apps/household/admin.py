@@ -17,6 +17,7 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.core.handlers import WSGIRequest
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -244,7 +245,7 @@ class HouseholdAdmin(
 
         return service
 
-    def has_withdrawn_permission(self, request) -> bool:
+    def has_withdrawn_permission(self, request: WSGIRequest) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
     def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:

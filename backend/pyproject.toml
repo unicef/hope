@@ -72,7 +72,6 @@ disable_error_code = [
   "list-item",
   "type-arg",
   "no-untyped-def",
-  "no-any-return",
 ]
 
 [tool.django-stubs]

@@ -18,7 +18,7 @@ from hct_mis_api.apps.utils.security import is_root
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
     def get_queryset(self, request) -> QuerySet:
-        qs = self.model.all_objects.get_queryset()
+        qs: QuerySet = self.model.all_objects.get_queryset()
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)

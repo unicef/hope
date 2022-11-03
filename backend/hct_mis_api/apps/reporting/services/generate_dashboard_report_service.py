@@ -607,7 +607,7 @@ class GenerateDashboardReportContentHelpers:
         return instances, valid_payment_records_in_instance_filter_key
 
     @staticmethod
-    def _aggregate_instances_sum(instances, field_list: List) -> Dict:
+    def _aggregate_instances_sum(instances: QuerySet, field_list: List) -> Dict:
         aggregation_list = [Sum(field_name) for field_name in field_list]
         return instances.aggregate(*aggregation_list)
 

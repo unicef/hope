@@ -192,7 +192,7 @@ class Dataset(NaturalKeyModel, models.Model):
     description = models.CharField(max_length=100)
     query = models.ForeignKey(Query, on_delete=models.CASCADE, related_name="datasets")
     value = models.BinaryField(null=True, blank=True)
-    info = JSONField(default=dict, blank=True)
+    info: Dict = JSONField(default=dict, blank=True)
     extra = models.BinaryField(null=True, blank=True, help_text="Any other attribute to pass to the formatter")
 
     def __str__(self) -> str:
