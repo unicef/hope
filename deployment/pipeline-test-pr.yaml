@@ -148,6 +148,15 @@ stages:
               dockerComposeCommand: 'run --no-deps backend lint'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+          - task: CmdLine@2
+            displayName: "Debug"
+            inputs:
+              script: |
+                pwd
+                ls
+                ls backend
+                ls code
+                ls lint-results
 
           - task: PublishTestResults@2
             displayName: "Publish lint result"
