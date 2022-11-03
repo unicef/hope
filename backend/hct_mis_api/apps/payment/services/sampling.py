@@ -1,5 +1,5 @@
 import abc
-from typing import List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 from django.db.models import Q, QuerySet
 
@@ -15,7 +15,7 @@ class Sampling:
     def __init__(self, input_data, cash_plan, payment_records: QuerySet):
         self.input_data = input_data
         self.cash_plan = cash_plan
-        self.payment_records: QuerySet = payment_records
+        self.payment_records: Optional[QuerySet] = payment_records
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
@@ -69,7 +69,7 @@ class BaseSampling(abc.ABC):
         self.excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
         self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas]
         self.sample_size = 0
-        self.payment_records = []
+        self.payment_records: Optional[QuerySet] = None
 
     def calc_sample_size(self, sample_count: int) -> int:
         if self.sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:

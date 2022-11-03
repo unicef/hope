@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Dict, Optional, Type
+from typing import Dict, Optional, Tuple, Type, Union
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -94,7 +94,7 @@ class DecimalRangeFilter(BaseRangeFilter):
 def filter_age(field_name, qs, min, max) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
-    values = None
+    values: Union[date, Tuple[date, date]]
     if min is not None and max is not None:
         lookup_expr = "range"
         # min year +1 , day-1

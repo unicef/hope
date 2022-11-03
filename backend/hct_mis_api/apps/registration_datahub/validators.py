@@ -1196,7 +1196,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea):
         try:
-            reduced_submissions: List[Dict[str, Any]] = rename_dict_keys(submissions, get_field_name)
+            reduced_submissions: List[Dict] = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;
