@@ -1,3 +1,4 @@
+from typing import Dict
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -234,7 +235,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def _create_variables(self, household=None, individual=None, payment_records=None):
+    def _create_variables(self, household=None, individual=None, payment_records=None) -> Dict:
         return {
             "input": {
                 "description": "Test Feedback",

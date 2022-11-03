@@ -1,5 +1,6 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
+from typing import Callable
 from unittest.mock import patch
 
 from django.conf import settings
@@ -40,8 +41,8 @@ class MockResponse:
         return self.data
 
 
-def raise_as_func(exception):
-    def _raise(*args, **kwargs):
+def raise_as_func(exception) -> Callable:
+    def _raise(*args, **kwargs) -> None:
         raise exception
 
     return _raise

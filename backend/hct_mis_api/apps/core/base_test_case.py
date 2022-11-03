@@ -77,7 +77,7 @@ class APITestCase(SnapshotTestTestCase):
         return context_value
 
     @classmethod
-    def generate_document_types_for_all_countries(cls):
+    def generate_document_types_for_all_countries(cls) -> None:
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
@@ -107,12 +107,12 @@ class APITestCase(SnapshotTestTestCase):
 
 class BaseElasticSearchTestCase(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         connections.create_connection(hosts=["elasticsearch:9200"], timeout=20)
         cls.rebuild_search_index()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         super().tearDownClass()
 
     @classmethod
