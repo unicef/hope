@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Dict
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -767,7 +768,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.assertTrue("Cannot change individual" in response["errors"][0]["message"])
 
-    def _prepare_input_data(self, ticket_id, household_id=None, individual_id=None):
+    def _prepare_input_data(self, ticket_id, household_id=None, individual_id=None) -> Dict:
         return {
             "input": {
                 "description": "New Description",

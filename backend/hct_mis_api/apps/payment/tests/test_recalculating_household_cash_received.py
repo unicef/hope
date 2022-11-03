@@ -162,21 +162,21 @@ class TestRecalculatingCash(APITestCase):
             variables=self.update_program_mutation_variables(program_id),
         )
 
-    def create_target_population(self, program_id):
+    def create_target_population(self, program_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables=self.create_target_population_mutation_variables(program_id),
         )
 
-    def lock_target_population(self, target_population_id):
+    def lock_target_population(self, target_population_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.LOCK_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )
 
-    def finalize_target_population(self, target_population_id):
+    def finalize_target_population(self, target_population_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.FINALIZE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},

@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import Dict, Tuple
 
 from django.test import TestCase
 
@@ -480,7 +481,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             )
 
     def test_date_validator(self):
-        test_data = (
+        test_data: Tuple[Dict] = (
             {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {

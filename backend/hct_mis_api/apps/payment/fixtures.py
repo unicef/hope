@@ -358,7 +358,9 @@ def generate_real_cash_plans_for_households(households):
     )
 
 
-def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+def create_payment_verification_plan_with_status(
+    cash_plan, user, business_area, program, target_population, status
+) -> CashPlanPaymentVerification:
     cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
     cash_plan_payment_verification.status = status
     cash_plan_payment_verification.save(update_fields=("status",))

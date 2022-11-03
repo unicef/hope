@@ -1,3 +1,4 @@
+from typing import Dict
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -9,7 +10,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
-def create_query_variables(cash_plan, verification_channel):
+def create_query_variables(cash_plan, verification_channel) -> Dict:
     return {
         "input": {
             "cashPlanId": encode_id_base64(cash_plan.pk, "CashPlan"),
