@@ -1689,6 +1689,9 @@ class FieldFactory(list):
     def to_dict_by(self, attr: str):
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
+    def to_choices(self):
+        return [(x["label"]["English(EN)"], x["name"]) for x in self]
+
     def apply_business_area(self, business_area_slug: str):
         factory = FieldFactory(self, self.scopes)
         for field in factory:
