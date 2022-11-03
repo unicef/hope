@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
-import React, { useState, useEffect, useCallback, ReactElement } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -32,21 +32,22 @@ import {
   CommunicationTabsValues,
 } from '../../../../utils/constants';
 import {
+  AccountabilityCommunicationMessageSampleSizeQueryVariables,
   CreateAccountabilityCommunicationMessageMutationVariables,
+  SamplingChoices,
+  useAccountabilityCommunicationMessageSampleSizeLazyQuery,
   useAllAdminAreasQuery,
-  useAllRapidProFlowsQuery,
   useCreateAccountabilityCommunicationMessageMutation,
-  useSampleSizeLazyQuery,
 } from '../../../../__generated__/graphql';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { TabPanel } from '../../../../components/core/TabPanel';
 import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { getPercentage } from '../../../../utils/utils';
 import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
+import { FormikEffect } from '../../../../components/core/FormikEffect';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -66,8 +67,6 @@ const initialValues = {
   filterSex: '',
   excludedAdminAreasFull: [],
   excludedAdminAreasRandom: [],
-  verificationChannel: 'MANUAL',
-  rapidProFlow: '',
   adminCheckbox: false,
   ageCheckbox: false,
   sexCheckbox: false,
@@ -76,22 +75,23 @@ const initialValues = {
   samplingType: 'FULL_LIST',
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(selectedSampleSizeType, values, businessArea) {
-  const variables = {
+function prepareVariables(
+  selectedSampleSizeType,
+  values,
+): AccountabilityCommunicationMessageSampleSizeQueryVariables {
+  return {
     input: {
-      sampling: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
+      households: values.households,
+      targetPopulation: values.targetPopulation,
+      registrationDataImport: values.registrationDataImport,
+      samplingType:
+        selectedSampleSizeType === 0
+          ? SamplingChoices.FullList
+          : SamplingChoices.Random,
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
               excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      verificationChannel: values.verificationChannel,
-      rapidProArguments:
-        values.verificationChannel === 'RAPIDPRO'
-          ? {
-              flowId: values.rapidProFlow,
             }
           : null,
       randomSamplingArguments:
@@ -108,10 +108,8 @@ function prepareVariables(selectedSampleSizeType, values, businessArea) {
               sex: values.sexCheckbox ? values.filterSex : null,
             }
           : null,
-      businessAreaSlug: businessArea,
     },
   };
-  return variables;
 }
 
 export const CreateCommunicationPage = (): React.ReactElement => {
@@ -140,25 +138,19 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     },
   });
 
-  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
-
-  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
-    variables: prepareVariables(
-      selectedSampleSizeType,
-      formValues,
-      businessArea,
-    ),
+  const [
+    loadSampleSize,
+    { data: sampleSizesData },
+  ] = useAccountabilityCommunicationMessageSampleSizeLazyQuery({
+    variables: prepareVariables(selectedSampleSizeType, formValues),
     fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
-    loadSampleSize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues]);
+    if (activeStep === CommunicationSteps.SampleSize) {
+      loadSampleSize();
+    }
+  }, [activeStep, formValues, loadSampleSize]);
 
   const validationSchema = useCallback(() => {
     const datum = {
@@ -182,9 +174,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
   }, [activeStep, t]);
 
   const validate = (values): { error?: string } => {
-    const { households } = values;
-    const { targetPopulation } = values;
-    const { registrationDataImport } = values;
+    const { households, targetPopulation, registrationDataImport } = values;
     const errors: { [key: string]: string | { [key: string]: string } } = {};
     if (
       households.length === 0 &&
@@ -209,8 +199,9 @@ export const CreateCommunicationPage = (): React.ReactElement => {
 
   const getSampleSizePercentage = (): string => {
     return `(${getPercentage(
-      sampleSizesData?.sampleSize?.sampleSize,
-      sampleSizesData?.sampleSize?.paymentRecordCount,
+      sampleSizesData?.accountabilityCommunicationMessageSampleSize?.sampleSize,
+      sampleSizesData?.accountabilityCommunicationMessageSampleSize
+        ?.numberOfRecipients,
     )})`;
   };
 
@@ -235,15 +226,19 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const prepareMutationVariables = (values) => {
-    const variables = {
+  const prepareMutationVariables = (
+    values,
+  ): CreateAccountabilityCommunicationMessageMutationVariables => {
+    return {
       businessAreaSlug: businessArea,
       inputs: {
         households: values.households,
         targetPopulation: values.targetPopulation,
         registrationDataImport: values.registrationDataImport,
-        samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
+        samplingType:
+          selectedSampleSizeType === 0
+            ? SamplingChoices.FullList
+            : SamplingChoices.Random,
         fullListArguments:
           selectedSampleSizeType === 0
             ? {
@@ -266,7 +261,6 @@ export const CreateCommunicationPage = (): React.ReactElement => {
         body: values.body,
       },
     };
-    return variables as CreateAccountabilityCommunicationMessageMutationVariables;
   };
 
   const dataChangeErrors = (errors): ReactElement[] =>
@@ -337,6 +331,10 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 </Stepper>
               </Grid>
               <Form>
+                <FormikEffect
+                  values={values}
+                  onChange={() => setFormValues(values)}
+                />
                 {activeStep === CommunicationSteps.LookUp && (
                   <Box display='flex' flexDirection='column'>
                     <LookUpSelection
@@ -385,7 +383,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                             <FormControlLabel
                               value={index}
                               onChange={() => {
-                                setFormValues(initialValues);
+                                setFormValues(values);
                                 setSelectedSampleSizeType(index);
                               }}
                               key={tab}
@@ -413,42 +411,22 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                             fontWeight='fontWeightBold'
                           >
                             Sample size:{' '}
-                            {sampleSizesData?.sampleSize?.sampleSize} out of{' '}
-                            {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                            {
+                              sampleSizesData
+                                ?.accountabilityCommunicationMessageSampleSize
+                                ?.sampleSize
+                            }{' '}
+                            out of{' '}
+                            {
+                              sampleSizesData
+                                ?.accountabilityCommunicationMessageSampleSize
+                                ?.numberOfRecipients
+                            }{' '}
                             {getSampleSizePercentage()}
                           </Box>
                           <Box fontSize={12} color='#797979'>
                             {t('This option is recommended for RapidPro')}
                           </Box>
-                          <Field
-                            name='verificationChannel'
-                            label={t('Verification Channel')}
-                            style={{ flexDirection: 'row' }}
-                            choices={[
-                              { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                              { value: 'XLSX', name: 'XLSX' },
-                              { value: 'MANUAL', name: 'MANUAL' },
-                            ]}
-                            component={FormikRadioGroup}
-                          />
-                          {values.verificationChannel === 'RAPIDPRO' && (
-                            <Field
-                              name='rapidProFlow'
-                              label={t('RapidPro Flow')}
-                              style={{ width: '90%' }}
-                              choices={
-                                rapidProFlows
-                                  ? rapidProFlows.allRapidProFlows.map(
-                                      (flow) => ({
-                                        value: flow.id,
-                                        name: flow.name,
-                                      }),
-                                    )
-                                  : []
-                              }
-                              component={FormikSelectField}
-                            />
-                          )}
                         </Box>
                       </TabPanel>
                       <TabPanel value={selectedSampleSizeType} index={1}>
@@ -550,39 +528,19 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                             fontWeight='fontWeightBold'
                           >
                             Sample size:{' '}
-                            {sampleSizesData?.sampleSize?.sampleSize} out of{' '}
-                            {sampleSizesData?.sampleSize?.paymentRecordCount}
+                            {
+                              sampleSizesData
+                                ?.accountabilityCommunicationMessageSampleSize
+                                ?.sampleSize
+                            }{' '}
+                            out of{' '}
+                            {
+                              sampleSizesData
+                                ?.accountabilityCommunicationMessageSampleSize
+                                ?.numberOfRecipients
+                            }{' '}
                             {getSampleSizePercentage()}
                           </Box>
-                          <Field
-                            name='verificationChannel'
-                            label={t('Verification Channel')}
-                            style={{ flexDirection: 'row' }}
-                            choices={[
-                              { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                              { value: 'XLSX', name: 'XLSX' },
-                              { value: 'MANUAL', name: 'MANUAL' },
-                            ]}
-                            component={FormikRadioGroup}
-                          />
-                          {values.verificationChannel === 'RAPIDPRO' && (
-                            <Field
-                              name='rapidProFlow'
-                              label='RapidPro Flow'
-                              style={{ width: '90%' }}
-                              choices={
-                                rapidProFlows
-                                  ? rapidProFlows.allRapidProFlows.map(
-                                      (flow) => ({
-                                        value: flow.id,
-                                        name: flow.name,
-                                      }),
-                                    )
-                                  : []
-                              }
-                              component={FormikSelectField}
-                            />
-                          )}
                         </Box>
                       </TabPanel>
                     </Box>
