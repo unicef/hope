@@ -649,7 +649,7 @@ def create_payment_verification_plan_with_status(cash_plan, user, business_area,
                 household=household,
             )
 
-        pv = PaymentVerificationFactory(
+        PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
             generic_fk_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
