@@ -101,7 +101,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     @property
     def get_unicef_id(self):
         # TODO: MB 'ca_id' rename to 'unicef_id'?
-        return getattr(self, "ca_id") if isinstance(self, CashPlan) else getattr(self, "unicef_id")
+        return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
     def get_exchange_rate(self, exchange_rates_client=None):
         if exchange_rates_client is None:
@@ -955,7 +955,7 @@ class CashPlan(GenericPaymentPlan):
 
     def unicef_id(self):
         # TODO: maybe 'ca_id' rename to 'unicef_id'?
-        return getattr(self, "ca_id")
+        return self.ca_id
 
     class Meta:
         verbose_name = "Cash Plan"
@@ -1016,7 +1016,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
 
     @property
     def unicef_id(self):
-        return getattr(self, "ca_id")
+        return self.ca_id
 
     def mark_as_failed(self):
         if self.status is self.STATUS_FORCE_FAILED:
