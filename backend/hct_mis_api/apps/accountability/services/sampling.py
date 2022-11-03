@@ -25,11 +25,11 @@ class BaseSampling(abc.ABC):
         self.households: Optional[QuerySet[Household]] = None
 
     @abc.abstractmethod
-    def data(self) -> dict:
+    def get_full_list_arguments(self) -> Optional[Dict]:
         pass
 
     @abc.abstractmethod
-    def calc_sample_size(self, sample_count: int) -> int:
+    def get_random_sampling_arguments(self) -> Optional[Dict]:
         pass
 
     @abc.abstractmethod
@@ -38,25 +38,22 @@ class BaseSampling(abc.ABC):
 
 
 class FullListSampling(BaseSampling):
-    def calc_sample_size(self, sample_count: int) -> int:
-        return sample_count
-
     def sampling(self, households: QuerySet[Household]):
         self.households = households.exclude(
             head_of_household__phone_no__isnull=False, admin_area__id__in=self.excluded_admin_areas_decoded
         )
-        self.sample_size = self.calc_sample_size(households.count())
+        self.sample_size = self.households.count()
 
-    def data(self) -> dict:
+    def get_full_list_arguments(self) -> Dict:
         return {
             "excluded_admin_areas": self.excluded_admin_areas_decoded,
         }
 
+    def get_random_sampling_arguments(self) -> None:
+        return None
+
 
 class RandomSampling(BaseSampling):
-    def calc_sample_size(self, sample_count: int) -> int:
-        return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
-
     def sampling(self, households: QuerySet[Household]):
         if self.sex and isinstance(self.sex, str):
             households = households.filter(head_of_household__sex=self.sex)
@@ -71,9 +68,14 @@ class RandomSampling(BaseSampling):
         self.households = households.exclude(
             head_of_household__phone_no__isnull=False, admin_area__id__in=self.excluded_admin_areas_decoded
         )
-        self.sample_size = self.calc_sample_size(households.count())
+        self.sample_size = get_number_of_samples(
+            self.households.count(), self.confidence_interval, self.margin_of_error
+        )
 
-    def data(self) -> dict:
+    def get_full_list_arguments(self) -> None:
+        return None
+
+    def get_random_sampling_arguments(self) -> Dict:
         return {
             "excluded_admin_areas": self.excluded_admin_areas_decoded,
             "confidence_interval": self.confidence_interval,
@@ -102,7 +104,6 @@ class Sampling:
         sampling = self._get_sampling()
         sampling.sampling(self.households)
         sample_size = sampling.sample_size
-        sampling_data = sampling.data()
 
         self.households = sampling.households
         number_of_recipients = self.households.count()
@@ -112,8 +113,8 @@ class Sampling:
 
         return ResultSampling(
             sample_size=sample_size,
-            full_list_arguments=sampling_data if sampling_type == Message.SamplingChoices.FULL_LIST else None,
-            random_sampling_arguments=sampling_data if sampling_type == Message.SamplingChoices.RANDOM else None,
+            full_list_arguments=sampling.get_full_list_arguments(),
+            random_sampling_arguments=sampling.get_full_list_arguments(),
             number_of_recipients=number_of_recipients,
             households=self.households,
         )

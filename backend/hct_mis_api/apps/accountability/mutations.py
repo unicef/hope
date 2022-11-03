@@ -154,7 +154,7 @@ class ExportSurveySampleMutationMutation(PermissionMutation):
         survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, survey.business_area)
 
-        export_survey_sample_task(survey.id, info.context.user.id)
+        export_survey_sample_task.delay(survey.id, info.context.user.id)
         return cls(survey=survey)
 
 
