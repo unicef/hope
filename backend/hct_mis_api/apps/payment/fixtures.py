@@ -1,6 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
-from random import randint, choice
+from random import choice, randint
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -693,7 +693,7 @@ def generate_real_cash_plans():
                 cash_plan.business_area,
                 target_population.program,
                 target_population,
-                PaymentVerificationPlan.STATUS_ACTIVE
+                PaymentVerificationPlan.STATUS_ACTIVE,
             )
 
     program.households.set(
