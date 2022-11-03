@@ -2,7 +2,6 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
 from django.db import transaction
