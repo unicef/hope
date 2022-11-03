@@ -1,7 +1,7 @@
 import time
 from collections import OrderedDict
 from importlib import import_module
-from typing import Tuple
+from typing import Any, List, Optional, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -126,6 +126,7 @@ class Command(BaseCommand):
             elif app_label not in executor.loader.migrated_apps:
                 raise CommandError("App '{}' does not have migrations.".format(app_label))
 
+        targets: List[Tuple[Any, Optional[str]]]
         if options["app_label"] and options["migration_name"]:
             migration_name = options["migration_name"]
             if migration_name == "zero":

@@ -69,7 +69,6 @@ disable_error_code = [
   "valid-type",
   "union-attr",
   "return-value",
-  "list-item",
   "type-arg",
   "no-untyped-def",
   "no-any-return",

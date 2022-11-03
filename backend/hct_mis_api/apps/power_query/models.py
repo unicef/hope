@@ -258,7 +258,7 @@ class Report(NaturalKeyModel, models.Model):
     def execute(self, run_query=False) -> List:
         # TODO: refactor that
         query: Query = self.query
-        result = []
+        result: List = []
         if run_query:
             query.execute_matrix()
         for dataset in query.datasets.all():
