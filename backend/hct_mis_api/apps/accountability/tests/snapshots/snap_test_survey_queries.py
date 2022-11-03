@@ -74,7 +74,7 @@ snapshots['TestSurveyQueries::test_single_survey_0_without_permission 1'] = {
 snapshots['TestSurveyQueries::test_single_survey_1_with_permission 1'] = {
     'data': {
         'survey': {
-            'body': None,
+            'body': '',
             'createdBy': {
                 'firstName': 'John',
                 'lastName': 'Wick'

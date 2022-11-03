@@ -1,8 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import SampleFileExpiredException, Survey
@@ -17,7 +16,8 @@ def download_cash_plan_payment_verification(request, survey_id):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     try:
-        sample_file_path = survey.sample_file_path()
-        return redirect(sample_file_path)
-    except SampleFileExpiredException as e:
-        raise GraphQLError(str(e)) from e
+        if sample_file_path := survey.sample_file_path():
+            return redirect(sample_file_path)
+        return HttpResponse("Sample file doesn't exist", status=404)
+    except SampleFileExpiredException:
+        return HttpResponse("Sample file expired", status=400)
