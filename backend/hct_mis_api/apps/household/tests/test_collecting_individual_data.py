@@ -61,6 +61,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)
+        household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, 0)
 
     def test_recalculating_data_when_flag_is_partial(self):
@@ -69,6 +70,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)
+        household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, None)
 
     def test_recalculating_data_when_flag_is_none(self):
@@ -77,4 +79,5 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)
+        household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, 123)

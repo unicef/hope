@@ -1,4 +1,7 @@
+from typing import List
+
 from django.db import DEFAULT_DB_ALIAS, connections
+from django.db.models import QuerySet
 from django.test.utils import CaptureQueriesContext
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
@@ -163,12 +166,17 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         ]
         super().setUpTestData()
 
+    def get_documents_query(self, documents: List[Document]) -> QuerySet[Document]:
+        return Document.objects.filter(id__in=[document.id for document in documents])
+
     def refresh_all_documents(self):
         for document in self.all_documents:
             document.refresh_from_db()
 
     def test_hard_documents_deduplication(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4])
+        )
         self.refresh_all_documents()
         self.assertEqual(self.document1.status, Document.STATUS_VALID)
         self.assertEqual(self.document2.status, Document.STATUS_NEED_INVESTIGATION)
@@ -180,38 +188,66 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
 
     def test_hard_documents_deduplication_for_initially_valid(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document5,))
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query(
+                [
+                    self.document5,
+                ]
+            )
+        )
         self.refresh_all_documents()
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
     def test_should_create_one_ticket(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4])
+        )
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4])
+        )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
 
     def test_hard_documents_deduplication_number_of_queries(self):
+        documents1 = self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
+        documents2 = self.get_documents_query(
+            [self.document2, self.document3, self.document4, self.document5, self.document7, self.document8]
+        )
         context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
         with context:
-            DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
+            DeduplicateTask.hard_deduplicate_documents(documents1)
             first_dedup_query_count = len(context.captured_queries)
-            DeduplicateTask.hard_deduplicate_documents(
-                (self.document2, self.document3, self.document4, self.document5, self.document7, self.document8),
-                self.registration_data_import,
-            )
+            DeduplicateTask.hard_deduplicate_documents(documents2, self.registration_data_import)
             second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
             self.assertEqual(
                 first_dedup_query_count, second_dedup_query_count, "Both queries should use same amount of queries"
             )
-            self.assertEqual(first_dedup_query_count, 6, "Should only use 6 queries")
+
+            # Queries:
+            # 1. Transaction savepoint
+            # 2. Select for update: Documents, Individuals
+            # 3. Filter all_matching_number_documents
+            # 4. Update Documents.status
+            # 5. Filter PossibleDuplicateThrough
+            # 6. Bulk Create GrievanceTicket
+            # 7. Bulk Create TicketNeedsAdjudicationDetails
+            # 8. Bulk Create PossibleDuplicateThrough
+            # 9. Transaction savepoint release
+            self.assertEqual(first_dedup_query_count, 9, "Should only use 9 queries")
 
     def test_ticket_created_correctly(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
+        )
         self.refresh_all_documents()
 
         self.assertEqual(GrievanceTicket.objects.count(), 1)
         DeduplicateTask.hard_deduplicate_documents(
-            (self.document7,),
+            self.get_documents_query(
+                [
+                    self.document7,
+                ]
+            ),
             self.registration_data_import,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
