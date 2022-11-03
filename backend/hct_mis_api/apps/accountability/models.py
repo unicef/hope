@@ -153,6 +153,7 @@ class SampleFileExpiredException(Exception):
 
 
 class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
+    SAMPLE_FILE_EXPIRATION_IN_DAYS = 30
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",
@@ -185,7 +186,7 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
     )
 
     title = models.CharField(max_length=60)
-    body = models.TextField(max_length=1000, blank=True, null=True)
+    body = models.TextField(max_length=1000, blank=True, default="")
     category = models.CharField(max_length=16, choices=CATEGORY_CHOICES)
     number_of_recipients = models.PositiveIntegerField(default=0)
     created_by = models.ForeignKey(
@@ -212,20 +213,24 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
     sample_file_generated_at = models.DateTimeField(blank=True, null=True)
 
     sampling_type = models.CharField(max_length=50, choices=SAMPLING_CHOICES, default=SAMPLING_FULL_LIST)
-    full_list_arguments = models.JSONField(blank=True, null=True)
-    random_sampling_arguments = models.JSONField(blank=True, null=True)
+    full_list_arguments = models.JSONField(default=dict)
+    random_sampling_arguments = models.JSONField(default=dict)
     sample_size = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.title
 
     def sample_file_path(self):
-        if self.has_valid_sample_file():
-            return self.sample_file.url
-        raise SampleFileExpiredException("Sample file expired")
+        if not self.sample_file:
+            return None
+        if not self.has_valid_sample_file():
+            raise SampleFileExpiredException()
+        return self.sample_file.url
 
     def has_valid_sample_file(self) -> bool:
-        return self.sample_file and self.sample_file_generated_at >= timezone.now() - timedelta(days=30)
+        return self.sample_file and self.sample_file_generated_at >= timezone.now() - timedelta(
+            days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS
+        )
 
     def store_sample_file(self, filename, file):
         self.sample_file.save(filename, file)
