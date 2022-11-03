@@ -13,6 +13,7 @@ from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -26,7 +27,10 @@ from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -771,9 +775,26 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
 
 class PaymentChannel(TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
-    delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
+    delivery_mechanism = models.ForeignKey(
+        "payment.DeliveryMechanism", on_delete=models.SET_NULL, related_name="payment_channels", null=True
+    )
     delivery_data = JSONField(default=dict, blank=True)
     is_fallback = models.BooleanField(default=False)
+
+    @property
+    def all_delivery_data(self) -> dict:
+        data = {**self.delivery_data}
+        for field_name in self.delivery_mechanism.global_core_fields:
+            data[field_name] = nested_getattr(self.individual, field_name)
+        return data
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["individual", "delivery_mechanism"],
+                name="unique individual_delivery_mechanism",
+            ),
+        ]
 
 
 class CashPlan(GenericPaymentPlan):
@@ -1286,3 +1307,33 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type)
+
+
+class ChoiceArrayField(ArrayField):
+    def formfield(self, **kwargs):
+        defaults = {
+            "form_class": forms.TypedMultipleChoiceField,
+            "choices": self.base_field.choices,
+            "coerce": self.base_field.to_python,
+            "widget": forms.SelectMultiple,
+        }
+        defaults.update(kwargs)
+
+        return super(ArrayField, self).formfield(**defaults)
+
+
+class DeliveryMechanism(TimeStampedUUIDModel):
+    delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
+    global_core_fields = ChoiceArrayField(
+        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
+        blank=True,
+    )
+    payment_channel_fields = ChoiceArrayField(
+        models.CharField(
+            max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
+        ),
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.delivery_mechanism

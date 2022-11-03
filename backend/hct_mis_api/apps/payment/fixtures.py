@@ -11,6 +11,8 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.geo.models import Area
@@ -42,7 +44,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
-    ServiceProvider,
+    ServiceProvider, DeliveryMechanism,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -179,13 +181,33 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     data_transfer_configuration = factory.Faker("json")
     fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
+class DeliveryMechanismFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = DeliveryMechanism
+    delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
+    global_core_fields = factory.List(
+        [
+            factory.fuzzy.FuzzyChoice(
+                FieldFactory.from_scope(Scope.GLOBAL).to_choices(),
+                getter=lambda c: c[0],
+            )
+        ]
+    )
+    payment_channel_fields = factory.List(
+        [
+            factory.fuzzy.FuzzyChoice(
+                FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices(),
+                getter=lambda c: c[0],
+            )
+        ]
+    )
 
 class PaymentChannelFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
     delivery_data = factory.Faker("json")
 
 
@@ -705,9 +727,19 @@ def generate_payment_plan():
         full_name="Jan Kowalski",
         sex=MALE,
     )[0]
+    DeliveryMechanism.objects.create(
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+        global_core_fields=['given_name', 'family_name'],
+        payment_channel_fields=['bank_account_number', 'bank_name']
+    )
+    delivery_mechanism_cash = DeliveryMechanism.objects.create(
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+        global_core_fields=['given_name', 'family_name'],
+        payment_channel_fields=[]
+    )
     payment_channel_1 = PaymentChannelFactory(
         individual=individual_1,
-        delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+        delivery_mechanism=delivery_mechanism_cash,
     )
 
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
@@ -722,7 +754,7 @@ def generate_payment_plan():
     )[0]
     payment_channel_2 = PaymentChannelFactory(
         individual=individual_2,
-        delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+        delivery_mechanism=delivery_mechanism_cash,
     )
 
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
