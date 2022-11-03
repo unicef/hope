@@ -47,6 +47,7 @@ from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from smart_admin.decorators import smart_register
 from smart_admin.mixins import LinkedObjectsMixin
+from requests.models import Response
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm
@@ -166,8 +167,8 @@ class DjAdminManager:
         self.admin_url_kc = f"{kc_host}{self.admin_path}"
         self.login_url_kc = f"{self.admin_url_kc}login/"
         self._logged = False
-        self._last_error: Optional[bool] = None
-        self._last_response = False
+        self._last_error: Optional[Response] = None
+        self._last_response: Optional[Response] = None
         self._username = None
         self._password = None
         self.form_errors = []
@@ -451,7 +452,8 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)
         else:
-            obj: account_models.User = self.get_object(request, unquote(object_id))
+            if not (obj := self.get_object(request, unquote(object_id))):
+                raise Exception("Object not found")
             kobo_pk = obj.custom_fields.get("kobo_pk", None)
             extra_context = extra_context or {}
             try:
@@ -986,7 +988,8 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            change_message[0]["changed"]["permissions"] = {
+            changed: Dict[str, Any] = change_message[0]["changed"]
+            changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),
             }

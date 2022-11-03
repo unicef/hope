@@ -226,7 +226,7 @@ def get_fields_attr_generators(flex_field, business_area_slug=None) -> Generator
 
 
 def resolve_assets(business_area_slug, uid: Optional[str] = None, *args: Any, **kwargs: Any):
-    method: KoboAPI
+    method: Iterable
     return_method: Callable
     method, return_method = (
         (
