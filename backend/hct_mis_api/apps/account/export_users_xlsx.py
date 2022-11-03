@@ -1,13 +1,12 @@
 from collections import OrderedDict
 from typing import Optional
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-User = get_user_model()
+from hct_mis_api.apps.account.models import User
 
 
 class GenericField:
