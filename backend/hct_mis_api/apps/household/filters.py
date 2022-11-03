@@ -350,25 +350,25 @@ def get_elasticsearch_query_for_individuals(value, business_area) -> Dict:
             }
         )
     elif len(values) == 1:
-        all_queries.extend(
-            [
-                {
-                    "match_phrase_prefix": {
-                        "given_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "given_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-                {
-                    "match_phrase_prefix": {
-                        "family_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+                }
+            }
+        )
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "family_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-            ],
+                }
+            },
         )
     else:
         all_queries.append(
@@ -463,25 +463,25 @@ def get_elasticsearch_query_for_households(value, business_area) -> Dict:
             }
         )
     elif len(values) == 1:
-        all_queries.extend(
-            [
-                {
-                    "match_phrase_prefix": {
-                        "head_of_household.given_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "head_of_household.given_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-                {
-                    "match_phrase_prefix": {
-                        "head_of_household.family_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+                }
+            }
+        )
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "head_of_household.family_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-            ],
+                }
+            },
         )
     else:
         all_queries.append(

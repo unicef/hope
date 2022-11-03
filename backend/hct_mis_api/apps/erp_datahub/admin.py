@@ -34,8 +34,8 @@ class FundsCommitmentAddForm(forms.ModelForm):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
     currency_code = forms.ChoiceField(choices=sorted(CURRENCY_CHOICES[1:], key=itemgetter(1)))
     funds_commitment_number = forms.CharField(required=True)
-    vendor_id = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
-    gl_account = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
+    vendor_id = forms.CharField(validators=[NumberValidator(), MinLengthValidator(10)])
+    gl_account = forms.CharField(validators=[NumberValidator(), MinLengthValidator(10)])
     business_office_code = forms.ModelChoiceField(
         queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=False
     )
