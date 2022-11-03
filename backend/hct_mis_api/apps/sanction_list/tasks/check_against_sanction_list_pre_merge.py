@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 from django.core.cache import cache
+from django.db import transaction
 from django.utils import timezone
 
 from constance import config
@@ -22,6 +23,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +73,7 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
+    @transaction.atomic
     def execute(cls, individuals=None, registration_data_import=None) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
@@ -128,12 +131,18 @@ class CheckAgainstSanctionListPreMergeTask:
                 )
                 log.debug([(r.full_name, r.meta.score) for r in results])
         cache.set("sanction_list_last_check", timezone.now(), None)
-        Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).update(
-            sanction_list_possible_match=True
+
+        possible_matches_individuals = evaluate_qs(
+            Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).select_for_update()
         )
-        Individual.objects.exclude(id__in=possible_matches).filter(sanction_list_possible_match=True).update(
-            sanction_list_possible_match=False
+        possible_matches_individuals.update(sanction_list_possible_match=True)
+
+        not_possible_matches_individuals = evaluate_qs(
+            Individual.objects.exclude(id__in=possible_matches)
+            .filter(sanction_list_possible_match=True)
+            .select_for_update()
         )
+        not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
         for ticket in tickets_to_create:
