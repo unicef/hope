@@ -23,6 +23,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     MALE,
+    COLLECT_TYPE_NONE,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -99,7 +100,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 def create_target_population_task(storage_id, program_id, tp_name):
     storage_obj = StorageFile.objects.get(id=storage_id)
     program = Program.objects.get(id=program_id)
-
+    file_path = None
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
             registration_data_import = RegistrationDataImport.objects.create(
@@ -124,7 +125,6 @@ def create_target_population_task(storage_id, program_id, tp_name):
             storage_obj.status = StorageFile.STATUS_PROCESSING
             storage_obj.save(update_fields=["status"])
             rows_count = 0
-            file_path = None
 
             # TODO fix to use Azure storage override AzureStorageFile open method
             with storage_obj.file.open("rb") as original_file, tempfile.NamedTemporaryFile(delete=False) as tmp:
@@ -139,6 +139,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                     iban = row["IBAN"]
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
+                    size = row["FAM_NUM"]
 
                     individual_data = {
                         "given_name": row.get("NAME", ""),
@@ -165,9 +166,10 @@ def create_target_population_task(storage_id, program_id, tp_name):
                             first_registration_date=first_registration_date,
                             last_registration_date=last_registration_date,
                             registration_data_import=registration_data_import,
-                            size=1,
+                            size=size,
                             family_id=family_id,
                             storage_obj=storage_obj,
+                            collect_individual_data=COLLECT_TYPE_NONE,
                         )
 
                         individual.household = household
@@ -205,13 +207,6 @@ def create_target_population_task(storage_id, program_id, tp_name):
             BankAccountInfo.objects.bulk_create(bank_infos)
 
             households = Household.objects.filter(family_id__in=list(family_ids)).only("id")
-            if len(family_ids) != rows_count:
-                for household in households:
-                    household.size = Individual.objects.filter(household=household).count()
-                Household.objects.bulk_update(households, ["size"])
-
-            households.update(withdrawn=True, withdrawn_date=timezone.now())
-            Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
 
             target_population = TargetPopulation.objects.create(
                 name=tp_name,
