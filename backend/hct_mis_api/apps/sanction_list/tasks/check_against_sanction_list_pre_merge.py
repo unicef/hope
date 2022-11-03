@@ -79,7 +79,11 @@ class CheckAgainstSanctionListPreMergeTask:
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
         documents: Tuple[Type[IndividualDocument]] = (
-            (IndividualDocumentAfghanistan, IndividualDocumentUkraine, IndividualDocumentOthers)
+            (  # type: ignore # TODO: look into this typing
+                IndividualDocumentAfghanistan,
+                IndividualDocumentUkraine,
+                IndividualDocumentOthers,
+            )
             if registration_data_import is None
             else (get_individual_doc(registration_data_import.business_area.slug),)
         )

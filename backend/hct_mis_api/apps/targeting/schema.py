@@ -13,7 +13,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
+    decode_and_get_object_required,
     decode_id_string,
     map_unicef_ids_to_households_unicef_ids,
 )
@@ -32,9 +32,7 @@ def targeting_criteria_object_type_to_query(
     targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
-    given_program: Program = (
-        decode_and_get_object(program, Program, True) if not isinstance(program, Program) else program
-    )
+    given_program: Program = decode_and_get_object_required(program, Program) if isinstance(program, str) else program  # type: ignore
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
         [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
     )

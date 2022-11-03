@@ -396,8 +396,10 @@ def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-# TODO: use narrower type
-def decode_and_get_object(encoded_id, model, required) -> Optional[Any]:
+T = TypeVar("T")
+
+
+def decode_and_get_object(encoded_id, model: T, required: bool) -> Optional[T]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -405,6 +407,10 @@ def decode_and_get_object(encoded_id, model, required) -> Optional[Any]:
         return get_object_or_404(model, id=decoded_id)
 
     return None
+
+
+def decode_and_get_object_required(encoded_id, model: T) -> T:
+    return decode_and_get_object(encoded_id, model, required=True)  # type: ignore
 
 
 def dict_to_camel_case(dictionary) -> Dict:

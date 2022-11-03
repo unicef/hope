@@ -229,7 +229,7 @@ def resolve_assets(business_area_slug, uid: Optional[str] = None, *args: Any, **
     method: Iterable
     return_method: Callable
     method, return_method = (
-        (
+        (  # type: ignore # TODO: refactor that
             KoboAPI(business_area_slug).get_single_project_data(uid),
             reduce_asset,
         )
@@ -248,7 +248,7 @@ def resolve_assets(business_area_slug, uid: Optional[str] = None, *args: Any, **
         logger.exception(error)
         raise GraphQLError(str(error))
 
-    return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
+    return return_method(assets, **{"only_deployed": kwargs.get("only_deployed", False)})
 
 
 class Query(graphene.ObjectType):
