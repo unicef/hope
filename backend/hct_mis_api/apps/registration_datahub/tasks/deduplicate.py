@@ -2,8 +2,7 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from time import sleep
-from typing import Any, Dict, List, NamedTuple, Tuple
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
 from django.db import transaction
 from django.db.models import CharField, F, Q, QuerySet, Value
@@ -76,7 +75,7 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
     business_area = None
-    thresholds: Thresholds = None
+    thresholds: Optional[Thresholds] = None
 
     @classmethod
     def _prepare_query_dict(cls, individual, fields, min_score) -> Dict[str, Any]:

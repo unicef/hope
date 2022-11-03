@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, TypeVar
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -216,9 +216,10 @@ def to_choice_object(choices) -> List[Dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(
-    obj: Union[Dict[Any, Any], List[Any], Any], convert_func: Callable
-) -> Union[Dict[Any, Any], List[Any], Any]:
+T = TypeVar("T")
+
+
+def rename_dict_keys(obj: T, convert_func: Callable) -> T:
     if isinstance(obj, dict):
         return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -395,8 +396,10 @@ def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-# TODO: use narrower type
-def decode_and_get_object(encoded_id, model, required) -> Optional[Any]:
+T = TypeVar("T")
+
+
+def decode_and_get_object(encoded_id, model: T, required: bool) -> Optional[T]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -404,6 +407,10 @@ def decode_and_get_object(encoded_id, model, required) -> Optional[Any]:
         return get_object_or_404(model, id=decoded_id)
 
     return None
+
+
+def decode_and_get_object_required(encoded_id, model: T) -> T:
+    return decode_and_get_object(encoded_id, model, required=True)  # type: ignore
 
 
 def dict_to_camel_case(dictionary) -> Dict:
@@ -514,9 +521,9 @@ def chart_map_choices(choices) -> Dict:
 def chart_get_filtered_qs(
     obj,
     year,
-    business_area_slug_filter: Dict = None,
-    additional_filters: Dict = None,
-    year_filter_path: str = None,
+    business_area_slug_filter: Optional[Dict] = None,
+    additional_filters: Optional[Dict] = None,
+    year_filter_path: Optional[str] = None,
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
@@ -604,11 +611,9 @@ def resolve_flex_fields_choices_to_string(parent) -> str:
             continue
 
         if flex_field in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
-            if isinstance(value, list):
-                new_value = [str(current_choice_value) for current_choice_value in value]
-            else:
-                new_value = str(value)
-            flex_fields_with_str_choices[flex_field_name] = new_value
+            flex_fields_with_str_choices[flex_field_name] = (
+                [str(current_choice_value) for current_choice_value in value] if isinstance(value, list) else str(value)
+            )
 
     return flex_fields_with_str_choices
 

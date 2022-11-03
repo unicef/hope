@@ -88,7 +88,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
         if submission_exists is False:
             total_households_count += 1
             for individual_data in result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
-                fields = {
+                fields: Dict[str, Optional[str]] = {
                     "given_name_i_c": None,
                     "middle_name_i_c": None,
                     "family_name_i_c": None,

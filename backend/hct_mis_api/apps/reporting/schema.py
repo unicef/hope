@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Tuple, Type
 
 from django.db.models.functions import ExtractYear
 
@@ -9,6 +10,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
@@ -24,7 +26,7 @@ from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
 
 class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(
             Permissions.REPORTING_EXPORT,
         ),

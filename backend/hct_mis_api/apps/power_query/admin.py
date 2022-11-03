@@ -91,7 +91,8 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button(visible=settings.DEBUG)
     def run(self, request, pk) -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
-        query: Query = self.get_object(request, pk)
+        if not (query := self.get_object(request, pk)):
+            raise Exception("Query not found")
         results = query.execute_matrix(persist=True)
         self.message_user(request, "Done", messages.SUCCESS)
         ctx["results"] = results
@@ -107,7 +108,8 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def preview(self, request, pk) -> Optional[HttpResponse]:
-        obj: Query = self.get_object(request, pk)
+        if not (obj := self.get_object(request, pk)):
+            raise Exception("Query not found")
         try:
             context = self.get_common_context(request, pk, title="Results")
             if obj.parametrizer:
@@ -258,7 +260,8 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request, pk) -> None:
-        obj: Report = self.get_object(request, pk)
+        if not (obj := self.get_object(request, pk)):
+            raise Exception("Report not found")
         try:
             result = obj.execute(run_query=True)
             errors = [r[1] for r in result if isinstance(r[1], Exception)]
@@ -295,7 +298,8 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
     def refresh(self, request, pk) -> None:
-        obj: Parametrizer = self.get_object(request, pk)
+        if not (obj := self.get_object(request, pk)):
+            raise Exception("Parametrizer not found")
         obj.refresh()
 
 

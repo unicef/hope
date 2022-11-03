@@ -82,5 +82,5 @@ class PostgresTestRunner(TestRunner):
             runner_kwargs["output"].close()
         return results
 
-    def setup_databases(self, **kwargs: Dict) -> Any:
+    def setup_databases(self, **kwargs: Any) -> Any:
         return super().setup_databases(**kwargs)

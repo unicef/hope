@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 
@@ -152,7 +152,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _map_columns_numbers(cls, first_row) -> Dict[str, int]:
-        columns_names_and_numbers_mapping = {
+        columns_names_and_numbers_mapping: Dict[str, Any] = {
             "type": None,
             "name": None,
             "required": None,

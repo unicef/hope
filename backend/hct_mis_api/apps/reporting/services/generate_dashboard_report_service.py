@@ -442,8 +442,8 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @classmethod
-    def format_programs_row(cls, instance: Program, *args) -> tuple:
-        result = (
+    def format_programs_row(cls, instance: Program, *args) -> Tuple:
+        result: List = [
             instance.business_area.code,
             instance.business_area.name,
             instance.name,
@@ -452,14 +452,14 @@ class GenerateDashboardReportContentHelpers:
             instance.frequency_of_payments,
             instance.unsuccessful_payments,
             instance.successful_payments,
-        )
+        ]
         months = cls.get_all_months()
         for month in months:
-            result += (
+            result += [
                 getattr(instance, f"{month}_cash", 0),
                 getattr(instance, f"{month}_voucher", 0),
-            )
-        return result
+            ]
+        return tuple(result)
 
     @staticmethod
     def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
@@ -815,7 +815,7 @@ class GenerateDashboardReportService:
             ),
         },
     }
-    ROW_CONTENT_METHODS = {
+    ROW_CONTENT_METHODS: Dict[str, Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]]] = {
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
             GenerateDashboardReportContentHelpers.format_beneficiaries_row,
@@ -898,7 +898,9 @@ class GenerateDashboardReportService:
 
     def _add_rows(self, active_sheet, report_type) -> int:
         is_hq_report = self.hq_or_country == self.HQ
-        get_row_methods: List[Callable] = self.ROW_CONTENT_METHODS[report_type]
+        get_row_methods: Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]] = self.ROW_CONTENT_METHODS[
+            report_type
+        ]
         all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)

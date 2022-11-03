@@ -72,8 +72,8 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     filename = forms.CharField(label="Output filename")
-    data = forms.CharField(widget=Textarea({"hidden": ""}))
-    fields = forms.CharField(widget=HiddenInput)
+    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # TODO: 'data' is an internal field
+    fields = forms.CharField(widget=HiddenInput)  # type: ignore # TODO: 'fields' is an internal field
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
