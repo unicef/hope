@@ -141,7 +141,7 @@ class SessionAdmin(HOPEModelAdminBase):
         warnings: List[List] = []
         errors = 0
         errors = 0
-        has_content = False
+        has_content: bool = False
         if settings.SENTRY_URL and obj.sentry_id:
             context["sentry_url"] = f"{settings.SENTRY_URL}?query={obj.sentry_id}"
 
@@ -158,7 +158,7 @@ class SessionAdmin(HOPEModelAdminBase):
 
         for model in (Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider):
             count = model.objects.filter(session=pk).count()
-            has_content = has_content or count
+            has_content = has_content or bool(count)
             context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
 
         for prj in Programme.objects.filter(session=pk):

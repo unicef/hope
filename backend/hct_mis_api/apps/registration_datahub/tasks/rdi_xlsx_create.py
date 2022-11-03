@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -57,7 +57,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     """
 
     def __init__(self) -> None:
-        self.image_loader = None
+        self.image_loader: Optional[SheetImageLoader] = None
         self.business_area = None
         self.households = {}
         self.documents = {}
@@ -346,7 +346,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         return obj_to_create
 
     def _create_objects(self, sheet, registration_data_import) -> None:
-        complex_fields = {
+        complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "tax_id_no_i_c": self._handle_document_fields,
                 "tax_id_photo_i_c": self._handle_document_photo_fields,

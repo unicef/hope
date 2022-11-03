@@ -37,11 +37,11 @@ class VerificationPlanCrudServices:
             cash_plan_verification.cash_plan, cash_plan_verification.verification_channel
         )
         sampling = Sampling(input_data, cash_plan, payment_records)
-        cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
+        cash_plan_verification, processed_payment_records = sampling.process_sampling(cash_plan_verification)
         ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
-        CreatePaymentVerifications(cash_plan_verification, payment_records).create()
+        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()
 
         return cash_plan_verification
 
@@ -58,11 +58,11 @@ class VerificationPlanCrudServices:
             cash_plan_verification.cash_plan, cash_plan_verification.verification_channel
         )
         sampling = Sampling(input_data, cash_plan_verification.cash_plan, payment_records)
-        cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
+        cash_plan_verification, processed_payment_records = sampling.process_sampling(cash_plan_verification)
         ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
-        CreatePaymentVerifications(cash_plan_verification, payment_records).create()
+        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()
 
         return cash_plan_verification
 

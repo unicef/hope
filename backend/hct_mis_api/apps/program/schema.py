@@ -1,3 +1,5 @@
+from typing import Tuple, Type
+
 from django.db.models import (
     Case,
     Count,
@@ -17,6 +19,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -67,7 +70,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
         hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     )

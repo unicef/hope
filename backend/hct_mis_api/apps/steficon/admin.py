@@ -2,7 +2,7 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from django import forms
 from django.conf import settings
@@ -331,7 +331,8 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Rule = self.get_object(request, pk)
+            rule: Optional[Rule] = self.get_object(request, pk)
+            form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
                 if form.is_valid():

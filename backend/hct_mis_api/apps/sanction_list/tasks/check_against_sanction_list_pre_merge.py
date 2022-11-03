@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional, Tuple, Type
 
 from django.core.cache import cache
 from django.db import transaction
@@ -13,6 +13,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
+    IndividualDocument,
     IndividualDocumentAfghanistan,
     IndividualDocumentOthers,
     IndividualDocumentUkraine,
@@ -22,6 +23,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -74,16 +76,20 @@ class CheckAgainstSanctionListPreMergeTask:
 
     @classmethod
     @transaction.atomic
-    def execute(cls, individuals=None, registration_data_import=None) -> None:
+    def execute(cls, individuals=None, registration_data_import: Optional[RegistrationDataImport] = None) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        if registration_data_import is None:
-            documents = (IndividualDocumentAfghanistan, IndividualDocumentUkraine, IndividualDocumentOthers)
-        else:
-            document = get_individual_doc(registration_data_import.business_area.slug)
-            documents = (document,)
+        documents: Tuple[Type[IndividualDocument]] = (
+            (  # type: ignore # TODO: look into this typing
+                IndividualDocumentAfghanistan,
+                IndividualDocumentUkraine,
+                IndividualDocumentOthers,
+            )
+            if registration_data_import is None
+            else (get_individual_doc(registration_data_import.business_area.slug),)
+        )
 
         tickets_to_create = []
         ticket_details_to_create = []

@@ -5,7 +5,7 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from typing import Any, List
+from typing import Any, Dict, List, Type
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
@@ -163,7 +163,7 @@ def get_env(**options) -> Environment:
     return env
 
 
-interpreters: List[Interpreter] = [
+interpreters: List[Type[Interpreter]] = [
     PythonExec,
 ]
-mapping = {a.label.lower(): a for a in interpreters}
+mapping: Dict[str, Type[Interpreter]] = {a.label.lower(): a for a in interpreters}

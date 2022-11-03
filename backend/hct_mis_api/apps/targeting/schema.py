@@ -13,7 +13,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
+    decode_and_get_object_required,
     decode_id_string,
     map_unicef_ids_to_households_unicef_ids,
 )
@@ -32,8 +32,7 @@ def targeting_criteria_object_type_to_query(
     targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
-    if not isinstance(program, Program):
-        program = decode_and_get_object(program, Program, True)
+    given_program: Program = decode_and_get_object_required(program, Program) if isinstance(program, str) else program  # type: ignore
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
         [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
     )
@@ -45,7 +44,7 @@ def targeting_criteria_object_type_to_query(
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
         for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
             individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockBase(
-                [], not program.individual_data_needed
+                [], not given_program.individual_data_needed
             )
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
             for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):

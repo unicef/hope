@@ -360,10 +360,11 @@ class Query(graphene.ObjectType):
             .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
             .count()
         )
-        if samples_count == 0 or all_payment_records_for_created_verifications == 0:
-            average_sample_size = 0
-        else:
-            average_sample_size = samples_count / all_payment_records_for_created_verifications
+        average_sample_size: float = (
+            0.0
+            if all_payment_records_for_created_verifications == 0
+            else samples_count / all_payment_records_for_created_verifications
+        )
         return {
             "labels": ["Payment Verification"],
             "datasets": dataset_percentage_done,

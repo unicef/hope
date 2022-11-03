@@ -153,7 +153,7 @@ class RapidProAPI:
             try:
                 received_amount = Decimal(received_amount_variable.get("value", 0))
             except InvalidOperation:
-                received_amount = 0
+                received_amount = Decimal(0)
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
     def test_connection_start_flow(self, flow_name, phone_number) -> Tuple[Optional[str], Optional[Dict]]:

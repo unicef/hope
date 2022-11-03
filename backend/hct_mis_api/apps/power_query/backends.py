@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
@@ -14,8 +14,14 @@ class PowerQueryBackend(ModelBackend):
             permsissions = Permission.objects.filter(
                 group__user_groups__user=user_obj, group__user_groups__business_area__slug=office_slug
             )
-            perms: List[Tuple[str, str]] = permsissions.values_list("content_type__app_label", "codename").order_by()
-            setattr(user_obj, key, {f"{ct}.{name}" for ct, name in perms})
+            setattr(
+                user_obj,
+                key,
+                {
+                    f"{ct}.{name}"
+                    for ct, name in permsissions.values_list("content_type__app_label", "codename").order_by()
+                },
+            )
         return getattr(user_obj, key)
 
     def has_perm(self, user_obj: User, perm, obj=None):  # type: ignore
