@@ -96,12 +96,12 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_filter = (
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
-        ("country", RelatedFieldComboFilter),
+        ("country", AutoCompleteFilter),
     )
     autocomplete_fields = ["type"]
 
     def get_queryset(self, request) -> QuerySet:
-        return super().get_queryset(request).select_related("individual", "type", "type__country")
+        return super().get_queryset(request).select_related("individual", "type", "country")
 
 
 @admin.register(DocumentType)

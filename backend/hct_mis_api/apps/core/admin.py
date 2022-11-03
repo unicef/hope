@@ -1,6 +1,7 @@
 import csv
 import logging
 from io import StringIO
+from typing import Any, List
 
 from django import forms
 from django.contrib import admin, messages
@@ -99,7 +100,7 @@ class BusinessofficeFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
-    def value(self):
+    def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
     def queryset(self, request, queryset):
@@ -137,9 +138,6 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
-    # formfield_overrides = {
-    #     JSONField: {"widget": JSONEditor},
-    # }
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "custom_fields":
@@ -189,7 +187,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
-    def _get_doap_matrix(self, obj):
+    def _get_doap_matrix(self, obj) -> List[Any]:
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
         fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
@@ -474,7 +472,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     def original_file_name(self, obj):
         return obj.file_name
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
+    def get_form(self, request, obj=None, change=False, **kwargs) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)

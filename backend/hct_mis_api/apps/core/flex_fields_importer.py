@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -172,7 +172,7 @@ class FlexibleAttributeImporter:
             else:
                 self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
-    def _can_add_row(self, row):
+    def _can_add_row(self, row) -> bool:
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
             "_group"
         )
@@ -195,7 +195,7 @@ class FlexibleAttributeImporter:
 
         return True
 
-    def _get_list_of_field_choices(self, sheet):
+    def _get_list_of_field_choices(self, sheet) -> Dict:
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
@@ -204,7 +204,7 @@ class FlexibleAttributeImporter:
 
         return {row[0].value.split(" ")[1] for row in fields_with_choices}
 
-    def _get_field_choice_name(self, row):
+    def _get_field_choice_name(self, row) -> Optional[str]:
         has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
@@ -269,7 +269,7 @@ class FlexibleAttributeImporter:
         for choice in choices_to_delete:
             choice.delete()
 
-    def _handle_groups_and_fields(self, sheet):
+    def _handle_groups_and_fields(self, sheet) -> None:
         groups_from_db, attrs_from_db = (
             FlexibleAttributeGroup.objects.all(),
             FlexibleAttribute.objects.all(),
@@ -401,7 +401,7 @@ class FlexibleAttributeImporter:
     can_add_flag = True
 
     @transaction.atomic
-    def import_xls(self, xls_file):
+    def import_xls(self, xls_file) -> None:
         self.current_group_tree = [None]
         if isinstance(xls_file, str) and isfile(xls_file):
             wb = xlrd.open_workbook(filename=xls_file)

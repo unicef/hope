@@ -1,4 +1,6 @@
 from django.db import transaction
+from typing import Dict
+
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -15,7 +17,7 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-def aggregate_optionally(household, **kwargs):
+def aggregate_optionally(household, **kwargs) -> Dict:
     if household.collect_individual_data == COLLECT_TYPE_PARTIAL:
         return {key: None for key, _ in kwargs.items()}
     return household.individuals.aggregate(**kwargs)

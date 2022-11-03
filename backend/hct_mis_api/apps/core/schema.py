@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import Generator, List, Tuple, Type
+from typing import Any, Dict, Generator, List, Tuple, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -85,7 +85,7 @@ class LabelNode(graphene.ObjectType):
     label = graphene.String()
 
 
-def resolve_label(parent):
+def resolve_label(parent) -> List[Dict[str, Any]]:
     labels = []
     for k, v in parent.items():
         labels.append({"language": k, "label": v})
@@ -111,7 +111,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
+def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args) -> Any:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
@@ -285,7 +285,7 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
-        def is_a_killer_filter(field):
+        def is_a_killer_filter(field) -> bool:
             if isinstance(field, FlexibleAttribute):
                 name = field.name
                 associated_with = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[field.associated_with][1]

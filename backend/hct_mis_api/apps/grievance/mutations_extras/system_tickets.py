@@ -35,7 +35,7 @@ def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
         )
 
 
-def _clear_deduplication_individuals_fields(individuals):
+def _clear_deduplication_individuals_fields(individuals) -> None:
     for individual in individuals:
         individual.deduplication_golden_record_status = UNIQUE
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
@@ -53,7 +53,7 @@ def _clear_deduplication_individuals_fields(individuals):
     )
 
 
-def close_needs_adjudication_old_ticket(ticket_details, info):
+def close_needs_adjudication_old_ticket(ticket_details, info) -> None:
     both_individuals = (ticket_details.golden_records_individual, ticket_details.possible_duplicate)
 
     if ticket_details.selected_individual is None:
@@ -67,7 +67,7 @@ def close_needs_adjudication_old_ticket(ticket_details, info):
         _clear_deduplication_individuals_fields(unique_individuals)
 
 
-def close_needs_adjudication_new_ticket(ticket_details, info):
+def close_needs_adjudication_new_ticket(ticket_details, info) -> None:
     individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
     selected_individuals = ticket_details.selected_individuals.all()
 

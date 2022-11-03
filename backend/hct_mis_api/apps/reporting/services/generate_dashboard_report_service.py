@@ -585,12 +585,11 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def _get_payment_records_for_report(self, report):
-        filter_vars = self._format_filters_for_payment_records(report)
-        return PaymentRecord.objects.filter(**filter_vars)
+    def _get_payment_records_for_report(self, report) -> PaymentRecord:
+        return PaymentRecord.objects.filter(**self._format_filters_for_payment_records(report))
 
     @classmethod
-    def _get_business_areas_or_programs(cls, report, valid_payment_records):
+    def _get_business_areas_or_programs(cls, report, valid_payment_records) -> Tuple[Any, str]:
         if cls._is_report_global(report):
             business_area_code_path = "code"
             instances = BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
@@ -621,7 +620,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @staticmethod
-    def _get_all_with_disabled_individual_count_fields():
+    def _get_all_with_disabled_individual_count_fields() -> List[str]:
         return [
             "female_age_group_0_5_count",
             "female_age_group_0_5_disabled_count",
@@ -646,7 +645,7 @@ class GenerateDashboardReportContentHelpers:
         ]
 
     @staticmethod
-    def _get_all_individual_count_fields():
+    def _get_all_individual_count_fields() -> List[str]:
         return [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -661,7 +660,7 @@ class GenerateDashboardReportContentHelpers:
         ]
 
     @staticmethod
-    def get_all_months():
+    def get_all_months() -> List[str]:
         return [
             "january",
             "february",
@@ -880,7 +879,7 @@ class GenerateDashboardReportService:
         self.ws_meta = ws_meta
         return wb
 
-    def _format_meta_tab(self):
+    def _format_meta_tab(self) -> None:
         self.ws_meta.append(self.META_HEADERS)
         info_row = (
             self._report_types_to_joined_str(),
@@ -897,7 +896,7 @@ class GenerateDashboardReportService:
         active_sheet.append(headers_row)
         return len(headers_row)
 
-    def _add_rows(self, active_sheet, report_type):
+    def _add_rows(self, active_sheet, report_type) -> int:
         is_hq_report = self.hq_or_country == self.HQ
         get_row_methods: List[Callable] = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
@@ -957,7 +956,7 @@ class GenerateDashboardReportService:
         if self.report.file:
             self._send_email()
 
-    def _send_email(self):
+    def _send_email(self) -> None:
         path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
         protocol = "http" if settings.IS_DEV else "https"
         context = {
@@ -977,7 +976,7 @@ class GenerateDashboardReportService:
         msg.send()
 
     @staticmethod
-    def _adjust_column_width_from_col(ws, min_col, max_col, min_row):
+    def _adjust_column_width_from_col(ws, min_col, max_col, min_row) -> None:
         column_widths = []
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
             for cell in col:
@@ -1005,7 +1004,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def _add_font_style_to_sheet(ws, totals_row=None):
+    def _add_font_style_to_sheet(ws, totals_row=None) -> None:
         bold_font = Font(bold=True)
         for cell in ws["1:1"]:
             cell.font = bold_font
@@ -1042,7 +1041,7 @@ class GenerateDashboardReportService:
         )
 
     @staticmethod
-    def _remove_empty_columns(ws, totals_row, min_col=1, max_col=2):
+    def _remove_empty_columns(ws, totals_row, min_col=1, max_col=2) -> int:
         to_remove_columns = []
         for col_idx in range(min_col, max_col):
             col_letter = get_column_letter(col_idx)

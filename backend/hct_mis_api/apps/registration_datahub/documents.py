@@ -1,3 +1,5 @@
+from typing import Optional, Type
+
 from django.conf import settings
 from django.db.models import Q
 
@@ -156,7 +158,7 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         )
 
 
-def get_imported_individual_doc(business_area_slug):
+def get_imported_individual_doc(business_area_slug) -> Optional[Type[Document]]:
     return {
         "afghanistan": ImportedIndividualDocumentAfghanistan,
         "ukraine": ImportedIndividualDocumentUkraine,

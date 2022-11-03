@@ -1,6 +1,6 @@
 import logging
 from enum import auto
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -47,13 +47,14 @@ class GrievanceNotification:
         return context
 
     def _prepare_user_recipients(self) -> Any:
-        return GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action](self)
+        func: Callable = GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action]
+        return func(self)
 
     def _prepare_emails(self) -> List[EmailMultiAlternatives]:
         return [self._prepare_email(user) for user in self.user_recipients]
 
     def _prepare_email(self, user_recipient) -> EmailMultiAlternatives:
-        prepare_bodies_method = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
+        prepare_bodies_method: Callable = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
         text_body, html_body, subject = prepare_bodies_method(self, user_recipient)
         email = EmailMultiAlternatives(
             subject=subject,
@@ -174,7 +175,7 @@ class GrievanceNotification:
         ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_bodies,
     }
 
-    ACTION_PREPARE_USER_RECIPIENTS_DICT = {
+    ACTION_PREPARE_USER_RECIPIENTS_DICT: Dict[int, Callable] = {
         ACTION_ASSIGNMENT_CHANGED: _prepare_assigned_to_recipient,
         ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_recipients,
         ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_recipients,

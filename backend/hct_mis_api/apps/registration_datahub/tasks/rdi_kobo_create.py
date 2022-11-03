@@ -91,7 +91,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     business_area = None
     attachments = None
 
-    def _handle_image_field(self, value, is_flex_field):
+    def _handle_image_field(self, value, is_flex_field) -> Union[str, File]:
         if not self.registration_data_import_mis.pull_pictures:
             return None
         download_url = ""
@@ -150,7 +150,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities):
+    def _handle_documents_and_identities(self, documents_and_identities) -> None:
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -200,7 +200,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict, individuals_dict):
+    def _handle_collectors(collectors_dict, individuals_dict) -> None:
         collectors_to_bulk_create = []
         for hash_key, collectors_list in collectors_dict.items():
             for collector in collectors_list:
@@ -365,6 +365,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if not self.business_area.postpone_deduplication:
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
-    def _handle_exception(self, assigned_to, field_name, e):
+    def _handle_exception(self, assigned_to, field_name, e) -> None:
         logger.exception(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e

@@ -279,7 +279,7 @@ class RdiMergeTask:
                 imported_individual.household.mis_unicef_id = individual.household.unicef_id
                 imported_individual.household.save()
 
-    def execute(self, registration_data_import_id):
+    def execute(self, registration_data_import_id) -> None:
         individual_ids = []
         try:
             with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
