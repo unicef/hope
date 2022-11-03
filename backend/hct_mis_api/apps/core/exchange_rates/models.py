@@ -5,7 +5,10 @@ from django.utils import timezone
 
 from dateutil.parser import parse
 
-from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateAPI
+from hct_mis_api.apps.core.exchange_rates.api import (
+    ExchangeRateClient,
+    get_exchange_rate_client,
+)
 
 
 class HistoryExchangeRate:
@@ -78,14 +81,12 @@ class SingleExchangeRate:
 
 
 class ExchangeRates:
-    def __init__(self, with_history: bool = True, api_client: ExchangeRateAPI = None):
+    def __init__(self, with_history: bool = True, api_client: ExchangeRateClient = None):
         if api_client is None:
-            api = ExchangeRateAPI()
-        else:
-            api = api_client
+            api_client = get_exchange_rate_client()
 
         self.exchange_rates_dict = self._convert_response_json_to_exchange_rates(
-            api.fetch_exchange_rates(with_history=with_history)
+            api_client.fetch_exchange_rates(with_history=with_history)
         )
 
     @staticmethod

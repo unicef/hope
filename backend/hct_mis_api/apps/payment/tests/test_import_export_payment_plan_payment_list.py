@@ -120,7 +120,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, error_msg)
 
-    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.__init__")
+    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init):
         mock_parent_init.return_value = None
         not_excluded_payments = self.payment_plan.not_excluded_payments.all()
@@ -149,7 +149,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, [])
 
-        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.fetch_exchange_rates") as mock:
+        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
             mock.return_value = {}
             service.import_payment_list()
         payment_1.refresh_from_db()
