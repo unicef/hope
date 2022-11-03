@@ -1,5 +1,5 @@
 import abc
-from typing import Iterable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from django.db.models import Q, QuerySet
 

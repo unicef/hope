@@ -6,14 +6,13 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
+    IndividualDocument,
     IndividualDocumentAfghanistan,
     IndividualDocumentOthers,
     IndividualDocumentUkraine,
@@ -23,6 +22,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 log = logging.getLogger(__name__)

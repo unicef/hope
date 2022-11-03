@@ -2,12 +2,12 @@ import logging
 from functools import reduce
 from typing import Any, List
 
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,

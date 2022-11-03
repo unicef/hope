@@ -3,7 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple
 from urllib.parse import unquote
 
 from django import forms
@@ -45,9 +45,9 @@ from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from requests.models import Response
 from smart_admin.decorators import smart_register
 from smart_admin.mixins import LinkedObjectsMixin
-from requests.models import Response
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm
