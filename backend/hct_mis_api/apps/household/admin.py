@@ -2,6 +2,7 @@ import logging
 from itertools import chain
 from typing import Any, Iterable, List, Optional
 
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
@@ -211,7 +212,7 @@ class HouseholdAdmin(
         return False
 
     def _toggle_withdraw_status(
-        self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None
+        self, request, hh: Household, tickets: Optional[Iterable] = None, comment=None, tag=None
     ) -> HouseholdWithdraw:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -339,12 +340,10 @@ class HouseholdAdmin(
                 except Exception as e:
                     self.message_user(request, str(e), messages.ERROR)
         else:
-            if obj.withdrawn:
-                form = Form()
-            else:
-                form = WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            context["form"] = (
+                Form() if obj.withdrawn else WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            )
 
-        context["form"] = form
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
@@ -709,10 +708,9 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         return self.xlsx_update(request)
 
     def xlsx_update(self, request) -> Any:
+        form: forms.Form
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
-            # form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
-            # form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)

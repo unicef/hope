@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any, List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -69,10 +69,10 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
 class ValidatedMutation(PermissionMutation):
     arguments_validators = []
-    object_validators = []
-    permissions = None
+    object_validators: List = []
+    permissions: Optional[Any] = None
 
-    model_class = None
+    model_class: Optional[Type] = None
 
     @classmethod
     @is_authenticated
@@ -375,7 +375,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         with transaction.atomic():
             user = info.context.user
-            target_population: TargetPopulation = kwargs.get("model_object")
+            target_population: TargetPopulation = kwargs["model_object"]
             old_target_population = kwargs.get("old_model_object")
             target_population.status = TargetPopulation.STATUS_PROCESSING
             target_population.finalized_by = user

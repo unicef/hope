@@ -562,9 +562,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     def change_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False
+        self.has_add_permission = lambda __: False  # type: ignore
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission
+        self.has_add_permission = has_add_permission  # type: ignore
 
         return template_response
 

@@ -606,7 +606,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 **self.combined_fields[sheet.title.lower()],
             }
 
-            switch_dict = {
+            switch_dict: Dict[str, Callable] = {
                 "ID": self.not_empty_validator,
                 "STRING": self.string_validator,
                 "INTEGER": self.integer_validator,
@@ -1164,7 +1164,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             if field_dict is None:
                 return
 
-            complex_types = {
+            complex_types: Dict[str, Callable] = {
                 "GEOPOINT": self.geopoint_validator,
                 "IMAGE": self.image_validator,
                 "DATE": self.date_validator,
@@ -1196,7 +1196,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea):
         try:
-            reduced_submissions: List[Dict[str, Any]] = rename_dict_keys(submissions, get_field_name)
+            reduced_submissions: List[Dict] = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;

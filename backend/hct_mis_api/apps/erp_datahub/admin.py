@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import Any, Dict
 
 from django import forms
 from django.conf import settings
@@ -170,7 +171,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
             )
 
     def get_changeform_initial_data(self, request):
-        initial = super().get_changeform_initial_data(request)
+        initial: Dict[str, Any] = super().get_changeform_initial_data(request)
         initial["created_by"] = request.user.email
         initial["updated_by"] = request.user.email
         initial["posting_date"] = timezone.now()

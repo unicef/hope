@@ -1,7 +1,7 @@
 import itertools
 import logging
 import pickle
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -129,7 +129,7 @@ class Query(NaturalKeyModel, models.Model):
             args = [{}]
         if not args:
             raise ValueError("No valid arguments provided")
-        results = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
+        results: Dict[str, str] = {"timestamp": strftime(timezone.now(), "%Y-%m-%d %H:%M")}
         with transaction.atomic():
             transaction.on_commit(lambda: self.update_results(results))
             for a in args:
@@ -137,11 +137,11 @@ class Query(NaturalKeyModel, models.Model):
                     dataset, __ = self.run(persist, a)
                     results[str(a)] = dataset.pk
                 except QueryRunError as e:
-                    results[str(a)] = e
+                    results[str(a)] = str(e)
             self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist=False, arguments: Dict = None) -> "[Dataset, dict]":
+    def run(self, persist=False, arguments: Optional[Dict] = None) -> "[Dataset, dict]":
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
