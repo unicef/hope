@@ -179,8 +179,7 @@ class Query(graphene.ObjectType):
 
     accountability_communication_message_sample_size = graphene.Field(
         GetCommunicationMessageSampleSizeObject,
-        business_area_slug=graphene.String(required=True),
-        inputs=GetAccountabilityCommunicationMessageSampleSizeInput(),
+        input=GetAccountabilityCommunicationMessageSampleSizeInput(),
     )
 
     feedback = graphene.relay.Node.Field(FeedbackNode)
@@ -210,15 +209,13 @@ class Query(graphene.ObjectType):
     def resolve_feedback_issue_type_choices(self, info, **kwargs):
         return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
 
-    def resolve_accountability_communication_message_sample_size(
-        self, info, business_area_slug: str, inputs: dict, **kwargs
-    ):
-        verifier = MessageArgumentVerifier(inputs)
+    def resolve_accountability_communication_message_sample_size(self, info, input: dict, **kwargs):
+        verifier = MessageArgumentVerifier(input)
         verifier.verify()
 
-        households = MessageCrudServices._get_households(inputs)
+        households = MessageCrudServices._get_households(input)
 
-        sampling = Sampling(inputs, households)
+        sampling = Sampling(input, households)
         number_of_recipients, sample_size = sampling.generate_sampling()
 
         return {
