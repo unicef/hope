@@ -48,7 +48,7 @@ import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 
-let steps = ['Recipients Look up', 'Sample Size', 'Details'];
+const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
 
 const Border = styled.div`
@@ -303,28 +303,10 @@ export const CreateCommunicationPage = (): React.ReactElement => {
           });
         } else {
           handleNext();
-          // Skip sample-size step when households are chosen
-          if (values.households.length) {
-            handleNext();
-          }
         }
       }}
     >
       {({ submitForm, setValues, values, setFieldValue, errors }) => {
-        if (values.households.length) {
-          steps = ['Recipients Look up', 'Details'];
-        }
-        if (values.targetPopulation) {
-          steps = ['Recipients Look up', 'Sample Size', 'Details'];
-        }
-        if (values.registrationDataImport) {
-          steps = ['Recipients Look up', 'Sample Size', 'Details'];
-        }
-
-        const showSampleSizeStep =
-          activeStep === CommunicationSteps.SampleSize &&
-          !values.households.length;
-
         return (
           <>
             <PageHeader
@@ -367,222 +349,244 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                     />
                   </Box>
                 )}
-                {showSampleSizeStep && (
-                  <Box px={8}>
-                    <Box display='flex' alignItems='center'>
-                      <Box pr={5} fontWeight='500' fontSize='medium'>
-                        {t('Sample Size')}:
-                      </Box>
-                      <RadioGroup
-                        aria-labelledby='selection-radio-buttons-group'
-                        value={selectedSampleSizeType}
-                        row
-                        name='radio-buttons-group'
-                      >
-                        {SampleSizeTabs.map((tab, index) => (
-                          <FormControlLabel
-                            value={index}
-                            onChange={() => {
-                              setFormValues(initialValues);
-                              setSelectedSampleSizeType(index);
-                            }}
-                            key={tab}
-                            control={<Radio color='primary' />}
-                            label={tab}
-                          />
-                        ))}
-                      </RadioGroup>
-                    </Box>
-                    <TabPanel value={selectedSampleSizeType} index={0}>
-                      {mappedAdminAreas && (
-                        <Field
-                          name='excludedAdminAreasFull'
-                          choices={mappedAdminAreas}
-                          variant='outlined'
-                          label={t('Filter Out Administrative Level Areas')}
-                          component={FormikMultiSelectField}
-                        />
-                      )}
+                {activeStep === CommunicationSteps.SampleSize &&
+                  (values.households.length ? (
+                    <Box px={8}>
                       <Box pt={3}>
+                        <Box fontSize={12} color='#797979'>
+                          {t(
+                            'You have selected households as the recipients group',
+                          )}
+                        </Box>
                         <Box
                           pb={3}
                           pt={3}
                           fontSize={16}
                           fontWeight='fontWeightBold'
                         >
-                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                          out of{' '}
-                          {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
-                          {getSampleSizePercentage()}
+                          {t('Survey will be sent to all households selected')}:
+                          ({values.households.length})
                         </Box>
-                        <Box fontSize={12} color='#797979'>
-                          {t('This option is recommended for RapidPro')}
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box px={8}>
+                      <Box display='flex' alignItems='center'>
+                        <Box pr={5} fontWeight='500' fontSize='medium'>
+                          {t('Sample Size')}:
                         </Box>
-                        <Field
-                          name='verificationChannel'
-                          label={t('Verification Channel')}
-                          style={{ flexDirection: 'row' }}
-                          choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                            { value: 'XLSX', name: 'XLSX' },
-                            { value: 'MANUAL', name: 'MANUAL' },
-                          ]}
-                          component={FormikRadioGroup}
-                        />
-                        {values.verificationChannel === 'RAPIDPRO' && (
+                        <RadioGroup
+                          aria-labelledby='selection-radio-buttons-group'
+                          value={selectedSampleSizeType}
+                          row
+                          name='radio-buttons-group'
+                        >
+                          {SampleSizeTabs.map((tab, index) => (
+                            <FormControlLabel
+                              value={index}
+                              onChange={() => {
+                                setFormValues(initialValues);
+                                setSelectedSampleSizeType(index);
+                              }}
+                              key={tab}
+                              control={<Radio color='primary' />}
+                              label={tab}
+                            />
+                          ))}
+                        </RadioGroup>
+                      </Box>
+                      <TabPanel value={selectedSampleSizeType} index={0}>
+                        {mappedAdminAreas && (
                           <Field
-                            name='rapidProFlow'
-                            label={t('RapidPro Flow')}
-                            style={{ width: '90%' }}
-                            choices={
-                              rapidProFlows
-                                ? rapidProFlows.allRapidProFlows.map(
-                                    (flow) => ({
-                                      value: flow.id,
-                                      name: flow.name,
-                                    }),
-                                  )
-                                : []
-                            }
-                            component={FormikSelectField}
+                            name='excludedAdminAreasFull'
+                            choices={mappedAdminAreas}
+                            variant='outlined'
+                            label={t('Filter Out Administrative Level Areas')}
+                            component={FormikMultiSelectField}
                           />
                         )}
-                      </Box>
-                    </TabPanel>
-                    <TabPanel value={selectedSampleSizeType} index={1}>
-                      <Box pt={3}>
-                        <Field
-                          name='confidenceInterval'
-                          label={t('Confidence Interval')}
-                          min={90}
-                          max={99}
-                          component={FormikSliderField}
-                          suffix='%'
-                        />
-                        <Field
-                          name='marginOfError'
-                          label={t('Margin of Error')}
-                          min={0}
-                          max={9}
-                          component={FormikSliderField}
-                          suffix='%'
-                        />
-                        <Typography variant='caption'>
-                          {t('Cluster Filters')}
-                        </Typography>
-                        <Box flexDirection='column' display='flex'>
-                          <Box display='flex'>
-                            <Field
-                              name='adminCheckbox'
-                              label={t('Administrative Level')}
-                              component={FormikCheckboxField}
-                            />
-                            <Field
-                              name='ageCheckbox'
-                              label={t('Age of HoH')}
-                              component={FormikCheckboxField}
-                            />
-                            <Field
-                              name='sexCheckbox'
-                              label={t('Gender of HoH')}
-                              component={FormikCheckboxField}
-                            />
+                        <Box pt={3}>
+                          <Box
+                            pb={3}
+                            pt={3}
+                            fontSize={16}
+                            fontWeight='fontWeightBold'
+                          >
+                            Sample size:{' '}
+                            {sampleSizesData?.sampleSize?.sampleSize} out of{' '}
+                            {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                            {getSampleSizePercentage()}
                           </Box>
-                          {values.adminCheckbox && (
+                          <Box fontSize={12} color='#797979'>
+                            {t('This option is recommended for RapidPro')}
+                          </Box>
+                          <Field
+                            name='verificationChannel'
+                            label={t('Verification Channel')}
+                            style={{ flexDirection: 'row' }}
+                            choices={[
+                              { value: 'RAPIDPRO', name: 'RAPIDPRO' },
+                              { value: 'XLSX', name: 'XLSX' },
+                              { value: 'MANUAL', name: 'MANUAL' },
+                            ]}
+                            component={FormikRadioGroup}
+                          />
+                          {values.verificationChannel === 'RAPIDPRO' && (
                             <Field
-                              name='excludedAdminAreasRandom'
-                              choices={mappedAdminAreas}
-                              variant='outlined'
-                              label={t('Filter Out Administrative Level Areas')}
-                              component={FormikMultiSelectField}
+                              name='rapidProFlow'
+                              label={t('RapidPro Flow')}
+                              style={{ width: '90%' }}
+                              choices={
+                                rapidProFlows
+                                  ? rapidProFlows.allRapidProFlows.map(
+                                      (flow) => ({
+                                        value: flow.id,
+                                        name: flow.name,
+                                      }),
+                                    )
+                                  : []
+                              }
+                              component={FormikSelectField}
                             />
                           )}
+                        </Box>
+                      </TabPanel>
+                      <TabPanel value={selectedSampleSizeType} index={1}>
+                        <Box pt={3}>
+                          <Field
+                            name='confidenceInterval'
+                            label={t('Confidence Interval')}
+                            min={90}
+                            max={99}
+                            component={FormikSliderField}
+                            suffix='%'
+                          />
+                          <Field
+                            name='marginOfError'
+                            label={t('Margin of Error')}
+                            min={0}
+                            max={9}
+                            component={FormikSliderField}
+                            suffix='%'
+                          />
+                          <Typography variant='caption'>
+                            {t('Cluster Filters')}
+                          </Typography>
+                          <Box flexDirection='column' display='flex'>
+                            <Box display='flex'>
+                              <Field
+                                name='adminCheckbox'
+                                label={t('Administrative Level')}
+                                component={FormikCheckboxField}
+                              />
+                              <Field
+                                name='ageCheckbox'
+                                label={t('Age of HoH')}
+                                component={FormikCheckboxField}
+                              />
+                              <Field
+                                name='sexCheckbox'
+                                label={t('Gender of HoH')}
+                                component={FormikCheckboxField}
+                              />
+                            </Box>
+                            {values.adminCheckbox && (
+                              <Field
+                                name='excludedAdminAreasRandom'
+                                choices={mappedAdminAreas}
+                                variant='outlined'
+                                label={t(
+                                  'Filter Out Administrative Level Areas',
+                                )}
+                                component={FormikMultiSelectField}
+                              />
+                            )}
 
-                          <Grid container>
-                            {values.ageCheckbox && (
-                              <Grid item xs={12}>
-                                <Grid container>
-                                  <Grid item xs={4}>
-                                    <Field
-                                      name='filterAgeMin'
-                                      label={t('Minimum Age')}
-                                      type='number'
-                                      color='primary'
-                                      component={FormikTextField}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={4}>
-                                    <Field
-                                      name='filterAgeMax'
-                                      label={t('Maximum Age')}
-                                      type='number'
-                                      color='primary'
-                                      component={FormikTextField}
-                                    />
+                            <Grid container>
+                              {values.ageCheckbox && (
+                                <Grid item xs={12}>
+                                  <Grid container>
+                                    <Grid item xs={4}>
+                                      <Field
+                                        name='filterAgeMin'
+                                        label={t('Minimum Age')}
+                                        type='number'
+                                        color='primary'
+                                        component={FormikTextField}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                      <Field
+                                        name='filterAgeMax'
+                                        label={t('Maximum Age')}
+                                        type='number'
+                                        color='primary'
+                                        component={FormikTextField}
+                                      />
+                                    </Grid>
                                   </Grid>
                                 </Grid>
-                              </Grid>
-                            )}
-                            {values.sexCheckbox && (
-                              <Grid item xs={5}>
-                                <Field
-                                  name='filterSex'
-                                  label={t('Gender')}
-                                  color='primary'
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                  ]}
-                                  component={FormikSelectField}
-                                />
-                              </Grid>
-                            )}
-                          </Grid>
-                        </Box>
-                        <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight='fontWeightBold'
-                        >
-                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                          out of{' '}
-                          {sampleSizesData?.sampleSize?.paymentRecordCount}
-                          {getSampleSizePercentage()}
-                        </Box>
-                        <Field
-                          name='verificationChannel'
-                          label={t('Verification Channel')}
-                          style={{ flexDirection: 'row' }}
-                          choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                            { value: 'XLSX', name: 'XLSX' },
-                            { value: 'MANUAL', name: 'MANUAL' },
-                          ]}
-                          component={FormikRadioGroup}
-                        />
-                        {values.verificationChannel === 'RAPIDPRO' && (
+                              )}
+                              {values.sexCheckbox && (
+                                <Grid item xs={5}>
+                                  <Field
+                                    name='filterSex'
+                                    label={t('Gender')}
+                                    color='primary'
+                                    choices={[
+                                      { value: 'FEMALE', name: t('Female') },
+                                      { value: 'MALE', name: t('Male') },
+                                    ]}
+                                    component={FormikSelectField}
+                                  />
+                                </Grid>
+                              )}
+                            </Grid>
+                          </Box>
+                          <Box
+                            pb={3}
+                            pt={3}
+                            fontSize={16}
+                            fontWeight='fontWeightBold'
+                          >
+                            Sample size:{' '}
+                            {sampleSizesData?.sampleSize?.sampleSize} out of{' '}
+                            {sampleSizesData?.sampleSize?.paymentRecordCount}
+                            {getSampleSizePercentage()}
+                          </Box>
                           <Field
-                            name='rapidProFlow'
-                            label='RapidPro Flow'
-                            style={{ width: '90%' }}
-                            choices={
-                              rapidProFlows
-                                ? rapidProFlows.allRapidProFlows.map(
-                                    (flow) => ({
-                                      value: flow.id,
-                                      name: flow.name,
-                                    }),
-                                  )
-                                : []
-                            }
-                            component={FormikSelectField}
+                            name='verificationChannel'
+                            label={t('Verification Channel')}
+                            style={{ flexDirection: 'row' }}
+                            choices={[
+                              { value: 'RAPIDPRO', name: 'RAPIDPRO' },
+                              { value: 'XLSX', name: 'XLSX' },
+                              { value: 'MANUAL', name: 'MANUAL' },
+                            ]}
+                            component={FormikRadioGroup}
                           />
-                        )}
-                      </Box>
-                    </TabPanel>
-                  </Box>
-                )}
+                          {values.verificationChannel === 'RAPIDPRO' && (
+                            <Field
+                              name='rapidProFlow'
+                              label='RapidPro Flow'
+                              style={{ width: '90%' }}
+                              choices={
+                                rapidProFlows
+                                  ? rapidProFlows.allRapidProFlows.map(
+                                      (flow) => ({
+                                        value: flow.id,
+                                        name: flow.name,
+                                      }),
+                                    )
+                                  : []
+                              }
+                              component={FormikSelectField}
+                            />
+                          )}
+                        </Box>
+                      </TabPanel>
+                    </Box>
+                  ))}
                 {activeStep === CommunicationSteps.Details && (
                   <>
                     <Border />
