@@ -8326,6 +8326,9 @@ export type AccountabilityCommunicationMessageQuery = (
     )>, targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'name'>
     )> }
   )> }
 );
@@ -15149,6 +15152,10 @@ export const AccountabilityCommunicationMessageDocument = gql`
     }
     createdAt
     targetPopulation {
+      id
+      name
+    }
+    registrationDataImport {
       id
       name
     }

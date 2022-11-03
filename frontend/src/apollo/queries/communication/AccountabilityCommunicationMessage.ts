@@ -16,6 +16,10 @@ export const AccountabilityCommunicationMessage = gql`
         id
         name
       }
+      registrationDataImport {
+        id
+        name
+      }
       title
       body
     }
