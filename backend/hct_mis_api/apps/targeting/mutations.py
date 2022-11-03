@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.db import transaction

@@ -26,7 +26,7 @@ from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
 
 class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission]] = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(
             Permissions.REPORTING_EXPORT,
         ),

@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict
 
 from django.conf import settings
 

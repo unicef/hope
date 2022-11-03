@@ -243,7 +243,7 @@ def hopeOneOfPermissionClass(*permissions) -> Type[BasePermission]:
 
 
 class BaseNodePermissionMixin:
-    permission_classes: Tuple[Type[BasePermission]] = (AllowAny,)
+    permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,)
 
     @classmethod
     def check_node_permission(cls, info, object_instance) -> None:

@@ -3,7 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from urllib.parse import unquote
 
 from django import forms
@@ -1104,7 +1104,9 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(self, request, form, formsets, add=False) -> List[Dict]:
-        change_message = construct_change_message(form, formsets, add)
+        change_message: List[Dict[str, Dict[str, Union[List[str], Dict[str, List]]]]] = construct_change_message(
+            form, formsets, add
+        )
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
             change_message[0]["changed"]["permissions"] = {

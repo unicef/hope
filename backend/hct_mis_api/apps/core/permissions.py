@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable
 
 from django.core.exceptions import PermissionDenied
 

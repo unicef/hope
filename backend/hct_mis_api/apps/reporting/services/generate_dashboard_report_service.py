@@ -815,7 +815,7 @@ class GenerateDashboardReportService:
             ),
         },
     }
-    ROW_CONTENT_METHODS = {
+    ROW_CONTENT_METHODS: Dict[str, Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]]] = {
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
             GenerateDashboardReportContentHelpers.format_beneficiaries_row,

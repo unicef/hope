@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission

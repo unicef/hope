@@ -1,4 +1,5 @@
 from typing import Optional
+
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse

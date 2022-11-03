@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission]] = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER),

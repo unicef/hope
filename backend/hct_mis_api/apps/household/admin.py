@@ -340,12 +340,10 @@ class HouseholdAdmin(
                 except Exception as e:
                     self.message_user(request, str(e), messages.ERROR)
         else:
-            if obj.withdrawn:
-                form = Form()
-            else:
-                form = WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            context["form"] = (
+                Form() if obj.withdrawn else WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            )
 
-        context["form"] = form
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 

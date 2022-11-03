@@ -315,7 +315,7 @@ class BankAccountInfoNode(DjangoObjectType):
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission]] = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),

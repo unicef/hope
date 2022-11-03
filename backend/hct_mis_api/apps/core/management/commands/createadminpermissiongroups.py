@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType

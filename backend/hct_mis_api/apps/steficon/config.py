@@ -16,7 +16,7 @@ This module provides the `api_setting` object, that is used to access
 REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from django.conf import settings
 from django.core.signals import setting_changed
