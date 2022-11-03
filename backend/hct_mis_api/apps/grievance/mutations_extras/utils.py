@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -68,6 +69,7 @@ def handle_add_document(document, individual) -> Document:
     return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
 
+@transaction.atomic
 def handle_edit_document(document_data: Dict) -> Document:
     from django.shortcuts import get_object_or_404
 
@@ -86,11 +88,8 @@ def handle_edit_document(document_data: Dict) -> Document:
     photoraw = updated_document.get("photoraw")
     if photo:
         photo = photoraw
-    document_id = updated_document.get("id")
 
-    document_id = decode_id_string(document_id)
-    document = get_object_or_404(Document, id=document_id)
-
+    document_id = decode_id_string(updated_document.get("id"))
     document_type = DocumentType.objects.get(type=type_name)
 
     document_already_exists = (
@@ -101,10 +100,13 @@ def handle_edit_document(document_data: Dict) -> Document:
     if document_already_exists:
         raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
+    document = get_object_or_404(Document.objects.select_for_update(), id=document_id)
+
     document.document_number = number
     document.type = document_type
     document.country = country
     document.photo = photo
+
     return document
 
 

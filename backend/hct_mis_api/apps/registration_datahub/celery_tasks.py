@@ -451,7 +451,6 @@ def deduplicate_documents() -> None:
         )
         rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
         for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
-            print(rdi)
             with transaction.atomic():
                 documents_query = Document.objects.filter(
                     status=Document.STATUS_PENDING, individual__registration_data_import=rdi
