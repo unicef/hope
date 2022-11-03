@@ -38,19 +38,28 @@ export function CommunicationDetails({
               <UniversalMoment>{message.createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label={t('Target Population')}>
-              {message.targetPopulation ? (
+          {message.targetPopulation && (
+            <Grid item xs={4}>
+              <LabelizedField label={t('Target Population')}>
                 <BlackLink
                   to={`/${businessArea}/target-population/${message.targetPopulation.id}`}
                 >
                   {message.targetPopulation.name}
                 </BlackLink>
-              ) : (
-                '-'
-              )}
-            </LabelizedField>
-          </Grid>
+              </LabelizedField>
+            </Grid>
+          )}
+          {message.registrationDataImport && (
+            <Grid item xs={4}>
+              <LabelizedField label={t('Registration Data Import')}>
+                <BlackLink
+                  to={`/${businessArea}/registration-data-import/${message.registrationDataImport.id}`}
+                >
+                  {message.registrationDataImport.name}
+                </BlackLink>
+              </LabelizedField>
+            </Grid>
+          )}
         </Grid>
       </OverviewContainer>
     </ContainerColumnWithBorder>
