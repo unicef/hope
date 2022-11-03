@@ -182,7 +182,8 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.target_populations = [cls.draft_target_population, cls.approved_target_population]
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter) -> TargetingCriteria:
+        # TODO: this function is copy-pasted in many places
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)

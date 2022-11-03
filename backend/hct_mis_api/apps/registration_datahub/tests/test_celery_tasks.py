@@ -2,6 +2,7 @@ import base64
 import json
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Generator
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -91,7 +92,7 @@ def create_imported_document_types():
         ImportedDocumentType.objects.create(type=document_type_string)
 
 
-def create_ukraine_business_area():
+def create_ukraine_business_area() -> None:
     BusinessArea.objects.create(
         slug="ukraine",
         code="1234",
@@ -103,9 +104,9 @@ def create_ukraine_business_area():
     )
 
 
-def run_automate_rdi_creation_task(*args, **kwargs):
+def run_automate_rdi_creation_task(*args, **kwargs) -> Any:
     @contextmanager
-    def do_nothing_cache(*_args, **_kwargs):
+    def do_nothing_cache(*_args, **_kwargs) -> Generator:
         yield Mock()
 
     with patch(

@@ -18,7 +18,7 @@ class HOPEApiTestCase(APITestCase):
     token = None
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")

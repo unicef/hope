@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+from django.db.models import QuerySet
 
 from freezegun import freeze_time
 from pytz import utc
@@ -84,7 +85,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
         cls.households = households
 
-    def get_households_queryset(self):
+    def get_households_queryset(self) -> QuerySet[Household]:
         return Household.objects.filter(pk__in=[h.pk for h in self.households])
 
     def test_wrong_arguments_count_validation(self):

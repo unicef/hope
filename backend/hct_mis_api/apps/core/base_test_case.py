@@ -2,7 +2,7 @@ import base64
 import os
 import random
 import sys
-from typing import Any
+from typing import Any, Dict
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.wsgi import WSGIRequest
@@ -59,7 +59,7 @@ class APITestCase(SnapshotTestTestCase):
             )
         )
 
-    def graphql_request(self, request_string, context=None, variables=None) -> Any:
+    def graphql_request(self, request_string, context=None, variables=None) -> Dict:
         if context is None:
             context = {}
 

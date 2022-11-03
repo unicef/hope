@@ -21,7 +21,7 @@ class MockSuperUser:
 
 class TestSettingTypesForCalculateFields(TestCase):
     @staticmethod
-    def load_xls_file(name):
+    def load_xls_file(name) -> None:
         task = FlexibleAttributeImporter()
         task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
 

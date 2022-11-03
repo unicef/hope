@@ -1,6 +1,6 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
-from typing import Callable
+from typing import Callable, Dict
 from unittest.mock import patch
 
 from django.conf import settings
@@ -9,6 +9,7 @@ from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import Client, RequestFactory
 from django.urls import reverse
+from django.core.handlers.wsgi import WSGIRequest
 from django.utils import timezone
 
 import requests
@@ -33,11 +34,11 @@ class MockSuperUser:
 
 
 class MockResponse:
-    def __init__(self, status_code, data):
+    def __init__(self, status_code, data: Dict) -> None:
         self.status_code = status_code
-        self.data = data
+        self.data: Dict = data
 
-    def json(self):
+    def json(self) -> Dict:
         return self.data
 
 
@@ -59,7 +60,7 @@ class TestKoboTemplateUpload(APITestCase):
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
 
-    def prepare_request(self, name):
+    def prepare_request(self, name) -> WSGIRequest:
         with open(
             f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}",
             "rb",

@@ -1,3 +1,4 @@
+from typing import Any, Dict
 import uuid
 from unittest.mock import MagicMock
 
@@ -142,7 +143,7 @@ class TestRecalculatingCash(APITestCase):
             }
         }
 
-    def send_successful_graphql_request(self, **kwargs):
+    def send_successful_graphql_request(self, **kwargs) -> Dict:
         response = self.graphql_request(**kwargs)
         self.assertTrue("data" in response)  # ensures successful response
         return response
