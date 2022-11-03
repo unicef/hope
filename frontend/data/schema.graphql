@@ -2492,7 +2492,7 @@ type Query {
   allAccountabilityCommunicationMessages(offset: Int, before: String, after: String, first: Int, last: Int, numberOfRecipients: Int, numberOfRecipients_Gte: Int, numberOfRecipients_Lte: Int, targetPopulation: ID, createdBy: ID, businessArea: String!, program: String, createdAtRange: String, title: String, body: String, samplingType: String, orderBy: String): CommunicationMessageNodeConnection
   accountabilityCommunicationMessageRecipient(id: ID!): CommunicationMessageRecipientMapNode
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
-  accountabilityCommunicationMessageSampleSize(businessAreaSlug: String!, inputs: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
+  accountabilityCommunicationMessageSampleSize(input: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
   feedback(id: ID!): FeedbackNode
   allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessAreaSlug: String!, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, orderBy: String): FeedbackNodeConnection
   feedbackIssueTypeChoices: [ChoiceObject]
