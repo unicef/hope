@@ -16,7 +16,7 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 
-class TestActionMessageMutation(APITestCase):
+class TestListQueryMessage(APITestCase):
     QUERY = """
     query AllAccountabilityCommunicationMessages($businessArea: String! $title: String, $body: String, $samplingType: String, $createdBy: ID, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $orderBy: String,) {
       allAccountabilityCommunicationMessages (businessArea: $businessArea, title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
