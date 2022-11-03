@@ -21,6 +21,7 @@ export const PAYMENT_RECORD_QUERY = gql`
         status
         statusDate
         receivedAmount
+        isManuallyEditable
       }
       currency
       entitlementQuantity

@@ -12,9 +12,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  PaymentVerificationNode,
   PaymentRecordNode,
-  usePaymentRecordVerificationQuery,
   usePaymentRecordQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
@@ -23,12 +21,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error } = usePaymentRecordVerificationQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: { paymentRecord } } = usePaymentRecordQuery({
-    // TODO: What id to use here?
+  const { data: { paymentRecord }, loading, error } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -39,9 +32,8 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) return null;
+  if (!paymentRecord || !choicesData || permissions === null) return null;
 
-  const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const verification =
     paymentRecord.parent?.verificationPlans?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -76,8 +68,8 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
         <VerifyManual
-          paymentVerificationId={paymentVerification.id}
-          enabled={paymentVerification.isManuallyEditable}
+          paymentVerificationId={paymentRecord.verification.id}
+          enabled={paymentRecord.verification.isManuallyEditable}
         />
       ) : null}
     </PageHeader>
@@ -86,7 +78,6 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
     <div>
       {toolbar}
       <VerificationRecordDetails
-        paymentVerification={paymentVerification}
         paymentRecord={paymentRecord as PaymentRecordNode}
         canViewActivityLog={hasPermissions(
           PERMISSIONS.ACTIVITY_LOG_VIEW,

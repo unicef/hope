@@ -4660,7 +4660,10 @@ export type Query = {
   grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
+  payment?: Maybe<PaymentNode>,
+  allPayments?: Maybe<PaymentNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
+  allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
   financialServiceProviderXlsxTemplate?: Maybe<FinancialServiceProviderXlsxTemplateNode>,
   allFinancialServiceProviderXlsxTemplates?: Maybe<FinancialServiceProviderXlsxTemplateNodeConnection>,
   financialServiceProviderXlsxReport?: Maybe<FinancialServiceProviderXlsxReportNode>,
@@ -4668,9 +4671,8 @@ export type Query = {
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
   allFinancialServiceProviders?: Maybe<FinancialServiceProviderNodeConnection>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
-  paymentVerificationPlan?: Maybe<PaymentVerificationPlanNode>,
-  allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
   allPaymentVerifications?: Maybe<PaymentVerificationNodeConnection>,
+  paymentVerificationPlan?: Maybe<PaymentVerificationPlanNode>,
   allPaymentVerificationPlan?: Maybe<PaymentVerificationPlanNodeConnection>,
   chartPaymentVerification?: Maybe<ChartPaymentVerification>,
   chartVolumeByDeliveryMechanism?: Maybe<ChartDatasetNode>,
@@ -4692,8 +4694,6 @@ export type Query = {
   allPaymentPlans?: Maybe<PaymentPlanNodeConnection>,
   paymentPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   currencyChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  payment?: Maybe<PaymentNode>,
-  allPayments?: Maybe<PaymentNodeConnection>,
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentPlanBackgroundActionStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
@@ -4930,8 +4930,39 @@ export type QueryAllSteficonRulesArgs = {
 };
 
 
+export type QueryPaymentArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllPaymentsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea: Scalars['String'],
+  paymentPlanId: Scalars['String'],
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
 export type QueryPaymentRecordArgs = {
   id: Scalars['ID']
+};
+
+
+export type QueryAllPaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  parent?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -4995,25 +5026,6 @@ export type QueryPaymentRecordVerificationArgs = {
 };
 
 
-export type QueryPaymentVerificationPlanArgs = {
-  id: Scalars['ID']
-};
-
-
-export type QueryAllPaymentRecordsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  parent?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>,
-  individual?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
 export type QueryAllPaymentVerificationsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -5027,6 +5039,11 @@ export type QueryAllPaymentVerificationsArgs = {
   businessArea: Scalars['String'],
   verificationChannel?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryPaymentVerificationPlanArgs = {
+  id: Scalars['ID']
 };
 
 
@@ -5128,23 +5145,6 @@ export type QueryAllPaymentPlansArgs = {
   totalEntitledQuantityTo?: Maybe<Scalars['Float']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryPaymentArgs = {
-  id: Scalars['ID']
-};
-
-
-export type QueryAllPaymentsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  businessArea: Scalars['String'],
-  paymentPlanId: Scalars['String'],
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -10461,7 +10461,7 @@ export type PaymentRecordQuery = (
       & Pick<TargetPopulationNode, 'id' | 'name'>
     ), verification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
-      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
     )>, household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size' | 'status' | 'unicefId'>
@@ -19128,6 +19128,7 @@ export const PaymentRecordDocument = gql`
       status
       statusDate
       receivedAmount
+      isManuallyEditable
     }
     currency
     entitlementQuantity
@@ -25348,7 +25349,10 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllSteficonRulesArgs, 'type'>>,
+  payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType, RequireFields<QueryPaymentArgs, 'id'>>,
+  allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
+  allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
   financialServiceProviderXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxTemplateArgs, 'id'>>,
   allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProviderXlsxTemplatesArgs>,
   financialServiceProviderXlsxReport?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxReportArgs, 'id'>>,
@@ -25356,9 +25360,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderArgs, 'id'>>,
   allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProvidersArgs>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
-  paymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentVerificationPlanArgs, 'id'>>,
-  allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
   allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationsArgs, 'businessArea'>>,
+  paymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentVerificationPlanArgs, 'id'>>,
   allPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationPlanArgs>,
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>,
   chartVolumeByDeliveryMechanism?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartVolumeByDeliveryMechanismArgs, 'businessAreaSlug' | 'year'>>,
@@ -25380,8 +25383,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPaymentPlans?: Resolver<Maybe<ResolversTypes['PaymentPlanNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentPlansArgs, 'businessArea'>>,
   paymentPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   currencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType, RequireFields<QueryPaymentArgs, 'id'>>,
-  allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>,
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentPlanBackgroundActionStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, QueryAvailableFspsForDeliveryMechanismsArgs>,
