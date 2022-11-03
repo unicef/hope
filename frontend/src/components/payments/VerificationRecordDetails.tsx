@@ -10,7 +10,7 @@ import {
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
-import { PaymentVerificationNode, PaymentRecordNode } from '../../__generated__/graphql';
+import { PaymentRecordNode } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
@@ -26,14 +26,12 @@ const Overview = styled(Paper)`
 `;
 
 interface VerificationRecordDetailsProps {
-  paymentVerification: PaymentVerificationNode;
   paymentRecord: PaymentRecordNode;
   canViewActivityLog: boolean;
   choicesData;
 }
 
 export function VerificationRecordDetails({
-  paymentVerification,
   paymentRecord,
   canViewActivityLog,
   choicesData,
@@ -90,7 +88,7 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
-                status={paymentVerification.status}
+                status={paymentRecord.verification.status}
                 statusToColor={verificationRecordsStatusToColor}
               />
             </LabelizedField>
@@ -99,7 +97,7 @@ export function VerificationRecordDetails({
             <LabelizedField
               label={t('AMOUNT RECEIVED')}
               value={formatCurrencyWithSymbol(
-                paymentVerification.receivedAmount,
+                paymentRecord.verification.receivedAmount,
                 paymentRecord.currency,
               )}
             />
@@ -225,7 +223,7 @@ export function VerificationRecordDetails({
         </Grid>
       </Overview>
       {canViewActivityLog && (
-        <UniversalActivityLogTable objectId={paymentVerification.id} />
+        <UniversalActivityLogTable objectId={paymentRecord.verification.id} />
       )}
     </>
   );

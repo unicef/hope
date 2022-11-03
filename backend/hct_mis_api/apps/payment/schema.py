@@ -661,34 +661,45 @@ class GenericPaymentPlanNode(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
+    payment = relay.Node.Field(PaymentNode)
+    all_payments = DjangoPermissionFilterConnectionField(
+        PaymentNode,
+        filterset_class=PaymentFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+    )
     payment_record = relay.Node.Field(PaymentRecordNode)
-    financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
-    all_financial_service_provider_xlsx_templates = DjangoPermissionFilterConnectionField(
-        FinancialServiceProviderXlsxTemplateNode,
-        filterset_class=FinancialServiceProviderXlsxTemplateFilter,
-    )
-    financial_service_provider_xlsx_report = relay.Node.Field(FinancialServiceProviderXlsxReportNode)
-    all_financial_service_provider_xlsx_reports = DjangoPermissionFilterConnectionField(
-        FinancialServiceProviderXlsxReportNode,
-        filterset_class=FinancialServiceProviderXlsxReportFilter,
-    )
-    financial_service_provider = relay.Node.Field(FinancialServiceProviderNode)
-    all_financial_service_providers = DjangoPermissionFilterConnectionField(
-        FinancialServiceProviderNode,
-        filterset_class=FinancialServiceProviderFilter,
-    )
-    payment_record_verification = relay.Node.Field(PaymentVerificationNode)
-    payment_verification_plan = relay.Node.Field(PaymentVerificationPlanNode)
     all_payment_records = DjangoPermissionFilterConnectionField(
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
         permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
     )
+
+    financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
+    all_financial_service_provider_xlsx_templates = DjangoPermissionFilterConnectionField(
+        FinancialServiceProviderXlsxTemplateNode,
+        filterset_class=FinancialServiceProviderXlsxTemplateFilter,
+    )
+
+    financial_service_provider_xlsx_report = relay.Node.Field(FinancialServiceProviderXlsxReportNode)
+    all_financial_service_provider_xlsx_reports = DjangoPermissionFilterConnectionField(
+        FinancialServiceProviderXlsxReportNode,
+        filterset_class=FinancialServiceProviderXlsxReportFilter,
+    )
+
+    financial_service_provider = relay.Node.Field(FinancialServiceProviderNode)
+    all_financial_service_providers = DjangoPermissionFilterConnectionField(
+        FinancialServiceProviderNode,
+        filterset_class=FinancialServiceProviderFilter,
+    )
+
+    payment_record_verification = relay.Node.Field(PaymentVerificationNode)
     all_payment_verifications = DjangoPermissionFilterConnectionField(
         PaymentVerificationNode,
         filterset_class=PaymentVerificationFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
+
+    payment_verification_plan = relay.Node.Field(PaymentVerificationPlanNode)
     all_payment_verification_plan = DjangoPermissionFilterConnectionField(
         PaymentVerificationPlanNode,
         filterset_class=PaymentVerificationPlanFilter,
@@ -768,12 +779,6 @@ class Query(graphene.ObjectType):
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)
-    payment = relay.Node.Field(PaymentNode)
-    all_payments = DjangoPermissionFilterConnectionField(
-        PaymentNode,
-        filterset_class=PaymentFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
-    )
     all_delivery_mechanisms = graphene.List(ChoiceObject)
     payment_plan_background_action_status_choices = graphene.List(ChoiceObject)
     available_fsps_for_delivery_mechanisms = graphene.List(
