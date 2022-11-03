@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import Any, Dict, Generator, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -226,12 +226,19 @@ def get_fields_attr_generators(flex_field, business_area_slug=None) -> Generator
 
 
 def resolve_assets(business_area_slug, uid: Optional[str] = None, *args: Any, **kwargs: Any):
-    if uid is not None:
-        method = KoboAPI(business_area_slug).get_single_project_data(uid)
-        return_method = reduce_asset
-    else:
-        method = KoboAPI(business_area_slug).get_all_projects_data()
-        return_method = reduce_assets_list
+    method: KoboAPI
+    return_method: Callable
+    method, return_method = (
+        (
+            KoboAPI(business_area_slug).get_single_project_data(uid),
+            reduce_asset,
+        )
+        if uid is not None
+        else (
+            KoboAPI(business_area_slug).get_all_projects_data(),
+            reduce_assets_list,
+        )
+    )
     try:
         assets = method
     except ObjectDoesNotExist:

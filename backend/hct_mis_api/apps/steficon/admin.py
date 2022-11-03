@@ -332,6 +332,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         )
         if request.method == "POST":
             rule: Rule = self.get_object(request, pk)
+            form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
                 if form.is_valid():

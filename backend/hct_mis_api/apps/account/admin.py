@@ -1104,12 +1104,11 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(self, request, form, formsets, add=False) -> List[Dict]:
-        change_message: List[Dict[str, Dict[str, Union[List[str], Dict[str, List]]]]] = construct_change_message(
-            form, formsets, add
-        )
+        change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            change_message[0]["changed"]["permissions"] = {
+            changed: Dict[str, Any] = change_message[0]["changed"]
+            changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),
             }

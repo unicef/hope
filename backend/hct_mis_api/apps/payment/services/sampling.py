@@ -15,7 +15,7 @@ class Sampling:
     def __init__(self, input_data, cash_plan, payment_records: QuerySet):
         self.input_data = input_data
         self.cash_plan = cash_plan
-        self.payment_records = payment_records
+        self.payment_records: QuerySet = payment_records
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
@@ -23,7 +23,7 @@ class Sampling:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
-        sampling = self._get_sampling()
+        sampling: BaseSampling = self._get_sampling()
         sampling.sampling(self.payment_records)
 
         cash_plan_verification.sampling = sampling.sampling_type

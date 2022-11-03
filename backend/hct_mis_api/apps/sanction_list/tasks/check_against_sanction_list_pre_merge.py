@@ -1,12 +1,13 @@
 import logging
-from typing import Dict, Tuple, Type
+from typing import Dict, Optional, Tuple, Type
 
 from django.core.cache import cache
 from django.utils import timezone
 
-from backend.hct_mis_api.apps.household.documents import IndividualDocument
 from constance import config
 
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSystemFlaggingDetails,
@@ -72,13 +73,13 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
-    def execute(cls, individuals=None, registration_data_import=None) -> None:
+    def execute(cls, individuals=None, registration_data_import: Optional[RegistrationDataImport] = None) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        documents: Tuple[IndividualDocument] = (
-            (IndividualDocumentAfghanistan(), IndividualDocumentUkraine(), IndividualDocumentOthers())
+        documents: Tuple[Type[IndividualDocument]] = (
+            (IndividualDocumentAfghanistan, IndividualDocumentUkraine, IndividualDocumentOthers)
             if registration_data_import is None
             else (get_individual_doc(registration_data_import.business_area.slug),)
         )

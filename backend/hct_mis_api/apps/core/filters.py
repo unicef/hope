@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, Type
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -56,7 +56,7 @@ class DateRangeField(Field):
 
 
 class BaseRangeFilter(Filter):
-    field_class: Optional[Field] = None
+    field_class: Optional[Type[Field]] = None
 
     def filter(self, qs, values):
         if values:

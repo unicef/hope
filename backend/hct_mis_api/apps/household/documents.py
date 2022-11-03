@@ -24,7 +24,6 @@ index_settings = {
 
 
 class IndividualDocument(Document):
-
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
         analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
