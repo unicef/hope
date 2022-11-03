@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { CommunicationTabsValues } from '../../../../utils/constants';
 import {
   ProgramNode,
+  RegistrationDataImportStatus,
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
@@ -47,7 +48,10 @@ export const LookUpSelection = ({
     filtersTargetPopulationApplied,
     setFiltersTargetPopulationApplied,
   ] = useState(filtersInitial);
-  const [filtersRDIApplied, setFiltersRDIApplied] = useState(filtersInitial);
+  const [filtersRDIApplied, setFiltersRDIApplied] = useState({
+    ...filtersInitial,
+    status: RegistrationDataImportStatus.Merged,
+  });
 
   const { t } = useTranslation();
 
