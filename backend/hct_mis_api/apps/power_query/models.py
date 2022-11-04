@@ -122,7 +122,7 @@ class Query(NaturalKeyModel, models.Model):
         self.info["last_run_results"] = results
         self.save()
 
-    def execute_matrix(self, persist=True, **kwargs) -> List["Dataset"]:
+    def execute_matrix(self, persist=True, **kwargs) -> Dict[str, str]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
         else:

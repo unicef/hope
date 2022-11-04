@@ -1,4 +1,5 @@
 import abc
+from typing import Optional
 
 from django.db.models import Q
 
@@ -121,7 +122,7 @@ class HopeRedirectPayment(HopeRedirect):
             return payment_verification.payment_record.business_area.slug
         return "/"
 
-    def _get_payment_verification(self) -> PaymentVerification:
+    def _get_payment_verification(self) -> Optional[PaymentVerification]:
         return PaymentVerification.objects.filter(payment_record__ca_id=self.ca_id).first()
 
 

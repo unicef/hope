@@ -197,16 +197,17 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[str, Document]:
+def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[Optional[str], Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
     from hct_mis_api.apps.household.models import Document
 
-    previous_documents = {}
+    previous_documents: Dict[Optional[str], Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = decode_id_string(document_data.get("value"))
         document = get_object_or_404(Document, id=document_id)
+        # TODO: key may be None
         previous_documents[encode_id_base64(document.id, "Document")] = {
             "id": encode_id_base64(document.id, "Document"),
             "document_number": document.document_number,

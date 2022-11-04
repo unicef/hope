@@ -1,6 +1,6 @@
 import logging
 from decimal import Decimal, InvalidOperation
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -61,7 +61,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e, phone_numbers) -> bool:
+    def _parse_json_urns_error(self, e, phone_numbers) -> Union[bool, List]:
         if e.response and e.response.status_code != 400:
             return False
         try:
@@ -84,7 +84,7 @@ class RapidProAPI:
         flows = self._handle_get_request(RapidProAPI.FLOWS_ENDPOINT)
         return flows["results"]
 
-    def start_flows(self, flow_uuid, phone_numbers) -> List:
+    def start_flows(self, flow_uuid, phone_numbers) -> Tuple[List, Optional[Exception]]:
         array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
@@ -104,7 +104,7 @@ class RapidProAPI:
                     raise ValidationError(message={"phone_numbers": errors}) from e
                 raise
 
-        successful_flows = []
+        successful_flows: List = []
         for urns in by_limit:
             try:
                 successful_flows.append(
@@ -156,7 +156,7 @@ class RapidProAPI:
                 received_amount = Decimal(0)
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
-    def test_connection_start_flow(self, flow_name, phone_number) -> Tuple[Optional[str], Optional[Dict]]:
+    def test_connection_start_flow(self, flow_name, phone_number) -> Tuple[Optional[str], Optional[List]]:
         # find flow by name, get its uuid and start it
         # if no flow with that name is found, return error
         try:
@@ -166,7 +166,7 @@ class RapidProAPI:
                 return (
                     f"Initial connection was successful but no flow with name '{flow_name}' was found in results list."
                 ), None
-            response = self.start_flows(test_flow["uuid"], [phone_number])
+            response, _ = self.start_flows(test_flow["uuid"], [phone_number])
             return None, response
         except Exception as e:
             logger.exception(e)

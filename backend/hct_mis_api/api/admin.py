@@ -108,12 +108,12 @@ class APITokenAdmin(SmartModelAdmin):
     def get_queryset(self, request) -> QuerySet:
         return super().get_queryset(request).select_related("user")
 
-    def get_fields(self, request, obj=None) -> Tuple[str]:
+    def get_fields(self, request, obj=None) -> Tuple[str, ...]:
         if obj:
             return super().get_fields(request, obj)
         return "user", "grants", "valid_to"
 
-    def get_readonly_fields(self, request, obj=None) -> Tuple[str]:
+    def get_readonly_fields(self, request, obj=None) -> Tuple[str, ...]:
         if obj:
             return "user", "valid_from"
         return tuple()

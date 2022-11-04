@@ -934,7 +934,7 @@ class DeduplicateTask:
         business_area,
         registration_data_import,
         possible_duplicates_through_dict,
-    ) -> NamedTuple:
+    ) -> Optional[NamedTuple]:
         from hct_mis_api.apps.grievance.models import (
             GrievanceTicket,
             TicketNeedsAdjudicationDetails,

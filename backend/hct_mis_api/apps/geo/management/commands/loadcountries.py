@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from django.core.management import BaseCommand
 
@@ -15,7 +16,7 @@ class Command(BaseCommand):
         initialize_countries()
 
 
-def initialize_countries() -> None:
+def initialize_countries() -> Dict:
     results = {"errors": []}
     try:
         default_data = {

@@ -1,7 +1,7 @@
 import json
 import numbers
 from collections import defaultdict
-from typing import Union
+from typing import Optional, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -91,7 +91,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     business_area = None
     attachments = None
 
-    def _handle_image_field(self, value, is_flex_field) -> Union[str, File]:
+    def _handle_image_field(self, value, is_flex_field) -> Optional[Union[str, File]]:
         if not self.registration_data_import_mis.pull_pictures:
             return None
         download_url = ""
