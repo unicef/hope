@@ -7,7 +7,7 @@ from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 @transaction.atomic
 def update_each_phone_numbers_validity(apps, schema_editor):
     Individual = apps.get_model("household", "Individual")
-    for individual in Individual.objects.all():
+    for individual in Individual.objects.iterator():
         calculate_phone_numbers_validity(individual)
         individual.save(update_fields=["phone_no_valid", "phone_no_alternative_valid"])
 
