@@ -97,15 +97,11 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id, program_id, tp_name):
+def create_target_population_task(storage_id, rdi_name):
     storage_obj = StorageFile.objects.get(id=storage_id)
-    program = Program.objects.get(id=program_id)
     file_path = None
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
-            registration_data_import = RegistrationDataImport.objects.create(
-                name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
-            )
 
             business_area = storage_obj.business_area
 
@@ -133,6 +129,9 @@ def create_target_population_task(storage_id, program_id, tp_name):
 
             with open(file_path, encoding="cp1251") as file:
                 reader = csv.DictReader(file, delimiter=";")
+                batch_size = 10000
+                current_batch_index = 0
+                registration_data_import = None
                 for row in reader:
                     rows_count += 1
                     family_id = row["ID_FAM"]
@@ -140,6 +139,15 @@ def create_target_population_task(storage_id, program_id, tp_name):
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
                     size = row["FAM_NUM"]
+                    if current_batch_index%batch_size == 0:
+                        registration_data_import = RegistrationDataImport.objects.create(
+                            name=f"{rdi_name} part {int(current_batch_index//batch_size)+1}",
+                            number_of_individuals=0,
+                            number_of_households=0,
+                            business_area=storage_obj.business_area,
+                            data_source=RegistrationDataImport.EDOPOMOGA,
+                        )
+                    current_batch_index += 1
 
                     individual_data = {
                         "given_name": row.get("NAME", ""),
@@ -206,23 +214,8 @@ def create_target_population_task(storage_id, program_id, tp_name):
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
-            households = Household.objects.filter(family_id__in=list(family_ids)).only("id")
-
-            target_population = TargetPopulation.objects.create(
-                name=tp_name,
-                created_by=storage_obj.created_by,
-                program=program,
-                status=TargetPopulation.STATUS_LOCKED,
-                build_status=TargetPopulation.BUILD_STATUS_OK,
-                business_area=business_area,
-                storage_file=storage_obj,
-            )
-            target_population.households.set(households)
-            target_population.refresh_stats()
-            target_population.save()
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
-
     except Exception:
         storage_obj.status = StorageFile.STATUS_FAILED
         storage_obj.save(update_fields=["status"])
