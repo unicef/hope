@@ -14,7 +14,7 @@ import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
 
 interface LookUpIndividualFiltersProps {
   onFilterChange;

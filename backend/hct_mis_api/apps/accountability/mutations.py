@@ -8,17 +8,26 @@ from hct_mis_api.apps.accountability.inputs import (
     CreateAccountabilityCommunicationMessageInput,
     CreateFeedbackInput,
     CreateFeedbackMessageInput,
+    CreateSurveyInput,
     UpdateFeedbackInput,
 )
-from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Survey
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
 
+from ..core.models import BusinessArea
+from .celery_tasks import export_survey_sample_task
 from .models import Message
-from .schema import CommunicationMessageNode, FeedbackMessageNode, FeedbackNode
+from .schema import (
+    CommunicationMessageNode,
+    FeedbackMessageNode,
+    FeedbackNode,
+    SurveyNode,
+)
 from .services.feedback_crud_services import FeedbackCrudServices
 from .services.message_crud_services import MessageCrudServices
+from .services.survey_crud_services import SurveyCrudServices
 
 
 class CreateCommunicationMessageMutation(PermissionMutation):
@@ -109,8 +118,50 @@ class CreateFeedbackMessageMutation(PermissionMutation):
         return cls(feedback_message=feedback_message)
 
 
+class CreateSurveyMutation(PermissionMutation):
+    survey = graphene.Field(SurveyNode)
+
+    class Arguments:
+        input = CreateSurveyInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input):
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
+        cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE, business_area)
+        survey = SurveyCrudServices.create(info.context.user, business_area, input)
+        log_create(
+            Survey.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            None,
+            survey,
+        )
+        return cls(survey=survey)
+
+
+class ExportSurveySampleMutationMutation(PermissionMutation):
+    survey = graphene.Field(SurveyNode)
+
+    class Arguments:
+        survey_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, survey_id):
+        survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
+        cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, survey.business_area)
+
+        export_survey_sample_task.delay(survey.id, info.context.user.id)
+        return cls(survey=survey)
+
+
 class Mutations(graphene.ObjectType):
     create_accountability_communication_message = CreateCommunicationMessageMutation.Field()
     create_feedback = CreateFeedbackMutation.Field()
     update_feedback = UpdateFeedbackMutation.Field()
     create_feedback_message = CreateFeedbackMessageMutation.Field()
+    create_survey = CreateSurveyMutation.Field()
+    export_survey_sample = ExportSurveySampleMutationMutation.Field()

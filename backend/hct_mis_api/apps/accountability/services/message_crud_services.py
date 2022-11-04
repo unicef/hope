@@ -36,7 +36,12 @@ class MessageCrudServices:
         message.households.set(households)
 
         sampling = Sampling(input_data, households)
-        sampling.process_sampling(message)
+        result = sampling.process_sampling()
+        message.sample_size = result.sample_size
+        message.full_list_arguments = result.full_list_arguments
+        message.random_sampling_arguments = result.random_sampling_arguments
+        message.number_of_recipients = result.number_of_recipients
+        message.households = result.households
 
         if message.number_of_recipients == 0:
             err_msg = "No recipients found for the given criteria"

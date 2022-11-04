@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from .models import Feedback, FeedbackMessage, Message
+from .models import Feedback, FeedbackMessage, Message, Survey
 
 
 class MessagesFilter(FilterSet):
@@ -100,3 +100,52 @@ class FeedbackMessageFilter(FilterSet):
     class Meta:
         fields = ("id",)
         model = FeedbackMessage
+
+
+class SurveyFilter(FilterSet):
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    search = CharFilter(method="filter_search")
+
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(title__icontains=value)
+
+    class Meta:
+        model = Survey
+        fields = {
+            "program": ["exact"],
+            "target_population": ["exact"],
+            "created_by": ["exact"],
+        }
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "unicef_id",
+            "title",
+            "category",
+            "number_of_recipient",
+            "created_by",
+            "created_at",
+        )
+    )
+
+
+class RecipientFilter(FilterSet):
+    survey = CharFilter(method="filter_survey", required=True)
+
+    class Meta:
+        model = Household
+        fields = []
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "unicef_id",
+            "head_of_household__full_name",
+            "size",
+            "admin_area__name",
+            "residence_status",
+            "registered_at",
+        )
+    )
+
+    def filter_survey(self, queryset, name, value):
+        return queryset.filter(surveys__id=decode_id_string(value))

@@ -21,6 +21,7 @@ interface RegistrationDataImportProps {
   selectedRDI?;
   handleChange?;
   noTableStyling?;
+  noTitle?;
 }
 
 const NoTableStyling = styled.div`
@@ -37,6 +38,7 @@ export function RegistrationDataImportTable({
   selectedRDI,
   handleChange,
   noTableStyling,
+  noTitle,
 }: RegistrationDataImportProps): ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -67,11 +69,13 @@ export function RegistrationDataImportTable({
           RegistrationDataImportNode,
           AllRegistrationDataImportsQueryVariables
         >
-          title={t('List of Imports')}
+          title={noTitle ? null : t('List of Imports')}
           getTitle={(data) =>
-            `${t('List of Imports')} (${
-              data.allRegistrationDataImports.totalCount
-            })`
+            noTitle
+              ? null
+              : `${t('List of Imports')} (${
+                  data.allRegistrationDataImports.totalCount
+                })`
           }
           headCells={enableRadioButton ? headCells : headCells.slice(1)}
           defaultOrderBy='importDate'

@@ -58,7 +58,7 @@ export interface DescriptionProps {
   permissions: string[];
 }
 
-export function Description ({
+export const Description = ({
   values,
   showIssueType,
   selectedIssueType,
@@ -69,7 +69,7 @@ export function Description ({
   setFieldValue,
   errors,
   permissions,
-}: DescriptionProps): React.ReactElement  {
+}: DescriptionProps): React.ReactElement => {
   const { t } = useTranslation();
   const categoryChoices: {
     [id: number]: string;

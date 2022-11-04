@@ -89,6 +89,10 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),),
     )
     target_population_status_choices = graphene.List(ChoiceObject)
+    all_active_target_populations = DjangoPermissionFilterConnectionField(
+        TargetPopulationNode,
+        permission_classes=(hopePermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
+    )
 
     def resolve_target_population_status_choices(self, info, **kwargs):
         return [{"name": name, "value": value} for value, name in target_models.TargetPopulation.STATUS_CHOICES]
@@ -106,3 +110,8 @@ class Query(graphene.ObjectType):
                 targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids)
             )
         ).distinct()
+
+    def resolve_all_active_target_populations(self, info, **kwargs):
+        return target_models.TargetPopulation.objects.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
+            business_area__slug=info.context.headers.get("Business-Area").lower()
+        )

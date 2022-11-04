@@ -171,6 +171,11 @@ class Permissions(Enum):
     ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS = auto()
     ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE = auto()
 
+    # Feedback
+    ACCOUNTABILITY_SURVEY_VIEW_CREATE = auto()
+    ACCOUNTABILITY_SURVEY_VIEW_LIST = auto()
+    ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
+
     # FeedbackMessage
     ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE = auto()
 
@@ -351,6 +356,8 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         permission_classes,
     ):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
+        if business_area := info.context.headers.get("Business-Area"):
+            filter_kwargs["business_area"] = business_area
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             log_and_raise("Permission Denied")
         if "permissions" in filtering_args:

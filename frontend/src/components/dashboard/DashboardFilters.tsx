@@ -7,7 +7,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;
