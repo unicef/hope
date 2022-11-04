@@ -23,6 +23,7 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
+from backend.hct_mis_api.apps.registration_datahub.models import recalculate_phone_numbers_validity
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -952,16 +953,7 @@ class Individual(
         return self.household.head_of_household.id == self.id
 
     def save(self, *args, **kwargs) -> None:
-        if current := Individual.objects.filter(pk=self.pk).first():
-            if current.phone_no_valid is None or current.phone_no != self.phone_no:
-                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
-            if current.phone_no_alternative_valid is None or current.phone_no_alternative != self.phone_no_alternative:
-                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
-        else:
-            if current.phone_no_valid is None:
-                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
-            if current.phone_no_alternative_valid is None:
-                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
+        recalculate_phone_numbers_validity(self, Individual)
         super().save(*args, **kwargs)
 
 

@@ -173,6 +173,20 @@ class ImportedHousehold(TimeStampedUUIDModel):
         return f"Household ID: {self.id}"
 
 
+def recalculate_phone_numbers_validity(obj, model):
+    # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
+    if current := model.objects.filter(pk=obj.pk).first():
+        # update
+        if current.phone_no_valid is None or current.phone_no != obj.phone_no:
+            obj.phone_no_valid = is_right_phone_number_format(str(obj.phone_no))
+        if current.phone_no_alternative_valid is None or current.phone_no_alternative != obj.phone_no_alternative:
+            obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
+    else:
+        # create
+        obj.phone_no_valid = is_right_phone_number_format(str(obj.phone_no))
+        obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
+
+
 class ImportedIndividual(TimeStampedUUIDModel):
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
@@ -294,16 +308,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         return role.role if role is not None else ROLE_NO_ROLE
 
     def save(self, *args, **kwargs) -> None:
-        if current := ImportedIndividual.objects.filter(pk=self.pk).first():
-            if current.phone_no_valid is None or current.phone_no != self.phone_no:
-                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
-            if current.phone_no_alternative_valid is None or current.phone_no_alternative != self.phone_no_alternative:
-                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
-        else:
-            if current.phone_no_valid is None:
-                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
-            if current.phone_no_alternative_valid is None:
-                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
+        recalculate_phone_numbers_validity(self, ImportedIndividual)
         super().save(*args, **kwargs)
 
 
