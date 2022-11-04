@@ -4,11 +4,16 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
+from hct_mis_api.apps.household.fixtures import (
+    EntitlementCardFactory,
+    create_household,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
@@ -29,6 +34,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.household.models import HEAD, MALE
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -103,6 +109,7 @@ class TestRapidProVerificationTask(TestCase):
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             cash_plan=cash_plan,
         )
+        cls.individuals = []
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=BusinessArea.objects.first()
@@ -114,6 +121,7 @@ class TestRapidProVerificationTask(TestCase):
                 },
                 {"registration_data_import": registration_data_import},
             )
+            cls.individuals.extend(individuals)
 
             household.programs.add(program)
 
@@ -315,6 +323,24 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.status,
                 PaymentVerification.STATUS_PENDING,
             )
+
+    def test_recalculating_validity_on_number_change(self):
+        ind = self.individuals[0]
+
+        ind.phone_no = "+380 789 678 567"
+        ind.save()
+
+        first_phone = ind.phone_no
+        first_validity = ind.phone_no_valid
+        self.assertTrue(first_validity)
+
+        ind.phone_no = "+380 789 678 XXX"
+        ind.save()
+
+        second_phone = ind.phone_no
+        self.assertNotEqual(first_phone, second_phone)
+        second_validity = ind.phone_no_valid
+        self.assertFalse(second_validity)
 
 
 class TestPhoneNumberVerification(TestCase):

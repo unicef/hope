@@ -1,3 +1,4 @@
+import copy
 import logging
 import re
 from datetime import date
@@ -748,8 +749,12 @@ class Individual(
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
+
     phone_no = PhoneNumberField(blank=True, db_index=True)
+    phone_no_valid = models.BooleanField(default=False, db_index=True)
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
+    phone_no_alternative_valid = models.BooleanField(default=False, db_index=True)
+
     relationship = models.CharField(
         max_length=255,
         blank=True,
@@ -820,14 +825,6 @@ class Individual(
     disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     vector_column = SearchVectorField(null=True)
-
-    @property
-    def phone_no_valid(self) -> bool:
-        return is_right_phone_number_format(self.phone_no)
-
-    @property
-    def phone_no_alternative_valid(self) -> bool:
-        return is_right_phone_number_format(self.phone_no_alternative)
 
     @property
     def age(self) -> int:
@@ -954,6 +951,14 @@ class Individual(
         if not self.household:
             return False
         return self.household.head_of_household.id == self.id
+
+    def save(self, *args, **kwargs):
+        if current := Individual.objects.filter(pk=self.pk).first():
+            if current.phone_no != self.phone_no:
+                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
+            if current.phone_no_alternative != self.phone_no_alternative:
+                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
+        super().save(*args, **kwargs)
 
 
 class EntitlementCard(TimeStampedUUIDModel):
