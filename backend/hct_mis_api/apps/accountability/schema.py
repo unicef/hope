@@ -205,6 +205,10 @@ class Query(graphene.ObjectType):
         AccountabilitySampleSizeObject,
         input=AccountabilitySampleSizeInput(),
     )
+    survey_category_choices = graphene.List(ChoiceObject)
+
+    def resolve_survey_category_choices(self, info):
+        return to_choice_object(Survey.CATEGORY_CHOICES)
 
     def resolve_feedback_issue_type_choices(self, info, **kwargs):
         return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
