@@ -201,6 +201,9 @@ class TestRapidProVerificationTask(TestCase):
                 "received": False,
             }
         ]
+        assert is_right_phone_number_format(
+            payment_record_verification.payment_record.head_of_household.phone_no
+        ), payment_record_verification.payment_record.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
@@ -226,6 +229,9 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
         )
+        assert is_right_phone_number_format(
+            payment_record_verification.payment_record.head_of_household.phone_no
+        ), payment_record_verification.payment_record.head_of_household.phone_no
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
@@ -269,6 +275,9 @@ class TestRapidProVerificationTask(TestCase):
                 "received_amount": payment_record_verification.payment_record.delivered_quantity,
             }
         ]
+        assert is_right_phone_number_format(
+            payment_record_verification.payment_record.head_of_household.phone_no
+        ), payment_record_verification.payment_record.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
@@ -321,12 +330,12 @@ class TestRapidProVerificationTask(TestCase):
     def test_recalculating_validity_on_number_change(self):
         ind = self.individuals[0]
 
-        first_phone = "+380 789 678 567"
+        first_phone = "+380 637 541 345"
         ind.phone_no = first_phone
         ind.save()
         self.assertTrue(ind.phone_no_valid)
 
-        second_phone = "+380 789 678 XXX"
+        second_phone = "+380 637 541 X"
         ind.phone_no = second_phone
         ind.save()
 
@@ -336,7 +345,8 @@ class TestRapidProVerificationTask(TestCase):
 
 class TestPhoneNumberVerification(TestCase):
     def test_phone_numbers(self):
-        self.assertTrue(is_right_phone_number_format("+40032215789"))
+        self.assertFalse(is_right_phone_number_format("+40 032 215 789"))
+        self.assertTrue(is_right_phone_number_format("+48 632 215 789"))
 
         self.assertTrue(is_right_phone_number_format("+48 123 234 345"))
         self.assertTrue(is_right_phone_number_format("0048 123 234 345"))
@@ -348,6 +358,6 @@ class TestPhoneNumberVerification(TestCase):
 
         self.assertFalse(is_right_phone_number_format("+38063754115"))
         self.assertTrue(is_right_phone_number_format("+380637541150"))
-        self.assertTrue(is_right_phone_number_format("+380 123 234 345"))
-        self.assertFalse(is_right_phone_number_format("+380 123 234 XXX"))
+        self.assertTrue(is_right_phone_number_format("+380 637 541 345"))
+        self.assertTrue(is_right_phone_number_format("+380 637 541 XXX"))  # it's ok to have A-Z in number
         self.assertFalse(is_right_phone_number_format("+380 23 234 345"))

@@ -18,12 +18,8 @@ def is_right_phone_number_format(phone_number) -> bool:
     if phone_number.startswith("00"):
         phone_number = f"+{phone_number[2:]}"
 
-    # phonenumbers lib accepts numbers such 123 123 XXX and treats them as 123 123 999 :o
-    if any(char.isalpha() for char in phone_number):
-        return False
-
     try:
-        return phonenumbers.is_possible_number(phonenumbers.parse(phone_number))
+        return phonenumbers.is_valid_number(phonenumbers.parse(phone_number))
     except phonenumbers.NumberParseException:
         logging.warning(f"'{phone_number}' is not a valid phone number")
         return False
