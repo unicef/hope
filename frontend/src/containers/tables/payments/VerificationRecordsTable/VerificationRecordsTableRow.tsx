@@ -27,11 +27,14 @@ export function VerificationRecordsTableRow({
 }: VerificationRecordsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
 
+  const nodeType = atob(paymentVerification.payment.id).split(":")[0];
+  const linkPath = `/${businessArea}/verification/payment${nodeType === "PaymentRecordNode" ? "-record" : ""}/${paymentVerification.payment.id}`;
+
   return (
     <TableRow hover role='checkbox' key={paymentVerification.id}>
       <TableCell align='left'>
         {canViewRecordDetails ? (
-          <BlackLink to={`/${businessArea}/verification-records/${paymentVerification.payment.id}`}>
+          <BlackLink to={linkPath}>
             {paymentVerification.payment?.unicefId}
           </BlackLink>
         ) : (
