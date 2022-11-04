@@ -953,9 +953,14 @@ class Individual(
 
     def save(self, *args, **kwargs) -> None:
         if current := Individual.objects.filter(pk=self.pk).first():
-            if current.phone_no != self.phone_no:
+            if current.phone_no_valid is None or current.phone_no != self.phone_no:
                 self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
-            if current.phone_no_alternative != self.phone_no_alternative:
+            if current.phone_no_alternative_valid is None or current.phone_no_alternative != self.phone_no_alternative:
+                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
+        else:
+            if current.phone_no_valid is None:
+                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
+            if current.phone_no_alternative_valid is None:
                 self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
         super().save(*args, **kwargs)
 
