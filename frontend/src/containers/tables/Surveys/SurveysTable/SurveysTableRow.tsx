@@ -11,11 +11,13 @@ import { SurveyNode } from '../../../../__generated__/graphql';
 interface SurveysTableRowProps {
   survey: SurveyNode;
   canViewDetails: boolean;
+  categoryDict;
 }
 
 export const SurveysTableRow = ({
   survey,
   canViewDetails,
+  categoryDict,
 }: SurveysTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -39,7 +41,7 @@ export const SurveysTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>{survey.title}</TableCell>
-      <TableCell align='left'>{survey.category}</TableCell>
+      <TableCell align='left'>{categoryDict[survey.category]}</TableCell>
       <TableCell align='left'>{survey.numberOfRecipients}</TableCell>
       <TableCell align='left'>{renderUserName(survey.createdBy)}</TableCell>
       <TableCell align='left'>
