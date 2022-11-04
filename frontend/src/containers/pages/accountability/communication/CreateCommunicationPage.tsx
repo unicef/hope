@@ -580,7 +580,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/acccountability/communication`}
+                    to={`/${businessArea}/accountability/communication`}
                   >
                     {t('Cancel')}
                   </Button>
