@@ -115,7 +115,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Faker("phone_number")
+    phone_no = factory.LazyFunction(faker.phone_number)
     phone_no_alternative = ""
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False

@@ -349,7 +349,7 @@ class TestPhoneNumberVerification(TestCase):
         self.assertTrue(is_right_phone_number_format("+48 632 215 789"))
 
         self.assertTrue(is_right_phone_number_format("+48 123 234 345"))
-        self.assertTrue(is_right_phone_number_format("0048 123 234 345"))
+        self.assertFalse(is_right_phone_number_format("0048 123 234 345"))
 
         self.assertFalse(is_right_phone_number_format("(201) 555-0123"))
         self.assertTrue(is_right_phone_number_format("+1 (201) 555-0123"))
