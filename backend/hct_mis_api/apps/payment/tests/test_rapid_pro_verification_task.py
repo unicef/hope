@@ -22,13 +22,13 @@ from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     CheckRapidProVerificationTask,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.utils.phone import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):
