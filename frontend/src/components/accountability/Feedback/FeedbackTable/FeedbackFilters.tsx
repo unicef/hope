@@ -8,7 +8,7 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { AssigneeAutocomplete } from '../../../grievances/GrievancesTable/AssigneeAutocomplete';
+import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 
 interface FeedbackFiltersProps {
   onFilterChange;

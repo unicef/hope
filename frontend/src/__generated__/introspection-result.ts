@@ -63,6 +63,9 @@
             "name": "SteficonRuleNode"
           },
           {
+            "name": "SurveyNode"
+          },
+          {
             "name": "ReportNode"
           },
           {
@@ -160,6 +163,9 @@
           },
           {
             "name": "CommunicationMessageRecipientMapNode"
+          },
+          {
+            "name": "RecipientNode"
           },
           {
             "name": "LogEntryNode"

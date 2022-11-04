@@ -8,16 +8,29 @@ input AccountabilityCommunicationMessageAgeInput {
   max: Int
 }
 
-input AccountabilityCommunicationMessageFullListArguments {
+input AccountabilityFullListArguments {
   excludedAdminAreas: [String]
 }
 
-input AccountabilityCommunicationMessageRandomSamplingArguments {
+input AccountabilityRandomSamplingArguments {
   excludedAdminAreas: [String]
   confidenceInterval: Float!
   marginOfError: Float!
   age: AccountabilityCommunicationMessageAgeInput
   sex: String
+}
+
+input AccountabilitySampleSizeInput {
+  targetPopulation: ID
+  program: ID
+  samplingType: String!
+  fullListArguments: AccountabilityFullListArguments
+  randomSamplingArguments: AccountabilityRandomSamplingArguments
+}
+
+type AccountabilitySampleSizeObject {
+  numberOfRecipients: Int
+  sampleSize: Int
 }
 
 type ActivateCashPlanVerificationMutation {
@@ -223,6 +236,7 @@ type BusinessAreaNode implements Node {
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  surveySet(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -518,8 +532,8 @@ input CreateAccountabilityCommunicationMessageInput {
   targetPopulation: ID
   registrationDataImport: ID
   samplingType: SamplingChoices!
-  fullListArguments: AccountabilityCommunicationMessageFullListArguments
-  randomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments
+  fullListArguments: AccountabilityFullListArguments
+  randomSamplingArguments: AccountabilityRandomSamplingArguments
   title: String!
   body: String!
 }
@@ -643,6 +657,21 @@ input CreateReportInput {
   dateTo: Date!
   adminArea: [ID]
   program: ID
+}
+
+input CreateSurveyInput {
+  title: String!
+  body: String
+  category: String!
+  targetPopulation: ID
+  program: ID
+  samplingType: String!
+  fullListArguments: AccountabilityFullListArguments
+  randomSamplingArguments: AccountabilityRandomSamplingArguments
+}
+
+type CreateSurveyMutation {
+  survey: SurveyNode
 }
 
 input CreateTargetPopulationInput {
@@ -825,6 +854,10 @@ type EditPaymentVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type ExportSurveySampleMutationMutation {
+  survey: SurveyNode
+}
+
 type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
@@ -921,8 +954,8 @@ input GetAccountabilityCommunicationMessageSampleSizeInput {
   targetPopulation: ID
   registrationDataImport: ID
   samplingType: SamplingChoices!
-  fullListArguments: AccountabilityCommunicationMessageFullListArguments
-  randomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments
+  fullListArguments: AccountabilityFullListArguments
+  randomSamplingArguments: AccountabilityRandomSamplingArguments
 }
 
 input GetCashplanVerificationSampleSizeInput {
@@ -1175,6 +1208,7 @@ type HouseholdNode implements Node {
   selections: [HouseholdSelection!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   adminAreaTitle: String
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
@@ -2137,6 +2171,8 @@ type Mutations {
   createFeedback(input: CreateFeedbackInput!): CreateFeedbackMutation
   updateFeedback(input: UpdateFeedbackInput!): UpdateFeedbackMutation
   createFeedbackMessage(input: CreateFeedbackMessageInput!): CreateFeedbackMessageMutation
+  createSurvey(input: CreateSurveyInput!): CreateSurveyMutation
+  exportSurveySample(surveyId: ID!): ExportSurveySampleMutationMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
@@ -2405,6 +2441,7 @@ type ProgramNode implements Node {
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
   totalUndeliveredQuantity: Decimal
@@ -2459,6 +2496,10 @@ type Query {
   feedback(id: ID!): FeedbackNode
   allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessAreaSlug: String!, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, orderBy: String): FeedbackNodeConnection
   feedbackIssueTypeChoices: [ChoiceObject]
+  survey(id: ID!): SurveyNode
+  allSurveys(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, targetPopulation: ID, createdBy: ID, createdAtRange: String, search: String, orderBy: String): SurveyNodeConnection
+  recipients(offset: Int, before: String, after: String, first: Int, last: Int, survey: String!, orderBy: String): RecipientNodeConnection
+  accountabilitySampleSize(input: AccountabilitySampleSizeInput): AccountabilitySampleSizeObject
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -2530,11 +2571,13 @@ type Query {
   programSectorChoices: [ChoiceObject]
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection
   goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
+  allActiveTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
   allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], countryOrigin: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
@@ -2626,6 +2669,24 @@ type ReassignRoleMutation {
 
 type RebuildTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type RecipientNode implements Node {
+  id: ID!
+  size: Int
+  headOfHousehold: IndividualNode!
+}
+
+type RecipientNodeConnection {
+  pageInfo: PageInfo!
+  edges: [RecipientNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type RecipientNodeEdge {
+  node: RecipientNode
+  cursor: String!
 }
 
 input ReferralTicketExtras {
@@ -3089,6 +3150,53 @@ type SteficonRuleNodeEdge {
   cursor: String!
 }
 
+enum SurveyCategory {
+  RAPID_PRO
+  SMS
+  MANUAL
+}
+
+type SurveyNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  unicefId: String
+  title: String!
+  body: String
+  category: SurveyCategory!
+  numberOfRecipients: Int!
+  createdBy: UserNode
+  recipients(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  targetPopulation: TargetPopulationNode
+  program: ProgramNode
+  businessArea: UserBusinessAreaNode!
+  sampleFile: String
+  sampleFileGeneratedAt: DateTime
+  samplingType: SurveySamplingType!
+  fullListArguments: JSONString
+  randomSamplingArguments: JSONString
+  sampleSize: Int!
+  sampleFilePath: String
+  hasValidSampleFile: Boolean
+}
+
+type SurveyNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SurveyNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SurveyNodeEdge {
+  node: SurveyNode
+  cursor: String!
+}
+
+enum SurveySamplingType {
+  FULL_LIST
+  RANDOM
+}
+
 type TableTotalCashTransferred {
   data: [_TableTotalCashTransferredDataNode]
 }
@@ -3137,6 +3245,7 @@ type TargetPopulationNode implements Node {
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
 }
@@ -3757,6 +3866,7 @@ type UserBusinessAreaNode implements Node {
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  surveySet(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   permissions: [String]
 }
 
@@ -3805,6 +3915,7 @@ type UserNode implements Node {
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
+  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 

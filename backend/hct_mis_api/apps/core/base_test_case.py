@@ -1,5 +1,6 @@
 import base64
 import shutil
+from functools import reduce
 from io import BytesIO
 
 from django.contrib.auth.models import AnonymousUser
@@ -44,9 +45,14 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user=None, files=None):
+    def generate_context(self, user=None, files=None, headers=None):
         request = RequestFactory()
-        context_value = request.get("/api/graphql/")
+        headers = reduce(
+            lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
+            (headers or {}).items(),
+            {},
+        )
+        context_value = request.get("/api/graphql/", **headers)
         context_value.user = user or AnonymousUser()
         self.__set_context_files(context_value, files)
         return context_value
