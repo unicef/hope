@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import phonenumbers
 
@@ -28,12 +29,13 @@ def is_right_phone_number_format(phone_number) -> bool:
         return False
 
 
-def calculate_phone_numbers_validity(obj) -> None:
+def calculate_phone_numbers_validity(obj) -> Any:
     obj.phone_no_valid = is_right_phone_number_format(str(obj.phone_no))
     obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
+    return obj
 
 
-def recalculate_phone_numbers_validity(obj, model) -> None:
+def recalculate_phone_numbers_validity(obj, model) -> Any:
     # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
     if current := model.objects.filter(pk=obj.pk).first():
         # update
@@ -43,4 +45,5 @@ def recalculate_phone_numbers_validity(obj, model) -> None:
             obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
     else:
         # create
-        calculate_phone_numbers_validity(obj)
+        obj = calculate_phone_numbers_validity(obj)
+    return obj
