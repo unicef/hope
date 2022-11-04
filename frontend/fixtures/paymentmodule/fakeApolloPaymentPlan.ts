@@ -5,6 +5,7 @@ import {
   PaymentPlanCurrency,
   PaymentVerificationPlanVerificationChannel,
   PaymentVerificationPlanSampling,
+  FinancialServiceProviderCommunicationChannel,
 } from '../../src/__generated__/graphql';
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
@@ -124,6 +125,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
         id:
           'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZToyMzA5MzQ2YS01NTA3LTRjY2UtOTkxMS05MDYwNjBkYWNkMDM=',
         name: 'Miranda Ltd',
+        communicationChannel: FinancialServiceProviderCommunicationChannel.Api,
         __typename: 'FinancialServiceProviderNode',
       },
       __typename: 'DeliveryMechanismNode',
@@ -136,6 +138,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
         id:
           'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTplNjlkZTM1Yi1kMzRjLTQyNzYtOTJhMi1lNTYyOWQwNmEzMzY=',
         name: 'Frazier-Watson',
+        communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
         __typename: 'FinancialServiceProviderNode',
       },
       __typename: 'DeliveryMechanismNode',
@@ -148,6 +151,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
         id:
           'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTpkODU3MmFjNy04MjMyLTQwYjItOWFjNS0zMDBiZWQ2YjcwNDU=',
         name: 'Bray Group',
+        communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
         __typename: 'FinancialServiceProviderNode',
       },
       __typename: 'DeliveryMechanismNode',
