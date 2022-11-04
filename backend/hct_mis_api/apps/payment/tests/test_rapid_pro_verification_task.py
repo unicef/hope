@@ -327,20 +327,17 @@ class TestRapidProVerificationTask(TestCase):
     def test_recalculating_validity_on_number_change(self):
         ind = self.individuals[0]
 
-        ind.phone_no = "+380 789 678 567"
+        first_phone = "+380 789 678 567"
+        ind.phone_no = first_phone
+        ind.save()
+        self.assertTrue(ind.phone_no_valid)
+
+        second_phone = "+380 789 678 XXX"
+        ind.phone_no = second_phone
         ind.save()
 
-        first_phone = ind.phone_no
-        first_validity = ind.phone_no_valid
-        self.assertTrue(first_validity)
-
-        ind.phone_no = "+380 789 678 XXX"
-        ind.save()
-
-        second_phone = ind.phone_no
         self.assertNotEqual(first_phone, second_phone)
-        second_validity = ind.phone_no_valid
-        self.assertFalse(second_validity)
+        self.assertFalse(ind.phone_no_valid)
 
 
 class TestPhoneNumberVerification(TestCase):
@@ -359,3 +356,4 @@ class TestPhoneNumberVerification(TestCase):
         self.assertTrue(is_right_phone_number_format("+380637541150"))
         self.assertTrue(is_right_phone_number_format("+380 123 234 345"))
         self.assertFalse(is_right_phone_number_format("+380 23 234 345"))
+        self.assertFalse(is_right_phone_number_format("+380 23 234 XXX"))

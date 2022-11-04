@@ -200,7 +200,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_valid = models.BooleanField(default=False)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_alternative_valid = models.BooleanField(default=False)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -287,17 +289,17 @@ class ImportedIndividual(TimeStampedUUIDModel):
         return self.registration_data_import.business_area
 
     @property
-    def phone_no_valid(self) -> bool:
-        return is_right_phone_number_format(str(self.phone_no))
-
-    @property
-    def phone_no_alternative_valid(self) -> bool:
-        return is_right_phone_number_format(str(self.phone_no_alternative))
-
-    @property
     def role(self) -> Optional[str]:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
+
+    def save(self, *args, **kwargs):
+        if current := ImportedIndividual.objects.filter(pk=self.pk).first():
+            if current.phone_no != self.phone_no:
+                self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
+            if current.phone_no_alternative != self.phone_no_alternative:
+                self.phone_no_alternative_valid = is_right_phone_number_format(str(self.phone_no_alternative))
+        super().save(*args, **kwargs)
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
