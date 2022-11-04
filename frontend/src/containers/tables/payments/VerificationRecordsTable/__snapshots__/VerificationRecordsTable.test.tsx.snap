@@ -335,7 +335,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudE5vZGU6NzBjYmU4ZjgtNzUxYy00NTliLTlmZjEtZDg4M2Y4ZTFjNGFj"
+                  href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6NzBjYmU4ZjgtNzUxYy00NTliLTlmZjEtZDg4M2Y4ZTFjNGFj"
                 >
                   RCPT-0060-22-0.000.005
                 </a>
@@ -413,7 +413,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudE5vZGU6ZmI4NjIzM2EtNWRiOS00NjQ2LWJiN2UtN2Q3OTVhNWI3Njc2"
+                  href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6ZmI4NjIzM2EtNWRiOS00NjQ2LWJiN2UtN2Q3OTVhNWI3Njc2"
                 >
                   RCPT-0060-22-0.000.007
                 </a>
@@ -491,7 +491,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudE5vZGU6M2UyZTQ4NjktZWRmNC00NTA4LWI4ZjAtY2YwZjZmNmUzNzY3"
+                  href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6M2UyZTQ4NjktZWRmNC00NTA4LWI4ZjAtY2YwZjZmNmUzNzY3"
                 >
                   RCPT-0060-22-0.000.003
                 </a>
@@ -569,7 +569,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudE5vZGU6ZTE2YTUxNWUtNjlhOC00NTM2LTg0MGMtMjczN2FmMjgyYmQw"
+                  href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6ZTE2YTUxNWUtNjlhOC00NTM2LTg0MGMtMjczN2FmMjgyYmQw"
                 >
                   RCPT-0060-22-0.000.004
                 </a>
@@ -647,7 +647,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudE5vZGU6ZjI3NTQxNzMtZjdjMC00NWJhLTgxNDctMmE4MTVjNWZmZmI3"
+                  href="/afghanistan/verification/payment/UGF5bWVudE5vZGU6ZjI3NTQxNzMtZjdjMC00NWJhLTgxNDctMmE4MTVjNWZmZmI3"
                 >
                   RCPT-0060-22-0.000.006
                 </a>
