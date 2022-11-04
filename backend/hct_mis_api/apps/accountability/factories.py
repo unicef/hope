@@ -49,7 +49,7 @@ class SurveyFactory(factory.DjangoModelFactory):
     class Meta:
         model = Survey
 
-    title = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    title = factory.Faker("sentence", nb_words=2, variable_nb_words=True, ext_word_list=None)
     category = factory.fuzzy.FuzzyChoice(Survey.CATEGORY_CHOICES, getter=lambda c: c[0])
     created_by = factory.SubFactory(UserFactory)
     target_population = None
