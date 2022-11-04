@@ -46,7 +46,7 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
+from hct_mis_api.apps.payment.utils import recalculate_phone_numbers_validity
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
@@ -171,20 +171,6 @@ class ImportedHousehold(TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return f"Household ID: {self.id}"
-
-
-def recalculate_phone_numbers_validity(obj, model):
-    # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
-    if current := model.objects.filter(pk=obj.pk).first():
-        # update
-        if current.phone_no_valid is None or current.phone_no != obj.phone_no:
-            obj.phone_no_valid = is_right_phone_number_format(str(obj.phone_no))
-        if current.phone_no_alternative_valid is None or current.phone_no_alternative != obj.phone_no_alternative:
-            obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
-    else:
-        # create
-        obj.phone_no_valid = is_right_phone_number_format(str(obj.phone_no))
-        obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
 
 
 class ImportedIndividual(TimeStampedUUIDModel):

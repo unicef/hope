@@ -23,12 +23,11 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
-from backend.hct_mis_api.apps.registration_datahub.models import recalculate_phone_numbers_validity
 
+from hct_mis_api.apps.payment.utils import recalculate_phone_numbers_validity
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
