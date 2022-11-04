@@ -3162,7 +3162,7 @@ type SurveyNode implements Node {
   updatedAt: DateTime!
   unicefId: String
   title: String!
-  body: String
+  body: String!
   category: SurveyCategory!
   numberOfRecipients: Int!
   createdBy: UserNode
@@ -3173,8 +3173,8 @@ type SurveyNode implements Node {
   sampleFile: String
   sampleFileGeneratedAt: DateTime
   samplingType: SurveySamplingType!
-  fullListArguments: JSONString
-  randomSamplingArguments: JSONString
+  fullListArguments: JSONString!
+  randomSamplingArguments: JSONString!
   sampleSize: Int!
   sampleFilePath: String
   hasValidSampleFile: Boolean
