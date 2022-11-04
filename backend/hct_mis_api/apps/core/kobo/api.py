@@ -1,7 +1,7 @@
 import logging
 import time
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -149,7 +149,7 @@ class KoboAPI:
         log_and_raise("Fetching import data took too long", error_type=RetryError)
         return None
 
-    def get_all_projects_data(self) -> List:
+    def get_all_projects_data(self) -> Union[List, Dict, None]:
         if not self.business_area:
             logger.error("Business area is not provided")
             raise ValueError("Business area is not provided")

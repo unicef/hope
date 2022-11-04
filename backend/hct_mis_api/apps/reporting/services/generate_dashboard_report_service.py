@@ -4,7 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -135,7 +135,7 @@ class GenerateDashboardReportContentHelpers:
         return instances, totals
 
     @classmethod
-    def get_programs(cls, report: DashboardReport) -> Tuple[QuerySet, Dict]:
+    def get_programs(cls, report: DashboardReport) -> Tuple[QuerySet, Optional[Dict]]:
 
         filter_vars = cls._format_filters(
             report,
@@ -585,7 +585,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def _get_payment_records_for_report(self, report) -> PaymentRecord:
+    def _get_payment_records_for_report(self, report) -> QuerySet[PaymentRecord]:
         return PaymentRecord.objects.filter(**self._format_filters_for_payment_records(report))
 
     @classmethod

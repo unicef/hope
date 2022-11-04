@@ -64,7 +64,7 @@ class ExportUsersXlsx:
             .filter(is_superuser=False, user_roles__business_area__slug=self.business_area_slug)
         )
         if users.exists() is False:
-            return
+            return None
 
         for user in users.iterator(chunk_size=2000):
             self.ws.append([field.value(user, self.business_area_slug) for field in fields])

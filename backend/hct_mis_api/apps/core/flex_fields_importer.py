@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import Dict, List, Optional
+from typing import List, Optional, Set
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -195,7 +195,7 @@ class FlexibleAttributeImporter:
 
         return True
 
-    def _get_list_of_field_choices(self, sheet) -> Dict:
+    def _get_list_of_field_choices(self, sheet) -> Set:
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
@@ -208,7 +208,7 @@ class FlexibleAttributeImporter:
         has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
-        return
+        return None
 
     def _reset_model_fields_variables(self) -> None:
         self.json_fields_to_create = defaultdict(dict)
