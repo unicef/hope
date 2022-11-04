@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { decodeIdString } from '../../../../utils/utils';
+import { choicesToDict, decodeIdString } from '../../../../utils/utils';
 import {
   AllSurveysQueryVariables,
   SurveyNode,
+  SurveysChoiceDataQuery,
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
@@ -13,11 +14,13 @@ import { SurveysTableRow } from './SurveysTableRow';
 interface SurveysTableProps {
   filter;
   canViewDetails: boolean;
+  choicesData: SurveysChoiceDataQuery;
 }
 
 export const SurveysTable = ({
   filter,
   canViewDetails,
+  choicesData,
 }: SurveysTableProps): ReactElement => {
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
@@ -28,6 +31,8 @@ export const SurveysTable = ({
       : '',
     program: filter.program || '',
   };
+  const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
+
   return (
     <TableWrapper>
       <UniversalTable<SurveyNode, AllSurveysQueryVariables>
@@ -43,6 +48,7 @@ export const SurveysTable = ({
             key={row.id}
             survey={row}
             canViewDetails={canViewDetails}
+            categoryDict={categoryDict}
           />
         )}
       />

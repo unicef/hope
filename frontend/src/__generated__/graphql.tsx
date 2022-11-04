@@ -3837,6 +3837,7 @@ export type Query = {
   allSurveys?: Maybe<SurveyNodeConnection>,
   recipients?: Maybe<RecipientNodeConnection>,
   accountabilitySampleSize?: Maybe<AccountabilitySampleSizeObject>,
+  surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -11019,6 +11020,17 @@ export type SurveyQuery = (
       & Pick<ProgramNode, 'id' | 'name'>
     )> }
   )> }
+);
+
+export type SurveysChoiceDataQueryVariables = {};
+
+
+export type SurveysChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { surveyCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type AllActiveTargetPopulationsQueryVariables = {
@@ -21680,6 +21692,56 @@ export function useSurveyLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookO
 export type SurveyQueryHookResult = ReturnType<typeof useSurveyQuery>;
 export type SurveyLazyQueryHookResult = ReturnType<typeof useSurveyLazyQuery>;
 export type SurveyQueryResult = ApolloReactCommon.QueryResult<SurveyQuery, SurveyQueryVariables>;
+export const SurveysChoiceDataDocument = gql`
+    query SurveysChoiceData {
+  surveyCategoryChoices {
+    name
+    value
+  }
+}
+    `;
+export type SurveysChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>, 'query'>;
+
+    export const SurveysChoiceDataComponent = (props: SurveysChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables> query={SurveysChoiceDataDocument} {...props} />
+    );
+    
+export type SurveysChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables> & TChildProps;
+export function withSurveysChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SurveysChoiceDataQuery,
+  SurveysChoiceDataQueryVariables,
+  SurveysChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables, SurveysChoiceDataProps<TChildProps>>(SurveysChoiceDataDocument, {
+      alias: 'surveysChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSurveysChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useSurveysChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSurveysChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSurveysChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSurveysChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, baseOptions);
+      }
+export function useSurveysChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, baseOptions);
+        }
+export type SurveysChoiceDataQueryHookResult = ReturnType<typeof useSurveysChoiceDataQuery>;
+export type SurveysChoiceDataLazyQueryHookResult = ReturnType<typeof useSurveysChoiceDataLazyQuery>;
+export type SurveysChoiceDataQueryResult = ApolloReactCommon.QueryResult<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>;
 export const AllActiveTargetPopulationsDocument = gql`
     query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String) {
   allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange) {
@@ -24741,6 +24803,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, QueryAllSurveysArgs>,
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
   accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeObject']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
+  surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
