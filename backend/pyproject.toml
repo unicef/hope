@@ -62,15 +62,14 @@ ignore_missing_imports = true # TODO
 
 # TODO: remove one, fix errors, repeat
 disable_error_code = [
-  "var-annotated",
+  "var-annotated", # this enforces Django Model fields to have type annotations
   "arg-type",
   "attr-defined",
-  "misc",
+  "misc", # cannot subclass DjangoObjectType
   "union-attr",
-  "return-value",
-  "type-arg",
+  "type-arg", # this misses type parameters for graphene.ObjectType
   "no-untyped-def",
-  "no-any-return",
+  "no-any-return", # this enforces adding return None for function that returns None
 ]
 
 [tool.django-stubs]

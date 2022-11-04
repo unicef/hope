@@ -74,7 +74,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         href=None,
         label="RDI",
     )
-    def hub(self, button) -> None:
+    def hub(self, button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
             if obj.hct_id:
@@ -83,6 +83,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
                 button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
                 return "javascript:alert('RDI not imported');"
         button.visible = False
+        return None
 
     @button()
     def inspect(self, request, pk) -> TemplateResponse:
@@ -272,7 +273,7 @@ class FetchForm(RemeberDataForm):
     start = forms.IntegerField()
     end = forms.IntegerField()
 
-    def clean(self) -> Dict[str, Any]:
+    def clean(self) -> Optional[Dict[str, Any]]:
         return super().clean()
 
 

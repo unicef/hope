@@ -224,9 +224,9 @@ class SendTPToDatahubTask:
     def _get_documents(self, individuals) -> QuerySet[Document]:
         return Document.objects.filter(individual__in=individuals).distinct()
 
-    def _send_program(self, program) -> dh_mis_models.Program:
+    def _send_program(self, program) -> Optional[dh_mis_models.Program]:
         if not (program.last_sync_at is None or program.last_sync_at < program.updated_at):
-            return
+            return None
         dh_program_args = build_arg_dict(program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT)
 
         dh_program = dh_mis_models.Program(**dh_program_args)
@@ -247,7 +247,7 @@ class SendTPToDatahubTask:
         dh_target.save()
         return dh_target
 
-    def _prepare_datahub_object_household(self, household) -> Dict:
+    def _prepare_datahub_object_household(self, household) -> dh_mis_models.Household:
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
         if household.country:
             dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
@@ -257,7 +257,7 @@ class SendTPToDatahubTask:
         dh_household.session = self.dh_session
         return dh_household
 
-    def _prepare_datahub_object_individual(self, individual) -> Dict:
+    def _prepare_datahub_object_individual(self, individual) -> dh_mis_models.Individual:
         dh_individual_args = build_arg_dict(individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT)
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.unhcr_id = self._get_unhcr_individual_id(individual)

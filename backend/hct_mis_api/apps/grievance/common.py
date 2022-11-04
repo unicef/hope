@@ -84,7 +84,7 @@ def create_needs_adjudication_tickets(
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
-        return
+        return None
 
     ticket_details_to_create = []
     for possible_duplicate in individuals_queryset:

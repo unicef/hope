@@ -222,7 +222,7 @@ class KoboTemplateValidator:
                 "field": core_field,
                 "message": f"Expected type: {field_type}, actual type: {core_field_from_file['type']}",
             }
-        return
+        return None
 
     @classmethod
     def _check_is_field_required(cls, core_field, core_field_from_file) -> Optional[Dict]:
@@ -233,12 +233,12 @@ class KoboTemplateValidator:
                 "field": core_field,
                 "message": "Field must be required",
             }
-        return
+        return None
 
     @classmethod
     def _check_field_choices(cls, core_field, core_field_from_file, field_choices) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
-            return
+            return None
 
         from_file_choices = core_field_from_file["choices"]
         errors = []

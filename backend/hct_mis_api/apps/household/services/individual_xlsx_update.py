@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
@@ -85,7 +85,7 @@ class IndividualXlsxUpdate:
         if invalid_columns:
             raise InvalidColumnsError(f"Invalid columns: {invalid_columns}")
 
-    def _build_helpers(self) -> None:
+    def _build_helpers(self) -> List:
         first_row = self.individuals_ws[1]
         self.columns_names = [cell.value for cell in first_row]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}

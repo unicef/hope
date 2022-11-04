@@ -2,7 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -189,7 +189,7 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: ET.Element, *args, **kwargs) -> str:
+    def _get_country_of_birth(self, individual_tag: ET.Element, *args, **kwargs) -> Optional[str]:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
@@ -352,7 +352,7 @@ class LoadSanctionListXMLTask:
 
         return individuals_to_update
 
-    def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> List[str]:
+    def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> QuerySet:
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         ids = self._get_all_individuals_from_db.difference(
             self._get_existing_individuals(individuals_reference_numbers)

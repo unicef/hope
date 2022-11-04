@@ -1,7 +1,7 @@
 import csv
 import logging
 from io import StringIO
-from typing import Any, List
+from typing import Any, Dict, List
 
 from django import forms
 from django.contrib import admin, messages
@@ -326,7 +326,7 @@ UNICEF HOPE""",
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
@@ -344,9 +344,11 @@ UNICEF HOPE""",
 
                     error, response = api.test_connection_start_flow(flow_name, phone_number)
                     if response:
-                        context["flow_uuid"] = response["flow"]["uuid"]
-                        context["flow_status"] = response["status"]
-                        context["timestamp"] = response["created_on"]
+                        for index, entry in enumerate(response):
+                            context[index] = {}
+                            context[index]["flow_uuid"] = entry["flow"]["uuid"]
+                            context[index]["flow_status"] = entry["status"]
+                            context[index]["timestamp"] = entry["created_on"]
 
                     if error:
                         messages.error(request, error)
