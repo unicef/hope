@@ -240,7 +240,7 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
 class XLSXKoboTemplateManager(models.Manager):
-    def latest_valid(self) -> QuerySet:
+    def latest_valid(self) -> Optional["XLSXKoboTemplate"]:
         return (
             self.get_queryset()
             .filter(status=self.model.SUCCESSFUL)

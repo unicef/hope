@@ -19,7 +19,7 @@ class Sampling:
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
-    ) -> Tuple[CashPlanPaymentVerification, List[PaymentRecord]]:
+    ) -> Tuple[CashPlanPaymentVerification, Optional[QuerySet]]:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 

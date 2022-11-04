@@ -6,10 +6,11 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, TypeVar
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Type, TypeVar, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
+from django.db import models
 
 import pytz
 from django_filters import OrderingFilter
@@ -27,7 +28,7 @@ class CaseInsensitiveTuple(tuple):
 
 def decode_id_string(id_string) -> Optional[str]:
     if not id_string:
-        return
+        return None
 
     from base64 import b64decode
 
@@ -36,7 +37,7 @@ def decode_id_string(id_string) -> Optional[str]:
 
 def encode_id_base64(id_string, model_name) -> Optional[str]:
     if not id_string:
-        return
+        return None
 
     from base64 import b64encode
 
@@ -107,7 +108,7 @@ def _slug_strip(value, separator="-") -> str:
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        # TODO: bug?
+        # FIXME: bug?
         value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523
     # Remove separator from the beginning and end of the slug.
     if separator:
@@ -216,10 +217,7 @@ def to_choice_object(choices) -> List[Dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-T = TypeVar("T")
-
-
-def rename_dict_keys(obj: T, convert_func: Callable) -> T:
+def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Union[Dict, List, Any]:
     if isinstance(obj, dict):
         return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -396,10 +394,7 @@ def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-T = TypeVar("T")
-
-
-def decode_and_get_object(encoded_id, model: T, required: bool) -> Optional[T]:
+def decode_and_get_object(encoded_id, model: Any, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -409,8 +404,8 @@ def decode_and_get_object(encoded_id, model: T, required: bool) -> Optional[T]:
     return None
 
 
-def decode_and_get_object_required(encoded_id, model: T) -> T:
-    return decode_and_get_object(encoded_id, model, required=True)  # type: ignore
+def decode_and_get_object_required(encoded_id, model: Any) -> Any:
+    return decode_and_get_object(encoded_id, model, required=True)
 
 
 def dict_to_camel_case(dictionary) -> Dict:
@@ -600,11 +595,11 @@ class CaIdIterator:
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 
 
-def resolve_flex_fields_choices_to_string(parent) -> str:
+def resolve_flex_fields_choices_to_string(parent) -> Dict:
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
-    flex_fields_with_str_choices = {**parent.flex_fields}
+    flex_fields_with_str_choices: Dict = {**parent.flex_fields}
     for flex_field_name, value in flex_fields_with_str_choices.items():
         flex_field = flex_fields.get(flex_field_name)
         if flex_field is None:

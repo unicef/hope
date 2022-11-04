@@ -1,3 +1,4 @@
+from typing import Type
 from django.conf import settings
 from django.db.models import Q
 
@@ -170,8 +171,9 @@ class IndividualDocumentOthers(IndividualDocument):
         return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
-def get_individual_doc(business_area_slug) -> IndividualDocument:
-    return {
+def get_individual_doc(business_area_slug) -> Type[IndividualDocument]:
+    # TODO: Incompatible return value type (got "Type[object]", expected "Type[IndividualDocument]")
+    return {  # type: ignore
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,
     }.get(business_area_slug, IndividualDocumentOthers)

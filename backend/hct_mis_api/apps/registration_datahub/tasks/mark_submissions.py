@@ -41,7 +41,7 @@ class MarkSubmissions:
             registration_data_import__id__in=list(datahub_ids),
         ).values_list("kobo_submission_uuid", flat=True)
 
-    def _get_datahub_ids(self) -> List:
+    def _get_datahub_ids(self) -> QuerySet[RegistrationDataImport]:
         return (
             RegistrationDataImport.objects.filter(status=RegistrationDataImport.MERGED)
             .filter(business_area=self.business_area)
