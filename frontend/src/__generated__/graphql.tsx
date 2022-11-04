@@ -5540,7 +5540,7 @@ export type SurveyNode = Node & {
   updatedAt: Scalars['DateTime'],
   unicefId?: Maybe<Scalars['String']>,
   title: Scalars['String'],
-  body?: Maybe<Scalars['String']>,
+  body: Scalars['String'],
   category: SurveyCategory,
   numberOfRecipients: Scalars['Int'],
   createdBy?: Maybe<UserNode>,
@@ -5551,8 +5551,8 @@ export type SurveyNode = Node & {
   sampleFile?: Maybe<Scalars['String']>,
   sampleFileGeneratedAt?: Maybe<Scalars['DateTime']>,
   samplingType: SurveySamplingType,
-  fullListArguments?: Maybe<Scalars['JSONString']>,
-  randomSamplingArguments?: Maybe<Scalars['JSONString']>,
+  fullListArguments: Scalars['JSONString'],
+  randomSamplingArguments: Scalars['JSONString'],
   sampleSize: Scalars['Int'],
   sampleFilePath?: Maybe<Scalars['String']>,
   hasValidSampleFile?: Maybe<Scalars['Boolean']>,
@@ -8333,19 +8333,6 @@ export type AccountabilityCommunicationMessageQuery = (
   )> }
 );
 
-export type AccountabilitySampleSizeQueryVariables = {
-  input: AccountabilitySampleSizeInput
-};
-
-
-export type AccountabilitySampleSizeQuery = (
-  { __typename?: 'Query' }
-  & { accountabilitySampleSize: Maybe<(
-    { __typename?: 'AccountabilitySampleSizeObject' }
-    & Pick<AccountabilitySampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
-  )> }
-);
-
 export type AccountabilityCommunicationMessageSampleSizeQueryVariables = {
   input: GetAccountabilityCommunicationMessageSampleSizeInput
 };
@@ -8356,6 +8343,19 @@ export type AccountabilityCommunicationMessageSampleSizeQuery = (
   & { accountabilityCommunicationMessageSampleSize: Maybe<(
     { __typename?: 'GetCommunicationMessageSampleSizeObject' }
     & Pick<GetCommunicationMessageSampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
+  )> }
+);
+
+export type AccountabilitySampleSizeQueryVariables = {
+  input: AccountabilitySampleSizeInput
+};
+
+
+export type AccountabilitySampleSizeQuery = (
+  { __typename?: 'Query' }
+  & { accountabilitySampleSize: Maybe<(
+    { __typename?: 'AccountabilitySampleSizeObject' }
+    & Pick<AccountabilitySampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
   )> }
 );
 
@@ -12073,7 +12073,7 @@ export type CreateSurveyAccountabilityComponentProps = Omit<ApolloReactComponent
     export const CreateSurveyAccountabilityComponent = (props: CreateSurveyAccountabilityComponentProps) => (
       <ApolloReactComponents.Mutation<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables> mutation={CreateSurveyAccountabilityDocument} {...props} />
     );
-
+    
 export type CreateSurveyAccountabilityProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables> & TChildProps;
 export function withCreateSurveyAccountability<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -12124,7 +12124,7 @@ export type ExportSurveySampleComponentProps = Omit<ApolloReactComponents.Mutati
     export const ExportSurveySampleComponent = (props: ExportSurveySampleComponentProps) => (
       <ApolloReactComponents.Mutation<ExportSurveySampleMutation, ExportSurveySampleMutationVariables> mutation={ExportSurveySampleDocument} {...props} />
     );
-
+    
 export type ExportSurveySampleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportSurveySampleMutation, ExportSurveySampleMutationVariables> & TChildProps;
 export function withExportSurveySample<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -15207,57 +15207,6 @@ export function useAccountabilityCommunicationMessageLazyQuery(baseOptions?: Apo
 export type AccountabilityCommunicationMessageQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageQuery>;
 export type AccountabilityCommunicationMessageLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageLazyQuery>;
 export type AccountabilityCommunicationMessageQueryResult = ApolloReactCommon.QueryResult<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>;
-export const AccountabilitySampleSizeDocument = gql`
-    query AccountabilitySampleSize($input: AccountabilitySampleSizeInput!) {
-  accountabilitySampleSize(input: $input) {
-    numberOfRecipients
-    sampleSize
-  }
-}
-    `;
-export type AccountabilitySampleSizeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>, 'query'> & ({ variables: AccountabilitySampleSizeQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const AccountabilitySampleSizeComponent = (props: AccountabilitySampleSizeComponentProps) => (
-      <ApolloReactComponents.Query<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables> query={AccountabilitySampleSizeDocument} {...props} />
-    );
-
-export type AccountabilitySampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables> & TChildProps;
-export function withAccountabilitySampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  AccountabilitySampleSizeQuery,
-  AccountabilitySampleSizeQueryVariables,
-  AccountabilitySampleSizeProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables, AccountabilitySampleSizeProps<TChildProps>>(AccountabilitySampleSizeDocument, {
-      alias: 'accountabilitySampleSize',
-      ...operationOptions
-    });
-};
-
-/**
- * __useAccountabilitySampleSizeQuery__
- *
- * To run a query within a React component, call `useAccountabilitySampleSizeQuery` and pass it any options that fit your needs.
- * When your component renders, `useAccountabilitySampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAccountabilitySampleSizeQuery({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useAccountabilitySampleSizeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
-        return ApolloReactHooks.useQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, baseOptions);
-      }
-export function useAccountabilitySampleSizeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, baseOptions);
-        }
-export type AccountabilitySampleSizeQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeQuery>;
-export type AccountabilitySampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeLazyQuery>;
-export type AccountabilitySampleSizeQueryResult = ApolloReactCommon.QueryResult<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>;
 export const AccountabilityCommunicationMessageSampleSizeDocument = gql`
     query AccountabilityCommunicationMessageSampleSize($input: GetAccountabilityCommunicationMessageSampleSizeInput!) {
   accountabilityCommunicationMessageSampleSize(input: $input) {
@@ -15271,7 +15220,7 @@ export type AccountabilityCommunicationMessageSampleSizeComponentProps = Omit<Ap
     export const AccountabilityCommunicationMessageSampleSizeComponent = (props: AccountabilityCommunicationMessageSampleSizeComponentProps) => (
       <ApolloReactComponents.Query<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables> query={AccountabilityCommunicationMessageSampleSizeDocument} {...props} />
     );
-
+    
 export type AccountabilityCommunicationMessageSampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables> & TChildProps;
 export function withAccountabilityCommunicationMessageSampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -15288,7 +15237,7 @@ export function withAccountabilityCommunicationMessageSampleSize<TProps, TChildP
  * __useAccountabilityCommunicationMessageSampleSizeQuery__
  *
  * To run a query within a React component, call `useAccountabilityCommunicationMessageSampleSizeQuery` and pass it any options that fit your needs.
- * When your component renders, `useAccountabilityCommunicationMessageSampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * When your component renders, `useAccountabilityCommunicationMessageSampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
@@ -15309,6 +15258,57 @@ export function useAccountabilityCommunicationMessageSampleSizeLazyQuery(baseOpt
 export type AccountabilityCommunicationMessageSampleSizeQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeQuery>;
 export type AccountabilityCommunicationMessageSampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeLazyQuery>;
 export type AccountabilityCommunicationMessageSampleSizeQueryResult = ApolloReactCommon.QueryResult<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>;
+export const AccountabilitySampleSizeDocument = gql`
+    query AccountabilitySampleSize($input: AccountabilitySampleSizeInput!) {
+  accountabilitySampleSize(input: $input) {
+    numberOfRecipients
+    sampleSize
+  }
+}
+    `;
+export type AccountabilitySampleSizeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>, 'query'> & ({ variables: AccountabilitySampleSizeQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AccountabilitySampleSizeComponent = (props: AccountabilitySampleSizeComponentProps) => (
+      <ApolloReactComponents.Query<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables> query={AccountabilitySampleSizeDocument} {...props} />
+    );
+    
+export type AccountabilitySampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables> & TChildProps;
+export function withAccountabilitySampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AccountabilitySampleSizeQuery,
+  AccountabilitySampleSizeQueryVariables,
+  AccountabilitySampleSizeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables, AccountabilitySampleSizeProps<TChildProps>>(AccountabilitySampleSizeDocument, {
+      alias: 'accountabilitySampleSize',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAccountabilitySampleSizeQuery__
+ *
+ * To run a query within a React component, call `useAccountabilitySampleSizeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountabilitySampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountabilitySampleSizeQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAccountabilitySampleSizeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
+        return ApolloReactHooks.useQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, baseOptions);
+      }
+export function useAccountabilitySampleSizeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, baseOptions);
+        }
+export type AccountabilitySampleSizeQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeQuery>;
+export type AccountabilitySampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeLazyQuery>;
+export type AccountabilitySampleSizeQueryResult = ApolloReactCommon.QueryResult<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>;
 export const AllAccountabilityCommunicationMessageRecipientsDocument = gql`
     query AllAccountabilityCommunicationMessageRecipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $messageId: String!, $recipientId: String, $fullName: String, $phoneNo: String, $sex: String, $orderBy: String) {
   allAccountabilityCommunicationMessageRecipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, messageId: $messageId, recipientId: $recipientId, fullName: $fullName, phoneNo: $phoneNo, sex: $sex, orderBy: $orderBy) {
@@ -19851,7 +19851,7 @@ export type AllActiveProgramsComponentProps = Omit<ApolloReactComponents.QueryCo
     export const AllActiveProgramsComponent = (props: AllActiveProgramsComponentProps) => (
       <ApolloReactComponents.Query<AllActiveProgramsQuery, AllActiveProgramsQueryVariables> query={AllActiveProgramsDocument} {...props} />
     );
-
+    
 export type AllActiveProgramsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllActiveProgramsQuery, AllActiveProgramsQueryVariables> & TChildProps;
 export function withAllActivePrograms<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -19868,7 +19868,7 @@ export function withAllActivePrograms<TProps, TChildProps = {}>(operationOptions
  * __useAllActiveProgramsQuery__
  *
  * To run a query within a React component, call `useAllActiveProgramsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllActiveProgramsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * When your component renders, `useAllActiveProgramsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
@@ -21474,7 +21474,7 @@ export type AllSurveysComponentProps = Omit<ApolloReactComponents.QueryComponent
     export const AllSurveysComponent = (props: AllSurveysComponentProps) => (
       <ApolloReactComponents.Query<AllSurveysQuery, AllSurveysQueryVariables> query={AllSurveysDocument} {...props} />
     );
-
+    
 export type AllSurveysProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllSurveysQuery, AllSurveysQueryVariables> & TChildProps;
 export function withAllSurveys<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -21491,7 +21491,7 @@ export function withAllSurveys<TProps, TChildProps = {}>(operationOptions?: Apol
  * __useAllSurveysQuery__
  *
  * To run a query within a React component, call `useAllSurveysQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllSurveysQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * When your component renders, `useAllSurveysQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
@@ -21563,7 +21563,7 @@ export type RecipientsComponentProps = Omit<ApolloReactComponents.QueryComponent
     export const RecipientsComponent = (props: RecipientsComponentProps) => (
       <ApolloReactComponents.Query<RecipientsQuery, RecipientsQueryVariables> query={RecipientsDocument} {...props} />
     );
-
+    
 export type RecipientsProps<TChildProps = {}> = ApolloReactHoc.DataProps<RecipientsQuery, RecipientsQueryVariables> & TChildProps;
 export function withRecipients<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -21580,7 +21580,7 @@ export function withRecipients<TProps, TChildProps = {}>(operationOptions?: Apol
  * __useRecipientsQuery__
  *
  * To run a query within a React component, call `useRecipientsQuery` and pass it any options that fit your needs.
- * When your component renders, `useRecipientsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * When your component renders, `useRecipientsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
@@ -21642,7 +21642,7 @@ export type SurveyComponentProps = Omit<ApolloReactComponents.QueryComponentOpti
     export const SurveyComponent = (props: SurveyComponentProps) => (
       <ApolloReactComponents.Query<SurveyQuery, SurveyQueryVariables> query={SurveyDocument} {...props} />
     );
-
+    
 export type SurveyProps<TChildProps = {}> = ApolloReactHoc.DataProps<SurveyQuery, SurveyQueryVariables> & TChildProps;
 export function withSurvey<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -21659,7 +21659,7 @@ export function withSurvey<TProps, TChildProps = {}>(operationOptions?: ApolloRe
  * __useSurveyQuery__
  *
  * To run a query within a React component, call `useSurveyQuery` and pass it any options that fit your needs.
- * When your component renders, `useSurveyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * When your component renders, `useSurveyQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
@@ -21714,7 +21714,7 @@ export type AllActiveTargetPopulationsComponentProps = Omit<ApolloReactComponent
     export const AllActiveTargetPopulationsComponent = (props: AllActiveTargetPopulationsComponentProps) => (
       <ApolloReactComponents.Query<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables> query={AllActiveTargetPopulationsDocument} {...props} />
     );
-
+    
 export type AllActiveTargetPopulationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables> & TChildProps;
 export function withAllActiveTargetPopulations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
@@ -21731,7 +21731,7 @@ export function withAllActiveTargetPopulations<TProps, TChildProps = {}>(operati
  * __useAllActiveTargetPopulationsQuery__
  *
  * To run a query within a React component, call `useAllActiveTargetPopulationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllActiveTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * When your component renders, `useAllActiveTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
@@ -25294,7 +25294,7 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  body?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  body?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   category?: Resolver<ResolversTypes['SurveyCategory'], ParentType, ContextType>,
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -25305,8 +25305,8 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   sampleFile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sampleFileGeneratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   samplingType?: Resolver<ResolversTypes['SurveySamplingType'], ParentType, ContextType>,
-  fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  fullListArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   sampleFilePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
