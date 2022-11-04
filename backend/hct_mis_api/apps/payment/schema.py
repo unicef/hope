@@ -26,8 +26,6 @@ from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -92,6 +90,8 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
