@@ -27,7 +27,7 @@ import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsP
 import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
 import { PaymentPlanVerificationDetailsPage } from './pages/payments/PaymentPlanVerificationDetailsPage';
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
-import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
+import { VerificationPaymentDetailsPage } from './pages/payments/VerificationPaymentDetailsPage';
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
@@ -43,6 +43,7 @@ import { ReportingPage } from './pages/reporting/ReportingPage';
 import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { VerificationPaymentRecordDetailsPage } from './pages/payments/VerificationPaymentRecordDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -98,8 +99,11 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/verification-records/:id'>
-            <VerificationRecordDetailsPage />
+          <SentryRoute path='/:businessArea/verification/payment-record/:id'>
+            <VerificationPaymentRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/verification/payment/:id'>
+            <VerificationPaymentDetailsPage />
           </SentryRoute>
           <SentryRoute exact path='/:businessArea/payment-verification'>
             <PaymentVerificationPage />
