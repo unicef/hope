@@ -10,6 +10,7 @@ import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
+import hct_mis_api.apps.accountability.views
 import hct_mis_api.apps.household.views
 import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
@@ -65,6 +66,11 @@ api_patterns = [
         f"{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
         hct_mis_api.apps.targeting.views.download_xlsx_households,
         name="admin-download-target-population",
+    ),
+    path(
+        "download-survey-sample/<str:survey_id>",
+        hct_mis_api.apps.accountability.views.download_cash_plan_payment_verification,
+        name="download-survey-sample",
     ),
     path(f"{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
     path(f"{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),

@@ -20,6 +20,7 @@ interface TargetPopulationProps {
   selectedTargetPopulation?;
   handleChange?;
   noTableStyling?;
+  noTitle?;
 }
 
 const NoTableStyling = styled.div`
@@ -36,6 +37,7 @@ export const TargetPopulationTable = ({
   selectedTargetPopulation,
   handleChange,
   noTableStyling,
+  noTitle,
 }: TargetPopulationProps): ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -69,7 +71,7 @@ export const TargetPopulationTable = ({
           TargetPopulationNode,
           AllTargetPopulationsQueryVariables
         >
-          title={t('Target Populations')}
+          title={noTitle ? null : t('Target Populations')}
           headCells={enableRadioButton ? headCells : headCells.slice(1)}
           rowsPerPageOptions={[10, 15, 20]}
           query={useAllTargetPopulationsQuery}

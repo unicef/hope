@@ -8,7 +8,7 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 
 interface IndividualsFilterProps {
   onFilterChange;

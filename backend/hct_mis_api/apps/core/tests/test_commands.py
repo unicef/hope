@@ -1,8 +1,9 @@
 from django.core.management import call_command
-from django.test import TestCase
+
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 
 
-class TestCommands(TestCase):
+class TestCommands(BaseElasticSearchTestCase):
     databases = "__all__"
 
     def test_initdemo(self):

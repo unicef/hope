@@ -14,7 +14,7 @@ import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogT
 import { CommunicationDetails } from '../../../../components/accountability/Communication/CommunicationDetails';
 import { CommunicationMessageDetails } from '../../../../components/accountability/Communication/CommunicationMessageDetails';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { RecipientsTable } from '../../../tables/Communication/RecipientsTable';
+import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 
 export function CommunicationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();

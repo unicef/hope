@@ -1,16 +1,32 @@
+import { Paper } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { usePermissions } from '../../../hooks/usePermissions';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import { CreateProgram } from '../../dialogs/programs/CreateProgram';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { ProgrammesTable } from '../../tables/ProgrammesTable/ProgrammesTable';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { ProgrammesTable } from '../../tables/ProgrammesTable/ProgrammesTable';
+
+const Container = styled(Paper)`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  background-color: #fff;
+  padding: ${({ theme }) => theme.spacing(8)}px
+    ${({ theme }) => theme.spacing(11)}px;
+  flex-direction: row;
+  align-items: center;
+  && > div {
+    margin: 5px;
+  }
+`;
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
@@ -55,11 +71,13 @@ export function ProgramsPage(): React.ReactElement {
   return (
     <div>
       {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
-      <ProgrammesFilters
-        filter={filter}
-        onFilterChange={setFilter}
-        choicesData={choicesData}
-      />
+      <Container>
+        <ProgrammesFilters
+          filter={filter}
+          onFilterChange={setFilter}
+          choicesData={choicesData}
+        />
+      </Container>
       <ProgrammesTable
         businessArea={businessArea}
         choicesData={choicesData}
