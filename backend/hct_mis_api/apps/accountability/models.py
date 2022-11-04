@@ -60,6 +60,10 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     random_sampling_arguments = models.JSONField(blank=True, null=True)
     sample_size = models.PositiveIntegerField(default=0)
 
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name = _("Message")
+
     def __str__(self) -> str:
         return f"{self.title} ({self.number_of_recipients} recipients)"
 
@@ -127,6 +131,10 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
         verbose_name=_("Linked grievance"),
     )
 
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name = _("Feedback")
+
 
 class FeedbackMessage(TimeStampedUUIDModel):
     description = models.TextField(
@@ -146,6 +154,10 @@ class FeedbackMessage(TimeStampedUUIDModel):
         null=True,
         verbose_name=_("Created by"),
     )
+
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name = _("Feedback message")
 
 
 class SampleFileExpiredException(Exception):
@@ -216,6 +228,10 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
     full_list_arguments = models.JSONField(default=dict)
     random_sampling_arguments = models.JSONField(default=dict)
     sample_size = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name = _("Survey")
 
     def __str__(self):
         return self.title
