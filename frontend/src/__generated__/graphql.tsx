@@ -10069,7 +10069,7 @@ export type PaymentPlanQuery = (
       & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
-        & Pick<FinancialServiceProviderNode, 'id' | 'name'>
+        & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel'>
       )> }
     )>>>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
       { __typename?: 'VolumeByDeliveryMechanismNode' }
@@ -18217,6 +18217,7 @@ export const PaymentPlanDocument = gql`
       fsp {
         id
         name
+        communicationChannel
       }
     }
     volumeByDeliveryMechanism {
