@@ -951,7 +951,7 @@ class Individual(
             return False
         return self.household.head_of_household.id == self.id
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if current := Individual.objects.filter(pk=self.pk).first():
             if current.phone_no != self.phone_no:
                 self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))

@@ -293,7 +293,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if current := ImportedIndividual.objects.filter(pk=self.pk).first():
             if current.phone_no != self.phone_no:
                 self.phone_no_valid = is_right_phone_number_format(str(self.phone_no))
