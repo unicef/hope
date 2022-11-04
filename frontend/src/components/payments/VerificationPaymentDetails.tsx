@@ -10,7 +10,7 @@ import {
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
-import { PaymentRecordNode } from '../../__generated__/graphql';
+import { PaymentQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
@@ -25,22 +25,26 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-interface VerificationRecordDetailsProps {
-  paymentRecord: PaymentRecordNode;
+interface VerificationPaymentDetailsProps {
+  payment: PaymentQuery["payment"];
   canViewActivityLog: boolean;
   choicesData;
 }
 
-export function VerificationRecordDetails({
-  paymentRecord,
+export function VerificationPaymentDetails({
+  payment,
   canViewActivityLog,
   choicesData,
-}: VerificationRecordDetailsProps): React.ReactElement {
+}: VerificationPaymentDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const deliveryTypeDict = choicesToDict(
     choicesData.paymentRecordDeliveryTypeChoices,
   );
+
+  // TODO: This component is serving some dummy data for now. It will be
+  // updated to use real data once the backend is ready.
+  // uncomment all the value props below once data available
 
   return (
     <>
@@ -52,7 +56,7 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
-                status={paymentRecord.status}
+                status={payment.status}
                 statusToColor={paymentRecordStatusToColor}
               />
             </LabelizedField>
@@ -60,22 +64,24 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('REGISTRATION GROUP')}>
               <BlackLink
-                to={`/${businessArea}/population/household/${paymentRecord.household.id}`}
+                to={`/${businessArea}/population/household/${payment.household.id}`}
               >
-                {paymentRecord.household.unicefId}
+                {payment.household.unicefId}
               </BlackLink>
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('TARGET POPULATION')}
-              value={paymentRecord.targetPopulation.name}
+              // value={payment.targetPopulation.name}
+              value="targetPopulation.name"
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={paymentRecord.distributionModality}
+              // value={payment.distributionModality}
+              value={0}
             />
           </Grid>
         </Grid>
@@ -88,7 +94,8 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
-                status={paymentRecord.verification.status}
+                // status={payment.verification.status}
+                status={payment.parent.verificationPlans.edges[0].node.status}
                 statusToColor={verificationRecordsStatusToColor}
               />
             </LabelizedField>
@@ -97,8 +104,9 @@ export function VerificationRecordDetails({
             <LabelizedField
               label={t('AMOUNT RECEIVED')}
               value={formatCurrencyWithSymbol(
-                paymentRecord.verification.receivedAmount,
-                paymentRecord.currency,
+                // payment.verification.receivedAmount,
+                0,
+                payment.currency,
               )}
             />
           </Grid>
@@ -112,28 +120,30 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('HOUSEHOLD ID')}
-              value={paymentRecord.household.unicefId}
+              value={payment.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('HEAD OF HOUSEHOLD')}
-              value={paymentRecord.fullName}
+              // value={payment.fullName}
+              value="test"
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('TOTAL PERSON COVERED')}
-              value={paymentRecord.totalPersonsCovered}
+              // value={payment.totalPersonsCovered}
+              value={0}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('PHONE NUMBER')}
               value={getPhoneNoLabel(
-                paymentRecord.household.headOfHousehold
+                payment.household.headOfHousehold
                   .phoneNo,
-                paymentRecord.household.headOfHousehold
+                payment.household.headOfHousehold
                   .phoneNoValid,
               )}
             />
@@ -142,9 +152,9 @@ export function VerificationRecordDetails({
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
               value={getPhoneNoLabel(
-                paymentRecord.household.headOfHousehold
+                payment.household.headOfHousehold
                   .phoneNoAlternative,
-                paymentRecord.household.headOfHousehold
+                payment.household.headOfHousehold
                   .phoneNoAlternativeValid,
               )}
             />
@@ -159,26 +169,26 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
-              value={paymentRecord.entitlementQuantity}
+              value={payment.entitlementQuantity}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
-              value={paymentRecord.deliveredQuantity}
+              value={payment.deliveredQuantity}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('CURRENCY')}
-              value={paymentRecord.currency}
+              value={payment.currency}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
               value={
-                deliveryTypeDict[paymentRecord.deliveryType]
+                deliveryTypeDict[payment.deliveryType]
               }
             />
           </Grid>
@@ -187,7 +197,7 @@ export function VerificationRecordDetails({
               label={t('DELIVERY DATE')}
               value={
                 <UniversalMoment>
-                  {paymentRecord.deliveryDate}
+                  {payment.deliveryDate}
                 </UniversalMoment>
               }
             />
@@ -195,35 +205,38 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT CARD ID')}
-              value={paymentRecord.entitlementCardNumber}
+              // value={payment.entitlementCardNumber}
+              value={0}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('TRANSACTION REFERENCE ID')}
-              value={paymentRecord.transactionReferenceId}
+              value={payment.transactionReferenceId}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT CARD ISSUE DATE')}
-              value={
-                <UniversalMoment>
-                  {paymentRecord.entitlementCardIssueDate}
-                </UniversalMoment>
-              }
+              // value={
+              //   <UniversalMoment>
+              //     {payment.entitlementCardIssueDate}
+              //   </UniversalMoment>
+              // }
+              value="test"
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('FSP')}
-              value={paymentRecord.serviceProvider.fullName}
+              // value={payment.serviceProvider.fullName}
+              value="FSP"
             />
           </Grid>
         </Grid>
       </Overview>
       {canViewActivityLog && (
-        <UniversalActivityLogTable objectId={paymentRecord.verification.id} />
+        <UniversalActivityLogTable objectId={payment.parent.verificationPlans.edges[0].node.id} />
       )}
     </>
   );

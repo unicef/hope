@@ -10434,13 +10434,29 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'entitlementQuantityUsd'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
     & { household: (
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
-      & { admin2: Maybe<(
-        { __typename?: 'AreaNode' }
-        & Pick<AreaNode, 'id' | 'name'>
+      & Pick<HouseholdNode, 'id' | 'size' | 'status' | 'unicefId'>
+      & { headOfHousehold: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
+      ) }
+    ), parent: (
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+      & { program: (
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      ), verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'verificationChannel'>
+          )> }
+        )>> }
       )> }
     ) }
   )> }
@@ -19051,16 +19067,46 @@ export const PaymentDocument = gql`
     query Payment($id: ID!) {
   payment(id: $id) {
     id
+    unicefId
+    status
+    statusDate
+    currency
+    entitlementQuantity
+    deliveredQuantity
+    deliveryDate
     household {
       id
-      unicefId
       size
-      admin2 {
+      status
+      unicefId
+      headOfHousehold {
+        id
+        phoneNo
+        phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
+      }
+    }
+    parent {
+      id
+      unicefId
+      program {
         id
         name
       }
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            verificationChannel
+          }
+        }
+      }
     }
-    entitlementQuantityUsd
+    deliveredQuantityUsd
+    deliveryType
+    transactionReferenceId
   }
 }
     `;
