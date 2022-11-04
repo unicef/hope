@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -12,7 +11,6 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
     create_household,
-    create_household_and_individuals,
 )
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
@@ -34,7 +32,6 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.household.models import HEAD, MALE
 
 
 class TestRapidProVerificationTask(TestCase):
