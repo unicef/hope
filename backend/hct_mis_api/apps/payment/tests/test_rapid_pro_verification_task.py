@@ -349,5 +349,5 @@ class TestPhoneNumberVerification(TestCase):
         self.assertFalse(is_right_phone_number_format("+38063754115"))
         self.assertTrue(is_right_phone_number_format("+380637541150"))
         self.assertTrue(is_right_phone_number_format("+380 123 234 345"))
+        self.assertFalse(is_right_phone_number_format("+380 123 234 XXX"))
         self.assertFalse(is_right_phone_number_format("+380 23 234 345"))
-        self.assertFalse(is_right_phone_number_format("+380 23 234 XXX"))
