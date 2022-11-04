@@ -85,3 +85,24 @@ class TestCreateSurvey(APITestCase):
                 }
             },
         )
+
+    def test_create_survey_without_recipients(self):
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_SURVEY_MUTATION,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "input": {
+                    "title": "Test survey",
+                    "category": Survey.CATEGORY_MANUAL,
+                    "samplingType": Survey.SAMPLING_FULL_LIST,
+                    "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                    "fullListArguments": {
+                        "excludedAdminAreas": [],
+                    },
+                }
+            },
+        )

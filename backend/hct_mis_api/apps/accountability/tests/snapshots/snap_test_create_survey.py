@@ -42,6 +42,26 @@ snapshots['TestCreateSurvey::test_create_survey_without_permission 1'] = {
     ]
 }
 
+snapshots['TestCreateSurvey::test_create_survey_without_recipients 1'] = {
+    'data': {
+        'createSurvey': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['No recipients found for the given criteria.']",
+            'path': [
+                'createSurvey'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCreateSurvey::test_create_survey_without_target_population_and_program 1'] = {
     'data': {
         'createSurvey': None
