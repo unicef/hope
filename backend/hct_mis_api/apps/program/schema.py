@@ -107,6 +107,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         PaymentVerificationSummaryNode,
         source="get_payment_verification_summary",
     )
+    unicef_id = graphene.String(source="ca_id")
 
     class Meta:
         model = CashPlan

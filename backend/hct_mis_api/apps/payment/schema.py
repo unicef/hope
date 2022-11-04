@@ -26,6 +26,8 @@ from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -298,6 +300,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
     has_payment_channel = graphene.Boolean()
+    full_name = graphene.String()
+    target_population = graphene.Field(TargetPopulationNode)
+    verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
 
     class Meta:
         model = Payment
@@ -322,6 +327,15 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_payment_plan_soft_conflicted(self, info) -> bool:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_soft_conflicted
+
+    def resolve_target_population(self, info) -> TargetPopulation:
+        return self.parent.target_population
+
+    def resolve_full_name(self, info) -> str:
+        return self.head_of_household.full_name
+
+    def resolve_verification(self, info) -> PaymentVerification:
+        return self.verification
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
@@ -494,6 +508,7 @@ class PaymentVerificationPlanNode(DjangoObjectType):
 class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS),)
     verification = graphene.Field(PaymentVerificationNode)
+    unicef_id = graphene.String(source="ca_id")
 
     class Meta:
         model = PaymentRecord
