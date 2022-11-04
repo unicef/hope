@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import Dict, List, Optional, Set
+from typing import List, Optional, Set
 
 from django.core.exceptions import ValidationError
 from django.db import transaction

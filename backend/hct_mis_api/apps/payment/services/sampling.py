@@ -1,5 +1,5 @@
 import abc
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 from django.db.models import Q, QuerySet
 
@@ -7,7 +7,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 

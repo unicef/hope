@@ -6,11 +6,10 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
-from django.db import models
 
 import pytz
 from django_filters import OrderingFilter
