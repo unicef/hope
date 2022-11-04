@@ -36,12 +36,12 @@ def is_right_phone_number_format(phone_number) -> bool:
         return False
 
 
-def calculate_phone_numbers_validity(obj, model):
+def calculate_phone_numbers_validity(obj) -> None:
     obj.phone_no_valid = is_right_phone_number_format(str(obj.phone_no))
     obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
 
 
-def recalculate_phone_numbers_validity(obj, model):
+def recalculate_phone_numbers_validity(obj, model) -> None:
     # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
     if current := model.objects.filter(pk=obj.pk).first():
         # update
@@ -51,7 +51,7 @@ def recalculate_phone_numbers_validity(obj, model):
             obj.phone_no_alternative_valid = is_right_phone_number_format(str(obj.phone_no_alternative))
     else:
         # create
-        calculate_phone_numbers_validity(obj, model)
+        calculate_phone_numbers_validity(obj)
 
 
 def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error) -> int:

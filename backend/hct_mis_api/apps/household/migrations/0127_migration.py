@@ -9,7 +9,7 @@ def update_each_phone_numbers_validity(apps, schema_editor):
     Individual = apps.get_model("household", "Individual")
     for individual in Individual.objects.all():
         calculate_phone_numbers_validity(individual, Individual)
-        individual.save()
+        individual.save(update_fields=["phone_no_valid", "phone_no_alternative_valid"])
 
 
 class Migration(migrations.Migration):

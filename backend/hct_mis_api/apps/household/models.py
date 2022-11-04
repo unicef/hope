@@ -24,10 +24,10 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from hct_mis_api.apps.payment.utils import recalculate_phone_numbers_validity
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.payment.utils import recalculate_phone_numbers_validity
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
