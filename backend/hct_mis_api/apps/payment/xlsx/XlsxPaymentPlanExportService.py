@@ -45,6 +45,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             [
                 self.HEADERS.index("payment_channel") + 1,
                 self.HEADERS.index("entitlement_quantity") + 1,
+                self.HEADERS.index("delivered_quantity") + 1,
             ]
         )
         return self.wb
