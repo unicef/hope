@@ -81,6 +81,7 @@ export function LookUpHouseholdTableRow({
             value={household.id}
             name='radio-button-household'
             inputProps={{ 'aria-label': household.id }}
+            data-cy='input-radio-household'
           />
         )}
       </TableCell>
