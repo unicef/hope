@@ -134,17 +134,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
         wb = service.open_workbook()
 
-        payment_1_payment_channels = ", ".join(
-            list(
-                payment_1.collector.payment_channels.all()
-                .distinct("delivery_mechanism")
-                .values_list("delivery_mechanism", flat=True)
-            )
-        )
         wb.active["A2"].value = payment_id_1
         wb.active["A3"].value = payment_id_2
-        wb.active["F2"].value = payment_1_payment_channels
-        wb.active["F3"].value = "Referral"
 
         service.validate()
         self.assertEqual(service.errors, [])
