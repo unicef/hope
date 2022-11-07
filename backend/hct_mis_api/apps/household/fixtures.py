@@ -161,7 +161,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.LazyFunction(faker.phone_number)
+    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n:03d}")
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
