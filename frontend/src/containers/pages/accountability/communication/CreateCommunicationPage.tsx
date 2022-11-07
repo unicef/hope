@@ -558,6 +558,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                           variant='outlined'
                           label={t('Title')}
                           component={FormikTextField}
+                          data-cy='input-title'
                         />
                       </Grid>
                     </Box>
@@ -570,6 +571,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                         variant='outlined'
                         label={t('Message')}
                         component={FormikTextField}
+                        data-cy='input-body'
                       />
                     </Grid>
                   </>
@@ -597,6 +599,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                     color='primary'
                     variant='contained'
                     onClick={submitForm}
+                    data-cy='button-submit'
                   >
                     {activeStep === steps.length - 1 ? t('Save') : t('Next')}
                   </LoadingButton>
