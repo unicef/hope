@@ -28,7 +28,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.utils.phone import is_right_phone_number_format
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -201,7 +201,7 @@ class TestRapidProVerificationTask(TestCase):
                 "received": False,
             }
         ]
-        assert is_right_phone_number_format(
+        assert is_valid_phone_number(
             payment_record_verification.payment_record.head_of_household.phone_no
         ), payment_record_verification.payment_record.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
@@ -229,7 +229,7 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
         )
-        assert is_right_phone_number_format(
+        assert is_valid_phone_number(
             payment_record_verification.payment_record.head_of_household.phone_no
         ), payment_record_verification.payment_record.head_of_household.phone_no
         fake_data_to_return_from_rapid_pro_api = [
@@ -275,7 +275,7 @@ class TestRapidProVerificationTask(TestCase):
                 "received_amount": payment_record_verification.payment_record.delivered_quantity,
             }
         ]
-        assert is_right_phone_number_format(
+        assert is_valid_phone_number(
             payment_record_verification.payment_record.head_of_household.phone_no
         ), payment_record_verification.payment_record.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
@@ -345,19 +345,19 @@ class TestRapidProVerificationTask(TestCase):
 
 class TestPhoneNumberVerification(TestCase):
     def test_phone_numbers(self):
-        self.assertFalse(is_right_phone_number_format("+40 032 215 789"))
-        self.assertTrue(is_right_phone_number_format("+48 632 215 789"))
+        self.assertFalse(is_valid_phone_number("+40 032 215 789"))
+        self.assertTrue(is_valid_phone_number("+48 632 215 789"))
 
-        self.assertTrue(is_right_phone_number_format("+48 123 234 345"))
-        self.assertFalse(is_right_phone_number_format("0048 123 234 345"))
+        self.assertTrue(is_valid_phone_number("+48 123 234 345"))
+        self.assertFalse(is_valid_phone_number("0048 123 234 345"))
 
-        self.assertFalse(is_right_phone_number_format("(201) 555-0123"))
-        self.assertTrue(is_right_phone_number_format("+1 (201) 555-0123"))
+        self.assertFalse(is_valid_phone_number("(201) 555-0123"))
+        self.assertTrue(is_valid_phone_number("+1 (201) 555-0123"))
 
-        self.assertFalse(is_right_phone_number_format("123-not-really-a-phone-number"))
+        self.assertFalse(is_valid_phone_number("123-not-really-a-phone-number"))
 
-        self.assertFalse(is_right_phone_number_format("+38063754115"))
-        self.assertTrue(is_right_phone_number_format("+380637541150"))
-        self.assertTrue(is_right_phone_number_format("+380 637 541 345"))
-        self.assertTrue(is_right_phone_number_format("+380 637 541 XXX"))  # it's ok to have A-Z in number
-        self.assertFalse(is_right_phone_number_format("+380 23 234 345"))
+        self.assertFalse(is_valid_phone_number("+38063754115"))
+        self.assertTrue(is_valid_phone_number("+380637541150"))
+        self.assertTrue(is_valid_phone_number("+380 637 541 345"))
+        self.assertTrue(is_valid_phone_number("+380 637 541 XXX"))  # it's ok to have A-Z in number
+        self.assertFalse(is_valid_phone_number("+380 23 234 345"))
