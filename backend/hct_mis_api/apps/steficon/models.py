@@ -120,7 +120,7 @@ class Rule(models.Model):
             self.history.exclude(pk=release.pk).update(deprecated=True)
         return release
 
-    def release(self):
+    def release(self) -> Optional["RuleCommit"]:
         if self.deprecated or not self.enabled:
             raise ValueError("Cannot release disabled/deprecated rules")
         commit = self.history.filter(version=self.version).first()

@@ -69,7 +69,7 @@ class ParametrizerFactory(factory.DjangoModelFactory):
         django_get_or_create = ("code",)
 
 
-def get_group(name="Group1", permissions=None):
+def get_group(name="Group1", permissions=None) -> Group:
     group = GroupFactory(name)
     permission_names = permissions or []
     for permission_name in permission_names:
