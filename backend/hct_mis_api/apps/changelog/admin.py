@@ -18,7 +18,6 @@ class ChangelogAdminForm(forms.ModelForm):
 class ChangelogAdmin(HOPEModelAdminBase):
     form = ChangelogAdminForm
     list_display = [
-        "description",
         "version",
         "active",
         "date",
