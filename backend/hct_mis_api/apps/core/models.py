@@ -368,6 +368,7 @@ class FileTemp(TimeStampedModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     file = models.FileField()
+    was_downloaded = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.file.name} - {self.created}"

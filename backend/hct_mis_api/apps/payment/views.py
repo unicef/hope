@@ -27,8 +27,9 @@ def download_payment_verification_plan(request, verification_id):
 
     if payment_verification_plan.has_xlsx_payment_verification_plan_file:
         if not payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded:
-            payment_verification_plan.xlsx_verification_file.was_downloaded = True
-            payment_verification_plan.xlsx_verification_file.save()
+            xlsx_file = payment_verification_plan.get_xlsx_verification_file
+            xlsx_file.was_downloaded = True
+            xlsx_file.save()
         return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)
     else:
         logger.error(f"File not found. PaymentVerificationPlan ID: {verification_id}")

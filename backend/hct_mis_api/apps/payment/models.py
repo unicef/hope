@@ -1,10 +1,11 @@
+import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Optional
+from typing import Optional, Union
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
@@ -37,6 +38,9 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -1159,26 +1163,36 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         return self.payment_plan_obj.business_area
 
     @property
-    def has_xlsx_payment_verification_plan_file(self):
+    def get_xlsx_verification_file(self) -> Optional[FileTemp]:
+        try:
+            return FileTemp.objects.get(object_id=self.pk, content_type=get_content_type_for_model(self))
+        except FileTemp.DoesNotExist:
+            return None
+        except FileTemp.MultipleObjectsReturned as e:
+            logger.exception(e)
+            return None
+
+    @property
+    def has_xlsx_payment_verification_plan_file(self) -> bool:
         if all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
-                getattr(self, "xlsx_verification_file", None),
+                self.get_xlsx_verification_file,
             ]
         ):
             return True
         return False
 
     @property
-    def xlsx_payment_verification_plan_file_link(self):
+    def xlsx_payment_verification_plan_file_link(self) -> Optional[str]:
         if self.has_xlsx_payment_verification_plan_file:
-            return self.xlsx_verification_file.file.url
+            return self.get_xlsx_verification_file.file.url
         return None
 
     @property
-    def xlsx_payment_verification_plan_file_was_downloaded(self):
+    def xlsx_payment_verification_plan_file_was_downloaded(self) -> bool:
         if self.has_xlsx_payment_verification_plan_file:
-            return self.xlsx_verification_file.was_downloaded
+            return self.get_xlsx_verification_file.was_downloaded
         return False
 
     def set_active(self):
@@ -1202,21 +1216,11 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         )
 
     @property
-    def get_payment_plan(self):
+    def get_payment_plan(self) -> Union[PaymentPlan, CashPlan, None]:
         try:
             return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
         except ObjectDoesNotExist:
             return None
-
-
-class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
-    # TODO: refactor this one as well, will use 'FileTemp'
-    file = models.FileField()
-    payment_verification_plan = models.OneToOneField(
-        PaymentVerificationPlan, related_name="xlsx_verification_file", on_delete=models.CASCADE
-    )
-    was_downloaded = models.BooleanField(default=False)
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
 def build_summary(payment_plan):
@@ -1419,7 +1423,7 @@ class Approval(TimeStampedUUIDModel):
         return self.type
 
     @property
-    def info(self):
+    def info(self) -> str:
         types_map = {
             self.APPROVAL: "Approved",
             self.AUTHORIZATION: "Authorized",
