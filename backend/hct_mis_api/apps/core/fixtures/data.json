@@ -1301,7 +1301,9 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [
+      "fea412b2-a617-4c23-b773-d0001f36a932"
+    ]
   }
 },
 {
@@ -3795,7 +3797,9 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [
+      "b902840f-68d3-40a0-b74d-0fb14096a11e"
+    ]
   }
 },
 {
