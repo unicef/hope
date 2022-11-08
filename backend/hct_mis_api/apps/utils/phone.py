@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 import phonenumbers
@@ -11,7 +10,6 @@ def is_valid_phone_number(phone_number) -> bool:
     try:
         parsed_number = phonenumbers.parse(phone_number)
     except phonenumbers.NumberParseException:
-        logging.warning(f"'{phone_number}' is not a valid phone number")
         return False
     else:
         return phonenumbers.is_valid_number(parsed_number)
