@@ -1,5 +1,6 @@
 import csv
 import logging
+from typing import Dict
 
 from django import forms  # Form, CharField, Textarea, ModelChoiceField, PasswordInput
 from django.contrib.admin import widgets
@@ -23,7 +24,7 @@ class KoboLoginForm(forms.Form):
 class KoboImportUsersForm(forms.Form):
     emails = forms.CharField(required=False, widget=forms.Textarea)
 
-    def clean_emails(self):
+    def clean_emails(self) -> Dict:
         errors = []
         for e in self.cleaned_data["emails"].split():
             try:
@@ -87,7 +88,7 @@ class LoadUsersForm(forms.Form):
     role = forms.ModelChoiceField(queryset=Role.objects.all())
     enable_kobo = forms.BooleanField(required=False)
 
-    def clean_emails(self):
+    def clean_emails(self) -> Dict:
         errors = []
         for e in self.cleaned_data["emails"].split():
             try:

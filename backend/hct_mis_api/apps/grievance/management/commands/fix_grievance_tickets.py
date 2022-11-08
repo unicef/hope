@@ -12,8 +12,8 @@ from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
 # there's this business_area filter
 # additional kwargs go to GrievanceTicket filter
 @transaction.atomic
-def fix_disability_fields(business_area=None, **kwargs):
-    def _logic(ba):
+def fix_disability_fields(business_area=None, **kwargs) -> None:
+    def _logic(ba) -> None:
         logging.info(f"Fixing disability fields for {ba}")
         tickets = GrievanceTicket.objects.filter(
             business_area=ba,

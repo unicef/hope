@@ -1,22 +1,19 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { StatusBox } from '../../../components/core/StatusBox';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
 import {
+  TargetPopulationBuildStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
 } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { StatusBox } from '../../../components/core/StatusBox';
-import {
-  targetPopulationBuildStatusToColor,
-  targetPopulationStatusMapping,
-  targetPopulationStatusToColor,
-} from '../../../utils/utils';
-import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
+import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -103,17 +100,15 @@ export const TargetPopulationPageHeader = ({
         title={
           <HeaderWrapper>
             {t(`${targetPopulation.name}`)}
-            <StatusWrapper>
-              <StatusBox
-                status={targetPopulation.status}
-                statusToColor={targetPopulationStatusToColor}
-                statusNameMapping={targetPopulationStatusMapping}
-              />
-              <StatusBox
-                status={targetPopulation.buildStatus}
-                statusToColor={targetPopulationBuildStatusToColor}
-              />
-            </StatusWrapper>
+            {targetPopulation.buildStatus !==
+              TargetPopulationBuildStatus.Ok && (
+              <StatusWrapper>
+                <StatusBox
+                  status={targetPopulation.buildStatus}
+                  statusToColor={targetPopulationBuildStatusToColor}
+                />
+              </StatusWrapper>
+            )}
           </HeaderWrapper>
         }
         breadCrumbs={breadCrumbsItems}

@@ -62,19 +62,14 @@ ignore_missing_imports = true # TODO
 
 # TODO: remove one, fix errors, repeat
 disable_error_code = [
-  "var-annotated",
+  "var-annotated", # this enforces Django Model fields to have type annotations
   "arg-type",
   "attr-defined",
-  "misc",
-  "assignment",
-  "valid-type",
+  "misc", # cannot subclass DjangoObjectType
   "union-attr",
-  "return-value",
-  "list-item",
-  "type-arg",
+  "type-arg", # this misses type parameters for graphene.ObjectType
   "no-untyped-def",
-  "no-untyped-call",
-  "no-any-return",
+  "no-any-return", # this enforces adding return None for function that returns None
 ]
 
 [tool.django-stubs]
@@ -83,7 +78,7 @@ django_settings_module = "hct_mis_api.settings.dev"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.10.2"
+version = "2022.11.1"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 

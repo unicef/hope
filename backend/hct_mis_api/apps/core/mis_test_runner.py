@@ -30,7 +30,7 @@ def elastic_search_partition_suite_by_case(suite) -> List:
 
 
 class MisParallelTestSuite(ParallelTestSuite):
-    def __init__(self, suite, processes, failfast=False):
+    def __init__(self, suite, processes, failfast=False) -> None:
         self.processes = processes
         self.failfast = failfast
         super().__init__(suite, processes, failfast)
@@ -82,5 +82,5 @@ class PostgresTestRunner(TestRunner):
             runner_kwargs["output"].close()
         return results
 
-    def setup_databases(self, **kwargs: Dict) -> Any:
+    def setup_databases(self, **kwargs: Any) -> Any:
         return super().setup_databases(**kwargs)

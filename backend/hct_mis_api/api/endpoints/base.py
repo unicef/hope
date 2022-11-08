@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import Http404
@@ -7,6 +9,8 @@ from django.utils.functional import cached_property
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
+
+from hct_mis_api.apps.core.models import BusinessArea
 
 from ..auth import HOPEAuthentication, HOPEPermission
 from ..models import APILogEntry, Grant
@@ -19,7 +23,7 @@ class RejectPolicy(models.TextChoices):
 
 class SelectedBusinessAreaMixin:
     @cached_property
-    def selected_business_area(self) -> models.Model:
+    def selected_business_area(self) -> BusinessArea:
         try:
             return self.request.auth.valid_for.all().get(slug=self.kwargs.get("business_area", None))
         except ObjectDoesNotExist:
@@ -46,7 +50,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc):
+    def handle_exception(self, exc) -> Any:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))

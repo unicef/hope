@@ -1,6 +1,8 @@
 import logging
+from typing import Dict, Optional, Tuple, Type
 
 from django.core.cache import cache
+from django.db import transaction
 from django.utils import timezone
 
 from constance import config
@@ -11,6 +13,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
+    IndividualDocument,
     IndividualDocumentAfghanistan,
     IndividualDocumentOthers,
     IndividualDocumentUkraine,
@@ -20,14 +23,16 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)
 
 
 class CheckAgainstSanctionListPreMergeTask:
     @staticmethod
-    def _get_query_dict(individual):
+    def _get_query_dict(individual) -> Dict:
         documents = [
             doc
             for doc in individual.documents.all()
@@ -70,16 +75,21 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
-    def execute(cls, individuals=None, registration_data_import=None) -> None:
+    @transaction.atomic
+    def execute(cls, individuals=None, registration_data_import: Optional[RegistrationDataImport] = None) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        if registration_data_import is None:
-            documents = (IndividualDocumentAfghanistan, IndividualDocumentUkraine, IndividualDocumentOthers)
-        else:
-            document = get_individual_doc(registration_data_import.business_area.slug)
-            documents = (document,)
+        documents: Tuple[Type[IndividualDocument]] = (
+            (  # type: ignore # TODO: look into this typing
+                IndividualDocumentAfghanistan,
+                IndividualDocumentUkraine,
+                IndividualDocumentOthers,
+            )
+            if registration_data_import is None
+            else (get_individual_doc(registration_data_import.business_area.slug),)
+        )
 
         tickets_to_create = []
         ticket_details_to_create = []
@@ -127,12 +137,18 @@ class CheckAgainstSanctionListPreMergeTask:
                 )
                 log.debug([(r.full_name, r.meta.score) for r in results])
         cache.set("sanction_list_last_check", timezone.now(), None)
-        Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).update(
-            sanction_list_possible_match=True
+
+        possible_matches_individuals = evaluate_qs(
+            Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).select_for_update()
         )
-        Individual.objects.exclude(id__in=possible_matches).filter(sanction_list_possible_match=True).update(
-            sanction_list_possible_match=False
+        possible_matches_individuals.update(sanction_list_possible_match=True)
+
+        not_possible_matches_individuals = evaluate_qs(
+            Individual.objects.exclude(id__in=possible_matches)
+            .filter(sanction_list_possible_match=True)
+            .select_for_update()
         )
+        not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
         for ticket in tickets_to_create:
