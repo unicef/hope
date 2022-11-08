@@ -191,7 +191,9 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
     from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
     flex_attrs = serialize_flex_attributes()
@@ -446,7 +448,9 @@ def update_labels_mapping(csv_file):
 
     from django.conf import settings
 
-    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
     from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
     with open(csv_file, newline="") as csv_file:

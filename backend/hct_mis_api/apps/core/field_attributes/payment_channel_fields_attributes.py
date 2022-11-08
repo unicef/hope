@@ -1,4 +1,8 @@
-from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, _INDIVIDUAL, Scope
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _INDIVIDUAL,
+    TYPE_STRING,
+    Scope,
+)
 
 PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {

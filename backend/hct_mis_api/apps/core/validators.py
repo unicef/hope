@@ -2,6 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_BOOL,
     TYPE_DATE,
@@ -11,8 +12,9 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
-    TYPE_STRING, Scope, )
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
 
