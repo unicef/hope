@@ -449,12 +449,14 @@ class ImportedIndividualIdentity(models.Model):
     document_number = models.CharField(
         max_length=255,
     )
+    country = CountryField(default="U")
+    partner = models.CharField(max_length=100, null=True)
 
     class Meta:
         verbose_name_plural = "Imported Individual Identities"
 
     def __str__(self) -> str:
-        return f"{self.individual} {self.document_number}"
+        return f"{self.partner} {self.individual} {self.document_number}"
 
 
 class KoboImportedSubmission(models.Model):

@@ -110,7 +110,7 @@ class TestDataSendTpToDatahub(TestCase):
         )
         unhcr, _ = Partner.objects.get_or_create(name=UNHCR, defaults={"is_un": True})
         cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)
-        IndividualIdentity.objects.create(partner=unhcr, number="UN-TEST", individual=cls.individual)
+        IndividualIdentity.objects.create(partner=unhcr, number="UN-TEST", individual=cls.individual, country=country)
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual,
             household=cls.household,
@@ -121,7 +121,6 @@ class TestDataSendTpToDatahub(TestCase):
         cls.household.save()
 
     def test_program_data_is_send_correctly(self):
-        self.maxDiff = None
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)

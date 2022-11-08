@@ -27,7 +27,7 @@ export function NewIdentityFieldArray({
                 (item, index) => (
                   <AgencyField
                     index={index}
-                    key={`${index}-${item?.country}-${item?.agency}`}
+                    key={`${index}-${item?.country}-${item?.partner}`}
                     onDelete={() => arrayHelpers.remove(index)}
                     countryChoices={addIndividualFieldsData.countriesChoices}
                     identityTypeChoices={
@@ -45,7 +45,7 @@ export function NewIdentityFieldArray({
                   onClick={() => {
                     arrayHelpers.push({
                       country: null,
-                      agency: null,
+                      partner: null,
                       number: '',
                     });
                   }}

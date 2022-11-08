@@ -837,6 +837,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info) -> None:
         identities_to_update,
         [
             "number",
+            "partner",
         ],
     )
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()

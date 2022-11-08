@@ -242,7 +242,7 @@ class DeduplicateTask:
     @classmethod
     def _prepare_identities_or_documents_query(cls, data, data_type) -> List[Dict]:
         queries = []
-        document_type_key = "type"
+        document_type_key = "partner" if data_type.lower() == "identity" else "type"
         prefix = "identities" if data_type.lower() == "identity" else "documents"
 
         for item in data:

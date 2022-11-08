@@ -42,7 +42,7 @@ export function EditIdentityRow({
     <>
       <AgencyField
         index={index}
-        key={`${index}-${identity?.node?.number}-${identity?.node?.agency}`}
+        key={`${index}-${identity?.node?.number}-${identity?.node?.partner}`}
         onDelete={() => arrayHelpers.remove(index)}
         countryChoices={addIndividualFieldsData.countriesChoices}
         identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
@@ -53,8 +53,8 @@ export function EditIdentityRow({
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
-              country: identity.node.agency.countryIso3,
-              agency: identity.node.agency.label,
+              country: identity.node.countryIso3,
+              partner: identity.node.partner,
               number: identity.node.number,
             });
             setEdit(false);
@@ -70,16 +70,13 @@ export function EditIdentityRow({
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID AGENCY1')}
-            value={identity.node.agency.label}
+            value={identity.node.partner}
           />
         </DisabledDiv>
       </Grid>
       <Grid item xs={4}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('Country')}
-            value={identity.node.agency.country}
-          />
+          <LabelizedField label={t('Country')} value={identity.node.country} />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
@@ -104,8 +101,8 @@ export function EditIdentityRow({
               onClick={() => {
                 arrayHelpers.push({
                   id: identity.node.id,
-                  country: identity.node.agency.countryIso3,
-                  agency: identity.node.agency.label,
+                  country: identity.node.countryIso3,
+                  partner: identity.node.partner,
                   number: identity.node.number,
                 });
                 setEdit(true);

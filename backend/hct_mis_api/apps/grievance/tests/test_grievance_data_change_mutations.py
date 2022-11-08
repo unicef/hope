@@ -195,6 +195,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             partner=unhcr,
             individual=cls.individuals[0],
             number="1111",
+            country=country_pl,
         )
 
     @parameterized.expand(

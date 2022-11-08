@@ -782,7 +782,9 @@
   "pk": 1,
   "fields": {
     "individual": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
-    "document_number": "johniak pany"
+    "document_number": "johniak pany",
+    "partner": "UNHCR",
+    "country": "PL"
   }
 },
 {

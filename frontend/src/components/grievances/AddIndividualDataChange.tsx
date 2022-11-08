@@ -210,7 +210,7 @@ export const AddIndividualDataChange = ({
                     onClick={() => {
                       arrayHelpers.push({
                         country: null,
-                        agency: null,
+                        partner: null,
                         number: '',
                       });
                     }}
