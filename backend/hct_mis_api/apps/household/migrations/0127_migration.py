@@ -7,11 +7,17 @@ from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 @transaction.atomic
 def update_each_phone_numbers_validity(apps, schema_editor):
     Individual = apps.get_model("household", "Individual")
+    individuals = []
     for individual in Individual.objects.only(
         "phone_no", "phone_no_alternative", "phone_no_valid", "phone_no_alternative_valid"
     ).iterator():
         individual = calculate_phone_numbers_validity(individual)
-        individual.save(update_fields=["phone_no_valid", "phone_no_alternative_valid"])
+        individuals.append(individual)
+        if len(individuals) == 1000:
+            Individual.objects.bulk_update(individuals, ["phone_no_valid", "phone_no_alternative_valid"])
+            individuals = []
+    if individuals:
+        Individual.objects.bulk_update(individuals, ["phone_no_valid", "phone_no_alternative_valid"])
 
 
 class Migration(migrations.Migration):
