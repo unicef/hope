@@ -3,17 +3,18 @@ import logging
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
-    XlsxPaymentVerificationPlanFile,
 )
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
@@ -73,7 +74,7 @@ def create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id)
 
             service = XlsxVerificationExportService(payment_verification_plan)
             # if no file will start creating it
-            if not getattr(payment_verification_plan, "xlsx_verification_file", None):
+            if not payment_verification_plan.has_xlsx_payment_verification_plan_file:
                 service.save_xlsx_file(user)
 
             payment_verification_plan.xlsx_file_exporting = False
@@ -91,13 +92,14 @@ def remove_old_cash_plan_payment_verification_xls(past_days=30):
     """Remove old Payment Verification report XLSX files"""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        files_qs = XlsxPaymentVerificationPlanFile.objects.filter(created_at__lte=days)
+        ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
+        files_qs = FileTemp.objects.filter(content_type=ct, created_at__lte=days)
         if files_qs:
             for obj in files_qs:
                 obj.file.delete(save=False)
                 obj.delete()
 
-            logger.info(f"Removed old XlsxPaymentVerificationPlanFile: {files_qs.count()}")
+            logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {files_qs.count()}")
 
     except Exception as e:
         logger.exception(e)

@@ -2,6 +2,7 @@ import logging
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -10,11 +11,11 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
-    XlsxPaymentVerificationPlanFile,
 )
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 
@@ -120,8 +121,10 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         filename = f"payment_verification_{self.payment_verification_plan.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
-            xlsx_obj = XlsxPaymentVerificationPlanFile(
-                created_by=user, payment_verification_plan=self.payment_verification_plan
+            xlsx_obj = FileTemp(
+                object_id=self.payment_verification_plan.pk,
+                content_type=get_content_type_for_model(self.payment_verification_plan),
+                created_by=user,
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
