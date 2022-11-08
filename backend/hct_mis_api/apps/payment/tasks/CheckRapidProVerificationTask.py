@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -66,7 +66,7 @@ class CheckRapidProVerificationTask:
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict, rapid_pro_result
-    ) -> PaymentVerification:
+    ) -> Optional[PaymentVerification]:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")

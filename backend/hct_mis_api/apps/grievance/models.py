@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -387,7 +387,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def __str__(self) -> str:
         return self.description or str(self.pk)
 
-    def get_issue_type(self) -> Dict:
+    def get_issue_type(self) -> Union[Dict, str]:
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
 

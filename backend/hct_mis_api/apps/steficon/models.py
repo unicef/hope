@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -100,7 +100,7 @@ class Rule(models.Model):
             super().save(force_insert, force_update, using, update_fields)
             self.commit()
 
-    def commit(self, is_release=False, force=False) -> "RuleCommit":
+    def commit(self, is_release=False, force=False) -> Optional["RuleCommit"]:
         stored, changes = self.get_changes()
         release = None
         values = {

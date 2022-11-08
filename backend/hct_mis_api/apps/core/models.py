@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
-from django.db.models import JSONField, QuerySet
+from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
@@ -240,7 +240,7 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
 class XLSXKoboTemplateManager(models.Manager):
-    def latest_valid(self) -> QuerySet:
+    def latest_valid(self) -> Optional["XLSXKoboTemplate"]:
         return (
             self.get_queryset()
             .filter(status=self.model.SUCCESSFUL)

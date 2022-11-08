@@ -1,7 +1,7 @@
 import itertools
 import logging
 import pickle
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -122,7 +122,7 @@ class Query(NaturalKeyModel, models.Model):
         self.info["last_run_results"] = results
         self.save()
 
-    def execute_matrix(self, persist=True, **kwargs) -> List["Dataset"]:
+    def execute_matrix(self, persist=True, **kwargs) -> Dict[str, str]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
         else:
@@ -141,7 +141,7 @@ class Query(NaturalKeyModel, models.Model):
             self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist=False, arguments: Optional[Dict] = None) -> "[Dataset, dict]":
+    def run(self, persist=False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
@@ -258,7 +258,7 @@ class Report(NaturalKeyModel, models.Model):
     def execute(self, run_query=False) -> List:
         # TODO: refactor that
         query: Query = self.query
-        result = []
+        result: List = []
         if run_query:
             query.execute_matrix()
         for dataset in query.datasets.all():

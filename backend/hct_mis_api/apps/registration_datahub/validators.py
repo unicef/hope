@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -1000,14 +1000,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def get_expected_household_fields(self) -> Dict:
+    def get_expected_household_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
-    def get_expected_individuals_fields(self) -> Dict:
+    def get_expected_individuals_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["individuals"].values() if field["required"]}
         except Exception as e:
@@ -1162,7 +1162,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         try:
             field_dict = self.all_fields.get(field)
             if field_dict is None:
-                return
+                return None
 
             complex_types: Dict[str, Callable] = {
                 "GEOPOINT": self.geopoint_validator,
@@ -1196,7 +1196,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea):
         try:
-            reduced_submissions: List[Dict] = rename_dict_keys(submissions, get_field_name)
+            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;

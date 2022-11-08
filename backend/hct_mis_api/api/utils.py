@@ -1,7 +1,8 @@
 from typing import Dict, List, Union
 
 
-def humanize_errors(errors: List) -> List:
+def humanize_errors(errors: List) -> Union[Dict, List]:
+    # TODO: refactor
     try:
         households = errors.pop("households")
         errs = {}

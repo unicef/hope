@@ -57,9 +57,9 @@ def fetch_household_and_individual(extras, ticket_type) -> Tuple[Optional[Househ
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get(ticket_type, {})
     individual_encoded_id = feedback_ticket_extras.get("individual")
-    individual = decode_and_get_object(individual_encoded_id, Individual, False)
+    individual: Optional[Individual] = decode_and_get_object(individual_encoded_id, Individual, False)
     household_encoded_id = feedback_ticket_extras.get("household")
-    household = decode_and_get_object(household_encoded_id, Household, False)
+    household: Optional[Household] = decode_and_get_object(household_encoded_id, Household, False)
     return household, individual
 
 

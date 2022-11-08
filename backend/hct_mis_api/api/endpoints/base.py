@@ -10,6 +10,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
+from hct_mis_api.apps.core.models import BusinessArea
+
 from ..auth import HOPEAuthentication, HOPEPermission
 from ..models import APILogEntry, Grant
 
@@ -21,7 +23,7 @@ class RejectPolicy(models.TextChoices):
 
 class SelectedBusinessAreaMixin:
     @cached_property
-    def selected_business_area(self) -> models.Model:
+    def selected_business_area(self) -> BusinessArea:
         try:
             return self.request.auth.valid_for.all().get(slug=self.kwargs.get("business_area", None))
         except ObjectDoesNotExist:

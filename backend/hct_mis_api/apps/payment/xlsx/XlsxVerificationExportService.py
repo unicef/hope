@@ -1,5 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
+from typing import Optional
 
 from django.conf import settings
 from django.core.files import File
@@ -72,7 +73,7 @@ class XlsxVerificationExportService:
         headers_row = XlsxVerificationExportService.HEADERS
         self.ws_verifications.append(headers_row)
 
-    def _to_received_column(self, payment_record_verification) -> "XlsxVerificationExportService":
+    def _to_received_column(self, payment_record_verification) -> Optional[str]:
         status = payment_record_verification.status
         if payment_record_verification.status == PaymentVerification.STATUS_PENDING:
             return None

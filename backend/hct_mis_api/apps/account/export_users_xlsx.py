@@ -1,13 +1,12 @@
 from collections import OrderedDict
 from typing import Optional
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-User = get_user_model()
+from hct_mis_api.apps.account.models import User
 
 
 class GenericField:
@@ -65,7 +64,7 @@ class ExportUsersXlsx:
             .filter(is_superuser=False, user_roles__business_area__slug=self.business_area_slug)
         )
         if users.exists() is False:
-            return
+            return None
 
         for user in users.iterator(chunk_size=2000):
             self.ws.append([field.value(user, self.business_area_slug) for field in fields])

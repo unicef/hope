@@ -27,7 +27,7 @@ def _jsonfy(value) -> Union[str, dict]:
         if isinstance(value, Model):
             ret = json.loads(serializers.serialize("json", [value]))
         elif isinstance(value, dict):
-            ret = _jsonfy(value)  # TODO: bug
+            ret = _jsonfy(value)  # FIXME: bug
         else:
             ret = str(value)
     except TypeError:

@@ -24,7 +24,7 @@ class Grant(Enum):
     API_PROGRAM_CREATE = auto()
 
     @classmethod
-    def choices(cls) -> Tuple[Tuple[str, str]]:
+    def choices(cls) -> Tuple[Tuple[Any, Any], ...]:
         return tuple((i.value, i.value) for i in cls)
 
 

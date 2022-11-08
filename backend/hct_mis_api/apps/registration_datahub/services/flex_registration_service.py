@@ -377,9 +377,9 @@ class FlexRegistrationService:
         self, individual_dict: Dict, individual: ImportedIndividual
     ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
-            return
+            return None
         if not individual_dict.get("bank_account_number"):
-            return
+            return None
         bank_name = individual_dict.get("bank_name_h_f", "")
         other_bank_name = individual_dict.get("other_bank_name", "")
         if not bank_name:

@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  TargetPopulationBuildStatus,
-  TargetPopulationStatus,
-  useTargetPopulationQuery,
-} from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { isPermissionDeniedError } from '../../../utils/utils';
-import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 import { useLazyInterval } from '../../../hooks/useInterval';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
+import {
+  TargetPopulationBuildStatus,
+  useTargetPopulationQuery,
+} from '../../../__generated__/graphql';
+import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
@@ -49,7 +48,6 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   if (!data || permissions === null) return null;
 
   const { targetPopulation } = data;
-  const { status } = targetPopulation;
 
   return (
     <>
@@ -65,9 +63,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
         canUnlock={hasPermissions(PERMISSIONS.TARGETING_UNLOCK, permissions)}
         canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
       />
-      {status !== TargetPopulationStatus.Open && (
-        <TargetPopulationDetails targetPopulation={targetPopulation} />
-      )}
+      <TargetPopulationDetails targetPopulation={targetPopulation} />
       <TargetPopulationCore
         id={targetPopulation.id}
         targetPopulation={targetPopulation}
