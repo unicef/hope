@@ -272,7 +272,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
         return queryset.distinct()
 
-    def refresh_stats(self):
+    def refresh_stats(self) -> None:
         households_ids = self.household_list.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
@@ -304,7 +304,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         try:
             return self.targeting_criteria.get_criteria_string()
         except Exception:
@@ -332,20 +332,20 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         return tp.steficon_rule.rule
 
-    def set_to_ready_for_cash_assist(self):
+    def set_to_ready_for_cash_assist(self) -> None:
         self.status = self.STATUS_READY_FOR_CASH_ASSIST
         self.sent_to_datahub = True
 
-    def is_finalized(self):
+    def is_finalized(self) -> bool:
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
-    def is_locked(self):
+    def is_locked(self) -> bool:
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
-    def is_open(self):
+    def is_open(self) -> bool:
         return self.status in (self.STATUS_OPEN,)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:

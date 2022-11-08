@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import Any, Dict
 
 from django import forms
 from django.conf import settings
@@ -33,8 +34,8 @@ class FundsCommitmentAddForm(forms.ModelForm):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
     currency_code = forms.ChoiceField(choices=sorted(CURRENCY_CHOICES[1:], key=itemgetter(1)))
     funds_commitment_number = forms.CharField(required=True)
-    vendor_id = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
-    gl_account = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
+    vendor_id = forms.CharField(validators=[NumberValidator(), MinLengthValidator(10)])
+    gl_account = forms.CharField(validators=[NumberValidator(), MinLengthValidator(10)])
     business_office_code = forms.ModelChoiceField(
         queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=False
     )
@@ -170,7 +171,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
             )
 
     def get_changeform_initial_data(self, request):
-        initial = super().get_changeform_initial_data(request)
+        initial: Dict[str, Any] = super().get_changeform_initial_data(request)
         initial["created_by"] = request.user.email
         initial["updated_by"] = request.user.email
         initial["posting_date"] = timezone.now()

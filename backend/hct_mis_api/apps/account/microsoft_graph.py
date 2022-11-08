@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict
 
 from django.conf import settings
 from django.http import Http404
@@ -19,12 +20,12 @@ DJANGO_USER_MAP = {
 
 
 class MicrosoftGraphAPI:
-    def __init__(self):
+    def __init__(self) -> None:
         self.azure_client_id = settings.AZURE_CLIENT_ID
         self.azure_client_secret = settings.AZURE_CLIENT_SECRET
         self.access_token = self.get_token()
 
-    def get_token(self):
+    def get_token(self) -> str:
         if not self.azure_client_id or not self.azure_client_secret:
             log_and_raise(
                 "Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET",
@@ -49,7 +50,7 @@ class MicrosoftGraphAPI:
         token = json_response["access_token"]
         return token
 
-    def get_results(self, url):
+    def get_results(self, url) -> Dict:
         headers = {"Authorization": f"Bearer {self.access_token}"}
         response = requests.get(url, headers=headers)
         try:
@@ -60,7 +61,7 @@ class MicrosoftGraphAPI:
         json_response = response.json()
         return json_response
 
-    def get_user_data(self, *, email=None, uuid=None):
+    def get_user_data(self, *, email=None, uuid=None) -> Any:
         try:
             if uuid:
                 q = f"https://graph.microsoft.com/v1.0/users/{uuid}"
@@ -68,7 +69,7 @@ class MicrosoftGraphAPI:
             elif email:
                 q = f"https://graph.microsoft.com/v1.0/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
                 data = self.get_results(q)
-                value = data.get("value")[0]
+                value = data["value"][0]
             else:
                 logger.error("You must provide 'uuid' or 'email' argument.")
                 raise ValueError("You must provide 'uuid' or 'email' argument.")

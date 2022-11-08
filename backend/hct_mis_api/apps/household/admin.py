@@ -1,14 +1,15 @@
 import logging
 from itertools import chain
-from typing import Iterable, List
+from typing import Any, Iterable, List, Optional
 
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpResponseRedirect
@@ -84,7 +85,7 @@ class AgencyAdmin(HOPEModelAdminBase):
     )
     autocomplete_fields = ("country",)
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return super().get_queryset(request).select_related("country")
 
 
@@ -96,12 +97,12 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_filter = (
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
-        ("country", RelatedFieldComboFilter),
+        ("country", AutoCompleteFilter),
     )
     autocomplete_fields = ["type"]
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related("individual", "type", "type__country")
+    def get_queryset(self, request) -> QuerySet:
+        return super().get_queryset(request).select_related("individual", "type", "country")
 
 
 @admin.register(DocumentType)
@@ -113,7 +114,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
         "label",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -192,7 +193,7 @@ class HouseholdAdmin(
     actions = ["mass_withdraw", "mass_unwithdraw", "count_queryset"]
     cursor_ordering_field = "unicef_id"
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
             "head_of_household", "country", "country_origin", "admin_area"
         )
@@ -201,16 +202,18 @@ class HouseholdAdmin(
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_ignored_linked_objects(self, request):
+    def get_ignored_linked_objects(self, request) -> List:
         return []
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
-    def _toggle_withdraw_status(self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None):
+    def _toggle_withdraw_status(
+        self, request, hh: Household, tickets: Optional[Iterable] = None, comment=None, tag=None
+    ) -> HouseholdWithdraw:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         if tickets is None:
@@ -241,10 +244,10 @@ class HouseholdAdmin(
 
         return service
 
-    def has_withdrawn_permission(self, request):
+    def has_withdrawn_permission(self, request) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
-    def mass_withdraw(self, request, qs):
+    def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
@@ -261,6 +264,7 @@ class HouseholdAdmin(
                         if service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
+                return None
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -272,7 +276,7 @@ class HouseholdAdmin(
 
     mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
 
-    def mass_unwithdraw(self, request, qs):
+    def mass_unwithdraw(self, request, qs) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Restore")
         context["action"] = "mass_unwithdraw"
         context["op"] = "restore"
@@ -294,6 +298,7 @@ class HouseholdAdmin(
                         if not service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
+                return None
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -306,7 +311,7 @@ class HouseholdAdmin(
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.can_withdrawn")
-    def withdraw(self, request, pk):
+    def withdraw(self, request, pk) -> Any:  # TODO: typing
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         context = self.get_common_context(request, pk)
@@ -335,17 +340,15 @@ class HouseholdAdmin(
                 except Exception as e:
                     self.message_user(request, str(e), messages.ERROR)
         else:
-            if obj.withdrawn:
-                form = Form()
-            else:
-                form = WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            context["form"] = (
+                Form() if obj.withdrawn else WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            )
 
-        context["form"] = form
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
     @button()
-    def tickets(self, request, pk):
+    def tickets(self, request, pk) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
         tickets = []
@@ -355,13 +358,13 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
     @button()
-    def members(self, request, pk):
+    def members(self, request, pk) -> HttpResponseRedirect:
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?qs=unicef_id={obj.unicef_id}")
 
     @button()
-    def sanity_check(self, request, pk):
+    def sanity_check(self, request, pk) -> TemplateResponse:
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
         hh = self.get_object(request, pk)
@@ -429,10 +432,10 @@ class IndividualRoleInHouseholdInline(TabularInline):
     readonly_fields = ("household", "role")
     fields = ("household", "role")
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj=None) -> bool:
         return False
 
 
@@ -532,7 +535,7 @@ class IndividualAdmin(
     ]
     actions = ["count_queryset"]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -542,7 +545,7 @@ class IndividualAdmin(
             )
         )
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -552,14 +555,14 @@ class IndividualAdmin(
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @button()
-    def household_members(self, request, pk):
+    def household_members(self, request, pk) -> HttpResponseRedirect:
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
 
     @button(html_attrs={"class": "aeb-green"})
-    def sanity_check(self, request, pk):
+    def sanity_check(self, request, pk) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
         context["roles"] = obj.households_and_roles.all()
@@ -568,7 +571,7 @@ class IndividualAdmin(
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
     @button(label="Add/Update Individual IBAN by xlsx")
-    def add_update_individual_iban_from_xlsx(self, request):
+    def add_update_individual_iban_from_xlsx(self, request) -> Any:
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
             context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
@@ -619,7 +622,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
         "household",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -640,7 +643,7 @@ class IndividualIdentityAdmin(HOPEModelAdminBase):
         "agency",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "agency")
 
 
@@ -661,7 +664,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         ("uploaded_by", AutoCompleteFilter),
     )
 
-    def xlsx_update_stage2(self, request, old_form):
+    def xlsx_update_stage2(self, request, old_form) -> TemplateResponse:
         xlsx_update_file = XlsxUpdateFile(
             file=old_form.cleaned_data["file"],
             business_area=old_form.cleaned_data["business_area"],
@@ -685,7 +688,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
 
-    def xlsx_update_stage3(self, request, old_form):
+    def xlsx_update_stage3(self, request, old_form) -> TemplateResponse:
         xlsx_update_file = old_form.cleaned_data["xlsx_update_file"]
         xlsx_update_file.xlsx_match_columns = old_form.cleaned_data["xlsx_match_columns"]
         xlsx_update_file.save()
@@ -701,14 +704,13 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
-    def add_view(self, request, form_url="", extra_context=None):
+    def add_view(self, request, form_url="", extra_context=None) -> Any:
         return self.xlsx_update(request)
 
-    def xlsx_update(self, request):
+    def xlsx_update(self, request) -> Any:
+        form: forms.Form
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
-            # form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
-            # form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)
