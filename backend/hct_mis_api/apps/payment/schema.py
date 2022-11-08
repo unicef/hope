@@ -1,6 +1,7 @@
 import json
 from base64 import b64decode
 from decimal import Decimal
+from typing import Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import (
@@ -159,6 +160,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    full_name = graphene.String(source="name")
 
     class Meta:
         model = FinancialServiceProvider
@@ -303,6 +305,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     full_name = graphene.String()
     target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
+    distribution_modality = graphene.String()
+    total_persons_covered = graphene.Int()
+    service_provider = graphene.Field(FinancialServiceProviderNode)
 
     class Meta:
         model = Payment
@@ -332,10 +337,20 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.parent.target_population
 
     def resolve_full_name(self, info) -> str:
-        return self.head_of_household.full_name
+        return self.head_of_household.full_name if self.head_of_household else ""
 
-    def resolve_verification(self, info) -> PaymentVerification:
+    def resolve_verification(self, info) -> Optional[PaymentVerification]:
         return self.verification
+
+    def resolve_distribution_modality(self, info) -> str:
+        return self.parent.unicef_id
+
+    def resolve_total_persons_covered(self, info) -> Optional[int]:
+        # TODO: in feature will get data from snap shot
+        return self.household.size
+
+    def resolve_service_provider(self, info) -> Optional[FinancialServiceProvider]:
+        return self.financial_service_provider
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
