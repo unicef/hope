@@ -25,7 +25,6 @@ def create_changelog_Changelog(**kwargs):
 
 
 class APITestCase(TestCase):
-    
     def setUp(self):
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         cls.user: User = UserFactory()
