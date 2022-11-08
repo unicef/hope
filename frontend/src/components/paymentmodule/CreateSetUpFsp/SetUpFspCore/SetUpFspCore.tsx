@@ -16,6 +16,7 @@ import {
   useAvailableFspsForDeliveryMechanismsQuery,
   useChooseDeliveryMechForPaymentPlanMutation,
 } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { DeliveryMechanismWarning } from '../../EditSetUpFsp/DeliveryMechanismWarning';
@@ -116,8 +117,8 @@ export const SetUpFspCore = ({
           {
             query: PaymentPlanDocument,
             variables: {
-              id
-            }
+              id,
+            },
           },
         ],
       });
@@ -180,6 +181,7 @@ export const SetUpFspCore = ({
       {({ values, submitForm }) => {
         return (
           <Form>
+            <AutoSubmitFormOnEnter />
             <Box m={5}>
               <ContainerColumnWithBorder>
                 <Box>

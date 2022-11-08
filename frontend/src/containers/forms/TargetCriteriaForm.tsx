@@ -12,6 +12,7 @@ import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import {
@@ -224,6 +225,7 @@ export function TargetCriteriaForm({
             fullWidth
             maxWidth='md'
           >
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title' disableTypography>
                 <Typography variant='h6'>{title}</Typography>

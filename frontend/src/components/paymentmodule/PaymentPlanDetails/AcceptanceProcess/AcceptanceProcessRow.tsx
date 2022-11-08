@@ -47,7 +47,7 @@ export const AcceptanceProcessRow = ({
       case 'IN_AUTHORIZATION':
         return t('Rejected in Authorization stage');
       case 'IN_REVIEW':
-        return t('Rejected in Finance Review stage');
+        return t('Rejected in Finance Release stage');
 
       default:
         return '';

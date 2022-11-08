@@ -125,7 +125,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, error_msg)
 
-    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.__init__")
+    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init):
         mock_parent_init.return_value = None
         not_excluded_payments = self.payment_plan.not_excluded_payments.all()
@@ -139,23 +139,13 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
         wb = service.open_workbook()
 
-        payment_1_payment_channels = ", ".join(
-            list(
-                payment_1.collector.payment_channels.all()
-                .select_related("delivery_mechanism")
-                .distinct("delivery_mechanism__delivery_mechanism")
-                .values_list("delivery_mechanism__delivery_mechanism", flat=True)
-            )
-        )
         wb.active["A2"].value = payment_id_1
         wb.active["A3"].value = payment_id_2
-        wb.active["F2"].value = payment_1_payment_channels
-        wb.active["F3"].value = "Cash"
 
         service.validate()
         self.assertEqual(service.errors, [])
 
-        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.fetch_exchange_rates") as mock:
+        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.fetch_exchange_rates") as mock:
             mock.return_value = {}
             service.import_payment_list()
         payment_1.refresh_from_db()
