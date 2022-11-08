@@ -1,3 +1,5 @@
+import time
+
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 
@@ -24,6 +26,7 @@ class Command(BaseCommand):
         while not connected:
             try:
                 db_connection.cursor()
+                time.sleep(0.5)
             except OperationalError:
                 connected = False
             else:
