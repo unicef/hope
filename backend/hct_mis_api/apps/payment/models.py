@@ -39,7 +39,6 @@ from hct_mis_api.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
