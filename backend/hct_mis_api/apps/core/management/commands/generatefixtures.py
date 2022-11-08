@@ -19,7 +19,6 @@ from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
-from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     EntitlementCardFactory,
@@ -45,6 +44,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaRuleFilterFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 
 class Command(BaseCommand):

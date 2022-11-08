@@ -1,16 +1,16 @@
 from collections import OrderedDict
+from typing import Optional
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-User = get_user_model()
+from hct_mis_api.apps.account.models import User
 
 
 class GenericField:
-    def __init__(self, name: str, column_name: str):
+    def __init__(self, name: str, column_name: str) -> None:
         self.name = name
         self.column_name = column_name
 
@@ -56,7 +56,7 @@ class ExportUsersXlsx:
             self.ws.column_dimensions[get_column_letter(i)].width = 20
 
     @transaction.atomic(using="default")
-    def get_exported_users_file(self):
+    def get_exported_users_file(self) -> Optional[Workbook]:
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
         users = (
             User.objects.prefetch_related("user_roles")
@@ -64,7 +64,7 @@ class ExportUsersXlsx:
             .filter(is_superuser=False, user_roles__business_area__slug=self.business_area_slug)
         )
         if users.exists() is False:
-            return
+            return None
 
         for user in users.iterator(chunk_size=2000):
             self.ws.append([field.value(user, self.business_area_slug) for field in fields])

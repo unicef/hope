@@ -1,3 +1,5 @@
+from typing import Tuple, Type
+
 from django.db.models import Case, Prefetch, Sum, Value, When
 
 import graphene
@@ -7,6 +9,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -126,15 +129,12 @@ class DocumentNode(DjangoObjectType):
     country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
-    @staticmethod
     def resolve_country(parent: Document, info):
         return getattr(parent.country, "name", parent.country)
 
-    @staticmethod
     def resolve_country_iso3(parent: Document, info):
         return parent.country.iso_code3
 
-    @staticmethod
     def resolve_photo(parent: Document, info):
         if parent.photo:
             return parent.photo.url
@@ -315,7 +315,7 @@ class BankAccountInfoNode(DjangoObjectType):
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),

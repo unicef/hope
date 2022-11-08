@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -240,7 +240,7 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.all_fields = self.get_all_fields()
 
     def get_combined_attributes(self) -> Dict:
@@ -257,7 +257,7 @@ class ImportDataInstanceValidator:
             **flex_attrs["households"],
         }
 
-    def serialize_flex_attributes(self):
+    def serialize_flex_attributes(self) -> Dict:
         from hct_mis_api.apps.core.models import FlexibleAttribute
 
         flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
@@ -286,14 +286,14 @@ class ImportDataInstanceValidator:
 
         return result_dict
 
-    def get_all_fields(self):
+    def get_all_fields(self) -> Dict:
         try:
             return self.get_combined_attributes()
         except Exception as e:
             logger.exception(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict, is_xlsx=True, *args, **kwargs):
+    def documents_validator(self, documents_numbers_dict, is_xlsx=True, *args, **kwargs) -> List:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -361,7 +361,7 @@ class ImportDataInstanceValidator:
             logger.exception(e)
             raise
 
-    def identity_validator(self, identities_numbers_dict, is_xlsx=True, *args, **kwargs):
+    def identity_validator(self, identities_numbers_dict, is_xlsx=True, *args, **kwargs) -> List[Dict[str, Any]]:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
@@ -398,13 +398,13 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
 
-    def get_combined_fields(self):
+    def get_combined_fields(self) -> Dict:
         core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
         flex_fields = serialize_flex_attributes()
         return {
@@ -428,7 +428,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def integer_validator(self, value, header, *args, **kwargs):
+    def integer_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -555,7 +555,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def not_empty_validator(self, value, *args, **kwargs):
+    def not_empty_validator(self, value, *args, **kwargs) -> bool:
         try:
             return not (value is None or value == "")
         except Exception as e:
@@ -606,7 +606,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 **self.combined_fields[sheet.title.lower()],
             }
 
-            switch_dict = {
+            switch_dict: Dict[str, Callable] = {
                 "ID": self.not_empty_validator,
                 "STRING": self.string_validator,
                 "INTEGER": self.integer_validator,
@@ -821,7 +821,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file, business_area_slug):
+    def validate_everything(self, xlsx_file, business_area_slug) -> List[Dict[str, Any]]:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
@@ -845,7 +845,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header, data_dict, household_ids):
+    def collector_column_validator(header, data_dict, household_ids) -> List[Dict[str, Any]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []
@@ -890,7 +890,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_collectors(self, wb):
+    def validate_collectors(self, wb) -> List[Dict[str, Any]]:
         try:
             errors = []
 
@@ -928,7 +928,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_collectors_size(self, wb):
+    def validate_collectors_size(self, wb) -> List[Dict[str, Any]]:
         try:
             errors = []
 
@@ -961,7 +961,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def _count_individuals(self, individuals_sheet):
+    def _count_individuals(self, individuals_sheet) -> int:
         first_row = individuals_sheet[1]
         individuals_count = 0
         for cell in first_row:
@@ -971,7 +971,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         individuals_count += 1
         return individuals_count
 
-    def _count_households(self, households_sheet):
+    def _count_households(self, households_sheet) -> int:
         household_count = 0
         for cell in households_sheet["A"][2:]:
             if cell.value:
@@ -980,13 +980,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()
         self.expected_individuals_fields = self.get_expected_individuals_fields()
 
-    def get_combined_fields(self):
+    def get_combined_fields(self) -> Dict[str, Dict]:
         core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT)
         flex_fields = serialize_flex_attributes()
         return {
@@ -1000,14 +1000,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def get_expected_household_fields(self):
+    def get_expected_household_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
-    def get_expected_individuals_fields(self):
+    def get_expected_individuals_fields(self) -> Set:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["individuals"].values() if field["required"]}
         except Exception as e:
@@ -1162,9 +1162,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         try:
             field_dict = self.all_fields.get(field)
             if field_dict is None:
-                return
+                return None
 
-            complex_types = {
+            complex_types: Dict[str, Callable] = {
                 "GEOPOINT": self.geopoint_validator,
                 "IMAGE": self.image_validator,
                 "DATE": self.date_validator,
@@ -1196,7 +1196,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea):
         try:
-            reduced_submissions: List[Dict[str, Any]] = rename_dict_keys(submissions, get_field_name)
+            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;

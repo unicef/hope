@@ -1,4 +1,7 @@
+import time
+
 from django.core.management import BaseCommand, call_command
+from django.db import OperationalError, connections
 
 from hct_mis_api.apps.core.management.sql import drop_databases
 from hct_mis_api.apps.payment.fixtures import generate_real_cash_plans
@@ -17,6 +20,18 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        db_connection = connections["default"]
+        connected = False
+
+        while not connected:
+            try:
+                db_connection.cursor()
+                time.sleep(0.5)
+            except OperationalError:
+                connected = False
+            else:
+                connected = True
+
         if options["skip_drop"] is False:
             drop_databases()
             call_command("migratealldb")

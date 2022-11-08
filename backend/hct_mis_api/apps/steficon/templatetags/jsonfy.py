@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Dict, Union
 
 from django import template
 from django.core import serializers
@@ -27,7 +27,7 @@ def _jsonfy(value) -> Union[str, dict]:
         if isinstance(value, Model):
             ret = json.loads(serializers.serialize("json", [value]))
         elif isinstance(value, dict):
-            ret = _jsonfy(value)  # TODO: bug
+            ret = _jsonfy(value)  # FIXME: bug
         else:
             ret = str(value)
     except TypeError:
@@ -37,12 +37,17 @@ def _jsonfy(value) -> Union[str, dict]:
 
 @register.filter
 def pretty_json(context) -> str:
-    data = {}
+    data: Dict = {}
     if isinstance(context, dict):
         for key, value in context.items():
             data[key] = _jsonfy(value)
     else:
-        data = _jsonfy(context)
+        jsoned: Union[str, Dict] = _jsonfy(context)
+        if isinstance(jsoned, str):
+            data = {"obj": jsoned, "type": type(context).__name__}
+        else:
+            data = jsoned
+
     response = json.dumps(data, sort_keys=True, indent=2)
     formatter = HtmlFormatter(style="colorful")
     response = highlight(response, JsonLexer(), formatter)

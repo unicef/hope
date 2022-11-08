@@ -2,9 +2,10 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Type
+from typing import Iterable, Optional, Tuple, Type
 
 from django.core.exceptions import PermissionDenied
+from django.db.models import Model
 
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
@@ -23,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name, *args):
+    # TODO: signature differs from superclass
+    def _generate_next_value_(name, *args):  # type: ignore
         return name
 
     # RDI
@@ -165,7 +167,7 @@ class Permissions(Enum):
     # ...
 
     @classmethod
-    def choices(cls):
+    def choices(cls) -> Tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
@@ -182,19 +184,19 @@ ALL_GRIEVANCES_CREATE_MODIFY = (
 
 class BasePermission:
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return False
 
 
 class AllowAny(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return True
 
 
 class AllowAuthenticated(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return info.context.user.is_authenticated
 
 
@@ -218,10 +220,10 @@ def hopePermissionClass(permission) -> Type[BasePermission]:
     return XDPerm
 
 
-def hopeOneOfPermissionClass(*permissions):
+def hopeOneOfPermissionClass(*permissions) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
-        def has_permission(cls, info, **kwargs):
+        def has_permission(cls, info, **kwargs) -> bool:
             if info.context.user.is_authenticated:
                 business_area_arg = kwargs.get("business_area")
                 if isinstance(business_area_arg, BusinessArea):
@@ -241,16 +243,16 @@ def hopeOneOfPermissionClass(*permissions):
 
 
 class BaseNodePermissionMixin:
-    permission_classes = (AllowAny,)
+    permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,)
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info, object_instance) -> None:
         business_area = object_instance.business_area
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
             log_and_raise("Permission Denied")
 
     @classmethod
-    def get_node(cls, info, object_id):
+    def get_node(cls, info, object_id) -> Optional[Model]:
         try:
             object_instance = cls._meta.model.objects.get(pk=object_id)  # type: ignore
             cls.check_node_permission(info, object_instance)
@@ -268,7 +270,7 @@ class BaseNodePermissionMixin:
         creator_permission,
         is_owner,
         owner_permission,
-    ):
+    ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
         if not info.context.user.is_authenticated or not (
@@ -362,12 +364,9 @@ class BaseMutationPermissionMixin:
         return True
 
     @classmethod
-    def has_permission(cls, info, permission, business_area_arg, raise_error=True) -> bool:
+    def has_permission(cls, info, permission: Iterable, business_area_arg, raise_error=True) -> bool:
         cls.is_authenticated(info)
-        if not isinstance(permission, list):
-            permissions = (permission,)
-        else:
-            permissions = permission
+        permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):
             business_area = business_area_arg
         else:
