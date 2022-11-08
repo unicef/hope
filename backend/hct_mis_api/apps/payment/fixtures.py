@@ -34,6 +34,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
@@ -44,7 +45,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
-    ServiceProvider, DeliveryMechanism,
+    ServiceProvider,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -181,9 +182,11 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     data_transfer_configuration = factory.Faker("json")
     fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
+
 class DeliveryMechanismFactory(factory.DjangoModelFactory):
     class Meta:
         model = DeliveryMechanism
+
     delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
     global_core_fields = factory.List(
         [
@@ -202,12 +205,13 @@ class DeliveryMechanismFactory(factory.DjangoModelFactory):
         ]
     )
 
+
 class PaymentChannelFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
+    delivery_mechanism = factory.LazyAttribute(lambda o: DeliveryMechanism.objects.first())
     delivery_data = factory.Faker("json")
 
 
@@ -676,7 +680,9 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
-    assigned_payment_channel = factory.LazyAttribute(lambda o: PaymentChannelFactory(individual=o.collector))
+    assigned_payment_channel = factory.LazyAttribute(
+        lambda o: (o.collector.payment_channels.first() or PaymentChannelFactory(individual=o.collector))
+    )
 
 
 class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
@@ -727,15 +733,16 @@ def generate_payment_plan():
         full_name="Jan Kowalski",
         sex=MALE,
     )[0]
-    DeliveryMechanism.objects.create(
+    delivery_mechanism_transfer, _ = DeliveryMechanism.objects.get_or_create(
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
-        global_core_fields=['given_name', 'family_name'],
-        payment_channel_fields=['bank_account_number', 'bank_name']
+        defaults=dict(
+            global_core_fields=["given_name", "family_name"],
+            payment_channel_fields=["bank_account_number", "bank_name"],
+        ),
     )
-    delivery_mechanism_cash = DeliveryMechanism.objects.create(
+    delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        global_core_fields=['given_name', 'family_name'],
-        payment_channel_fields=[]
+        defaults=dict(global_core_fields=["given_name", "family_name"], payment_channel_fields=[]),
     )
     payment_channel_1 = PaymentChannelFactory(
         individual=individual_1,

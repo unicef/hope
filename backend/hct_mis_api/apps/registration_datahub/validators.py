@@ -18,7 +18,8 @@ from openpyxl import load_workbook
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     TYPE_SELECT_MANY,
-    TYPE_SELECT_ONE, FieldFactory,
+    TYPE_SELECT_ONE,
+    FieldFactory,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.kobo.common import (

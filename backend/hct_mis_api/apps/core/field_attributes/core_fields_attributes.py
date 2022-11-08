@@ -32,21 +32,23 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    TYPE_INTEGER,
-    _INDIVIDUAL,
-    TYPE_SELECT_ONE,
     _HOUSEHOLD,
+    _INDIVIDUAL,
     TYPE_BOOL,
-    TYPE_IMAGE,
-    TYPE_STRING,
-    TYPE_GEOPOINT,
     TYPE_DATE,
-    TYPE_SELECT_MANY,
-    TYPE_LIST_OF_IDS,
+    TYPE_GEOPOINT,
     TYPE_ID,
+    TYPE_IMAGE,
+    TYPE_INTEGER,
+    TYPE_LIST_OF_IDS,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
     Scope,
 )
-from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
+from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
+    PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
+)
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
@@ -1690,7 +1692,7 @@ class FieldFactory(list):
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
     def to_choices(self):
-        return [(x["label"]["English(EN)"], x["name"]) for x in self]
+        return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
     def apply_business_area(self, business_area_slug: str):
         factory = FieldFactory(self, self.scopes)

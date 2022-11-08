@@ -403,7 +403,9 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
         TYPE_SELECT_MANY,
         TYPE_SELECT_ONE,
     )
-    from hct_mis_api.apps.core.field_attributes.fields_types import FIELD_TYPES_TO_INTERNAL_TYPE
+    from hct_mis_api.apps.core.field_attributes.fields_types import (
+        FIELD_TYPES_TO_INTERNAL_TYPE,
+    )
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
