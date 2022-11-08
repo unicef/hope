@@ -17,9 +17,7 @@ from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-)
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
