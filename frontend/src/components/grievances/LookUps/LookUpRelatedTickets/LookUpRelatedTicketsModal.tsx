@@ -12,6 +12,7 @@ import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
 import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
@@ -58,6 +59,7 @@ export const LookUpRelatedTicketsModal = ({
           scroll='paper'
           aria-labelledby='form-dialog-title'
         >
+          {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle id='scroll-dialog-title'>
               {t('Look up Related Tickets')}

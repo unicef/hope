@@ -19,6 +19,7 @@ import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 
 export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -28,8 +29,10 @@ export const ApprovePaymentPlan = ({
   paymentPlan,
 }: ApprovePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
+
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+
   const {
     mutatePaymentPlanAction: approve,
     loading: loadingApprove,
@@ -69,6 +72,7 @@ export const ApprovePaymentPlan = ({
       >
         {({ submitForm }) => (
           <>
+            {approveDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
                 color='primary'
