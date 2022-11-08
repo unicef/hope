@@ -27,7 +27,8 @@ class VerificationPlanStatusChangeServices:
                 raise GraphQLError("You can't discard if xlsx file was downloaded or imported")
             # remove xlsx file
             if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
-                self.payment_verification_plan.xlsx_verification_file.delete()
+                self.payment_verification_plan.get_xlsx_verification_file.file.delete()
+                self.payment_verification_plan.get_xlsx_verification_file.delete()
 
         self.payment_verification_plan.set_pending()
         self.payment_verification_plan.save()
@@ -51,8 +52,8 @@ class VerificationPlanStatusChangeServices:
             self._reset_payment_verifications()
             # remove xlsx file
             if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
-                self.payment_verification_plan.xlsx_verification_file.file.delete()
-                self.payment_verification_plan.xlsx_verification_file.delete()
+                self.payment_verification_plan.get_xlsx_verification_file.file.delete()
+                self.payment_verification_plan.get_xlsx_verification_file.delete()
 
             return self.payment_verification_plan
         else:

@@ -58,5 +58,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(update_payment_verification_fk,),
-        migrations.RunPython(update_payment_record_fk, )
+        migrations.RunPython(update_payment_record_fk,)
     ]
