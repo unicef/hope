@@ -135,11 +135,11 @@ def get_role_query(_, args) -> Q:
 
 
 def get_scope_id_number_query(_, args):
-    return Q(identities__partner__name=WFP)
+    return Q(identities__partner__name=WFP, identities__number=args[0])
 
 
 def get_scope_id_issuer_query(_, args):
-    return Q(identities__partner__name=WFP)
+    return Q(identities__partner__name=WFP, identities__country__iso_code3=args[0])
 
 
 def get_unhcr_id_number_query(_, args):
@@ -147,7 +147,7 @@ def get_unhcr_id_number_query(_, args):
 
 
 def get_unhcr_id_issuer_query(_, args):
-    return Q(identities__partner__name=UNHCR)
+    return Q(identities__partner__name=UNHCR, identities__country__iso_code3=args[0])
 
 
 def get_has_phone_number_query(_, args):

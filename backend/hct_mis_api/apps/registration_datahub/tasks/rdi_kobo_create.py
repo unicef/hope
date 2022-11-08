@@ -11,7 +11,6 @@ from django.db import transaction
 from dateutil.parser import parse
 from django_countries.fields import Country
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import (
@@ -165,13 +164,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
                 is_identity = document_name in identity_fields
 
+                country = Country(data["issuing_country"])
+
                 if is_identity:
-                    partner, _ = Partner.objects.get_or_create(name="WFP" if document_name == "scope_id" else "UNHCR")
+                    partner = "WFP" if document_name == "scope_id" else "UNHCR"
                     identities.append(
                         ImportedIndividualIdentity(
                             partner=partner,
                             individual=data["individual"],
                             document_number=data["number"],
+                            country=country,
                         )
                     )
                 else:
@@ -179,7 +181,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if type_name == "OTHER_ID":
                         type_name = IDENTIFICATION_TYPE_OTHER
                     label = IDENTIFICATION_TYPE_DICT.get(type_name, data.get("name"))
-                    country = Country(data["issuing_country"])
                     document_type, _ = ImportedDocumentType.objects.get_or_create(
                         label=label,
                         type=type_name,

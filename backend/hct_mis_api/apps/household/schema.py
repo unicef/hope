@@ -94,10 +94,20 @@ class DocumentTypeNode(DjangoObjectType):
 
 class IndividualIdentityNode(DjangoObjectType):
     partner = graphene.String(description="Partner")
-    country = graphene.String(description="Agency country")
+    country = graphene.String(description="Individual Identity country")
+    country_iso3 = graphene.String(description="Individual Identity country iso3")
 
-    def resolve_partner(parent, info):
+    @staticmethod
+    def resolve_partner(parent: IndividualIdentity, info):
         return parent.partner.name
+
+    @staticmethod
+    def resolve_country(parent: IndividualIdentity, info):
+        return parent.country.name
+
+    @staticmethod
+    def resolve_country_iso3(parent: IndividualIdentity, info):
+        return parent.country.iso_code3
 
     class Meta:
         model = IndividualIdentity

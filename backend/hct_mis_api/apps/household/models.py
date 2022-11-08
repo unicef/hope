@@ -24,7 +24,6 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import StorageFile
@@ -625,11 +624,14 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
 
 
 class IndividualIdentity(models.Model):
-    partner = models.ForeignKey(Partner, related_name="individual_identities", on_delete=models.CASCADE)
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
     )
+    partner = models.ForeignKey(
+        "account.Partner", related_name="individual_identities", null=True, on_delete=models.PROTECT
+    )
+    country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Individual Identities"

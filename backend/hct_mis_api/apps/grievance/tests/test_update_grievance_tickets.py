@@ -239,12 +239,14 @@ class TestUpdateGrievanceTickets(APITestCase):
             partner=unhcr,
             individual=cls.individuals[0],
             number="1111",
+            country=country_pl,
         )
 
         cls.identity_to_remove = IndividualIdentity.objects.create(
             partner=unhcr,
             individual=cls.individuals[0],
             number="3456",
+            country=country_pl,
         )
 
     @parameterized.expand(

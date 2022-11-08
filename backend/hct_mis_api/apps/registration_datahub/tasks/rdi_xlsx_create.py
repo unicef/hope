@@ -36,6 +36,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     RegistrationDataImportDatahub,
 )
@@ -310,17 +311,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         ImportedDocument.objects.bulk_create(docs_to_create)
 
     def _create_identities(self) -> None:
-        # idents_to_create = [
-        #     ImportedIndividualIdentity(
-        #         partner=ImportedAgency.objects.get(type=ident_data["agency"]),
-        #         individual=ident_data["individual"],
-        #         document_number=ident_data["number"],
-        #     )
-        #     for ident_data in self.identities.values()
-        # ]
-        #
-        # ImportedIndividualIdentity.objects.bulk_create(idents_to_create)
-        pass
+        identities_to_create = [
+            ImportedIndividualIdentity(
+                partner=identity["partner"],
+                individual=identity["individual"],
+                document_number=identity["number"],
+                country=identity["issuing_country"],
+            )
+            for identity in self.identities.values()
+        ]
+
+        ImportedIndividualIdentity.objects.bulk_create(identities_to_create)
 
     def _create_collectors(self) -> None:
         collectors_to_create = []

@@ -140,6 +140,7 @@ class TestSendTpToDatahub(TestCase):
             partner=cls.unhcr,
             individual=cls.individual_primary,
             number="1111",
+            country=country,
         )
 
         cls.individual_alternate = IndividualFactory(
@@ -155,6 +156,7 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.individual_alternate,
             number="2222",
             partner=cls.unhcr,
+            country=country,
         )
 
         cls.individual_no_role_first = IndividualFactory(
@@ -165,6 +167,7 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.individual_no_role_first,
             number="3333",
             partner=cls.unhcr,
+            country=country,
         )
 
         cls.individual_no_role_second = IndividualFactory(
@@ -175,6 +178,7 @@ class TestSendTpToDatahub(TestCase):
             individual=cls.individual_no_role_second,
             number="4444",
             partner=cls.unhcr,
+            country=country,
         )
 
         cls.household.head_of_household = cls.individual_primary
