@@ -9,7 +9,11 @@ import {
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import {
+  FinancialServiceProviderCommunicationChannel,
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+} from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
@@ -57,7 +61,13 @@ export const PaymentPlanDetailsHeader = ({
   const canAuthorize = true;
   const canMarkAsReviewed = true;
   const canDownloadXlsx = true;
-  const canSendToFsp = true;
+  const canSendToFsp =
+    paymentPlan.status === PaymentPlanStatus.Accepted &&
+    paymentPlan.deliveryMechanisms.some(
+      ({ fsp: { communicationChannel } }) =>
+        communicationChannel ===
+        FinancialServiceProviderCommunicationChannel.Api,
+    );
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {

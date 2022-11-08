@@ -33,6 +33,7 @@ import {
   useCreateCashPlanPaymentVerificationMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '../core/ButtonTooltip';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
@@ -200,6 +201,7 @@ export function CreateVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <FormikEffect
             values={values}
             onChange={() => handleFormChange(values)}

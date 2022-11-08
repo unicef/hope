@@ -149,7 +149,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess should re
                 <span
                   class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
                 >
-                  Finance Review (0/1)
+                  Finance Release (0/1)
                 </span>
               </span>
             </span>
