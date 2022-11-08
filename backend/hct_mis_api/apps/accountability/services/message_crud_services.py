@@ -3,6 +3,7 @@ from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
+from django.shortcuts import get_object_or_404
 
 from graphql import GraphQLError
 
@@ -11,6 +12,7 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
+from ...targeting.models import TargetPopulation
 from ..models import Message
 from .sampling import Sampling
 from .verifiers import MessageArgumentVerifier
@@ -33,7 +35,6 @@ class MessageCrudServices:
             body=input_data["body"],
             sampling_type=input_data["sampling_type"],
         )
-        message.households.set(households)
 
         sampling = Sampling(input_data, households)
         result = sampling.process_sampling()
@@ -41,7 +42,15 @@ class MessageCrudServices:
         message.full_list_arguments = result.full_list_arguments
         message.random_sampling_arguments = result.random_sampling_arguments
         message.number_of_recipients = result.number_of_recipients
-        message.households = result.households
+        message.households.set(result.households)
+
+        if target_population_id := input_data.get("target_population"):
+            message.target_population = get_object_or_404(TargetPopulation, id=decode_id_string(target_population_id))
+
+        if registration_data_import_id := input_data.get("registration_data_import"):
+            message.registration_data_import = get_object_or_404(
+                RegistrationDataImport, id=decode_id_string(registration_data_import_id)
+            )
 
         if message.number_of_recipients == 0:
             err_msg = "No recipients found for the given criteria"

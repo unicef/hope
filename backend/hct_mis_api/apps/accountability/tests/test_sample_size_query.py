@@ -13,25 +13,10 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 
-class TestActionMessageMutation(APITestCase):
-    MUTATION_NEW_MESSAGE = """
-    mutation CreateAccountabilityCommunicationMessage($businessArea: String!, $inputs: CreateAccountabilityCommunicationMessageInput!) {
-      createAccountabilityCommunicationMessage(businessAreaSlug: $businessArea, inputs: $inputs) {
-        message {
-          title
-          body
-          createdBy {
-            firstName
-          }
-          numberOfRecipients
-        }
-      }
-    }
-    """
-
-    MUTATION_SAMPLE_SIZE = """
-    query AccountabilityCommunicationMessageSampleSize($businessArea: String!, $inputs: GetAccountabilityCommunicationMessageSampleSizeInput!) {
-      accountabilityCommunicationMessageSampleSize(businessAreaSlug: $businessArea, inputs: $inputs) {
+class TestSampleSizeQuery(APITestCase):
+    QUERY_SAMPLE_SIZE = """
+    query AccountabilityCommunicationMessageSampleSize($input: GetAccountabilityCommunicationMessageSampleSizeInput!) {
+      accountabilityCommunicationMessageSampleSize(input: $input) {
         numberOfRecipients
         sampleSize
       }
@@ -90,8 +75,7 @@ class TestActionMessageMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
-            "businessArea": self.business_area.slug,
-            "inputs": {
+            "input": {
                 "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
@@ -99,7 +83,7 @@ class TestActionMessageMutation(APITestCase):
         }
 
         self.snapshot_graphql_request(
-            request_string=self.MUTATION_SAMPLE_SIZE,
+            request_string=self.QUERY_SAMPLE_SIZE,
             context={"user": self.user},
             variables=data,
         )
@@ -124,16 +108,16 @@ class TestActionMessageMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
-            "businessArea": self.business_area.slug,
-            "inputs": {
+            "input": {
                 "households": [self.id_to_base64(household.id, "HouseholdNode") for household in self.households],
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
         }
+        self.maxDiff = None
 
         self.snapshot_graphql_request(
-            request_string=self.MUTATION_SAMPLE_SIZE,
+            request_string=self.QUERY_SAMPLE_SIZE,
             context={"user": self.user},
             variables=data,
         )
@@ -158,8 +142,7 @@ class TestActionMessageMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
-            "businessArea": self.business_area.slug,
-            "inputs": {
+            "input": {
                 "registrationDataImport": self.id_to_base64(self.rdi_id, "RegistrationDataImportNode"),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
@@ -167,7 +150,7 @@ class TestActionMessageMutation(APITestCase):
         }
 
         self.snapshot_graphql_request(
-            request_string=self.MUTATION_SAMPLE_SIZE,
+            request_string=self.QUERY_SAMPLE_SIZE,
             context={"user": self.user},
             variables=data,
         )

@@ -256,19 +256,24 @@ export const CreateSurveyPage = (): React.ReactElement => {
       validate={(values) => validate(values)}
       validateOnBlur={validateData}
       validateOnChange={validateData}
-      onSubmit={async (values) => {
+      onSubmit={(values) => {
         if (activeStep === steps.length - 1) {
-          try {
-            const response = await mutate({
-              variables: prepareMutationVariables(values),
-            });
-            showMessage(t('Survey created.'), {
-              pathname: `/${businessArea}/accountability/surveys/${response.data.createSurvey.survey.id}`,
-              historyMethod: 'push',
-            });
-          } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
-          }
+          confirm({
+            title: t('Confirmation'),
+            content: t('Are you sure you want to send this survey?'),
+          }).then(async () => {
+            try {
+              const response = await mutate({
+                variables: prepareMutationVariables(values),
+              });
+              showMessage(t('Communication Ticket created.'), {
+                pathname: `/${businessArea}/accountability/surveys/${response.data.createSurvey.survey.id}`,
+                historyMethod: 'push',
+              });
+            } catch (e) {
+              e.graphQLErrors.map((x) => showMessage(x.message));
+            }
+          });
         } else {
           setFormValues(values);
           handleNext();
