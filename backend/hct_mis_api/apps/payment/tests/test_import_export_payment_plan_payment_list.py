@@ -24,6 +24,7 @@ from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProvider,
     GenericPayment,
     PaymentPlan,
@@ -78,8 +79,12 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         # set Lock status
         cls.payment_plan.status_lock()
         cls.payment_plan.save()
+
+        cls.delivery_mechanism_deposit_to_card, _ = DeliveryMechanism.objects.get_or_create(
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_DEPOSIT_TO_CARD,
+        )
         for ind in Individual.objects.all():
-            PaymentChannelFactory(individual=ind, delivery_mechanism="Deposit to Card")
+            PaymentChannelFactory(individual=ind, delivery_mechanism=cls.delivery_mechanism_deposit_to_card)
 
         cls.xlsx_valid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
@@ -137,14 +142,15 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         payment_1_payment_channels = ", ".join(
             list(
                 payment_1.collector.payment_channels.all()
-                .distinct("delivery_mechanism")
-                .values_list("delivery_mechanism", flat=True)
+                .select_related("delivery_mechanism")
+                .distinct("delivery_mechanism__delivery_mechanism")
+                .values_list("delivery_mechanism__delivery_mechanism", flat=True)
             )
         )
         wb.active["A2"].value = payment_id_1
         wb.active["A3"].value = payment_id_2
         wb.active["F2"].value = payment_1_payment_channels
-        wb.active["F3"].value = "Referral"
+        wb.active["F3"].value = "Cash"
 
         service.validate()
         self.assertEqual(service.errors, [])
@@ -157,7 +163,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         self.assertEqual(float_to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
         self.assertEqual(float_to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
-        self.assertEqual("Referral", payment_2.collector.payment_channels.first().delivery_mechanism)
+        self.assertEqual("Cash", payment_2.collector.payment_channels.first().delivery_mechanism.delivery_mechanism)
 
     def test_export_payment_plan_payment_list(self):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)

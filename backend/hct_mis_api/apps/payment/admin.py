@@ -19,6 +19,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     CashPlanPaymentVerification,
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
@@ -29,7 +30,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    DeliveryMechanism,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
