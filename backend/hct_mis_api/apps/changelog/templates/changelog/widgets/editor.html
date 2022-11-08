@@ -6,33 +6,34 @@
     }
 </style>
 <div id="{{ widget.attrs.id }}_container">
-    <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
-{% if widget.value %}{{ widget.value }}{% endif %}</textarea>
+    <div {% include "django/forms/widgets/attrs.html" %}>
+    </div>
+    <textarea hidden id="django-form-field__description" name="{{ widget.name }}" id="" cols="30" rows="10"></textarea>
 </div>
 <script>
     (function ($) {
         var editor;
         var toolbarOptions = [
-          ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-          ['blockquote', 'code-block'],
+            ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+            ['blockquote', 'code-block'],
 
-          [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-          [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
-          [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
-          [{ 'direction': 'rtl' }],                         // text direction
+            [{ 'header': 1 }, { 'header': 2 }, { 'header': 3 }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+            [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+            [{ 'direction': 'rtl' }],                         // text direction
 
-          //[{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            //[{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
 
-          [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-          [{ 'font': [] }],
-          [{ 'align': [] }],
+            [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+            [{ 'font': [] }],
+            [{ 'align': [] }],
 
-          //['clean']                                         // remove formatting button
+            ['clean']                                         // remove formatting button
         ];
         var options = {
-          debug: 'info',
+          debug: 'error',
           modules: {
             toolbar: toolbarOptions
           },
@@ -42,6 +43,11 @@
 
         $(document).ready(function () {
             editor = new Quill('#{{ widget.attrs.id }}', options);
+            editor.on('text-change', function(delta, source) {
+                var htmlText = editor.root.innerHTML;
+                document.getElementById('django-form-field__description').textContent = htmlText;
+            });
+            editor.pasteHTML($("<textarea/>").html("{{ widget.value }}").text());
         });
     })(django.jQuery);
 
