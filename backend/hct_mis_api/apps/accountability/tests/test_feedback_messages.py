@@ -2,7 +2,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.factories import (
+from hct_mis_api.apps.accountability.fixtures import (
     FeedbackFactory,
     FeedbackMessageFactory,
 )

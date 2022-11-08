@@ -15,6 +15,7 @@ import {
   SurveyCategory,
   useExportSurveySampleMutation,
   useSurveyQuery,
+  useSurveysChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
@@ -29,14 +30,21 @@ export const SurveyDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useSurveysChoiceDataQuery({
+    fetchPolicy: 'cache-and-network',
+  });
+
   const [mutate] = useExportSurveySampleMutation();
   const permissions = usePermissions();
 
-  if (loading) return <LoadingComponent />;
+  if (loading || choicesLoading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
+  if (!data || !choicesData || permissions === null) return null;
 
   const { survey } = data;
 
@@ -110,7 +118,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
         {renderActions()}
       </PageHeader>
       <Box display='flex' flexDirection='column'>
-        <SurveyDetails survey={survey} />
+        <SurveyDetails survey={survey} choicesData={choicesData} />
         <RecipientsTable
           canViewDetails={hasPermissions(
             PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,

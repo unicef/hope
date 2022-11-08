@@ -1,3 +1,6 @@
+import re
+
+from django.db.models import Q
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
@@ -107,7 +110,20 @@ class SurveyFilter(FilterSet):
     search = CharFilter(method="filter_search")
 
     def filter_search(self, queryset, name, value):
-        return queryset.filter(title__icontains=value)
+        if re.match(r"([\"\']).+\1", value):
+            values = [value.replace('"', "").strip()]
+        else:
+            values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            value = value.strip(",")
+            inner_query = Q()
+            inner_query |= Q(title__icontains=value)
+            inner_query |= Q(unicef_id__istartswith=value)
+            inner_query |= Q(unicef_id__iendswith=value)
+
+            q_obj &= inner_query
+        return queryset.filter(q_obj).distinct()
 
     class Meta:
         model = Survey

@@ -10,11 +10,15 @@ import {
 } from '../../../../config/permissions';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { usePermissions } from '../../../../hooks/usePermissions';
+import { useSurveysChoiceDataQuery } from '../../../../__generated__/graphql';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 
 export const SurveysPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { t } = useTranslation();
+  const { data: choicesData } = useSurveysChoiceDataQuery({
+    fetchPolicy: 'cache-and-network',
+  });
 
   const [filter, setFilter] = useState({
     search: '',
@@ -26,7 +30,7 @@ export const SurveysPage = (): React.ReactElement => {
 
   const debouncedFilter = useDebounce(filter, 500);
 
-  if (permissions === null) return null;
+  if (!choicesData || permissions === null) return null;
   if (
     !hasPermissionInModule(
       PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST,
@@ -45,7 +49,11 @@ export const SurveysPage = (): React.ReactElement => {
         <CreateSurveyMenu />
       </PageHeader>
       <SurveysFilters filter={filter} onFilterChange={setFilter} />
-      <SurveysTable filter={debouncedFilter} canViewDetails={canViewDetails} />
+      <SurveysTable
+        filter={debouncedFilter}
+        canViewDetails={canViewDetails}
+        choicesData={choicesData}
+      />
     </>
   );
 };

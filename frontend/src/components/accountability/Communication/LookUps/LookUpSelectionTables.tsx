@@ -1,7 +1,7 @@
 import React from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RegistrationDataImportTable } from '../../../../containers/tables/rdi/RegistrationDataImportTable';
-import { TargetPopulationTable } from '../../../../containers/tables/targeting/TargetPopulationTable';
+import { LookUpTargetPopulationTable } from '../../../../containers/tables/Surveys/LookUpTargetPopulationTable';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { CommunicationTabsValues } from '../../../../utils/constants';
 import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
@@ -18,7 +18,7 @@ interface LookUpSelectionTablesProps {
   onValueChange;
   handleChange;
 }
-export function LookUpSelectionTables({
+export const LookUpSelectionTables = ({
   selectedTab,
   choicesData,
   values,
@@ -28,7 +28,7 @@ export function LookUpSelectionTables({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesProps): React.ReactElement {
+}: LookUpSelectionTablesProps): React.ReactElement => {
   const permissions = usePermissions();
 
   return (
@@ -48,7 +48,7 @@ export function LookUpSelectionTables({
         />
       )}
       {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
-        <TargetPopulationTable
+        <LookUpTargetPopulationTable
           filter={filtersTargetPopulationApplied}
           canViewDetails={hasPermissions(
             PERMISSIONS.TARGETING_VIEW_DETAILS,
@@ -81,4 +81,4 @@ export function LookUpSelectionTables({
       )}
     </>
   );
-}
+};

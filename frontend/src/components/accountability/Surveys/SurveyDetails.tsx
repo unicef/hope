@@ -2,8 +2,11 @@ import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { renderUserName } from '../../../utils/utils';
-import { SurveyQuery } from '../../../__generated__/graphql';
+import { choicesToDict, renderUserName } from '../../../utils/utils';
+import {
+  SurveyQuery,
+  SurveysChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
@@ -13,10 +16,12 @@ import { UniversalMoment } from '../../core/UniversalMoment';
 
 interface SurveyDetailsProps {
   survey: SurveyQuery['survey'];
+  choicesData: SurveysChoiceDataQuery;
 }
 
 export const SurveyDetails = ({
   survey,
+  choicesData,
 }: SurveyDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -29,6 +34,7 @@ export const SurveyDetails = ({
     program,
     body,
   } = survey;
+  const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
 
   return (
     <ContainerColumnWithBorder>
@@ -38,7 +44,10 @@ export const SurveyDetails = ({
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid item xs={3}>
-            <LabelizedField label={t('Category')} value={category} />
+            <LabelizedField
+              label={t('Category')}
+              value={categoryDict[category]}
+            />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label={t('Survey Title')} value={title} />
