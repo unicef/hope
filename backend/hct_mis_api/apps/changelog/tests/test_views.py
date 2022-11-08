@@ -25,13 +25,11 @@ def create_changelog_Changelog(**kwargs):
 
 
 class APITestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
+    
+    def setUp(self):
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         cls.user: User = UserFactory()
-
-    # def setUp(self):
-    #     self.client.force_login(self.superuser)
+        self.client.force_login(self.superuser)
 
     def tests_Changelog_list_view(self):
         instance1 = create_changelog_Changelog()
@@ -42,7 +40,7 @@ class APITestCase(TestCase):
         self.client.force_login(self.user)
         resp = self.client.get(url)
         assert resp.status_code == 200, "You need to be logged in and superuser"
-        assert str(f"{instance1.version}-{instance1.date}") in resp.content.decode("utf-8")
+        assert str(f"{instance1.date}") in resp.content.decode("utf-8")
         assert str(instance2.date) in resp.content.decode("utf-8")
 
     def tests_Changelog_detail_view(self):
