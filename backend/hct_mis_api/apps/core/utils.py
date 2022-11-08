@@ -34,13 +34,16 @@ def decode_id_string(id_string) -> Optional[str]:
     return b64decode(id_string).decode().split(":")[1]
 
 
-def encode_id_base64(id_string, model_name) -> Optional[str]:
-    if not id_string:
-        return None
-
+def encode_id_base64_required(id_string, model_name) -> str:
     from base64 import b64encode
 
     return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
+
+
+def encode_id_base64(id_string, model_name) -> Optional[str]:
+    if not id_string:
+        return None
+    return encode_id_base64_required(id_string, model_name)
 
 
 def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-") -> None:
