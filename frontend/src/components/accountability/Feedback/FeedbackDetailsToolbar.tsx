@@ -29,6 +29,9 @@ export const FeedbackDetailsToolbar = ({
     },
   ];
 
+  const canCreateLinkedGrievance =
+    feedback.householdLookup && feedback.individualLookup;
+
   return (
     <PageHeader
       title={`Feedback ID: ${feedback.unicefId}`}
@@ -49,25 +52,27 @@ export const FeedbackDetailsToolbar = ({
             </Button>
           </Box>
         )}
-        <Box mr={3}>
-          <Button
-            onClick={() =>
-              history.push({
-                pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
-                state: {
-                  selectedHousehold: feedback.householdLookup,
-                  selectedIndividual: feedback.individualLookup,
-                  linkedFeedbackId: id,
-                },
-              })
-            }
-            variant='contained'
-            color='primary'
-            disabled={Boolean(feedback.linkedGrievance?.id)}
-          >
-            {t('Create Linked Ticket')}
-          </Button>
-        </Box>
+        {canCreateLinkedGrievance && (
+          <Box mr={3}>
+            <Button
+              onClick={() =>
+                history.push({
+                  pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                  state: {
+                    selectedHousehold: feedback.householdLookup,
+                    selectedIndividual: feedback.individualLookup,
+                    linkedFeedbackId: id,
+                  },
+                })
+              }
+              variant='contained'
+              color='primary'
+              disabled={Boolean(feedback.linkedGrievance?.id)}
+            >
+              {t('Create Linked Ticket')}
+            </Button>
+          </Box>
+        )}
       </Box>
     </PageHeader>
   );

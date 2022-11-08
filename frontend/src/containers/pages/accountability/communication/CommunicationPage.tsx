@@ -54,7 +54,7 @@ export function CommunicationPage(): React.ReactElement {
           to={`/${businessArea}/accountability/communication/create`}
           data-cy='button-communication-create-new'
         >
-          {t('new message')}
+          {t('New message')}
         </Button>
       </PageHeader>
       <CommunicationFilters filter={filter} onFilterChange={setFilter} />

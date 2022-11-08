@@ -42,6 +42,10 @@ class SurveyCrudServices:
         survey.random_sampling_arguments = result.random_sampling_arguments
         survey.number_of_recipients = result.number_of_recipients
         survey.recipients.set(result.households)
+
+        if not result.households:
+            raise ValidationError("No recipients found for the given criteria.")
+
         survey.save()
 
         return survey

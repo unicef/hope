@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
             LANGUAGE plpgsql
             AS $$
         BEGIN
-            NEW.unicef_id := format('MSG-%s-%s', to_char(NEW.created_at, 'yy'), TRIM(CASE WHEN NEW.unicef_id_index > 9999 THEN NEW.unicef_id_index::varchar(64) ELSE to_char(NEW.unicef_id_index, '0000') END));
+            NEW.unicef_id := format('FED-%s-%s', to_char(NEW.created_at, 'yy'), TRIM(CASE WHEN NEW.unicef_id_index > 9999 THEN NEW.unicef_id_index::varchar(64) ELSE to_char(NEW.unicef_id_index, '0000') END));
             return NEW;
         END
         $$;
@@ -129,7 +129,7 @@ class Migration(migrations.Migration):
             """,
         ),
         migrations.RunSQL(
-            sql="UPDATE accountability_feedback SET unicef_id = format('MSG-%s-%s', to_char(created_at, 'yy'), TRIM(CASE WHEN unicef_id_index > 9999 THEN unicef_id_index::varchar(64) ELSE to_char(unicef_id_index, '0000') END));",
+            sql="UPDATE accountability_feedback SET unicef_id = format('FED-%s-%s', to_char(created_at, 'yy'), TRIM(CASE WHEN unicef_id_index > 9999 THEN unicef_id_index::varchar(64) ELSE to_char(unicef_id_index, '0000') END));",
             reverse_sql="UPDATE accountability_feedback SET unicef_id = NULL;",
         ),
     ]

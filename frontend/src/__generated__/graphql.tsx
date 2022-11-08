@@ -3837,6 +3837,7 @@ export type Query = {
   allSurveys?: Maybe<SurveyNodeConnection>,
   recipients?: Maybe<RecipientNodeConnection>,
   accountabilitySampleSize?: Maybe<AccountabilitySampleSizeObject>,
+  surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -4008,8 +4009,7 @@ export type QueryAllAccountabilityCommunicationMessageRecipientsArgs = {
 
 
 export type QueryAccountabilityCommunicationMessageSampleSizeArgs = {
-  businessAreaSlug: Scalars['String'],
-  inputs?: Maybe<GetAccountabilityCommunicationMessageSampleSizeInput>
+  input?: Maybe<GetAccountabilityCommunicationMessageSampleSizeInput>
 };
 
 
@@ -5541,7 +5541,7 @@ export type SurveyNode = Node & {
   updatedAt: Scalars['DateTime'],
   unicefId?: Maybe<Scalars['String']>,
   title: Scalars['String'],
-  body?: Maybe<Scalars['String']>,
+  body: Scalars['String'],
   category: SurveyCategory,
   numberOfRecipients: Scalars['Int'],
   createdBy?: Maybe<UserNode>,
@@ -5552,8 +5552,8 @@ export type SurveyNode = Node & {
   sampleFile?: Maybe<Scalars['String']>,
   sampleFileGeneratedAt?: Maybe<Scalars['DateTime']>,
   samplingType: SurveySamplingType,
-  fullListArguments?: Maybe<Scalars['JSONString']>,
-  randomSamplingArguments?: Maybe<Scalars['JSONString']>,
+  fullListArguments: Scalars['JSONString'],
+  randomSamplingArguments: Scalars['JSONString'],
   sampleSize: Scalars['Int'],
   sampleFilePath?: Maybe<Scalars['String']>,
   hasValidSampleFile?: Maybe<Scalars['Boolean']>,
@@ -8327,7 +8327,23 @@ export type AccountabilityCommunicationMessageQuery = (
     )>, targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'name'>
     )> }
+  )> }
+);
+
+export type AccountabilityCommunicationMessageSampleSizeQueryVariables = {
+  input: GetAccountabilityCommunicationMessageSampleSizeInput
+};
+
+
+export type AccountabilityCommunicationMessageSampleSizeQuery = (
+  { __typename?: 'Query' }
+  & { accountabilityCommunicationMessageSampleSize: Maybe<(
+    { __typename?: 'GetCommunicationMessageSampleSizeObject' }
+    & Pick<GetCommunicationMessageSampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
   )> }
 );
 
@@ -11004,6 +11020,17 @@ export type SurveyQuery = (
       & Pick<ProgramNode, 'id' | 'name'>
     )> }
   )> }
+);
+
+export type SurveysChoiceDataQueryVariables = {};
+
+
+export type SurveysChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { surveyCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type AllActiveTargetPopulationsQueryVariables = {
@@ -15140,6 +15167,10 @@ export const AccountabilityCommunicationMessageDocument = gql`
       id
       name
     }
+    registrationDataImport {
+      id
+      name
+    }
     title
     body
   }
@@ -15188,6 +15219,57 @@ export function useAccountabilityCommunicationMessageLazyQuery(baseOptions?: Apo
 export type AccountabilityCommunicationMessageQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageQuery>;
 export type AccountabilityCommunicationMessageLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageLazyQuery>;
 export type AccountabilityCommunicationMessageQueryResult = ApolloReactCommon.QueryResult<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>;
+export const AccountabilityCommunicationMessageSampleSizeDocument = gql`
+    query AccountabilityCommunicationMessageSampleSize($input: GetAccountabilityCommunicationMessageSampleSizeInput!) {
+  accountabilityCommunicationMessageSampleSize(input: $input) {
+    numberOfRecipients
+    sampleSize
+  }
+}
+    `;
+export type AccountabilityCommunicationMessageSampleSizeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>, 'query'> & ({ variables: AccountabilityCommunicationMessageSampleSizeQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AccountabilityCommunicationMessageSampleSizeComponent = (props: AccountabilityCommunicationMessageSampleSizeComponentProps) => (
+      <ApolloReactComponents.Query<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables> query={AccountabilityCommunicationMessageSampleSizeDocument} {...props} />
+    );
+    
+export type AccountabilityCommunicationMessageSampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables> & TChildProps;
+export function withAccountabilityCommunicationMessageSampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AccountabilityCommunicationMessageSampleSizeQuery,
+  AccountabilityCommunicationMessageSampleSizeQueryVariables,
+  AccountabilityCommunicationMessageSampleSizeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables, AccountabilityCommunicationMessageSampleSizeProps<TChildProps>>(AccountabilityCommunicationMessageSampleSizeDocument, {
+      alias: 'accountabilityCommunicationMessageSampleSize',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAccountabilityCommunicationMessageSampleSizeQuery__
+ *
+ * To run a query within a React component, call `useAccountabilityCommunicationMessageSampleSizeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountabilityCommunicationMessageSampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountabilityCommunicationMessageSampleSizeQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAccountabilityCommunicationMessageSampleSizeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>) {
+        return ApolloReactHooks.useQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, baseOptions);
+      }
+export function useAccountabilityCommunicationMessageSampleSizeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, baseOptions);
+        }
+export type AccountabilityCommunicationMessageSampleSizeQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeQuery>;
+export type AccountabilityCommunicationMessageSampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeLazyQuery>;
+export type AccountabilityCommunicationMessageSampleSizeQueryResult = ApolloReactCommon.QueryResult<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>;
 export const AccountabilitySampleSizeDocument = gql`
     query AccountabilitySampleSize($input: AccountabilitySampleSizeInput!) {
   accountabilitySampleSize(input: $input) {
@@ -21610,6 +21692,56 @@ export function useSurveyLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookO
 export type SurveyQueryHookResult = ReturnType<typeof useSurveyQuery>;
 export type SurveyLazyQueryHookResult = ReturnType<typeof useSurveyLazyQuery>;
 export type SurveyQueryResult = ApolloReactCommon.QueryResult<SurveyQuery, SurveyQueryVariables>;
+export const SurveysChoiceDataDocument = gql`
+    query SurveysChoiceData {
+  surveyCategoryChoices {
+    name
+    value
+  }
+}
+    `;
+export type SurveysChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>, 'query'>;
+
+    export const SurveysChoiceDataComponent = (props: SurveysChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables> query={SurveysChoiceDataDocument} {...props} />
+    );
+    
+export type SurveysChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables> & TChildProps;
+export function withSurveysChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SurveysChoiceDataQuery,
+  SurveysChoiceDataQueryVariables,
+  SurveysChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables, SurveysChoiceDataProps<TChildProps>>(SurveysChoiceDataDocument, {
+      alias: 'surveysChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSurveysChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useSurveysChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSurveysChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSurveysChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSurveysChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, baseOptions);
+      }
+export function useSurveysChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, baseOptions);
+        }
+export type SurveysChoiceDataQueryHookResult = ReturnType<typeof useSurveysChoiceDataQuery>;
+export type SurveysChoiceDataLazyQueryHookResult = ReturnType<typeof useSurveysChoiceDataLazyQuery>;
+export type SurveysChoiceDataQueryResult = ApolloReactCommon.QueryResult<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>;
 export const AllActiveTargetPopulationsDocument = gql`
     query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String) {
   allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange) {
@@ -24663,7 +24795,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessagesArgs, 'businessArea'>>,
   accountabilityCommunicationMessageRecipient?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageRecipientArgs, 'id'>>,
   allAccountabilityCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessageRecipientsArgs, 'messageId'>>,
-  accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeObject']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageSampleSizeArgs, 'businessAreaSlug'>>,
+  accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeObject']>, ParentType, ContextType, QueryAccountabilityCommunicationMessageSampleSizeArgs>,
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>,
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllFeedbacksArgs, 'businessAreaSlug'>>,
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -24671,6 +24803,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, QueryAllSurveysArgs>,
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
   accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeObject']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
+  surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -25224,7 +25357,7 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  body?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  body?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   category?: Resolver<ResolversTypes['SurveyCategory'], ParentType, ContextType>,
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -25235,8 +25368,8 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   sampleFile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sampleFileGeneratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   samplingType?: Resolver<ResolversTypes['SurveySamplingType'], ParentType, ContextType>,
-  fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  fullListArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   sampleFilePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
