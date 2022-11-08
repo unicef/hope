@@ -622,14 +622,13 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("partner", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
-    # autocomplete_fields = ["agency", "individual"]
     raw_id_fields = (
         "individual",
         "partner",
     )
 
     def get_queryset(self, request) -> QuerySet:
-        return super().get_queryset(request).select_related("individual", "agency")
+        return super().get_queryset(request).select_related("individual", "partner")
 
 
 @admin.register(EntitlementCard)

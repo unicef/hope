@@ -141,6 +141,8 @@ def handle_add_identity(identity, individual) -> IndividualIdentity:
     from hct_mis_api.apps.household.models import IndividualIdentity
 
     partner_name = identity.get("partner")
+    country_code = identity.get("country")
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
@@ -148,7 +150,7 @@ def handle_add_identity(identity, individual) -> IndividualIdentity:
     if identity_already_exists:
         log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
 
-    return IndividualIdentity(number=number, individual=individual, partner=partner)
+    return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
 
 
 def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
@@ -161,20 +163,21 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     partner_name = updated_identity.get("partner")
     number = updated_identity.get("number")
     identity_id = updated_identity.get("id")
+    country_code = updated_identity.get("country")
 
-    identity_id = decode_id_string(identity_id)
-    identity = get_object_or_404(IndividualIdentity, id=identity_id)
-
+    country = geo_models.Country.objects.get(iso_code3=country_code)
+    identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
     identity_already_exists = (
-        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, partner=partner).exists()
+        IndividualIdentity.objects.exclude(pk=identity.id).filter(number=number, partner=partner).exists()
     )
     if identity_already_exists:
         log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
 
     identity.number = number
     identity.partner = partner
+    identity.country = country
     return identity
 
 
@@ -249,7 +252,7 @@ def prepare_edit_documents(documents_to_edit) -> List[Dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dict[str, Any]:
+def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dict[int, Any]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -264,6 +267,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dic
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "partner": identity.partner.name,
+            "country": identity.country.iso_code3,
         }
 
     return previous_identities
@@ -318,6 +322,7 @@ def prepare_edit_identities(identities) -> List[Dict]:
                 },
                 "previous_value": {
                     "id": encoded_id,
+                    "country": identity.country.iso_code3,
                     "partner": identity.partner.name,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,

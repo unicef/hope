@@ -57,20 +57,6 @@ input AgeInput {
   max: Int
 }
 
-type AgencyNode {
-  id: ID!
-  type: AgencyType!
-  label: String!
-  country: String
-  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
-  countryIso3: String
-}
-
-enum AgencyType {
-  UNHCR
-  WFP
-}
-
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -691,7 +677,7 @@ input EditIndividualDocumentObjectType {
 input EditIndividualIdentityObjectType {
   id: ID!
   country: String!
-  agency: String!
+  partner: String!
   number: String!
 }
 
@@ -1421,8 +1407,8 @@ type ImportedIndividualIdentityNode implements Node {
   id: ID!
   individual: ImportedIndividualNode!
   documentNumber: String!
-  type: String
   country: String
+  partner: String
 }
 
 type ImportedIndividualIdentityNodeConnection {
@@ -1558,11 +1544,11 @@ input IndividualDocumentObjectType {
 
 type IndividualIdentityNode implements Node {
   id: ID!
-  agency: AgencyNode!
   individual: IndividualNode!
   number: String!
-  type: String
+  partner: String
   country: String
+  countryIso3: String
 }
 
 type IndividualIdentityNodeConnection {
@@ -1579,7 +1565,7 @@ type IndividualIdentityNodeEdge {
 
 input IndividualIdentityObjectType {
   country: String!
-  agency: String!
+  partner: String!
   number: String!
 }
 
@@ -1961,6 +1947,7 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
 type PaymentDetailsApproveMutation {

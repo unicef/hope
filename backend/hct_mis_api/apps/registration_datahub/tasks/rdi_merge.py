@@ -5,9 +5,9 @@ from django.db import transaction
 from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
@@ -162,9 +162,9 @@ class RdiMergeTask:
             country_origin = household_data.pop("country_origin")
 
             if country and country.code not in countries:
-                countries[country.code] = geo_models.Country.objects.get(iso_code2=country.code)
+                countries[country.code] = Country.objects.get(iso_code2=country.code)
             if country_origin and country_origin.code not in countries:
-                countries[country_origin.code] = geo_models.Country.objects.get(iso_code2=country_origin.code)
+                countries[country_origin.code] = Country.objects.get(iso_code2=country_origin.code)
 
             if country := countries.get(country.code):
                 household_data["country"] = country
@@ -197,16 +197,15 @@ class RdiMergeTask:
             )
             documents_to_create.append(document)
         identities_to_create = []
-        # for imported_identity in imported_individual.identities.all():
-        #     partner, _ = Partner.objects.get_or_create(
-        #         name=imported_identity.partner.name,
-        #     )
-        #     identity = IndividualIdentity(
-        #         partner=partner,
-        #         number=imported_identity.document_number,
-        #         individual=individual,
-        #     )
-        #     identities_to_create.append(identity)
+        for imported_identity in imported_individual.identities.all():
+            partner, _ = Partner.objects.get_or_create(name=imported_identity.partner, defaults={"is_un": True})
+            identity = IndividualIdentity(
+                partner=partner,
+                number=imported_identity.document_number,
+                individual=individual,
+                country=Country.objects.get(iso_code2=str(imported_identity.country)),
+            )
+            identities_to_create.append(identity)
 
         return documents_to_create, identities_to_create
 

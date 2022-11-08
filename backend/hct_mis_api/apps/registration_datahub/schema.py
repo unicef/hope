@@ -285,9 +285,11 @@ class ImportedDocumentNode(DjangoObjectType):
 
 class ImportedIndividualIdentityNode(DjangoObjectType):
     partner = graphene.String(description="Partner")
+    country = graphene.String(description="Country")
 
-    def resolve_partner(parent, info):
-        return parent.partner.name
+    @staticmethod
+    def resolve_country(parent: ImportedIndividualIdentity, info):
+        return getattr(parent.country, "name", parent.country)
 
     class Meta:
         model = ImportedIndividualIdentity
