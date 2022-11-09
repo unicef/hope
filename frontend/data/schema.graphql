@@ -359,6 +359,7 @@ type CashPlanNode implements Node {
   availablePaymentRecordsCount: Int
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
   paymentVerificationSummary: PaymentVerificationSummaryNode
+  unicefId: String
 }
 
 type CashPlanNodeConnection {
@@ -879,6 +880,7 @@ type FinancialServiceProviderNode implements Node {
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  fullName: String
 }
 
 type FinancialServiceProviderNodeConnection {
@@ -2616,6 +2618,12 @@ type PaymentNode implements Node {
   paymentPlanSoftConflicted: Boolean
   paymentPlanSoftConflictedData: [PaymentConflictDataNode]
   hasPaymentChannel: Boolean
+  fullName: String
+  targetPopulation: TargetPopulationNode
+  verification: PaymentVerificationNode
+  distributionModality: String
+  totalPersonsCovered: Int
+  serviceProvider: FinancialServiceProviderNode
 }
 
 type PaymentNodeConnection {
@@ -2939,6 +2947,7 @@ type PaymentRecordNode implements Node {
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   verification: PaymentVerificationNode
+  unicefId: String
 }
 
 type PaymentRecordNodeConnection {

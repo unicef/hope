@@ -53,7 +53,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
             title: `${t('Cash Plan')} ${decodeIdString(
               paymentRecord.parent.id,
             )}`,
-            to: `/${businessArea}/payment-verification/${paymentRecord.parent.id}`,
+            to: `/${businessArea}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
           },
         ]
       : []),
