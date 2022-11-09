@@ -7,7 +7,6 @@ from functools import wraps
 
 from django.db import transaction
 from django.db.models import Q
-from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
@@ -25,9 +24,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
