@@ -2,9 +2,9 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.db.models import QuerySet
 from django.test import TestCase
 from django.utils import timezone
-from django.db.models import QuerySet
 
 from freezegun import freeze_time
 from pytz import utc

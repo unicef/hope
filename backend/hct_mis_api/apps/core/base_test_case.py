@@ -2,7 +2,7 @@ import base64
 import os
 import random
 import sys
-from typing import Any, Dict
+from typing import Dict
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.wsgi import WSGIRequest

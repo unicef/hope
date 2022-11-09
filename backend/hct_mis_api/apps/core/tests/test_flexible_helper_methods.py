@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase

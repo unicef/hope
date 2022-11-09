@@ -1,5 +1,5 @@
 from operator import itemgetter
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 
 from django.test import TestCase
 

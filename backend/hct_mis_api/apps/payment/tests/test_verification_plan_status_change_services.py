@@ -1,5 +1,5 @@
-from typing import Dict
 import uuid
+from typing import Dict
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase

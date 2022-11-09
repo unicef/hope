@@ -1,4 +1,3 @@
-from typing import Optional
 from rest_framework.reverse import reverse
 
 from ...apps.program.models import Program

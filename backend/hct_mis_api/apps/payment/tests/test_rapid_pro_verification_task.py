@@ -1,6 +1,6 @@
-from typing import Dict, List
 import uuid
 from decimal import Decimal
+from typing import Dict, List
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase

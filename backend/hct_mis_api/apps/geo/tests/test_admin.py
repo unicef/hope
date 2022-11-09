@@ -2,7 +2,6 @@ from io import BytesIO
 
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
-from django.contrib.auth import get_user_model
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 

@@ -1,4 +1,5 @@
 from typing import Dict
+
 from django.core.management import call_command
 
 from parameterized import parameterized

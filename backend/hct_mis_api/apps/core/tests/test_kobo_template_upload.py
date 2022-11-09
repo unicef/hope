@@ -7,9 +7,9 @@ from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.core.handlers.wsgi import WSGIRequest
 from django.test import Client, RequestFactory
 from django.urls import reverse
-from django.core.handlers.wsgi import WSGIRequest
 from django.utils import timezone
 
 import requests
