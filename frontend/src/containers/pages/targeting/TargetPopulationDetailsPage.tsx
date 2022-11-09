@@ -69,10 +69,7 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
               PERMISSIONS.TARGETING_REMOVE,
               permissions,
             )}
-            canDuplicate={hasPermissions(
-              PERMISSIONS.TARGETING_DUPLICATE,
-              permissions,
-            )}
+            canDuplicate={canDuplicate}
             canLock={hasPermissions(PERMISSIONS.TARGETING_LOCK, permissions)}
             canUnlock={hasPermissions(
               PERMISSIONS.TARGETING_UNLOCK,
