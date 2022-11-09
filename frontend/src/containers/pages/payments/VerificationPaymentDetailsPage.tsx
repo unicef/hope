@@ -50,10 +50,10 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     )
       ? [
           {
-            title: `${t('Cash Plan')} ${decodeIdString(
+            title: `${t('Payment Plan')} ${decodeIdString(
               payment.parent.id,
             )}`,
-            to: `/${businessArea}/payment-verification/${payment.parent.id}`,
+            to: `/${businessArea}/payment-verification/payment-plan/${payment.parent.id}`,
           },
         ]
       : []),

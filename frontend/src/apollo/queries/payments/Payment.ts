@@ -7,6 +7,17 @@ query Payment($id: ID!) {
     unicefId
     status
     statusDate
+    targetPopulation {
+      id
+      name
+    }
+    verification {
+      id
+      status
+      statusDate
+      receivedAmount
+      isManuallyEditable
+    }
     currency
     entitlementQuantity
     deliveredQuantity
@@ -22,6 +33,7 @@ query Payment($id: ID!) {
         phoneNoAlternative
         phoneNoValid
         phoneNoAlternativeValid
+        fullName
       }
     }
     parent {
@@ -44,6 +56,10 @@ query Payment($id: ID!) {
     deliveredQuantityUsd
     deliveryType
     transactionReferenceId
+    serviceProvider {
+      id
+      fullName
+    }
   }
 }
 `;
