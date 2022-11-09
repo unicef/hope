@@ -119,12 +119,12 @@ export const IndividualBioData = ({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Bank name')}>
-            {individual?.bankAccountInfo.bankName}
+            {individual?.bankAccountInfo?.bankName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Bank account number')}>
-            {individual?.bankAccountInfo.bankAccountNumber}
+            {individual?.bankAccountInfo?.bankAccountNumber}
           </LabelizedField>
         </Grid>
       </>
