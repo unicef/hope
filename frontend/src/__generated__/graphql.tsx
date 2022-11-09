@@ -639,6 +639,7 @@ export type CashPlanNode = Node & {
   availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
   verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>,
   paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>,
+  unicefId?: Maybe<Scalars['String']>,
 };
 
 
@@ -1261,6 +1262,7 @@ export type FinancialServiceProviderNode = Node & {
   financialserviceproviderxlsxreportSet: FinancialServiceProviderXlsxReportNodeConnection,
   deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection,
   paymentSet: PaymentNodeConnection,
+  fullName?: Maybe<Scalars['String']>,
 };
 
 
@@ -3869,6 +3871,12 @@ export type PaymentNode = Node & {
   paymentPlanSoftConflicted?: Maybe<Scalars['Boolean']>,
   paymentPlanSoftConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>,
   hasPaymentChannel?: Maybe<Scalars['Boolean']>,
+  fullName?: Maybe<Scalars['String']>,
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  verification?: Maybe<PaymentVerificationNode>,
+  distributionModality?: Maybe<Scalars['String']>,
+  totalPersonsCovered?: Maybe<Scalars['Int']>,
+  serviceProvider?: Maybe<FinancialServiceProviderNode>,
 };
 
 export type PaymentNodeConnection = {
@@ -4225,6 +4233,7 @@ export type PaymentRecordNode = Node & {
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
   verification?: Maybe<PaymentVerificationNode>,
+  unicefId?: Maybe<Scalars['String']>,
 };
 
 
@@ -10435,12 +10444,18 @@ export type PaymentQuery = (
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
     & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
-    & { household: (
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, verification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
+    )>, household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size' | 'status' | 'unicefId'>
       & { headOfHousehold: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'fullName'>
       ) }
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
@@ -10458,7 +10473,10 @@ export type PaymentQuery = (
           )> }
         )>> }
       )> }
-    ) }
+    ), serviceProvider: Maybe<(
+      { __typename?: 'FinancialServiceProviderNode' }
+      & Pick<FinancialServiceProviderNode, 'id' | 'fullName'>
+    )> }
   )> }
 );
 
@@ -19071,6 +19089,17 @@ export const PaymentDocument = gql`
     unicefId
     status
     statusDate
+    targetPopulation {
+      id
+      name
+    }
+    verification {
+      id
+      status
+      statusDate
+      receivedAmount
+      isManuallyEditable
+    }
     currency
     entitlementQuantity
     deliveredQuantity
@@ -19086,6 +19115,7 @@ export const PaymentDocument = gql`
         phoneNoAlternative
         phoneNoValid
         phoneNoAlternativeValid
+        fullName
       }
     }
     parent {
@@ -19108,6 +19138,10 @@ export const PaymentDocument = gql`
     deliveredQuantityUsd
     deliveryType
     transactionReferenceId
+    serviceProvider {
+      id
+      fullName
+    }
   }
 }
     `;
@@ -23816,6 +23850,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, CashPlanNodeVerificationPlansArgs>,
   paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
@@ -24133,6 +24168,7 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   financialserviceproviderxlsxreportSet?: Resolver<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs>,
   deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodePaymentSetArgs>,
+  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeConnection'] = ResolversParentTypes['FinancialServiceProviderNodeConnection']> = {
@@ -25064,6 +25100,12 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   paymentPlanSoftConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentPlanSoftConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>,
   hasPaymentChannel?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+  distributionModality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  serviceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
 };
 
 export type PaymentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentNodeConnection'] = ResolversParentTypes['PaymentNodeConnection']> = {
@@ -25180,6 +25222,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeSensitiveTicketDetailsArgs>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type PaymentRecordNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeConnection'] = ResolversParentTypes['PaymentRecordNodeConnection']> = {
