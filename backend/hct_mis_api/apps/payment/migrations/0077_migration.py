@@ -27,6 +27,7 @@ def update_xlsx_payment_verification_plan_file(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('contenttypes', '0002_remove_content_type_name'),
         ('payment', '0075_migration_squashed_0076_migration'),
     ]
 
