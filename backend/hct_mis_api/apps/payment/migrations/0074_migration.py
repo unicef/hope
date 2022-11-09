@@ -11,10 +11,7 @@ def update_payment_verification_fk(apps, schema_editor):
     pv_plan_to_upd = []
     pv_summary_to_upd = []
 
-    content_type_for_cash_plan, _ = (
-        # need here 'get_or_create' for initdemo if db is empty
-        ContentType.objects.get_or_create(app_label="payment", model="cashplan")
-    )
+    content_type_for_cash_plan = ContentType.objects.get(app_label="payment", model="cashplan")
 
     for pv_obj in PaymentVerificationPlan.objects.all():
         if pv_obj.cash_plan:
@@ -34,12 +31,10 @@ def update_payment_verification_fk(apps, schema_editor):
 
 def update_payment_record_fk(apps, schema_editor):
     PaymentVerification = apps.get_model("payment", "PaymentVerification")
+    ContentType = apps.get_model('contenttypes', 'ContentType')
     pv_to_upd = []
 
-    content_type_for_payment_record, _ = (
-        # need here 'get_or_create' for initdemo if db is empty
-        ContentType.objects.get_or_create(app_label="payment", model="paymentrecord")
-    )
+    content_type_for_payment_record = ContentType.objects.get_or_create(app_label="payment", model="paymentrecord")
 
     for pv in PaymentVerification.objects.all():
         if pv.payment_record:

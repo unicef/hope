@@ -7,8 +7,7 @@ def update_xlsx_payment_verification_plan_file(apps, schema_editor):
     XlsxPaymentVerificationPlanFile = apps.get_model("payment", "XlsxPaymentVerificationPlanFile")
     FileTemp = apps.get_model("core", "FileTemp")
     ContentType = apps.get_model('contenttypes', 'ContentType')
-    # added here 'get_or_create' for initdemo if db is empty sometimes got DoesNotExist
-    ct = ContentType.objects.get_or_create(app_label="payment", model="paymentverificationplan")[0]
+    ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
     objs_create_list = []
 
     for xlsx in XlsxPaymentVerificationPlanFile.objects.all():
