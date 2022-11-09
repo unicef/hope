@@ -35,7 +35,7 @@ export function IndividualVulnerabilities({
     '*',
   );
 
-  const fields = Object.entries(individual.flexFields || {}).map(
+  const fields = Object.entries(individual?.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
