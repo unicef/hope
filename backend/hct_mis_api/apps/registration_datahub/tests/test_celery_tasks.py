@@ -117,13 +117,13 @@ def run_automate_rdi_creation_task(*args, **kwargs) -> Any:
 
 
 class TestAutomatingRDICreationTask(TestCase):
-    databases = [
+    databases = {
         "default",
         "cash_assist_datahub_ca",
         "cash_assist_datahub_erp",
         "cash_assist_datahub_mis",
         "registration_datahub",
-    ]
+    }
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_successful_run_without_records_to_import(self):

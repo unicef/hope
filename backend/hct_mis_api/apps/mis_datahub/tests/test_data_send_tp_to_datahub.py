@@ -41,7 +41,7 @@ class TestDataSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs):
+    def _create_target_population(**kwargs) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,

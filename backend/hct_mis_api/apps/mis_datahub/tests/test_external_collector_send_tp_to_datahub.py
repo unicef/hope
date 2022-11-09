@@ -33,7 +33,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs):
+    def _create_target_population(**kwargs) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,
@@ -103,7 +103,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.target_population_without_individuals.save()
 
     @classmethod
-    def create_first_household(cls, admin_area, rdi):
+    def create_first_household(cls, admin_area, rdi) -> None:
         cls.household = HouseholdFactory.build(
             size=4,
             registration_data_import=rdi,
@@ -140,7 +140,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.household.save()
 
     @classmethod
-    def create_second_household(cls, admin_area, rdi_second):
+    def create_second_household(cls, admin_area, rdi_second) -> None:
         cls.household_second = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
@@ -180,7 +180,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.household_second.save()
 
     @classmethod
-    def create_third_household(cls, admin_area, rdi_second):
+    def create_third_household(cls, admin_area, rdi_second) -> None:
         """this is generated only to have additional informaation in DB"""
         household_third = HouseholdFactory.build(
             size=1,

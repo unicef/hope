@@ -1,3 +1,4 @@
+from typing import Dict, List
 import uuid
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
@@ -33,7 +34,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestRapidProVerificationTask(TestCase):
     START_UUID = "3d946aa7-af58-4838-8dfd-553786d9bb35"
-    ORIGINAL_RAPIDPRO_RUNS_RESPONSE = [
+    ORIGINAL_RAPIDPRO_RUNS_RESPONSE: List[Dict] = [
         {
             "id": 1202235952,
             "uuid": "5b6f30ee-010b-4bd5-a510-e78f062af448",
