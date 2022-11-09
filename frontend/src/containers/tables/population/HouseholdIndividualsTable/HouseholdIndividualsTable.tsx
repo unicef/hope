@@ -89,7 +89,7 @@ export function HouseholdIndividualsTable({
     choicesData?.relationshipChoices,
   );
   const roleChoicesDict = choicesToDict(choicesData?.roleChoices);
-  const allIndividuals = household.individuals.edges.map((edge) => edge.node);
+  const allIndividuals = household?.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
       allIndividuals.sort((a, b) => {

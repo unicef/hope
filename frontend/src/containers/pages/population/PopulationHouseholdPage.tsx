@@ -1,17 +1,21 @@
 import get from 'lodash/get';
-import React, {useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {LoadingComponent} from '../../../components/core/LoadingComponent';
-import {PageHeader} from '../../../components/core/PageHeader';
-import {PermissionDenied} from '../../../components/core/PermissionDenied';
-import {HouseholdFilters} from '../../../components/population/HouseholdFilter';
-import {hasPermissions, PERMISSIONS} from '../../../config/permissions';
-import {useBusinessArea} from '../../../hooks/useBusinessArea';
-import {useDebounce} from '../../../hooks/useDebounce';
-import {usePermissions} from '../../../hooks/usePermissions';
-import {ProgramNode, useAllProgramsForChoicesQuery, useHouseholdChoiceDataQuery,} from '../../../__generated__/graphql';
-import {HouseholdTable} from '../../tables/population/HouseholdTable';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { HouseholdFilters } from '../../../components/population/HouseholdFilter';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { usePermissions } from '../../../hooks/usePermissions';
+import {
+  ProgramNode,
+  useAllProgramsForChoicesQuery,
+  useHouseholdChoiceDataQuery,
+} from '../../../__generated__/graphql';
+import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 const Container = styled.div`
   display: flex;
@@ -19,7 +23,7 @@ const Container = styled.div`
   width: 100%;
 `;
 
-export function PopulationHouseholdPage(): React.ReactElement {
+export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
     householdSize: { min: undefined, max: undefined },
@@ -73,4 +77,4 @@ export function PopulationHouseholdPage(): React.ReactElement {
       </Container>
     </div>
   );
-}
+};
