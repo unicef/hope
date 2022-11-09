@@ -481,7 +481,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             )
 
     def test_date_validator(self):
-        test_data: Tuple[Dict[Any, Any]] = (
+        test_data: Tuple = (
             {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
@@ -509,7 +509,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     def test_get_field_type_error(self):
         attachments = self.VALID_JSON[0]["_attachments"]
 
-        test_data: Tuple[Dict] = (
+        test_data: Tuple[Dict, ...] = (
             # INTEGER
             {"args": ("size_h_c", 4, attachments), "expected": None},
             {

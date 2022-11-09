@@ -1,3 +1,4 @@
+from typing import Dict, List
 from django.forms.models import inlineformset_factory
 from django.test import TestCase
 
@@ -69,4 +70,6 @@ class UserRolesTest(TestCase):
         formset = UserRoleFormSet(instance=self.user, data=data)
         self.assertFalse(formset.is_valid())
         self.assertEqual(len(formset.errors), 2)
-        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", formset.errors[0]["role"])
+
+        errors: List[Dict] = formset.errors
+        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", errors[0]["role"])

@@ -62,7 +62,7 @@ class PushToRDITests(HOPEApiTestCase):
     def test_push(self):
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
-        data = [
+        input_data = [
             {
                 "residence_status": "",
                 "village": "village1",
@@ -96,7 +96,7 @@ class PushToRDITests(HOPEApiTestCase):
                 "size": 1,
             }
         ]
-        response = self.client.post(self.url, data, format="json")
+        response = self.client.post(self.url, input_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
         data: Dict = response.json()
