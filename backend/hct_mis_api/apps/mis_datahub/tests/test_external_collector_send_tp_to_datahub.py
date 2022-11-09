@@ -23,7 +23,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
     databases = "__all__"
 
     @staticmethod
-    def _pre_test_commands():
+    def _pre_test_commands() -> None:
         create_afghanistan()
         call_command("loadcountries")
         call_command("generatedocumenttypes")
