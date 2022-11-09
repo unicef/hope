@@ -10,20 +10,20 @@ from django.db.models import Q
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.core.models import XLSXKoboTemplate, StorageFile
+from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )
 from hct_mis_api.apps.household.models import (
-    Individual,
-    Household,
-    Document,
-    BankAccountInfo,
-    DocumentType,
-    IDENTIFICATION_TYPE_TAX_ID,
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-    MALE,
     COLLECT_TYPE_NONE,
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    IDENTIFICATION_TYPE_TAX_ID,
+    MALE,
+    BankAccountInfo,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -139,7 +139,7 @@ def create_target_population_task(storage_id, rdi_name):
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
                     size = row["FAM_NUM"]
-                    if current_batch_index%batch_size == 0:
+                    if current_batch_index % batch_size == 0:
                         registration_data_import = RegistrationDataImport.objects.create(
                             name=f"{rdi_name} part {int(current_batch_index//batch_size)+1}",
                             number_of_individuals=0,
