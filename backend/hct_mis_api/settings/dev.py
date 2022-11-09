@@ -15,9 +15,4 @@ ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2"])
 # change logging level to debug
 LOGGING["loggers"]["django.request"]["level"] = "DEBUG"
 
-# ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
-}
-
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
