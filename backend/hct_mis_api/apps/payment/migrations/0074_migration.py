@@ -48,6 +48,7 @@ def update_payment_record_fk(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('contenttypes', '0002_remove_content_type_name'),
         ('payment', '0072_migration_squashed_0073_migration'),
     ]
 
