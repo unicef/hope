@@ -12,7 +12,6 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, Individual
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentChannelFactory,

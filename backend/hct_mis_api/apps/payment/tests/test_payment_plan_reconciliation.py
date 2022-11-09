@@ -25,7 +25,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_steficon,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentChannelFactory,
     PaymentFactory,
