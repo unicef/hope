@@ -1,8 +1,8 @@
-from typing import Dict, List
+from typing import List
 
 from django.forms.models import inlineformset_factory
-from django.test import TestCase
 from django.forms.utils import ErrorList
+from django.test import TestCase
 
 from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineFormSet
 from hct_mis_api.apps.account.fixtures import UserFactory
