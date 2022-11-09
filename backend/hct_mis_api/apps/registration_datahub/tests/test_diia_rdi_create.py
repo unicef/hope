@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from django.core.exceptions import ValidationError
 from django.forms import model_to_dict
 
@@ -68,22 +69,22 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
             individual,
             ("sex", "age", "marital_status", "relationship", "middle_name"),
         )
-        expected = {
+        expected_ind: Dict[str, str] = {
             "relationship": "HEAD",
             "sex": "MALE",
             "middle_name": "Mid",
             "marital_status": "MARRIED",
         }
-        self.assertEqual(individuals_obj_data, expected)
+        self.assertEqual(individuals_obj_data, expected_ind)
 
         household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id", "address"))
-        expected = {
+        expected_hh: Dict[str, Any] = {
             "country": Country(code="UA"),
             "size": 3,
             "diia_rec_id": "222222",
             "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
         }
-        self.assertEqual(household_obj_data, expected)
+        self.assertEqual(household_obj_data, expected_hh)
 
     def test_execute_staging_data_tax_id_error(self):
         self.assertEqual(0, ImportedHousehold.objects.all().count())

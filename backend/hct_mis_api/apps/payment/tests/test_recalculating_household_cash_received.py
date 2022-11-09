@@ -148,14 +148,14 @@ class TestRecalculatingCash(APITestCase):
         self.assertTrue("data" in response)  # ensures successful response
         return response
 
-    def create_program(self):
+    def create_program(self) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables=self.create_program_mutation_variables,
         )
 
-    def activate_program(self, program_id):
+    def activate_program(self, program_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},

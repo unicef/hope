@@ -119,7 +119,7 @@ class PushToRDITests(HOPEApiTestCase):
 
 
 class CompleteRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod

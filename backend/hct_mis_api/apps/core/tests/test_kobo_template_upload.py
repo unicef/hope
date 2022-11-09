@@ -55,7 +55,7 @@ class TestKoboTemplateUpload(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.maxDiff = None
-        cls.client = Client()
+        cls.client = Client()  # type: ignore # TODO: expression has type "django.test.client.Client", variable has type "graphene.test.Client"
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
@@ -120,7 +120,7 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self):
         request = self.prepare_request("kobo-template-valid.xlsx")
-        request.session = "session"
+        request.session = "session"  # type: ignore # TODO: expression has type "str", variable has type "SessionBase"
         messages = FallbackStorage(request)
         request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)

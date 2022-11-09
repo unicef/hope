@@ -24,19 +24,19 @@ from hct_mis_api.apps.household.services.individual_xlsx_update import (
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
-def valid_file():
+def valid_file() -> File:
     content = Path(f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file.xlsx").read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file.xlsx")
 
 
-def valid_file_complex():
+def valid_file_complex() -> File:
     content = Path(
         f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file_complex.xlsx"
     ).read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file_complex.xlsx")
 
 
-def invalid_file():
+def invalid_file() -> File:
     content = Path(
         f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/invalid_updated_test_file.xlsx"
     ).read_bytes()

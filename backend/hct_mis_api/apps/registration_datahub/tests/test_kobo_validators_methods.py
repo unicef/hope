@@ -11,7 +11,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
     VALID_JSON = [
         {
@@ -509,7 +509,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     def test_get_field_type_error(self):
         attachments = self.VALID_JSON[0]["_attachments"]
 
-        test_data = (
+        test_data: Tuple[Dict] = (
             # INTEGER
             {"args": ("size_h_c", 4, attachments), "expected": None},
             {

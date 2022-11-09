@@ -321,7 +321,7 @@ def create_household_and_individuals(
     return household, individuals
 
 
-def create_individual_document(individual, document_type=None):
+def create_individual_document(individual, document_type=None) -> Document:
     additional_fields = {}
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)

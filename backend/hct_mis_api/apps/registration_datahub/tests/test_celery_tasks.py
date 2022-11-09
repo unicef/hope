@@ -24,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 )
 
 
-def create_record(registration, status):
+def create_record(registration, status) -> Record:
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
     fields = {
@@ -87,7 +87,7 @@ def create_record(registration, status):
     )
 
 
-def create_imported_document_types():
+def create_imported_document_types() -> None:
     for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
         ImportedDocumentType.objects.create(type=document_type_string)
 

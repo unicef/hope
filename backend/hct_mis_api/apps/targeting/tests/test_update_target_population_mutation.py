@@ -1,4 +1,5 @@
 import copy
+from typing import Dict
 
 from parameterized import parameterized
 
@@ -39,7 +40,7 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
     }
 }
 """
-VARIABLES = {
+VARIABLES: Dict = {
     "updateTargetPopulationInput": {
         "targetingCriteria": {
             "rules": [
@@ -203,7 +204,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     def test_update_mutation_correct_variables(self, name, permissions, population_index, should_be_updated):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        variables = copy.deepcopy(VARIABLES)
+        variables: Dict = copy.deepcopy(VARIABLES)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.target_populations[population_index].id, "TargetPopulationNode"
         )

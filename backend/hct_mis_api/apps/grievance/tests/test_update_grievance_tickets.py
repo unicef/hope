@@ -319,6 +319,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.add_individual_grievance_ticket.refresh_from_db()
         result = self.add_individual_grievance_ticket.add_individual_ticket_details.individual_data
+        # TODO: test shouldn't use conditional logic
         if name == "with_permission":
             expected_result = {
                 "sex": "MALE",
@@ -446,8 +447,9 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.individual_data_change_grievance_ticket.refresh_from_db()
         result = self.individual_data_change_grievance_ticket.individual_data_update_ticket_details.individual_data
+        # TODO: test shouldn't use conditional logic
         if name == "with_permission":
-            expected_result = {
+            expected_result: Dict = {
                 "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
                 "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
                 "documents": [
@@ -505,7 +507,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             }
 
         else:
-            expected_result = {
+            expected_result: Dict = {  # type: ignore # defined above; once it's refactored, it shouldn't be an issue
                 "sex": {"value": "MALE", "approve_status": False},
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [
@@ -575,6 +577,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         self.household_data_change_grievance_ticket.refresh_from_db()
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
 
+        # TODO: test shouldn't use conditional logic
         if name == "with_permission":
             expected_result = {
                 "size": {"value": 3, "approve_status": False, "previous_value": 2},
@@ -631,6 +634,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.positive_feedback_grievance_ticket.refresh_from_db()
 
+        # TODO: test shouldn't use conditional logic
         if name == "with_permission":
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
             self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)

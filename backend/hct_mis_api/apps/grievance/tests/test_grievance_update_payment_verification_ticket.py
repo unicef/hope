@@ -176,7 +176,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         )
 
     def _prepare_input(self, extras=None) -> Dict:
-        input_data = {
+        input_data: Dict = {
             "input": {
                 "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
             }

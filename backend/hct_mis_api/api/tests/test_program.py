@@ -1,3 +1,4 @@
+from typing import Optional
 from rest_framework.reverse import reverse
 
 from ...apps.program.models import Program
@@ -6,11 +7,11 @@ from .base import HOPEApiTestCase
 
 
 class CreateProgramTests(HOPEApiTestCase):
-    databases = ["default"]
+    databases = {"default"}
     user_permissions = [Grant.API_PROGRAM_CREATE]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.url = reverse("api:program-create", args=[cls.business_area.slug])
 
@@ -27,7 +28,8 @@ class CreateProgramTests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         data = response.json()
-        program: Program = Program.objects.filter(name="Program #1").first()
+        if not (program := Program.objects.filter(name="Program #1").first()):
+            self.fail("Program was not present")
         self.assertTrue(program)
         self.assertDictEqual(
             data,

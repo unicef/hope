@@ -1,3 +1,4 @@
+from typing import Any, Dict, List, Optional, Union
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -374,7 +375,7 @@ class TestFlexibleHelperMethods(TestCase):
         self.assertEqual(result, expected)
 
     def test_get_field_choice_name(self):
-        cases_to_test = [
+        cases_to_test: List[Dict[str, Union[List, Optional[str]]]] = [
             {
                 "row": [
                     Cell(
