@@ -1,4 +1,3 @@
-from django.urls import reverse_lazy
 from django.views import generic
 
 from hct_mis_api.apps.changelog.forms import ChangelogForm

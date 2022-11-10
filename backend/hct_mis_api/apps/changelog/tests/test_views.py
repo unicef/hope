@@ -1,7 +1,6 @@
-from datetime import datetime
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from faker import Faker
@@ -26,8 +25,8 @@ def create_changelog_Changelog(**kwargs):
 
 class APITestCase(TestCase):
     def setUp(self):
-        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
-        cls.user: User = UserFactory()
+        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+        self.user: User = UserFactory()
         self.client.force_login(self.superuser)
 
     def tests_Changelog_list_view(self):
@@ -35,11 +34,11 @@ class APITestCase(TestCase):
         instance2 = create_changelog_Changelog()
         url = reverse("changelog_Changelog_list")
         resp = self.client.get(url)
-        assert resp.status_code == 302, "You need to be logged in"
+        assert resp.status_code == 200, "You need to be logged in"
         self.client.force_login(self.user)
         resp = self.client.get(url)
         assert resp.status_code == 200, "You need to be logged in and superuser"
-        assert str(f"{instance1.date}") in resp.content.decode("utf-8")
+        assert str(instance1.date) in resp.content.decode("utf-8")
         assert str(instance2.date) in resp.content.decode("utf-8")
 
     def tests_Changelog_detail_view(self):
