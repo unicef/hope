@@ -248,7 +248,7 @@ class GenerateReportContentHelpers:
     def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
             payment_verification.payment_verification_plan.id,
-            payment_verification.get_payment.unicef_id,
+            payment_verification.payment_obj.unicef_id,
             payment_verification.payment_verification_plan.get_payment_plan.get_unicef_id,
             self._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
