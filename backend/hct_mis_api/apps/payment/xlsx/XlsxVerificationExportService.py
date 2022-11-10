@@ -76,12 +76,12 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
     def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification):
-        household = payment_record_verification.get_payment.household
-        head_of_household = payment_record_verification.get_payment.head_of_household
+        household = payment_record_verification.payment_obj.household
+        head_of_household = payment_record_verification.payment_obj.head_of_household
 
         payment_record_verification_row = (
             str(payment_record_verification.payment_object_id),
-            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.get_payment else "",
+            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
             str(household.admin1.name) if household.admin1 else "",
