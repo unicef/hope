@@ -16,7 +16,7 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 import { useLazyInterval } from '../../../hooks/useInterval';
 
-export function TargetPopulationDetailsPage(): React.ReactElement {
+export const TargetPopulationDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { data, loading, error, refetch } = useTargetPopulationQuery({
@@ -48,6 +48,10 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   const { targetPopulation } = data;
   const { status } = targetPopulation;
 
+  const canDuplicate =
+    hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
+    Boolean(targetPopulation.targetingCriteria);
+
   return (
     <>
       {isEdit ? (
@@ -65,10 +69,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
               PERMISSIONS.TARGETING_REMOVE,
               permissions,
             )}
-            canDuplicate={hasPermissions(
-              PERMISSIONS.TARGETING_DUPLICATE,
-              permissions,
-            )}
+            canDuplicate={canDuplicate}
             canLock={hasPermissions(PERMISSIONS.TARGETING_LOCK, permissions)}
             canUnlock={hasPermissions(
               PERMISSIONS.TARGETING_UNLOCK,
@@ -88,4 +89,4 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
       )}
     </>
   );
-}
+};

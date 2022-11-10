@@ -1,10 +1,8 @@
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program
 
 
 class StorageFileForm(forms.Form):
@@ -12,16 +10,12 @@ class StorageFileForm(forms.Form):
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
 
-        self.fields["business_area"] = forms.ModelChoiceField(
-            queryset=self.get_business_area_queryset()
-        )
+        self.fields["business_area"] = forms.ModelChoiceField(queryset=self.get_business_area_queryset())
 
         self.fields["file"] = forms.FileField(label="Select a file")
 
     def get_business_area_queryset(self):
-        return BusinessArea.objects.filter(
-            id__in=self.user.user_roles.all().values_list("business_area_id", flat=True)
-        )
+        return BusinessArea.objects.filter(id__in=self.user.user_roles.all().values_list("business_area_id", flat=True))
 
     def clean(self, *args, **kwargs):
         cleaned_data = super().clean()
@@ -33,4 +27,3 @@ class StorageFileForm(forms.Form):
 
 class ProgramForm(forms.Form):
     name = forms.CharField(max_length=255, label="RDI name")
-
