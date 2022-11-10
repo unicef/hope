@@ -59,33 +59,48 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             DocumentFactory(individual=cls.individuals_2[0], type=cls.document_type, document_number="1")
         )
 
-        ##
-
         cls.household_3, cls.individuals_3 = create_household(
             household_args={"size": 1, "business_area": cls.business_area}
         )
-        cls.household_3.storage_obj = None
+        cls.household_3.storage_obj = cls.storage_file
         cls.household_3.save()
         cls.individuals_3[0].documents.add(
-            DocumentFactory(individual=cls.individuals_3[0], type=cls.document_type, document_number="2")
+            DocumentFactory(individual=cls.individuals_3[0], type=cls.document_type, document_number="1")
         )
+
+        ##
 
         cls.household_4, cls.individuals_4 = create_household(
             household_args={"size": 1, "business_area": cls.business_area}
         )
-        cls.household_4.storage_obj = cls.storage_file
+        cls.household_4.storage_obj = None
         cls.household_4.save()
         cls.individuals_4[0].documents.add(
             DocumentFactory(individual=cls.individuals_4[0], type=cls.document_type, document_number="2")
         )
 
+        cls.household_5, cls.individuals_5 = create_household(
+            household_args={"size": 1, "business_area": cls.business_area}
+        )
+        cls.household_5.storage_obj = cls.storage_file
+        cls.household_5.save()
+        cls.individuals_5[0].documents.add(
+            DocumentFactory(individual=cls.individuals_5[0], type=cls.document_type, document_number="2")
+        )
+
     def test_detecting_paid_hhs_loaded_via_sf(self):
         hhs = find_paid_households(self.storage_file.pk)
-        # hh1 was loaded via SF and hh2 (e.g. from RDI) was already paid and had the same doc number for individual
+
+        # hh1 and hh3 were loaded via SF and hh2 (e.g. from RDI) was already paid and had the same doc number for individual
         # so we see hh2 as a "paid household"
         assert self.household_1.id not in hhs
         assert self.household_2.id in hhs
+        assert self.household_3.id not in hhs
+
+        # and we see hh1 and hh3 as a matching hh for hh2
+        assert self.household_1.id in hhs[self.household_2.id]
+        assert self.household_3.id in hhs[self.household_2.id]
 
         # hh3 has no payment record, so it won't be seen as paid even though hh4 has the same doc number
-        assert self.household_3.id not in hhs
         assert self.household_4.id not in hhs
+        assert self.household_5.id not in hhs
