@@ -257,7 +257,7 @@ class TestXlsxVerificationImport(APITestCase):
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
-            payment_verification.get_payment.delivered_quantity - 1
+            payment_verification.payment_obj.delivered_quantity - 1
         )
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
@@ -273,7 +273,7 @@ class TestXlsxVerificationImport(APITestCase):
         )
         self.assertEqual(
             payment_verification.received_amount,
-            payment_verification.get_payment.delivered_quantity - 1,
+            payment_verification.payment_obj.delivered_quantity - 1,
         )
 
     def test_import_valid_status_changed_received_yes_full(self):
@@ -285,7 +285,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[
             f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"
-        ] = payment_verification.get_payment.delivered_quantity
+        ] = payment_verification.payment_obj.delivered_quantity
         file = io.BytesIO(save_virtual_workbook(wb))
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
@@ -300,5 +300,5 @@ class TestXlsxVerificationImport(APITestCase):
         )
         self.assertEqual(
             payment_verification.received_amount,
-            payment_verification.get_payment.delivered_quantity,
+            payment_verification.payment_obj.delivered_quantity,
         )

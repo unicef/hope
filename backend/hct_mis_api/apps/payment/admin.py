@@ -150,7 +150,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         return getattr(payment_plan, "name", "~no name~")
 
     def household(self, obj):
-        payment = obj.get_payment
+        payment = obj.payment_obj
         return payment.household.unicef_id if payment else ""
 
     def get_queryset(self, request):

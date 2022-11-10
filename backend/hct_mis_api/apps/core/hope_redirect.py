@@ -120,7 +120,7 @@ class HopeRedirectPayment(HopeRedirect):
 
     def _get_business_area_slug_from_obj(self) -> str:
         if payment_verification := self._get_payment_verification():
-            return payment_verification.get_payment.business_area.slug
+            return payment_verification.payment_obj.business_area.slug
         return "/"
 
     def _get_payment_verification(self) -> PaymentVerification:
