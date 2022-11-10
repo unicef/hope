@@ -39,6 +39,7 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     GenericPayment,
@@ -814,11 +815,12 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
 
 def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order):
     needed_delivery_mechanisms = list(
-        PaymentChannel.objects.filter(
+        PaymentChannel.objects.select_related("delivery_mechanism")
+        .filter(
             individual__in=collectors_that_cant_be_paid,
         )
-        .exclude(delivery_mechanism__in=delivery_mechanisms_in_order)
-        .values_list("delivery_mechanism", flat=True)
+        .exclude(delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
+        .values_list("delivery_mechanism__delivery_mechanism", flat=True)
         .distinct()
     )
     if (
@@ -853,7 +855,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             id__in=payment_plan.not_excluded_payments.values_list("collector", flat=True)
         )
 
-        query = Q(payment_channels__delivery_mechanism__in=delivery_mechanisms_in_order)
+        query = Q(payment_channels__delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
         if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
             query |= Q(payment_channels__isnull=True)
 
@@ -879,13 +881,13 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
 
         cash_fallback_payment_collectors = collectors_that_can_be_paid.filter(payment_channels__isnull=True)
         payment_channels_to_create = []
+
+        cash_delivery_mechanism = DeliveryMechanism.objects.get(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH)
         for collector in cash_fallback_payment_collectors:
-            # TODO handle delivery data
-            payment_channels_to_create.append(
-                PaymentChannel(
-                    individual=collector, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH, is_fallback=True
-                )
+            payment_channel = PaymentChannel(
+                individual=collector, delivery_mechanism=cash_delivery_mechanism, is_fallback=True, delivery_data={}
             )
+            payment_channels_to_create.append(payment_channel)
         PaymentChannel.objects.bulk_create(payment_channels_to_create)
 
         return cls(payment_plan=payment_plan)

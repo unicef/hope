@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("payment", "0072_migration_squashed_0073_migration"),
+        ("payment", "0073_migration_squashed_0074_migration"),
     ]
 
     operations = [

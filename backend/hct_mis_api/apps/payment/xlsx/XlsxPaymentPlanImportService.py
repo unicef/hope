@@ -5,6 +5,7 @@ import openpyxl
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     GenericPayment,
     Payment,
     PaymentChannel,
@@ -136,8 +137,11 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             return
         payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
         payment_channel_cell = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")]
+
+        delivery_type_list = list(map(lambda x: x[0].lower(), GenericPayment.DELIVERY_TYPE_CHOICE))
+
         for payment_channel in payment_channels_list:
-            if payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
+            if payment_channel.lower() not in delivery_type_list:
                 self.errors.append(
                     (
                         XlsxPaymentPlanExportService.TITLE,
@@ -146,18 +150,22 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                         f"but received {payment_channel}",
                     )
                 )
-            collectors_payment_channels = list(
+            delivery_mechanisms = list(
                 payment.collector.payment_channels.all()
-                .distinct("delivery_mechanism")
-                .values_list("delivery_mechanism", flat=True)
+                .distinct("delivery_mechanism__delivery_mechanism")
+                .values_list("delivery_mechanism__delivery_mechanism", flat=True)
             )
-            if payment.collector.payment_channels.exists() and payment_channel not in collectors_payment_channels:
+            delivery_mechanisms_lower_case = list(map(lambda x: x.lower(), delivery_mechanisms))
+            if (
+                payment.collector.payment_channels.exists()
+                and payment_channel.lower() not in delivery_mechanisms_lower_case
+            ):
                 self.errors.append(
                     (
                         XlsxPaymentPlanExportService.TITLE,
                         payment_channel_cell.coordinate,
                         f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
-                        f"channel(s): {', '.join(collectors_payment_channels)}",
+                        f"channel(s): {', '.join(delivery_mechanisms)}",
                     )
                 )
             if not payment.collector.payment_channels.exists() and payment_channel:
@@ -197,11 +205,14 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
 
             if not payment.collector.payment_channels.exists():
                 for payment_channel in payment_channels_list:
-                    if payment_channel is not None and payment_channel != "":
-                        # TODO handle delivery data
+                    # TODO handle delivery channels other than CASH
+                    # if payment_channel is not None and payment_channel != "":
+                    if payment_channel == GenericPayment.DELIVERY_TYPE_CASH:
+                        cash_delivery_mechanism = DeliveryMechanism.objects.get(
+                            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+                        )
                         PaymentChannel.objects.get_or_create(
-                            individual=payment.collector,
-                            delivery_mechanism=payment_channel,
+                            individual=payment.collector, delivery_mechanism=cash_delivery_mechanism, delivery_data={}
                         )
 
         if entitlement_amount is not None and entitlement_amount != "":
