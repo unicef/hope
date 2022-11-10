@@ -37,7 +37,7 @@ def find_paid_households(sf_pk, business_area_slug="ukraine"):
             individuals__documents__document_number__in=tax_ids_in_household_to_match,
         ).values_list("id", flat=True)
 
-    return {hh: match(hh) for hh in already_paid_households}
+    return {str(hh): list(map(str, match(hh))) for hh in already_paid_households}
 
 
 class Command(BaseCommand):
