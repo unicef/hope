@@ -30,6 +30,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
@@ -238,21 +239,23 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         cls.household_1, cls.individual_1 = cls.create_household_and_individual()
         cls.household_1.refresh_from_db()
-        cls.payment_channel_1_cash = PaymentChannelFactory(
-            individual=cls.individual_1,
+
+        cls.delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
         )
-
+        cls.payment_channel_1_cash = PaymentChannelFactory(
+            individual=cls.individual_1,
+            delivery_mechanism=cls.delivery_mechanism_cash,
+        )
         cls.household_2, cls.individual_2 = cls.create_household_and_individual()
         cls.payment_channel_2_cash = PaymentChannelFactory(
             individual=cls.individual_2,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=cls.delivery_mechanism_cash,
         )
-
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
         cls.payment_channel_3_cash = PaymentChannelFactory(
             individual=cls.individual_3,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=cls.delivery_mechanism_cash,
         )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -612,7 +615,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment = payment_plan.payment_items.first()
             self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
-            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "Cash")
+            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism.delivery_mechanism, "Cash")
 
             self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
             self.assertEqual(sheet.cell(row=2, column=2).value, self.household_1.unicef_id)
