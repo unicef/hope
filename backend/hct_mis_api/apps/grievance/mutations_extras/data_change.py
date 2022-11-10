@@ -723,6 +723,7 @@ def convert_to_empty_string_if_null(value):
 
 
 def close_update_individual_grievance_ticket(grievance_ticket, info):
+    print(f"close_update_individual_grievance_ticket {grievance_ticket}")
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
         return
@@ -816,6 +817,13 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     payment_channels_to_update = [
         handle_update_payment_channel(data["value"]) for data in payment_channels_to_edit if is_approved(data)
     ]
+
+    print(f"pc to create {payment_channels_to_create}")
+    for pctc in payment_channels_to_create:
+        for field in pctc._meta.get_fields():
+            print(f"field {field.name} {getattr(pctc, field.name)}")
+    print(f"pc to update {payment_channels_to_update}")
+    print(f"pc to remove {payment_channels_to_remove}")
 
     Document.objects.bulk_create(documents_to_create)
     Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo"])

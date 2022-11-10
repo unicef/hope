@@ -104,8 +104,8 @@ mutation ApproveIndividualDataChange(
             context={"user": self.user},
             variables={
                 "input": {
-                    "businessArea": "afghanistan",
-                    "description": "asd",
+                    "businessArea": self.business_area.slug,
+                    "description": "description",
                     "assignedTo": encode_id_base64(self.user.id, "User"),
                     "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
                     "consent": True,
@@ -174,3 +174,7 @@ mutation ApproveIndividualDataChange(
 
         self.individuals[0].refresh_from_db()
         assert self.individuals[0].payment_channels.count() == 1
+
+
+# test
+# TODO close_add_individual_grievance_ticket update payment channel
