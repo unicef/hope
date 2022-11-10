@@ -62,6 +62,7 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     canApprovePaymentVerification,
     canAssign,
   } = grievancePermissions(isCreator, isOwner, ticket, permissions);
+  console.log('TICKET', ticket);
 
   return (
     <>
