@@ -18,6 +18,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
@@ -340,3 +341,8 @@ class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
 
     def has_change_permission(self, request, obj=None) -> bool:
         return False
+
+
+@admin.register(DeliveryMechanism)
+class DeliveryMechanismAdmin(HOPEModelAdminBase):
+    pass

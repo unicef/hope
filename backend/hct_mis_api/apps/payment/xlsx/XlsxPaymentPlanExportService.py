@@ -43,8 +43,8 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         self._adjust_column_width_from_col(ws=self.ws_export_list, max_col=len(self.HEADERS))
         self._add_col_bgcolor(
             [
-                self.HEADERS.index("payment_channel") + 1,
                 self.HEADERS.index("entitlement_quantity") + 1,
+                self.HEADERS.index("delivered_quantity") + 1,
             ]
         )
         return self.wb

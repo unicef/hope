@@ -6,11 +6,11 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('payment', '0072_migration'), ('payment', '0073_migration')]
+    replaces = [('payment', '0073_migration'), ('payment', '0074_migration')]
 
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
-        ('payment', '0071_migration'),
+        ('payment', '0072_migration'),
     ]
 
     operations = [

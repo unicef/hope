@@ -383,7 +383,7 @@ def _calculate_volume(delivery_mechanism_per_payment_plan, field):
         return None
     payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-        assigned_payment_channel__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
+        assigned_payment_channel__delivery_mechanism__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
 

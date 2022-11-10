@@ -432,13 +432,14 @@ class PaymentPlanService:
 
                 payments_for_delivery_mechanism = (
                     self.payment_plan.not_excluded_payments.filter(
-                        collector__payment_channels__delivery_mechanism=delivery_mechanism
+                        collector__payment_channels__delivery_mechanism__delivery_mechanism=delivery_mechanism
                     )
                     .exclude(id__in=[processed_payment.id for processed_payment in processed_payments])
                     .annotate(
                         payment_channel=Subquery(
                             PaymentChannel.objects.filter(
-                                individual=OuterRef("collector"), delivery_mechanism=delivery_mechanism
+                                individual=OuterRef("collector"),
+                                delivery_mechanism__delivery_mechanism=delivery_mechanism,
                             ).values("id")[:1]
                         )
                     )
