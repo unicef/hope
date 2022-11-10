@@ -12,28 +12,32 @@ User = get_user_model()
 faker = Faker()
 
 
-def create_changelog_Changelog(**kwargs):
-    defaults = {}
-    defaults["description"] = faker.paragraph(nb_sentences=5)
-    defaults["version"] = faker.bothify(text="#.##.###")
-    defaults["active"] = faker.boolean()
-    defaults["date"] = faker.date_this_month()
-    defaults.update(**kwargs)
+def create_changelog() -> Changelog:
+    defaults = {
+        "description": faker.paragraph(nb_sentences=5),
+        "version": faker.bothify(text="#.##.###"),
+        "active": faker.boolean(),
+        "date": faker.date_this_month(),
+    }
     return Changelog.objects.create(**defaults)
 
 
 class APITestCase(TestCase):
+    superuser: User
+    user: User
+
     def setUp(self):
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
-        self.user: User = UserFactory()
-        self.client.force_login(self.superuser)
+        self.superuser = UserFactory(is_superuser=True, is_staff=True)
+        self.user = UserFactory()
 
     def tests_Changelog_list_view(self):
-        instance1 = create_changelog_Changelog()
-        instance2 = create_changelog_Changelog()
+        instance1 = create_changelog()
+        instance2 = create_changelog()
         url = reverse("changelog_Changelog_list")
+        # Log out
+        self.client.logout()
         resp = self.client.get(url)
-        assert resp.status_code == 200, "You need to be logged in"
+        assert resp.status_code == 302, "You need to be logged in"
         self.client.force_login(self.user)
         resp = self.client.get(url)
         assert resp.status_code == 200, "You need to be logged in and superuser"
@@ -41,7 +45,7 @@ class APITestCase(TestCase):
         assert str(instance2.date) in resp.content.decode("utf-8")
 
     def tests_Changelog_detail_view(self):
-        instance = create_changelog_Changelog()
+        instance = create_changelog()
         url = reverse(
             "changelog_Changelog_detail",
             args=[
