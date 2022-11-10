@@ -31,7 +31,7 @@ class TestDataSendTpToDatahub(TestCase):
     databases = "__all__"
 
     @staticmethod
-    def _pre_test_commands():
+    def _pre_test_commands() -> None:
         create_afghanistan()
         call_command("generatedocumenttypes")
         call_command("loadcountries")
@@ -41,7 +41,7 @@ class TestDataSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs):
+    def _create_target_population(**kwargs) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,
@@ -103,7 +103,7 @@ class TestDataSendTpToDatahub(TestCase):
         HouseholdSelection.objects.update(vulnerability_score=1.23)
 
     @classmethod
-    def create_first_household(cls, admin_area, rdi):
+    def create_first_household(cls, admin_area, rdi) -> None:
         country = Country.objects.filter(iso_code2="PL").first()
         cls.household = HouseholdFactory.build(
             size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country

@@ -16,7 +16,7 @@ from .fixtures import (
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQuery(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
     def setUpTestData(cls):

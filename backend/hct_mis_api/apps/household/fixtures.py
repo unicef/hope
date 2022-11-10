@@ -161,8 +161,10 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.LazyAttribute(lambda _: f"+380 {faker.msisdn()[:9]}")
+    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n:03d}")
+    phone_no_valid = True
     phone_no_alternative = ""
+    phone_no_alternative_valid = True
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -321,7 +323,7 @@ def create_household_and_individuals(
     return household, individuals
 
 
-def create_individual_document(individual, document_type=None):
+def create_individual_document(individual, document_type=None) -> Document:
     additional_fields = {}
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)
