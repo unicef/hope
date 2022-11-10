@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 @app.task
 @log_start_and_end
 @sentry_tags
-def sync_sanction_list_task():
+def sync_sanction_list_task() -> None:
     try:
         from hct_mis_api.apps.sanction_list.tasks.load_xml import (
             LoadSanctionListXMLTask,
@@ -24,7 +24,7 @@ def sync_sanction_list_task():
 
 @app.task
 @sentry_tags
-def check_against_sanction_list_task(uploaded_file_id, original_file_name):
+def check_against_sanction_list_task(uploaded_file_id, original_file_name) -> None:
     try:
         from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
             CheckAgainstSanctionListTask,

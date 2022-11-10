@@ -1,6 +1,7 @@
 import time
 from collections import OrderedDict
 from importlib import import_module
+from typing import Any, List, Optional, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -125,6 +126,7 @@ class Command(BaseCommand):
             elif app_label not in executor.loader.migrated_apps:
                 raise CommandError("App '{}' does not have migrations.".format(app_label))
 
+        targets: List[Tuple[Any, Optional[str]]]
         if options["app_label"] and options["migration_name"]:
             migration_name = options["migration_name"]
             if migration_name == "zero":
@@ -311,7 +313,7 @@ class Command(BaseCommand):
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
                 self.stdout.write(self.style.SUCCESS(" DONE" + elapsed))
 
-    def sync_apps(self, connection, app_labels):
+    def sync_apps(self, connection, app_labels) -> None:
         """Run the old syncdb-style operation on a list of app_labels."""
         with connection.cursor() as cursor:
             tables = connection.introspection.table_names(cursor)
@@ -358,7 +360,7 @@ class Command(BaseCommand):
                 self.stdout.write("    Running deferred SQL...\n")
 
     @staticmethod
-    def describe_operation(operation, backwards):
+    def describe_operation(operation, backwards) -> Tuple[str, bool]:
         """Return a string that describes a migration operation for --plan."""
         prefix = ""
         is_error = False

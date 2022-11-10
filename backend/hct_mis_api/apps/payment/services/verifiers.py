@@ -31,10 +31,10 @@ class PaymentVerificationArgumentVerifier:
         },
     }
 
-    def __init__(self, input_data):
+    def __init__(self, input_data) -> None:
         self.input_data = input_data
 
-    def verify(self, field_name):
+    def verify(self, field_name) -> None:
         options = self.ARGUMENTS.get(field_name)
 
         for key, value in options.items():

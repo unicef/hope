@@ -200,7 +200,7 @@ class Command(BaseCommand):
                         if i == 1:
                             value = HEAD
                         else:
-                            i_field_dict = combined_fields.get(header)
+                            i_field_dict = combined_fields[header]
                             choices = [x["value"] for x in i_field_dict["choices"] if x["value"] != HEAD]
                             value = random.choice(choices)
                         single_individual_data.append(value)

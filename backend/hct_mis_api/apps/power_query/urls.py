@@ -1,10 +1,12 @@
 from django.urls import path
 
-from .views import fetch, report
+from .views import data, document, report, report_list
 
 app_name = "power_query"
 
 urlpatterns = [
+    path("reports/", report_list, name="report_list"),
     path("report/<int:pk>/", report, name="report"),
-    path("data/<int:pk>/", fetch, name="data"),
+    path("document/<int:report>/<int:pk>/", document, name="document"),
+    path("data/<int:pk>/", data, name="data"),
 ]

@@ -46,6 +46,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/is_only_collector": "NO",
                     "individual_questions/mas_treatment_i_f": "1",
                     "individual_questions/arm_picture_i_f": "signature-17_32_52.png",
+                    "individual_questions/identification/tax_id_no_i_c": "45638193",
+                    "individual_questions/identification/tax_id_issuer_i_c": "UKR",
+                    "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
+                    "individual_questions/identification/bank_name_i_c": "Privat",
                 }
             ],
             "wash_questions/score_bed": "5",
