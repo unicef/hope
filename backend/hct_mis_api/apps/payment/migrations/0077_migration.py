@@ -6,8 +6,10 @@ from django.db import migrations
 def update_xlsx_payment_verification_plan_file(apps, schema_editor):
     XlsxPaymentVerificationPlanFile = apps.get_model("payment", "XlsxPaymentVerificationPlanFile")
     FileTemp = apps.get_model("core", "FileTemp")
-    ContentType = apps.get_model('contenttypes', 'ContentType')
-    ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
+    PaymentVerificationPlan = apps.get_model("payment", "PaymentVerificationPlan")
+    ContentType = apps.get_model("contenttypes", "ContentType")
+
+    ct = ContentType.objects.get_for_model(PaymentVerificationPlan)
     objs_create_list = []
 
     for xlsx in XlsxPaymentVerificationPlanFile.objects.all():
@@ -24,18 +26,22 @@ def update_xlsx_payment_verification_plan_file(apps, schema_editor):
     FileTemp.objects.bulk_create(objs_create_list, 1000)
 
 
+def backward(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('payment', '0075_migration_squashed_0076_migration'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("payment", "0075_migration_squashed_0076_migration"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='deliverymechanismperpaymentplan',
+            name="deliverymechanismperpaymentplan",
             unique_together=set(),
         ),
-        migrations.RunPython(update_xlsx_payment_verification_plan_file, ),
+        migrations.RunPython(update_xlsx_payment_verification_plan_file, backward),
 
     ]
