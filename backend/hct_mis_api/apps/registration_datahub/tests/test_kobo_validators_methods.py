@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import Dict, Tuple
 
 from django.test import TestCase
 
@@ -10,7 +11,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
     VALID_JSON = [
         {
@@ -480,7 +481,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             )
 
     def test_date_validator(self):
-        test_data = (
+        test_data: Tuple = (
             {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
@@ -508,7 +509,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     def test_get_field_type_error(self):
         attachments = self.VALID_JSON[0]["_attachments"]
 
-        test_data = (
+        test_data: Tuple[Dict, ...] = (
             # INTEGER
             {"args": ("size_h_c", 4, attachments), "expected": None},
             {

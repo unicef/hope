@@ -2,6 +2,7 @@ import base64
 import json
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Generator
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -23,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 )
 
 
-def create_record(registration, status):
+def create_record(registration, status) -> Record:
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
     fields = {
@@ -86,12 +87,12 @@ def create_record(registration, status):
     )
 
 
-def create_imported_document_types():
+def create_imported_document_types() -> None:
     for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
         ImportedDocumentType.objects.create(type=document_type_string)
 
 
-def create_ukraine_business_area():
+def create_ukraine_business_area() -> None:
     BusinessArea.objects.create(
         slug="ukraine",
         code="1234",
@@ -103,9 +104,9 @@ def create_ukraine_business_area():
     )
 
 
-def run_automate_rdi_creation_task(*args, **kwargs):
+def run_automate_rdi_creation_task(*args, **kwargs) -> Any:
     @contextmanager
-    def do_nothing_cache(*_args, **_kwargs):
+    def do_nothing_cache(*_args, **_kwargs) -> Generator:
         yield Mock()
 
     with patch(
@@ -116,13 +117,13 @@ def run_automate_rdi_creation_task(*args, **kwargs):
 
 
 class TestAutomatingRDICreationTask(TestCase):
-    databases = [
+    databases = {
         "default",
         "cash_assist_datahub_ca",
         "cash_assist_datahub_erp",
         "cash_assist_datahub_mis",
         "registration_datahub",
-    ]
+    }
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_successful_run_without_records_to_import(self):

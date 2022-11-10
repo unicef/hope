@@ -1,4 +1,5 @@
 import operator
+from typing import Tuple
 from unittest import mock
 
 from django.conf import settings
@@ -111,7 +112,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             self.assertTrue(upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c"))
 
         # test incorrect values:
-        incorrect_values = (
+        incorrect_values: Tuple = (
             "123 123 123",  # no region code
             "13-13-1994",
             "213.22.2020",

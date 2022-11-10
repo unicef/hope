@@ -1,4 +1,5 @@
 import json
+from typing import Dict, List, Union
 from unittest import TestCase
 from unittest.mock import Mock
 
@@ -31,13 +32,12 @@ class ValidatorTest(TestCase):
     def setUpClass(cls) -> None:
         cls.validator = RDINestedSerializer
 
-    def _run(self, data):
+    def _run(self, data) -> Union[Dict, List]:
         serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))
         serializer.is_valid()
-        r = JsonResponse(serializer.errors)
-        return humanize_errors(json.loads(r.content))
+        return humanize_errors(json.loads(JsonResponse(serializer.errors).content))
 
-    def assertErrors(self, post_data, expected):
+    def assertErrors(self, post_data, expected) -> None:
         res = self._run(post_data)
         self.assertDictEqual(res, expected)
 
@@ -67,7 +67,6 @@ class ValidatorTest(TestCase):
                                 "country": ["This field is required."],
                                 "members": ["This field is required."],
                                 "residence_status": ["This field is required."],
-                                # "size": ["This field is required."],
                             }
                         ]
                     }

@@ -113,7 +113,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_size_1_approved.save()
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)

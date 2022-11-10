@@ -460,7 +460,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def geolocation_validator(self, value, header, *args, **kwargs):
+    def geolocation_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -473,7 +473,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def date_validator(self, value, header, *args, **kwargs):
+    def date_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
@@ -491,7 +491,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def phone_validator(self, value, header, *args, **kwargs):
+    def phone_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -507,7 +507,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def choice_validator(self, value, header, *args, **kwargs):
+    def choice_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             field = self.all_fields.get(header)
             if field is None:
