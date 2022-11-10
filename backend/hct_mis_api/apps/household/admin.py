@@ -251,6 +251,8 @@ class HouseholdAdmin(
         from hct_mis_api.apps.targeting.models import TargetPopulation
 
         context = self.get_common_context(request, title="Extend TargetPopulation")
+        tp: TargetPopulation
+        ba: BusinessArea
         if "apply" in request.POST:
             form = AddToTargetPopulationForm(request.POST, read_only=True)
             if form.is_valid():
@@ -335,7 +337,7 @@ class HouseholdAdmin(
     def has_create_target_population_permission(self, request):
         return request.user.has_perm("targeting.add_target_population")
 
-    def mass_withdraw(self, request, qs):
+    def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
@@ -416,7 +418,7 @@ class HouseholdAdmin(
             context["title"] = "Withdrawn"
             msg = "Household successfully withdrawn"
             tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
-
+        form: Union[Form, WithdrawForm]
         if request.method == "POST":
             form = WithdrawForm(request.POST)
             if form.is_valid():
