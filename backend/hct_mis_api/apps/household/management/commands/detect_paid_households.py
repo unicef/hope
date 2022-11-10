@@ -56,4 +56,5 @@ class Command(BaseCommand):
             raise ValueError("business_area_slug arg is required")
 
         households = find_paid_households(options["storage_file_pk"], options["business_area_slug"])
-        self.stdout.write(f"Found {len(households)} households already that were already paid: {', '.join(households)}")
+        for household, matches in households.items():
+            self.stdout.write(f"Household {household} has already been paid and matches {matches}")
