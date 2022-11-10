@@ -30,7 +30,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 
 
 # used for ease of assertions, so it imitates serializer's behaviour
-def _time(some_time):
+def _time(some_time) -> str:
     return str(some_time).replace(" ", "T").replace("+00:00", "Z")
 
 

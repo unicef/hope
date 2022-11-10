@@ -9,7 +9,7 @@ from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, Repor
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryCelery(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
     def setUpTestData(cls):

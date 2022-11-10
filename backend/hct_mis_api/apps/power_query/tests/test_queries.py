@@ -8,10 +8,10 @@ from .fixtures import FormatterFactory, QueryFactory, ReportFactory
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQuery(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user2 = UserFactory(is_superuser=False, is_staff=False, is_active=True)

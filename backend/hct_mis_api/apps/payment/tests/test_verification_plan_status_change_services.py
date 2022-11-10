@@ -1,4 +1,5 @@
 import uuid
+from typing import Dict
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
@@ -153,7 +154,7 @@ class TestPhoneNumberVerification(TestCase):
         self.assertIsNone(self.verification.error)
         self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
 
-        def create_flow_response():
+        def create_flow_response() -> Dict:
             return {
                 "uuid": str(uuid.uuid4()),
             }

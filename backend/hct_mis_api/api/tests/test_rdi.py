@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from typing import Dict
 
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -23,7 +24,7 @@ from .base import HOPEApiTestCase
 
 
 class CreateRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
@@ -34,8 +35,6 @@ class CreateRDITests(HOPEApiTestCase):
     def test_create_rdi(self):
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_data_policy": "FULL",
         }
         response = self.client.post(self.url, data, format="json")
@@ -50,7 +49,7 @@ class CreateRDITests(HOPEApiTestCase):
 
 
 class PushToRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
@@ -63,7 +62,7 @@ class PushToRDITests(HOPEApiTestCase):
     def test_push(self):
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
-        data = [
+        input_data = [
             {
                 "residence_status": "",
                 "village": "village1",
@@ -97,10 +96,10 @@ class PushToRDITests(HOPEApiTestCase):
                 "size": 1,
             }
         ]
-        response = self.client.post(self.url, data, format="json")
+        response = self.client.post(self.url, input_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
-        data = response.json()
+        data: Dict = response.json()
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
 
@@ -119,7 +118,7 @@ class PushToRDITests(HOPEApiTestCase):
 
 
 class CompleteRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod

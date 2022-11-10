@@ -116,10 +116,7 @@ class FlexibleAttributeImporter:
             return
 
         if header_name == "required":
-            if value == "true":
-                self.object_fields_to_create[header_name] = True
-            else:
-                self.object_fields_to_create[header_name] = False
+            self.object_fields_to_create[header_name] = value == "true"
             return
 
         if header_name in model_fields:
