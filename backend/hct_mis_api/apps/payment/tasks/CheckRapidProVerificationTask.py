@@ -68,7 +68,7 @@ class CheckRapidProVerificationTask:
         payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
         if not payment_record_verification:
             return None
-        delivered_amount = payment_record_verification.get_payment.delivered_quantity
+        delivered_amount = payment_record_verification.payment_obj.delivered_quantity
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_record_verification.received_amount = received_amount
         return payment_record_verification

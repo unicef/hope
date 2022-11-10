@@ -91,7 +91,7 @@ class VerificationPlanStatusChangeServices:
         api = RapidProAPI(business_area_slug)
 
         hoh_ids = [
-            pv.get_payment.household.head_of_household.pk
+            pv.payment_obj.household.head_of_household.pk
             for pv in self.payment_verification_plan.payment_record_verifications.filter(sent_to_rapid_pro=False)
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
@@ -107,7 +107,7 @@ class VerificationPlanStatusChangeServices:
 
         payment_verifications_to_upd = []
         for pv in self.payment_verification_plan.payment_record_verifications.all():
-            if pv.get_payment.head_of_household in processed_individuals:
+            if pv.payment_obj.head_of_household in processed_individuals:
                 pv.sent_to_rapid_pro = True
                 payment_verifications_to_upd.append(pv)
         PaymentVerification.objects.bulk_update(payment_verifications_to_upd, ("sent_to_rapid_pro",), 1000)

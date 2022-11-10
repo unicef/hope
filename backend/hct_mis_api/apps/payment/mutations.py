@@ -351,7 +351,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
             raise GraphQLError(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
-        delivered_amount = payment_verification.get_payment.delivered_quantity
+        delivered_amount = payment_verification.payment_obj.delivered_quantity
         if status == PaymentVerification.STATUS_PENDING and received_amount is not None:
             logger.error(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
@@ -455,7 +455,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if not payment_verification.is_manually_editable:
             logger.error("You can only edit payment verification in first 10 minutes")
             raise GraphQLError("You can only edit payment verification in first 10 minutes")
-        delivered_amount = payment_verification.get_payment.delivered_quantity
+        delivered_amount = payment_verification.payment_obj.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
             logger.error(f"You can't set received_amount {received_amount} and not set received to NO")
