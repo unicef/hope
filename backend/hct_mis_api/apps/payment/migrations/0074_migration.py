@@ -6,12 +6,13 @@ from django.db import migrations
 def update_payment_verification_fk(apps, schema_editor):
     PaymentVerificationPlan = apps.get_model("payment", "PaymentVerificationPlan")
     PaymentVerificationSummary = apps.get_model("payment", "PaymentVerificationSummary")
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    CashPlan = apps.get_model("payment", "CashPlan")
+    ContentType = apps.get_model("contenttypes", "ContentType")
 
     pv_plan_to_upd = []
     pv_summary_to_upd = []
 
-    content_type_for_cash_plan = ContentType.objects.get(app_label="payment", model="cashplan")
+    content_type_for_cash_plan = ContentType.objects.get_for_model(CashPlan)
 
     for pv_obj in PaymentVerificationPlan.objects.all():
         if pv_obj.cash_plan:
@@ -31,10 +32,11 @@ def update_payment_verification_fk(apps, schema_editor):
 
 def update_payment_record_fk(apps, schema_editor):
     PaymentVerification = apps.get_model("payment", "PaymentVerification")
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    PaymentRecord = apps.get_model("payment", "PaymentRecord")
+    ContentType = apps.get_model("contenttypes", "ContentType")
     pv_to_upd = []
 
-    content_type_for_payment_record = ContentType.objects.get_or_create(app_label="payment", model="paymentrecord")
+    content_type_for_payment_record = ContentType.objects.get_for_model(PaymentRecord)
 
     for pv in PaymentVerification.objects.all():
         if pv.payment_record:
@@ -45,14 +47,18 @@ def update_payment_record_fk(apps, schema_editor):
     PaymentVerification.objects.bulk_update(pv_to_upd, ("payment_content_type_id", "payment_object_id"), 1000)
 
 
+def backward(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('payment', '0072_migration_squashed_0073_migration'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("payment", "0072_migration_squashed_0073_migration"),
     ]
 
     operations = [
-        migrations.RunPython(update_payment_verification_fk,),
-        migrations.RunPython(update_payment_record_fk,)
+        migrations.RunPython(update_payment_verification_fk, backward),
+        migrations.RunPython(update_payment_record_fk, backward),
     ]
