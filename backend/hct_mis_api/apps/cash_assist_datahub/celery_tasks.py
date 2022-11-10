@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @app.task(queue="priority")
 @log_start_and_end
 @sentry_tags
-def pull_from_cashassist_datahub_task():
+def pull_from_cashassist_datahub_task() -> None:
     try:
         from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
             PullFromDatahubTask,
@@ -25,7 +25,7 @@ def pull_from_cashassist_datahub_task():
 
 @app.task(queue="priority")
 @sentry_tags
-def fix_exchange_rates_task():
+def fix_exchange_rates_task() -> None:
     try:
         fix_exchange_rates()
     except Exception as e:

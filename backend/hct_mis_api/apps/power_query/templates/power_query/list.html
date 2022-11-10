@@ -1,11 +1,13 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load admin_urls %}
-{% block action-content %}
+{% extends "power_query/base.html" %}{% load admin_urls %}
+
+{% block body %}
+    {{ report }}
     <table>
-    {% for entry in entries %}
-        <tr><td>{{ entry.name }}</td><td>{{ entry.description }}</td></tr>
-    {% endfor %}
+        {% for report in reports %}
+            <tr>
+                <td><a href="{{ report.get_absolute_url }}">{{ report.name }}</a></td>
+                <td></td>
+            </tr>
+        {% endfor %}
     </table>
-    {% if perms.power_query.add_query %}
-        <a href="{% url "admin:power_query_query_add" %}?ct={{ ct.pk }}">Add New</a>
-    {% endif %}
 {% endblock %}

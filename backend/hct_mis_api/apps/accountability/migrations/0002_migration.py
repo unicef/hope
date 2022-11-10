@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         ("core", "0054_migration"),
         ("program", "0034_migration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("grievance", "0055_migration"),
+        ("grievance", "0054_migration"),
         ("household", "0119_migration"),
         ("accountability", "0001_migration"),
     ]

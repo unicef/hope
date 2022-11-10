@@ -1,15 +1,16 @@
 import csv
 import logging
+from typing import List
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
+from django.db.models import QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
@@ -28,20 +29,20 @@ class ActiveRecordFilter(ListFilter):
     title = "Active"
     parameter_name = "active"
 
-    def __init__(self, request, params, model, model_admin):
+    def __init__(self, request, params, model, model_admin) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
             if p in params:
                 value = params.pop(p)
                 self.used_parameters[p] = prepare_lookup_value(p, value)
 
-    def has_output(self):
+    def has_output(self) -> bool:
         return True
 
-    def value(self):
+    def value(self) -> str:
         return self.used_parameters.get(self.parameter_name, "")
 
-    def expected_parameters(self):
+    def expected_parameters(self) -> List:
         return [self.parameter_name]
 
     def choices(self, changelist):
@@ -52,7 +53,7 @@ class ActiveRecordFilter(ListFilter):
                 "display": title,
             }
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset: QuerySet) -> QuerySet:
         if self.value() == "1":
             queryset = queryset.filter(valid_until__isnull=True)
         elif self.value() == "0":
@@ -66,7 +67,7 @@ class ValidityManagerMixin:
 
 
 @admin.register(Country)
-class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     raw_id_fields = ("parent",)
@@ -99,7 +100,7 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
 
 
 @admin.register(AreaType)
-class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "country", "area_level", "parent")
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
@@ -135,7 +136,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",

@@ -1,9 +1,11 @@
+from typing import Optional
+
 from django.conf import settings
 
 
 class DbRouter:
     @staticmethod
-    def select_db(model):
+    def select_db(model) -> Optional[str]:
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def db_for_read(self, model, **hints):

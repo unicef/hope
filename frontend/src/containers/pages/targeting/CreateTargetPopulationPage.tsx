@@ -21,6 +21,7 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
+  ProgramStatus,
   useAllProgramsForChoicesQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
@@ -30,7 +31,7 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export function CreateTargetPopulationPage(): React.ReactElement {
+export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
     name: '',
@@ -48,7 +49,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     data: allProgramsData,
     loading: loadingPrograms,
   } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
+    variables: { businessArea, status: [ProgramStatus.Active] },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -134,12 +135,12 @@ export function CreateTargetPopulationPage(): React.ReactElement {
               render={(arrayHelpers) => (
                 <TargetingCriteria
                   helpers={arrayHelpers}
-                  candidateListRules={values.criterias}
-                  isEdit
+                  rules={values.criterias}
                   selectedProgram={getFullNodeFromEdgesById(
                     allProgramsData?.allPrograms?.edges,
                     values.program,
                   )}
+                  isEdit
                 />
               )}
             />
@@ -159,4 +160,4 @@ export function CreateTargetPopulationPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};

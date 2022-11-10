@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -251,7 +251,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         business_area = arg("business_area")
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, business_area)
         verify_required_arguments(input, "category", cls.CATEGORY_OPTIONS)
@@ -272,7 +272,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             validate_grievance_documents_size(grievance_ticket.id, documents)
             create_grievance_documents(info, grievance_ticket, documents)
 
-        save_extra_methods = {
+        save_extra_methods: Dict[int, Callable] = {
             GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
             GrievanceTicket.CATEGORY_DATA_CHANGE: save_data_change_extras,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: save_grievance_complaint_extras,
@@ -281,7 +281,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: save_negative_feedback_extras,
             GrievanceTicket.CATEGORY_REFERRAL: save_referral_extras,
         }
-        save_extra_method = save_extra_methods.get(category)
+        save_extra_method: Optional[Callable] = save_extra_methods.get(category)
         grievances = [grievance_ticket]
         if save_extra_method:
             grievances = save_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
@@ -296,8 +296,8 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         return cls(grievance_tickets=grievances)
 
     @classmethod
-    def save_basic_data(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+    def save_basic_data(cls, root, info, input, **kwargs) -> Tuple[GrievanceTicket, Dict]:
+        arg: Callable = lambda name, default=None: input.get(name, default)
         user = info.context.user
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
@@ -414,7 +414,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         ticket_id = decode_id_string(arg("ticket_id"))
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=ticket_id)
@@ -526,10 +526,10 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
     @classmethod
-    def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs):
+    def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs) -> Tuple[GrievanceTicket, Dict]:
         old_status = grievance_ticket.status
         old_assigned_to = grievance_ticket.assigned_to
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
@@ -628,7 +628,7 @@ POSSIBLE_FEEDBACK_STATUS_FLOW = {
 class GrievanceStatusChangeMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
-    CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING = {
+    CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING: Dict[int, Union[Dict[int, Callable], Callable]] = {
         GrievanceTicket.CATEGORY_DATA_CHANGE: {
             GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: close_update_household_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: close_update_individual_grievance_ticket,
@@ -659,7 +659,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: close_system_flagging_ticket,
     }
 
-    MOVE_TO_STATUS_PERMISSION_MAPPING: dict[str, dict[Union[str, int], list[Enum]]] = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING: Dict[int, Dict[Union[str, int], List[Enum]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,
@@ -711,11 +711,13 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def get_close_function(cls, category, issue_type):
+    def get_close_function(cls, category, issue_type) -> Optional[Callable]:
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
         if isinstance(function_or_nested_issue_types, dict) and issue_type:
             return function_or_nested_issue_types.get(issue_type)
-        return function_or_nested_issue_types
+        return function_or_nested_issue_types  # type: ignore
+        # TODO: what if there's no issue type and function_or_nested_issue_types is a dict?
+        # it would return a dict instead of a callable
 
     @classmethod
     @is_authenticated
@@ -761,7 +763,13 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                 for individual in selected_individuals:
                     traverse_sibling_tickets(grievance_ticket, individual)
 
-            close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
+            close_function: Optional[Callable] = cls.get_close_function(
+                grievance_ticket.category, grievance_ticket.issue_type
+            )
+            if not close_function:
+                log_and_raise(
+                    f"No close function found for category {grievance_ticket.category} and issue type {grievance_ticket.issue_type}"
+                )
             close_function(grievance_ticket, info)
             grievance_ticket.refresh_from_db()
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
@@ -1092,12 +1100,12 @@ class ReassignRoleMutation(graphene.Mutation):
         version = BigInt(required=False)
 
     @classmethod
-    def verify_role_choices(cls, role):
+    def verify_role_choices(cls, role) -> None:
         if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
-    def verify_if_role_exists(cls, household, current_individual, role):
+    def verify_if_role_exists(cls, household, current_individual, role) -> None:
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
                 log_and_raise("This individual is not a head of provided household")
