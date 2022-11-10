@@ -12,11 +12,5 @@ class HTMLEditor(forms.Textarea):
         self.attrs["theme"] = theme
 
     class Media:
-        css = {
-            "all": (
-                static("admin/changelog/easymde/easymde.min.css"),
-            )
-        }
-        js = (
-            static("admin/changelog/easymde/easymde.min.js"),
-        )
+        css = {"all": (static("admin/changelog/easymde/easymde.min.css"),)}
+        js = (static("admin/changelog/easymde/easymde.min.js"),)
