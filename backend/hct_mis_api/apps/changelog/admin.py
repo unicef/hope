@@ -8,8 +8,6 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class ChangelogAdminForm(forms.ModelForm):
-    description = forms.CharField(widget=HTMLEditor)
-
     class Meta:
         model = Changelog
         fields = "__all__"
@@ -23,7 +21,7 @@ class ChangelogAdmin(HOPEModelAdminBase):
         "date",
     ]
     formfield_overrides = {
-        models.TextField: {"widget": HTMLEditor(theme="snow")},
+        models.TextField: {"widget": HTMLEditor},
     }
 
 
