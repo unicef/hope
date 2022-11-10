@@ -19,7 +19,7 @@ class TestSyncToMisDatahubTask(TestCase):
     funds_commitment_2 = None
 
     @classmethod
-    def _prepare_business_areas(cls):
+    def _prepare_business_areas(cls) -> None:
         call_command("loadbusinessareas")
         cls.bosnia_and_herzegovina = BusinessArea.objects.get(code="0530")
         cls.bosnia = BusinessArea(

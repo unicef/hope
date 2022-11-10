@@ -54,7 +54,6 @@ show_error_codes = true
 exclude = [
   "migrations",
   "venv",
-  "tests", # TODO
 ]
 
 strict = true

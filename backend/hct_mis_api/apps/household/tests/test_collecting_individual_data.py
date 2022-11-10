@@ -9,6 +9,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     HEAD,
     MALE,
+    Household,
 )
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
@@ -31,7 +32,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
-    def create_hh(self, collect_individual_data):
+    def create_hh(self, collect_individual_data) -> Household:
         household, _ = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.registration_data_import,
