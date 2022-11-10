@@ -46,9 +46,9 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -200,7 +200,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_valid = models.BooleanField(default=False)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_alternative_valid = models.BooleanField(default=False)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -287,17 +289,13 @@ class ImportedIndividual(TimeStampedUUIDModel):
         return self.registration_data_import.business_area
 
     @property
-    def phone_no_valid(self) -> bool:
-        return is_right_phone_number_format(str(self.phone_no))
-
-    @property
-    def phone_no_alternative_valid(self) -> bool:
-        return is_right_phone_number_format(str(self.phone_no_alternative))
-
-    @property
     def role(self) -> Optional[str]:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
+
+    def save(self, *args, **kwargs) -> None:
+        recalculate_phone_numbers_validity(self, ImportedIndividual)
+        super().save(*args, **kwargs)
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):

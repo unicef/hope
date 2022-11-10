@@ -60,7 +60,7 @@ class Rule(models.Model):
     def __str__(self):
         return self.name
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
@@ -120,7 +120,7 @@ class Rule(models.Model):
             self.history.exclude(pk=release.pk).update(deprecated=True)
         return release
 
-    def release(self):
+    def release(self) -> Optional["RuleCommit"]:
         if self.deprecated or not self.enabled:
             raise ValueError("Cannot release disabled/deprecated rules")
         commit = self.history.filter(version=self.version).first()

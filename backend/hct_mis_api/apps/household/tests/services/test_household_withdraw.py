@@ -10,7 +10,7 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 
 
 class TestHouseholdWithdraw(TestCase):
-    databases = ("registration_datahub", "default")
+    databases = {"registration_datahub", "default"}
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod

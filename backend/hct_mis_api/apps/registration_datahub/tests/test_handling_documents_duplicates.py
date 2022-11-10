@@ -169,7 +169,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     def get_documents_query(self, documents: List[Document]) -> QuerySet[Document]:
         return Document.objects.filter(id__in=[document.id for document in documents])
 
-    def refresh_all_documents(self):
+    def refresh_all_documents(self) -> None:
         for document in self.all_documents:
             document.refresh_from_db()
 

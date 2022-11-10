@@ -8,7 +8,7 @@ from hct_mis_api.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Individua
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
-def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
+def close_system_flagging_ticket(grievance_ticket, info, should_log=True) -> None:
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:

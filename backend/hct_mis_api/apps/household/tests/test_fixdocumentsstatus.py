@@ -13,7 +13,7 @@ from hct_mis_api.apps.household.models import Document, Household, Individual
 
 
 class TestDocumentStatusFixer(TestCase):
-    databases = ("registration_datahub", "default")
+    databases = {"registration_datahub", "default"}
 
     @classmethod
     def setUpTestData(cls):
