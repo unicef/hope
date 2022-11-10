@@ -1,5 +1,10 @@
+import json
+import os
+import shutil
+
 from django.core.management import BaseCommand
 from django.db.models import Q
+from django.conf import settings
 
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.household.models import Household
@@ -56,5 +61,13 @@ class Command(BaseCommand):
             raise ValueError("business_area_slug arg is required")
 
         households = find_paid_households(options["storage_file_pk"], options["business_area_slug"])
-        for household, matches in households.items():
-            self.stdout.write(f"Household {household} has already been paid and matches {matches}")
+
+        generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
+        if os.path.exists(generated_dir):
+            shutil.rmtree(generated_dir)
+        os.makedirs(generated_dir)
+        filepath = os.path.join(generated_dir, "households.json")
+
+        with open(filepath, "w") as file_ptr:
+            self.stdout.write(f"Writing households to {filepath}")
+            json.dump(households, file_ptr)
