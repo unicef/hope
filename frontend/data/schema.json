@@ -12666,6 +12666,18 @@
             "deprecationReason": null
           },
           {
+            "name": "unicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "withdrawn",
             "description": null,
             "args": [],
@@ -13378,22 +13390,6 @@
             "deprecationReason": null
           },
           {
-            "name": "unicefId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "businessArea",
             "description": null,
             "args": [],
@@ -13624,6 +13620,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Decimal",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "familyId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -14553,7 +14561,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "HouseholdSelection",
+                    "name": "HouseholdSelectionNode",
                     "ofType": null
                   }
                 }
@@ -14781,7 +14789,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "HouseholdSelection",
+              "name": "HouseholdSelectionNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -15004,6 +15012,18 @@
                 "name": "BigInt",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "unicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15396,22 +15416,6 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "unicefId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -18208,6 +18212,22 @@
           },
           {
             "name": "deduplicationIgnoreWithdraw",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "active",
             "description": null,
             "args": [],
             "type": {
@@ -23303,7 +23323,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "HouseholdSelection",
+                    "name": "HouseholdSelectionNode",
                     "ofType": null
                   }
                 }
@@ -25486,7 +25506,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "HouseholdSelection",
+        "name": "HouseholdSelectionNode",
         "description": null,
         "fields": [
           {
@@ -39598,6 +39618,22 @@
           },
           {
             "name": "deduplicationIgnoreWithdraw",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "active",
             "description": null,
             "args": [],
             "type": {

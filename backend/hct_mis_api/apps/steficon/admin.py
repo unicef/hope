@@ -2,11 +2,12 @@ import csv
 import json
 import logging
 from io import StringIO
+from typing import Dict, List, Optional
 
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
@@ -17,13 +18,12 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
 from admin_sync.mixin import SyncMixin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -33,6 +33,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from ..account.models import User
 from ..administration.widgets import JsonWidget
+from ..utils.admin import HOPEModelAdminBase
 from ..utils.security import is_root
 from .forms import (
     RuleDownloadCSVFileProcessForm,
@@ -48,7 +49,7 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id"):
+    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id") -> None:
         self.model = model
         self.pk_field = pk_field
         self.admin_site = admin_site
@@ -56,10 +57,10 @@ class AutocompleteWidget(forms.Widget):
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
 
-    def get_url(self):
+    def get_url(self) -> str:
         return reverse("admin:autocomplete")
 
-    def get_context(self, name, value, attrs):
+    def get_context(self, name, value, attrs) -> Dict:
         context = {}
         context["widget"] = {
             "query_string": "",
@@ -84,25 +85,27 @@ class AutocompleteWidget(forms.Widget):
     def media(self):
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file = (
-            (
+        i18n_file: List = (
+            [
                 "admin/js/vendor/select2/i18n/{}.js".format(
                     i18n_name,
                 )
-            )
+            ]
             if i18n_name
-            else ()
+            else []
         )
         return forms.Media(
-            js=(
-                "admin/js/vendor/jquery/jquery{}.js".format(extra),
-                "admin/js/vendor/select2/select2.full{}.js".format(extra),
-            )
-            + i18n_file
-            + (
-                "admin/js/jquery.init.js",
-                "admin/js/autocomplete.js",
-                "adminfilters/adminfilters{}.js".format(extra),
+            js=tuple(
+                [
+                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
+                ]
+                + i18n_file
+                + [
+                    "admin/js/jquery.init.js",
+                    "admin/js/autocomplete.js",
+                    "adminfilters/adminfilters{}.js".format(extra),
+                ]
             ),
             css={
                 "screen": (
@@ -114,7 +117,6 @@ class AutocompleteWidget(forms.Widget):
 
 
 class TestRuleMixin:
-    # @button(visible=lambda c: "/test/" not in c["request"].path)
     @button()
     def test(self, request, pk):
         rule: Rule = self.get_object(request, pk)
@@ -209,7 +211,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -263,6 +265,17 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         ),
     ]
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("history")
+            .select_related(
+                "created_by",
+                "updated_by",
+            )
+        )
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "flags":
             if is_root(request):
@@ -300,7 +313,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     def render_delete_form(self, request, context):
         return super().render_delete_form(request, context)
 
-    def _get_csv_config(self, form):
+    def _get_csv_config(self, form) -> Dict:
         return dict(
             quoting=int(form.cleaned_data["quoting"]),
             delimiter=form.cleaned_data["delimiter"],
@@ -318,7 +331,8 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Rule = self.get_object(request, pk)
+            rule: Optional[Rule] = self.get_object(request, pk)
+            form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
                 if form.is_valid():
@@ -492,9 +506,7 @@ class RuleCommitResource(ModelResource):
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(
-    ExtraButtonsMixin, AdminFiltersMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin
-):
+class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)

@@ -10,7 +10,7 @@ import { ContentLink } from '../core/ContentLink';
 import { LoadingComponent } from '../core/LoadingComponent';
 
 const StyledBox = styled(Paper)`
-  border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
+  border: 1px solid ${({ theme }) => theme.hctPalette.orange};
   border-radius: 3px;
   background-color: #fff;
   display: flex;
@@ -19,7 +19,7 @@ const StyledBox = styled(Paper)`
   padding: 26px 22px;
 `;
 const OrangeTitle = styled.div`
-  color: ${({ theme }) => theme.hctPalette.oragne};
+  color: ${({ theme }) => theme.hctPalette.orange};
 `;
 
 const WarnIcon = styled(WarningIcon)`

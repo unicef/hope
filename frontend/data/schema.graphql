@@ -221,6 +221,7 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
+  active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -1129,6 +1130,7 @@ type HouseholdNode implements Node {
   removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
+  unicefId: String
   withdrawn: Boolean!
   withdrawnDate: DateTime
   consentSign: String!
@@ -1176,7 +1178,6 @@ type HouseholdNode implements Node {
   lastRegistrationDate: DateTime!
   fchildHoh: Boolean
   childHoh: Boolean
-  unicefId: String!
   businessArea: UserBusinessAreaNode!
   start: DateTime
   deviceid: String!
@@ -1193,6 +1194,7 @@ type HouseholdNode implements Node {
   rowId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
+  familyId: String
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -1205,12 +1207,12 @@ type HouseholdNode implements Node {
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
-  selections: [HouseholdSelection!]!
+  selections: [HouseholdSelectionNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   adminAreaTitle: String
-  selection: HouseholdSelection
+  selection: HouseholdSelectionNode
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
@@ -1255,7 +1257,7 @@ enum HouseholdResidenceStatus {
   NON_HOST
 }
 
-type HouseholdSelection {
+type HouseholdSelectionNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1876,6 +1878,7 @@ type IndividualNode implements Node {
   removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
+  unicefId: String
   duplicate: Boolean!
   duplicateDate: DateTime
   withdrawn: Boolean!
@@ -1903,7 +1906,6 @@ type IndividualNode implements Node {
   userFields: JSONString!
   enrolledInNutritionProgramme: Boolean
   administrationOfRutf: Boolean
-  unicefId: String!
   deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
   deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
@@ -3244,7 +3246,7 @@ type TargetPopulationNode implements Node {
   adultMaleCount: Int
   adultFemaleCount: Int
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
-  selections: [HouseholdSelection!]!
+  selections: [HouseholdSelectionNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   totalFamilySize: Int
@@ -3852,6 +3854,7 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
+  active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!

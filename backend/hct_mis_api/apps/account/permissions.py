@@ -2,8 +2,10 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
+from typing import Iterable, Optional, Tuple, Type
 
 from django.core.exceptions import PermissionDenied
+from django.db.models import Model
 
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
@@ -22,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name, *args):
+    # TODO: signature differs from superclass
+    def _generate_next_value_(name, *args):  # type: ignore
         return name
 
     # RDI
@@ -185,7 +188,7 @@ class Permissions(Enum):
     # ...
 
     @classmethod
-    def choices(cls):
+    def choices(cls) -> Tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
@@ -202,23 +205,23 @@ ALL_GRIEVANCES_CREATE_MODIFY = (
 
 class BasePermission:
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return False
 
 
 class AllowAny(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return True
 
 
 class AllowAuthenticated(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return info.context.user.is_authenticated
 
 
-def hopePermissionClass(permission):
+def hopePermissionClass(permission) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info, **kwargs):
@@ -238,10 +241,10 @@ def hopePermissionClass(permission):
     return XDPerm
 
 
-def hopeOneOfPermissionClass(*permissions):
+def hopeOneOfPermissionClass(*permissions) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
-        def has_permission(cls, info, **kwargs):
+        def has_permission(cls, info, **kwargs) -> bool:
             if info.context.user.is_authenticated:
                 business_area_arg = kwargs.get("business_area")
                 if isinstance(business_area_arg, BusinessArea):
@@ -261,16 +264,16 @@ def hopeOneOfPermissionClass(*permissions):
 
 
 class BaseNodePermissionMixin:
-    permission_classes = (AllowAny,)
+    permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,)
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info, object_instance) -> None:
         business_area = object_instance.business_area
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
             log_and_raise("Permission Denied")
 
     @classmethod
-    def get_node(cls, info, object_id):
+    def get_node(cls, info, object_id) -> Optional[Model]:
         try:
             object_instance = cls._meta.model.objects.get(pk=object_id)  # type: ignore
             cls.check_node_permission(info, object_instance)
@@ -288,7 +291,7 @@ class BaseNodePermissionMixin:
         creator_permission,
         is_owner,
         owner_permission,
-    ):
+    ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
         if not info.context.user.is_authenticated or not (
@@ -310,7 +313,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         permission_classes=(AllowAny,),
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self._fields = fields
         self._provided_filterset_class = filterset_class
         self._filterset_class = None
@@ -378,18 +381,15 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
 class BaseMutationPermissionMixin:
     @classmethod
-    def is_authenticated(cls, info):
+    def is_authenticated(cls, info) -> bool:
         if not info.context.user.is_authenticated:
             cls.raise_permission_denied_error(True)
         return True
 
     @classmethod
-    def has_permission(cls, info, permission, business_area_arg, raise_error=True):
+    def has_permission(cls, info, permission: Iterable, business_area_arg, raise_error=True) -> bool:
         cls.is_authenticated(info)
-        if not isinstance(permission, list):
-            permissions = (permission,)
-        else:
-            permissions = permission
+        permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):
             business_area = business_area_arg
         else:
@@ -419,7 +419,7 @@ class BaseMutationPermissionMixin:
         is_owner,
         owner_permission,
         raise_error=True,
-    ):
+    ) -> bool:
         cls.is_authenticated(info)
         if not (
             cls.has_permission(info, general_permission, business_area_arg, False)
@@ -430,7 +430,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @staticmethod
-    def raise_permission_denied_error(not_authenticated=False, raise_error=True):
+    def raise_permission_denied_error(not_authenticated=False, raise_error=True) -> bool:
         if not raise_error:
             return False
         if not_authenticated:

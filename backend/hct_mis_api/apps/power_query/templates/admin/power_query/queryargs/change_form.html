@@ -1,0 +1,39 @@
+{% extends "admin_extra_buttons/change_form.html" %}{% load power_query %}
+{% block breadcrumbs %}
+    {{ block.super }}
+{% endblock %}
+{% block after_field_sets2 %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jmespath/0.16.0/jmespath.min.js"></script>
+    <textarea id="id_source" style="display:block;width: 100%; height: 300px">{{ parameters|safe }}</textarea>
+    <textarea id="id_result" style="width: 100%; height: 300px"></textarea>
+    <script>
+        (function ($) {
+            $(function () {
+                const expressionTxt = $("#id_code");
+                const sourceTxt = $("#id_source");
+                const resultTxt = $("#id_result");
+                var parse = function(){
+                    try {
+                        var data = JSON.parse(sourceTxt.val());
+                        var result = jmespath.search(data, expressionTxt.val());
+                        resultTxt.val(JSON.stringify(result, null, " "));
+                    } catch (e) {
+                        resultTxt.val(e);
+                    }
+                };
+                var formatJson = function() {
+                    var raw = sourceTxt.val();
+                    resultTxt.val(JSON.stringify(JSON.parse(raw), null, " "));
+                };
+
+                sourceTxt.on("paste", function (e) {
+                    setTimeout(formatJson, 0.5);
+                });
+                $("#id_code").on("keyup", parse);
+                expressionTxt.trigger("keyup")
+            });
+        })(django.jQuery);
+
+    </script>
+
+{% endblock %}

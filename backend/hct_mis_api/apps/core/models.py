@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -12,11 +13,16 @@ from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from natural_keys import NaturalKeyModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import (
+    SoftDeletionTreeManager,
+    SoftDeletionTreeModel,
+    TimeStampedUUIDModel,
+)
 from mptt.fields import TreeForeignKey
 
 
@@ -94,8 +100,9 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:
             self.parent.is_split = True
@@ -113,38 +120,38 @@ class BusinessArea(TimeStampedUUIDModel):
             ("can_export_doap", "Can export DOAP matrix"),
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
-    def cash_assist_code(self):
+    def cash_assist_code(self) -> str:
         return self.code_to_cash_assist_mapping.get(self.code, self.code)
 
     @cash_assist_code.setter
-    def cash_assist_code(self, value):
+    def cash_assist_code(self, value) -> None:
         self.code = self.cash_assist_to_code_mapping.get(value, value)
 
     @property
-    def can_import_ocha_response_plans(self):
+    def can_import_ocha_response_plans(self) -> bool:
         return any([c.details for c in self.countries.all()])
 
     @classmethod
-    def get_business_areas_as_choices(cls):
+    def get_business_areas_as_choices(cls) -> List[Dict[str, Any]]:
         return [
             {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
             for business_area in cls.objects.all()
         ]
 
-    def should_check_against_sanction_list(self):
+    def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
 
-    def get_sys_option(self, key, default=None):
+    def get_sys_option(self, key, default=None) -> Any:
         if "hope" in self.custom_fields:
             return self.custom_fields["hope"].get(key, default)
         return default
 
 
-class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
+class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
     STRING = "STRING"
@@ -165,7 +172,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         (SELECT_MANY, _("Select Many")),
         (STRING, _("String")),
     )
-    ASSOCIATED_WITH_CHOICES = (
+    ASSOCIATED_WITH_CHOICES: Any = (
         (0, _("Household")),
         (1, _("Individual")),
     )
@@ -184,11 +191,16 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 
     @property
-    def is_flex_field(self):
+    def is_flex_field(self) -> bool:
         return True
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"type: {self.type}, name: {self.name}"
+
+
+class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
+    def get_by_natural_key(self, name) -> "FlexibleAttributeGroup":
+        return self.get(name=name)
 
 
 class FlexibleAttributeGroup(SoftDeletionTreeModel):
@@ -205,12 +217,16 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
+    objects = FlexibleAttributeGroupManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"name: {self.name}"
 
+    def natural_key(self) -> Tuple[str]:
+        return (self.name,)
 
-class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
+
+class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ["list_name", "name"]
         ordering = ("name",)
@@ -220,7 +236,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     label = JSONField(default=dict)
     flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"list name: {self.list_name}, name: {self.name}"
 
 
@@ -228,7 +244,7 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
 class XLSXKoboTemplateManager(models.Manager):
-    def latest_valid(self):
+    def latest_valid(self) -> Optional["XLSXKoboTemplate"]:
         return (
             self.get_queryset()
             .filter(status=self.model.SUCCESSFUL)
@@ -269,33 +285,33 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     template_id = models.CharField(max_length=200, blank=True)
     first_connection_failed_time = models.DateTimeField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.file_name} - {self.created_at}"
 
 
 class CountryCodeMapManager(models.Manager):
-    def __init__(self):
+    def __init__(self) -> None:
         self._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         super().__init__()
 
-    def get_code(self, iso_code):
+    def get_code(self, iso_code) -> Optional[str]:
         iso_code = iso_code.upper()
         self.build_cache()
         return self._cache[len(iso_code)].get(iso_code, iso_code)
 
-    def get_iso3_code(self, ca_code):
+    def get_iso3_code(self, ca_code) -> Optional[str]:
         ca_code = ca_code.upper()
         self.build_cache()
 
         return self._cache["ca3"].get(ca_code, ca_code)
 
-    def get_iso2_code(self, ca_code):
+    def get_iso2_code(self, ca_code) -> Optional[str]:
         ca_code = ca_code.upper()
         self.build_cache()
 
         return self._cache["ca2"].get(ca_code, ca_code)
 
-    def build_cache(self):
+    def build_cache(self) -> None:
         if not self._cache[2] or not self._cache[3] or not self._cache["ca2"] or not self._cache["ca3"]:
             for entry in self.all().select_related("country"):
                 self._cache[2][entry.country.iso_code2] = entry.ca_code
@@ -320,7 +336,7 @@ class CustomModelEntry(ModelEntry):
     """
 
     @classmethod
-    def from_entry(cls, name, app=None, **entry):
+    def from_entry(cls, name, app=None, **entry) -> "CustomModelEntry":
         obj, _ = PeriodicTask._default_manager.get_or_create(
             name=name,
             defaults=cls._unpack_fields(**entry),
@@ -333,6 +349,18 @@ class CustomDatabaseScheduler(DatabaseScheduler):
 
 
 class StorageFile(models.Model):
+    STATUS_NOT_PROCESSED = "Not processed"
+    STATUS_PROCESSING = "Processing"
+    STATUS_FINISHED = "Finished"
+    STATUS_FAILED = "Failed"
+
+    STATUS_CHOICE = Choices(
+        (STATUS_NOT_PROCESSED, _("Not processed")),
+        (STATUS_PROCESSING, _("Processing")),
+        (STATUS_FINISHED, _("Finished")),
+        (STATUS_FAILED, _("Failed")),
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -344,19 +372,25 @@ class StorageFile(models.Model):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
     file = models.FileField(upload_to="files")
 
+    status = models.CharField(
+        choices=STATUS_CHOICE,
+        default=STATUS_NOT_PROCESSED,
+        max_length=25,
+    )
+
     @property
-    def file_name(self):
+    def file_name(self) -> str:
         return self.file.name
 
     @property
-    def file_url(self):
+    def file_url(self) -> str:
         return self.file.url
 
     @property
-    def file_size(self):
+    def file_size(self) -> int:
         return self.file.size
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.file.name
 
 
