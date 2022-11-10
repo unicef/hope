@@ -77,10 +77,6 @@ LOGGING = {
 }
 
 # ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    "default": {"hosts": "elasticsearch:9200"},
-    "test": {"hosts": "elasticsearch:9200"},
-}
 ELASTICSEARCH_INDEX_PREFIX = "test_"
 
 logging.disable(logging.CRITICAL)
