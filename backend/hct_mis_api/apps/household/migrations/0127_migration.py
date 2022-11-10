@@ -37,5 +37,5 @@ class Migration(migrations.Migration):
             name="phone_no_valid",
             field=models.BooleanField(db_index=True, default=False),
         ),
-        migrations.RunPython(update_each_phone_numbers_validity),
+        migrations.RunPython(update_each_phone_numbers_validity, migrations.RunPython.noop),
     ]
