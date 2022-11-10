@@ -1,5 +1,7 @@
 from faker import Faker
+import factory
 
+from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.models import BusinessArea
 
 faker = Faker()
@@ -17,3 +19,10 @@ def create_afghanistan() -> BusinessArea:
             "has_data_sharing_agreement": True,
         },
     )
+
+
+class StorageFileFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StorageFile
+
+    business_area = factory.LazyAttribute(lambda _: BusinessArea.objects.first())
