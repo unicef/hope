@@ -73,7 +73,7 @@ class TestBuildSummary(TestCase):
         with self.assertNumQueries(3):
             build_summary(self.cash_plan)
 
-    def _create_verification_with_status(self, status):
+    def _create_verification_with_status(self, status) -> CashPlanPaymentVerification:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,

@@ -49,18 +49,13 @@ class TestPullDataFromDatahub(TestCase):
     household = None
 
     @staticmethod
-    def _pre_test_commands():
+    def _pre_test_commands() -> None:
         create_afghanistan()
         call_command("loadcountries")
         call_command("loadcountrycodes")
 
-        # call_command("generatedocumenttypes")
-        # business_area_with_data_sharing = BusinessArea.objects.first()
-        # business_area_with_data_sharing.has_data_sharing_agreement = True
-        # business_area_with_data_sharing.save()
-
     @classmethod
-    def _setup_in_app_data(cls):
+    def _setup_in_app_data(cls) -> None:
         target_population = TargetPopulation()
         target_population.name = "Test TP"
         target_population.status = TargetPopulation.STATUS_PROCESSING
@@ -88,7 +83,7 @@ class TestPullDataFromDatahub(TestCase):
         cls.program = program
 
     @classmethod
-    def _setup_datahub_data(cls):
+    def _setup_datahub_data(cls) -> None:
         session = Session()
         session.status = Session.STATUS_READY
         session.save()
@@ -183,7 +178,7 @@ class TestPullDataFromDatahub(TestCase):
         cls.dh_payment_record = dh_payment_record
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
         cls._setup_in_app_data()
         cls._setup_datahub_data()

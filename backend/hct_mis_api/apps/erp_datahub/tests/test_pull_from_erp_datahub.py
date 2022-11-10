@@ -23,11 +23,11 @@ class TestPullDataFromErpDatahub(TestCase):
     funds_commitment_2 = None
 
     @staticmethod
-    def _pre_test_commands():
+    def _pre_test_commands() -> None:
         create_afghanistan()
 
     @classmethod
-    def _setup_in_app_data(cls):
+    def _setup_in_app_data(cls) -> None:
         (household, _) = create_household(household_args={"size": 1})
 
         cls.cash_plan_1 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
@@ -65,7 +65,7 @@ class TestPullDataFromErpDatahub(TestCase):
         )
 
     @classmethod
-    def _setup_datahub_data(cls):
+    def _setup_datahub_data(cls) -> None:
         cls.funds_commitment_1 = FundsCommitmentFactory(
             funds_commitment_number="123456", total_open_amount_local=1000, total_open_amount_usd=2000
         )
@@ -77,14 +77,14 @@ class TestPullDataFromErpDatahub(TestCase):
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
     @patch("hct_mis_api.apps.erp_datahub.utils.get_exchange_rate_for_cash_plan", new=lambda *arg: 2)
     @patch("hct_mis_api.apps.erp_datahub.utils.get_payment_record_delivered_quantity_in_usd", new=lambda *arg: 2)
-    def test_pull_data(self):
+    def test_pull_data(self) -> None:
         task = PullFromErpDatahubTask()
         task.execute()
         self.cash_plan_1.refresh_from_db()

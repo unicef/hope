@@ -296,7 +296,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
-    def full_rebuild(self):
+    def full_rebuild(self) -> None:
         household_queryset = Household.objects.filter(business_area=self.business_area)
         household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
         self.households.set(household_queryset)
@@ -386,7 +386,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     def get_excluded_household_ids(self):
         return self.target_population.excluded_household_ids
 
-    def get_query(self):
+    def get_query(self) -> Q:
         query = super().get_query()
         if (
             self.target_population

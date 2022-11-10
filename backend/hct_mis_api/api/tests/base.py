@@ -10,7 +10,7 @@ from hct_mis_api.apps.account.fixtures import (
 
 
 class HOPEApiTestCase(APITestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [
         Grant.API_RDI_CREATE,
         Grant.API_RDI_UPLOAD,
@@ -18,7 +18,7 @@ class HOPEApiTestCase(APITestCase):
     token = None
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
