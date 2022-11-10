@@ -5,6 +5,7 @@ import openpyxl
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     GenericPayment,
     Payment,
     PaymentChannel,
@@ -151,8 +152,8 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 )
             delivery_mechanisms = list(
                 payment.collector.payment_channels.all()
-                .distinct("delivery_mechanism")
-                .values_list("delivery_mechanism", flat=True)
+                .distinct("delivery_mechanism__delivery_mechanism")
+                .values_list("delivery_mechanism__delivery_mechanism", flat=True)
             )
             delivery_mechanisms_lower_case = list(map(lambda x: x.lower(), delivery_mechanisms))
             if (
@@ -204,11 +205,14 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
 
             if not payment.collector.payment_channels.exists():
                 for payment_channel in payment_channels_list:
-                    if payment_channel is not None and payment_channel != "":
-                        # TODO handle delivery data
+                    # TODO handle delivery channels other than CASH
+                    # if payment_channel is not None and payment_channel != "":
+                    if payment_channel == GenericPayment.DELIVERY_TYPE_CASH:
+                        cash_delivery_mechanism = DeliveryMechanism.objects.get(
+                            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+                        )
                         PaymentChannel.objects.get_or_create(
-                            individual=payment.collector,
-                            delivery_mechanism=payment_channel,
+                            individual=payment.collector, delivery_mechanism=cash_delivery_mechanism, delivery_data={}
                         )
 
         if entitlement_amount is not None and entitlement_amount != "":

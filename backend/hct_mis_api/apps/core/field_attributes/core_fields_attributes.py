@@ -1,10 +1,6 @@
 import copy
-import enum
 import logging
-from datetime import datetime
 from functools import reduce
-
-from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     admin_area1_query,
@@ -35,6 +31,24 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _HOUSEHOLD,
+    _INDIVIDUAL,
+    TYPE_BOOL,
+    TYPE_DATE,
+    TYPE_GEOPOINT,
+    TYPE_ID,
+    TYPE_IMAGE,
+    TYPE_INTEGER,
+    TYPE_LIST_OF_IDS,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
+    Scope,
+)
+from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
+    PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
+)
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
@@ -55,53 +69,6 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 logger = logging.getLogger(__name__)
-
-TYPE_ID = "ID"
-TYPE_INTEGER = "INTEGER"
-TYPE_STRING = "STRING"
-TYPE_LIST_OF_IDS = "LIST_OF_IDS"
-TYPE_BOOL = "BOOL"
-TYPE_DATE = "DATE"
-TYPE_IMAGE = "IMAGE"
-TYPE_SELECT_ONE = "SELECT_ONE"
-TYPE_SELECT_MANY = "SELECT_MANY"
-TYPE_GEOPOINT = "GEOPOINT"
-TYPE_DECIMAL = "DECIMAL"
-
-FIELD_TYPES_TO_INTERNAL_TYPE = {
-    TYPE_ID: str,
-    TYPE_INTEGER: int,
-    TYPE_STRING: str,
-    TYPE_LIST_OF_IDS: list,
-    TYPE_BOOL: bool,
-    TYPE_DATE: datetime,
-    TYPE_IMAGE: (
-        str,
-        InMemoryUploadedFile,
-    ),
-    TYPE_SELECT_ONE: str,
-    TYPE_SELECT_MANY: list,
-    TYPE_GEOPOINT: str,
-    TYPE_DECIMAL: str,
-}
-
-_INDIVIDUAL = "Individual"
-_HOUSEHOLD = "Household"
-
-FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE, TYPE_BOOL]
-
-
-class Scope(str, enum.Enum):
-    KOBO_IMPORT = "KOBO_IMPORT"
-    HOUSEHOLD_ID = "HOUSEHOLD_ID"
-    COLLECTOR = "COLLECTOR"
-    HOUSEHOLD_UPDATE = "HOUSEHOLD_UPDATE"
-    INDIVIDUAL_UPDATE = "INDIVIDUAL_UPDATE"
-    INDIVIDUAL_XLSX_UPDATE = "INDIVIDUAL_XLSX_UPDATE"
-    TARGETING = "TARGETING"
-    GLOBAL = "GLOBAL"
-    XLSX = "XLSX"
-
 
 CORE_FIELDS_ATTRIBUTES = [
     {
@@ -1664,46 +1631,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "household_id",
         "scope": [Scope.HOUSEHOLD_ID],
     },
-    {
-        "id": "e5766962-1455-4ebc-8fad-fc89cdde792b",
-        "type": TYPE_STRING,
-        "name": "bank_name",
-        "lookup": "bank_name",
-        "required": False,
-        "label": {"English(EN)": "Bank name"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "bank_name_i_c",
-        "scope": [Scope.XLSX],
-    },
-    {
-        "id": "3d6a45f3-d3f7-48a0-801b-7a98c0da517a",
-        "type": TYPE_STRING,
-        "name": "bank_account_number",
-        "lookup": "bank_account_number",
-        "required": False,
-        "label": {"English(EN)": "Bank account number"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "bank_account_number_i_c",
-        "scope": [Scope.XLSX],
-    },
-    {
-        "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
-        "type": TYPE_STRING,
-        "name": "debit_card_number",
-        "lookup": "debit_card_number",
-        "required": False,
-        "label": {"English(EN)": "Debit card number"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "debit_card_number_i_c",
-        "scope": [Scope.XLSX],
-    },
-]
+] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
 class FieldFactory(list):
@@ -1762,6 +1690,9 @@ class FieldFactory(list):
 
     def to_dict_by(self, attr: str):
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
+
+    def to_choices(self):
+        return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
     def apply_business_area(self, business_area_slug: str):
         factory = FieldFactory(self, self.scopes)
