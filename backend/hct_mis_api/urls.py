@@ -78,7 +78,7 @@ api_patterns = [
         include("hct_mis_api.apps.power_query.urls"),
     ),
     path(
-        f"b/changelog/",
+        "b/changelog/",
         include("hct_mis_api.apps.changelog.urls"),
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
