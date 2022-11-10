@@ -327,11 +327,7 @@ class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
 
 class PaymentVerificationFactory(PaymentGFKFactory):
     generic_fk_obj = factory.SubFactory(PaymentRecordFactory)
-    payment_verification_plan = factory.Iterator(
-        PaymentVerificationPlan.objects.filter(
-            payment_plan_content_type=ContentType.objects.get_or_create(app_label="payment", model="cashplan")[0]
-        )
-    )
+    payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
         getter=lambda c: c[0],
