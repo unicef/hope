@@ -179,7 +179,6 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("type",)
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)
