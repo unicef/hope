@@ -6,11 +6,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import (
-    calculate_counts,
-    from_received_to_status,
-    is_right_phone_number_format,
-)
+from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +67,7 @@ class CheckRapidProVerificationTask:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")
-        if not phone_number or not is_right_phone_number_format(phone_number):
+        if not phone_number or not is_valid_phone_number(phone_number):
             return None
         payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
         if not payment_record_verification:
