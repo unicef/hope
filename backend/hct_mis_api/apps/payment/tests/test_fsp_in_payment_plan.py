@@ -18,7 +18,11 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    GenericPayment,
+    PaymentPlan,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -47,13 +51,22 @@ def base_setup(cls):
         },
         individuals_data=[{}],
     )
+    cls.delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+    )
+    cls.delivery_mechanism_voucher, _ = DeliveryMechanism.objects.get_or_create(
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
+    )
+    cls.delivery_mechanism_transfer, _ = DeliveryMechanism.objects.get_or_create(
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+    )
     cls.payment_channel_1_voucher = PaymentChannelFactory(
         individual=cls.individuals_1[0],
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
+        delivery_mechanism=cls.delivery_mechanism_voucher,
     )
     cls.payment_channel_1_cash = PaymentChannelFactory(
         individual=cls.individuals_1[0],
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+        delivery_mechanism=cls.delivery_mechanism_cash,
     )
     IndividualRoleInHouseholdFactory(
         individual=cls.individuals_1[0],
@@ -70,11 +83,11 @@ def base_setup(cls):
     )
     cls.payment_channel_2_transfer = PaymentChannelFactory(
         individual=cls.individuals_2[0],
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        delivery_mechanism=cls.delivery_mechanism_transfer,
     )
     cls.payment_channel_2_cash = PaymentChannelFactory(
         individual=cls.individuals_2[0],
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+        delivery_mechanism=cls.delivery_mechanism_cash,
     )
     IndividualRoleInHouseholdFactory(
         individual=cls.individuals_2[0],
@@ -96,11 +109,11 @@ def base_setup(cls):
     )
     cls.payment_channel_3_transfer = PaymentChannelFactory(
         individual=cls.individuals_3[0],
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        delivery_mechanism=cls.delivery_mechanism_transfer,
     )
     cls.payment_channel_3_cash = PaymentChannelFactory(
         individual=cls.individuals_3[0],
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+        delivery_mechanism=cls.delivery_mechanism_cash,
     )
 
 
@@ -541,10 +554,13 @@ class TestFSPAssignment(APITestCase):
         for fsp in [self.santander_fsp, self.bank_of_america_fsp, self.bank_of_europe_fsp]:
             fsp.delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_MOBILE_MONEY)
 
+        delivery_mechanism_mobile_money, _ = DeliveryMechanism.objects.get_or_create(
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_MOBILE_MONEY,
+        )
         for individual in [self.individuals_1[0], self.individuals_2[0], self.individuals_3[0]]:
             PaymentChannelFactory(
                 individual=individual,
-                delivery_mechanism=GenericPayment.DELIVERY_TYPE_MOBILE_MONEY,
+                delivery_mechanism=delivery_mechanism_mobile_money,
             )
 
         new_program_mutation_variables = dict(
@@ -860,7 +876,9 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
         assert "errors" not in choose_dms_with_cash_response, choose_dms_with_cash_response
         self.individuals_4[0].refresh_from_db()
         assert (
-            self.individuals_4[0].payment_channels.filter(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH).count()
+            self.individuals_4[0]
+            .payment_channels.filter(delivery_mechanism__delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH)
+            .count()
             == 1
         )
 
@@ -870,9 +888,12 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
             household=self.household_4,
             role=ROLE_PRIMARY,
         )
+        delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+        )
         PaymentChannelFactory(
             individual=self.individuals_4[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_mechanism=delivery_mechanism_cash,
         )
 
         payment_plan_setup(self)

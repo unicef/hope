@@ -6,12 +6,12 @@ import openpyxl
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     FieldFactory,
-    Scope,
 )
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.household.models import Individual
 
 
