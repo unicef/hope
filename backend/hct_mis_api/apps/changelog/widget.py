@@ -14,11 +14,9 @@ class HTMLEditor(forms.Textarea):
     class Media:
         css = {
             "all": (
-                static("admin/changelog/quill/quill.core.css"),
-                static("admin/changelog/quill/quill.snow.css"),
+                static("admin/changelog/easymde/easymde.min.css"),
             )
         }
         js = (
-            static("admin/changelog/quill/quill.core.js"),
-            static("admin/changelog/quill/quill.min.js"),
+            static("admin/changelog/easymde/easymde.min.js"),
         )

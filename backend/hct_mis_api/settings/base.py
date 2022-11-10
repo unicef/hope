@@ -282,6 +282,7 @@ OTHER_APPS = [
     "drf_yasg",
     "flags",
     "admin_cursor_paginator",
+    "markdownify.apps.MarkdownifyConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
