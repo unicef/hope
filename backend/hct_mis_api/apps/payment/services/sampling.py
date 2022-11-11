@@ -1,5 +1,5 @@
 import abc
-from typing import List, Tuple
+from typing import Optional, Tuple
 
 from django.db.models import Q, QuerySet
 
@@ -7,7 +7,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 
@@ -15,15 +15,15 @@ class Sampling:
     def __init__(self, input_data, cash_plan, payment_records: QuerySet):
         self.input_data = input_data
         self.cash_plan = cash_plan
-        self.payment_records = payment_records
+        self.payment_records: Optional[QuerySet] = payment_records
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
-    ) -> Tuple[CashPlanPaymentVerification, List[PaymentRecord]]:
+    ) -> Tuple[CashPlanPaymentVerification, Optional[QuerySet]]:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
-        sampling = self._get_sampling()
+        sampling: BaseSampling = self._get_sampling()
         sampling.sampling(self.payment_records)
 
         cash_plan_verification.sampling = sampling.sampling_type
@@ -48,7 +48,7 @@ class Sampling:
 
         return payment_record_count, sampling.sample_size
 
-    def _get_sampling(self):
+    def _get_sampling(self) -> "BaseSampling":
         sampling_type = self.input_data.get("sampling")
         if sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             arguments = self.input_data.get("full_list_arguments")
@@ -69,7 +69,7 @@ class BaseSampling(abc.ABC):
         self.excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
         self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas]
         self.sample_size = 0
-        self.payment_records = []
+        self.payment_records: Optional[QuerySet] = None
 
     def calc_sample_size(self, sample_count: int) -> int:
         if self.sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:

@@ -1,4 +1,5 @@
 import uuid
+from typing import Dict
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
@@ -59,7 +60,7 @@ class TestPhoneNumberVerification(TestCase):
             cash_plan=cash_plan,
         )
         cls.individuals = []
-        for _ in range(cls.payment_record_amount):
+        for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=BusinessArea.objects.first()
             )
@@ -68,7 +69,10 @@ class TestPhoneNumberVerification(TestCase):
                     "registration_data_import": registration_data_import,
                     "admin_area": Area.objects.order_by("?").first(),
                 },
-                {"registration_data_import": registration_data_import},
+                {
+                    "registration_data_import": registration_data_import,
+                    "phone_no": f"+48 609 999 {i:03d}",
+                },
             )
             cls.individuals.append(individuals[0])
 
@@ -150,7 +154,7 @@ class TestPhoneNumberVerification(TestCase):
         self.assertIsNone(self.verification.error)
         self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
 
-        def create_flow_response():
+        def create_flow_response() -> Dict:
             return {
                 "uuid": str(uuid.uuid4()),
             }

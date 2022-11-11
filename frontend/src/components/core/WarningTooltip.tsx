@@ -5,7 +5,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 
 const StyledWarning = styled(WarningIcon)`
   color: ${({ theme, confirmed }) =>
-    confirmed ? 'deeppink' : theme.hctPalette.oragne};
+    confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
 
 interface WarningTooltipProps {

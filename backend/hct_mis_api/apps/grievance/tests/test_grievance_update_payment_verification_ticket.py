@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -174,8 +176,8 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def _prepare_input(self, extras=None):
-        input_data = {
+    def _prepare_input(self, extras=None) -> Dict:
+        input_data: Dict = {
             "input": {
                 "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
             }

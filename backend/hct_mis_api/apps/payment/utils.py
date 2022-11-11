@@ -1,37 +1,14 @@
-import logging
 from decimal import Decimal
 from math import ceil
+from typing import Union
 
 from django.db.models import Q, QuerySet
-
-import phonenumbers
 
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 
-def is_right_phone_number_format(phone_number) -> bool:
-    # from phonenumbers.parse method description:
-    # This method will throw a NumberParseException if the number is not
-    # considered to be a possible number.
-    #
-    # so if `parse` does not throw, we may assume it's ok
-
-    if not isinstance(phone_number, str):
-        phone_number = str(phone_number)
-
-    phone_number = phone_number.replace(" ", "")
-    if phone_number.startswith("00"):
-        phone_number = f"+{phone_number[2:]}"
-
-    try:
-        return phonenumbers.is_possible_number(phonenumbers.parse(phone_number))
-    except phonenumbers.NumberParseException:
-        logging.warning(f"'{phone_number}' is not a valid phone number")
-        return False
-
-
-def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):
+def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error) -> int:
     from statistics import NormalDist
 
     variable = 0.5
@@ -43,7 +20,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(received, received_amount, delivered_amount):
+def from_received_to_status(received, received_amount, delivered_amount) -> str:
     received_amount_dec = float_to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
@@ -58,13 +35,13 @@ def from_received_to_status(received, received_amount, delivered_amount):
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def float_to_decimal(received_amount):
+def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
     if isinstance(received_amount, float):
         return Decimal(f"{round(received_amount, 2):.2f}")
     return received_amount
 
 
-def from_received_yes_no_to_status(received, received_amount, delivered_amount):
+def from_received_yes_no_to_status(received, received_amount, delivered_amount) -> str:
     received_bool = None
     if received == "YES":
         received_bool = True

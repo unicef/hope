@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from elasticsearch_dsl.connections import create_connection
 
-from hct_mis_api.apps.household.elasticsearch_utils import (
+from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_all_indexes,
     rebuild_search_index,
 )

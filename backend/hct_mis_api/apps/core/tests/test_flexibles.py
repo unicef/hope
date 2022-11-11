@@ -18,7 +18,7 @@ class MockSuperUser:
 
 
 class TestFlexibles(TestCase):
-    def load_xls(self, name):
+    def load_xls(self, name) -> None:
         task = FlexibleAttributeImporter()
         task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
 

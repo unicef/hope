@@ -7,11 +7,11 @@ from hct_mis_api.apps.program.models import CashPlan
 
 class PullFromErpDatahubTask:
     @atomic()
-    def execute(self):
+    def execute(self) -> None:
         self.update_cash_plans()
         self.update_payment_records()
 
-    def update_cash_plans(self):
+    def update_cash_plans(self) -> None:
         cash_plans_without_exchange_rate = CashPlan.objects.filter(exchange_rate__isnull=True)
 
         for cash_plan in cash_plans_without_exchange_rate:
@@ -19,7 +19,7 @@ class PullFromErpDatahubTask:
 
         CashPlan.objects.bulk_update(cash_plans_without_exchange_rate, ["exchange_rate"])
 
-    def update_payment_records(self):
+    def update_payment_records(self) -> None:
         payment_records_to_update = PaymentRecord.objects.filter(
             delivered_quantity_usd__isnull=True,
             delivered_quantity__isnull=False,

@@ -1,9 +1,12 @@
+from datetime import datetime
+from typing import Dict, Tuple
+
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
-def get_household_status(household):
+def get_household_status(household) -> Tuple[str, datetime]:
     if isinstance(household, Household):
         payment_records = PaymentRecord.objects.filter(household=household)
         if payment_records.exists():
@@ -22,7 +25,7 @@ def get_household_status(household):
     return "imported", household.updated_at
 
 
-def get_individual_info(individual, tax_id):
+def get_individual_info(individual, tax_id) -> Dict:
     return {
         "role": individual.role,
         "relationship": individual.relationship,
@@ -30,7 +33,7 @@ def get_individual_info(individual, tax_id):
     }
 
 
-def get_household_info(household, individual=None, tax_id=None):
+def get_household_info(household, individual=None, tax_id=None) -> Dict:
     status, date = get_household_status(household)
     output = {"status": status, "date": date}
     if individual:
@@ -38,9 +41,9 @@ def get_household_info(household, individual=None, tax_id=None):
     return {"info": output}
 
 
-def serialize_by_individual(individual, tax_id):
+def serialize_by_individual(individual, tax_id) -> Dict:
     return get_household_info(individual.household, individual, tax_id)
 
 
-def serialize_by_household(household):
+def serialize_by_household(household) -> Dict:
     return get_household_info(household)

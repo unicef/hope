@@ -19,10 +19,10 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 
 
 class TestUkrainianRegistrationService(TestCase):
-    databases = (
+    databases = {
         "default",
         "registration_datahub",
-    )
+    }
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod

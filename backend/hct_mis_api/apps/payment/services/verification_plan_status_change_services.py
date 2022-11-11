@@ -60,7 +60,7 @@ class VerificationPlanStatusChangeServices:
         else:
             raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")
 
-    def _reset_payment_verifications(self):
+    def _reset_payment_verifications(self) -> None:
         # payment verifications to reset using for discard and mark_invalid
         payment_record_verifications = self.cash_plan_verification.payment_record_verifications.all()
         for payment_record_verification in payment_record_verifications:
@@ -82,13 +82,13 @@ class VerificationPlanStatusChangeServices:
 
         return self.cash_plan_verification
 
-    def _can_activate_via_rapidpro(self):
+    def _can_activate_via_rapidpro(self) -> bool:
         return (
             self.cash_plan_verification.verification_channel
             == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO
         )
 
-    def _activate_rapidpro(self):
+    def _activate_rapidpro(self) -> None:
         business_area_slug = self.cash_plan_verification.business_area.slug
         api = RapidProAPI(business_area_slug)
         pv_id = self.cash_plan_verification.id
@@ -126,7 +126,7 @@ class VerificationPlanStatusChangeServices:
         ).delete()
         return self.cash_plan_verification
 
-    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status):
+    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status) -> None:
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return
@@ -154,7 +154,7 @@ class VerificationPlanStatusChangeServices:
 
         TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
 
-    def _create_grievance_tickets(self, cashplan_payment_verification):
+    def _create_grievance_tickets(self, cashplan_payment_verification) -> None:
         self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
         self._create_grievance_ticket_for_status(
             cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
