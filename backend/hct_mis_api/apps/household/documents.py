@@ -1,3 +1,5 @@
+from typing import Type
+
 from django.conf import settings
 from django.db.models import Q
 
@@ -5,8 +7,8 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
+from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
-from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
 index_settings = {
@@ -170,8 +172,9 @@ class IndividualDocumentOthers(IndividualDocument):
         return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
-def get_individual_doc(business_area_slug) -> IndividualDocument:
-    return {
+def get_individual_doc(business_area_slug) -> Type[IndividualDocument]:
+    # TODO: Incompatible return value type (got "Type[object]", expected "Type[IndividualDocument]")
+    return {  # type: ignore
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,
     }.get(business_area_slug, IndividualDocumentOthers)

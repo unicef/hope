@@ -1,7 +1,9 @@
+from typing import Any, Tuple
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.db.models import JSONField
+from django.db.models import JSONField, QuerySet
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
@@ -15,19 +17,19 @@ from hct_mis_api.apps.utils.security import is_root
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         qs = self.model.all_objects.get_queryset()
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_filter(self, request):
+    def get_list_filter(self, request) -> Tuple:
         return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class JSONWidgetMixin:
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request) or settings.DEBUG:
                 kwargs = {"widget": JSONEditor}

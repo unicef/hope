@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -64,6 +64,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 from hct_mis_api.apps.utils.schema import Arg
 
 
@@ -296,15 +297,15 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
 def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
-        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
+        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
     if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL:
-        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)
+        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
     return grievance_ticket
 
 
-def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
 
@@ -345,7 +346,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     return [grievance_ticket]
 
 
-def update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     household_data_update_new_extras = extras.get("household_data_update_issue_type_extras")
     household = ticket_details.household
@@ -405,7 +406,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
     save_images(flex_fields, "individuals")
-    individual_data_with_approve_status = {
+    individual_data_with_approve_status: Dict[str, Any] = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
 
@@ -475,7 +476,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     return [grievance_ticket]
 
 
-def update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_individual_data_update_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
 
     individual_data_update_extras = extras.get("individual_data_update_issue_type_extras")
@@ -503,7 +506,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     verify_flex_fields(flex_fields, "individuals")
     save_images(flex_fields, "individuals")
 
-    individual_data_with_approve_status = {
+    individual_data_with_approve_status: Dict[str, Any] = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_individual_data.items()
     }
 
@@ -569,7 +572,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     return grievance_ticket
 
 
-def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
 
@@ -585,7 +588,7 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     return [grievance_ticket]
 
 
-def save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
     household_encoded_id = household_data_update_issue_type_extras.get("household")
@@ -600,7 +603,7 @@ def save_household_delete_extras(root, info, input, grievance_ticket, extras, **
     return [grievance_ticket]
 
 
-def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     add_individual_issue_type_extras = data_change_extras.get("add_individual_issue_type_extras")
 
@@ -632,7 +635,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     return [grievance_ticket]
 
 
-def update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.add_individual_ticket_details
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
@@ -659,12 +662,13 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     return grievance_ticket
 
 
-def close_add_individual_grievance_ticket(grievance_ticket, info):
+@transaction.atomic
+def close_add_individual_grievance_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.add_individual_ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
 
-    household = ticket_details.household
+    household = Household.objects.select_for_update().get(id=ticket_details.household.id)
     individual_data = ticket_details.individual_data
     documents = individual_data.pop("documents", [])
     identities = individual_data.pop("identities", [])
@@ -689,7 +693,8 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
         individual.save()
         if relationship_to_head_of_household == HEAD:
             household.head_of_household = individual
-            household.individuals.exclude(id=individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
+            household_individuals = evaluate_qs(household.individuals.exclude(id=individual.id).select_for_update())
+            household_individuals.update(relationship=RELATIONSHIP_UNKNOWN)
             household.save(update_fields=["head_of_household"])
         household.size += 1
         household.save()
@@ -703,15 +708,14 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     IndividualIdentity.objects.bulk_create(identities_to_create)
     BankAccountInfo.objects.bulk_create(payment_channels_to_create)
 
-    if individual.household:
-        recalculate_data(individual.household)
+    if household:
+        recalculate_data(household)
     else:
         individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
-            registration_data_import_id=getattr(grievance_ticket.registration_data_import, "pk", None),
             individuals_ids=[str(individual.id)],
         )
     )
@@ -725,7 +729,8 @@ def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
     return value or ""
 
 
-def close_update_individual_grievance_ticket(grievance_ticket, info):
+@transaction.atomic
+def close_update_individual_grievance_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
         return
@@ -773,29 +778,32 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     if individual.flex_fields is not None:
         merged_flex_fields.update(individual.flex_fields)
     merged_flex_fields.update(flex_fields)
-    Individual.objects.filter(id=individual.id).update(
+
+    new_individual = Individual.objects.select_for_update().get(id=individual.id)
+    Individual.objects.filter(id=new_individual.id).update(
         flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
     )
-    new_individual = Individual.objects.get(id=individual.id)
+
     relationship_to_head_of_household = individual_data.get("relationship")
     if (
         household
         and relationship_to_head_of_household
         and relationship_to_head_of_household.get("value") == HEAD
         and is_approved(relationship_to_head_of_household)
-        and individual.relationship != HEAD
+        and new_individual.relationship != HEAD
     ):
         if household.individuals.filter(relationship=HEAD).count() > 1:
             raise GraphQLError("There is one head of household. First, you need to change its role.")
-        household.head_of_household = individual
+        household = Household.objects.select_for_update().get(id=household.id)
+        household.head_of_household = new_individual
         household.save()
 
-    reassign_roles_on_update(individual, ticket_details.role_reassign_data, info)
+    reassign_roles_on_update(new_individual, ticket_details.role_reassign_data, info)
     if is_approved(role_data):
-        handle_role(role_data.get("value"), household, individual)
+        handle_role(role_data.get("value"), household, new_individual)
 
     documents_to_create = [
-        handle_add_document(document_data["value"], individual)
+        handle_add_document(document_data["value"], new_individual)
         for document_data in documents
         if is_approved(document_data)
     ]
@@ -804,7 +812,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     ]
 
     identities_to_create = [
-        handle_add_identity(identity_data["value"], individual)
+        handle_add_identity(identity_data["value"], new_individual)
         for identity_data in identities
         if is_approved(identity_data)
     ]
@@ -813,7 +821,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     ]
 
     payment_channels_to_create = [
-        handle_add_payment_channel(data["value"], individual) for data in payment_channels if is_approved(data)
+        handle_add_payment_channel(data["value"], new_individual) for data in payment_channels if is_approved(data)
     ]
 
     payment_channels_to_update = [
@@ -832,18 +840,18 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])
     BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
 
-    new_individual.refresh_from_db()
-
     if new_individual.household:
         recalculate_data(new_individual.household)
     else:
         new_individual.recalculate_data()
+
+    new_individual.refresh_from_db()
+
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
-            registration_data_import_id=getattr(grievance_ticket.registration_data_import, "pk", None),
-            individuals_ids=[str(individual.id)],
+            individuals_ids=[str(new_individual.id)],
         )
     )
 
@@ -858,7 +866,8 @@ def cast_flex_fields(flex_fields) -> None:
             flex_fields[key] = int(value)
 
 
-def close_update_household_grievance_ticket(grievance_ticket, info):
+@transaction.atomic
+def close_update_household_grievance_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     if not ticket_details:
         return
@@ -897,13 +906,15 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
     if household.flex_fields is not None:
         merged_flex_fields.update(household.flex_fields)
     merged_flex_fields.update(flex_fields)
-    Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
-    new_household = Household.objects.get(id=household.id)
+
+    new_household = Household.objects.select_for_update().get(id=household.id)
+    Household.objects.filter(id=new_household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     recalculate_data(new_household)
     log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
 
-def close_delete_individual_ticket(grievance_ticket, info):
+@transaction.atomic
+def close_delete_individual_ticket(grievance_ticket, info) -> None:
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
@@ -911,9 +922,10 @@ def close_delete_individual_ticket(grievance_ticket, info):
     household = None
     if individual_to_remove.household:
         household = individual_to_remove.household
+
+    individual_to_remove = Individual.objects.select_for_update().get(id=individual_to_remove.id)
     withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
     if household:
-        household.refresh_from_db()
         recalculate_data(household)
 
 
@@ -926,7 +938,8 @@ def check_external_collector(household) -> None:
         raise GraphQLError("One of the Household member is an external collector. This household cannot be withdrawn.")
 
 
-def close_delete_household_ticket(grievance_ticket, info):
+@transaction.atomic
+def close_delete_household_ticket(grievance_ticket, info) -> None:
     from django.db.models import Q
 
     from hct_mis_api.apps.grievance.models import (
@@ -939,7 +952,7 @@ def close_delete_household_ticket(grievance_ticket, info):
     if not ticket_details or ticket_details.approve_status is False:
         return
 
-    household = Household.objects.get(id=ticket_details.household.id)
+    household = Household.objects.select_for_update().get(id=ticket_details.household.id)
     check_external_collector(household)
 
     individuals = household.individuals.values_list("id", flat=True)

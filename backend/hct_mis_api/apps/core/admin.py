@@ -1,6 +1,7 @@
 import csv
 import logging
 from io import StringIO
+from typing import Any, Dict, List
 
 from django import forms
 from django.contrib import admin, messages
@@ -99,7 +100,7 @@ class BusinessofficeFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
-    def value(self):
+    def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
     def queryset(self, request, queryset):
@@ -137,9 +138,6 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
-    # formfield_overrides = {
-    #     JSONField: {"widget": JSONEditor},
-    # }
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "custom_fields":
@@ -189,7 +187,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
-    def _get_doap_matrix(self, obj):
+    def _get_doap_matrix(self, obj) -> List[Any]:
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
         fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
@@ -328,7 +326,7 @@ UNICEF HOPE""",
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
@@ -346,9 +344,11 @@ UNICEF HOPE""",
 
                     error, response = api.test_connection_start_flow(flow_name, phone_number)
                     if response:
-                        context["flow_uuid"] = response["flow"]["uuid"]
-                        context["flow_status"] = response["status"]
-                        context["timestamp"] = response["created_on"]
+                        for index, entry in enumerate(response):
+                            context[index] = {}
+                            context[index]["flow_uuid"] = entry["flow"]["uuid"]
+                            context[index]["flow_status"] = entry["status"]
+                            context[index]["timestamp"] = entry["created_on"]
 
                     if error:
                         messages.error(request, error)
@@ -474,7 +474,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     def original_file_name(self, obj):
         return obj.file_name
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
+    def get_form(self, request, obj=None, change=False, **kwargs) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
@@ -564,9 +564,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     def change_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False
+        self.has_add_permission = lambda __: False  # type: ignore
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission
+        self.has_add_permission = has_add_permission  # type: ignore
 
         return template_response
 

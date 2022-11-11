@@ -1707,7 +1707,7 @@ CORE_FIELDS_ATTRIBUTES = [
 
 
 class FieldFactory(list):
-    def __init__(self, fields=None, scopes=None, *args, **kwargs):
+    def __init__(self, fields=None, scopes=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)
@@ -1753,7 +1753,7 @@ class FieldFactory(list):
     def associated_with_household(self):
         return self._associated_with(_HOUSEHOLD)
 
-    def _associated_with(self, associated_with):
+    def _associated_with(self, associated_with) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
             if item.get("associated_with") == associated_with:

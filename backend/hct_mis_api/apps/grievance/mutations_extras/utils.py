@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -18,6 +19,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     BankAccountInfo,
+    Document,
     Household,
     Individual,
     IndividualIdentity,
@@ -43,7 +45,7 @@ def handle_role(role, household, individual) -> None:
             IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
-def handle_add_document(document, individual):
+def handle_add_document(document, individual) -> Document:
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Document, DocumentType
@@ -67,7 +69,8 @@ def handle_add_document(document, individual):
     return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
 
-def handle_edit_document(document_data: Dict):
+@transaction.atomic
+def handle_edit_document(document_data: Dict) -> Document:
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -85,11 +88,8 @@ def handle_edit_document(document_data: Dict):
     photoraw = updated_document.get("photoraw")
     if photo:
         photo = photoraw
-    document_id = updated_document.get("id")
 
-    document_id = decode_id_string(document_id)
-    document = get_object_or_404(Document, id=document_id)
-
+    document_id = decode_id_string(updated_document.get("id"))
     document_type = DocumentType.objects.get(type=type_name)
 
     document_already_exists = (
@@ -100,10 +100,13 @@ def handle_edit_document(document_data: Dict):
     if document_already_exists:
         raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
+    document = get_object_or_404(Document.objects.select_for_update(), id=document_id)
+
     document.document_number = number
     document.type = document_type
     document.country = country
     document.photo = photo
+
     return document
 
 
@@ -157,11 +160,11 @@ def handle_add_identity(identity, individual) -> IndividualIdentity:
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
 
-def handle_edit_identity(identity_data: Dict):
+def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Agency, IndividualIdentity
+    from hct_mis_api.apps.household.models import Agency
 
     updated_identity = identity_data.get("value", {})
     agency_name = updated_identity.get("agency")
@@ -194,17 +197,21 @@ def handle_edit_identity(identity_data: Dict):
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status):
+def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[str, Dict]:
     from django.shortcuts import get_object_or_404
 
-    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.core.utils import (
+        decode_id_string,
+        encode_id_base64,
+        encode_id_base64_required,
+    )
     from hct_mis_api.apps.household.models import Document
 
-    previous_documents = {}
+    previous_documents: Dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = decode_id_string(document_data.get("value"))
-        document = get_object_or_404(Document, id=document_id)
-        previous_documents[encode_id_base64(document.id, "Document")] = {
+        document: Document = get_object_or_404(Document, id=document_id)
+        previous_documents[encode_id_base64_required(document.id, "Document")] = {
             "id": encode_id_base64(document.id, "Document"),
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
@@ -282,7 +289,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dic
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status):
+def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status) -> Dict[str, Any]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -303,7 +310,7 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
     return previous_payment_channels
 
 
-def prepare_edit_identities(identities):
+def prepare_edit_identities(identities) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -341,7 +348,7 @@ def prepare_edit_identities(identities):
     return edited_identities
 
 
-def prepare_edit_payment_channel(payment_channels):
+def prepare_edit_payment_channel(payment_channels) -> List[Dict]:
     items = []
 
     handlers = {
@@ -354,7 +361,7 @@ def prepare_edit_payment_channel(payment_channels):
     return items
 
 
-def handle_bank_transfer_payment_method(pc):
+def handle_bank_transfer_payment_method(pc) -> Dict:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -447,7 +454,9 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
     withdraw_individual(individual_to_remove, info, old_individual, household)
 
 
-def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, info, unique_individual):
+def mark_as_duplicate_individual_and_reassign_roles(
+    ticket_details, individual_to_remove, info, unique_individual
+) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
@@ -460,7 +469,7 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
-def get_data_from_role_data(role_data):
+def get_data_from_role_data(role_data) -> Tuple[str, Individual, Individual, Household]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -648,7 +657,7 @@ def mark_as_duplicate_individual(
     old_individual_to_remove,
     removed_individual_household,
     unique_individual,
-):
+) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
         individual_to_remove,
@@ -675,7 +684,7 @@ def log_and_withdraw_household_if_needed(
         removed_individual_household.withdraw()
 
 
-def save_images(flex_fields, associated_with):
+def save_images(flex_fields, associated_with) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
@@ -714,7 +723,7 @@ def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Opti
     return None
 
 
-def handle_document(document) -> dict:
+def handle_document(document) -> Dict:
     photo = document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
@@ -722,5 +731,5 @@ def handle_document(document) -> dict:
     return document
 
 
-def handle_documents(documents) -> list[dict]:
+def handle_documents(documents) -> List[Dict]:
     return [handle_document(document) for document in documents]

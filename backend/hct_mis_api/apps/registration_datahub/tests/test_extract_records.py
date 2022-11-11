@@ -11,7 +11,7 @@ from hct_mis_api.apps.registration_datahub.models import Record
 
 
 class TestExtractRecords(TestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
 
     @classmethod
     def setUpTestData(cls):

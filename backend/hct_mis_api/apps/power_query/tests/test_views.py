@@ -13,7 +13,7 @@ from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, Repor
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryViews(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
     def setUpTestData(cls):
@@ -74,7 +74,7 @@ class TestPowerQueryViews(TestCase):
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryBasicAuth(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
     def setUpTestData(cls):
@@ -110,7 +110,7 @@ CONTENT_TYPES = [
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryResponses(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
     def setUpTestData(cls):

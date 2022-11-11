@@ -86,7 +86,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root, info, input, **kwargs) -> "EditPaymentVerificationMutation":
         cash_plan_verification_id = decode_id_string(input.get("cash_plan_payment_verification_id"))
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -121,7 +121,9 @@ class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMu
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def processed_mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def processed_mutate(
+        cls, root, info, cash_plan_verification_id, **kwargs
+    ) -> "ActivateCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -152,7 +154,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "FinishCashPlanVerificationMutation":
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
         check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
@@ -183,7 +185,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "DiscardCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -215,7 +217,7 @@ class InvalidCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "InvalidCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -247,7 +249,7 @@ class DeleteCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "DeleteCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
         cash_plan = cash_plan_verification.cash_plan
@@ -448,18 +450,19 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
+# TODO: what about typing [0] on XlsxErrorNode
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent, info):
+    def resolve_sheet(parent: "XlsxErrorNode", info) -> str:
         return parent[0]  # type: ignore
 
-    def resolve_coordinates(parent, info):
+    def resolve_coordinates(parent: "XlsxErrorNode", info) -> str:
         return parent[1]  # type: ignore
 
-    def resolve_message(parent, info):
+    def resolve_message(parent: "XlsxErrorNode", info) -> str:
         return parent[2]  # type: ignore
 
 
@@ -471,7 +474,7 @@ class ExportXlsxCashPlanVerification(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, cash_plan_verification_id):
+    def mutate(cls, root, info, cash_plan_verification_id) -> "ExportXlsxCashPlanVerification":
         pk = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=pk)
 
@@ -502,7 +505,7 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, file, cash_plan_verification_id):
+    def mutate(cls, root, info, file, cash_plan_verification_id) -> "ImportXlsxCashPlanVerification":
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
 

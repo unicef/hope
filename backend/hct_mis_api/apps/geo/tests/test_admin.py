@@ -2,7 +2,6 @@ from io import BytesIO
 
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
-from django.contrib.auth import get_user_model
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 
@@ -11,11 +10,10 @@ from factory import fuzzy
 from webtest import Upload
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.geo.admin import AreaAdmin
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area, AreaType
-
-User = get_user_model()
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

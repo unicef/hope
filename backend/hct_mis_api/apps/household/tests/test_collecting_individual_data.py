@@ -9,6 +9,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     HEAD,
     MALE,
+    Household,
 )
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
@@ -31,7 +32,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
-    def create_hh(self, collect_individual_data):
+    def create_hh(self, collect_individual_data) -> Household:
         household, _ = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.registration_data_import,
@@ -61,6 +62,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)
+        household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, 0)
 
     def test_recalculating_data_when_flag_is_partial(self):
@@ -69,6 +71,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)
+        household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, None)
 
     def test_recalculating_data_when_flag_is_none(self):
@@ -77,4 +80,5 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.female_age_group_0_5_count = 123
         household.save()
         recalculate_data(household)
+        household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, 123)

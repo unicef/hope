@@ -1,5 +1,6 @@
 import json
 import operator
+from typing import Dict
 
 from django.db import transaction
 
@@ -12,7 +13,7 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 class ValidateXlsxImport:
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, import_data):
+    def execute(self, import_data) -> Dict:
         import_data.status = ImportData.STATUS_RUNNING
         import_data.save()
         errors = UploadXLSXInstanceValidator().validate_everything(import_data.file, import_data.business_area_slug)

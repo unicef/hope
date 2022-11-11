@@ -35,7 +35,7 @@ export const theme = {
     width: 270,
   },
   hctPalette: {
-    oragne: '#FC942A',
+    orange: '#FC942A',
     blue: '#D8E1EE',
     darkerBlue: '#033D90',
     green: '#10CB16',

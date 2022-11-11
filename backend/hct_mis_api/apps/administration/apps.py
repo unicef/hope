@@ -11,10 +11,8 @@ class TemplateConfig(AppConfig):
 
 class Config(SmartConfig):
     default_site = "hct_mis_api.apps.administration.site.HopeAdminSite"
-    # verbose_name = _("Smart Admin")
-    # name = 'django.contrib.admin'
 
-    def ready(self):
+    def ready(self) -> None:
         super().ready()
         django.contrib.admin.autodiscover()
         self.module.autodiscover()

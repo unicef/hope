@@ -1,7 +1,9 @@
+from typing import List
+
 import graphene
 
 from hct_mis_api.apps.core.utils import decode_and_get_object
-from hct_mis_api.apps.grievance.models import TicketComplaintDetails
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketComplaintDetails
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -13,7 +15,7 @@ class GrievanceComplaintTicketExtras(graphene.InputObjectType):
     payment_record = graphene.List(graphene.ID)
 
 
-def save_grievance_complaint_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_grievance_complaint_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     grievance_complaint_extras = extras.get("category", {})
     grievance_complaint_category_extras = grievance_complaint_extras.get("grievance_complaint_ticket_extras", {})
 

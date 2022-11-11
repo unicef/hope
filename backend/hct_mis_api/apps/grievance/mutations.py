@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -277,7 +277,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: save_negative_feedback_extras,
             GrievanceTicket.CATEGORY_REFERRAL: save_referral_extras,
         }
-        save_extra_method: Callable = save_extra_methods.get(category)
+        save_extra_method: Optional[Callable] = save_extra_methods.get(category)
         grievances = [grievance_ticket]
         if save_extra_method:
             grievances = save_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
@@ -577,7 +577,7 @@ POSSIBLE_FEEDBACK_STATUS_FLOW = {
 class GrievanceStatusChangeMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
-    CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING = {
+    CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING: Dict[int, Union[Dict[int, Callable], Callable]] = {
         GrievanceTicket.CATEGORY_DATA_CHANGE: {
             GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: close_update_household_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: close_update_individual_grievance_ticket,
@@ -660,11 +660,13 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def get_close_function(cls, category, issue_type) -> Callable:
+    def get_close_function(cls, category, issue_type) -> Optional[Callable]:
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
         if isinstance(function_or_nested_issue_types, dict) and issue_type:
             return function_or_nested_issue_types.get(issue_type)
-        return function_or_nested_issue_types
+        return function_or_nested_issue_types  # type: ignore
+        # TODO: what if there's no issue type and function_or_nested_issue_types is a dict?
+        # it would return a dict instead of a callable
 
     @classmethod
     @is_authenticated
@@ -710,7 +712,13 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                 for individual in selected_individuals:
                     traverse_sibling_tickets(grievance_ticket, individual)
 
-            close_function: Callable = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
+            close_function: Optional[Callable] = cls.get_close_function(
+                grievance_ticket.category, grievance_ticket.issue_type
+            )
+            if not close_function:
+                log_and_raise(
+                    f"No close function found for category {grievance_ticket.category} and issue type {grievance_ticket.issue_type}"
+                )
             close_function(grievance_ticket, info)
             grievance_ticket.refresh_from_db()
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
