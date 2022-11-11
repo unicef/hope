@@ -1,3 +1,5 @@
+from django.contrib.gis.geos import MultiPolygon, Polygon
+
 import factory
 from factory import fuzzy
 from faker import Faker
@@ -7,9 +9,7 @@ from hct_mis_api.apps.geo.models import Area, AreaType, Country
 faker = Faker()
 
 
-def create_fake_multipolygon():
-    from django.contrib.gis.geos import MultiPolygon, Polygon
-
+def create_fake_multipolygon() -> MultiPolygon:
     p1 = Polygon(((0, 0), (0, 1), (1, 1), (0, 0)))
     p2 = Polygon(((1, 1), (1, 2), (2, 2), (1, 1)))
 

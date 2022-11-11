@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const StyledFlag = styled(FlagIcon)`
   color: ${({ theme, confirmed }) =>
-    confirmed ? 'deeppink' : theme.hctPalette.oragne};
+    confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
 interface FlagTooltipProps {
   confirmed?: boolean;

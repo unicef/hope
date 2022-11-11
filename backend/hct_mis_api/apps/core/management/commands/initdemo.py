@@ -1,6 +1,8 @@
-from django.core.management import BaseCommand, call_command
+import time
 
-from hct_mis_api.apps.core.management.sql import drop_databases
+from django.core.management import BaseCommand, call_command
+from django.db import OperationalError, connections
+
 from hct_mis_api.apps.payment.fixtures import generate_real_cash_plans
 from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
     update_mis_unicef_id_individual_and_household,
@@ -17,8 +19,20 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        db_connection = connections["default"]
+        connected = False
+
+        while not connected:
+            try:
+                db_connection.cursor()
+                time.sleep(0.5)
+            except OperationalError:
+                connected = False
+            else:
+                connected = True
+
         if options["skip_drop"] is False:
-            drop_databases()
+            call_command("dropalldb")
             call_command("migratealldb")
 
         call_command("flush", "--noinput")

@@ -33,7 +33,7 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
         serializer.save(business_area=self.selected_business_area)
 
     @swagger_auto_schema(request_body=ProgramSerializer)
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs) -> Response:
         self.selected_business_area
         serializer = ProgramSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -1,4 +1,5 @@
 import uuid
+from typing import Dict
 from unittest.mock import MagicMock
 
 import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
@@ -142,40 +143,40 @@ class TestRecalculatingCash(APITestCase):
             }
         }
 
-    def send_successful_graphql_request(self, **kwargs):
+    def send_successful_graphql_request(self, **kwargs) -> Dict:
         response = self.graphql_request(**kwargs)
         self.assertTrue("data" in response)  # ensures successful response
         return response
 
-    def create_program(self):
+    def create_program(self) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables=self.create_program_mutation_variables,
         )
 
-    def activate_program(self, program_id):
+    def activate_program(self, program_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables=self.update_program_mutation_variables(program_id),
         )
 
-    def create_target_population(self, program_id):
+    def create_target_population(self, program_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables=self.create_target_population_mutation_variables(program_id),
         )
 
-    def lock_target_population(self, target_population_id):
+    def lock_target_population(self, target_population_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.LOCK_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )
 
-    def finalize_target_population(self, target_population_id):
+    def finalize_target_population(self, target_population_id) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.FINALIZE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},

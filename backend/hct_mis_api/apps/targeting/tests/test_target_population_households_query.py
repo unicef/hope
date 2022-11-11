@@ -98,7 +98,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.variables = {"businessArea": cls.business_area.slug}
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)

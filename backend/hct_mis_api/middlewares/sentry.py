@@ -13,7 +13,7 @@ class SentryScopeMiddleware:
 
     # Note: must be listed AFTER AuthenticationMiddleware
     def __call__(self, request: HttpRequest) -> Any:
-        sys.stderr.isatty = lambda: False
+        sys.stderr.isatty = lambda: False  # type: ignore # I guess this is a hack to make Sentry not use colors in the terminal?
         with configure_scope() as scope:
             scope.set_tag("username", request.user.username)
             scope.set_tag("business_area", request.headers.get("Business-Area"))

@@ -29,7 +29,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.rdi = RegistrationDataImportFactory()
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
@@ -41,7 +41,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     @classmethod
-    def set_imported_individuals(cls, imported_household):
+    def set_imported_individuals(cls, imported_household) -> None:
         individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",

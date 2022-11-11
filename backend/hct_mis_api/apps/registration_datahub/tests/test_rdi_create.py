@@ -3,6 +3,7 @@ import secrets
 from datetime import date
 from io import BytesIO
 from pathlib import Path
+from typing import Dict
 from unittest import mock
 
 from django.conf import settings
@@ -51,12 +52,12 @@ class ImageLoaderMock:
 
 
 class CellMock:
-    def __init__(self, value, coordinate):
+    def __init__(self, value, coordinate) -> None:
         self.value = value
         self.coordinate = coordinate
 
 
-def create_document_image():
+def create_document_image() -> File:
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
     return File(BytesIO(content), name="image.png")
 
@@ -361,10 +362,12 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         )
 
         households = ImportedHousehold.objects.all()
-        individuals = ImportedIndividual.objects.all()
+        for household in households:
+            self.assertTrue(household.row_id in [3, 4, 5])
 
-        [self.assertTrue(household.row_id in [3, 4, 5]) for household in households]
-        [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
+        individuals = ImportedIndividual.objects.all()
+        for individual in individuals:
+            self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8])
 
     def test_create_bank_account(self):
         task = self.RdiXlsxCreateTask()
@@ -494,20 +497,20 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             individual,
             ("country", "sex", "age", "marital_status", "relationship"),
         )
-        expected = {
+        expected_ind: Dict = {
             "relationship": "HEAD",
             "sex": "MALE",
             "marital_status": "MARRIED",
         }
-        self.assertEqual(individuals_obj_data, expected)
+        self.assertEqual(individuals_obj_data, expected_ind)
 
         household_obj_data = model_to_dict(individual.household, ("residence_status", "country", "flex_fields"))
-        expected = {
+        expected_hh: Dict = {
             "residence_status": "REFUGEE",
             "country": Country(code="AF"),
             "flex_fields": {},
         }
-        self.assertEqual(household_obj_data, expected)
+        self.assertEqual(household_obj_data, expected_hh)
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
@@ -808,11 +811,11 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         result = []
 
         for _ in range(10000):
-            copy = {**base_form}
+            copy: Dict = {**base_form}
 
             new_individuals = []
             for x in range(4):
-                individual = {
+                individual: Dict = {
                     **copy["individual_questions"][0],
                     "individual_questions/more_information/drivers_license_no_i_c": secrets.token_hex(15),
                     "individual_questions/more_information/birth_certificate_no_i_c": secrets.token_hex(15),

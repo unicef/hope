@@ -1,11 +1,13 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
+from typing import Callable, Dict
 from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.core.handlers.wsgi import WSGIRequest
 from django.test import Client, RequestFactory
 from django.urls import reverse
 from django.utils import timezone
@@ -32,16 +34,16 @@ class MockSuperUser:
 
 
 class MockResponse:
-    def __init__(self, status_code, data):
+    def __init__(self, status_code, data: Dict) -> None:
         self.status_code = status_code
-        self.data = data
+        self.data: Dict = data
 
-    def json(self):
+    def json(self) -> Dict:
         return self.data
 
 
-def raise_as_func(exception):
-    def _raise(*args, **kwargs):
+def raise_as_func(exception) -> Callable:
+    def _raise(*args, **kwargs) -> None:
         raise exception
 
     return _raise
@@ -53,12 +55,12 @@ class TestKoboTemplateUpload(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.maxDiff = None
-        cls.client = Client()
+        cls.client = Client()  # type: ignore # TODO: expression has type "django.test.client.Client", variable has type "graphene.test.Client"
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
 
-    def prepare_request(self, name):
+    def prepare_request(self, name) -> WSGIRequest:
         with open(
             f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}",
             "rb",
@@ -118,7 +120,7 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self):
         request = self.prepare_request("kobo-template-valid.xlsx")
-        request.session = "session"
+        request.session = "session"  # type: ignore # TODO: expression has type "str", variable has type "SessionBase"
         messages = FallbackStorage(request)
         request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)
@@ -132,7 +134,7 @@ class TestKoboTemplateUpload(APITestCase):
 
 
 class TestKoboErrorHandling(APITestCase):
-    def generate_empty_template(self):
+    def generate_empty_template(self) -> XLSXKoboTemplate:
         with NamedTemporaryFile(mode="w+b") as tmp_file:
             tmp_file.write(b"abcdefg")
             tmp_file.seek(0)

@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from typing import Any, Dict
 
 from django.urls import reverse
 
@@ -24,11 +25,11 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 
 class PushLaxToRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
@@ -37,7 +38,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
     def test_push(self):
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
-        data = [
+        input_data = [
             {
                 "residence_status": "",
                 "village": "village1",
@@ -234,10 +235,10 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 ],
             },  # household 6
         ]
-        response = self.client.post(self.url, data, format="json")
+        response = self.client.post(self.url, input_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
-        data = response.json()
+        data: Dict[Any, Any] = response.json()
         self.assertEquals(len(data["households"]), 6)
         self.assertEquals(data["processed"], 6)
         self.assertEquals(data["errors"], 2)

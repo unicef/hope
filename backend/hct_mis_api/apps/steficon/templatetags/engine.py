@@ -17,14 +17,14 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side: Any, flag: Any, linenum: int, text: str) -> str:
         try:
-            linenum = "{}".format(linenum)
-            id = f' id="{self._prefix[side]}{linenum}"'
+            line_number: str = "{}".format(linenum)
+            id = f' id="{self._prefix[side]}{line_number}"'
         except TypeError:
             id = ""
         text = text.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
         text = text.replace(" ", "&nbsp;").rstrip()
 
-        return f'<td class="diff_header lineno"{id}>{linenum}</td><td class="code" nowrap="nowrap">{text}</td>'
+        return f'<td class="diff_header lineno"{id}>{line_number}</td><td class="code" nowrap="nowrap">{text}</td>'
 
     def make_table(
         self,

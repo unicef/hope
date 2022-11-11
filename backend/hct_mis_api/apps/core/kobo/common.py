@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -60,7 +60,7 @@ def get_field_name(field_name: str) -> str:
         return field_name
 
 
-def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> list:
+def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> List:
     if deployed:
         return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]
@@ -88,7 +88,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
         if submission_exists is False:
             total_households_count += 1
             for individual_data in result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
-                fields = {
+                fields: Dict[str, Optional[str]] = {
                     "given_name_i_c": None,
                     "middle_name_i_c": None,
                     "family_name_i_c": None,
@@ -114,9 +114,10 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data, business_area):
+def filter_by_owner(data: Union[List, Dict], business_area) -> Optional[Union[List, Dict]]:
     kobo_username = business_area.kobo_username
     if isinstance(data, list):
         return [element for element in data if element["owner__username"] == kobo_username]
     if data["owner__username"] == kobo_username:
         return data
+    return None

@@ -5,7 +5,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def handle_total_cash_in_specific_households(id_list):
+def handle_total_cash_in_specific_households(id_list) -> None:
     total_cash_received_subquery = Subquery(
         PaymentRecord.objects.filter(household__pk=OuterRef("pk"))
         .values("household__pk")
@@ -24,7 +24,7 @@ def handle_total_cash_in_specific_households(id_list):
     )
 
 
-def handle_total_cash_in_households(only_new=False):
+def handle_total_cash_in_households(only_new=False) -> None:
     base_queryset = Household.objects.all()
     if only_new:
         base_queryset = base_queryset.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)

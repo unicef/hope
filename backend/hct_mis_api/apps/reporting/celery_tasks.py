@@ -33,7 +33,7 @@ def report_export_task(report_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def dashboard_report_export_task(dashboard_report_id):
+def dashboard_report_export_task(dashboard_report_id) -> None:
     try:
         from hct_mis_api.apps.reporting.models import DashboardReport
         from hct_mis_api.apps.reporting.services.generate_dashboard_report_service import (

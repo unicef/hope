@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
+from typing import List, Optional, Set
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -72,15 +73,16 @@ class FlexibleAttributeImporter:
         "deviceid",
     )
 
-    def _get_model_fields(self, object_type_to_add):
+    def _get_model_fields(self, object_type_to_add) -> Optional[List[str]]:
         return {
             "attribute": self.ATTRIBUTE_MODEL_FIELDS,
             "group": self.GROUP_MODEL_FIELDS,
             "choice": self.CHOICE_MODEL_FIELDS,
         }.get(object_type_to_add)
 
-    def _assign_field_values(self, value, header_name, object_type_to_add, row, row_number):
-        model_fields = self._get_model_fields(object_type_to_add)
+    def _assign_field_values(self, value, header_name, object_type_to_add, row, row_number) -> None:
+        if not (model_fields := self._get_model_fields(object_type_to_add)):
+            return
 
         if any(header_name.startswith(i) for i in self.JSON_MODEL_FIELDS):
             if "::" in header_name:
@@ -114,10 +116,7 @@ class FlexibleAttributeImporter:
             return
 
         if header_name == "required":
-            if value == "true":
-                self.object_fields_to_create[header_name] = True
-            else:
-                self.object_fields_to_create[header_name] = False
+            self.object_fields_to_create[header_name] = value == "true"
             return
 
         if header_name in model_fields:
@@ -170,7 +169,7 @@ class FlexibleAttributeImporter:
             else:
                 self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
-    def _can_add_row(self, row):
+    def _can_add_row(self, row) -> bool:
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
             "_group"
         )
@@ -193,7 +192,7 @@ class FlexibleAttributeImporter:
 
         return True
 
-    def _get_list_of_field_choices(self, sheet):
+    def _get_list_of_field_choices(self, sheet) -> Set:
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
@@ -202,11 +201,11 @@ class FlexibleAttributeImporter:
 
         return {row[0].value.split(" ")[1] for row in fields_with_choices}
 
-    def _get_field_choice_name(self, row):
+    def _get_field_choice_name(self, row) -> Optional[str]:
         has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
-        return
+        return None
 
     def _reset_model_fields_variables(self) -> None:
         self.json_fields_to_create = defaultdict(dict)
@@ -267,7 +266,7 @@ class FlexibleAttributeImporter:
         for choice in choices_to_delete:
             choice.delete()
 
-    def _handle_groups_and_fields(self, sheet):
+    def _handle_groups_and_fields(self, sheet) -> None:
         groups_from_db, attrs_from_db = (
             FlexibleAttributeGroup.objects.all(),
             FlexibleAttribute.objects.all(),
@@ -399,7 +398,7 @@ class FlexibleAttributeImporter:
     can_add_flag = True
 
     @transaction.atomic
-    def import_xls(self, xls_file):
+    def import_xls(self, xls_file) -> None:
         self.current_group_tree = [None]
         if isinstance(xls_file, str) and isfile(xls_file):
             wb = xlrd.open_workbook(filename=xls_file)

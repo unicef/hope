@@ -56,7 +56,7 @@ class SingleExchangeRate:
     def __repr__(self):
         return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: Optional[datetime]) -> Optional[float]:
         today = timezone.now()
 
         dispersion_date_is_not_provided = dispersion_date is None
@@ -78,7 +78,7 @@ class SingleExchangeRate:
 
 
 class ExchangeRates:
-    def __init__(self, with_history: bool = True, api_client: ExchangeRateAPI = None):
+    def __init__(self, with_history: bool = True, api_client: Optional[ExchangeRateAPI] = None):
         if api_client is None:
             api = ExchangeRateAPI()
         else:
@@ -100,9 +100,9 @@ class ExchangeRates:
         }
 
     def get_exchange_rate_for_currency_code(
-        self, currency_code: str, dispersion_date: datetime = None
+        self, currency_code: str, dispersion_date: Optional[datetime] = None
     ) -> Optional[float]:
-        currency: SingleExchangeRate = self.exchange_rates_dict.get(currency_code)
+        currency: Optional[SingleExchangeRate] = self.exchange_rates_dict.get(currency_code)
 
         if currency is None:
             return None
