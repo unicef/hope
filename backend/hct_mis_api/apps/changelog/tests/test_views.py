@@ -23,7 +23,6 @@ def create_changelog() -> Changelog:
 
 
 class APITestCase(TestCase):
-
     def setUp(self):
         self.superuser = UserFactory(is_superuser=True, is_staff=True)
         self.user = UserFactory()
