@@ -11,14 +11,14 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
+    XlsxPaymentPlanBaseService,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class XlsxPaymentPlanExportService(XlsxExportBaseService):
-    TITLE = "Payment Plan - Payment List"
-    HEADERS = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
-
+class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseService):
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments.select_related(
@@ -44,7 +44,6 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         self._add_col_bgcolor(
             [
                 self.HEADERS.index("entitlement_quantity") + 1,
-                self.HEADERS.index("delivered_quantity") + 1,
             ]
         )
         return self.wb
