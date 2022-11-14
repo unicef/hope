@@ -12,12 +12,11 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
-from hct_mis_api.apps.payment.models import PaymentChannel
+from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentChannel
 
 logger = logging.getLogger(__name__)
 
@@ -276,6 +275,7 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 
     # from hct_mis_api.apps.household.models import BankAccountInfo
+    # TODO
 
     previous_payment_channels = {}
     for payment_channel_data in payment_channels_to_remove_with_approve_status:
@@ -329,38 +329,6 @@ def prepare_edit_identities(identities):
             }
         )
     return edited_identities
-
-
-def handle_bank_transfer_payment_method(pc):
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
-
-    # from hct_mis_api.apps.household.models import BankAccountInfo
-
-    bank_account_number = pc.get("bank_account_number")
-    bank_name = pc.get("bank_name")
-    encoded_id = pc.get("id")
-    payment_channel_type = pc.get("type")
-    # TODO: PaymentChannel
-    # bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(encoded_id))
-    # return {
-    #     "approve_status": False,
-    #     "value": {
-    #         "id": encoded_id,
-    #         "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
-    #         "bank_account_number": bank_account_number,
-    #         "bank_name": bank_name,
-    #         "type": payment_channel_type,
-    #     },
-    #     "previous_value": {
-    #         "id": encoded_id,
-    #         "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
-    #         "bank_account_number": bank_account_info.bank_account_number,
-    #         "bank_name": bank_account_info.bank_name,
-    #         "type": payment_channel_type,
-    #     },
-    # }
 
 
 def verify_required_arguments(input_data, field_name, options):

@@ -8,7 +8,6 @@ import graphene
 from django_countries.fields import Country
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import PaymentChannel
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -62,6 +61,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.payment.models import PaymentChannel
 from hct_mis_api.apps.utils.schema import Arg
 
 

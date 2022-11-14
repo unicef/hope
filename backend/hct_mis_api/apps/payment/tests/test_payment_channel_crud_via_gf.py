@@ -1,15 +1,14 @@
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
     PaymentChannelFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentChannel
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentChannel
 
 
 class TestPaymentChannelCRUD(APITestCase):
