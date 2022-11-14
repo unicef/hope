@@ -204,7 +204,7 @@ class ImportDataValidator(BaseValidator):
                     elif value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": f"Issuing country is required: agency: {values['agency']} no: {value}",
+                            "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -377,7 +377,7 @@ class ImportDataInstanceValidator:
                     elif value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": f"Issuing country is required: agency: {values['agency']} no: {value}",
+                            "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -626,13 +626,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
-                    "agency": "UNHCR",
+                    "partner": "UNHCR",
                     "validation_data": [],
                     "numbers": [],
                     "issuing_countries": [],
                 },
                 "scope_id_no_i_c": {
-                    "agency": "WFP",
+                    "partner": "WFP",
                     "validation_data": [],
                     "numbers": [],
                     "issuing_countries": [],
@@ -1203,8 +1203,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             # thx
 
             identities_numbers = {
-                "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
-                "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "unhcr_id_no_i_c": {"partner": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "scope_id_no_i_c": {"partner": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
             }
             documents_numbers: Dict[str, Dict[str, Any]] = {
                 "birth_certificate_no_i_c": {

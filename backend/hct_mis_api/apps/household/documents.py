@@ -89,7 +89,7 @@ class IndividualDocument(Document):
     identities = fields.ObjectField(
         properties={
             "number": fields.KeywordField(similarity="boolean"),
-            "agency": fields.KeywordField(attr="agency.type", similarity="boolean"),
+            "partner": fields.KeywordField(attr="partnner.name", similarity="boolean"),
         }
     )
     households_and_roles = fields.ObjectField(

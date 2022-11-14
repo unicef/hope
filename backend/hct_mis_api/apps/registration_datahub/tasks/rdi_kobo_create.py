@@ -30,7 +30,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    ImportedAgency,
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
@@ -165,15 +164,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
                 is_identity = document_name in identity_fields
 
+                country = Country(data["issuing_country"])
+
                 if is_identity:
-                    agency, _ = ImportedAgency.objects.get_or_create(
-                        type="WFP" if document_name == "scope_id" else "UNHCR", country=Country(data["issuing_country"])
-                    )
+                    partner = "WFP" if document_name == "scope_id" else "UNHCR"
                     identities.append(
                         ImportedIndividualIdentity(
-                            agency=agency,
+                            partner=partner,
                             individual=data["individual"],
                             document_number=data["number"],
+                            country=country,
                         )
                     )
                 else:
@@ -181,7 +181,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if type_name == "OTHER_ID":
                         type_name = IDENTIFICATION_TYPE_OTHER
                     label = IDENTIFICATION_TYPE_DICT.get(type_name, data.get("name"))
-                    country = Country(data["issuing_country"])
                     document_type, _ = ImportedDocumentType.objects.get_or_create(
                         label=label,
                         type=type_name,
