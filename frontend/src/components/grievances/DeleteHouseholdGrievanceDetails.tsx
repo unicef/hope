@@ -1,21 +1,21 @@
 import { Box, Grid, Typography } from '@material-ui/core';
-import styled from 'styled-components';
+import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { choicesToDict } from '../../utils/utils';
 import {
   GrievanceTicketQuery,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
+import { BlackLink } from '../core/BlackLink';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
-import InfoIcon from '@material-ui/icons/Info';
 import { Title } from '../core/Title';
 import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
-import { BlackLink } from '../core/BlackLink';
 
 const Info = styled(InfoIcon)`
   color: ${({ theme }) => theme.hctPalette.gray};
