@@ -8,7 +8,7 @@ from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismFactory,
     PaymentChannelFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentChannel
+from hct_mis_api.apps.payment.models import GenericPayment
 
 
 class TestPaymentChannelCRUD(APITestCase):
