@@ -1,25 +1,26 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import { Field, Formik } from 'formik';
+import { Box, Grid, Typography } from '@material-ui/core';
+import styled from 'styled-components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { choicesToDict } from '../../utils/utils';
 import {
-  GrievanceTicketDocument,
   GrievanceTicketQuery,
-  useApproveDeleteHouseholdDataChangeMutation,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
+import InfoIcon from '@material-ui/icons/Info';
 import { Title } from '../core/Title';
+import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { BlackLink } from '../core/BlackLink';
+
+const Info = styled(InfoIcon)`
+  color: ${({ theme }) => theme.hctPalette.gray};
+  margin-right: 10px;
+`;
 
 export const DeleteHouseholdGrievanceDetails = ({
   ticket,
@@ -29,72 +30,12 @@ export const DeleteHouseholdGrievanceDetails = ({
   canApproveDataChange: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
-  const confirm = useConfirmation();
+
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-
-  const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const approveEnabled = isForApproval;
-  const dialogText = t(
-    'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
-  );
-
-  const dialogContentWithdrawReason = (
-    <Formik
-      initialValues={{ withdrawReason: '', duplicateHouseholdId: null }}
-      enableReinitialize
-      onSubmit={(values) => {
-        console.log('VALUES', values);
-      }}
-    >
-      {({ submitForm }) => (
-        <Box display='flex' flexDirection='column'>
-          <Box mt={2}>
-            <Typography variant='body2'>
-              {t('Please provide the reason of withdrawal of this household.')}
-            </Typography>
-          </Box>
-          <Field
-            name='withdrawReason'
-            choices={[
-              {
-                value: 'duplicate',
-                name: 'This household is a duplicate of another household',
-              },
-            ]}
-            component={FormikRadioGroup}
-            noMargin
-          />
-          <Grid container>
-            <Grid item xs={6}>
-              <Field
-                name='duplicateHouseholdId'
-                fullWidth
-                variant='outlined'
-                label={t('Household Id')}
-                component={FormikTextField}
-                required
-              />
-            </Grid>
-          </Grid>
-          <Field
-            name='withdrawReason'
-            choices={[{ value: 'other', name: 'Other' }]}
-            component={FormikRadioGroup}
-            noMargin
-          />
-          <Button onClick={submitForm}>Submit</Button>
-        </Box>
-      )}
-    </Formik>
-  );
-
-  const { approveStatus } = ticket.deleteHouseholdTicketDetails;
 
   if (choicesLoading) return <LoadingComponent />;
 
@@ -102,54 +43,38 @@ export const DeleteHouseholdGrievanceDetails = ({
     choicesData.residenceStatusChoices,
   );
 
+  const { approveStatus } = ticket.deleteHouseholdTicketDetails;
+
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
+        <Box display='flex' justifyContent='space-between' alignItems='center'>
           <Typography variant='h6'>{t('Household to be withdrawn')}</Typography>
+          {approveStatus &&
+            ticket.deleteHouseholdTicketDetails.reasonHousehold && (
+              <Box display='flex' alignItems='center'>
+                <Info />
+                <Box mr={2}>
+                  <p>This household is a duplicate of a household ID:</p>
+                </Box>
+                <BlackLink
+                  to={`/${businessArea}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
+                >
+                  {ticket.deleteHouseholdTicketDetails.reasonHousehold.unicefId}
+                </BlackLink>
+                {canApproveDataChange && (
+                  <ApproveDeleteHouseholdGrievanceDetails
+                    type='edit'
+                    ticket={ticket}
+                  />
+                )}
+              </Box>
+            )}
           {canApproveDataChange && (
-            <Button
-              onClick={() =>
-                confirm({
-                  title: approveStatus
-                    ? t('Warning')
-                    : t('Reason of withdrawal'),
-                  content: approveStatus
-                    ? dialogText
-                    : dialogContentWithdrawReason,
-                  continueText: t('Confirm'),
-                }).then(async () => {
-                  try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.deleteHouseholdTicketDetails
-                          ?.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
-                    });
-                    if (approveStatus) {
-                      showMessage(t('Changes Disapproved'));
-                    }
-                    if (!approveStatus) {
-                      showMessage(t('Changes Approved'));
-                    }
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
-                  }
-                })
-              }
-              variant={approveStatus ? 'outlined' : 'contained'}
-              color='primary'
-              disabled={!approveEnabled}
-            >
-              {approveStatus ? t('Disapprove') : t('Approve')}
-            </Button>
+            <ApproveDeleteHouseholdGrievanceDetails
+              type='button'
+              ticket={ticket}
+            />
           )}
         </Box>
       </Title>

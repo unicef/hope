@@ -51,7 +51,11 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             {extraContent}
           </Typography>
         ) : null}
-        <Typography variant='body2'>{content}</Typography>
+        {typeof content !== 'string' ? (
+          content
+        ) : (
+          <Typography variant='body2'>{content}</Typography>
+        )}
       </DialogContent>
       <DialogFooter>
         <DialogActions>

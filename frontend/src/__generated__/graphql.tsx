@@ -2687,6 +2687,7 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 export type MutationsApproveAddIndividualArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -2694,6 +2695,7 @@ export type MutationsApproveAddIndividualArgs = {
 export type MutationsApproveDeleteIndividualArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -2701,6 +2703,7 @@ export type MutationsApproveDeleteIndividualArgs = {
 export type MutationsApproveDeleteHouseholdArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -2708,6 +2711,7 @@ export type MutationsApproveDeleteHouseholdArgs = {
 export type MutationsApproveSystemFlaggingArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -5045,6 +5049,7 @@ export type TicketDeleteHouseholdDetailsNode = Node & {
   household?: Maybe<HouseholdNode>,
   roleReassignData: Scalars['JSONString'],
   approveStatus: Scalars['Boolean'],
+  reasonHousehold?: Maybe<HouseholdNode>,
   householdData?: Maybe<Scalars['Arg']>,
 };
 
@@ -6283,7 +6288,8 @@ export type ApproveAddIndividualDataChangeMutation = (
 
 export type ApproveDeleteHouseholdDataChangeMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  approveStatus: Scalars['Boolean']
+  approveStatus: Scalars['Boolean'],
+  reasonHhId?: Maybe<Scalars['String']>
 };
 
 
@@ -7808,6 +7814,10 @@ export type GrievanceTicketQuery = (
     )>, deleteHouseholdTicketDetails: Maybe<(
       { __typename?: 'TicketDeleteHouseholdDetailsNode' }
       & Pick<TicketDeleteHouseholdDetailsNode, 'id' | 'approveStatus'>
+      & { reasonHousehold: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )> }
     )>, systemFlaggingTicketDetails: Maybe<(
       { __typename?: 'TicketSystemFlaggingDetailsNode' }
       & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
@@ -10383,8 +10393,8 @@ export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof
 export type ApproveAddIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
 export const ApproveDeleteHouseholdDataChangeDocument = gql`
-    mutation ApproveDeleteHouseholdDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
-  approveDeleteHousehold(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    mutation ApproveDeleteHouseholdDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!, $reasonHhId: String) {
+  approveDeleteHousehold(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus, reasonHhId: $reasonHhId) {
     grievanceTicket {
       id
       status
@@ -10426,6 +10436,7 @@ export function withApproveDeleteHouseholdDataChange<TProps, TChildProps = {}>(o
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      approveStatus: // value for 'approveStatus'
+ *      reasonHhId: // value for 'reasonHhId'
  *   },
  * });
  */
@@ -14512,6 +14523,10 @@ export const GrievanceTicketDocument = gql`
     deleteHouseholdTicketDetails {
       id
       approveStatus
+      reasonHousehold {
+        id
+        unicefId
+      }
     }
     systemFlaggingTicketDetails {
       id
@@ -21822,6 +21837,7 @@ export type TicketDeleteHouseholdDetailsNodeResolvers<ContextType = any, ParentT
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  reasonHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
 };
 
