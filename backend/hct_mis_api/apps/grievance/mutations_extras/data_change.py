@@ -143,10 +143,10 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
     number = graphene.String(required=True)
 
 
-class BankTransferObjectType(graphene.InputObjectType):
-    type = graphene.String(required=True)
-    # bank_name = graphene.String(required=True)
-    # bank_account_number = graphene.String(required=True)
+class PaymentChannelObjectType(graphene.InputObjectType):
+    delivery_mechanism = graphene.ID(required=True)
+    delivery_data = graphene.JSONString()
+    is_fallback = graphene.Boolean()
 
 
 class EditBankTransferObjectType(graphene.InputObjectType):
@@ -190,7 +190,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     identities = graphene.List(IndividualIdentityObjectType)
     identities_to_remove = graphene.List(graphene.ID)
     identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
-    payment_channels = graphene.List(BankTransferObjectType)
+    payment_channels = graphene.List(PaymentChannelObjectType)
     payment_channels_to_edit = graphene.List(EditBankTransferObjectType)
     payment_channels_to_remove = graphene.List(graphene.ID)
     flex_fields = Arg()
@@ -225,7 +225,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     role = graphene.String(required=True)
     documents = graphene.List(IndividualDocumentObjectType)
     identities = graphene.List(IndividualIdentityObjectType)
-    payment_channels = graphene.List(BankTransferObjectType)
+    payment_channels = graphene.List(PaymentChannelObjectType)
     business_area = graphene.String()
     flex_fields = Arg()
 

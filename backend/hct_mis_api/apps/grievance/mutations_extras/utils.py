@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo import models as geo_models
@@ -99,20 +100,9 @@ def handle_edit_document(document_data: dict):
 def handle_add_payment_channel(payment_channel, individual):
     print(f"handle_add_payment_channel: {payment_channel}")
     payment_channel_type = payment_channel.get("type")
-    if payment_channel_type == "BANK_TRANSFER":
-        # bank_name = payment_channel.get("bank_name")
-        # bank_account_number = payment_channel.get("bank_account_number")
-        delivery_mechanism = payment_channel.get("delivery_mechanism")
-
-        # TODO: PaymentChannel
-        # return BankAccountInfo(
-        #     individual=individual,
-        #     bank_name=bank_name,
-        #     bank_account_number=bank_account_number,
-        # )
-
-        # TODO: delivery mechanism
-        return PaymentChannel(individual=individual)
+    delivery_mechanism_id = payment_channel.get("delivery_mechanism")
+    delivery_mechanism = get_object_or_404(DeliveryMechanism, id=decode_id_string(delivery_mechanism_id))
+    return PaymentChannel(individual=individual, delivery_mechanism=delivery_mechanism)
 
 
 def handle_update_payment_channel(payment_channel):
