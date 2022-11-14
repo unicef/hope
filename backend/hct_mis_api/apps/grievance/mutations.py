@@ -972,7 +972,7 @@ class SimpleApproveMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, grievance_ticket_id, approve_status, reason_hh_id=None, **kwargs):
-        # TODO: add validation for 'reason_hh_id'
+        # TODO: add validation for 'reason_hh_id' and upd TicketDeleteHouseholdDetails.reason_household
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
