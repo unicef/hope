@@ -93,14 +93,16 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
 
         # hh1 and hh3 were loaded via SF and hh2 (e.g. from RDI) was already paid and had the same doc number for individual
         # so we see hh2 as a "paid household"
-        assert str(self.household_1.id) not in hhs
-        assert str(self.household_2.id) in hhs
-        assert str(self.household_3.id) not in hhs
+        print(self.household_1.unicef_id)
+        assert str(self.household_1.unicef_id) not in hhs
+        assert str(self.household_2.unicef_id) in hhs
+        assert str(self.household_3.unicef_id) not in hhs
 
         # and we see hh1 and hh3 as a matching hh for hh2
-        assert str(self.household_1.id) in hhs[str(self.household_2.id)]
-        assert str(self.household_3.id) in hhs[str(self.household_2.id)]
+
+        assert str(self.household_1.unicef_id) in hhs[str(self.household_2.unicef_id)][0]
+        assert str(self.household_3.unicef_id) in hhs[str(self.household_2.unicef_id)][0]
 
         # hh3 has no payment record, so it won't be seen as paid even though hh4 has the same doc number
-        assert str(self.household_4.id) not in hhs
-        assert str(self.household_5.id) not in hhs
+        assert str(self.household_4.unicef_id) not in hhs
+        assert str(self.household_5.unicef_id) not in hhs

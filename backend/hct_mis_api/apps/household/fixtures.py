@@ -218,6 +218,8 @@ def create_household(household_args=None, individual_args=None):
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
     household.save()
+    #TODO - remove this when we have a better way to refresh households
+    household.refresh_from_db()
 
     individuals_to_update = []
     for index, individual in enumerate(individuals):
