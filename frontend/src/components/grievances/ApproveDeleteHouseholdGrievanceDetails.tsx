@@ -33,6 +33,10 @@ export interface ApproveDeleteHouseholdGrievanceDetails {
   type: 'edit' | 'button';
 }
 
+const EditIcon = styled(Edit)`
+  color: ${({ theme }) => theme.hctPalette.darkerBlue};
+`;
+
 const validationSchema = Yup.object().shape({
   reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
     if (withdrawReasonValue === 'duplicate') {
@@ -43,10 +47,6 @@ const validationSchema = Yup.object().shape({
     return Yup.string();
   }),
 });
-
-const EditIcon = styled(Edit)`
-  color: ${({ theme }) => theme.hctPalette.darkerBlue};
-`;
 
 export const ApproveDeleteHouseholdGrievanceDetails = ({
   ticket,
@@ -83,7 +83,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     <Formik
       enableReinitialize
       initialValues={{
-        withdrawReason: reasonHousehold?.unicefId ? 'duplicate' : '',
+        withdrawReason: '',
         reasonHhId: type === 'edit' ? reasonHousehold?.unicefId : '',
       }}
       validationSchema={validationSchema}
