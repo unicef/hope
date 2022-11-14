@@ -12,7 +12,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
-from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
