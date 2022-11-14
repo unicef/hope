@@ -105,6 +105,7 @@ mutation ApproveIndividualDataChange(
         cls.delivery_mechanism_1 = DeliveryMechanismFactory(
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_MOBILE_MONEY
         )
+        cls.delivery_mechanism_2 = DeliveryMechanismFactory(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CHEQUE)
 
         assert cls.individuals[0].payment_channels.count() == 0
 
@@ -196,45 +197,55 @@ mutation ApproveIndividualDataChange(
         self.individuals[0].refresh_from_db()
         assert self.individuals[0].payment_channels.count() == 1
 
-    # def test_editing_payment_channel_via_data_update(self):
-    #     self.individuals[0].payment_channels.set([PaymentChannelFactory(individual=self.individuals[0])])
-    #     assert self.individuals[0].payment_channels.count() == 1
+    def test_editing_payment_channel_via_data_update(self):
+        payment_channel = PaymentChannelFactory(
+            individual=self.individuals[0], delivery_mechanism=self.delivery_mechanism_1
+        )
+        self.individuals[0].payment_channels.set([payment_channel])
+        assert self.individuals[0].payment_channels.count() == 1
+        assert self.individuals[0].payment_channels.first().delivery_mechanism == self.delivery_mechanism_1
 
-    #     create_response = self.create_individual_data_update_ticket(
-    #         extras={
-    #             "individual": encode_id_base64(self.individuals[0].id, "Individual"),
-    #             "individualData": {
-    #                 "flexFields": {},
-    #                 "paymentChannels": [{"type": "BANK_TRANSFER"}],
-    #             },
-    #         }
-    #     )
-    #     encoded_grievance_ticket_id = create_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]["id"]
+        create_response = self.create_individual_data_update_ticket(
+            extras={
+                "individual": encode_id_base64(self.individuals[0].id, "Individual"),
+                "individualData": {
+                    "flexFields": {},
+                    "paymentChannels": [
+                        {"deliveryMechanism": encode_id_base64(self.delivery_mechanism_2.id, "DeliveryMechanism")}
+                    ],
+                },
+            }
+        )
+        encoded_grievance_ticket_id = create_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]["id"]
 
-    #     self.set_ticket_to_in_progress(encoded_grievance_ticket_id)
-    #     self.approve_ticket(encoded_grievance_ticket_id)
+        self.set_ticket_to_in_progress(encoded_grievance_ticket_id)
+        self.approve_ticket(encoded_grievance_ticket_id)
 
-    #     approve_ind_data_change_response = self.graphql_request(
-    #         request_string=self.APPROVE_INDIVIDUAL_DATA_CHANGE_MUTATION,
-    #         context={"user": self.user},
-    #         variables={
-    #             "grievanceTicketId": encoded_grievance_ticket_id,
-    #             "individualApproveData": "{}",
-    #             "approvedDocumentsToCreate": [],
-    #             "approvedDocumentsToRemove": [],
-    #             "approvedDocumentsToEdit": [],
-    #             "approvedIdentitiesToCreate": [],
-    #             "approvedIdentitiesToRemove": [],
-    #             "approvedIdentitiesToEdit": [],
-    #             "approvedPaymentChannelsToCreate": [],
-    #             "approvedPaymentChannelsToRemove": [],
-    #             "approvedPaymentChannelsToEdit": [0],
-    #             "flexFieldsApproveData": "{}",
-    #         },
-    #     )
-    #     assert "errors" not in approve_ind_data_change_response, approve_ind_data_change_response
+        approve_ind_data_change_response = self.graphql_request(
+            request_string=self.APPROVE_INDIVIDUAL_DATA_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": encoded_grievance_ticket_id,
+                "individualApproveData": "{}",
+                "approvedDocumentsToCreate": [],
+                "approvedDocumentsToRemove": [],
+                "approvedDocumentsToEdit": [],
+                "approvedIdentitiesToCreate": [],
+                "approvedIdentitiesToRemove": [],
+                "approvedIdentitiesToEdit": [],
+                "approvedPaymentChannelsToCreate": [],
+                "approvedPaymentChannelsToRemove": [],
+                "approvedPaymentChannelsToEdit": [0],
+                "flexFieldsApproveData": "{}",
+            },
+        )
+        assert "errors" not in approve_ind_data_change_response, approve_ind_data_change_response
 
-    #     self.close_ticket(encoded_grievance_ticket_id)
+        self.close_ticket(encoded_grievance_ticket_id)
+
+        self.individuals[0].refresh_from_db()
+        assert self.individuals[0].payment_channels.count() == 1
+        assert self.individuals[0].payment_channels.first().delivery_mechanism == self.delivery_mechanism_2
 
 
 # TODO: add individual with payment channel

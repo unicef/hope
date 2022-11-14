@@ -97,25 +97,22 @@ def handle_edit_document(document_data: dict):
     return document
 
 
-def handle_add_payment_channel(payment_channel, individual):
-    print(f"handle_add_payment_channel: {payment_channel}")
-    payment_channel_type = payment_channel.get("type")
-    delivery_mechanism_id = payment_channel.get("delivery_mechanism")
-    delivery_mechanism = get_object_or_404(DeliveryMechanism, id=decode_id_string(delivery_mechanism_id))
-    return PaymentChannel(individual=individual, delivery_mechanism=delivery_mechanism)
+def handle_add_payment_channel(data, individual):
+    return PaymentChannel(
+        individual=individual,
+        delivery_mechanism=get_object_or_404(DeliveryMechanism, id=decode_id_string(data.pop("delivery_mechanism"))),
+    )
 
 
-def handle_update_payment_channel(payment_channel):
-    payment_channel_type = payment_channel.get("type")
-    payment_channel_id = decode_id_string(payment_channel.get("id"))
-
-    if payment_channel_type == "BANK_TRANSFER":
-        pass
-        # TODO: PaymentChannel
-        # bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
-        # bank_account_info.bank_name = payment_channel.get("bank_name")
-        # bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
-        # return bank_account_info
+def handle_update_payment_channel(data):
+    print(f"handle_update_payment_channel: {data}")
+    existing_obj = get_object_or_404(PaymentChannel, id=decode_id_string(data.pop("id")))
+    if delivery_mechanism := data.get("delivery_mechanism"):
+        print(f"set delivery_mechanism: {delivery_mechanism}")
+        existing_obj.delivery_mechanism = get_object_or_404(DeliveryMechanism, id=decode_id_string(delivery_mechanism))
+    # TODO
+    existing_obj.save()
+    return existing_obj
 
 
 def handle_add_identity(identity, individual):
