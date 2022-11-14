@@ -965,7 +965,7 @@ class SimpleApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         approve_status = graphene.Boolean(required=True)
-        reason_hh_id = graphene.ID(required=False)
+        reason_hh_id = graphene.String(required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -1002,15 +1002,16 @@ class SimpleApproveMutation(PermissionMutation):
         ticket_details = grievance_ticket.ticket_details
 
         if grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
-            hh_id = decode_id_string(reason_hh_id) if reason_hh_id else None
-            if ticket_details.reason_household_id is not hh_id:
-                if hh_id:
-                    # validate reason HH id
-                    hh = get_object_or_404(Household, id=hh_id)
-                    if hh.withdrawn:
-                        raise GraphQLError(f"The original household ({hh.unicef_id}) hasn't to be in withdrawn status")
+            reason_hh_obj = None
+            reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
+            if reason_hh_id :
+                # validate reason HH id
+                reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
+                if reason_hh_obj.withdrawn:
+                    raise GraphQLError(f"The original household ({reason_hh_obj.unicef_id}) hasn't to be in withdrawn status")
 
-            ticket_details.reason_household_id = hh_id  # set ID or None
+            # update reason_household value
+            ticket_details.reason_household = reason_hh_obj   # set HH or None
 
         ticket_details.approve_status = approve_status
         ticket_details.save()
