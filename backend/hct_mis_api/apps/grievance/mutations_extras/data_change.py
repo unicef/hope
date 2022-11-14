@@ -8,6 +8,7 @@ import graphene
 from django_countries.fields import Country
 from graphql import GraphQLError
 
+from hct_mis_api.apps.payment.models import PaymentChannel
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -51,7 +52,6 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
-    BankAccountInfo,
     Document,
     Household,
     Individual,
@@ -145,8 +145,8 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
 
 class BankTransferObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
-    bank_name = graphene.String(required=True)
-    bank_account_number = graphene.String(required=True)
+    # bank_name = graphene.String(required=True)
+    # bank_account_number = graphene.String(required=True)
 
 
 class EditBankTransferObjectType(graphene.InputObjectType):
@@ -698,7 +698,8 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
-    BankAccountInfo.objects.bulk_create(payment_channels_to_create)
+    # BankAccountInfo.objects.bulk_create(payment_channels_to_create) # TODO: replace with PC
+    PaymentChannel.objects.bulk_create(payment_channels_to_create)
 
     if individual.household:
         recalculate_data(individual.household)
@@ -819,9 +820,6 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     ]
 
     print(f"pc to create {payment_channels_to_create}")
-    for pctc in payment_channels_to_create:
-        for field in pctc._meta.get_fields():
-            print(f"field {field.name} {getattr(pctc, field.name)}")
     print(f"pc to update {payment_channels_to_update}")
     print(f"pc to remove {payment_channels_to_remove}")
 
@@ -833,9 +831,13 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "agency"])
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
 
-    BankAccountInfo.objects.bulk_create(payment_channels_to_create)
-    BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])
-    BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
+    # # TODO: replace with PC
+    # BankAccountInfo.objects.bulk_create(payment_channels_to_create)
+    # BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])
+    # BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
+    PaymentChannel.objects.bulk_create(payment_channels_to_create)
+    PaymentChannel.objects.bulk_update(payment_channels_to_update, ["delivery_data"])
+    PaymentChannel.objects.filter(id__in=payment_channels_to_remove).delete()
 
     new_individual.refresh_from_db()
 
