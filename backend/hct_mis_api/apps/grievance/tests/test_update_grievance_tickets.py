@@ -303,9 +303,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                             ],
                             "paymentChannels": [
                                 {
-                                    "type": "BANK_TRANSFER",
-                                    "bankName": "privatbank",
-                                    "bankAccountNumber": 2356789789789789,
+                                    "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                                    "deliveryMechanism": "CASH",
                                 },
                             ],
                         }

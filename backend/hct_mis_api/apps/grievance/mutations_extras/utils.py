@@ -99,7 +99,7 @@ def handle_edit_document(document_data: dict):
 def handle_add_payment_channel(data, individual):
     pc = PaymentChannel(
         individual=individual,
-        delivery_mechanism=get_object_or_404(DeliveryMechanism, id=decode_id_string(data.pop("delivery_mechanism"))),
+        delivery_mechanism=DeliveryMechanism.objects.get(delivery_mechanism=data.pop("delivery_mechanism")),
     )
     assert not data
     return pc
@@ -108,7 +108,7 @@ def handle_add_payment_channel(data, individual):
 def handle_update_payment_channel(data):
     existing_obj = get_object_or_404(PaymentChannel, id=decode_id_string(data.pop("id")))
     if delivery_mechanism := data.get("delivery_mechanism"):
-        existing_obj.delivery_mechanism = get_object_or_404(DeliveryMechanism, id=decode_id_string(delivery_mechanism))
+        existing_obj.delivery_mechanism = DeliveryMechanism.objects.get(delivery_mechanism=delivery_mechanism)
     # TODO
     existing_obj.save()
     return existing_obj
@@ -179,6 +179,19 @@ def handle_edit_identity(identity_data: dict):
     identity.number = number
     identity.agency = agency_type
     return identity
+
+
+def prepare_payment_channels(payment_channels):
+    print("prepare_payment_channels", payment_channels)
+
+    def convert(channel):
+        print(f"Converting {channel} for {payment_channels}")
+        output = {**channel}
+        if delivery_mechanism := channel.get("delivery_mechanism"):
+            output["delivery_mechanism"] = DeliveryMechanism.objects.get(delivery_mechanism=delivery_mechanism)
+        return output
+
+    return [{**payment_channel, "value": convert(payment_channel["value"])} for payment_channel in payment_channels]
 
 
 def prepare_previous_documents(documents_to_remove_with_approve_status):

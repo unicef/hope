@@ -143,14 +143,14 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
 
 
 class PaymentChannelObjectType(graphene.InputObjectType):
-    delivery_mechanism = graphene.ID(required=True)
+    delivery_mechanism = graphene.String(required=True)
     delivery_data = graphene.JSONString()
     is_fallback = graphene.Boolean()
 
 
 class EditPaymentChannelObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
-    delivery_mechanism = graphene.ID()
+    delivery_mechanism = graphene.String()
     delivery_data = graphene.JSONString()
     is_fallback = graphene.Boolean()
 
@@ -446,7 +446,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
 
     individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
+
     individual_data_with_approve_status["payment_channels_to_remove"] = payment_channels_to_remove_with_approve_status
+
     individual_data_with_approve_status["payment_channels_to_edit"] = payment_channels_to_edit
 
     individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status

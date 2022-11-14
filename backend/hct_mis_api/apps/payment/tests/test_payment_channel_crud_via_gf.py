@@ -160,9 +160,7 @@ mutation ApproveIndividualDataChange(
                 "individual": encode_id_base64(self.individuals[0].id, "Individual"),
                 "individualData": {
                     "flexFields": {},
-                    "paymentChannels": [
-                        {"deliveryMechanism": encode_id_base64(self.delivery_mechanism_1.id, "DeliveryMechanism")}
-                    ],
+                    "paymentChannels": [{"deliveryMechanism": self.delivery_mechanism_1.delivery_mechanism}],
                 },
             }
         )
@@ -212,7 +210,7 @@ mutation ApproveIndividualDataChange(
                     "paymentChannelsToEdit": [
                         {
                             "id": encode_id_base64(payment_channel.id, "PaymentChannel"),
-                            "deliveryMechanism": encode_id_base64(self.delivery_mechanism_2.id, "DeliveryMechanism"),
+                            "deliveryMechanism": self.delivery_mechanism_2.delivery_mechanism,
                         }
                     ],
                 },
