@@ -965,12 +965,14 @@ class SimpleApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         approve_status = graphene.Boolean(required=True)
+        reason_hh_id = graphene.ID(required=False)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
+    def mutate(cls, root, info, grievance_ticket_id, approve_status, reason_hh_id=None, **kwargs):
+        # TODO: add validation for 'reason_hh_id'
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
