@@ -440,24 +440,7 @@ class ImportedDocument(TimeStampedUUIDModel):
                 raise ValidationError("Document number is not validating")
 
 
-class ImportedAgency(models.Model):
-    type = models.CharField(
-        max_length=100,
-    )
-    label = models.CharField(
-        max_length=100,
-    )
-    country = CountryField()
-
-    class Meta:
-        unique_together = ("country", "type")
-
-    def __str__(self) -> str:
-        return f"{self.label}"
-
-
 class ImportedIndividualIdentity(models.Model):
-    agency = models.ForeignKey("ImportedAgency", related_name="identities", on_delete=models.CASCADE)
     individual = models.ForeignKey(
         "ImportedIndividual",
         related_name="identities",
@@ -466,12 +449,14 @@ class ImportedIndividualIdentity(models.Model):
     document_number = models.CharField(
         max_length=255,
     )
+    country = CountryField(default="U")
+    partner = models.CharField(max_length=100, null=True)
 
     class Meta:
         verbose_name_plural = "Imported Individual Identities"
 
     def __str__(self) -> str:
-        return f"{self.agency} {self.individual} {self.document_number}"
+        return f"{self.partner} {self.individual} {self.document_number}"
 
 
 class KoboImportedSubmission(models.Model):

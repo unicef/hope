@@ -651,7 +651,6 @@ SMART_ADMIN_SECTIONS = {
     "Configuration": [
         "core",
         "constance",
-        "household.agency",
         "flags",
     ],
     "Power Query & Reports": [

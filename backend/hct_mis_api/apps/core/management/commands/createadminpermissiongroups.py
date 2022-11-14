@@ -58,7 +58,6 @@ class Command(BaseCommand):
                 "ticketreferraldetails",
             ],
             "household": [
-                "agency",
                 "documenttype",
                 "document",
                 "entitlementcard",

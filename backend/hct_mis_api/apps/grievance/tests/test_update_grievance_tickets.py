@@ -8,6 +8,7 @@ from django.core.management import call_command
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -40,7 +41,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SINGLE,
     UNHCR,
-    Agency,
     DocumentType,
     IndividualIdentity,
 )
@@ -234,17 +234,19 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.positive_feedback_grievance_ticket)
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
+        unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
         cls.identity_to_update = IndividualIdentity.objects.create(
-            agency=unhcr_agency,
+            partner=unhcr,
             individual=cls.individuals[0],
             number="1111",
+            country=country_pl,
         )
 
         cls.identity_to_remove = IndividualIdentity.objects.create(
-            agency=unhcr_agency,
+            partner=unhcr,
             individual=cls.individuals[0],
             number="3456",
+            country=country_pl,
         )
 
     @parameterized.expand(
@@ -295,7 +297,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             ],
                             "identities": [
                                 {
-                                    "agency": UNHCR,
+                                    "partner": UNHCR,
                                     "country": "POL",
                                     "number": "2222",
                                 }
@@ -340,7 +342,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "bank_account_number": "2356789789789789",
                     },
                 ],
-                "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
+                "identities": [{"partner": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
                 "birth_date": "1981-02-02",
                 "given_name": "John",
@@ -422,7 +424,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "documentsToRemove": [],
                             "identities": [
                                 {
-                                    "agency": UNHCR,
+                                    "partner": UNHCR,
                                     "country": "POL",
                                     "number": "2222",
                                 }
@@ -430,7 +432,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "identitiesToEdit": [
                                 {
                                     "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                                    "agency": UNHCR,
+                                    "partner": UNHCR,
                                     "country": "POL",
                                     "number": "3333",
                                 }
@@ -466,7 +468,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 ],
                 "identities": [
                     {
-                        "value": {"agency": "UNHCR", "number": "2222", "country": "POL"},
+                        "value": {"partner": "UNHCR", "number": "2222", "country": "POL"},
                         "approve_status": False,
                     },
                 ],
@@ -474,14 +476,14 @@ class TestUpdateGrievanceTickets(APITestCase):
                     {
                         "value": {
                             "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                            "agency": "UNHCR",
+                            "partner": "UNHCR",
                             "number": "3333",
                             "country": "POL",
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         },
                         "previous_value": {
                             "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                            "agency": "UNHCR",
+                            "partner": "UNHCR",
                             "number": "1111",
                             "country": "POL",
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),

@@ -31,7 +31,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    ImportedAgency,
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
@@ -218,27 +217,27 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+        partner = "WFP" if "scope_id" in header else "UNHCR"
 
-        identities_data = self.identities.get(f"individual_{row_num}_{agency_type}")
+        identities_data = self.identities.get(f"individual_{row_num}_{partner}")
 
         if identities_data:
             identities_data["number"] = value
-            identities_data["agency"] = agency_type
+            identities_data["partner"] = partner
         else:
-            self.identities[f"individual_{row_num}_{agency_type}"] = {
+            self.identities[f"individual_{row_num}_{partner}"] = {
                 "individual": individual,
                 "number": value,
-                "agency": agency_type,
+                "partner": partner,
             }
 
     def _handle_identity_photo(self, cell, row_num, header, individual, *args, **kwargs):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+        partner = "WFP" if "scope_id" in header else "UNHCR"
 
-        identity_data = self.identities.get(f"individual_{row_num}_{agency_type}")
+        identity_data = self.identities.get(f"individual_{row_num}_{partner}")
 
         image = self.image_loader.get(cell.coordinate)
         file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -251,27 +250,27 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if identity_data:
             identity_data["photo"] = file
         else:
-            self.identities[f"individual_{row_num}_{agency_type}"] = {
+            self.identities[f"individual_{row_num}_{partner}"] = {
                 "individual": individual,
                 "photo": file,
-                "agency": agency_type,
+                "partner": partner,
             }
 
     def _handle_identity_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
 
-        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+        partner = "WFP" if "scope_id" in header else "UNHCR"
 
-        identities_data = self.identities.get(f"individual_{row_num}_{agency_type}")
+        identities_data = self.identities.get(f"individual_{row_num}_{partner}")
 
         if identities_data:
             identities_data["issuing_country"] = Country(value)
         else:
-            self.identities[f"individual_{row_num}_{agency_type}"] = {
+            self.identities[f"individual_{row_num}_{partner}"] = {
                 "individual": individual,
                 "issuing_country": Country(value),
-                "agency": agency_type,
+                "partner": partner,
             }
 
     def _handle_collectors(self, value, header, individual, *args, **kwargs):
@@ -312,16 +311,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         ImportedDocument.objects.bulk_create(docs_to_create)
 
     def _create_identities(self) -> None:
-        idents_to_create = [
+        identities_to_create = [
             ImportedIndividualIdentity(
-                agency=ImportedAgency.objects.get(country=ident_data["issuing_country"], type=ident_data["agency"]),
-                individual=ident_data["individual"],
-                document_number=ident_data["number"],
+                partner=identity["partner"],
+                individual=identity["individual"],
+                document_number=identity["number"],
+                country=identity["issuing_country"],
             )
-            for ident_data in self.identities.values()
+            for identity in self.identities.values()
         ]
 
-        ImportedIndividualIdentity.objects.bulk_create(idents_to_create)
+        ImportedIndividualIdentity.objects.bulk_create(identities_to_create)
 
     def _create_collectors(self) -> None:
         collectors_to_create = []

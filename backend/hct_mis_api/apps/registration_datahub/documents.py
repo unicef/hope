@@ -88,7 +88,7 @@ class ImportedIndividualDocument(Document):
     identities = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
-            "agency": fields.KeywordField(attr="agency.type", similarity="boolean"),
+            "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
         }
     )
     households_and_roles = fields.ObjectField(
