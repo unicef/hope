@@ -52,7 +52,6 @@ from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
-    Agency,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -93,29 +92,22 @@ class DocumentTypeNode(DjangoObjectType):
         model = DocumentType
 
 
-class AgencyNode(DjangoObjectType):
-    country = graphene.String(description="Country name")
-    country_iso3 = graphene.String(description="Country ISO3")
+class IndividualIdentityNode(DjangoObjectType):
+    partner = graphene.String(description="Partner")
+    country = graphene.String(description="Individual Identity country")
+    country_iso3 = graphene.String(description="Individual Identity country iso3")
 
-    def resolve_country(parent: Agency, info):
+    @staticmethod
+    def resolve_partner(parent: IndividualIdentity, info):
+        return parent.partner.name
+
+    @staticmethod
+    def resolve_country(parent: IndividualIdentity, info):
         return parent.country.name
 
-    def resolve_country_iso3(parent: Agency, info):
+    @staticmethod
+    def resolve_country_iso3(parent: IndividualIdentity, info):
         return parent.country.iso_code3
-
-    class Meta:
-        model = Agency
-
-
-class IndividualIdentityNode(DjangoObjectType):
-    type = graphene.String(description="Agency type")
-    country = graphene.String(description="Agency country")
-
-    def resolve_type(parent, info):
-        return parent.agency.type
-
-    def resolve_country(parent, info):
-        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = IndividualIdentity

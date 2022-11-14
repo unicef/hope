@@ -5,6 +5,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -17,7 +18,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Agency,
     Document,
     DocumentType,
     IndividualIdentity,
@@ -79,7 +79,7 @@ class TestSendTpToDatahub(TestCase):
         )
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
+        cls.unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,
@@ -111,6 +111,7 @@ class TestSendTpToDatahub(TestCase):
             relationship="HEAD",
             registration_data_import=rdi_second,
         )
+        unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
         IndividualRoleInHousehold.objects.create(
             individual=cls.second_household_head,
             household=cls.household_second,
@@ -136,9 +137,10 @@ class TestSendTpToDatahub(TestCase):
             type=DocumentType.objects.filter(type="NATIONAL_ID").first(),
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
+            partner=cls.unhcr,
             individual=cls.individual_primary,
             number="1111",
+            country=country,
         )
 
         cls.individual_alternate = IndividualFactory(
@@ -151,9 +153,10 @@ class TestSendTpToDatahub(TestCase):
             role=ROLE_ALTERNATE,
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
             individual=cls.individual_alternate,
             number="2222",
+            partner=cls.unhcr,
+            country=country,
         )
 
         cls.individual_no_role_first = IndividualFactory(
@@ -161,9 +164,10 @@ class TestSendTpToDatahub(TestCase):
             registration_data_import=rdi,
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
             individual=cls.individual_no_role_first,
             number="3333",
+            partner=cls.unhcr,
+            country=country,
         )
 
         cls.individual_no_role_second = IndividualFactory(
@@ -171,9 +175,10 @@ class TestSendTpToDatahub(TestCase):
             registration_data_import=rdi,
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
             individual=cls.individual_no_role_second,
             number="4444",
+            partner=cls.unhcr,
+            country=country,
         )
 
         cls.household.head_of_household = cls.individual_primary

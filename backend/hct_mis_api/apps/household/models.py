@@ -623,38 +623,21 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
         self.status = self.STATUS_VALID
 
 
-class Agency(models.Model):
-    type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
-    label = models.CharField(
-        max_length=100,
-    )
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
-
-    class Meta:
-        verbose_name_plural = "Agencies"
-        constraints = [
-            UniqueConstraint(
-                fields=["type", "country"],
-                name="unique_type_and_country",
-            )
-        ]
-
-    def __str__(self) -> str:
-        return f"{self.label} in {self.country}"
-
-
 class IndividualIdentity(models.Model):
-    agency = models.ForeignKey("Agency", related_name="individual_identities", on_delete=models.CASCADE)
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
     )
+    partner = models.ForeignKey(
+        "account.Partner", related_name="individual_identities", null=True, on_delete=models.PROTECT
+    )
+    country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Individual Identities"
 
     def __str__(self) -> str:
-        return f"{self.agency} {self.individual} {self.number}"
+        return f"{self.partner} {self.individual} {self.number}"
 
 
 class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):

@@ -48,7 +48,6 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Agency,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -73,20 +72,6 @@ from hct_mis_api.apps.utils.admin import (
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
-
-
-@admin.register(Agency)
-class AgencyAdmin(HOPEModelAdminBase):
-    search_fields = ("label", "country")
-    list_display = ("label", "type", "country")
-    list_filter = (
-        "type",
-        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
-    )
-    autocomplete_fields = ("country",)
-
-    def get_queryset(self, request) -> QuerySet:
-        return super().get_queryset(request).select_related("country")
 
 
 @admin.register(Document)
@@ -635,16 +620,15 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
-    list_display = ("agency", "individual", "number")
+    list_display = ("partner", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
-    # autocomplete_fields = ["agency", "individual"]
     raw_id_fields = (
         "individual",
-        "agency",
+        "partner",
     )
 
     def get_queryset(self, request) -> QuerySet:
-        return super().get_queryset(request).select_related("individual", "agency")
+        return super().get_queryset(request).select_related("individual", "partner")
 
 
 @admin.register(EntitlementCard)
