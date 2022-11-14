@@ -98,17 +98,17 @@ def handle_edit_document(document_data: dict):
 
 
 def handle_add_payment_channel(data, individual):
-    return PaymentChannel(
+    pc = PaymentChannel(
         individual=individual,
         delivery_mechanism=get_object_or_404(DeliveryMechanism, id=decode_id_string(data.pop("delivery_mechanism"))),
     )
+    assert not data
+    return pc
 
 
 def handle_update_payment_channel(data):
-    print(f"handle_update_payment_channel: {data}")
     existing_obj = get_object_or_404(PaymentChannel, id=decode_id_string(data.pop("id")))
     if delivery_mechanism := data.get("delivery_mechanism"):
-        print(f"set delivery_mechanism: {delivery_mechanism}")
         existing_obj.delivery_mechanism = get_object_or_404(DeliveryMechanism, id=decode_id_string(delivery_mechanism))
     # TODO
     existing_obj.save()
@@ -329,19 +329,6 @@ def prepare_edit_identities(identities):
             }
         )
     return edited_identities
-
-
-def prepare_edit_payment_channel(payment_channels):
-    items = []
-
-    handlers = {
-        "BANK_TRANSFER": handle_bank_transfer_payment_method,
-    }
-
-    for pc in payment_channels:
-        handler = handlers.get(pc.get("type"))
-        items.append(handler(pc))
-    return items
 
 
 def handle_bank_transfer_payment_method(pc):

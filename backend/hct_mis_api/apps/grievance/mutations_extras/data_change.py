@@ -38,7 +38,6 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_update_payment_channel,
     prepare_edit_documents,
     prepare_edit_identities,
-    prepare_edit_payment_channel,
     prepare_previous_documents,
     prepare_previous_identities,
     prepare_previous_payment_channels,
@@ -149,11 +148,11 @@ class PaymentChannelObjectType(graphene.InputObjectType):
     is_fallback = graphene.Boolean()
 
 
-class EditBankTransferObjectType(graphene.InputObjectType):
+class EditPaymentChannelObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
-    type = graphene.String(required=True)
-    bank_name = graphene.String(required=True)
-    bank_account_number = graphene.String(required=True)
+    delivery_mechanism = graphene.ID()
+    delivery_data = graphene.JSONString()
+    is_fallback = graphene.Boolean()
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
@@ -191,7 +190,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     identities_to_remove = graphene.List(graphene.ID)
     identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
     payment_channels = graphene.List(PaymentChannelObjectType)
-    payment_channels_to_edit = graphene.List(EditBankTransferObjectType)
+    payment_channels_to_edit = graphene.List(EditPaymentChannelObjectType)
     payment_channels_to_remove = graphene.List(graphene.ID)
     flex_fields = Arg()
 
@@ -448,9 +447,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
 
     individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
     individual_data_with_approve_status["payment_channels_to_remove"] = payment_channels_to_remove_with_approve_status
-    individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
-        payment_channels_to_edit
-    )
+    individual_data_with_approve_status["payment_channels_to_edit"] = payment_channels_to_edit
 
     individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
 
@@ -552,9 +549,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
 
     individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
     individual_data_with_approve_status["payment_channels_to_remove"] = payment_channels_to_remove_with_approve_status
-    individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
-        payment_channels_to_edit
-    )
+    individual_data_with_approve_status["payment_channels_to_edit"] = payment_channels_to_edit
     individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
         payment_channels_to_remove_with_approve_status
     )
@@ -698,7 +693,6 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
-    # BankAccountInfo.objects.bulk_create(payment_channels_to_create) # TODO: replace with PC
     PaymentChannel.objects.bulk_create(payment_channels_to_create)
 
     if individual.household:
@@ -724,7 +718,6 @@ def convert_to_empty_string_if_null(value):
 
 
 def close_update_individual_grievance_ticket(grievance_ticket, info):
-    print(f"close_update_individual_grievance_ticket {grievance_ticket}")
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
         return
@@ -816,12 +809,8 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     ]
 
     payment_channels_to_update = [
-        handle_update_payment_channel(data["value"]) for data in payment_channels_to_edit if is_approved(data)
+        handle_update_payment_channel(data) for data in payment_channels_to_edit if is_approved(data)
     ]
-
-    print(f"pc to create {payment_channels_to_create}")
-    print(f"pc to update {payment_channels_to_update}")
-    print(f"pc to remove {payment_channels_to_remove}")
 
     Document.objects.bulk_create(documents_to_create)
     Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo"])
@@ -831,12 +820,10 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "agency"])
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
 
-    # # TODO: replace with PC
-    # BankAccountInfo.objects.bulk_create(payment_channels_to_create)
-    # BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])
-    # BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
     PaymentChannel.objects.bulk_create(payment_channels_to_create)
-    PaymentChannel.objects.bulk_update(payment_channels_to_update, ["delivery_data"])
+    PaymentChannel.objects.bulk_update(
+        payment_channels_to_update, ["delivery_data", "delivery_mechanism", "is_fallback"]
+    )
     PaymentChannel.objects.filter(id__in=payment_channels_to_remove).delete()
 
     new_individual.refresh_from_db()
@@ -846,6 +833,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     else:
         new_individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
+
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,

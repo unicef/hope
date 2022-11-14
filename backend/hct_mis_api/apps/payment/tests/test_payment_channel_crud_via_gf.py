@@ -210,8 +210,11 @@ mutation ApproveIndividualDataChange(
                 "individual": encode_id_base64(self.individuals[0].id, "Individual"),
                 "individualData": {
                     "flexFields": {},
-                    "paymentChannels": [
-                        {"deliveryMechanism": encode_id_base64(self.delivery_mechanism_2.id, "DeliveryMechanism")}
+                    "paymentChannelsToEdit": [
+                        {
+                            "id": encode_id_base64(payment_channel.id, "PaymentChannel"),
+                            "deliveryMechanism": encode_id_base64(self.delivery_mechanism_2.id, "DeliveryMechanism"),
+                        }
                     ],
                 },
             }
@@ -246,6 +249,53 @@ mutation ApproveIndividualDataChange(
         self.individuals[0].refresh_from_db()
         assert self.individuals[0].payment_channels.count() == 1
         assert self.individuals[0].payment_channels.first().delivery_mechanism == self.delivery_mechanism_2
+
+    def test_deleting_payment_channel_via_data_update(self):
+        payment_channel = PaymentChannelFactory(
+            individual=self.individuals[0], delivery_mechanism=self.delivery_mechanism_1
+        )
+        self.individuals[0].payment_channels.set([payment_channel])
+        assert self.individuals[0].payment_channels.count() == 1
+        assert self.individuals[0].payment_channels.first().delivery_mechanism == self.delivery_mechanism_1
+
+        create_response = self.create_individual_data_update_ticket(
+            extras={
+                "individual": encode_id_base64(self.individuals[0].id, "Individual"),
+                "individualData": {
+                    "flexFields": {},
+                    "paymentChannelsToRemove": [encode_id_base64(payment_channel.id, "PaymentChannel")],
+                },
+            }
+        )
+        encoded_grievance_ticket_id = create_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]["id"]
+
+        self.set_ticket_to_in_progress(encoded_grievance_ticket_id)
+        self.approve_ticket(encoded_grievance_ticket_id)
+
+        approve_ind_data_change_response = self.graphql_request(
+            request_string=self.APPROVE_INDIVIDUAL_DATA_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": encoded_grievance_ticket_id,
+                "individualApproveData": "{}",
+                "approvedDocumentsToCreate": [],
+                "approvedDocumentsToRemove": [],
+                "approvedDocumentsToEdit": [],
+                "approvedIdentitiesToCreate": [],
+                "approvedIdentitiesToRemove": [],
+                "approvedIdentitiesToEdit": [],
+                "approvedPaymentChannelsToCreate": [],
+                "approvedPaymentChannelsToRemove": [0],
+                "approvedPaymentChannelsToEdit": [],
+                "flexFieldsApproveData": "{}",
+            },
+        )
+        assert "errors" not in approve_ind_data_change_response, approve_ind_data_change_response
+
+        self.close_ticket(encoded_grievance_ticket_id)
+
+        self.individuals[0].refresh_from_db()
+        assert self.individuals[0].payment_channels.count() == 0
 
 
 # TODO: add individual with payment channel
