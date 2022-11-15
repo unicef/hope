@@ -588,31 +588,33 @@ def chart_filters_decoder(filters):
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(
-    filters, program_id_path="id", administrative_area_path="admin_areas", payment_verification_gfk=False
-):
-    filter_query = {} if not payment_verification_gfk else Q()
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
+    filter_query = {}
     if filters.get("program") is not None:
-        if not payment_verification_gfk:
-            filter_query.update({program_id_path: filters.get("program")})
-        else:
-            for path in program_id_path.split(","):
-                filter_query |= Q(**{path: filters.get("program")})
+        filter_query.update({program_id_path: filters.get("program")})
     if filters.get("administrative_area") is not None:
-        if not payment_verification_gfk:
-            filter_query.update(
-                {
-                    f"{administrative_area_path}__id": filters.get("administrative_area"),
-                    f"{administrative_area_path}__area_type__area_level": 2,
-                }
-            )
-        else:
-            for path in administrative_area_path.split(","):
-                filter_query |= Q(
-                    Q(**{f"{path}__id": filters.get("administrative_area")})
-                    & Q(**{f"{path}__area_type__area_level": 2})
-                )
+        filter_query.update(
+            {
+                f"{administrative_area_path}__id": filters.get("administrative_area"),
+                f"{administrative_area_path}__area_type__area_level": 2,
+            }
+        )
+    return filter_query
 
+
+def chart_create_filter_query_for_payment_verification_gfk(
+        filters, program_id_path="id", administrative_area_path="admin_areas"
+):
+    filter_query = Q()
+    if filters.get("program") is not None:
+        for path in program_id_path.split(","):
+            filter_query |= Q(**{path: filters.get("program")})
+    if filters.get("administrative_area") is not None:
+        for path in administrative_area_path.split(","):
+            filter_query |= Q(
+                Q(**{f"{path}__id": filters.get("administrative_area")})
+                & Q(**{f"{path}__area_type__area_level": 2})
+            )
     return filter_query
 
 
