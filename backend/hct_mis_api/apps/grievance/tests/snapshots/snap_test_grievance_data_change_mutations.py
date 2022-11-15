@@ -84,35 +84,75 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
 }
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_0_with_permission 1'] = {
-    'errors': [
-        {
-            'locations': [
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
                 {
-                    'column': 36,
-                    'line': 2
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': {
+                        'individual': {
+                            'fullName': 'Benjamin Butler'
+                        },
+                        'individualData': {
+                            'documents': [
+                            ],
+                            'documents_to_edit': [
+                            ],
+                            'documents_to_remove': [
+                            ],
+                            'flex_fields': {
+                            },
+                            'identities': [
+                            ],
+                            'identities_to_edit': [
+                            ],
+                            'identities_to_remove': [
+                            ],
+                            'payment_channels': [
+                            ],
+                            'payment_channels_to_edit': [
+                                {
+                                    'delivery_mechanism': 'Cheque',
+                                    'id': 'QmFua0FjY291bnRJbmZvTm9kZTpkMzZlM2U2NC05ZjNiLTQwODgtYmM5ZS03ODM4MGEyMmVhOGQ='
+                                }
+                            ],
+                            'payment_channels_to_remove': [
+                            ],
+                            'previous_documents': {
+                            },
+                            'previous_identities': {
+                            },
+                            'previous_payment_channels': {
+                            }
+                        }
+                    },
+                    'issueType': 14,
+                    'sensitiveTicketDetails': None
                 }
-            ],
-            'message': '''Variable "$input" got invalid value {"assignedTo": "VXNlck5vZGU6MDMwZDI3OGEtNWE4NS00ZjM4LWEzMjQtZmI1Y2FjMWFjZGYw", "businessArea": "afghanistan", "category": 2, "consent": true, "description": "Test", "extras": {"issueType": {"individualDataUpdateIssueTypeExtras": {"individual": "SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh", "individualData": {"paymentChannelsToEdit": [{"bankAccountNumber": 1111222233334444, "bankName": "privatbank", "id": "QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=", "type": "BANK_TRANSFER"}]}}}}, "issueType": 14, "language": "PL"}.
-In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankAccountNumber": Unknown field.
-In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankName": Unknown field.
-In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "type": Unknown field.'''
+            ]
         }
-    ]
+    }
 }
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 36,
-                    'line': 2
+                    'column': 7,
+                    'line': 3
                 }
             ],
-            'message': '''Variable "$input" got invalid value {"assignedTo": "VXNlck5vZGU6MDMwZDI3OGEtNWE4NS00ZjM4LWEzMjQtZmI1Y2FjMWFjZGYw", "businessArea": "afghanistan", "category": 2, "consent": true, "description": "Test", "extras": {"issueType": {"individualDataUpdateIssueTypeExtras": {"individual": "SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh", "individualData": {"paymentChannelsToEdit": [{"bankAccountNumber": 1111222233334444, "bankName": "privatbank", "id": "QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=", "type": "BANK_TRANSFER"}]}}}}, "issueType": 14, "language": "PL"}.
-In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankAccountNumber": Unknown field.
-In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankName": Unknown field.
-In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "type": Unknown field.'''
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
         }
     ]
 }

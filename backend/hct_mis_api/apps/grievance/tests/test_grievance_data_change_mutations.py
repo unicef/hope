@@ -5,8 +5,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 from parameterized import parameterized
-from backend.hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
 
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
 from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.payment.fixtures import PaymentChannelFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -404,7 +404,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         payment_channel = PaymentChannelFactory(
             individual=self.individuals[0],
-            delivery_mechanism=DeliveryMechanismFactory(delivery_mechaism=GenericPayment.DELIVERY_TYPE_TRANSFER),
+            delivery_mechanism=DeliveryMechanismFactory(delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER),
         )
 
         variables = {
