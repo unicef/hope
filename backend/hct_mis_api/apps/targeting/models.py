@@ -12,9 +12,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, JSONField, Q, Sum
-from django.db.models.functions import Coalesce
-from django.utils import timezone
+from django.db.models import JSONField, Q
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
@@ -258,8 +256,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def excluded_household_ids(self):
-        excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
-        return excluded_household_ids_array
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
 
     @property
     def household_list(self):
@@ -271,49 +268,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if self.vulnerability_score_min is not None:
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
         return queryset.distinct()
-
-    def refresh_stats(self) -> None:
-        targeting_details = self.household_list.annotate(
-            child_male=Coalesce("male_age_group_0_5_count", 0)
-            + Coalesce("male_age_group_6_11_count", 0)
-            + Coalesce("male_age_group_12_17_count", 0)
-            + Coalesce("male_age_group_0_5_disabled_count", 0)
-            + Coalesce("male_age_group_6_11_disabled_count", 0)
-            + Coalesce("male_age_group_12_17_disabled_count", 0),
-            child_female=Coalesce("female_age_group_0_5_count", 0)
-            + Coalesce("female_age_group_6_11_count", 0)
-            + Coalesce("female_age_group_12_17_count", 0)
-            + Coalesce("female_age_group_0_5_disabled_count", 0)
-            + Coalesce("female_age_group_6_11_disabled_count", 0)
-            + Coalesce("female_age_group_12_17_disabled_count", 0),
-            adult_male=Coalesce("male_age_group_18_59_count", 0)
-            + Coalesce("male_age_group_60_count", 0)
-            + Coalesce("male_age_group_18_59_disabled_count", 0)
-            + Coalesce("male_age_group_60_disabled_count", 0),
-            adult_female=Coalesce("female_age_group_18_59_count", 0)
-            + Coalesce("female_age_group_60_count", 0)
-            + Coalesce("female_age_group_18_59_disabled_count", 0)
-            + Coalesce("female_age_group_60_disabled_count", 0),
-        ).aggregate(
-            child_male_count=Sum("child_male"),
-            child_female_count=Sum("child_female"),
-            adult_male_count=Sum("adult_male"),
-            adult_female_count=Sum("adult_female"),
-            total_individuals_count=Sum("size"),
-            total_households_count=Count("id"),
-        )
-
-        for key, value in targeting_details.items():
-            setattr(self, key, value)
-
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
-
-    def full_rebuild(self) -> None:
-        household_queryset = Household.objects.filter(business_area=self.business_area)
-        household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
-        self.households.set(household_queryset)
-        self.refresh_stats()
 
     def get_criteria_string(self) -> str:
         try:
