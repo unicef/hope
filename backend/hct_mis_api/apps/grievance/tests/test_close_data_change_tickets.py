@@ -4,6 +4,8 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -184,9 +186,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 ],
                 "payment_channels": [
                     {
-                        "type": "BANK_TRANSFER",
-                        "bank_name": "privatbank",
-                        "bank_account_number": 2356789789789789,
+                        "delivery_mechanism": "Cash",
                     },
                 ],
             },
@@ -272,6 +272,8 @@ class TestCloseDataChangeTickets(APITestCase):
             },
             approve_status=True,
         )
+
+        DeliveryMechanismFactory(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH)
 
     @parameterized.expand(
         [

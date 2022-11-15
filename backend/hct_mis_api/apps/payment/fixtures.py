@@ -186,6 +186,7 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
 class DeliveryMechanismFactory(factory.DjangoModelFactory):
     class Meta:
         model = DeliveryMechanism
+        django_get_or_create = ("delivery_mechanism",)
 
     delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
     global_core_fields = factory.List(

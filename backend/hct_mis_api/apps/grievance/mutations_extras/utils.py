@@ -97,10 +97,12 @@ def handle_edit_document(document_data: dict):
 
 
 def handle_add_payment_channel(data, individual):
+    delivery_mechanism = DeliveryMechanism.objects.get(delivery_mechanism=data.pop("delivery_mechanism"))
     pc = PaymentChannel(
         individual=individual,
-        delivery_mechanism=DeliveryMechanism.objects.get(delivery_mechanism=data.pop("delivery_mechanism")),
+        delivery_mechanism=delivery_mechanism,
     )
+    # TODO
     assert not data
     return pc
 
