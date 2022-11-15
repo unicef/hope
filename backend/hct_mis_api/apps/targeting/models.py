@@ -1,11 +1,7 @@
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField
-from django.contrib.postgres.validators import (
-    RangeMaxValueValidator,
-    RangeMinValueValidator,
-)
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -17,13 +13,11 @@ from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
-from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -38,28 +32,6 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 logger = logging.getLogger(__name__)
-
-_MAX_LEN = 256
-_MIN_RANGE = 1
-_MAX_RANGE = 200
-
-
-def get_serialized_range(min_range=None, max_range=None):
-    return NumericRange(min_range or _MIN_RANGE, max_range or _MAX_RANGE)
-
-
-def get_integer_range(min_range=None, max_range=None):
-    """Numeric Range support for saving as InterRangeField."""
-    min_range = min_range or _MIN_RANGE
-    max_range = max_range or _MAX_RANGE
-    return IntegerRangeField(
-        default=get_serialized_range,
-        blank=True,
-        validators=[
-            RangeMinValueValidator(min_range),
-            RangeMaxValueValidator(max_range),
-        ],
-    )
 
 
 class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
@@ -169,9 +141,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
+    status = models.CharField(max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
     build_status = models.CharField(
-        max_length=_MAX_LEN, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
     households = models.ManyToManyField(
