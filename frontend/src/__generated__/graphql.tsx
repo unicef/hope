@@ -104,7 +104,7 @@ export type AddIndividualDataObjectType = {
   role: Scalars['String'],
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
-  paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
+  paymentChannels?: Maybe<Array<Maybe<PaymentChannelObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
@@ -354,12 +354,6 @@ export type BankAccountInfoNode = Node & {
   type?: Maybe<Scalars['String']>,
 };
 
-export type BankTransferObjectType = {
-  type: Scalars['String'],
-  bankName: Scalars['String'],
-  bankAccountNumber: Scalars['String'],
-};
-
 
 export type BusinessAreaNode = Node & {
    __typename?: 'BusinessAreaNode',
@@ -396,6 +390,7 @@ export type BusinessAreaNode = Node & {
   userRoles: Array<UserRoleNode>,
   householdSet: HouseholdNodeConnection,
   individualSet: IndividualNodeConnection,
+  registrationdataimportSet: RegistrationDataImportNodeConnection,
   paymentplanSet: PaymentPlanNodeConnection,
   cashplanSet: CashPlanNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -403,7 +398,6 @@ export type BusinessAreaNode = Node & {
   serviceproviderSet: ServiceProviderNodeConnection,
   tickets: GrievanceTicketNodeConnection,
   programSet: ProgramNodeConnection,
-  registrationdataimportSet: RegistrationDataImportNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
@@ -430,6 +424,15 @@ export type BusinessAreaNodeHouseholdSetArgs = {
 
 
 export type BusinessAreaNodeIndividualSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeRegistrationdataimportSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -499,15 +502,6 @@ export type BusinessAreaNodeProgramSetArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
-};
-
-
-export type BusinessAreaNodeRegistrationdataimportSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1189,13 +1183,6 @@ export enum DocumentTypeType {
   Other = 'OTHER'
 }
 
-export type EditBankTransferObjectType = {
-  id: Scalars['ID'],
-  type: Scalars['String'],
-  bankName: Scalars['String'],
-  bankAccountNumber: Scalars['String'],
-};
-
 export type EditCashPlanPaymentVerificationInput = {
   cashPlanPaymentVerificationId: Scalars['ID'],
   sampling: Scalars['String'],
@@ -1225,6 +1212,13 @@ export type EditIndividualIdentityObjectType = {
   country: Scalars['String'],
   agency: Scalars['String'],
   number: Scalars['String'],
+};
+
+export type EditPaymentChannelObjectType = {
+  id: Scalars['ID'],
+  deliveryMechanism?: Maybe<Scalars['String']>,
+  deliveryData?: Maybe<Scalars['JSONString']>,
+  isFallback?: Maybe<Scalars['Boolean']>,
 };
 
 export type EditPaymentVerificationMutation = {
@@ -3132,8 +3126,8 @@ export type IndividualUpdateDataObjectType = {
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   identitiesToEdit?: Maybe<Array<Maybe<EditIndividualIdentityObjectType>>>,
-  paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
-  paymentChannelsToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
+  paymentChannels?: Maybe<Array<Maybe<PaymentChannelObjectType>>>,
+  paymentChannelsToEdit?: Maybe<Array<Maybe<EditPaymentChannelObjectType>>>,
   paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
@@ -3750,29 +3744,12 @@ export type PartnerTypeUserSetArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
-export enum PaymentChannelDeliveryMechanism {
-  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
-  Cash = 'CASH',
-  CashByFsp = 'CASH_BY_FSP',
-  Cheque = 'CHEQUE',
-  DepositToCard = 'DEPOSIT_TO_CARD',
-  InKind = 'IN_KIND',
-  MobileMoney = 'MOBILE_MONEY',
-  Other = 'OTHER',
-  PrePaidCard = 'PRE_PAID_CARD',
-  Referral = 'REFERRAL',
-  Transfer = 'TRANSFER',
-  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
-  Voucher = 'VOUCHER'
-}
-
 export type PaymentChannelNode = Node & {
    __typename?: 'PaymentChannelNode',
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   individual: IndividualNode,
-  deliveryMechanism?: Maybe<PaymentChannelDeliveryMechanism>,
   isFallback: Scalars['Boolean'],
   paymentSet: PaymentNodeConnection,
 };
@@ -3784,6 +3761,12 @@ export type PaymentChannelNodePaymentSetArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
+};
+
+export type PaymentChannelObjectType = {
+  deliveryMechanism: Scalars['String'],
+  deliveryData?: Maybe<Scalars['JSONString']>,
+  isFallback?: Maybe<Scalars['Boolean']>,
 };
 
 export type PaymentConflictDataNode = {
@@ -6841,6 +6824,7 @@ export type UserBusinessAreaNode = Node & {
   userRoles: Array<UserRoleNode>,
   householdSet: HouseholdNodeConnection,
   individualSet: IndividualNodeConnection,
+  registrationdataimportSet: RegistrationDataImportNodeConnection,
   paymentplanSet: PaymentPlanNodeConnection,
   cashplanSet: CashPlanNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -6848,7 +6832,6 @@ export type UserBusinessAreaNode = Node & {
   serviceproviderSet: ServiceProviderNodeConnection,
   tickets: GrievanceTicketNodeConnection,
   programSet: ProgramNodeConnection,
-  registrationdataimportSet: RegistrationDataImportNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
@@ -6876,6 +6859,15 @@ export type UserBusinessAreaNodeHouseholdSetArgs = {
 
 
 export type UserBusinessAreaNodeIndividualSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6945,15 +6937,6 @@ export type UserBusinessAreaNodeProgramSetArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
-};
-
-
-export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -7033,6 +7016,7 @@ export type UserNode = Node & {
   lastDoapSync?: Maybe<Scalars['DateTime']>,
   doapHash: Scalars['String'],
   userRoles: Array<UserRoleNode>,
+  registrationDataImports: RegistrationDataImportNodeConnection,
   createdPaymentPlans: PaymentPlanNodeConnection,
   createdFinancialServiceProviderXlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection,
   createdFinancialServiceProviders: FinancialServiceProviderNodeConnection,
@@ -7042,13 +7026,21 @@ export type UserNode = Node & {
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
-  registrationDataImports: RegistrationDataImportNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   changedTargetPopulations: TargetPopulationNodeConnection,
   finalizedTargetPopulations: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
+};
+
+
+export type UserNodeRegistrationDataImportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -7116,15 +7108,6 @@ export type UserNodeAssignedTicketsArgs = {
 
 
 export type UserNodeTicketNotesArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type UserNodeRegistrationDataImportsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -22310,6 +22293,8 @@ export type ResolversTypes = {
   Float: ResolverTypeWrapper<Scalars['Float']>,
   UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
   UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   PaymentPlanNodeConnection: ResolverTypeWrapper<PaymentPlanNodeConnection>,
   PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>,
   PaymentPlanNode: ResolverTypeWrapper<PaymentPlanNode>,
@@ -22404,7 +22389,6 @@ export type ResolversTypes = {
   PaymentStatus: PaymentStatus,
   PaymentDeliveryType: PaymentDeliveryType,
   PaymentChannelNode: ResolverTypeWrapper<PaymentChannelNode>,
-  PaymentChannelDeliveryMechanism: PaymentChannelDeliveryMechanism,
   PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
   DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
   ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>,
@@ -22451,8 +22435,6 @@ export type ResolversTypes = {
   TicketReferralDetailsNode: ResolverTypeWrapper<TicketReferralDetailsNode>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
   PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
   PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
@@ -22611,8 +22593,8 @@ export type ResolversTypes = {
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
-  BankTransferObjectType: BankTransferObjectType,
-  EditBankTransferObjectType: EditBankTransferObjectType,
+  PaymentChannelObjectType: PaymentChannelObjectType,
+  EditPaymentChannelObjectType: EditPaymentChannelObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
@@ -22747,6 +22729,8 @@ export type ResolversParentTypes = {
   Float: Scalars['Float'],
   UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
   UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   PaymentPlanNodeConnection: PaymentPlanNodeConnection,
   PaymentPlanNodeEdge: PaymentPlanNodeEdge,
   PaymentPlanNode: PaymentPlanNode,
@@ -22841,7 +22825,6 @@ export type ResolversParentTypes = {
   PaymentStatus: PaymentStatus,
   PaymentDeliveryType: PaymentDeliveryType,
   PaymentChannelNode: PaymentChannelNode,
-  PaymentChannelDeliveryMechanism: PaymentChannelDeliveryMechanism,
   PaymentConflictDataNode: PaymentConflictDataNode,
   DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
   ApprovalProcessNodeConnection: ApprovalProcessNodeConnection,
@@ -22888,8 +22871,6 @@ export type ResolversParentTypes = {
   TicketReferralDetailsNode: TicketReferralDetailsNode,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
   PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
   PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
@@ -23048,8 +23029,8 @@ export type ResolversParentTypes = {
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
-  BankTransferObjectType: BankTransferObjectType,
-  EditBankTransferObjectType: EditBankTransferObjectType,
+  PaymentChannelObjectType: PaymentChannelObjectType,
+  EditPaymentChannelObjectType: EditPaymentChannelObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
@@ -23340,6 +23321,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, BusinessAreaNodeHouseholdSetArgs>,
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, BusinessAreaNodeIndividualSetArgs>,
+  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentplanSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodeCashplanSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
@@ -23347,7 +23329,6 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, BusinessAreaNodeTicketsArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
-  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
@@ -24619,7 +24600,6 @@ export type PaymentChannelNodeResolvers<ContextType = any, ParentType extends Re
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  deliveryMechanism?: Resolver<Maybe<ResolversTypes['PaymentChannelDeliveryMechanism']>, ParentType, ContextType>,
   isFallback?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentChannelNodePaymentSetArgs>,
 };
@@ -25928,6 +25908,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeHouseholdSetArgs>,
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeIndividualSetArgs>,
+  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentplanSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCashplanSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
@@ -25935,7 +25916,6 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeServiceproviderSetArgs>,
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTicketsArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeProgramSetArgs>,
-  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
@@ -25975,6 +25955,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   createdPaymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, UserNodeCreatedPaymentPlansArgs>,
   createdFinancialServiceProviderXlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs>,
   createdFinancialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, UserNodeCreatedFinancialServiceProvidersArgs>,
@@ -25984,7 +25965,6 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserNodeTicketNotesArgs>,
-  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
   changedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeChangedTargetPopulationsArgs>,
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
