@@ -24,7 +24,6 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    choices_to_dict,
     encode_ids,
     to_choice_object,
 )
@@ -441,17 +440,10 @@ class Query(graphene.ObjectType):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_manual_category_choices(self, info, **kwargs):
-        return [
-            {"name": name, "value": value}
-            for value, name in GrievanceTicket.CATEGORY_CHOICES
-            if value in GrievanceTicket.MANUAL_CATEGORIES
-        ]
-
-    def resolve_grievance_ticket_all_category_choices(self, info, **kwargs):
-        return [{"name": name, "value": value} for value, name in GrievanceTicket.CATEGORY_CHOICES]
+        return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
 
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
-        categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
+        categories = dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
