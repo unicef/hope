@@ -4,8 +4,6 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
-from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -38,6 +36,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
