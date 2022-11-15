@@ -21,31 +21,11 @@ snapshots['TestApproveDeleteHousehold::test_approve_delete_household 1'] = {
 
 snapshots['TestApproveDeleteHousehold::test_approve_delete_household 2'] = {
     'data': {
-        'approveDeleteHousehold': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 11,
-                    'line': 3
-                }
-            ],
-            'message': "The original household (HH-22-0000.0142) hasn't to be in withdrawn status",
-            'path': [
-                'approveDeleteHousehold'
-            ]
-        }
-    ]
-}
-
-snapshots['TestApproveDeleteHousehold::test_approve_delete_household 3'] = {
-    'data': {
         'approveDeleteHousehold': {
             'grievanceTicket': {
                 'deleteHouseholdTicketDetails': {
                     'reasonHousehold': {
-                        'unicefId': 'HH-22-0000.0143'
+                        'withdrawn': False
                     }
                 }
             }
@@ -53,7 +33,7 @@ snapshots['TestApproveDeleteHousehold::test_approve_delete_household 3'] = {
     }
 }
 
-snapshots['TestApproveDeleteHousehold::test_approve_delete_household 4'] = {
+snapshots['TestApproveDeleteHousehold::test_approve_delete_household 3'] = {
     'data': {
         'approveDeleteHousehold': {
             'grievanceTicket': {
@@ -65,7 +45,7 @@ snapshots['TestApproveDeleteHousehold::test_approve_delete_household 4'] = {
     }
 }
 
-snapshots['TestApproveDeleteHousehold::test_approve_delete_household 5'] = {
+snapshots['TestApproveDeleteHousehold::test_approve_delete_household 4'] = {
     'data': {
         'approveDeleteHousehold': None
     },
@@ -85,13 +65,13 @@ snapshots['TestApproveDeleteHousehold::test_approve_delete_household 5'] = {
     ]
 }
 
-snapshots['TestApproveDeleteHousehold::test_approve_delete_household 6'] = {
+snapshots['TestApproveDeleteHousehold::test_approve_delete_household 5'] = {
     'data': {
         'approveDeleteHousehold': {
             'grievanceTicket': {
                 'deleteHouseholdTicketDetails': {
                     'reasonHousehold': {
-                        'unicefId': 'HH-22-0000.0144'
+                        'withdrawn': False
                     }
                 }
             }
