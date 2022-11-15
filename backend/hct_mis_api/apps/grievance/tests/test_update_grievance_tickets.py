@@ -79,6 +79,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.maxDiff = None
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -303,7 +304,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                             ],
                             "paymentChannels": [
                                 {
-                                    "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                                     "deliveryMechanism": "CASH",
                                 },
                             ],
@@ -334,9 +334,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 ],
                 "payment_channels": [
                     {
-                        "type": "BANK_TRANSFER",
-                        "bank_name": "privatbank",
-                        "bank_account_number": "2356789789789789",
+                        "delivery_mechanism": "CASH",
                     },
                 ],
                 "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
