@@ -187,7 +187,7 @@ class Query(NaturalKeyModel, models.Model):
 
 
 class Dataset(NaturalKeyModel, models.Model):
-    hash = models.CharField(unique=True, max_length=200, editable=False)
+    hash = models.CharField(max_length=200, editable=False)
     last_run = models.DateTimeField(null=True, blank=True)
     description = models.CharField(max_length=100)
     query = models.ForeignKey(Query, on_delete=models.CASCADE, related_name="datasets")
