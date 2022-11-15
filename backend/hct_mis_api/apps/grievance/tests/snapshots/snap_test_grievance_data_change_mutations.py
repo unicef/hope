@@ -39,9 +39,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                                 {
                                     'approve_status': False,
                                     'value': {
-                                        'bank_account_number': '2356789789789789',
-                                        'bank_name': 'privatbank',
-                                        'type': 'BANK_TRANSFER'
+                                        'delivery_mechanism': 'Cheque'
                                     }
                                 }
                             ],
@@ -86,166 +84,51 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
 }
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_0_with_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': {
-                        'individual': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'individualData': {
-                            'documents': [
-                            ],
-                            'documents_to_edit': [
-                            ],
-                            'documents_to_remove': [
-                            ],
-                            'flex_fields': {
-                            },
-                            'identities': [
-                            ],
-                            'identities_to_edit': [
-                            ],
-                            'identities_to_remove': [
-                            ],
-                            'payment_channels': [
-                            ],
-                            'payment_channels_to_edit': [
-                                {
-                                    'approve_status': False,
-                                    'previous_value': {
-                                        'bank_account_number': '2356789789789789',
-                                        'bank_name': 'privatbank',
-                                        'id': 'QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=',
-                                        'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
-                                        'type': 'BANK_TRANSFER'
-                                    },
-                                    'value': {
-                                        'bank_account_number': '1111222233334444',
-                                        'bank_name': 'privatbank',
-                                        'id': 'QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=',
-                                        'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
-                                        'type': 'BANK_TRANSFER'
-                                    }
-                                }
-                            ],
-                            'payment_channels_to_remove': [
-                            ],
-                            'previous_documents': {
-                            },
-                            'previous_identities': {
-                            },
-                            'previous_payment_channels': {
-                            }
-                        }
-                    },
-                    'issueType': 14,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_1_without_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': None
-    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 7,
-                    'line': 3
+                    'column': 36,
+                    'line': 2
                 }
             ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'createGrievanceTicket'
-            ]
+            'message': '''Variable "$input" got invalid value {"assignedTo": "VXNlck5vZGU6MDMwZDI3OGEtNWE4NS00ZjM4LWEzMjQtZmI1Y2FjMWFjZGYw", "businessArea": "afghanistan", "category": 2, "consent": true, "description": "Test", "extras": {"issueType": {"individualDataUpdateIssueTypeExtras": {"individual": "SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh", "individualData": {"paymentChannelsToEdit": [{"bankAccountNumber": 1111222233334444, "bankName": "privatbank", "id": "QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=", "type": "BANK_TRANSFER"}]}}}}, "issueType": 14, "language": "PL"}.
+In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankAccountNumber": Unknown field.
+In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankName": Unknown field.
+In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "type": Unknown field.'''
+        }
+    ]
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_1_without_permission 1'] = {
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 36,
+                    'line': 2
+                }
+            ],
+            'message': '''Variable "$input" got invalid value {"assignedTo": "VXNlck5vZGU6MDMwZDI3OGEtNWE4NS00ZjM4LWEzMjQtZmI1Y2FjMWFjZGYw", "businessArea": "afghanistan", "category": 2, "consent": true, "description": "Test", "extras": {"issueType": {"individualDataUpdateIssueTypeExtras": {"individual": "SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh", "individualData": {"paymentChannelsToEdit": [{"bankAccountNumber": 1111222233334444, "bankName": "privatbank", "id": "QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=", "type": "BANK_TRANSFER"}]}}}}, "issueType": 14, "language": "PL"}.
+In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankAccountNumber": Unknown field.
+In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "bankName": Unknown field.
+In field "extras": In field "issueType": In field "individualDataUpdateIssueTypeExtras": In field "individualData": In field "paymentChannelsToEdit": In element #0: In field "type": Unknown field.'''
         }
     ]
 }
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_0_with_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': {
-                        'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
-                        },
-                        'individualData': {
-                            'birth_date': '1980-02-01',
-                            'documents': [
-                                {
-                                    'country': 'POL',
-                                    'number': '123-123-UX-321',
-                                    'photo': '/api/uploads/test_file_name.jpg',
-                                    'photoraw': 'test_file_name.jpg',
-                                    'type': 'NATIONAL_ID'
-                                }
-                            ],
-                            'estimated_birth_date': False,
-                            'family_name': 'Romaniak',
-                            'flex_fields': {
-                            },
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'identities': [
-                                {
-                                    'agency': 'UNHCR',
-                                    'country': 'POL',
-                                    'number': '2222'
-                                }
-                            ],
-                            'marital_status': 'SINGLE',
-                            'payment_channels': [
-                                {
-                                    'bank_account_number': '2356789789789789',
-                                    'bank_name': 'privatbank',
-                                    'type': 'BANK_TRANSFER'
-                                }
-                            ],
-                            'relationship': 'UNKNOWN',
-                            'role': 'NO_ROLE',
-                            'sex': 'MALE'
-                        }
-                    },
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': None,
-                    'issueType': 16,
-                    'sensitiveTicketDetails': None
-                }
-            ]
+    'errors': [
+        {
+            'message': 'Object of type SimpleUploadedFile is not JSON serializable'
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_1_without_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': None
-    },
     'errors': [
         {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'createGrievanceTicket'
-            ]
+            'message': 'Object of type SimpleUploadedFile is not JSON serializable'
         }
     ]
 }
@@ -409,7 +292,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'disability': {
                                 'approve_status': False,
                                 'previous_value': 'not disabled',
-                                'value': "disabled"
+                                'value': 'disabled'
                             },
                             'documents': [
                                 {

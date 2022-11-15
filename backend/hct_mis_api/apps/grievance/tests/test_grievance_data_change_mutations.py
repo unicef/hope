@@ -5,7 +5,10 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 from parameterized import parameterized
+from backend.hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
 
+from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.fixtures import PaymentChannelFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -249,9 +252,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 ],
                                 "paymentChannels": [
                                     {
-                                        "type": "BANK_TRANSFER",
-                                        "bankName": "privatbank",
-                                        "bankAccountNumber": 2356789789789789,
+                                        "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                                        "deliveryMechanism": "CASH",
                                     },
                                 ],
                             },
@@ -373,9 +375,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                             "individualData": {
                                 "paymentChannels": [
                                     {
-                                        "type": "BANK_TRANSFER",
-                                        "bankName": "privatbank",
-                                        "bankAccountNumber": 2356789789789789,
+                                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CHEQUE,
                                     },
                                 ],
                             },
@@ -402,11 +402,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     def test_edit_payment_channel_for_individual(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        bank_account = BankAccountInfoFactory(
-            id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
+        payment_channel = PaymentChannelFactory(
             individual=self.individuals[0],
-            bank_name="privatbank",
-            bank_account_number=2356789789789789,
+            delivery_mechanism=DeliveryMechanismFactory(delivery_mechaism=GenericPayment.DELIVERY_TYPE_TRANSFER),
         )
 
         variables = {
@@ -425,10 +423,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                             "individualData": {
                                 "paymentChannelsToEdit": [
                                     {
-                                        "id": self.id_to_base64(bank_account.id, "BankAccountInfoNode"),
-                                        "type": "BANK_TRANSFER",
-                                        "bankName": "privatbank",
-                                        "bankAccountNumber": 1111222233334444,
+                                        "id": self.id_to_base64(payment_channel.id, "BankAccountInfoNode"),
+                                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CHEQUE,
                                     },
                                 ],
                             },
