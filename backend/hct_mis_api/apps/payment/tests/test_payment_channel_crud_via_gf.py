@@ -1,3 +1,4 @@
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -72,6 +73,19 @@ mutation ApproveIndividualDataChange(
 }
 """
 
+    APPROVE_ADD_INDIVIDUAL_MUTATION = """\
+mutation ApproveAddIndividualDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveAddIndividual(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+      __typename
+    }
+    __typename
+  }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
@@ -124,6 +138,28 @@ mutation ApproveIndividualDataChange(
                     "issueType": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
                     "linkedTickets": [],
                     "extras": {"issueType": {"individualDataUpdateIssueTypeExtras": extras}},
+                }
+            },
+        )
+        assert "errors" not in create_response, create_response["errors"]
+        return create_response
+
+    def create_add_individual_ticket(self, extras):
+        create_response = self.graphql_request(
+            request_string=self.CREATE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "businessArea": self.business_area.slug,
+                    "description": "description",
+                    "assignedTo": encode_id_base64(self.user.id, "User"),
+                    "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+                    "consent": True,
+                    "language": "",
+                    "area": "",
+                    "issueType": GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+                    "linkedTickets": [],
+                    "extras": {"issueType": {"addIndividualIssueTypeExtras": extras}},
                 }
             },
         )
@@ -294,5 +330,34 @@ mutation ApproveIndividualDataChange(
         self.individuals[0].refresh_from_db()
         assert self.individuals[0].payment_channels.count() == 0
 
+    def test_adding_payment_channel_via_add_individual(self):
+        create_response = self.create_add_individual_ticket(
+            extras={
+                "household": encode_id_base64(self.household.id, "Household"),
+                "individualData": {
+                    "birthDate": "2022-11-09",
+                    "fullName": "X",
+                    "sex": "FEMALE",
+                    "relationship": "MOTHER_FATHER",
+                    "role": "NO_ROLE",
+                    "estimatedBirthDate": False,
+                },
+            }
+        )
+        encoded_grievance_ticket_id = create_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]["id"]
 
-# TODO: add individual with payment channel
+        self.set_ticket_to_in_progress(encoded_grievance_ticket_id)
+        self.approve_ticket(encoded_grievance_ticket_id)
+
+        approve_add_ind_response = self.graphql_request(
+            request_string=self.APPROVE_ADD_INDIVIDUAL_MUTATION,
+            context={"user": self.user},
+            variables={"grievanceTicketId": encoded_grievance_ticket_id, "approveStatus": True},
+        )
+        assert "errors" not in approve_add_ind_response, approve_add_ind_response["errors"]
+
+        previous_count = Individual.objects.count()
+
+        self.close_ticket(encoded_grievance_ticket_id)
+
+        assert Individual.objects.count() == previous_count + 1
