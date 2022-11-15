@@ -1004,14 +1004,16 @@ class SimpleApproveMutation(PermissionMutation):
         if grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
             reason_hh_obj = None
             reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
-            if reason_hh_id :
+            if reason_hh_id:
                 # validate reason HH id
                 reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
                 if reason_hh_obj.withdrawn:
-                    raise GraphQLError(f"The original household ({reason_hh_obj.unicef_id}) hasn't to be in withdrawn status")
+                    raise GraphQLError(
+                        f"The original household ({reason_hh_obj.unicef_id}) hasn't to be in withdrawn status"
+                    )
 
             # update reason_household value
-            ticket_details.reason_household = reason_hh_obj   # set HH or None
+            ticket_details.reason_household = reason_hh_obj  # set HH or None
 
         ticket_details.approve_status = approve_status
         ticket_details.save()
