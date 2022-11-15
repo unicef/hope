@@ -254,7 +254,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 ],
                                 "paymentChannels": [
                                     {
-                                        "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                                         "deliveryMechanism": "CASH",
                                     },
                                 ],
