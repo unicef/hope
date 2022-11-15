@@ -1448,7 +1448,9 @@ type ImportedIndividualNode implements Node {
   estimatedBirthDate: Boolean
   maritalStatus: ImportedIndividualMaritalStatus!
   phoneNo: String!
+  phoneNoValid: Boolean
   phoneNoAlternative: String!
+  phoneNoAlternativeValid: Boolean
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
@@ -1480,8 +1482,6 @@ type ImportedIndividualNode implements Node {
   role: String
   age: Int
   importId: String
-  phoneNoValid: Boolean
-  phoneNoAlternativeValid: Boolean
 }
 
 type ImportedIndividualNodeConnection {
@@ -1602,7 +1602,9 @@ type IndividualNode implements Node {
   estimatedBirthDate: Boolean
   maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
+  phoneNoValid: Boolean
   phoneNoAlternative: String!
+  phoneNoAlternativeValid: Boolean
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
@@ -1658,8 +1660,6 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
-  phoneNoValid: Boolean
-  phoneNoAlternativeValid: Boolean
   paymentChannels: [BankAccountInfoNode]
 }
 
