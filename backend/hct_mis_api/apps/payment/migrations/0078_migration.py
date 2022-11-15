@@ -26,10 +26,6 @@ def update_xlsx_payment_verification_plan_file(apps, schema_editor):
     FileTemp.objects.bulk_create(objs_create_list, 1000)
 
 
-def backward(apps, schema_editor):
-    pass
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -42,6 +38,6 @@ class Migration(migrations.Migration):
             name="deliverymechanismperpaymentplan",
             unique_together=set(),
         ),
-        migrations.RunPython(update_xlsx_payment_verification_plan_file, backward),
+        migrations.RunPython(update_xlsx_payment_verification_plan_file, migrations.RunPython.noop),
 
     ]

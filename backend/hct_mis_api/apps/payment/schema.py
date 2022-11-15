@@ -40,7 +40,7 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    chart_create_filter_query,
+    chart_create_filter_query_for_payment_verification_gfk,
     chart_filters_decoder,
     chart_get_filtered_qs,
     chart_map_choices,
@@ -945,11 +945,10 @@ class Query(graphene.ObjectType):
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
-        additional_filters = chart_create_filter_query(
+        additional_filters = chart_create_filter_query_for_payment_verification_gfk(
             filters,
             program_id_path="payment__parent__program__id,payment_record__parent__program__id",
             administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
-            payment_verification_gfk=True,
         )
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,
