@@ -20,7 +20,7 @@ class Command(BaseCommand):
                 TargetPopulation.STATUS_STEFICON_WAIT,
             ],
         )
-        locked_and_finished_tps.update(build_status=TargetPopulation.BUILD_STATUS_OK)
+        locked_and_finished_tps.update(build_status=TargetPopulation.BUILD_STATUS_BUILDING)
         for tp in locked_and_finished_tps:
             tp.refresh_stats()
             tp.save()

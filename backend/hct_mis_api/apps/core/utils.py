@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -390,10 +390,6 @@ def is_valid_uuid(uuid_str) -> bool:
         return True
     except ValueError:
         return False
-
-
-def choices_to_dict(choices: List[Tuple]) -> Dict:
-    return {value: name for value, name in choices}
 
 
 def decode_and_get_object(encoded_id, model: Any, required: bool) -> Optional[Any]:

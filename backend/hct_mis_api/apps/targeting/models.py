@@ -12,12 +12,12 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, JSONField, Q
+from django.db.models import Count, JSONField, Q, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
-from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
@@ -25,7 +25,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -273,26 +273,39 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     def refresh_stats(self) -> None:
-        households_ids = self.household_list.values_list("id")
-        delta18 = relativedelta(years=+18)
-        date18ago = timezone.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        targeting_details = self.household_list.annotate(
+            child_male=Coalesce("male_age_group_0_5_count", 0)
+            + Coalesce("male_age_group_6_11_count", 0)
+            + Coalesce("male_age_group_12_17_count", 0)
+            + Coalesce("male_age_group_0_5_disabled_count", 0)
+            + Coalesce("male_age_group_6_11_disabled_count", 0)
+            + Coalesce("male_age_group_12_17_disabled_count", 0),
+            child_female=Coalesce("female_age_group_0_5_count", 0)
+            + Coalesce("female_age_group_6_11_count", 0)
+            + Coalesce("female_age_group_12_17_count", 0)
+            + Coalesce("female_age_group_0_5_disabled_count", 0)
+            + Coalesce("female_age_group_6_11_disabled_count", 0)
+            + Coalesce("female_age_group_12_17_disabled_count", 0),
+            adult_male=Coalesce("male_age_group_18_59_count", 0)
+            + Coalesce("male_age_group_60_count", 0)
+            + Coalesce("male_age_group_18_59_disabled_count", 0)
+            + Coalesce("male_age_group_60_disabled_count", 0),
+            adult_female=Coalesce("female_age_group_18_59_count", 0)
+            + Coalesce("female_age_group_60_count", 0)
+            + Coalesce("female_age_group_18_59_disabled_count", 0)
+            + Coalesce("female_age_group_60_disabled_count", 0),
+        ).aggregate(
+            child_male_count=Sum("child_male"),
+            child_female_count=Sum("child_female"),
+            adult_male_count=Sum("adult_male"),
+            adult_female_count=Sum("adult_female"),
+            total_individuals_count=Sum("size"),
+            total_households_count=Count("id"),
         )
-        self.child_male_count = targeted_individuals.get("child_male_count")
-        self.child_female_count = targeted_individuals.get("child_female_count")
-        self.adult_male_count = targeted_individuals.get("adult_male_count")
-        self.adult_female_count = targeted_individuals.get("adult_female_count")
-        self.total_households_count = len(households_ids)
-        self.total_individuals_count = (
-            targeted_individuals.get("child_male_count")
-            + targeted_individuals.get("child_female_count")
-            + targeted_individuals.get("adult_male_count")
-            + targeted_individuals.get("adult_female_count")
-        )
+
+        for key, value in targeting_details.items():
+            setattr(self, key, value)
+
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
@@ -301,8 +314,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
         self.households.set(household_queryset)
         self.refresh_stats()
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
 
     def get_criteria_string(self) -> str:
         try:
