@@ -16,6 +16,7 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class TestExternalCollectorSendTpToDatahub(TestCase):
@@ -88,7 +89,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_with_individuals.households.set([cls.household, cls.household_second])
-        cls.target_population_with_individuals.refresh_stats()
+        cls.target_population_with_individuals = refresh_stats(cls.target_population_with_individuals)
         cls.target_population_with_individuals.save()
 
         cls.target_population_without_individuals = cls._create_target_population(
@@ -99,7 +100,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_without_individuals.households.set([cls.household, cls.household_second])
-        cls.target_population_without_individuals.refresh_stats()
+        cls.target_population_without_individuals = refresh_stats(cls.target_population_without_individuals)
         cls.target_population_without_individuals.save()
 
     @classmethod
