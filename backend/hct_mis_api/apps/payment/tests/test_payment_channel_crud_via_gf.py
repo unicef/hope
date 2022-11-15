@@ -341,6 +341,7 @@ mutation ApproveAddIndividualDataChange($grievanceTicketId: ID!, $approveStatus:
                     "relationship": "MOTHER_FATHER",
                     "role": "NO_ROLE",
                     "estimatedBirthDate": False,
+                    "paymentChannels": [{"deliveryMechanism": self.delivery_mechanism_1.delivery_mechanism}],
                 },
             }
         )
@@ -356,8 +357,9 @@ mutation ApproveAddIndividualDataChange($grievanceTicketId: ID!, $approveStatus:
         )
         assert "errors" not in approve_add_ind_response, approve_add_ind_response["errors"]
 
-        previous_count = Individual.objects.count()
+        previous_individuals = set(Individual.objects.all())
 
         self.close_ticket(encoded_grievance_ticket_id)
 
-        assert Individual.objects.count() == previous_count + 1
+        new_individual = set(Individual.objects.all()).difference(previous_individuals).pop()
+        assert new_individual.payment_channels.count() == 1
