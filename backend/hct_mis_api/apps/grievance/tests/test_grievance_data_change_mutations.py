@@ -1,14 +1,12 @@
 from datetime import date
 from unittest import mock
+from uuid import UUID
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
-from hct_mis_api.apps.payment.models import GenericPayment
-from hct_mis_api.apps.payment.fixtures import PaymentChannelFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -18,7 +16,6 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -36,6 +33,11 @@ from hct_mis_api.apps.household.models import (
     Agency,
     DocumentType,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
+    PaymentChannelFactory,
+)
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -403,6 +405,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         payment_channel = PaymentChannelFactory(
+            pk=UUID("00000000-0000-0000-0000-000000000001"),
             individual=self.individuals[0],
             delivery_mechanism=DeliveryMechanismFactory(delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER),
         )

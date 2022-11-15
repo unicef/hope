@@ -116,7 +116,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'payment_channels_to_edit': [
                                 {
                                     'delivery_mechanism': 'Cheque',
-                                    'id': 'QmFua0FjY291bnRJbmZvTm9kZTpkMzZlM2U2NC05ZjNiLTQwODgtYmM5ZS03ODM4MGEyMmVhOGQ='
+                                    'id': 'QmFua0FjY291bnRJbmZvTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE='
                                 }
                             ],
                             'payment_channels_to_remove': [
