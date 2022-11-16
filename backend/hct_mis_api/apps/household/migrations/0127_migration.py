@@ -30,12 +30,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="individual",
             name="phone_no_alternative_valid",
-            field=models.BooleanField(db_index=True, default=False),
+            field=models.BooleanField(default=False),
         ),
         migrations.AddField(
             model_name="individual",
             name="phone_no_valid",
-            field=models.BooleanField(db_index=True, default=False),
+            field=models.BooleanField(default=False),
         ),
         migrations.RunPython(update_each_phone_numbers_validity, migrations.RunPython.noop),
+        migrations.AlterField(
+            model_name="individual",
+            name="phone_no_alternative_valid",
+            field=models.BooleanField(default=False, db_index=True),
+        ),
+        migrations.AlterField(
+            model_name="individual",
+            name="phone_no_valid",
+            field=models.BooleanField(default=False, db_index=True),
+        ),
     ]
