@@ -559,6 +559,14 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
     )
     role_reassign_data = JSONField(default=dict)
     approve_status = models.BooleanField(default=False)
+    reason_household = models.ForeignKey(
+        "household.Household",
+        related_name="+",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
 
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
