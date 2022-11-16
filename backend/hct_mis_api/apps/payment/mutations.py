@@ -63,13 +63,13 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification

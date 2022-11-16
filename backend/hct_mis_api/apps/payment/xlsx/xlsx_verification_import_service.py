@@ -8,8 +8,8 @@ from hct_mis_api.apps.payment.utils import (
     float_to_decimal,
     from_received_yes_no_to_status,
 )
-from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
+from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
 

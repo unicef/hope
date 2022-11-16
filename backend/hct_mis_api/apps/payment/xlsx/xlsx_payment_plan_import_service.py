@@ -12,13 +12,13 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
-from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
-    XlsxPaymentPlanExportService,
+from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
+    XlsxPaymentPlanBaseService,
 )
 
 
-class XlsxPaymentPlanImportService(XlsxImportBaseService):
+class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "n")
 
     def __init__(self, payment_plan: PaymentPlan, file):
@@ -34,7 +34,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
-        self.ws_payments = wb[XlsxPaymentPlanExportService.TITLE]
+        self.ws_payments = wb[self.TITLE]
         return wb
 
     def validate(self):
@@ -46,7 +46,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         exchange_rate = self.payment_plan.get_exchange_rate()
 
         for row in self.ws_payments.iter_rows(min_row=2):
-            if not any([cell.value for cell in row]):
+            if not any(cell.value for cell in row):
                 continue
             self._import_row(row, exchange_rate)
 
@@ -56,11 +56,11 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
 
     def _validate_headers(self):
         headers_row = self.ws_payments[1]
-        accepted_headers = XlsxPaymentPlanExportService.HEADERS
+        accepted_headers = self.HEADERS
         if len(headers_row) != len(accepted_headers):
             self.errors.append(
                 (
-                    XlsxPaymentPlanExportService.TITLE,
+                    self.TITLE,
                     None,
                     f"Different count of headers. Acceptable headers are: [{accepted_headers}]",
                 )
@@ -70,7 +70,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             if column >= len(accepted_headers):
                 self.errors.append(
                     (
-                        XlsxPaymentPlanExportService.TITLE,
+                        self.TITLE,
                         header.coordinate,
                         f"Unexpected header {header.value}",
                     )
@@ -78,7 +78,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             elif header.value != accepted_headers[column]:
                 self.errors.append(
                     (
-                        XlsxPaymentPlanExportService.TITLE,
+                        self.TITLE,
                         header.coordinate,
                         f"Unexpected header {header.value} expected {accepted_headers[column]}",
                     )
@@ -91,52 +91,50 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             if cell.value is None:
                 column += 1
                 continue
-            if cell.data_type != XlsxPaymentPlanImportService.COLUMNS_TYPES[column]:
-                readable_cell_error = XlsxPaymentPlanImportService.TYPES_READABLE_MAPPING[
-                    XlsxPaymentPlanImportService.COLUMNS_TYPES[column]
-                ]
+            if cell.data_type != self.COLUMNS_TYPES[column]:
+                readable_cell_error = self.TYPES_READABLE_MAPPING[self.COLUMNS_TYPES[column]]
                 self.errors.append(
                     (
-                        XlsxPaymentPlanExportService.TITLE,
+                        self.TITLE,
                         cell.coordinate,
                         f"Wrong type off cell {readable_cell_error} "
-                        f"expected, {XlsxPaymentPlanImportService.TYPES_READABLE_MAPPING[cell.data_type]} given.",
+                        f"expected, {self.TYPES_READABLE_MAPPING[cell.data_type]} given.",
                     )
                 )
             column += 1
 
     def _validate_payment_id(self, row):
-        cell = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")]
+        cell = row[self.HEADERS.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
                 (
-                    XlsxPaymentPlanExportService.TITLE,
+                    self.TITLE,
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
                 )
             )
 
     def _validate_entitlement(self, row):
-        payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
+        payment_id = row[self.HEADERS.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        entitlement_amount = row[XlsxPaymentPlanExportService.HEADERS.index("entitlement_quantity")].value
+        entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
         if entitlement_amount is not None and entitlement_amount != "":
             entitlement_amount = float_to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 
     def _validate_payment_channel(self, row):
-        payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
+        payment_id = row[self.HEADERS.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        payment_channels_value = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value
+        payment_channels_value = row[self.HEADERS.index("payment_channel")].value
         if not payment_channels_value:
             return
         payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
-        payment_channel_cell = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")]
+        payment_channel_cell = row[self.HEADERS.index("payment_channel")]
 
         delivery_type_list = list(map(lambda x: x[0].lower(), GenericPayment.DELIVERY_TYPE_CHOICE))
 
@@ -144,7 +142,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             if payment_channel.lower() not in delivery_type_list:
                 self.errors.append(
                     (
-                        XlsxPaymentPlanExportService.TITLE,
+                        self.TITLE,
                         payment_channel_cell.coordinate,
                         f"Payment_channel should be one of {[x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]} "
                         f"but received {payment_channel}",
@@ -162,7 +160,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             ):
                 self.errors.append(
                     (
-                        XlsxPaymentPlanExportService.TITLE,
+                        self.TITLE,
                         payment_channel_cell.coordinate,
                         f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
                         f"channel(s): {', '.join(delivery_mechanisms)}",
@@ -175,7 +173,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         if not self.is_updated:
             self.errors.append(
                 (
-                    XlsxPaymentPlanExportService.TITLE,
+                    self.TITLE,
                     None,
                     "There aren't any updates in imported file, please add changes and try again",
                 )
@@ -183,7 +181,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
 
     def _validate_rows(self):
         for row in self.ws_payments.iter_rows(min_row=2):
-            if not any([cell.value for cell in row]):
+            if not any(cell.value for cell in row):
                 continue
             self._validate_row_types(row)
             self._validate_payment_id(row)
@@ -191,16 +189,15 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._validate_payment_channel(row)
 
     def _import_row(self, row, exchange_rate):
-        payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
-        entitlement_amount = row[XlsxPaymentPlanExportService.HEADERS.index("entitlement_quantity")].value
+        payment_id = row[self.HEADERS.index("payment_id")].value
+        entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
 
         payment = self.payments_dict.get(payment_id)
 
         if payment is None:
             return
 
-        payment_channels_value = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value
-        if payment_channels_value:
+        if payment_channels_value := row[self.HEADERS.index("payment_channel")].value:
             payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
 
             if not payment.collector.payment_channels.exists():
