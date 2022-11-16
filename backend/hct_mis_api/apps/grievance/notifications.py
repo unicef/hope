@@ -10,7 +10,7 @@ from django.utils import timezone
 from constance import config
 
 from hct_mis_api.apps.account.models import User, UserRole
-from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class GrievanceNotification:
             "last_name": user_recipient.last_name,
             "ticket_url": f'{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/grievance-and-feedback/{encode_id_base64(self.grievance_ticket.id, "GrievanceTicket")}',
             "ticket_id": self.grievance_ticket.unicef_id,
-            "ticket_category": choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.grievance_ticket.category],
+            "ticket_category": self.grievance_ticket.get_category_display(),
         }
         return context
 
@@ -81,7 +81,7 @@ class GrievanceNotification:
         return (
             text_body,
             html_body,
-            f"A Grievance & Feedback ticket for {choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.grievance_ticket.category]}",
+            f"A Grievance & Feedback ticket for {self.grievance_ticket.get_category_display()}",
         )
 
     def _prepare_universal_category_created_recipients(self):

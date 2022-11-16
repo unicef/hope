@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.utils import (
     decode_and_get_object_required,
     decode_id_string,
     map_unicef_ids_to_households_unicef_ids,
+    to_choice_object,
 )
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
@@ -90,7 +91,7 @@ class Query(graphene.ObjectType):
     target_population_status_choices = graphene.List(ChoiceObject)
 
     def resolve_target_population_status_choices(self, info, **kwargs) -> List[Dict[str, Any]]:
-        return [{"name": name, "value": value} for value, name in target_models.TargetPopulation.STATUS_CHOICES]
+        return to_choice_object(target_models.TargetPopulation.STATUS_CHOICES)
 
     def resolve_target_population_households(parent, info, target_population, **kwargs) -> QuerySet:
         target_population_id = decode_id_string(target_population)
