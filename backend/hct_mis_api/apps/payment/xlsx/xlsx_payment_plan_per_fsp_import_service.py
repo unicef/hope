@@ -1,14 +1,16 @@
 import openpyxl
 
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
-from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
-    XlsxPaymentPlanExportService,
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProviderXlsxTemplate,
+    Payment,
 )
+from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
+from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
+    HEADERS = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
+
     def __init__(self, payment_plan, file):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments
@@ -23,13 +25,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def _set_fsp_expected_columns(self):
         first_payment_row = self.ws_payments[2]
-        payment_id = first_payment_row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
+        payment_id = first_payment_row[self.HEADERS.index("payment_id")].value
         payment = self.payments_dict[payment_id]
 
         self.fsp = payment.financial_service_provider
-        self.expected_columns = (
-            self.fsp.fsp_xlsx_template and self.fsp.fsp_xlsx_template.columns
-        ) or XlsxPaymentPlanExportService.HEADERS
+        self.expected_columns = (self.fsp.fsp_xlsx_template and self.fsp.fsp_xlsx_template.columns) or self.HEADERS
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)

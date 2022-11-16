@@ -14,7 +14,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
+from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
 logger = logging.getLogger(__name__)
 

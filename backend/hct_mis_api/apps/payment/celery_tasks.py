@@ -17,10 +17,10 @@ from hct_mis_api.apps.payment.models import (
     XlsxCashPlanPaymentVerificationFile,
 )
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
@@ -111,7 +111,7 @@ def remove_old_cash_plan_payment_verification_xls(past_days=30):
 def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
             XlsxPaymentPlanExportService,
         )
 
@@ -150,7 +150,7 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import (
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
             XlsxPaymentPlanExportPerFspService,
         )
 
@@ -189,7 +189,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import (
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
             XlsxPaymentPlanImportService,
         )
 
