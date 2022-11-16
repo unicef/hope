@@ -9,7 +9,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import get_count_and_percentage
+from hct_mis_api.apps.core.utils import get_count_and_percentage, to_choice_object
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -79,4 +79,4 @@ class Query(graphene.ObjectType):
     registration_data_status_choices = graphene.List(ChoiceObject)
 
     def resolve_registration_data_status_choices(self, info, **kwargs):
-        return [{"name": name, "value": value} for value, name in RegistrationDataImport.STATUS_CHOICE]
+        return to_choice_object(RegistrationDataImport.STATUS_CHOICE)

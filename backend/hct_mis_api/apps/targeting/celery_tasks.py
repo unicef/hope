@@ -12,6 +12,7 @@ from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 from ..targeting.models import HouseholdSelection, TargetPopulation
+from .services.targeting_stats_refresher import full_rebuild, refresh_stats
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ def target_population_rebuild_stats(target_population_id):
         target_population.save()
         try:
             with transaction.atomic():
-                target_population.refresh_stats()
+                target_population = refresh_stats(target_population)
                 target_population.save()
         except Exception as e:
             logger.exception(e)
@@ -87,7 +88,7 @@ def target_population_full_rebuild(target_population_id):
             with transaction.atomic():
                 if not target_population.is_open():
                     raise Exception("Target population is not in open status")
-                target_population.full_rebuild()
+                target_population = full_rebuild(target_population)
                 target_population.save()
         except Exception as e:
             logger.exception(e)

@@ -33,6 +33,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class TestSendTpToDatahub(TestCase):
@@ -192,7 +193,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_first.households.set([cls.household])
-        cls.target_population_first.refresh_stats()
+        cls.target_population_first = refresh_stats(cls.target_population_first)
         cls.target_population_first.save()
 
         cls.target_population_second = cls._create_target_population(
@@ -203,7 +204,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_second.households.set([cls.household])
-        cls.target_population_second.refresh_stats()
+        cls.target_population_second = refresh_stats(cls.target_population_second)
         cls.target_population_second.save()
 
         cls.target_population_third = cls._create_target_population(
@@ -214,7 +215,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_third.households.set([cls.household_second])
-        cls.target_population_third.refresh_stats()
+        cls.target_population_third = refresh_stats(cls.target_population_third)
         cls.target_population_third.save()
 
     def test_individual_data_needed_true(self):
@@ -282,7 +283,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_first.households.set([household])
-        target_population_first.refresh_stats()
+        target_population_first = refresh_stats(target_population_first)
         target_population_second = self._create_target_population(
             sent_to_datahub=False,
             name="Test TP xD 2",
@@ -291,7 +292,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_second.households.set([household])
-        target_population_second.refresh_stats()
+        target_population_second = refresh_stats(target_population_second)
         task = SendTPToDatahubTask()
         task.send_target_population(target_population_first)
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
@@ -334,7 +335,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
             targeting_criteria=targeting_criteria,
         )
-        target_population.refresh_stats()
+        target_population = refresh_stats(target_population)
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -359,7 +360,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
             targeting_criteria=targeting_criteria,
         )
-        target_population.refresh_stats()
+        target_population = refresh_stats(target_population)
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)

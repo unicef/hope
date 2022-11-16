@@ -104,15 +104,6 @@ class TargetingCriteriaNode(DjangoObjectType):
         model = target_models.TargetingCriteria
 
 
-class StatsObjectType(graphene.ObjectType):
-    child_male = graphene.Int()
-    child_female = graphene.Int()
-    adult_male = graphene.Int()
-    adult_female = graphene.Int()
-    all_households = graphene.Int()
-    all_individuals = graphene.Int()
-
-
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     """Defines an individual target population record."""
 
