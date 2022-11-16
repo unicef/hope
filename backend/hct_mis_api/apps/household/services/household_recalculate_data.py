@@ -32,7 +32,7 @@ def recalculate_data(household: Household) -> None:
     active_beneficiary = Q(withdrawn=False, duplicate=False)
     female_beneficiary = Q(Q(sex=FEMALE) & active_beneficiary & is_beneficiary)
     male_beneficiary = Q(Q(sex=MALE) & active_beneficiary & is_beneficiary)
-    disabled_disability = Q(disability=DISABLED)
+    disabled_disability = Q(disability=DISABLED) & active_beneficiary & is_beneficiary
     female_disability_beneficiary = Q(disabled_disability & female_beneficiary)
     male_disability_beneficiary = Q(disabled_disability & male_beneficiary)
 
