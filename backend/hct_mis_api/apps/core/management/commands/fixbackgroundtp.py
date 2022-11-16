@@ -2,6 +2,10 @@ from django.core.management import BaseCommand
 from django.db import transaction
 
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import (
+    full_rebuild,
+    refresh_stats,
+)
 
 
 class Command(BaseCommand):
@@ -20,13 +24,13 @@ class Command(BaseCommand):
                 TargetPopulation.STATUS_STEFICON_WAIT,
             ],
         )
-        locked_and_finished_tps.update(build_status=TargetPopulation.BUILD_STATUS_OK)
+        locked_and_finished_tps.update(build_status=TargetPopulation.BUILD_STATUS_BUILDING)
         for tp in locked_and_finished_tps:
-            tp.refresh_stats()
+            tp = refresh_stats(tp)
             tp.save()
         print("Rebuilding OPEN TPs")
         open_tps = TargetPopulation.objects.filter(status=TargetPopulation.STATUS_OPEN, created_at__year__gt="2021")
         for tp in open_tps:
             print(tp)
-            tp.full_rebuild()
+            tp = full_rebuild(tp)
             tp.save()

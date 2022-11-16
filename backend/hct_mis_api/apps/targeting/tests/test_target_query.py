@@ -12,6 +12,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
 class TestTargetPopulationQuery(APITestCase):
@@ -83,7 +84,7 @@ class TestTargetPopulationQuery(APITestCase):
             business_area=cls.business_area,
         )
         cls.target_population_size_2.save()
-        cls.target_population_size_2.full_rebuild()
+        cls.target_population_size_2 = full_rebuild(cls.target_population_size_2)
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparison_method": "EQUALS"}
@@ -95,7 +96,7 @@ class TestTargetPopulationQuery(APITestCase):
             targeting_criteria=targeting_criteria,
         )
         cls.target_population_residence_status.save()
-        cls.target_population_residence_status.full_rebuild()
+        cls.target_population_residence_status = full_rebuild(cls.target_population_residence_status)
         cls.target_population_residence_status.save()
 
         targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -109,7 +110,7 @@ class TestTargetPopulationQuery(APITestCase):
             business_area=cls.business_area,
         )
         cls.target_population_size_1_approved.save()
-        cls.target_population_size_1_approved.full_rebuild()
+        cls.target_population_size_1_approved = full_rebuild(cls.target_population_size_1_approved)
         cls.target_population_size_1_approved.save()
 
     @staticmethod

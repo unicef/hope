@@ -24,6 +24,7 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class TestDataSendTpToDatahub(TestCase):
@@ -90,7 +91,7 @@ class TestDataSendTpToDatahub(TestCase):
 
         cls.create_first_household(admin_area2, rdi)
 
-        cls.target_population = cls._create_target_population(
+        cls.target_population: TargetPopulation = cls._create_target_population(
             sent_to_datahub=False,
             name="Test TP",
             program=cls.program,
@@ -98,7 +99,7 @@ class TestDataSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population.households.set([cls.household])
-        cls.target_population.refresh_stats()
+        cls.target_population: TargetPopulation = refresh_stats(cls.target_population)
         cls.target_population.save()
         HouseholdSelection.objects.update(vulnerability_score=1.23)
 
@@ -214,7 +215,7 @@ class TestDataSendTpToDatahub(TestCase):
     def test_household_send_correctly(self):
         task = SendTPToDatahubTask()
         self.target_population.refresh_from_db()
-        self.target_population.refresh_stats()
+        self.target_population: TargetPopulation = refresh_stats(self.target_population)
         self.target_population.save()
         task.send_target_population(self.target_population)
         self.household.refresh_from_db()

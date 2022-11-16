@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.contrib.postgres.fields import IntegerRangeField
+from django.db.models import DateTimeField, Q
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -77,8 +78,8 @@ class TargetPopulationFilter(FilterSet):
         )
 
         filter_overrides = {
-            target_models.IntegerRangeField: {"filter_class": NumericRangeFilter},
-            target_models.models.DateTimeField: {"filter_class": DateTimeFilter},
+            IntegerRangeField: {"filter_class": NumericRangeFilter},
+            DateTimeField: {"filter_class": DateTimeFilter},
         }
 
     order_by = CustomOrderingFilter(

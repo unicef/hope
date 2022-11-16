@@ -13,7 +13,6 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -162,25 +161,20 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         (STATUS_ON_HOLD, _("On Hold")),
     )
 
-    CATEGORY_CHOICES = (
+    MANUAL_CATEGORIES = (
         (CATEGORY_DATA_CHANGE, _("Data Change")),
         (CATEGORY_GRIEVANCE_COMPLAINT, _("Grievance Complaint")),
-        (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
         (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
-        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_REFERRAL, _("Referral")),
         (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
+    )
+    SYSTEM_CATEGORIES = (
+        (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
-    MANUAL_CATEGORIES = (
-        CATEGORY_DATA_CHANGE,
-        CATEGORY_GRIEVANCE_COMPLAINT,
-        CATEGORY_NEGATIVE_FEEDBACK,
-        CATEGORY_POSITIVE_FEEDBACK,
-        CATEGORY_REFERRAL,
-        CATEGORY_SENSITIVE_GRIEVANCE,
-    )
+    CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
@@ -345,12 +339,12 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return getattr(self, details_name, None)
 
     @property
-    def status_log(self) -> Dict:
-        return choices_to_dict(GrievanceTicket.STATUS_CHOICES)[self.status]
+    def status_log(self) -> str:
+        return self.get_status_display()
 
     @property
-    def category_log(self) -> Dict:
-        return choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.category]
+    def category_log(self) -> str:
+        return self.get_category_display()
 
     @property
     def issue_type_log(self):

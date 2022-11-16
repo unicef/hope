@@ -1,31 +1,23 @@
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField
-from django.contrib.postgres.validators import (
-    RangeMaxValueValidator,
-    RangeMinValueValidator,
-)
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, JSONField, Q
-from django.utils import timezone
+from django.db.models import JSONField, Q
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
-from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
-from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -40,28 +32,6 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 logger = logging.getLogger(__name__)
-
-_MAX_LEN = 256
-_MIN_RANGE = 1
-_MAX_RANGE = 200
-
-
-def get_serialized_range(min_range=None, max_range=None):
-    return NumericRange(min_range or _MIN_RANGE, max_range or _MAX_RANGE)
-
-
-def get_integer_range(min_range=None, max_range=None):
-    """Numeric Range support for saving as InterRangeField."""
-    min_range = min_range or _MIN_RANGE
-    max_range = max_range or _MAX_RANGE
-    return IntegerRangeField(
-        default=get_serialized_range,
-        blank=True,
-        validators=[
-            RangeMinValueValidator(min_range),
-            RangeMaxValueValidator(max_range),
-        ],
-    )
 
 
 class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
@@ -171,9 +141,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
+    status = models.CharField(max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
     build_status = models.CharField(
-        max_length=_MAX_LEN, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
     households = models.ManyToManyField(
@@ -258,8 +228,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def excluded_household_ids(self):
-        excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
-        return excluded_household_ids_array
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
 
     @property
     def household_list(self):
@@ -271,38 +240,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if self.vulnerability_score_min is not None:
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
         return queryset.distinct()
-
-    def refresh_stats(self) -> None:
-        households_ids = self.household_list.values_list("id")
-        delta18 = relativedelta(years=+18)
-        date18ago = timezone.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-        )
-        self.child_male_count = targeted_individuals.get("child_male_count")
-        self.child_female_count = targeted_individuals.get("child_female_count")
-        self.adult_male_count = targeted_individuals.get("adult_male_count")
-        self.adult_female_count = targeted_individuals.get("adult_female_count")
-        self.total_households_count = len(households_ids)
-        self.total_individuals_count = (
-            targeted_individuals.get("child_male_count")
-            + targeted_individuals.get("child_female_count")
-            + targeted_individuals.get("adult_male_count")
-            + targeted_individuals.get("adult_female_count")
-        )
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
-
-    def full_rebuild(self) -> None:
-        household_queryset = Household.objects.filter(business_area=self.business_area)
-        household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
-        self.households.set(household_queryset)
-        self.refresh_stats()
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
 
     def get_criteria_string(self) -> str:
         try:

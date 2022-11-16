@@ -26,6 +26,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -224,7 +225,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                 storage_file=storage_obj,
             )
             target_population.households.set(households)
-            target_population.refresh_stats()
+            target_population = refresh_stats(target_population)
             target_population.save()
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
