@@ -107,8 +107,8 @@ export const GrievanceDetailsToolbar = ({
     };
     delete allData.previous_documents;
     delete allData.previous_identities;
+    delete allData.previous_payment_channels;
     delete allData.flex_fields;
-
     const { approved, notApproved } = countApprovedAndUnapproved(
       Object.values(allData),
     );

@@ -355,24 +355,26 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         <Verification values={values} />
                       )}
                       {activeStep === GrievanceSteps.Description && (
-                        <Description
-                          values={values}
-                          showIssueType={showIssueType}
-                          selectedIssueType={selectedIssueType}
-                          businessArea={businessArea}
-                          choicesData={choicesData}
-                          userChoices={userChoices}
-                          mappedPrograms={mappedPrograms}
-                          setFieldValue={setFieldValue}
-                          errors={errors}
-                          permissions={permissions}
-                        />
+                        <>
+                          <Description
+                            values={values}
+                            showIssueType={showIssueType}
+                            selectedIssueType={selectedIssueType}
+                            businessArea={businessArea}
+                            choicesData={choicesData}
+                            userChoices={userChoices}
+                            mappedPrograms={mappedPrograms}
+                            setFieldValue={setFieldValue}
+                            errors={errors}
+                            permissions={permissions}
+                          />
+                          <DataChangeComponent
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
+                          {dataChangeErrors(errors, touched)}
+                        </>
                       )}
-                      <DataChangeComponent
-                        values={values}
-                        setFieldValue={setFieldValue}
-                      />
-                      {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
                           <Button
