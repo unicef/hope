@@ -5,6 +5,7 @@ from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.models import COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
@@ -28,6 +29,7 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
         for hh in (
             Household.objects.filter(**params)
             .only("id", "collect_individual_data")
+            .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
             .prefetch_related("individuals")
             .iterator(chunk_size=10000)
         ):
