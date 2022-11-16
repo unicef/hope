@@ -372,9 +372,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             values={values}
                             setFieldValue={setFieldValue}
                           />
-                          {dataChangeErrors(errors, touched)}
                         </>
                       )}
+                      {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
                           <Button
