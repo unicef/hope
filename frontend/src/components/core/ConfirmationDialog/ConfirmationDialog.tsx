@@ -14,7 +14,7 @@ import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapp
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
   title?: string;
-  content?: string;
+  content?: string | React.ReactElement;
   continueText?: string;
   extraContent?: string;
   disabled?: boolean;
@@ -51,7 +51,11 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             {extraContent}
           </Typography>
         ) : null}
-        <Typography variant='body2'>{content}</Typography>
+        {typeof content !== 'string' ? (
+          content
+        ) : (
+          <Typography variant='body2'>{content}</Typography>
+        )}
       </DialogContent>
       <DialogFooter>
         <DialogActions>

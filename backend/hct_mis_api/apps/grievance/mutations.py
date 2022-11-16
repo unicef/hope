@@ -965,12 +965,13 @@ class SimpleApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         approve_status = graphene.Boolean(required=True)
+        reason_hh_id = graphene.String(required=False)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
+    def mutate(cls, root, info, grievance_ticket_id, approve_status, reason_hh_id=None, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -997,7 +998,23 @@ class SimpleApproveMutation(PermissionMutation):
                 grievance_ticket.assigned_to == info.context.user,
                 Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
             )
+
         ticket_details = grievance_ticket.ticket_details
+
+        if grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
+            reason_hh_obj = None
+            reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
+            if reason_hh_id:
+                # validate reason HH id
+                reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
+                if reason_hh_obj.withdrawn:
+                    raise GraphQLError(
+                        f"The original household ({reason_hh_obj.unicef_id}) hasn't to be in withdrawn status"
+                    )
+
+            # update reason_household value
+            ticket_details.reason_household = reason_hh_obj  # set HH or None
+
         ticket_details.approve_status = approve_status
         ticket_details.save()
         grievance_ticket.refresh_from_db()
