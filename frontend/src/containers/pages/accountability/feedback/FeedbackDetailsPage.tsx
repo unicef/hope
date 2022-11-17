@@ -39,10 +39,6 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     permissions,
   );
-  const canAddMessage = hasPermissions(
-    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE,
-    permissions,
-  );
 
   if (loading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -58,10 +54,6 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
           businessArea={businessArea}
           canViewHouseholdDetails={canViewHouseholdDetails}
           canViewIndividualDetails={canViewIndividualDetails}
-        />
-        <Messages
-          messages={feedback.feedbackMessages}
-          canAddMessage={canAddMessage}
         />
         <LinkedGrievance businessArea={businessArea} feedback={feedback} />
       </Grid>
