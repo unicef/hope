@@ -1,3 +1,5 @@
+from typing import List
+
 from django.conf import settings
 
 from django_filters import FilterSet
@@ -7,7 +9,7 @@ class ElasticSearchFilterSet(FilterSet):
     USE_ALL_FIELDS_AS_POSTGRES_DB = settings.GRIEVANCE_POSTGRES_ENABLED
     USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = tuple()
 
-    def elasticsearch_filter_queryset(self):
+    def elasticsearch_filter_queryset(self) -> List[str]:
         raise NotImplementedError()
 
     def prepare_filters(self, allowed_fields):

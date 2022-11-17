@@ -1,29 +1,27 @@
 import logging
 from typing import Optional
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
 from graphql import GraphQLError
 
+from hct_mis_api.apps.accountability.models import Message
+from hct_mis_api.apps.accountability.services.sampling import Sampling
+from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
-from ...targeting.models import TargetPopulation
-from ..models import Message
-from .sampling import Sampling
-from .verifiers import MessageArgumentVerifier
-
-User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
 class MessageCrudServices:
     @classmethod
-    def create(cls, user: User, business_area_slug: str, input_data: dict) -> Message:
+    def create(cls, user: AbstractUser, business_area_slug: str, input_data: dict) -> Message:
         verifier = MessageArgumentVerifier(input_data)
         verifier.verify()
 
@@ -71,3 +69,4 @@ class MessageCrudServices:
                 registration_data_import__status=RegistrationDataImport.MERGED,
                 registration_data_import_id=decode_id_string(registration_data_import_id),
             )
+        return None

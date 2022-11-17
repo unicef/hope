@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
@@ -10,12 +10,10 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
-User = get_user_model()
-
 
 class SurveyCrudServices:
     @classmethod
-    def create(cls, user: User, business_area: BusinessArea, input_data: dict) -> Survey:
+    def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Survey:
         survey = Survey(
             created_by=user,
             business_area=business_area,

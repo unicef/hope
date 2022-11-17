@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 
@@ -30,7 +32,7 @@ class IsNull(Func):
 
 
 class GrievanceOrderingFilter(OrderingFilter):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.extra["choices"] += [
             ("linked_tickets", "Linked tickets"),
@@ -48,7 +50,7 @@ class GrievanceOrderingFilter(OrderingFilter):
                     household_unicef_id_count=Window(
                         expression=Count("household_unicef_id"),
                         partition_by=[F("household_unicef_id")],
-                        order_by=["household_unicef_id"],
+                        order_by=[F("household_unicef_id")],
                     )
                 )
                 .order_by(F("total_linked") + F("household_unicef_id_count") - 1, "unicef_id")
@@ -77,12 +79,11 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         "business_area",
     )
 
-    def elasticsearch_filter_queryset(self):
+    def elasticsearch_filter_queryset(self) -> List[str]:
         grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
-        grievance_ids = execute_es_query(grievance_es_query_dict)
-        return grievance_ids
+        return execute_es_query(grievance_es_query_dict)
 
-    def prepare_filters(self, allowed_fields):
+    def prepare_filters(self, allowed_fields) -> Dict:
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):
