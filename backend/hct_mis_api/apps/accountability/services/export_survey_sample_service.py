@@ -31,7 +31,7 @@ class ExportSurveySampleService:
         self.survey = survey
         self.user = user
 
-    def export_sample(self):
+    def export_sample(self) -> None:
         filename = f"survey_sample_{self.survey.unicef_id}.xlsx"
 
         wb = self._generate_file()
@@ -39,7 +39,7 @@ class ExportSurveySampleService:
             wb.save(tmp.name)
             self.survey.store_sample_file(filename, File(tmp))
 
-    def send_email(self):
+    def send_email(self) -> None:
         protocol = "http" if settings.IS_DEV else "https"
         survey_id = encode_id_base64(self.survey.id, "Survey")
         api = reverse("download-survey-sample", args=[survey_id])
@@ -67,7 +67,7 @@ class ExportSurveySampleService:
         if not result:
             logger.error(f"Email couldn't be send to {context['email']}")
 
-    def _generate_file(self):
+    def _generate_file(self) -> openpyxl.Workbook:
         wb = self._create_workbook()
         self._generate_headers()
         self._add_records()
@@ -75,21 +75,21 @@ class ExportSurveySampleService:
 
         return wb
 
-    def _create_workbook(self):
+    def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         active_wb = wb.active
         active_wb.title = self.WORKBOOK_TITLE
         self.active_wb = active_wb
         return wb
 
-    def _generate_headers(self):
+    def _generate_headers(self) -> None:
         self.active_wb.append(self.HEADERS)
 
-    def _add_records(self):
+    def _add_records(self) -> None:
         for recipient in self.survey.recipients.all():
             self._get_record(recipient)
 
-    def _get_record(self, recipient):
+    def _get_record(self, recipient) -> None:
         row = (
             str(recipient.unicef_id),
             str(recipient.head_of_household.full_name),
@@ -100,7 +100,7 @@ class ExportSurveySampleService:
         )
         self.active_wb.append(row)
 
-    def _adjust_columns_width(self):
+    def _adjust_columns_width(self) -> None:
         min_row = 0
         min_col = 1
         max_col = 8
