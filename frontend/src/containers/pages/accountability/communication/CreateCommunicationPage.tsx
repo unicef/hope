@@ -424,9 +424,6 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                             }{' '}
                             {getSampleSizePercentage()}
                           </Box>
-                          <Box fontSize={12} color='#797979'>
-                            {t('This option is recommended for RapidPro')}
-                          </Box>
                         </Box>
                       </TabPanel>
                       <TabPanel value={selectedSampleSizeType} index={1}>

@@ -69,6 +69,7 @@ export function RequestedIndividualDataChange({
   delete individualData.identities_to_remove;
   delete individualData.previous_documents;
   delete individualData.previous_identities;
+  delete individualData.previous_payment_channels;
 
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
