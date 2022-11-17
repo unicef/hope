@@ -223,6 +223,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             Permissions.PAYMENT_MODULE_CREATE,
             Permissions.PAYMENT_MODULE_VIEW_DETAILS,
             Permissions.PAYMENT_MODULE_VIEW_LIST,
+            Permissions.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            Permissions.PAYMENT_MODULE_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
             Permissions.PROGRAMME_CREATE,
             Permissions.PROGRAMME_ACTIVATE,
             Permissions.TARGETING_CREATE,
