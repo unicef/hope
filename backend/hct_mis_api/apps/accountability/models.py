@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 
 from django.conf import settings
 from django.db import models
@@ -236,7 +237,7 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
     def __str__(self):
         return self.title
 
-    def sample_file_path(self):
+    def sample_file_path(self) -> Optional[str]:
         if not self.sample_file:
             return None
         if not self.has_valid_sample_file():
@@ -248,7 +249,7 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
             days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS
         )
 
-    def store_sample_file(self, filename, file):
+    def store_sample_file(self, filename, file) -> None:
         self.sample_file.save(filename, file)
         self.sample_file_generated_at = timezone.now()
         self.save()

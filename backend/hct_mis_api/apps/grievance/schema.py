@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Tuple, Type
 
 from django.core.files.storage import default_storage
-from django.db.models import Case, DateField, F, Q, When
+from django.db.models import Case, DateField, F, Q, Value, When
 from django.utils import timezone
 
 import graphene
@@ -490,7 +490,7 @@ class Query(graphene.ObjectType):
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),
+                    default=Value(timezone.now()) - F("created_at"),
                     output_field=DateField(),
                 )
             )

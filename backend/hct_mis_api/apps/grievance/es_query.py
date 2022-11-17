@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
@@ -25,7 +26,7 @@ OBJECT_FIELDS = (
 TERMS_FIELDS = ("status", "admin2")
 
 
-def execute_es_query(query_dict):
+def execute_es_query(query_dict) -> List[str]:
     es_response = (
         GrievanceTicketDocument.search()
         .params(search_type="dfs_query_then_fetch", preserve_order=True)
@@ -36,11 +37,11 @@ def execute_es_query(query_dict):
     return es_ids
 
 
-def create_es_query(options):
-    all_queries = []
-    query_search = []
-    query_term_fields = []
-    query_terms_fields = []
+def create_es_query(options) -> Dict:
+    all_queries: List[Dict[str, Any]] = []
+    query_search: List[Dict[str, Any]] = []
+    query_term_fields: List[Dict[str, Any]] = []
+    query_terms_fields: List[Dict[str, Any]] = []
 
     options["admin2"] = options.pop("admin", None)
 
@@ -98,7 +99,7 @@ def create_es_query(options):
     all_queries.extend(query_terms_fields)
     all_queries.extend(query_search)
 
-    query_dict = {
+    query_dict: Dict[str, Any] = {
         "query": {
             "bool": {
                 "must": all_queries,
