@@ -10,7 +10,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { GrievanceTicketNode } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
@@ -41,7 +41,7 @@ export const ReassignRoleBox = ({
   shouldDisplayButton,
   shouldDisableButton,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
 }): React.ReactElement => {

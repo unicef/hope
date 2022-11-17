@@ -9,7 +9,7 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { renderUserName } from '../../../utils/utils';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../../__generated__/graphql';
@@ -40,7 +40,7 @@ export function Notes({
   notes,
   canAddNote,
 }: {
-  notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+  notes: GrievanceTicketNode['ticketNotes'];
   canAddNote: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();

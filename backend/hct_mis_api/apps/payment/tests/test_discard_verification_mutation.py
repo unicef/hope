@@ -9,14 +9,11 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
-    CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -28,11 +25,11 @@ from hct_mis_api.apps.targeting.fixtures import (
 class TestDiscardVerificationMutation(APITestCase):
 
     DISCARD_MUTATION = """
-        mutation DiscardVerification($cashPlanVerificationId: ID!){
-          discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
-            cashPlan{
-                name
-                verifications {
+        mutation DiscardVerification($paymentVerificationPlanId: ID!){
+          discardPaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
+            paymentPlan{
+                objType
+                verificationPlans {
                     edges {
                         node {
                             status
@@ -72,11 +69,11 @@ class TestDiscardVerificationMutation(APITestCase):
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan, verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
-        cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
-        cash_plan_payment_verification.save()
+        payment_verification_plan.status = PaymentVerificationPlan.STATUS_ACTIVE
+        payment_verification_plan.save()
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=cls.user, business_area=cls.business_area
@@ -97,13 +94,13 @@ class TestDiscardVerificationMutation(APITestCase):
                 target_population=target_population,
             )
             PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
-                payment_record=payment_record,
+                payment_verification_plan=payment_verification_plan,
+                generic_fk_obj=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
-        cls.verification = cash_plan.verifications.first()
+        cls.verification = cash_plan.payment_verification_plan.first()
 
     @parameterized.expand(
         [
@@ -118,6 +115,6 @@ class TestDiscardVerificationMutation(APITestCase):
             request_string=self.DISCARD_MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [self.id_to_base64(self.verification.id, "CashPlanPaymentVerificationNode")]
+                "paymentVerificationPlanId": [self.id_to_base64(self.verification.id, "PaymentVerificationPlanNode")]
             },
         )

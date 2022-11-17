@@ -14,7 +14,7 @@ import {
 } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../core/BreadCrumbs';
@@ -58,7 +58,7 @@ export const GrievanceDetailsToolbar = ({
   canClose,
   canAssign,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   canEdit: boolean;
   canSetInProgress: boolean;
   canSetOnHold: boolean;

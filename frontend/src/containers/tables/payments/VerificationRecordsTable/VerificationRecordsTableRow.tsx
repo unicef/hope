@@ -13,70 +13,77 @@ import {
 import { PaymentVerificationNode } from '../../../../__generated__/graphql';
 
 interface VerificationRecordsTableRowProps {
-  record: PaymentVerificationNode;
+  paymentVerification: PaymentVerificationNode;
   canViewRecordDetails: boolean;
   // selected: Array<string>;
   // checkboxClickHandler: () => void;
+  showStatusColumn?: boolean;
 }
 
 export function VerificationRecordsTableRow({
-  record,
+  paymentVerification,
   canViewRecordDetails,
+  showStatusColumn = true,
 }: VerificationRecordsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
 
+  const nodeType = atob(paymentVerification.payment.id).split(":")[0];
+  const linkPath = `/${businessArea}/verification/payment${nodeType === "PaymentRecordNode" ? "-record" : ""}/${paymentVerification.payment.id}`;
+
   return (
-    <TableRow hover role='checkbox' key={record.id}>
+    <TableRow hover role='checkbox' key={paymentVerification.id}>
       <TableCell align='left'>
         {canViewRecordDetails ? (
-          <BlackLink to={`/${businessArea}/verification-records/${record.id}`}>
-            {record.paymentRecord?.caId}
+          <BlackLink to={linkPath}>
+            {paymentVerification.payment?.unicefId}
           </BlackLink>
         ) : (
-          <span>{record.paymentRecord?.caId}</span>
+          <span>{paymentVerification.payment?.unicefId}</span>
         )}
       </TableCell>
       <TableCell align='left'>
-        {record.cashPlanPaymentVerification.verificationChannel}
+        {paymentVerification.paymentVerificationPlan.verificationChannel}
       </TableCell>
       <TableCell align='left'>
-        {record.cashPlanPaymentVerification.unicefId}
+        {paymentVerification.paymentVerificationPlan.unicefId}
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={record.status}
+          status={paymentVerification.status}
           statusToColor={verificationRecordsStatusToColor}
         />
       </TableCell>
       <AnonTableCell>
-        {record.paymentRecord.household.headOfHousehold.fullName}
+        {paymentVerification.payment.household.headOfHousehold.fullName}
       </AnonTableCell>
       <TableCell align='left'>
-        {record.paymentRecord.household.unicefId}
+        {paymentVerification.payment.household.unicefId}
       </TableCell>
-      <TableCell align='left'>
-        <StatusBox
-          status={record.paymentRecord.household.status}
-          statusToColor={householdStatusToColor}
-        />
-      </TableCell>
+      {showStatusColumn && (
+        <TableCell align='left'>
+          <StatusBox
+            status={paymentVerification.payment.household.status}
+            statusToColor={householdStatusToColor}
+          />
+        </TableCell>
+      )}
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
-          record.paymentRecord.deliveredQuantity,
-          record.paymentRecord.currency,
+          paymentVerification.payment.deliveredQuantity,
+          paymentVerification.payment.currency,
         )}
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
-          record.receivedAmount,
-          record.paymentRecord.currency,
+          paymentVerification.receivedAmount,
+          paymentVerification.payment.currency,
         )}
       </TableCell>
       <TableCell align='left'>
-        {record.paymentRecord.household.headOfHousehold.phoneNo}
+        {paymentVerification.payment.household.headOfHousehold.phoneNo}
       </TableCell>
       <TableCell align='left'>
-        {record.paymentRecord.household.headOfHousehold.phoneNoAlternative ||
+        {paymentVerification.payment.household.headOfHousehold.phoneNoAlternative ||
           '-'}
       </TableCell>
     </TableRow>

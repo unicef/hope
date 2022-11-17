@@ -1,11 +1,12 @@
 from datetime import timedelta
 from decimal import Decimal
-from random import randint
+from random import choice, randint
 from uuid import UUID
 
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
-import factory.fuzzy
+import factory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -32,8 +33,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    CashPlanPaymentVerification,
-    CashPlanPaymentVerificationSummary,
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -45,6 +44,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
     ServiceProvider,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -62,9 +63,29 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
+class PaymentGFKFactory(factory.django.DjangoModelFactory):
+    payment_object_id = factory.SelfAttribute("generic_fk_obj.id")
+    payment_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
+
     class Meta:
-        model = CashPlanPaymentVerificationSummary
+        exclude = ["generic_fk_obj"]
+        abstract = True
+
+
+class PaymentPlanGFKFactory(factory.django.DjangoModelFactory):
+    payment_plan_object_id = factory.SelfAttribute("generic_fk_obj.id")
+    payment_plan_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
+
+    class Meta:
+        exclude = ["generic_fk_obj"]
+        abstract = True
+
+
+class PaymentVerificationSummaryFactory(PaymentPlanGFKFactory):
+    generic_fk_obj = factory.SubFactory("payment.fixtures.CashPlanFactory")
+
+    class Meta:
+        model = PaymentVerificationSummary
 
 
 class CashPlanFactory(factory.DjangoModelFactory):
@@ -134,11 +155,11 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
             return
 
-        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
+        PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
@@ -279,20 +300,20 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
+class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
+    generic_fk_obj = factory.SubFactory(CashPlanFactory)
     status = factory.fuzzy.FuzzyChoice(
-        ((CashPlanPaymentVerification.STATUS_PENDING, "pending"),),
+        ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
     )
     sampling = factory.fuzzy.FuzzyChoice(
-        CashPlanPaymentVerification.SAMPLING_CHOICES,
+        PaymentVerificationPlan.SAMPLING_CHOICES,
         getter=lambda c: c[0],
     )
     verification_channel = factory.fuzzy.FuzzyChoice(
-        CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES,
+        PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
-    cash_plan = factory.Iterator(CashPlan.objects.all())
     sample_size = factory.fuzzy.FuzzyInteger(0, 100)
     responded_count = factory.fuzzy.FuzzyInteger(20, 90)
     received_count = factory.fuzzy.FuzzyInteger(30, 70)
@@ -301,14 +322,12 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
     rapid_pro_flow_start_uuids = factory.LazyFunction(list)
 
     class Meta:
-        model = CashPlanPaymentVerification
+        model = PaymentVerificationPlan
 
 
-class PaymentVerificationFactory(factory.DjangoModelFactory):
-    cash_plan_payment_verification = factory.Iterator(CashPlanPaymentVerification.objects.all())
-    payment_record = factory.LazyAttribute(
-        lambda o: PaymentRecord.objects.filter(parent=o.cash_plan_payment_verification.cash_plan).order_by("?").first()
-    )
+class PaymentVerificationFactory(PaymentGFKFactory):
+    generic_fk_obj = factory.SubFactory(PaymentRecordFactory)
+    payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
         getter=lambda c: c[0],
@@ -435,12 +454,14 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
+    service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
             return
 
-        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
+        PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
 class RealPaymentRecordFactory(factory.DjangoModelFactory):
@@ -498,88 +519,6 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     )
     service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
     registration_ca_id = factory.Faker("uuid4")
-
-
-def generate_real_cash_plans():
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3)
-    program = RealProgramFactory(status=Program.ACTIVE)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program)
-    for cash_plan in cash_plans:
-        targeting_criteria = TargetingCriteriaFactory()
-
-        rule = TargetingCriteriaRule.objects.create(targeting_criteria=targeting_criteria)
-        TargetingCriteriaRuleFilter.objects.create(
-            targeting_criteria_rule=rule, comparison_method="EQUALS", field_name="residence_status", arguments=[REFUGEE]
-        )
-        target_population = TargetPopulationFactory(
-            program=program,
-            status=TargetPopulation.STATUS_OPEN,
-            targeting_criteria=targeting_criteria,
-        )
-        target_population.full_rebuild()
-        target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
-        target_population.save()
-        RealPaymentRecordFactory.create_batch(
-            5,
-            target_population=target_population,
-            parent=cash_plan,
-        )
-    program.households.set(
-        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(parent__in=cash_plans)
-        .values_list("household__id", flat=True)
-    )
-
-
-def generate_real_cash_plans_for_households(households):
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
-    program = RealProgramFactory(business_area=households[0].business_area)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
-    for cash_plan in cash_plans:
-        for hh in households:
-            RealPaymentRecordFactory(
-                parent=cash_plan,
-                household=hh,
-                business_area=hh.business_area,
-            )
-    program.households.set(
-        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(parent__in=cash_plans)
-        .values_list("household__id", flat=True)
-    )
-
-
-def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
-    cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
-    cash_plan_payment_verification.status = status
-    cash_plan_payment_verification.save(update_fields=("status",))
-    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    for _ in range(5):
-        household, _ = create_household(
-            {
-                "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
-            },
-            {"registration_data_import": registration_data_import},
-        )
-
-        household.programs.add(program)
-
-        payment_record = PaymentRecordFactory(
-            parent=cash_plan,
-            household=household,
-            target_population=target_population,
-        )
-
-        PaymentVerificationFactory(
-            cash_plan_payment_verification=cash_plan_payment_verification,
-            payment_record=payment_record,
-            status=PaymentVerification.STATUS_PENDING,
-        )
-        EntitlementCardFactory(household=household)
-    return cash_plan_payment_verification
 
 
 class PaymentPlanFactory(factory.DjangoModelFactory):
@@ -704,6 +643,145 @@ class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
         getter=lambda c: c[0],
     )
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
+
+
+def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+    payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
+    payment_verification_plan.status = status
+    payment_verification_plan.save(update_fields=("status",))
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+    for _ in range(5):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
+
+        household.programs.add(program)
+
+        if isinstance(cash_plan, CashPlan):
+            payment_record = PaymentRecordFactory(
+                parent=cash_plan,
+                household=household,
+                target_population=target_population,
+            )
+        else:
+            payment_record = PaymentFactory(
+                parent=cash_plan,
+                household=household,
+            )
+
+        PaymentVerificationFactory(
+            payment_verification_plan=payment_verification_plan,
+            generic_fk_obj=payment_record,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        EntitlementCardFactory(household=household)
+    return payment_verification_plan
+
+
+def generate_real_cash_plans():
+    if ServiceProvider.objects.count() < 3:
+        ServiceProviderFactory.create_batch(3)
+    program = RealProgramFactory(status=Program.ACTIVE)
+    cash_plans = RealCashPlanFactory.create_batch(3, program=program)
+    for cash_plan in cash_plans:
+        generate_payment_verification_plan_with_status = choice([True, False, False])
+        targeting_criteria = TargetingCriteriaFactory()
+
+        rule = TargetingCriteriaRule.objects.create(targeting_criteria=targeting_criteria)
+        TargetingCriteriaRuleFilter.objects.create(
+            targeting_criteria_rule=rule, comparison_method="EQUALS", field_name="residence_status", arguments=[REFUGEE]
+        )
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_OPEN,
+            targeting_criteria=targeting_criteria,
+        )
+        target_population.full_rebuild()
+        target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
+        target_population.save()
+        RealPaymentRecordFactory.create_batch(
+            5,
+            target_population=target_population,
+            parent=cash_plan,
+        )
+
+        if generate_payment_verification_plan_with_status:
+            root = User.objects.get(username="root")
+            create_payment_verification_plan_with_status(
+                cash_plan,
+                root,
+                cash_plan.business_area,
+                target_population.program,
+                target_population,
+                PaymentVerificationPlan.STATUS_ACTIVE,
+            )
+
+    program.households.set(
+        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
+        .filter(parent__in=cash_plans)
+        .values_list("household__id", flat=True)
+    )
+
+
+def generate_real_cash_plans_for_households(households):
+    if ServiceProvider.objects.count() < 3:
+        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
+    program = RealProgramFactory(business_area=households[0].business_area)
+    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
+    for cash_plan in cash_plans:
+        for hh in households:
+            RealPaymentRecordFactory(
+                parent=cash_plan,
+                household=hh,
+                business_area=hh.business_area,
+            )
+    program.households.set(
+        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
+        .filter(parent__in=cash_plans)
+        .values_list("household__id", flat=True)
+    )
+
+
+def generate_reconciled_payment_plan():
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    root = User.objects.get(username="root")
+    now = timezone.now()
+    tp = TargetPopulation.objects.first()
+
+    pp = PaymentPlan.objects.update_or_create(
+        unicef_id="PP-0060-22-11223344",
+        business_area=afghanistan,
+        target_population=tp,
+        start_date=now,
+        end_date=now + timedelta(days=30),
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=root,
+        program=tp.program,
+        total_delivered_quantity=999,
+    )[0]
+    # update status
+    pp.status_reconciled()
+    pp.save()
+
+    fsp_1 = FinancialServiceProviderFactory(
+        delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+    )
+    DeliveryMechanismPerPaymentPlanFactory(
+        payment_plan=pp, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+    )
+
+    create_payment_verification_plan_with_status(
+        pp, root, afghanistan, tp.program, tp, PaymentVerificationPlan.STATUS_ACTIVE
+    )
+    pp.update_population_count_fields()
 
 
 def generate_payment_plan():
@@ -862,6 +940,10 @@ def generate_payment_plan():
         name="Test FSP 1",
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
     )[0]
+
+    DeliveryMechanismPerPaymentPlanFactory(
+        payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+    )
 
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(

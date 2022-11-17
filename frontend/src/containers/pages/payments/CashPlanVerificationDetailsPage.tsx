@@ -19,7 +19,8 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  CashPlanPaymentVerificationStatus,
+  CashPlanNode,
+  PaymentVerificationPlanStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
@@ -48,7 +49,7 @@ const BottomTitle = styled.div`
   padding: 70px;
 `;
 
-export function PaymentVerificationDetailsPage(): React.ReactElement {
+export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
@@ -56,7 +57,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     search: null,
     status: null,
     verificationChannel: null,
-    cashPlanPaymentVerification: null,
+    paymentVerificationPlan: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
@@ -74,7 +75,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
 
-  const { cashPlan } = data;
+  const cashPlan= data.cashPlan as CashPlanNode;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -88,12 +89,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
-  const statesArray = cashPlan.verifications?.edges?.map((v) => v.node.status);
+  const statesArray = cashPlan.verificationPlans?.edges?.map((v) => v.node.status);
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
-      statesArray.includes(CashPlanPaymentVerificationStatus.Finished) ||
-      statesArray.includes(CashPlanPaymentVerificationStatus.Active);
+      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
+      statesArray.includes(PaymentVerificationPlanStatus.Active);
 
     return showTable && statesArray.length > 0;
   };
@@ -106,7 +107,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   };
 
   const isFinished =
-    cashPlan.cashPlanPaymentVerificationSummary.status === 'FINISHED';
+    cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
@@ -125,7 +126,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {canCreate && (
           <CreateVerificationPlan
             disabled={false}
-            cashPlanId={cashPlan.id}
+            cashOrPaymentPlanId={cashPlan.id}
             canCreatePaymentVerificationPlan={
               cashPlan.canCreatePaymentVerificationPlan
             }
@@ -152,18 +153,18 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     <>
       {toolbar}
       <Container>
-        <CashPlanDetailsSection cashPlan={cashPlan} />
+        <CashPlanDetailsSection planNode={cashPlan} />
       </Container>
       <Container>
-        <VerificationPlansSummary cashPlan={cashPlan} />
+        <VerificationPlansSummary planNode={cashPlan} />
       </Container>
-      {cashPlan.verifications?.edges?.length
-        ? cashPlan.verifications.edges.map((edge) => (
+      {cashPlan.verificationPlans?.edges?.length
+        ? cashPlan.verificationPlans.edges.map((edge) => (
             <VerificationPlanDetails
               key={edge.node.id}
               samplingChoicesData={choicesData}
               verificationPlan={edge.node}
-              cashPlan={cashPlan}
+              planNode={cashPlan}
             />
           ))
         : null}
@@ -173,13 +174,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <VerificationRecordsFilters
               filter={filter}
               onFilterChange={setFilter}
-              verifications={cashPlan.verifications}
+              verifications={cashPlan.verificationPlans}
             />
           </Container>
           <TableWrapper>
             <VerificationRecordsTable
+              paymentPlanId={cashPlan.id}
               filter={debouncedFilter}
-              cashPlanId={cashPlan.id}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
@@ -200,7 +201,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {cashPlan.verifications?.edges[0]?.node?.id &&
+      {cashPlan.verificationPlans?.edges[0]?.node?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={cashPlan.id}

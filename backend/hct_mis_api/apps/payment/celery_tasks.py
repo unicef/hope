@@ -3,6 +3,7 @@ import logging
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.utils import timezone
 
@@ -12,10 +13,7 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    XlsxCashPlanPaymentVerificationFile,
-)
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -64,22 +62,22 @@ def fsp_generate_xlsx_report_task(fsp_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id, user_id):
+def create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id):
     try:
         user = get_user_model().objects.get(pk=user_id)
-        cash_plan_payment_verification = CashPlanPaymentVerification.objects.get(id=cash_plan_payment_verification_id)
+        payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
 
         with configure_scope() as scope:
-            scope.set_tag("business_area", cash_plan_payment_verification.business_area)
+            scope.set_tag("business_area", payment_verification_plan.business_area)
 
-            service = XlsxVerificationExportService(cash_plan_payment_verification)
+            service = XlsxVerificationExportService(payment_verification_plan)
             # if no file will start creating it
-            if not getattr(cash_plan_payment_verification, "xlsx_cashplan_payment_verification_file", None):
+            if not payment_verification_plan.has_xlsx_payment_verification_plan_file:
                 service.save_xlsx_file(user)
 
-            cash_plan_payment_verification.xlsx_file_exporting = False
-            cash_plan_payment_verification.save()
-            service.send_email(service.get_email_context(user))
+            payment_verification_plan.xlsx_file_exporting = False
+            payment_verification_plan.save()
+            service.send_email(user)
     except Exception as e:
         logger.exception(e)
         raise
@@ -92,13 +90,14 @@ def remove_old_cash_plan_payment_verification_xls(past_days=30):
     """Remove old Payment Verification report XLSX files"""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        files_qs = XlsxCashPlanPaymentVerificationFile.objects.filter(created_at__lte=days)
+        ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
+        files_qs = FileTemp.objects.filter(content_type=ct, created_at__lte=days)
         if files_qs:
             for obj in files_qs:
                 obj.file.delete(save=False)
                 obj.delete()
 
-            logger.info(f"Removed old XlsxCashPlanPaymentVerificationFile: {files_qs.count()}")
+            logger.info(f"Removed old xlsx files for PaymentVerificationPlan: {files_qs.count()}")
 
     except Exception as e:
         logger.exception(e)
@@ -228,6 +227,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
 @sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file_pk):
     try:
+        from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)

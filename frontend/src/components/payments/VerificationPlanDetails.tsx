@@ -11,11 +11,12 @@ import {
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import {
-  CashPlanPaymentVerificationStatus,
-  CashPlanQuery,
+  PaymentVerificationPlanStatus,
+  CashPlanNode,
+  PaymentPlanNode,
   CashPlanVerificationSamplingChoicesQuery,
-  useExportXlsxCashPlanVerificationMutation,
-  useInvalidCashPlanPaymentVerificationMutation,
+  useExportXlsxPaymentVerificationPlanFileMutation,
+  useInvalidPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingButton } from '../core/LoadingButton';
@@ -31,9 +32,9 @@ import { ImportXlsx } from './ImportXlsx';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 
 interface VerificationPlanDetailsProps {
-  verificationPlan: CashPlanQuery['cashPlan']['verifications']['edges'][number]['node'];
+  verificationPlan: CashPlanNode['verificationPlans']['edges'][number]['node'] | PaymentPlanNode['verificationPlans']['edges'][number]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  cashPlan: CashPlanQuery['cashPlan'];
+  planNode: CashPlanNode | PaymentPlanNode;
 }
 
 const Container = styled.div`
@@ -63,7 +64,7 @@ const StyledBox = styled(Box)`
 export const VerificationPlanDetails = ({
   verificationPlan,
   samplingChoicesData,
-  cashPlan,
+  planNode,
 }: VerificationPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -72,12 +73,12 @@ export const VerificationPlanDetails = ({
   const [
     mutateExport,
     { loading: loadingExport },
-  ] = useExportXlsxCashPlanVerificationMutation();
+  ] = useExportXlsxPaymentVerificationPlanFileMutation();
 
   const [
     mutateInvalid,
     { loading: loadingInvalid },
-  ] = useInvalidCashPlanPaymentVerificationMutation();
+  ] = useInvalidPaymentVerificationPlanMutation();
 
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
@@ -130,24 +131,24 @@ export const VerificationPlanDetails = ({
                 <Box mr={2}>
                   {canDelete && (
                     <DeleteVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
-                      cashPlanId={cashPlan.id}
+                      paymentVerificationPlanId={verificationPlan.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   )}
                 </Box>
 
                 {canEdit && (
                   <EditVerificationPlan
-                    cashPlanId={cashPlan.id}
-                    cashPlanVerificationId={verificationPlan.id}
+                    paymentVerificationPlanNode={verificationPlan}
+                    cashOrPaymentPlanId={planNode.id}
                   />
                 )}
                 {canActivate && (
                   <Box alignItems='center' display='flex'>
                     {canActivate && (
                       <ActivateVerificationPlan
-                        cashPlanVerificationId={verificationPlan.id}
-                        cashPlanId={cashPlan.id}
+                        paymentVerificationPlanId={verificationPlan.id}
+                        cashOrPaymentPlanId={planNode.id}
                       />
                     )}
                   </Box>
@@ -175,7 +176,7 @@ export const VerificationPlanDetails = ({
                                 try {
                                   await mutateExport({
                                     variables: {
-                                      cashPlanVerificationId:
+                                      paymentVerificationPlanId:
                                         verificationPlan.id,
                                     },
                                   });
@@ -202,7 +203,7 @@ export const VerificationPlanDetails = ({
                             <Box p={2}>
                               <StyledLink
                                 download
-                                href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
+                                href={`/api/download-payment-verification-plan/${verificationPlan.id}`}
                               >
                                 <Button
                                   color='primary'
@@ -219,8 +220,8 @@ export const VerificationPlanDetails = ({
                     {canImport && (
                       <Box p={2}>
                         <ImportXlsx
-                          cashPlanId={cashPlan.id}
-                          verificationPlanId={verificationPlan.id}
+                          paymentVerificationPlanId={verificationPlan.id}
+                          cashOrPaymentPlanId={planNode.id}
                         />
                       </Box>
                     )}
@@ -230,14 +231,14 @@ export const VerificationPlanDetails = ({
                   verificationPlan.xlsxFileWasDownloaded &&
                   verificationPlan.xlsxFileImported && (
                     <FinishVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
-                      cashPlanId={cashPlan.id}
+                      paymentVerificationPlanId={verificationPlan.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   )}
                 {canDiscard &&
                   (verificationPlan.xlsxFileWasDownloaded &&
                   verificationPlan.status ===
-                    CashPlanPaymentVerificationStatus.Active ? (
+                    PaymentVerificationPlanStatus.Active ? (
                     <Box p={2}>
                       <LoadingButton
                         loading={loadingInvalid}
@@ -246,7 +247,7 @@ export const VerificationPlanDetails = ({
                         onClick={() =>
                           mutateInvalid({
                             variables: {
-                              cashPlanVerificationId: verificationPlan.id,
+                              paymentVerificationPlanId: verificationPlan.id,
                             },
                           })
                         }
@@ -256,8 +257,8 @@ export const VerificationPlanDetails = ({
                     </Box>
                   ) : (
                     <DiscardVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
-                      cashPlanId={cashPlan.id}
+                      paymentVerificationPlanId={verificationPlan.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   ))}
               </Box>

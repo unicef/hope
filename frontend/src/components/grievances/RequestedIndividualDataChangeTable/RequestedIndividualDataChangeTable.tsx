@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import {
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useAllAddIndividualFieldsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
@@ -17,7 +17,7 @@ import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
 
 interface RequestedIndividualDataChangeTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   setFieldValue;
   values;
   isEdit;
