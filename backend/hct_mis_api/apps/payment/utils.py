@@ -1,11 +1,35 @@
+import logging
 from decimal import Decimal
 from math import ceil
 from typing import Union
 
 from django.db.models import Q, QuerySet
 
+import phonenumbers
+
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+
+
+def is_right_phone_number_format(phone_number) -> bool:
+    # from phonenumbers.parse method description:
+    # This method will throw a NumberParseException if the number is not
+    # considered to be a possible number.
+    #
+    # so if `parse` does not throw, we may assume it's ok
+
+    if not isinstance(phone_number, str):
+        phone_number = str(phone_number)
+
+    phone_number = phone_number.replace(" ", "")
+    if phone_number.startswith("00"):
+        phone_number = f"+{phone_number[2:]}"
+
+    try:
+        return phonenumbers.is_possible_number(phonenumbers.parse(phone_number))
+    except phonenumbers.NumberParseException:
+        logging.warning(f"'{phone_number}' is not a valid phone number")
+        return False
 
 
 def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error) -> int:

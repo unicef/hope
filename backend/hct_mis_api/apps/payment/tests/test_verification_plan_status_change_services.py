@@ -60,7 +60,7 @@ class TestPhoneNumberVerification(TestCase):
             cash_plan=cash_plan,
         )
         cls.individuals = []
-        for i in range(cls.payment_record_amount):
+        for _ in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=BusinessArea.objects.first()
             )
@@ -69,10 +69,7 @@ class TestPhoneNumberVerification(TestCase):
                     "registration_data_import": registration_data_import,
                     "admin_area": Area.objects.order_by("?").first(),
                 },
-                {
-                    "registration_data_import": registration_data_import,
-                    "phone_no": f"+48 609 999 {i:03d}",
-                },
+                {"registration_data_import": registration_data_import},
             )
             cls.individuals.append(individuals[0])
 
