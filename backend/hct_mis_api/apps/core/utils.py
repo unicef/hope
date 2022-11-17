@@ -590,12 +590,12 @@ def chart_filters_decoder(filters):
 
 def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
     filter_query = {}
-    if filters.get("program") is not None:
-        filter_query.update({program_id_path: filters.get("program")})
-    if filters.get("administrative_area") is not None:
+    if program :=filters.get("program"):
+        filter_query.update({program_id_path: program})
+    if administrative_area := filters.get("administrative_area"):
         filter_query.update(
             {
-                f"{administrative_area_path}__id": filters.get("administrative_area"),
+                f"{administrative_area_path}__id": administrative_area,
                 f"{administrative_area_path}__area_type__area_level": 2,
             }
         )
@@ -606,13 +606,14 @@ def chart_create_filter_query_for_payment_verification_gfk(
     filters, program_id_path="id", administrative_area_path="admin_areas"
 ):
     filter_query = Q()
-    if filters.get("program") is not None:
+    if program :=filters.get("program"):
         for path in program_id_path.split(","):
-            filter_query |= Q(**{path: filters.get("program")})
-    if filters.get("administrative_area") is not None:
+            filter_query |= Q(**{path: program})
+
+    if administrative_area := filters.get("administrative_area"):
         for path in administrative_area_path.split(","):
             filter_query |= Q(
-                Q(**{f"{path}__id": filters.get("administrative_area")}) & Q(**{f"{path}__area_type__area_level": 2})
+                Q(**{f"{path}__id": administrative_area}) & Q(**{f"{path}__area_type__area_level": 2})
             )
     return filter_query
 
