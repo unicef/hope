@@ -15,7 +15,7 @@ class MessageRecipientMapInline(admin.TabularInline):
     extra = 0
     list_prefetch_related = ("household__head_of_household",)
     fields: Optional[Sequence[str]] = ("get_hoh_name",)
-    readonly_fields: Optional[Sequence[str]] = ("get_hoh_name",)
+    readonly_fields: Sequence[str] = ("get_hoh_name",)
 
     def has_add_permission(self, request, obj=None):
         return False
