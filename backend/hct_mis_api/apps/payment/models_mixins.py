@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from django.utils.functional import cached_property
 
@@ -18,7 +18,7 @@ class DeliveryDataMixin:
         return self.delivery_mechanism.global_core_fields + self.delivery_mechanism.payment_channel_fields
 
     @cached_property
-    def delivery_data(self) -> dict:
+    def delivery_data(self) -> Dict:
         from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
             FieldFactory,
         )
@@ -26,7 +26,7 @@ class DeliveryDataMixin:
         associated_objects = {
             _INDIVIDUAL: self.individual,
             _HOUSEHOLD: self.individual.household,
-            _PAYMENT_CHANNEL_DATA: self.payment_channel_data and self.payment_channel_data.data or {},
+            _PAYMENT_CHANNEL_DATA: (self.payment_channel_data and self.payment_channel_data.data) or {},
         }
         fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.PAYMENT_CHANNEL]).to_dict_by("name")
 

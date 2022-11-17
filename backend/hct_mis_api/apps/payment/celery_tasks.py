@@ -344,7 +344,7 @@ def create_individuals_payment_channels_for_new_delivery_mechanism(delivery_mech
         delivery_mechanism = DeliveryMechanism.objects.get(id=delivery_mechanism_id)
         payment_channels_to_create = []
 
-        for individual in Individual.objects.exclude(duplicate=True, withdrawn=True).iterator():
+        for individual in Individual.objects.exclude(duplicate=True, withdrawn=True).iterator().only("id"):
             payment_channel_data_instance = PaymentChannelData.objects.filter(individual=individual).first()
             payment_channel = PaymentChannel(
                 payment_channel_data=payment_channel_data_instance, delivery_mechanism=delivery_mechanism
