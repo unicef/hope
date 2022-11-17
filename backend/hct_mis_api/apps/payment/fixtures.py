@@ -42,6 +42,7 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     Payment,
     PaymentChannel,
+    PaymentChannelData,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -206,13 +207,24 @@ class DeliveryMechanismFactory(factory.DjangoModelFactory):
     )
 
 
+class PaymentChannelDataFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentChannelData
+
+    data = factory.Faker("json")
+    individual = factory.SubFactory(IndividualFactory)
+
+
 class PaymentChannelFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
     delivery_mechanism = factory.LazyAttribute(lambda o: DeliveryMechanism.objects.first())
-    delivery_data = factory.Faker("json")
+    payment_channel_data = factory.LazyAttribute(
+        lambda o: getattr(o.individual, "payment_channel_data", None)
+        or PaymentChannelDataFactory(individual=o.individual)
+    )
 
 
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):

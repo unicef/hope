@@ -43,12 +43,13 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
+    RdiPaymentChannelCreationMixin,
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 
-class RdiXlsxCreateTask(RdiBaseCreateTask):
+class RdiXlsxCreateTask(RdiPaymentChannelCreationMixin, RdiBaseCreateTask):
     """
     Works on valid XLSX files, parsing them and creating households/individuals
     in the Registration Datahub. Once finished it will update the status of
@@ -58,13 +59,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def __init__(self):
         self.image_loader = None
         self.business_area = None
-        self.households = {}
+        self.households_to_create = {}
+        self.households_to_update = []
         self.documents = {}
         self.identities = {}
         self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
+        super().__init__()
 
     def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
@@ -326,7 +329,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         collectors_to_create = []
         for hh_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
-                collector.household_id = self.households.get(hh_id).pk
+                collector.household_id = self.households_to_create.get(hh_id).pk
                 collectors_to_create.append(collector)
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
@@ -344,7 +347,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return obj_to_create
 
-    def _create_objects(self, sheet, registration_data_import):
+    def _process_rows(self, sheet, registration_data_import):
         complex_fields = {
             "individuals": {
                 "tax_id_no_i_c": self._handle_document_fields,
@@ -413,7 +416,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             raise ValueError(f"Unhandled sheet label '{sheet.title}'")
 
         first_row = sheet[1]
-        households_to_update = []
         for row in sheet.iter_rows(min_row=3):
             if not any([cell.value for cell in row]):
                 continue
@@ -448,7 +450,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 temp_value = int(temp_value)
                             household_id = str(temp_value)
                             if sheet_title == "individuals":
-                                obj_to_create.household = self.households.get(household_id)
+                                obj_to_create.household = self.households_to_create.get(household_id)
+
+                        if header in self.payment_channel_xlsx_fields:
+                            self.payment_channels_data[obj_to_create.id][combined_fields[header]["name"]] = cell.value
 
                         if header in complex_fields[sheet_title]:
                             fn = complex_fields[sheet_title].get(header)
@@ -479,10 +484,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 continue
 
                             if header == "relationship_i_c" and value == HEAD:
-                                household = self.households.get(household_id)
+                                household = self.households_to_create.get(household_id)
                                 if household is not None:
                                     household.head_of_household = obj_to_create
-                                    households_to_update.append(household)
+                                    self.households_to_update.append(household)
 
                             setattr(
                                 obj_to_create,
@@ -514,7 +519,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 if sheet_title == "households":
                     obj_to_create = self._assign_admin_areas_titles(obj_to_create)
-                    self.households[household_id] = obj_to_create
+                    self.households_to_create[household_id] = obj_to_create
                 else:
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
@@ -524,12 +529,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 logger.exception(e)
                 raise Exception(f"Error processing row {row}: {e.__class__.__name__}({e})") from e
 
+    def _create_objects(self, sheet):
+        sheet_title = sheet.title.lower()
         if sheet_title == "households":
-            ImportedHousehold.objects.bulk_create(self.households.values())
+            ImportedHousehold.objects.bulk_create(self.households_to_create.values())
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)
             ImportedHousehold.objects.bulk_update(
-                households_to_update,
+                self.households_to_update,
                 ["head_of_household"],
                 1000,
             )
@@ -537,6 +544,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_identities()
             self._create_collectors()
             self._create_bank_accounts_infos()
+            self._create_payment_channels()
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
@@ -556,7 +564,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         worksheets = (wb["Households"], wb["Individuals"])
         for sheet in worksheets:
             self.image_loader = SheetImageLoader(sheet)
-            self._create_objects(sheet, registration_data_import)
+            self._process_rows(sheet, registration_data_import)
+            self._create_objects(sheet)
 
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()

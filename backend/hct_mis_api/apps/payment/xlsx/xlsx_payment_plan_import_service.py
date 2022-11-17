@@ -4,13 +4,7 @@ from django.utils import timezone
 import openpyxl
 
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
-    Payment,
-    PaymentChannel,
-    PaymentPlan,
-)
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
@@ -125,50 +119,6 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             if entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 
-    def _validate_payment_channel(self, row):
-        payment_id = row[self.HEADERS.index("payment_id")].value
-        payment = self.payments_dict.get(payment_id)
-        if payment is None:
-            return
-        payment_channels_value = row[self.HEADERS.index("payment_channel")].value
-        if not payment_channels_value:
-            return
-        payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
-        payment_channel_cell = row[self.HEADERS.index("payment_channel")]
-
-        delivery_type_list = list(map(lambda x: x[0].lower(), GenericPayment.DELIVERY_TYPE_CHOICE))
-
-        for payment_channel in payment_channels_list:
-            if payment_channel.lower() not in delivery_type_list:
-                self.errors.append(
-                    (
-                        self.TITLE,
-                        payment_channel_cell.coordinate,
-                        f"Payment_channel should be one of {[x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]} "
-                        f"but received {payment_channel}",
-                    )
-                )
-            delivery_mechanisms = list(
-                payment.collector.payment_channels.all()
-                .distinct("delivery_mechanism__delivery_mechanism")
-                .values_list("delivery_mechanism__delivery_mechanism", flat=True)
-            )
-            delivery_mechanisms_lower_case = list(map(lambda x: x.lower(), delivery_mechanisms))
-            if (
-                payment.collector.payment_channels.exists()
-                and payment_channel.lower() not in delivery_mechanisms_lower_case
-            ):
-                self.errors.append(
-                    (
-                        self.TITLE,
-                        payment_channel_cell.coordinate,
-                        f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
-                        f"channel(s): {', '.join(delivery_mechanisms)}",
-                    )
-                )
-            if not payment.collector.payment_channels.exists() and payment_channel:
-                self.is_updated = True
-
     def _validate_imported_file(self):
         if not self.is_updated:
             self.errors.append(
@@ -186,7 +136,6 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_row_types(row)
             self._validate_payment_id(row)
             self._validate_entitlement(row)
-            self._validate_payment_channel(row)
 
     def _import_row(self, row, exchange_rate):
         payment_id = row[self.HEADERS.index("payment_id")].value
@@ -196,21 +145,6 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
         if payment is None:
             return
-
-        if payment_channels_value := row[self.HEADERS.index("payment_channel")].value:
-            payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
-
-            if not payment.collector.payment_channels.exists():
-                for payment_channel in payment_channels_list:
-                    # TODO handle delivery channels other than CASH
-                    # if payment_channel is not None and payment_channel != "":
-                    if payment_channel == GenericPayment.DELIVERY_TYPE_CASH:
-                        cash_delivery_mechanism = DeliveryMechanism.objects.get(
-                            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
-                        )
-                        PaymentChannel.objects.get_or_create(
-                            individual=payment.collector, delivery_mechanism=cash_delivery_mechanism, delivery_data={}
-                        )
 
         if entitlement_amount is not None and entitlement_amount != "":
             entitlement_amount = float_to_decimal(entitlement_amount)

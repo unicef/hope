@@ -850,7 +850,10 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             id__in=payment_plan.not_excluded_payments.values_list("collector", flat=True)
         )
 
-        query = Q(payment_channels__delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
+        query = Q(
+            payment_channels__delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order,
+            payment_channels__is_valid=True,
+        )
         if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
             query |= Q(payment_channels__isnull=True)
 
@@ -880,7 +883,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         cash_delivery_mechanism = DeliveryMechanism.objects.get(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH)
         for collector in cash_fallback_payment_collectors:
             payment_channel = PaymentChannel(
-                individual=collector, delivery_mechanism=cash_delivery_mechanism, is_fallback=True, delivery_data={}
+                individual=collector, delivery_mechanism=cash_delivery_mechanism, is_fallback=True
             )
             payment_channels_to_create.append(payment_channel)
         PaymentChannel.objects.bulk_create(payment_channels_to_create)

@@ -28,6 +28,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import PaymentChannel, PaymentChannelData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.models import (
@@ -35,6 +36,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
+    ImportedPaymentChannel,
     KoboImportedSubmission,
     RegistrationDataImportDatahub,
 )
@@ -266,6 +268,28 @@ class RdiMergeTask:
 
         return roles_to_create
 
+    def _prepare_and_create_payment_channels(self, imported_payment_channels, individuals_dict) -> None:
+        payment_channels_data_to_create = []
+        for imported_payment_channel in imported_payment_channels:
+            payment_channel_data = PaymentChannelData(
+                individual=individuals_dict.get(imported_payment_channel.individual.id),
+                data=imported_payment_channel.payment_channel_data.data,
+            )
+            payment_channels_data_to_create.append(payment_channel_data)
+        PaymentChannelData.objects.bulk_create(payment_channels_data_to_create)
+
+        payment_channels_to_create = []
+        for imported_payment_channel, payment_channel_data in zip(
+            imported_payment_channels, payment_channels_data_to_create
+        ):
+            payment_channel = PaymentChannel(
+                individual=individuals_dict.get(imported_payment_channel.individual.id),
+                delivery_mechanism_id=imported_payment_channel.delivery_mechanism_id,
+                payment_channel_data=payment_channel_data,
+            )
+            payment_channels_to_create.append(payment_channel)
+        PaymentChannel.objects.bulk_create(payment_channels_to_create)
+
     def _update_individuals_and_households(self, individual_ids):
         # update mis_unicef_id for ImportedIndividual
         individual_qs = Individual.objects.filter(id__in=individual_ids)
@@ -306,6 +330,10 @@ class RdiMergeTask:
                         individual__in=imported_individuals
                     )
 
+                    imported_payment_channels = ImportedPaymentChannel.objects.filter(
+                        individual__in=imported_individuals
+                    )
+
                     households_dict = self._prepare_households(imported_households, obj_hct)
                     (
                         individuals_dict,
@@ -317,12 +345,14 @@ class RdiMergeTask:
                     bank_account_infos_to_create = self._prepare_bank_account_info(
                         imported_bank_account_infos, individuals_dict
                     )
+
                     Household.objects.bulk_create(households_dict.values())
                     Individual.objects.bulk_create(individuals_dict.values())
                     Document.objects.bulk_create(documents_to_create)
                     IndividualIdentity.objects.bulk_create(identities_to_create)
                     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                     BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
+                    self._prepare_and_create_payment_channels(imported_payment_channels, individuals_dict)
 
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                     household_ids = [str(household.id) for household in households_dict.values()]

@@ -151,6 +151,10 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     import_id = graphene.String()
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
+    created_payment_channels = graphene.List(graphene.String)
+
+    def resolve_created_payment_channels(parent, info):
+        return list(parent.imported_payment_channels.values_list("delivery_mechanism__delivery_mechanism", flat=True))
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()

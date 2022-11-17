@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from datetime import date
+from typing import List
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -43,6 +44,7 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
+from hct_mis_api.apps.payment.models_mixins import DeliveryDataMixin
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
@@ -670,3 +672,35 @@ class DiiaIndividual(models.Model):
         if self.iban:
             self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)
+
+
+class ImportedPaymentChannelData(models.Model):
+    individual = models.OneToOneField("registration_datahub.ImportedIndividual", on_delete=models.CASCADE)
+    data = JSONField(default=dict, blank=True)
+
+
+class ImportedPaymentChannel(DeliveryDataMixin, models.Model):
+    individual = models.ForeignKey(
+        "registration_datahub.ImportedIndividual", related_name="imported_payment_channels", on_delete=models.CASCADE
+    )
+    delivery_mechanism_id = models.CharField(max_length=128)
+    payment_channel_data = models.ForeignKey(
+        "registration_datahub.ImportedPaymentChannelData", on_delete=models.SET_NULL, null=True
+    )
+    is_fallback = models.BooleanField(default=False)
+    is_valid = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["individual", "delivery_mechanism_id"],
+                name="unique imported_individual_delivery_mechanism_id",
+            ),
+        ]
+
+    @cached_property
+    def required_fields(self) -> List[str]:
+        from hct_mis_api.apps.payment.models import DeliveryMechanism
+
+        delivery_mechanism = DeliveryMechanism.objects.get(id=self.delivery_mechanism_id)
+        return delivery_mechanism.global_core_fields + delivery_mechanism.payment_channel_fields

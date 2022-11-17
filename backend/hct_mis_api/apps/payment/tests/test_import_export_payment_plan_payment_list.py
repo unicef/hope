@@ -103,19 +103,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
     def test_import_invalid_file(self):
         error_msg = [
             ("Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"),
-            (
-                "Payment Plan - Payment List",
-                "F3",
-                "Payment_channel should be one of ['Cardless cash withdrawal', 'Cash', 'Cash by FSP', 'Cheque', "
-                "'Deposit to Card', 'In Kind', 'Mobile Money', 'Other', 'Pre-paid card', 'Referral', 'Transfer', "
-                "'Transfer to Account', 'Voucher'] but received Invalid",
-            ),
-            (
-                "Payment Plan - Payment List",
-                "F3",
-                "You can't set payment_channel Invalid for Collector with already assigned "
-                "payment channel(s): Deposit to Card",
-            ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
@@ -134,7 +121,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         payment_id_2 = str(not_excluded_payments[1].unicef_id)
         payment_1 = not_excluded_payments[0]
         payment_2 = not_excluded_payments[1]
-        payment_2.collector.payment_channels.all().delete()
 
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
         wb = service.open_workbook()
@@ -153,7 +139,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         self.assertEqual(float_to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
         self.assertEqual(float_to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
-        self.assertEqual("Cash", payment_2.collector.payment_channels.first().delivery_mechanism.delivery_mechanism)
 
     def test_export_payment_plan_payment_list(self):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)

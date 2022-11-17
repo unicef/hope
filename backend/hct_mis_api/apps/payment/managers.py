@@ -97,7 +97,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         from hct_mis_api.apps.payment.models import PaymentChannel
 
         return self.select_related("assigned_payment_channel", "collector", "financial_service_provider").annotate(
-            has_defined_payment_channel=Exists(PaymentChannel.objects.filter(individual=OuterRef("collector"))),
+            has_defined_payment_channel=Exists(
+                PaymentChannel.objects.filter(individual=OuterRef("collector"), is_fallback=False, is_valid=True)
+            ),
             has_assigned_payment_channel=Case(
                 When(assigned_payment_channel=None, then=Value(False)),
                 default=Value(True),

@@ -12,8 +12,12 @@ from sentry_sdk import configure_scope
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
+    DeliveryMechanism,
+    PaymentChannel,
+    PaymentChannelData,
     XlsxCashPlanPaymentVerificationFile,
 )
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
@@ -329,4 +333,28 @@ def remove_old_payment_plan_payment_list_xlsx(past_days=30):
 
     except Exception:
         logger.exception("Remove old Payment Plan Payment List Error")
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def create_individuals_payment_channels_for_new_delivery_mechanism(delivery_mechanism_id: str):
+    try:
+        delivery_mechanism = DeliveryMechanism.objects.get(id=delivery_mechanism_id)
+        payment_channels_to_create = []
+
+        for individual in Individual.objects.exclude(duplicate=True, withdrawn=True).iterator():
+            payment_channel_data_instance = PaymentChannelData.objects.filter(individual=individual).first()
+            payment_channel = PaymentChannel(
+                payment_channel_data=payment_channel_data_instance, delivery_mechanism=delivery_mechanism
+            )
+            payment_channel.validate()
+            if payment_channel.is_valid:
+                payment_channels_to_create.append(payment_channel)
+
+        PaymentChannel.objects.bulk_create(payment_channels_to_create)
+
+    except Exception:
+        logger.exception("create_individuals_payment_channels_for_new_delivery_mechanism Error")
         raise

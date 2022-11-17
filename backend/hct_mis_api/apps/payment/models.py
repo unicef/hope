@@ -28,14 +28,11 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    Scope,
-)
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.payment.models_mixins import DeliveryDataMixin
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -779,25 +776,22 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         self.sent_by = sent_by
 
 
-class PaymentChannel(TimeStampedUUIDModel):
+class PaymentChannelData(TimeStampedUUIDModel):
+    # TODO migrate BankAccountInfo etc here
+    individual = models.OneToOneField(
+        "household.Individual", on_delete=models.CASCADE, related_name="payment_channel_data"
+    )
+    data = JSONField(default=dict, blank=True)
+
+
+class PaymentChannel(DeliveryDataMixin, TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.ForeignKey(
-        "payment.DeliveryMechanism", on_delete=models.SET_NULL, related_name="payment_channels", null=True
+        "payment.DeliveryMechanism", on_delete=models.CASCADE, related_name="payment_channels"
     )
-    delivery_data = JSONField(default=dict, blank=True)
+    payment_channel_data = models.ForeignKey("payment.PaymentChannelData", on_delete=models.SET_NULL, null=True)
     is_fallback = models.BooleanField(default=False)
-
-    @property
-    def all_delivery_data(self) -> dict:
-        associated_objects = {_INDIVIDUAL: self.individual, _HOUSEHOLD: self.individual.household}
-        global_core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.PAYMENT_CHANNEL]).to_dict_by("name")
-
-        data = {**self.delivery_data}
-        for field_name in self.delivery_mechanism.global_core_fields:
-            associated_object = associated_objects.get(global_core_fields[field_name]["associated_with"])
-            data[field_name] = getattr(associated_object, field_name, None)
-
-        return data
+    is_valid = models.BooleanField(default=True)  # TODO this should be shown somewhere in UI
 
     class Meta:
         constraints = [
@@ -1334,11 +1328,6 @@ class ChoiceArrayField(ArrayField):
 
 
 class DeliveryMechanism(TimeStampedUUIDModel):
-    # TODO MB rdi logic
-    # create imported payment channel instance + show on frontend which ones gonna be created
-    # check all PCH XLS rows and what validate what PCHs can be created based on this data
-    # If CASH can't be created raise validation error
-    # create separate logic for payment channel scoep and fill PCH delivery data
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
     global_core_fields = ChoiceArrayField(
         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),

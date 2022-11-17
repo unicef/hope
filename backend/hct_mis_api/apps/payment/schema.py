@@ -307,7 +307,10 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
     def resolve_has_payment_channel(self, info) -> bool:
-        return self.collector.payment_channels.exists()
+        return (
+            getattr(self, "has_defined_payment_channel", None)
+            or self.collector.payment_channels.exclude(Q(is_fallback=True) | Q(is_valid=False)).exists()
+        )
 
     def resolve_payment_plan_hard_conflicted(self, info) -> bool:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
@@ -437,7 +440,7 @@ class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
 
     class Meta:
         model = PaymentChannel
-        exclude = ("delivery_data",)
+        exclude = ("payment_channel_data",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 

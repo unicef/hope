@@ -674,6 +674,9 @@ class TestPaymentPlanReconciliation(APITestCase):
                         == f"Payment {payment.unicef_id}: Delivered quantity 666 is not equal Entitlement quantity 500.00"
                     )
 
+            payment.refresh_from_db()
+            self.assertEqual(payment.delivered_quantity, None)
+
             # update xls, delivered_quantity == entitlement_quantity
             sheet.cell(
                 row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1

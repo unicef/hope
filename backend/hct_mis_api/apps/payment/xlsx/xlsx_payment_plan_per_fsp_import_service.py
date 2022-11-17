@@ -150,7 +150,6 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         payment_id = row[self.expected_columns.index("payment_id")].value
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.expected_columns.index("delivered_quantity")].value
-
         if delivered_quantity is not None and delivered_quantity != "":
             delivered_quantity = float_to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:
