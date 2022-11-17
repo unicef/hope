@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import { FeedbackDetails } from '../../../../components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
 import { FeedbackDetailsToolbar } from '../../../../components/accountability/Feedback/FeedbackDetailsToolbar';
 import { LinkedGrievance } from '../../../../components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
-import { Messages } from '../../../../components/accountability/Feedback/Messages';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
