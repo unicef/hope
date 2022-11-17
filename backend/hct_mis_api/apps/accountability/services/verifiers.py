@@ -22,10 +22,10 @@ class MessageArgumentVerifier:
         "only_one_of_these": ["households", "target_population", "registration_data_import"],
     }
 
-    def __init__(self, input_data):
+    def __init__(self, input_data) -> None:
         self.input_data = input_data
 
-    def verify(self):
+    def verify(self) -> None:
         only_one_of_these = self.ARGUMENTS.get("only_one_of_these")
         inputs = [self.input_data.get(argument) for argument in only_one_of_these]
         fields = [*only_one_of_these]

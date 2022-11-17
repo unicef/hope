@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.accountability.models import Feedback
@@ -8,19 +8,17 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
 
-User = get_user_model()
-
 
 class FeedbackCrudServices:
     @classmethod
-    def validate_lookup(cls, feedback):
+    def validate_lookup(cls, feedback) -> None:
         if feedback.household_lookup is not None and feedback.individual_lookup is not None:
             if feedback.household_lookup != feedback.individual_lookup.household:
                 raise Exception("Household lookup does not match individual lookup")
 
     @classmethod
-    def create(cls, user: User, input_data: dict) -> Feedback:
-        def check(key):
+    def create(cls, user: AbstractUser, input_data: dict) -> Feedback:
+        def check(key) -> bool:
             return key in input_data and input_data[key] is not None
 
         obj = Feedback(
@@ -51,7 +49,7 @@ class FeedbackCrudServices:
 
     @classmethod
     def update(cls, feedback: Feedback, input_data: dict) -> Feedback:
-        def check(key):
+        def check(key) -> bool:
             return key in input_data and input_data[key] is not None
 
         if check("issue_type"):

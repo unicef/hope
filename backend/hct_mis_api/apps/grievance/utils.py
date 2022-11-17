@@ -47,7 +47,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
 
 
-def create_grievance_documents(info, grievance_ticket, documents):
+def create_grievance_documents(info, grievance_ticket, documents) -> None:
     grievance_documents = []
     for document in documents:
         file = document["file"]
@@ -65,7 +65,7 @@ def create_grievance_documents(info, grievance_ticket, documents):
     GrievanceDocument.objects.bulk_create(grievance_documents)
 
 
-def update_grievance_documents(documents):
+def update_grievance_documents(documents) -> None:
     for document in documents:
         current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
         if current_document:
@@ -81,7 +81,7 @@ def update_grievance_documents(documents):
             current_document.save()
 
 
-def delete_grievance_documents(ticket_id, ids_to_delete):
+def delete_grievance_documents(ticket_id, ids_to_delete) -> None:
     documents_to_delete = GrievanceDocument.objects.filter(
         grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
     )

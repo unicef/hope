@@ -1,4 +1,5 @@
 import itertools
+from typing import Any, Dict, Tuple
 
 from django.db.models import Avg, Case, CharField, Count, F, Q, Value, When
 from django.utils.encoding import force_str
@@ -33,7 +34,7 @@ TICKET_ORDERING = {
 }
 
 
-def transform_to_chart_dataset(qs):
+def transform_to_chart_dataset(qs) -> Dict[str, Any]:
     labels, data = [], []
     for q in qs:
         label, value = q
@@ -43,12 +44,12 @@ def transform_to_chart_dataset(qs):
     return {"labels": labels, "datasets": [{"data": data}]}
 
 
-def display_value(choices, field, default_field=None):
+def display_value(choices, field, default_field=None) -> Case:
     options = [When(**{field: k, "then": Value(force_str(v))}) for k, v in choices]
     return Case(*options, default=default_field, output_field=CharField())
 
 
-def create_type_generated_queries():
+def create_type_generated_queries() -> Tuple[Q, Q]:
     user_generated, system_generated = Q(), Q()
     for category in GrievanceTicket.CATEGORY_CHOICES:
         category_num, category_str = category
