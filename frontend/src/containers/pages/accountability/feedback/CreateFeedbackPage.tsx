@@ -355,7 +355,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <Consent />
                           <Field
                             name='consent'
-                            label={t('Received Consent')}
+                            label={t('Received Consent*')}
                             color='primary'
                             fullWidth
                             required

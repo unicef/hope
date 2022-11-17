@@ -125,7 +125,7 @@ export const Messages = ({
           {({ submitForm }) => (
             <StyledBox>
               <Title>
-                <Typography variant='h6'>{t('Messages')}</Typography>
+                <Typography variant='h6'>{t('Notes')}</Typography>
               </Title>
               <OverviewContainerColumn>
                 {mappedMessages}
