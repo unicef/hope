@@ -603,7 +603,7 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
 
 
 def chart_create_filter_query_for_payment_verification_gfk(
-        filters, program_id_path="id", administrative_area_path="admin_areas"
+    filters, program_id_path="id", administrative_area_path="admin_areas"
 ):
     filter_query = Q()
     if filters.get("program") is not None:
@@ -612,8 +612,7 @@ def chart_create_filter_query_for_payment_verification_gfk(
     if filters.get("administrative_area") is not None:
         for path in administrative_area_path.split(","):
             filter_query |= Q(
-                Q(**{f"{path}__id": filters.get("administrative_area")})
-                & Q(**{f"{path}__area_type__area_level": 2})
+                Q(**{f"{path}__id": filters.get("administrative_area")}) & Q(**{f"{path}__area_type__area_level": 2})
             )
     return filter_query
 
