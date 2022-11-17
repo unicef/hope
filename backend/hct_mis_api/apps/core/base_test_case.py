@@ -5,7 +5,7 @@ import shutil
 import sys
 from functools import reduce
 from io import BytesIO
-from typing import Dict
+from typing import Dict, Optional
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -73,14 +73,14 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user=None, files=None, headers=None) -> WSGIRequest:
+    def generate_context(self, user=None, files=None, headers: Optional[Dict[str, str]] = None) -> WSGIRequest:
         request = RequestFactory()
-        headers = reduce(
+        prepared_headers: Dict = reduce(
             lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
             (headers or {}).items(),
             {},
         )
-        context_value = request.get("/api/graphql/", **headers)
+        context_value = request.get("/api/graphql/", **prepared_headers)
         context_value.user = user or AnonymousUser()
         self.__set_context_files(context_value, files)
         return context_value
@@ -133,7 +133,7 @@ class UploadDocumentsBase(APITestCase):
     TEST_DIR = "test_data"
 
     @staticmethod
-    def create_fixture_file(name, size, content_type):
+    def create_fixture_file(name, size, content_type) -> InMemoryUploadedFile:
         return InMemoryUploadedFile(
             name=name, file=BytesIO(b"xxxxxxxxxxx"), charset=None, field_name="0", size=size, content_type=content_type
         )
