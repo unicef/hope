@@ -1,6 +1,6 @@
 # Table of contents
 
-* [UNICEF HCT MIS](README.md)
+* [HOPE (UNICEF HCT MIS)](README.md)
 * [Quick Links](quick-links.md)
 
 ## Introduction
