@@ -19,7 +19,7 @@ interface LookUpPaymentRecordTableRowProps {
     event:
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
       | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    number,
+    number: string,
   ) => void;
 }
 

@@ -63,22 +63,25 @@
             "name": "SteficonRuleNode"
           },
           {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
             "name": "TicketComplaintDetailsNode"
           },
           {
             "name": "TicketSensitiveDetailsNode"
           },
           {
-            "name": "CashPlanPaymentVerificationSummaryNode"
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationPlanNode"
+          },
+          {
+            "name": "PaymentVerificationSummaryNode"
+          },
+          {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
           },
           {
             "name": "ReportNode"
@@ -160,9 +163,6 @@
           },
           {
             "name": "TicketReferralDetailsNode"
-          },
-          {
-            "name": "PaymentVerificationLogEntryNode"
           },
           {
             "name": "DocumentNode"

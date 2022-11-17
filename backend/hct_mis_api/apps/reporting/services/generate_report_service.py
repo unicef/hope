@@ -24,10 +24,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    CashPlanPaymentVerification,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report
@@ -141,15 +141,19 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_cash_plan_verifications(report: Report):
+        pp_business_area_ids = list(
+            CashPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
+        )
         filter_vars = {
-            "cash_plan__business_area": report.business_area,
+            "payment_plan_object_id__in": pp_business_area_ids,
             "completion_date__isnull": False,
             "completion_date__gte": report.date_from,
             "completion_date__lte": report.date_to,
         }
         if report.program:
-            filter_vars["cash_plan__program"] = report.program
-        return CashPlanPaymentVerification.objects.filter(**filter_vars)
+            pp_program_ids = list(CashPlan.objects.filter(program=report.program).values_list("id", flat=True))
+            filter_vars["payment_plan_object_id__in"] = pp_program_ids
+        return PaymentVerificationPlan.objects.filter(**filter_vars)
 
     @staticmethod
     def _map_admin_area_names_from_ids(admin_areas_ids: list) -> str:
@@ -163,11 +167,11 @@ class GenerateReportContentHelpers:
         return ", ".join(result)
 
     @classmethod
-    def format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
+    def format_cash_plan_verification_row(self, verification: PaymentVerificationPlan) -> tuple:
         return (
             verification.id,
-            verification.cash_plan.ca_id,
-            verification.cash_plan.program.name,
+            verification.payment_plan_obj.get_unicef_id,
+            verification.payment_plan_obj.program.name,
             self._format_date(verification.activation_date),
             verification.status,
             verification.verification_channel,
@@ -227,22 +231,26 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payment_verifications(report: Report):
+        pp_business_area_ids = list(
+            PaymentPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
+        )
         filter_vars = {
-            "cash_plan_payment_verification__cash_plan__business_area": report.business_area,
-            "cash_plan_payment_verification__completion_date__isnull": False,
-            "cash_plan_payment_verification__completion_date__date__range": (report.date_from, report.date_to),
+            "payment_verification_plan__payment_plan_object_id__in": pp_business_area_ids,
+            "payment_verification_plan__completion_date__isnull": False,
+            "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
-            filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
+            pp_program_ids = list(PaymentPlan.objects.filter(program=report.program).values_list("id", flat=True))
+            filter_vars["payment_verification_plan__payment_plan_object_id__in"] = pp_program_ids
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
     def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
-            payment_verification.cash_plan_payment_verification.id,
-            payment_verification.payment_record.ca_id,
-            payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
-            self._format_date(payment_verification.cash_plan_payment_verification.completion_date),
+            payment_verification.payment_verification_plan.id,
+            payment_verification.payment_obj.unicef_id,
+            payment_verification.payment_verification_plan.get_payment_plan.get_unicef_id,
+            self._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
@@ -260,7 +268,7 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_payment_plan_row(self, payment_plan: PaymentPlan) -> tuple:
         return (
-            payment_plan.unicef_id,
+            payment_plan.get_unicef_id,
             payment_plan.get_status_display(),
             payment_plan.total_households_count,
             payment_plan.get_currency_display(),
@@ -567,9 +575,9 @@ class GenerateReportService:
             "household id",  # 145aacc4-160a-493e-9d36-4f7f981284c7
         ),
         Report.PAYMENT_VERIFICATION: (
-            "cash plan verification ID",
+            "plan verification ID",
             "payment record ID",  # ANT-21-CSH-00001-0000002
-            "cash plan ID",  # ANT-21-CSH-00001
+            "plan ID",  # ANT-21-CSH-00001
             "verification completion date",
             "received amount",  # 30,00
             "status",  # RECEIVED_WITH_ISSUES

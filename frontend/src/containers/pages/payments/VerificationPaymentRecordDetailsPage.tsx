@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { VerificationRecordDetails } from '../../../components/payments/VerificationRecordDetails';
+import { VerificationPaymentRecordDetails } from '../../../components/payments/VerificationPaymentRecordDetails';
 import { VerifyManual } from '../../../components/payments/VerifyManual';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -12,16 +12,15 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  PaymentVerificationNode,
-  usePaymentRecordVerificationQuery,
+  usePaymentRecordQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
 
-export function VerificationRecordDetailsPage(): React.ReactElement {
+export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error } = usePaymentRecordVerificationQuery({
+  const { data: { paymentRecord }, loading, error } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -32,10 +31,10 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) return null;
+  if (!paymentRecord || !choicesData || permissions === null) return null;
 
-  const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
-
+  const verification =
+    paymentRecord.parent?.verificationPlans?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -52,9 +51,9 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       ? [
           {
             title: `${t('Cash Plan')} ${decodeIdString(
-              paymentVerification.paymentRecord.parent.id,
+              paymentRecord.parent.id,
             )}`,
-            to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.parent.id}`,
+            to: `/${businessArea}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
           },
         ]
       : []),
@@ -62,15 +61,14 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`${t('Payment ID')} ${paymentVerification.paymentRecord.caId}`}
+      title={`${t('Payment Record ID')} ${paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      {paymentVerification.cashPlanPaymentVerification.verificationChannel ===
-        'MANUAL' &&
+      {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
         <VerifyManual
-          paymentVerificationId={paymentVerification.id}
-          enabled={paymentVerification.isManuallyEditable}
+          paymentVerificationId={paymentRecord.verification.id}
+          enabled={paymentRecord.verification.isManuallyEditable}
         />
       ) : null}
     </PageHeader>
@@ -78,8 +76,8 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   return (
     <div>
       {toolbar}
-      <VerificationRecordDetails
-        paymentVerification={paymentVerification}
+      <VerificationPaymentRecordDetails
+        paymentRecord={paymentRecord}
         canViewActivityLog={hasPermissions(
           PERMISSIONS.ACTIVITY_LOG_VIEW,
           permissions,

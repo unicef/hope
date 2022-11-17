@@ -133,10 +133,10 @@ export function VerificationRecordsFilters({
             <Grid item>
               <SelectFilter
                 onChange={(e) =>
-                  handleFilterChange(e, 'cashPlanPaymentVerification')
+                  handleFilterChange(e, 'paymentVerificationPlan')
                 }
                 label={t('Verification Plan Id')}
-                value={filter.cashPlanPaymentVerification || ''}
+                value={filter.paymentVerificationPlan || ''}
               >
                 <MenuItem value=''>
                   <em>None</em>

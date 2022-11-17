@@ -18,24 +18,24 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
   useCashPlanQuery,
-  useFinishCashPlanPaymentVerificationMutation,
+  useFinishPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 
 export interface FinishVerificationPlanProps {
-  cashPlanVerificationId: string;
-  cashPlanId: string;
+  paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
-  cashPlanVerificationId,
-  cashPlanId,
+  paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useFinishCashPlanPaymentVerificationMutation();
+  const [mutate] = useFinishPaymentVerificationPlanMutation();
   const { id } = useParams();
   const { data, loading } = useCashPlanQuery({
     variables: { id },
@@ -47,13 +47,13 @@ export function FinishVerificationPlan({
     return null;
   }
   const { cashPlan } = data;
-  const verificationPlan = cashPlan?.verifications?.edges?.length
-    ? cashPlan.verifications.edges[0].node
+  const verificationPlan = cashPlan?.verificationPlans?.edges?.length
+    ? cashPlan.verificationPlans.edges[0].node
     : null;
 
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
+      variables: { cashPlanVerificationId: paymentVerificationPlanId },
       refetchQueries,
     });
     if (errors) {

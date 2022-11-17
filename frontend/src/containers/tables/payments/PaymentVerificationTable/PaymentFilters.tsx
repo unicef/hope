@@ -38,7 +38,7 @@ export function PaymentFilters({
         <Grid item>
           <SearchTextField
             value={filter.search || ''}
-            label='Cash Plan ID'
+            label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange(e, 'search')}
           />
         </Grid>

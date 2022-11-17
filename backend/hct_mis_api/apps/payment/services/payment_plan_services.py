@@ -393,6 +393,9 @@ class PaymentPlanService:
 
     def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
         with transaction.atomic():
+            self.payment_plan.background_action_status_xlsx_importing_reconciliation()
+            self.payment_plan.save()
+
             file_temp = FileTemp.objects.create(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
@@ -407,7 +410,7 @@ class PaymentPlanService:
                     file_temp.pk,
                 )
             )
-        return self.payment_plan
+        return self.payment_plan.refresh_from_db()
 
     def validate_fsps_per_delivery_mechanisms(self, dm_to_fsp_mapping, update_dms=False, update_payments=False):
         processed_payments = []

@@ -8,19 +8,19 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestXlsxVerificationExport(APITestCase):
 
     EXPORT_MUTATION = """
-        mutation exportXlsxCashPlanVerification($cashPlanVerificationId: ID!) {
-          exportXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId) {
-            cashPlan{
-              verifications{
+        mutation exportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
+          exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
+            paymentPlan{
+              verificationPlans{
                 edges{
                   node{
                     status
@@ -48,10 +48,10 @@ class TestXlsxVerificationExport(APITestCase):
 
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
-        cls.cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX,
-            status=CashPlanPaymentVerification.STATUS_ACTIVE,
+        cls.payment_verification_plan = PaymentVerificationPlanFactory(
+            generic_fk_obj=cash_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
 
     @parameterized.expand(
@@ -67,8 +67,8 @@ class TestXlsxVerificationExport(APITestCase):
             request_string=self.EXPORT_MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": self.id_to_base64(
-                    self.cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode"
+                "paymentVerificationPlanId": self.id_to_base64(
+                    self.payment_verification_plan.id, "PaymentVerificationPlanNode"
                 ),
             },
         )

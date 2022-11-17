@@ -24,6 +24,7 @@ interface UniversalTableProps<T, K> {
   onSelectAllClick?: (event, rows) => void;
   numSelected?: number;
 }
+
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
   initialVariables,
@@ -78,6 +79,7 @@ export function UniversalTable<T, K>({
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
+
   return (
     <TableComponent<T>
       title={correctTitle}

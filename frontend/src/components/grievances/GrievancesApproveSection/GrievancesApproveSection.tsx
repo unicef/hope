@@ -4,7 +4,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GrievanceTicketNode } from '../../../__generated__/graphql';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
@@ -16,7 +16,7 @@ import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
 
 interface GrievancesApproveSectionProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   businessArea: string;
   canApproveFlagAndAdjudication: boolean;
   canApproveDataChange: boolean;

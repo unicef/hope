@@ -2,8 +2,10 @@ from django.db.models import (
     Case,
     Count,
     DecimalField,
+    Exists,
     F,
     IntegerField,
+    OuterRef,
     Q,
     Sum,
     Value,
@@ -31,12 +33,20 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.filters import CashPlanFilter
+from hct_mis_api.apps.payment.filters import (
+    CashPlanFilter,
+    PaymentVerificationPlanFilter,
+)
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    CashPlanPaymentVerification,
     GenericPayment,
     PaymentRecord,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
+)
+from hct_mis_api.apps.payment.schema import (
+    PaymentVerificationPlanNode,
+    PaymentVerificationSummaryNode,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
@@ -89,22 +99,28 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     total_undelivered_quantity = graphene.Float()
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
+    verification_plans = DjangoPermissionFilterConnectionField(
+        PaymentVerificationPlanNode,
+        filterset_class=PaymentVerificationPlanFilter,
+    )
+    payment_verification_summary = graphene.Field(
+        PaymentVerificationSummaryNode,
+        source="get_payment_verification_summary",
+    )
+    unicef_id = graphene.String(source="ca_id")
 
     class Meta:
         model = CashPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_total_number_of_households(self, info, **kwargs):
-        return self.total_number_of_households
-
-    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
-        return self.can_create_payment_verification_plan
-
     def resolve_available_payment_records_count(self, info, **kwargs):
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
+
+    def resolve_verification_plans(self, info, **kwargs):
+        return self.get_payment_verification_plans
 
 
 class Query(graphene.ObjectType):
@@ -132,6 +148,7 @@ class Query(graphene.ObjectType):
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
+    # TODO: maybe deprecated going to use 'all_cash_plans_and_payment_plans'
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
         filterset_class=CashPlanFilter,
@@ -174,22 +191,27 @@ class Query(graphene.ObjectType):
         return to_choice_object(Program.STATUS_CHOICE)
 
     def resolve_all_cash_plans(self, info, **kwargs):
+        payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
+            payment_plan_object_id=OuterRef("id")
+        )
+
         return CashPlan.objects.annotate(
             custom_order=Case(
                 When(
-                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
                     then=Value(1),
                 ),
                 When(
-                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
                     then=Value(2),
                 ),
                 When(
-                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
                     then=Value(3),
                 ),
                 output_field=IntegerField(),
-            )
+                default=Value(0),
+            ),
         ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])

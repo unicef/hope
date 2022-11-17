@@ -2,6 +2,7 @@ import logging
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -10,11 +11,9 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import (
-    PaymentVerification,
-    XlsxCashPlanPaymentVerificationFile,
-)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
 logger = logging.getLogger(__name__)
@@ -49,9 +48,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
-    def __init__(self, cashplan_payment_verification):
-        self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan):
+        self.payment_verification_plan = payment_verification_plan
+        self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -76,22 +75,22 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
-    def _add_payment_record_verification_row(self, payment_record_verification):
-        household = payment_record_verification.payment_record.household
-        head_of_household = payment_record_verification.payment_record.head_of_household
+    def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification):
+        household = payment_record_verification.payment_obj.household
+        head_of_household = payment_record_verification.payment_obj.head_of_household
 
         payment_record_verification_row = (
-            str(payment_record_verification.payment_record_id),
-            str(payment_record_verification.payment_record.ca_id),
+            str(payment_record_verification.payment_object_id),
+            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
             str(household.admin1.name) if household.admin1 else "",
             str(household.admin2.name) if household.admin2 else "",
             str(household.village),
             str(household.address),
-            str(payment_record_verification.payment_record.household_id),
+            str(payment_record_verification.payment_obj.household_id),
             str(household.unicef_id),
-            payment_record_verification.payment_record.delivered_quantity,
+            payment_record_verification.payment_obj.delivered_quantity,
             payment_record_verification.received_amount,
         )
         self.ws_export_list.append(payment_record_verification_row)
@@ -116,25 +115,27 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return self.wb
 
     def save_xlsx_file(self, user):
-        filename = f"payment_verification_{self.cashplan_payment_verification.unicef_id}.xlsx"
+        filename = f"payment_verification_{self.payment_verification_plan.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
-            xlsx_obj = XlsxCashPlanPaymentVerificationFile(
-                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
+            xlsx_obj = FileTemp(
+                object_id=self.payment_verification_plan.pk,
+                content_type=get_content_type_for_model(self.payment_verification_plan),
+                created_by=user,
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
     def get_email_context(self, user) -> dict:
-        payment_verification_id = encode_id_base64(self.cashplan_payment_verification.pk, "CashPlanPaymentVerification")
-        link = self.get_link(reverse("download-cash-plan-payment-verification", args=[payment_verification_id]))
+        payment_verification_id = encode_id_base64(self.payment_verification_plan.pk, "PaymentVerificationPlan")
+        link = self.get_link(reverse("download-payment-verification-plan", args=[payment_verification_id]))
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
+            "email": getattr(user, "email", ""),
             "message": msg,
             "link": link,
             "title": "Verification Plan XLSX file generated",
@@ -142,18 +143,17 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         return context
 
-    @staticmethod
-    def send_email(user, cash_plan_payment_verification_id):
+    def send_email(self, user):
         protocol = "http" if settings.IS_DEV else "https"
-        payment_verification_id = encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")
-        api = reverse("download-cash-plan-payment-verification", args=[payment_verification_id])
+        payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
+        api = reverse("download-payment-verification-plan", args=[payment_verification_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
+            "email": getattr(user, "email", ""),
             "message": msg,
             "link": link,
         }
