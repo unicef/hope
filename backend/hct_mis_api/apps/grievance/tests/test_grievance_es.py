@@ -2,6 +2,7 @@ import json
 import os
 from unittest.mock import patch
 
+from django.conf import settings
 from django.core.management import call_command
 
 from elasticsearch import Elasticsearch
@@ -10,7 +11,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.constants import (
@@ -23,7 +23,7 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 def execute_test_es_query(query_dict):
-    es = Elasticsearch("http://elasticsearch:9200")
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     es.indices.refresh("test_es_db")
 
     resp = es.search(index="test_es_db", body=query_dict)
@@ -302,12 +302,11 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     def setUpTestData(cls):
         cls.es = cls.create_es_db()
 
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         call_command("loadcountries")
 
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         country = Country.objects.first()
         area_type_new = AreaTypeFactory(
             name="Admin type one",
@@ -442,13 +441,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
     @staticmethod
-    def create_es_db():
+    def create_es_db() -> Elasticsearch:
         grievance_es_index = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), "tests", "grievance_es_index.json"
         )
 
         with open(grievance_es_index) as f:
-            es = Elasticsearch("http://elasticsearch:9200")
+            es = Elasticsearch(settings.ELASTICSEARCH_HOST)
             es.indices.create(
                 index="test_es_db",
                 body={
@@ -465,7 +464,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @classmethod
     def tearDownClass(cls):
-        es = Elasticsearch("http://elasticsearch:9200")
+        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
         es.indices.delete(index="test_es_db", ignore=[400, 404])
         super().tearDownClass()
 

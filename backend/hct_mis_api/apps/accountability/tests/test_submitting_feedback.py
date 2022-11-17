@@ -1,3 +1,5 @@
+from typing import Dict, List, Optional
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
@@ -119,14 +121,14 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         cls.admin_area = AreaFactory(name="City Test", area_type=cls.area_type, p_code="asdfgfhghkjltr")
 
-    def create_dummy_correct_input(self):
+    def create_dummy_correct_input(self) -> Dict:
         return {
             "businessAreaSlug": self.business_area.slug,
             "issueType": Feedback.POSITIVE_FEEDBACK,
             "description": "Test description",
         }
 
-    def submit_feedback(self, data):
+    def submit_feedback(self, data) -> Optional[str]:
         amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
@@ -137,7 +139,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.assertEqual(Feedback.objects.count(), amount + 1)
         return decode_id_string(response["data"]["createFeedback"]["feedback"]["id"])
 
-    def create_new_feedback(self, data=None):
+    def create_new_feedback(self, data=None) -> Optional[str]:
         return self.submit_feedback(data or self.create_dummy_correct_input())
 
     def test_creating_new_feedback(self):
@@ -165,7 +167,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             }
         )
 
-        def filter_it(variables):
+        def filter_it(variables) -> List:
             vars = {"businessAreaSlug": self.business_area.slug} | variables
             response = self.graphql_request(
                 request_string=self.ALL_FEEDBACKS_QUERY,
@@ -188,7 +190,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert len(filter_it({"createdBy": str(self.program.pk)})) == 0
 
     def test_failing_to_create_new_feedback(self):
-        def expect_failure(data):
+        def expect_failure(data) -> None:
             current_amount = Feedback.objects.count()
             response = self.graphql_request(
                 request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
@@ -310,7 +312,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in response, response["errors"]
         self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
 
-    def create_linked_grievance_ticket(self, feedback_id):
+    def create_linked_grievance_ticket(self, feedback_id) -> Dict:
         create_grievance_response = self.graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user},
