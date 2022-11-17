@@ -9,9 +9,9 @@ snapshots = Snapshot()
 
 snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verification_0_with_permission 1'] = {
     'data': {
-        'exportXlsxCashPlanVerification': {
-            'cashPlan': {
-                'verifications': {
+        'exportXlsxPaymentVerificationPlanFile': {
+            'paymentPlan': {
+                'verificationPlans': {
                     'edges': [
                         {
                             'node': {
@@ -31,7 +31,7 @@ snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verifi
 
 snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verification_1_without_permission 1'] = {
     'data': {
-        'exportXlsxCashPlanVerification': None
+        'exportXlsxPaymentVerificationPlanFile': None
     },
     'errors': [
         {
@@ -43,7 +43,7 @@ snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verifi
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'exportXlsxCashPlanVerification'
+                'exportXlsxPaymentVerificationPlanFile'
             ]
         }
     ]

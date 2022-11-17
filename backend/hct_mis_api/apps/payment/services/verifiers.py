@@ -1,30 +1,30 @@
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 
 
 class PaymentVerificationArgumentVerifier:
     ARGUMENTS = {
         "sampling": {
-            CashPlanPaymentVerification.SAMPLING_FULL_LIST: {
+            PaymentVerificationPlan.SAMPLING_FULL_LIST: {
                 "required": ["full_list_arguments"],
                 "not_allowed": ["random_sampling_arguments"],
             },
-            CashPlanPaymentVerification.SAMPLING_RANDOM: {
+            PaymentVerificationPlan.SAMPLING_RANDOM: {
                 "required": ["random_sampling_arguments"],
                 "not_allowed": ["full_list_arguments"],
             },
         },
         "verification_channel": {
-            CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO: {
+            PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO: {
                 "required": ["rapid_pro_arguments"],
                 "not_allowed": ["xlsx_arguments", "manual_arguments"],
             },
-            CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX: {
+            PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX: {
                 "required": [],
                 "not_allowed": ["rapid_pro_arguments", "manual_arguments"],
             },
-            CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL: {
+            PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL: {
                 "required": [],
                 "not_allowed": ["rapid_pro_arguments", "xlsx_arguments"],
             },

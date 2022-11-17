@@ -1,19 +1,65 @@
 import { gql } from 'apollo-boost';
 
 export const Payment = gql`
-  query Payment($id: ID!) {
-    payment(id: $id) {
+query Payment($id: ID!) {
+  payment(id: $id) {
+    id
+    unicefId
+    status
+    statusDate
+    targetPopulation {
       id
-      household {
+      name
+    }
+    verification {
+      id
+      status
+      statusDate
+      receivedAmount
+      isManuallyEditable
+    }
+    currency
+    entitlementQuantity
+    deliveredQuantity
+    deliveryDate
+    household {
+      id
+      size
+      status
+      unicefId
+      headOfHousehold {
         id
-        unicefId
-        size
-        admin2 {
-          id
-          name
+        phoneNo
+        phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
+        fullName
+      }
+    }
+    parent {
+      id
+      unicefId
+      program {
+        id
+        name
+      }
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            verificationChannel
+          }
         }
       }
-      entitlementQuantityUsd
+    }
+    deliveredQuantityUsd
+    deliveryType
+    transactionReferenceId
+    serviceProvider {
+      id
+      fullName
     }
   }
+}
 `;

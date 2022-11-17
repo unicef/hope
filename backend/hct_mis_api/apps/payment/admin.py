@@ -18,7 +18,6 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    CashPlanPaymentVerification,
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -29,6 +28,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentVerificationPlan,
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
@@ -75,23 +75,24 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
 
 
-@admin.register(CashPlanPaymentVerification)
-class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("cash_plan", "status", "verification_channel")
+@admin.register(PaymentVerificationPlan)
+class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+    # TODO: fix filtering
+    list_display = ("payment_plan_obj", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("verification_channel", ChoicesFieldComboFilter),
-        ("cash_plan", AutoCompleteFilter),
-        ("cash_plan__business_area", AutoCompleteFilter),
+        # ("payment_plan", AutoCompleteFilter),
+        # ("payment_plan__business_area", AutoCompleteFilter),
     )
     date_hierarchy = "updated_at"
-    search_fields = ("cash_plan__name",)
-    raw_id_fields = ("cash_plan",)
+    search_fields = ("payment_plan__name",)
+    raw_id_fields = ("payment_plan",)
 
     @button()
     def verifications(self, request, pk):
         list_url = reverse("admin:payment_paymentverification_changelist")
-        url = f"{list_url}?cash_plan_payment_verification__exact={pk}"
+        url = f"{list_url}?payment_verification_plan__exact={pk}"
         return HttpResponseRedirect(url)
 
     @button()
@@ -122,7 +123,7 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
         return confirm_action(
             self,
             request,
-            lambda _: VerificationPlanStatusChangeServices(CashPlanPaymentVerification.objects.get(pk=pk)).activate(),
+            lambda _: VerificationPlanStatusChangeServices(PaymentVerificationPlan.objects.get(pk=pk)).activate(),
             "This action will trigger Cash Plan Payment Verification activation (also sending messages via Rapid Pro).",
             "Successfully activated.",
         )
@@ -130,34 +131,37 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
 
 @admin.register(PaymentVerification)
 class PaymentVerificationAdmin(HOPEModelAdminBase):
-    list_display = ("household", "status", "received_amount", "cash_plan_name")
+    # TODO: update filter and get_qs
+    list_display = ("household", "status", "received_amount", "payment_plan_name")
 
     list_filter = (
         DepotManager,
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
-        ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
-        ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),
-        ("payment_record__household__unicef_id", ValueFilter),
+        # ("payment_verification_plan__payment_plan_obj", AutoCompleteFilter),
+        # ("payment_verification_plan__payment_plan_obj__business_area", AutoCompleteFilter),
+        ("payment__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("payment_record", "cash_plan_payment_verification")
+    raw_id_fields = ("payment_verification_plan",)
 
-    def cash_plan_name(self, obj):
-        return obj.cash_plan_payment_verification.cash_plan.name
+    def payment_plan_name(self, obj):
+        payment_plan = obj.payment_verification_plan.payment_plan_obj
+        return getattr(payment_plan, "name", "~no name~")
 
     def household(self, obj):
-        return obj.payment_record.household.unicef_id
+        payment = obj.payment_obj
+        return payment.household.unicef_id if payment else ""
 
     def get_queryset(self, request):
         return (
             super()
             .get_queryset(request)
             .select_related(
-                "cash_plan_payment_verification",
-                "cash_plan_payment_verification__cash_plan",
-                "payment_record",
-                "payment_record__household",
+                "payment_verification_plan",
+                # "payment_verification_plan__payment_plan_obj",
+                # "payment_obj",
+                # "payment_obj__household",
             )
         )
 
@@ -176,7 +180,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
-        ("cash_plan_payment_verification_summary__status", ChoicesFieldComboFilter),
+        ("payment_verification_summary__status", ChoicesFieldComboFilter),
         ("program__id", ValueFilter),
         ("vision_id", ValueFilter),
     )
@@ -184,7 +188,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     search_fields = ("name",)
 
     def verification_status(self, obj):
-        return obj.cash_plan_payment_verification_summary.status
+        return obj.get_payment_verification_summary.status if obj.get_payment_verification_summary else None
 
     @button()
     def payments(self, request, pk):

@@ -7,7 +7,7 @@ import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { choicesToDict } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useApproveDeleteHouseholdDataChangeMutation,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
@@ -22,7 +22,7 @@ export const DeleteHouseholdGrievanceDetails = ({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   canApproveDataChange: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
