@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
-def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id):
-    es = Elasticsearch("http://elasticsearch:9200")
+def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id) -> None:
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
     documents_to_update = []
     for ticket_id in grievance_tickets_ids:

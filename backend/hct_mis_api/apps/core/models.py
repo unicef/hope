@@ -417,7 +417,7 @@ class TicketPriority(models.Model):
 
     @classmethod
     @lru_cache()
-    def priority_by_business_area_and_ticket_type(cls, business_area_id, ticket_type):
+    def priority_by_business_area_and_ticket_type(cls, business_area_id, ticket_type) -> int:
         try:
             return cls.objects.get(business_area__pk=business_area_id, ticket_type=ticket_type).priority
         except ObjectDoesNotExist:
@@ -425,14 +425,14 @@ class TicketPriority(models.Model):
 
     @classmethod
     @lru_cache()
-    def urgency_by_business_area_and_ticket_type(cls, business_area_id, ticket_type):
+    def urgency_by_business_area_and_ticket_type(cls, business_area_id, ticket_type) -> int:
         try:
             return cls.objects.get(business_area__pk=business_area_id, ticket_type=ticket_type).urgency
         except ObjectDoesNotExist:
             return cls._get_default_urgency_by_ticket_type(ticket_type)
 
     @classmethod
-    def _get_default_priority_by_ticket_type(cls, ticket_type):
+    def _get_default_priority_by_ticket_type(cls, ticket_type) -> int:
         return {
             cls.NEEDS_ADJUDICATION: config.NEEDS_ADJUDICATION_PRIORITY,
             cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_PRIORITY,
@@ -440,7 +440,7 @@ class TicketPriority(models.Model):
         }[ticket_type]
 
     @classmethod
-    def _get_default_urgency_by_ticket_type(cls, ticket_type):
+    def _get_default_urgency_by_ticket_type(cls, ticket_type) -> int:
         return {
             cls.NEEDS_ADJUDICATION: config.NEEDS_ADJUDICATION_URGENCY,
             cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_URGENCY,

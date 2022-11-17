@@ -22,7 +22,7 @@ class BaseSampling(abc.ABC):
         self.administrative_level = arguments.get("administrative_level")
         self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas if x and x.strip()]
         self.sample_size = 0
-        self.households: Optional[QuerySet[Household]] = None
+        self.households: QuerySet[Household] = Household.objects.none()
 
     @abc.abstractmethod
     def get_full_list_arguments(self) -> Optional[Dict]:
