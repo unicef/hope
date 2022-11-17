@@ -73,7 +73,7 @@
   * [DevOps / Infra](technical-specification/technical-architecture/devops-infra.md)
   * [Flexible Fields](technical-specification/technical-architecture/flexible-fields.md)
   * [DB Architecture](technical-specification/technical-architecture/db-architecture.md)
-  * [\(Offline\) Registration Module App](technical-specification/technical-architecture/offline-capabilities.md)
+  * [(Offline) Registration Module App](technical-specification/technical-architecture/offline-capabilities.md)
   * [Elasticsearch Scoring](technical-specification/technical-architecture/elasticsearch-scoring.md)
   * [ODK Forms and Collection](technical-specification/technical-architecture/odk-forms-and-collection.md)
 * [Development Setup / Process](technical-specification/development-setup/README.md)
@@ -92,6 +92,7 @@
   * [Kobo hosting](technical-specification/kobo-integration/kobo-hosting.md)
   * [Open issues](technical-specification/kobo-integration/open-issues.md)
   * [Mapping of KoBo fields in HOPE](technical-specification/kobo-integration/mapping-of-kobo-fields-in-hope.md)
+* [Aurora (aka Flex Registration)](technical-specification/aurora-aka-flex-registration.md)
 * [Deployment](technical-specification/deployment.md)
 
 ## Project Management
@@ -111,4 +112,3 @@
 * [Sprint Cadence](project-management/sprint-cadence.md)
 * [CO / User testing](project-management/co-user-testing.md)
 * [Definition of Ready/Done](project-management/definition-of-ready-and-done.md)
-
