@@ -19,10 +19,10 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
