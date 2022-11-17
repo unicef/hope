@@ -10,46 +10,46 @@ def update_payment_verification_fk(apps, schema_editor):
     CashPlan = apps.get_model("payment", "CashPlan")
     ContentType = apps.get_model("contenttypes", "ContentType")
 
-    # pv_plan_to_upd = []
-    pv_summary_to_upd = []
-
     content_type_for_cash_plan = ContentType.objects.get_for_model(CashPlan)
 
-    subquery = Subquery(
+    subquery_pvp = Subquery(
         PaymentVerificationPlan.objects
         .filter(pk=OuterRef("pk"))
         .values("cash_plan_id")[:1]
     )
-    PaymentVerificationPlan.objects.all().update(
-        payment_plan_content_type_id=content_type_for_cash_plan.id,
-        payment_plan_object_id=subquery
+    subquery_summary = Subquery(
+        PaymentVerificationSummary.objects
+        .filter(pk=OuterRef("pk"))
+        .values("cash_plan_id")[:1]
     )
 
-    for pv in PaymentVerificationSummary.objects.all():
-        if pv.cash_plan:
-            pv.payment_plan_content_type_id = content_type_for_cash_plan.id
-            pv.payment_plan_object_id = pv.cash_plan_id
-            pv_summary_to_upd.append(pv)
-
-    # PaymentVerificationPlan.objects.bulk_update(pv_plan_to_upd, ("payment_plan_content_type_id", "payment_plan_object_id"), 1000)
-    PaymentVerificationSummary.objects.bulk_update(pv_summary_to_upd, ("payment_plan_content_type_id", "payment_plan_object_id"), 1000)
+    PaymentVerificationPlan.objects.all().update(
+        payment_plan_content_type_id=content_type_for_cash_plan.id,
+        payment_plan_object_id=subquery_pvp,
+    )
+    PaymentVerificationSummary.objects.all().update(
+        payment_plan_content_type_id=content_type_for_cash_plan.id,
+        payment_plan_object_id=subquery_summary,
+    )
 
 
 def update_payment_record_fk(apps, schema_editor):
     PaymentVerification = apps.get_model("payment", "PaymentVerification")
     PaymentRecord = apps.get_model("payment", "PaymentRecord")
     ContentType = apps.get_model("contenttypes", "ContentType")
-    pv_to_upd = []
 
     content_type_for_payment_record = ContentType.objects.get_for_model(PaymentRecord)
 
-    for pv in PaymentVerification.objects.all():
-        if pv.payment_record:
-            pv.payment_content_type_id = content_type_for_payment_record.id
-            pv.payment_object_id = pv.payment_record_id
-            pv_to_upd.append(pv)
+    subquery_pv = Subquery(
+        PaymentVerification.objects
+        .filter(pk=OuterRef("pk"))
+        .values("payment_record_id")[:1]
+    )
 
-    PaymentVerification.objects.bulk_update(pv_to_upd, ("payment_content_type_id", "payment_object_id"), 1000)
+    PaymentVerification.objects.all().update(
+        payment_content_type_id=content_type_for_payment_record.id,
+        payment_object_id=subquery_pv,
+    )
 
 
 class Migration(migrations.Migration):

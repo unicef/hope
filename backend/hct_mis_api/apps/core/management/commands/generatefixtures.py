@@ -191,7 +191,7 @@ class Command(BaseCommand):
                     grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
 
                 EntitlementCardFactory(household=household)
-        PaymentVerificationPlanFactory.create_batch(1)
+        PaymentVerificationPlanFactory()
         PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic
