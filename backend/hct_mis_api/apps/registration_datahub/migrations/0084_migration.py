@@ -4,14 +4,6 @@ from django.db import migrations, models
 import django_countries.fields
 
 
-def populate_partner_and_country(apps, schema_editor):
-    IndividualIdentity = apps.get_model("registration_datahub", "ImportedIndividualIdentity")
-    for identity in IndividualIdentity.objects.all():
-        identity.partner = identity.agency.type
-        identity.country = identity.agency.country
-        identity.save(update_fields=("partner", "country"))
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -28,10 +20,5 @@ class Migration(migrations.Migration):
             model_name='importedindividualidentity',
             name='partner',
             field=models.CharField(max_length=100, null=True),
-        ),
-        migrations.RunPython(populate_partner_and_country, migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name='importedindividualidentity',
-            name='agency',
         ),
     ]
