@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase
 
 from parameterized import parameterized
@@ -19,7 +20,7 @@ from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(self):

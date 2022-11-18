@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -99,7 +100,7 @@ HOUSEHOLD_QUERY = """
 
 
 class TestHouseholdQuery(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):

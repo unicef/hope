@@ -1,15 +1,13 @@
+from typing import List
+
 from django.utils import timezone
 
-import graphene
-
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
-class PaymentVerificationTicketExtras(graphene.InputObjectType):
-    pass
-
-
-def save_payment_verification_extras(grievance_ticket, info):
+def update_payment_verification_service(grievance_ticket, *args, **kwargs) -> List[GrievanceTicket]:
     payment_verification_details = grievance_ticket.payment_verification_ticket_details
     payment_verification = payment_verification_details.payment_verification
     if not (
@@ -17,7 +15,7 @@ def save_payment_verification_extras(grievance_ticket, info):
         and payment_verification
         and not payment_verification_details.has_multiple_payment_verifications
     ):
-        return
+        return [grievance_ticket]
     # update PaymentVerification status
     if (
         payment_verification.payment_record
@@ -36,3 +34,23 @@ def save_payment_verification_extras(grievance_ticket, info):
     payment_verification.received_amount = payment_verification_details.new_received_amount
 
     payment_verification.save()
+    return [grievance_ticket]
+
+
+def update_ticket_payment_verification_service(grievance_ticket, extras, input_data) -> GrievanceTicket:
+    if grievance_ticket.status != GrievanceTicket.STATUS_IN_PROGRESS:
+        log_and_raise("Payment Details is editable only for Grievance Ticket on status In Progress")
+
+    data = extras.get("ticket_payment_verification_details_extras", {})
+    new_received_amount = data.get("new_received_amount")
+    new_status = data.get("new_status")
+
+    payment_details = grievance_ticket.payment_verification_ticket_details
+    if not payment_details.has_multiple_payment_verifications:
+        if new_received_amount:
+            payment_details.new_received_amount = new_received_amount
+        if new_status:
+            payment_details.new_status = new_status
+
+        payment_details.save()
+    return grievance_ticket

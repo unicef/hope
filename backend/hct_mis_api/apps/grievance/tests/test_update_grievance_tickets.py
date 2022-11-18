@@ -2,6 +2,7 @@ from datetime import date
 from typing import Dict
 from unittest import mock
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from parameterized import parameterized
@@ -47,7 +48,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestUpdateGrievanceTickets(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     UPDATE_GRIEVANCE_TICKET_MUTATION = """
     mutation UpdateGrievanceTicket(
@@ -614,7 +615,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_feedback_ticket(self, name, permissions):
+    def test_update_feedback_ticket(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -627,26 +628,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
             }
         }
-        self.graphql_request(
+        self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
             context={"user": self.user},
             variables=input_data,
         )
-        self.positive_feedback_grievance_ticket.refresh_from_db()
-
-        # TODO: test shouldn't use conditional logic
-        if name == "with_permission":
-            self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
-            self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, "City Test")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
-        else:
-            self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
-            self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, "City Example")
-            self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
-            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
 
     @parameterized.expand(
         [

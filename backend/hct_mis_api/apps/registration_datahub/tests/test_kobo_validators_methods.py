@@ -1,6 +1,7 @@
 from operator import itemgetter
 from typing import Dict, Tuple
 
+from django.conf import settings
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -12,7 +13,8 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 class TestKoboSaveValidatorsMethods(TestCase):
     databases = {"default", "registration_datahub"}
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
     VALID_JSON = [
         {
             "_notes": [],

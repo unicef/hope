@@ -9,6 +9,10 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    TicketAddIndividualDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -49,6 +53,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
         )
+        TicketAddIndividualDetailsFactory(ticket=cls.grievance_ticket1)
+
         cls.grievance_ticket2 = GrievanceTicket.objects.create(
             description="Test",
             assigned_to=cls.user,
@@ -60,6 +66,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
         )
+        TicketAddIndividualDetailsFactory(ticket=cls.grievance_ticket2)
+
         cls.grievance_ticket3 = GrievanceTicket.objects.create(
             description="Test",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -69,6 +77,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
         )
+        TicketNeedsAdjudicationDetailsFactory(ticket=cls.grievance_ticket3)
 
     @parameterized.expand(
         [
