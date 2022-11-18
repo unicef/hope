@@ -1,10 +1,10 @@
-# HOPE (UNICEF HCT MIS)
+# UNICEF HCT MIS
 
 #### [Development environment setup instructions](technical-specification/development-setup/)
 
 ## Overview
 
-HOPE (Humanitarian Cash Operations & Programme Ecosystem) is HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed. It will be used by country offices, HQ users and on the ground partners (for registration of beneficiaries). The HCT-MIS application looks to provide a unified consolidated reporting for beneficiary data, increase accountability and traceability, grow cash programs while ensuring due diligence, and overall - simplifying a system of complex processes.
+HCT MIS is UNICEF's humanitarian cash transfer platform that is being developed. It will be used by country offices, HQ users and on the ground partners \(for registration of beneficiaries\). The HCT-MIS application looks to provide a unified consolidated reporting for beneficiary data, increase accountability and traceability, grow cash programs while ensuring due diligence, and overall - simplifying a system of complex processes.
 
 **Summary:** The HCT-MIS system allows UN Agencies enriched beneficiary data to view / track / create better informed cash programmes for people in need.
 
@@ -30,7 +30,7 @@ HOPE (Humanitarian Cash Operations & Programme Ecosystem) is HCT MIS is UNICEF's
 * Better informed programming
 * Enhancing transparency
 * Interoperability
-* Leveraging Existing (UN) Systems
+* Leveraging Existing \(UN\) Systems
 * Making it easier for country user staff to use the system.
 * View impact of new modality over time
 * Enhanced Security
@@ -45,8 +45,11 @@ HOPE (Humanitarian Cash Operations & Programme Ecosystem) is HCT MIS is UNICEF's
 * Interagency Data Sharing & Reporting
 * Unified and rolled up information for multipurpose use
 * Alignment with interagency reporting standards.
-* Reporting Indicators to measure success (Globally / Locally)
+* Reporting Indicators to measure success \(Globally / Locally\)
 
 ## Phase by Phase Approach
 
 For delivery of this project, multiple phases have been identified for completion. Phase 1 included a breakdown of the project goals and details. The following iteration are subject to be be planned in the preceding Iteration. List of identified Iterations and Deliverables can be viewed [here](project-management/iterations-deliverables/).
+
+
+
