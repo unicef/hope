@@ -7,6 +7,7 @@ import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
 import InfoIcon from '@material-ui/icons/Info';
+import ListIcon from "@material-ui/icons/List";
 import MessageIcon from '@material-ui/icons/Message';
 import RateReviewIcon from '@material-ui/icons/RateReview';
 import BallotIcon from '@material-ui/icons/Ballot';
@@ -111,7 +112,7 @@ export const menuItems = [
         name: 'Grievance Tickets',
         href: '/grievance-and-feedback/tickets',
         selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
-        icon: <List />,
+        icon: <ListIcon />,
         permissionModule: 'HOUSEHOLDS',
       },
       {
