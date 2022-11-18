@@ -34,9 +34,11 @@ In the advanced option of the AjaxField we can select the following attributes:
 
 ### Visible if
 
-Smart - Visible
+A field can trigger js function on changes in the Advanced Section (smart > onchange)
 
-### Custom Field Type
+smart.showHideDependant(this, '\[data-flex=field\_x], \[data-flex=field\_y], \[data-flex=field\_x], 'y');
+
+### Custom Field Type (WIP)
 
 Equivalent of meta class for fields.
 
