@@ -24,7 +24,10 @@ from hct_mis_api.apps.core.utils import (
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
+from hct_mis_api.apps.grievance.documents import (
+    GrievanceTicketDocument,
+    bulk_update_assigned_to,
+)
 from hct_mis_api.apps.grievance.inputs import (
     CreateGrievanceTicketInput,
     CreateTicketNoteInput,
@@ -95,6 +98,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
@@ -285,6 +289,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         grievances = [grievance_ticket]
         if save_extra_method:
             grievances = save_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
+
+        cls.populate_index(grievances)
+
         for grievance in grievances:
             log_create(
                 GrievanceTicket.ACTIVITY_LOG_MAPPING,
@@ -294,6 +301,11 @@ class CreateGrievanceTicketMutation(PermissionMutation):
                 grievance,
             )
         return cls(grievance_tickets=grievances)
+
+    @classmethod
+    def populate_index(cls, grievances_list) -> None:
+        grievances = GrievanceTicket.objects.filter(id__in=[ticket.id for ticket in grievances_list])
+        populate_index(grievances, GrievanceTicketDocument)
 
     @classmethod
     def save_basic_data(cls, root, info, input, **kwargs) -> Tuple[GrievanceTicket, Dict]:
@@ -369,7 +381,6 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             "required": [],
             "not_allowed": [],
         },
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
