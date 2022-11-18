@@ -550,7 +550,6 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                         <Field
                           name='title'
                           required
-                          multiline
                           fullWidth
                           variant='outlined'
                           label={t('Title')}
