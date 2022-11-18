@@ -20,6 +20,20 @@ logger = logging.getLogger(__name__)
 INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
+def es_autosync(is_autosync_enabled):
+    """This decorator checks if auto-synchronization with Elasticsearch is turned on"""
+
+    def wrapper(func):
+        def inner(*args, **kwargs):
+            if is_autosync_enabled:
+                return func(*args, **kwargs)
+
+        return inner
+
+    return wrapper
+
+
+@es_autosync(settings.ELASTICSEARCH_DSL_AUTOSYNC)
 def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id) -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
