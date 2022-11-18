@@ -32,7 +32,7 @@ def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id) -> None:
             "_source": {"doc": {"assigned_to": {"id": str(assigned_to_id)}}},
         }
         documents_to_update.append(document)
-        bulk(es, documents_to_update)
+    bulk(es, documents_to_update)
     logger.info(f"GrievanceDocuments with {','.join([str(_id) for _id in grievance_tickets_ids])} have been updated.")
 
 
