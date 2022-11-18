@@ -384,12 +384,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 </Grid>
                                 <Grid item xs={6}>
                                   <LabelizedField label={t('Household')}>
-                                    {values.selectedHousehold.unicefId}
+                                    {values.selectedHousehold?.unicefId}
                                   </LabelizedField>
                                 </Grid>
                                 <Grid item xs={6}>
                                   <LabelizedField label={t('Individual')}>
-                                    {values.selectedIndividual.unicefId}
+                                    {values.selectedIndividual?.unicefId}
                                   </LabelizedField>
                                 </Grid>
                               </Grid>
