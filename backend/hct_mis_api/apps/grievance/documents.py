@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 
 from django.conf import settings
 
@@ -20,6 +21,20 @@ logger = logging.getLogger(__name__)
 INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
+def es_autosync(is_autosync_enabled: bool):
+    """This decorator checks if auto-synchronization with Elasticsearch is turned on"""
+
+    def wrapper(func: Callable):
+        def inner(*args, **kwargs):
+            if is_autosync_enabled:
+                return func(*args, **kwargs)
+
+        return inner
+
+    return wrapper
+
+
+@es_autosync(settings.ELASTICSEARCH_DSL_AUTOSYNC)
 def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id) -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
@@ -32,7 +47,7 @@ def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id) -> None:
             "_source": {"doc": {"assigned_to": {"id": str(assigned_to_id)}}},
         }
         documents_to_update.append(document)
-        bulk(es, documents_to_update)
+    bulk(es, documents_to_update)
     logger.info(f"GrievanceDocuments with {','.join([str(_id) for _id in grievance_tickets_ids])} have been updated.")
 
 
