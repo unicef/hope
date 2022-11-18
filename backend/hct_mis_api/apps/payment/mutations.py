@@ -969,7 +969,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     def mutate(cls, root, info, file, payment_plan_id):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             msg = "You can only import for LOCKED Payment Plan"
@@ -1045,7 +1045,9 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
     def mutate(cls, root, info, payment_plan_id, steficon_rule_id):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(
+            info, Permissions.PAYMENT_MODULE_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area
+        )
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             msg = "You can run formula only for 'Locked' status of Payment Plan"
