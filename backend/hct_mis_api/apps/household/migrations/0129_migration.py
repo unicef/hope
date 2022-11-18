@@ -31,28 +31,33 @@ def populate_partner_and_country(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('account', '0043_migration'),
-        ('geo', '0007_migration'),
-        ('household', '0127_migration'),
+        ("account", "0043_migration"),
+        ("geo", "0007_migration"),
+        ("household", "0128_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='individualidentity',
-            name='country',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='geo.country'),
+            model_name="individualidentity",
+            name="country",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"),
         ),
         migrations.AddField(
-            model_name='individualidentity',
-            name='partner',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='individual_identities', to='account.partner'),
+            model_name="individualidentity",
+            name="partner",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="individual_identities",
+                to="account.partner",
+            ),
         ),
         migrations.RunPython(populate_partner_and_country, migrations.RunPython.noop),
         migrations.RemoveField(
-            model_name='individualidentity',
-            name='agency',
+            model_name="individualidentity",
+            name="agency",
         ),
         migrations.DeleteModel(
-            name='Agency',
+            name="Agency",
         ),
     ]
