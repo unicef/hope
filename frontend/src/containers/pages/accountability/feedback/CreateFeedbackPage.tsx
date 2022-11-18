@@ -368,11 +368,32 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                       {activeStep === steps.length - 1 && (
                         <BoxPadding>
                           <OverviewContainer>
-                            <Grid container spacing={6}>
-                              <LabelizedField label={t('Category')}>
-                                {t('Feedback')}
-                              </LabelizedField>
-                            </Grid>
+                            <Box p={6}>
+                              <Grid container spacing={6}>
+                                <Grid item xs={6}>
+                                  <LabelizedField label={t('Category')}>
+                                    {t('Feedback')}
+                                  </LabelizedField>
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <LabelizedField label={t('Issue Type')}>
+                                    {values.issueType === 'POSITIVE_FEEDACK'
+                                      ? 'Positive Feedback'
+                                      : 'Negative Feedback'}
+                                  </LabelizedField>
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <LabelizedField label={t('Household')}>
+                                    {values.selectedHousehold.unicefId}
+                                  </LabelizedField>
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <LabelizedField label={t('Individual')}>
+                                    {values.selectedIndividual.unicefId}
+                                  </LabelizedField>
+                                </Grid>
+                              </Grid>
+                            </Box>
                           </OverviewContainer>
                           <BoxWithBorderBottom />
                           <BoxPadding />
