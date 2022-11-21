@@ -352,6 +352,7 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
+              data-cy='button-set-to-in-progress'
             >
               {t('Set to in progress')}
             </LoadingButton>
@@ -380,6 +381,7 @@ export const GrievanceDetailsToolbar = ({
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
+                  data-cy='button-send-for-approval'
                 >
                   {t('Send For Approval')}
                 </LoadingButton>
@@ -395,6 +397,7 @@ export const GrievanceDetailsToolbar = ({
                     continueText: 'close ticket',
                   }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
                 }
+                data-cy='button-close-ticket'
               >
                 {t('Close Ticket')}
               </Button>
@@ -441,6 +444,7 @@ export const GrievanceDetailsToolbar = ({
                     continueText: 'close ticket',
                   }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
                 }
+                data-cy='button-close-ticket'
               >
                 {t('Close Ticket')}
               </Button>

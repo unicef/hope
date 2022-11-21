@@ -58,6 +58,7 @@ export const EditIndividualDataChangeFieldRow = ({
               value: item.name,
               name: item.labelEn,
             }))}
+          data-cy='select-field-chooser'
         />
       </Grid>
 
@@ -78,11 +79,13 @@ export const EditIndividualDataChangeFieldRow = ({
       ) : (
         <Grid item xs={4} />
       )}
-      {itemValue.fieldName && <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>}
+      {itemValue.fieldName && (
+        <Grid item xs={1}>
+          <IconButton onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        </Grid>
+      )}
     </>
   );
 };

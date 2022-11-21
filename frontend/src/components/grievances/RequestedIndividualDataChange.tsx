@@ -212,6 +212,7 @@ export function RequestedIndividualDataChange({
           variant='contained'
           color='primary'
           disabled={!approveEnabled}
+          data-cy='button-approve'
         >
           {t('Approve')}
         </Button>
@@ -230,6 +231,7 @@ export function RequestedIndividualDataChange({
         variant='contained'
         color='primary'
         disabled={!approveEnabled}
+        data-cy='button-approve'
       >
         {t('Approve')}
       </Button>

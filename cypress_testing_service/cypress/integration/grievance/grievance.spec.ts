@@ -42,24 +42,101 @@ Then('I should see the New Ticket page', () => {
 When('I fill in the form and save', () => {
   cy.get('[data-cy="select-category"]').click();
   cy.contains('Referral').click();
-  cy.get('[data-cy="button-submit"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="household-table-row"]').eq(0).click();
   cy.contains('LOOK UP INDIVIDUAL').click({ force: true });
   cy.get('[data-cy="individual-table-row"]').eq(0).click();
-  cy.get('[data-cy="button-submit"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="input-maleChildrenCount"]').click();
   cy.get('[data-cy="input-childrenDisabledCount"]').click();
   cy.get('[data-cy="input-village"]').click();
   cy.get('[data-cy="input-countryOrigin"]').click();
   cy.get('[data-cy="input-headOfHousehold"]').click();
   cy.get('[data-cy="input-consent"]').click();
-  cy.get('[data-cy="button-submit"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="input-description"]').click().type('description');
-  cy.get('[data-cy="button-submit"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+});
+
+When('I fill in the form without individual and household and save', () => {
+  cy.get('[data-cy="select-category"]').click();
+  cy.contains('Referral').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="input-consent"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="input-description"]').click().type('description');
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+});
+
+When('I fill in the form individual data change and save', () => {
+  cy.get('[data-cy="select-category"]').click();
+  cy.contains('Data Change').click();
+  cy.get('[data-cy="select-issueType"]').click();
+  cy.contains('Individual Data Update').click({ force: true });
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="household-table-row"]').eq(0).click();
+  cy.contains('LOOK UP INDIVIDUAL').click({ force: true });
+  cy.get('[data-cy="individual-table-row"]').eq(0).click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="input-fullName"]').click();
+  cy.get('[data-cy="input-birthDate"]').click();
+  cy.get('[data-cy="input-sex"]').click();
+  cy.get('[data-cy="input-phoneNo"]').click();
+  cy.get('[data-cy="input-relationship"]').click();
+  cy.get('[data-cy="input-consent"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="input-description"]')
+    .click({ force: true })
+    .type('description');
+  cy.get('[data-cy="select-individualDataUpdateFields[0].fieldName"]').click({
+    force: true,
+  });
+  cy.contains('Family name').click({ force: true });
+  cy.get('[data-cy="input-individualDataUpdateFields[0].fieldValue"]')
+    .click({ force: true })
+    .type('Kovalsky');
+  cy.get('[data-cy="button-add-new-field"]').click();
+  cy.get('[data-cy="select-individualDataUpdateFields[1].fieldName"]').click({
+    force: true,
+  });
+  cy.contains('Marital status').click({ force: true });
+  cy.get('[data-cy="select-individualDataUpdateFields[1].fieldValue"]').click({
+    force: true,
+  });
+  cy.contains('Widowed').click({ force: true });
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+
+  cy.get('[data-cy="button-submit"]').click({ force: true });
 });
 
 Then('I should see the Grievance details page', () => {
   cy.contains('Ticket ID:');
+});
+
+Then(
+  'I should see the Requested Data Change component with correct values',
+  () => {
+    cy.contains('Requested Data Change');
+    cy.contains('Kovalsky');
+    cy.contains('Widowed');
+  },
+);
+
+When('I change states and approve data', () => {
+  cy.get('[data-cy="button-set-to-in-progress"]').click({ force: true });
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('[data-cy="button-send-for-approval"]').click({ force: true });
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('[data-cy="button-approve"]').click({ force: true });
+  cy.get('[data-cy="button-confirm"]').click({ force: true });
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.contains('Close Ticket').click({ force: true });
+  cy.get('[data-cy="button-confirm"]').click({ force: true });
+});
+
+Then('I should see the ticket is closed', () => {
+  cy.contains('Closed');
 });
 
 When('I edit the Grievance and save', () => {
