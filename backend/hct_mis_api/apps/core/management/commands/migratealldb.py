@@ -9,7 +9,6 @@ class Command(BaseCommand):
     help = "Migrate all databases specified in settings"
 
     def handle(self, *args, **options):
-        print("migrate all DB =====")
         for db in settings.DATABASES:
             self.stdout.write(self.style.WARNING(f"Migrating {db} database"))
             if db == "read_only":
