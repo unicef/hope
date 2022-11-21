@@ -5,7 +5,6 @@ def cached_in_django_cache(timeout_in_hours):
     def decorator(func):
         def wrapper(*args, **kwargs):
             key = f"{func.__name__}_{kwargs}"
-            print(key)
             value = cache.get(key)
             if value is not None:
                 return value
