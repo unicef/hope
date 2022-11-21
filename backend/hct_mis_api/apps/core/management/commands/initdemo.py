@@ -56,10 +56,9 @@ class Command(BaseCommand):
             if connection_name == "read_only":
                 continue
             connection = connections[connection_name]
-            print("Con NAME", connection_name)
             with connection.cursor() as cursor:
                 sql = sql_drop_tables(connection, connection_name)
                 if not sql:
                     continue
-                print(sql)
+                print(connection_name, ": >>\n", sql)
                 cursor.execute(sql)
