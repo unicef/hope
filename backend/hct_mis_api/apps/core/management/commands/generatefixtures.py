@@ -1,6 +1,7 @@
 import random
 import time
 from decimal import Decimal
+from functools import partial
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -175,19 +176,21 @@ class Command(BaseCommand):
                             .first()
                             .name,
                         ),
-                        "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
+                        "sensitive": partial(
+                            SensitiveGrievanceTicketWithoutExtrasFactory,
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
                         ),
-                        "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
+                        "complaint": partial(
+                            GrievanceComplaintTicketWithoutExtrasFactory,
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
                         ),
                     }
 
-                    grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
+                    switch_dict[grievance_type]()
 
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
