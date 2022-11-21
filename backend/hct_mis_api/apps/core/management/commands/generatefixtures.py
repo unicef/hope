@@ -2,6 +2,7 @@ import random
 import time
 from decimal import Decimal
 from functools import partial
+from typing import Callable, Dict
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -20,6 +21,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     EntitlementCardFactory,
@@ -169,8 +171,9 @@ class Command(BaseCommand):
                 if should_create_grievance:
                     grievance_type = random.choice(("feedback", "sensitive", "complaint"))
                     should_contain_payment_record = random.choice((True, False))
-                    switch_dict = {
-                        "feedback": lambda: GrievanceTicketFactory(
+                    switch_dict: Dict[str, Callable[[], GrievanceTicket]] = {
+                        "feedback": partial(
+                            GrievanceTicketFactory,
                             admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)
                             .order_by("?")
                             .first()
