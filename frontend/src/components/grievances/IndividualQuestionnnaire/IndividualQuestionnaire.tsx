@@ -39,6 +39,12 @@ export const IndividualQuestionnaire = ({
           size: 3,
         },
         {
+          name: 'sex',
+          label: t('Gender'),
+          value: selectedIndividualData.sex,
+          size: 3,
+        },
+        {
           name: 'phoneNo',
           label: t('Phone Number'),
           value: selectedIndividualData.phoneNo,
