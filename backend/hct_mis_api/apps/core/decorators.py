@@ -6,10 +6,9 @@ def cached_in_django_cache(timeout_in_hours):
         def wrapper(*args, **kwargs):
             key = f"{func.__name__}_{kwargs}"
             value = cache.get(key)
-            if value is not None:
-                return value
-            value = func(*args, **kwargs)
-            cache.set(key, value, timeout_in_hours * 60 * 60)
+            if value is None:
+                value = func(*args, **kwargs)
+                cache.set(key, value, timeout_in_hours * 60 * 60)
             return value
 
         return wrapper
