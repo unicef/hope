@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
@@ -87,6 +88,7 @@ class Query(graphene.ObjectType):
                 ]
             )
 
+    @cached_in_django_cache(24)
     def resolve_dashboard_years_choices(self, info, business_area_slug, **kwargs):
         current_year = datetime.today().year
         years_list = [*range(current_year, current_year - 5, -1)]
