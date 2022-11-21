@@ -55,6 +55,7 @@ export const individualDataRow = (
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}
             inputProps={{ 'aria-labelledby': labelId }}
+            data-cy='checkbox-requested-data-change'
           />
         ) : (
           isItemSelected && (
