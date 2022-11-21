@@ -43,13 +43,17 @@ export const Verification = ({
             </Box>
           </Box>
         )}
-        <Typography variant='subtitle2'>
-          {t('Individual Questionnaire')}
-        </Typography>
-        <Box py={4}>
-          <IndividualQuestionnaire values={values} />
-        </Box>
-        <BoxWithBorderBottom />
+        {values.selectedIndividual && (
+          <>
+            <Typography variant='subtitle2'>
+              {t('Individual Questionnaire')}
+            </Typography>
+            <Box py={4}>
+              <IndividualQuestionnaire values={values} />
+            </Box>
+            <BoxWithBorderBottom />
+          </>
+        )}
       </>
       <Consent />
       <Field
