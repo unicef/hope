@@ -59,8 +59,8 @@ class Command(BaseCommand):
                 continue
             connection = connections[connection_name]
             with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection)
+                sql = sql_drop_tables(connection, connection_name)
                 if not sql:
                     continue
-                print(sql)
+                print(connection_name, ">>\n", sql)
                 cursor.execute(sql)
