@@ -52,9 +52,7 @@ class Command(BaseCommand):
         # generate_real_cash_plans()
 
     def _drop_databases(self):
-        print("Drop DB ====")
         for connection_name in connections:
-            print("con => >>>>>", connection_name)
             if connection_name == "read_only":
                 continue
             connection = connections[connection_name]
