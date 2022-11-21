@@ -22,6 +22,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -192,6 +193,7 @@ class Query(graphene.ObjectType):
         ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
@@ -223,6 +225,7 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True

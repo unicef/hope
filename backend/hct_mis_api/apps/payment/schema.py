@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -318,6 +319,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
@@ -370,6 +372,7 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
@@ -385,6 +388,7 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": [{"data": data}]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
@@ -404,11 +408,13 @@ class Query(graphene.ObjectType):
         return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
         return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
         if business_area_slug == "global":
             return None
@@ -451,6 +457,7 @@ class Query(graphene.ObjectType):
         return {"data": data}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_total_transferred_cash_by_country(self, info, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(year, "global", {}, True)
 
