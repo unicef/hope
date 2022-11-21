@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
@@ -563,6 +564,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
         payment_records_qs = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
@@ -570,6 +572,7 @@ class Query(graphene.ObjectType):
         return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
         households_individuals_params = [
             "household__female_age_group_0_5_count",
@@ -594,6 +597,7 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
         households_child_params = [
             "household__female_age_group_0_5_count",
@@ -615,6 +619,7 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
         households_params = [
             "household__female_age_group_0_5_count",
@@ -642,6 +647,7 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
         households_params_with_disability = [
             "household__female_age_group_0_5_disabled_count",
