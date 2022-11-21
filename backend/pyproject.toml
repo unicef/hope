@@ -17,7 +17,7 @@ exclude = '''
   | snapshots
 )/
 '''
-# TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
+# TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop 
 [tool.isort]
 py_version = 39
 profile = "black"
