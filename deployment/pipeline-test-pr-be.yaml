@@ -1,4 +1,7 @@
-trigger: none
+trigger:
+  paths:
+    include:
+      - backend/*
 pr:
   - master
   - develop
@@ -10,40 +13,11 @@ variables:
   #                          Mandatory variables 
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
-  Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.registry: "ICTD-HOPE-DEV-ACR"
   Docker.backend.repository: "hope-backend"
-  Docker.frontend.repository: "hope-frontend"
   Docker.url: "uniappsakshopedev.azurecr.io"
-  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
-  Kubernetes.namespace: "ictd-hope-dev"
 
 stages:
-  - stage: test_frontend
-    displayName: Test-Frontend
-    jobs:
-      - job: django_tests
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[FRONTEND TEST]"
-        steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: "14.x"
-            displayName: "Install Node.js"
-          - task: Cache@2
-            inputs:
-              key: $(Build.SourcesDirectory)/frontend/yarn.lock
-              path: $(Build.SourcesDirectory)/frontend/node_modules
-            displayName: Cache Yarn packages
-          - script: yarn
-            displayName: "Yarn Install"
-            workingDirectory: 'frontend'
-
-          - script: yarn test --watchAll=false
-            workingDirectory: 'frontend'
-            displayName: "Test"
-
   - stage: check_format
     dependsOn: []
     displayName: Check BE format
