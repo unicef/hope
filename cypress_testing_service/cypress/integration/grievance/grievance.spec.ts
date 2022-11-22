@@ -96,7 +96,7 @@ When('I fill in the form individual data change and save', () => {
   cy.get('[data-cy="input-individualDataUpdateFields[0].fieldValue"]')
     .click({ force: true })
     .type('Kovalsky');
-  cy.get('[data-cy="button-add-new-field"]').click();
+  cy.get('[data-cy="button-add-new-field"]').click({ force: true });
   cy.get('[data-cy="select-individualDataUpdateFields[1].fieldName"]').click({
     force: true,
   });
@@ -106,8 +106,8 @@ When('I fill in the form individual data change and save', () => {
   });
   cy.contains('Widowed').click({ force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
-
   cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 When('I fill in the form household data change and save', () => {
@@ -138,7 +138,7 @@ When('I fill in the form household data change and save', () => {
     force: true,
   });
   cy.contains('Belarus').click({ force: true });
-  cy.get('[data-cy="button-add-new-field"]').click();
+  cy.get('[data-cy="button-add-new-field"]').click({ force: true });
   cy.get('[data-cy="select-householdDataUpdateFields[1].fieldName"]').click({
     force: true,
   });
@@ -147,10 +147,10 @@ When('I fill in the form household data change and save', () => {
     .click({
       force: true,
     })
-    .type('Some Address');
+    .type('Some Address', { force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
-
   cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 Then('I should see the Grievance details page', () => {
@@ -160,7 +160,6 @@ Then('I should see the Grievance details page', () => {
 Then(
   'I should see the Requested Individual Data Change component with correct values',
   () => {
-    cy.contains('Requested Data Change');
     cy.contains('Kovalsky');
     cy.contains('Widowed');
   },
@@ -169,22 +168,24 @@ Then(
 Then(
   'I should see the Requested Household Data Change component with correct values',
   () => {
-    cy.contains('Requested Data Change');
     cy.contains('Belarus');
     cy.contains('Some Address');
   },
 );
 
 When('I change states and approve data', () => {
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
   cy.get('[data-cy="button-set-to-in-progress"]').click({ force: true });
-  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="button-send-for-approval"]').click({ force: true });
-  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[type="checkbox"]').eq(0).check({ force: true });
   cy.get('[type="checkbox"]').eq(1).check({ force: true });
   cy.get('[data-cy="button-approve"]').click({ force: true });
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.contains('Close Ticket').click({ force: true });
+  cy.get('[data-cy="button-confirm"]').click({ force: true });
 });
 
 Then('I should see the ticket is closed and changes are approved', () => {
