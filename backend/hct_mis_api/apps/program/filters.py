@@ -20,7 +20,7 @@ class ProgramFilter(FilterSet):
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
-    number_of_households = IntegerRangeFilter(field_name="total_hh_count")
+    number_of_households = IntegerRangeFilter(method="filter_number_of_households")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
@@ -42,7 +42,7 @@ class ProgramFilter(FilterSet):
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
 
-    def filter_queryset(self, queryset):
+    def filter_number_of_households(self, queryset, name, value):
         queryset = queryset.annotate(
             total_hh_count=Count(
                 "cash_plans__payment_records__household",
@@ -50,7 +50,13 @@ class ProgramFilter(FilterSet):
                 distinct=True,
             )
         )
-        return super().filter_queryset(queryset)
+        min_value = value.get("min")
+        max_value = value.get("max")
+        if min_value:
+            queryset = queryset.filter(total_hh_count__gte=min_value)
+        if max_value:
+            queryset = queryset.filter(total_hh_count__lte=max_value)
+        return queryset
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
