@@ -75,13 +75,13 @@ query AllProgramsForChoices(
                 "businessArea": self.business_area.slug,
                 "status": [],
                 "sector": [],
-                "numberOfHouseholds": '{"min":"2","max":"3"}',
+                "numberOfHouseholds": '{"min":"0","max":"1"}',
                 "budget": "{}",
                 "first": 5,
                 "orderBy": None,
             },
         )
-        assert "errors" not in response
+        assert "errors" not in response, response["errors"]
 
         print("response", response)
         assert False

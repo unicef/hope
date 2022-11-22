@@ -8,7 +8,6 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import relay
@@ -35,6 +34,7 @@ from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.filters import CashPlanFilter, ProgramFilter
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
+from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -63,7 +63,8 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.history.all()
 
     def resolve_total_number_of_households(self, info, **kwargs):
-        return self.total_number_of_households
+        # return self.total_number_of_households
+        return self.total_hh_count
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -142,45 +143,25 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_programs(self, info, **kwargs):
-        # return (
-        #     Program.objects.annotate(
-        #         custom_order=Case(
-        #             When(status=Program.DRAFT, then=Value(1)),
-        #             When(status=Program.ACTIVE, then=Value(2)),
-        #             When(status=Program.FINISHED, then=Value(3)),
-        #             output_field=IntegerField(),
-        #         )
-        #     )
-        #     .annotate(
-        #         households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
-        #     )
-        #     .order_by("custom_order", "start_date")
-        # )
-        # breakpoint()
-
-        print("resolve_all_programs")
-
-        def does_path_exist_in_query(path, selection_set):
-            if "." not in path:
-                return path in (field.name.value for field in selection_set.selections)
-            else:
-                path, rest = path.split(".", 1)
-                for field in selection_set.selections:
-                    if field.name.value == path:
-                        return does_path_exist_in_query(rest, field.selection_set)
-                return False
-
-        print("A", does_path_exist_in_query("edges.node.totalNumberOfHouseholds", info.field_asts[0].selection_set))
-        print("B", does_path_exist_in_query("edges.node.totalNumberOfHouseholdsX", info.field_asts[0].selection_set))
-
-        return Program.objects.annotate(
+        queryset = Program.objects.annotate(
             custom_order=Case(
                 When(status=Program.DRAFT, then=Value(1)),
                 When(status=Program.ACTIVE, then=Value(2)),
                 When(status=Program.FINISHED, then=Value(3)),
                 output_field=IntegerField(),
             )
-        ).order_by("custom_order", "start_date")
+        )
+
+        if does_path_exist_in_query("edges.node.totalNumberOfHouseholds", info):
+            queryset = queryset.annotate(
+                total_hh_count=Count(
+                    "cash_plans__payment_records__household",
+                    filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
+                    distinct=True,
+                )
+            )
+
+        return queryset.order_by("custom_order", "start_date")
 
     def resolve_program_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)
