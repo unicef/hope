@@ -20,7 +20,7 @@ class ProgramFilter(FilterSet):
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
-    number_of_households = IntegerRangeFilter(field_name="total_hh_count")
+    number_of_households = IntegerRangeFilter(method="filter_number_of_households")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
@@ -39,18 +39,22 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_number_of_households", "budget")
     )
 
-    def filter_queryset(self, queryset):
+    def filter_number_of_households(self, queryset, name, value):
         queryset = queryset.annotate(
-            total_hh_count=Count(
+            total_number_of_households=Count(
                 "cash_plans__payment_records__household",
                 filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
                 distinct=True,
             )
         )
-        return super().filter_queryset(queryset)
+        if min_value := value.get("min"):
+            queryset = queryset.filter(total_number_of_households__gte=min_value)
+        if max_value := value.get("max"):
+            queryset = queryset.filter(total_number_of_households__lte=max_value)
+        return queryset
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
