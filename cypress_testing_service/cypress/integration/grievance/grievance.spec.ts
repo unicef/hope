@@ -110,16 +110,68 @@ When('I fill in the form individual data change and save', () => {
   cy.get('[data-cy="button-submit"]').click({ force: true });
 });
 
+When('I fill in the form household data change and save', () => {
+  cy.get('[data-cy="select-category"]').click();
+  cy.contains('Data Change').click();
+  cy.get('[data-cy="select-issueType"]').click();
+  cy.contains('Household Data Update').click({ force: true });
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="household-table-row"]').eq(0).click();
+  cy.contains('LOOK UP INDIVIDUAL').click({ force: true });
+  cy.get('[data-cy="individual-table-row"]').eq(0).click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="input-maleChildrenCount"]').click();
+  cy.get('[data-cy="input-femaleChildrenCount"]').click();
+  cy.get('[data-cy="input-childrenDisabledCount"]').click();
+  cy.get('[data-cy="input-headOfHousehold"]').click();
+  cy.get('[data-cy="input-countryOrigin"]').click();
+  cy.get('[data-cy="input-consent"]').click();
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="input-description"]')
+    .click({ force: true })
+    .type('description');
+  cy.get('[data-cy="select-householdDataUpdateFields[0].fieldName"]').click({
+    force: true,
+  });
+  cy.contains('Country of registration').click({ force: true });
+  cy.get('[data-cy="select-householdDataUpdateFields[0].fieldValue"]').click({
+    force: true,
+  });
+  cy.contains('Belarus').click({ force: true });
+  cy.get('[data-cy="button-add-new-field"]').click();
+  cy.get('[data-cy="select-householdDataUpdateFields[1].fieldName"]').click({
+    force: true,
+  });
+  cy.contains('Address').click({ force: true });
+  cy.get('[data-cy="input-householdDataUpdateFields[1].fieldValue"]')
+    .click({
+      force: true,
+    })
+    .type('Some Address');
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+
+  cy.get('[data-cy="button-submit"]').click({ force: true });
+});
+
 Then('I should see the Grievance details page', () => {
   cy.contains('Ticket ID:');
 });
 
 Then(
-  'I should see the Requested Data Change component with correct values',
+  'I should see the Requested Individual Data Change component with correct values',
   () => {
     cy.contains('Requested Data Change');
     cy.contains('Kovalsky');
     cy.contains('Widowed');
+  },
+);
+
+Then(
+  'I should see the Requested Household Data Change component with correct values',
+  () => {
+    cy.contains('Requested Data Change');
+    cy.contains('Belarus');
+    cy.contains('Some Address');
   },
 );
 
@@ -131,10 +183,8 @@ When('I change states and approve data', () => {
   cy.get('[type="checkbox"]').eq(0).check({ force: true });
   cy.get('[type="checkbox"]').eq(1).check({ force: true });
   cy.get('[data-cy="button-approve"]').click({ force: true });
-  cy.get('[data-cy="button-confirm"]').click({ force: true });
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.contains('Close Ticket').click({ force: true });
-  cy.get('[data-cy="button-confirm"]').click({ force: true });
 });
 
 Then('I should see the ticket is closed and changes are approved', () => {
