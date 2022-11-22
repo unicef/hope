@@ -39,15 +39,17 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
 
     file_url = graphene.String()
-    admin_area = DjangoFilterConnectionField(AreaNode)
+    admin_area_1 = graphene.Field(AreaNode)
+    admin_area_2 = DjangoFilterConnectionField(AreaNode)
+
+    def resolve_admin_area_1(self, info, **kwargs):
+        return self.admin_area.first().parent
+
+    def resolve_admin_area_2(self, info, **kwargs):
+        return self.admin_area.all()
 
     def resolve_file_url(self, info, **kwargs):
         return self.file.url if self.file else ""
-
-    def resolve_admin_area(self, info, **kwargs):
-        return self.admin_area.all()
-
-
 class Query(graphene.ObjectType):
     report = relay.Node.Field(ReportNode)
     all_reports = DjangoPermissionFilterConnectionField(

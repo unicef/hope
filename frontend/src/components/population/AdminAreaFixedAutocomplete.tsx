@@ -1,6 +1,4 @@
-import { InputAdornment } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -113,11 +111,11 @@ export const AdminAreaFixedAutocomplete = ({
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position='start'>
-                <RoomRoundedIcon style={{ color: '#5f6368' }} />
-              </InputAdornment>
-            ),
+            // startAdornment: (
+            //   <InputAdornment position='start'>
+            //     <RoomRoundedIcon style={{ color: '#5f6368' }} />
+            //   </InputAdornment>
+            // ),
             endAdornment: (
               <>
                 {loading ? (
