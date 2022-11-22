@@ -157,7 +157,30 @@ class Query(graphene.ObjectType):
         #     .order_by("custom_order", "start_date")
         # )
         # breakpoint()
-        return Program.objects.all()
+
+        print("resolve_all_programs")
+
+        def does_path_exist_in_query(path, selection_set):
+            if "." not in path:
+                return path in (field.name.value for field in selection_set.selections)
+            else:
+                path, rest = path.split(".", 1)
+                for field in selection_set.selections:
+                    if field.name.value == path:
+                        return does_path_exist_in_query(rest, field.selection_set)
+                return False
+
+        print("A", does_path_exist_in_query("edges.node.totalNumberOfHouseholds", info.field_asts[0].selection_set))
+        print("B", does_path_exist_in_query("edges.node.totalNumberOfHouseholdsX", info.field_asts[0].selection_set))
+
+        return Program.objects.annotate(
+            custom_order=Case(
+                When(status=Program.DRAFT, then=Value(1)),
+                When(status=Program.ACTIVE, then=Value(2)),
+                When(status=Program.FINISHED, then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by("custom_order", "start_date")
 
     def resolve_program_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)
