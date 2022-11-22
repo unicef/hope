@@ -267,6 +267,7 @@ export const GrievanceDetailsToolbar = ({
           changeState(GRIEVANCE_TICKET_STATES.CLOSED);
         })
       }
+      data-cy='button-close-ticket'
     >
       {t('Close Ticket')}
     </Button>
@@ -429,6 +430,7 @@ export const GrievanceDetailsToolbar = ({
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
+                  data-cy='button-send-for-approval'
                 >
                   {t('Send For Approval')}
                 </LoadingButton>

@@ -67,6 +67,7 @@ export function RequestedHouseholdDataChange({
           variant='contained'
           color='primary'
           disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          data-cy='button-approve'
         >
           {t('Approve')}
         </Button>
@@ -85,6 +86,7 @@ export function RequestedHouseholdDataChange({
         variant='contained'
         color='primary'
         disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+        data-cy='button-approve'
       >
         {t('Approve')}
       </Button>

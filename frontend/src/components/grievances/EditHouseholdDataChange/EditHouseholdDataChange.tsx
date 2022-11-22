@@ -87,6 +87,7 @@ export const EditHouseholdDataChange = ({
                   onClick={() => {
                     arrayHelpers.push({ fieldName: null, fieldValue: null });
                   }}
+                  data-cy='button-add-new-field'
                 >
                   {t('Add new field')}
                 </Button>
