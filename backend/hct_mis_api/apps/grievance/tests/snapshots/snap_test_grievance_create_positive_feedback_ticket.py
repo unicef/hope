@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_feedback_ticket_with_household_and_individual_extras_0_with_permission 1'] = {
@@ -17,17 +18,47 @@ snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_
                     'description': 'Test Feedback',
                     'language': 'Polish, English',
                     'positiveFeedbackTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        }
+                        'household': None,
+                        'individual': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'positiveFeedbackTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'positiveFeedbackTicketDetails',
+                'individual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_feedback_ticket_with_household_and_individual_extras_1_without_permission 1'] = {
@@ -61,15 +92,31 @@ snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_
                     'description': 'Test Feedback',
                     'language': 'Polish, English',
                     'positiveFeedbackTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
+                        'household': None,
                         'individual': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'positiveFeedbackTicketDetails',
+                'household'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_feedback_ticket_with_household_extras_1_without_permission 1'] = {
@@ -104,14 +151,30 @@ snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_
                     'language': 'Polish, English',
                     'positiveFeedbackTicketDetails': {
                         'household': None,
-                        'individual': {
-                            'fullName': 'John Doe'
-                        }
+                        'individual': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'positiveFeedbackTicketDetails',
+                'individual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreatePositiveFeedbackTicketQuery::test_create_positive_feedback_ticket_with_individual_extras_1_without_permission 1'] = {

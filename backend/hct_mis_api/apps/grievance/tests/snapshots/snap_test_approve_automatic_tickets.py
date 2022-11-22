@@ -13,13 +13,28 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
-                    'selectedIndividual': {
-                        'id': 'SW5kaXZpZHVhbE5vZGU6OTRiMDlmZjItOWU2ZC00ZjM0LWE3MmMtYzMxOWUxZGI3MTE1'
-                    }
+                    'selectedIndividual': None
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 13
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'approveNeedsAdjudication',
+                'grievanceTicket',
+                'needsAdjudicationTicketDetails',
+                'selectedIndividual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_1_without_permission 1'] = {

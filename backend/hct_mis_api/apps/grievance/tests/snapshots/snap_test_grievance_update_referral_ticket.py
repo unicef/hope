@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_with_household_and_individual_extras_0_with_permission 1'] = {
@@ -11,16 +12,44 @@ snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_w
         'updateGrievanceTicket': {
             'grievanceTicket': {
                 'referralTicketDetails': {
-                    'household': {
-                        'size': 1
-                    },
-                    'individual': {
-                        'fullName': 'John Doe'
-                    }
+                    'household': None,
+                    'individual': None
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 8
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'updateGrievanceTicket',
+                'grievanceTicket',
+                'referralTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'updateGrievanceTicket',
+                'grievanceTicket',
+                'referralTicketDetails',
+                'individual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_with_household_and_individual_extras_1_without_permission 1'] = {
@@ -48,14 +77,29 @@ snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_w
         'updateGrievanceTicket': {
             'grievanceTicket': {
                 'referralTicketDetails': {
-                    'household': {
-                        'size': 1
-                    },
+                    'household': None,
                     'individual': None
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 8
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'updateGrievanceTicket',
+                'grievanceTicket',
+                'referralTicketDetails',
+                'household'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_with_household_extras_1_without_permission 1'] = {
@@ -84,13 +128,28 @@ snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_w
             'grievanceTicket': {
                 'referralTicketDetails': {
                     'household': None,
-                    'individual': {
-                        'fullName': 'John Doe'
-                    }
+                    'individual': None
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'updateGrievanceTicket',
+                'grievanceTicket',
+                'referralTicketDetails',
+                'individual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceUpdateReferralTicketQuery::test_update_referral_ticket_with_individual_extras_1_without_permission 1'] = {

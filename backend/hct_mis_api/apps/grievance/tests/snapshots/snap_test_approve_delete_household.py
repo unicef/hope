@@ -24,13 +24,28 @@ snapshots['TestApproveDeleteHousehold::test_approve_delete_household 2'] = {
         'approveDeleteHousehold': {
             'grievanceTicket': {
                 'deleteHouseholdTicketDetails': {
-                    'reasonHousehold': {
-                        'withdrawn': False
-                    }
+                    'reasonHousehold': None
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 6
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'approveDeleteHousehold',
+                'grievanceTicket',
+                'deleteHouseholdTicketDetails',
+                'reasonHousehold'
+            ]
+        }
+    ]
 }
 
 snapshots['TestApproveDeleteHousehold::test_approve_delete_household 3'] = {
@@ -70,11 +85,26 @@ snapshots['TestApproveDeleteHousehold::test_approve_delete_household 5'] = {
         'approveDeleteHousehold': {
             'grievanceTicket': {
                 'deleteHouseholdTicketDetails': {
-                    'reasonHousehold': {
-                        'withdrawn': False
-                    }
+                    'reasonHousehold': None
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 6
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'approveDeleteHousehold',
+                'grievanceTicket',
+                'deleteHouseholdTicketDetails',
+                'reasonHousehold'
+            ]
+        }
+    ]
 }

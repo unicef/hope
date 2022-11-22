@@ -4,7 +4,28 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
+
+snapshots['TestCreatePaymentVerificationMutation::test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record 1'] = {
+    'data': {
+        'createCashPlanPaymentVerification': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 3
+                }
+            ],
+            'message': 'There are no payment records that could be assigned to a new verification plan.',
+            'path': [
+                'createCashPlanPaymentVerification'
+            ]
+        }
+    ]
+}
 
 snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_verification_0_with_permission 1'] = {
     'data': {
@@ -77,41 +98,16 @@ snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_
 }
 
 snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_verification_when_invalid_arguments 3'] = {
-    'data': {
-        'createCashPlanPaymentVerification': None
-    },
+    'data': None,
     'errors': [
         {
             'locations': [
                 {
-                    'column': 13,
-                    'line': 3
+                    'column': 53,
+                    'line': 2
                 }
             ],
-            'message': "You can't provide full_list_arguments in RANDOM",
-            'path': [
-                'createCashPlanPaymentVerification'
-            ]
-        }
-    ]
-}
-
-snapshots['TestCreatePaymentVerificationMutation::test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record 1'] = {
-    'data': {
-        'createCashPlanPaymentVerification': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 13,
-                    'line': 3
-                }
-            ],
-            'message': 'There are no payment records that could be assigned to a new verification plan.',
-            'path': [
-                'createCashPlanPaymentVerification'
-            ]
+            'message': "Variable '$input' got invalid value 123 at 'input.rapidProArguments.flowId'; String cannot represent a non string value: 123"
         }
     ]
 }

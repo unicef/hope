@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_0_with_permission 1'] = {
@@ -14,15 +15,9 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'household': None,
+                        'individual': None,
+                        'paymentRecord': None
                     },
                     'consent': True,
                     'description': 'Test Feedback',
@@ -30,7 +25,57 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 17
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_1_without_permission 1'] = {
@@ -61,15 +106,9 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
-                        }
+                        'household': None,
+                        'individual': None,
+                        'paymentRecord': None
                     },
                     'consent': True,
                     'description': 'Test Feedback',
@@ -79,15 +118,9 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
-                        }
+                        'household': None,
+                        'individual': None,
+                        'paymentRecord': None
                     },
                     'consent': True,
                     'description': 'Test Feedback',
@@ -95,7 +128,105 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                1,
+                'complaintTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                1,
+                'complaintTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 17
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'paymentRecord'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 17
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                1,
+                'complaintTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_with_two_payment_records_1_without_permission 1'] = {
@@ -168,12 +299,8 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': None,
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'individual': None,
+                        'paymentRecord': None
                     },
                     'consent': True,
                     'description': 'Test Feedback',
@@ -181,7 +308,41 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 17
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_without_household_1_without_permission 1'] = {
@@ -212,13 +373,9 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
+                        'household': None,
                         'individual': None,
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'paymentRecord': None
                     },
                     'consent': True,
                     'description': 'Test Feedback',
@@ -226,7 +383,41 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 17
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_without_individual_1_without_permission 1'] = {
@@ -257,12 +448,8 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
+                        'household': None,
+                        'individual': None,
                         'paymentRecord': None
                     },
                     'consent': True,
@@ -271,7 +458,41 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 11
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 14
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'complaintTicketDetails',
+                'individual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket_without_payment_record_1_without_permission 1'] = {

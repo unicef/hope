@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
@@ -18,7 +19,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
                     'line': 3
                 }
             ],
-            'message': "['Only Target Population with status OPEN can be approved']",
+            'message': 'Only Target Population with status OPEN can be approved',
             'path': [
                 'lockTargetPopulation'
             ]
@@ -211,7 +212,7 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_pop
                     'line': 3
                 }
             ],
-            'message': "['Only locked Target Population with status can be unlocked']",
+            'message': 'Only locked Target Population with status can be unlocked',
             'path': [
                 'unlockTargetPopulation'
             ]

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceUpdatePaymentVerificationTicketQuery::test_payment_verification_ticket_approve_payment_details_0_with_permission 1'] = {
@@ -43,12 +44,29 @@ snapshots['TestGrievanceUpdatePaymentVerificationTicketQuery::test_update_paymen
         'updateGrievanceTicket': {
             'grievanceTicket': {
                 'paymentVerificationTicketDetails': {
-                    'newReceivedAmount': 1234.99,
+                    'newReceivedAmount': None,
                     'newStatus': 'RECEIVED'
                 }
             }
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 7
+                }
+            ],
+            'message': 'Received not compatible Decimal "1234.99"',
+            'path': [
+                'updateGrievanceTicket',
+                'grievanceTicket',
+                'paymentVerificationTicketDetails',
+                'newReceivedAmount'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceUpdatePaymentVerificationTicketQuery::test_update_payment_verification_ticket_with_new_received_amount_extras_1_without_permission 1'] = {

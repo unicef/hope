@@ -8,87 +8,31 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permission 1'] = {
-    'data': {
-        'allIndividuals': {
-            'edges': [
-                {
-                    'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'givenName': 'Benjamin',
-                        'household': {
-                            'programs': {
-                                'edges': [
-                                    {
-                                        'node': {
-                                            'name': 'Test program TWO'
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        'phoneNo': '(953)682-4596'
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1969-11-29',
-                        'familyName': 'Franklin',
-                        'givenName': 'Jenna',
-                        'household': {
-                            'programs': {
-                                'edges': [
-                                    {
-                                        'node': {
-                                            'name': 'Test program TWO'
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        'phoneNo': '001-296-358-5428-607'
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1983-12-21',
-                        'familyName': 'Perry',
-                        'givenName': 'Timothy',
-                        'household': {
-                            'programs': {
-                                'edges': [
-                                    {
-                                        'node': {
-                                            'name': 'Test program TWO'
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        'phoneNo': '(548)313-1700-902'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestIndividualQuery::test_individual_programme_filter_1_without_permission 1'] = {
-    'data': {
-        'allIndividuals': None
-    },
+    'data': None,
     'errors': [
         {
             'locations': [
                 {
-                    'column': 7,
-                    'line': 3
+                    'column': 26,
+                    'line': 2
                 }
             ],
-            'message': 'Permission Denied',
-            'path': [
-                'allIndividuals'
-            ]
+            'message': "Variable '$programs' got invalid value <UUID instance> at 'programs[0]'; ID cannot represent value: <UUID instance>"
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_individual_programme_filter_1_without_permission 1'] = {
+    'data': None,
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 26,
+                    'line': 2
+                }
+            ],
+            'message': "Variable '$programs' got invalid value <UUID instance> at 'programs[0]'; ID cannot represent value: <UUID instance>"
         }
     ]
 }
@@ -173,6 +117,7 @@ snapshots['TestIndividualQuery::test_individual_query_all_1_without_permission 1
 }
 
 snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1'] = {
+    'data': None,
     'errors': [
         {
             'locations': [
@@ -181,12 +126,13 @@ snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1
                     'line': 3
                 }
             ],
-            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+            'message': "Unknown argument 'orderBy' on field 'Query.individual'."
         }
     ]
 }
 
 snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
+    'data': None,
     'errors': [
         {
             'locations': [
@@ -195,7 +141,7 @@ snapshots['TestIndividualQuery::test_individual_query_single_1_without_permissio
                     'line': 3
                 }
             ],
-            'message': 'Unknown argument "orderBy" on field "individual" of type "Query".'
+            'message': "Unknown argument 'orderBy' on field 'Query.individual'."
         }
     ]
 }

@@ -19,7 +19,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_0_wrong_args_cou
                     'line': 3
                 }
             ],
-            'message': "['Comparison method - EQUALS expect 1 arguments, 2 given']",
+            'message': 'Comparison method - EQUALS expect 1 arguments, 2 given',
             'path': [
                 'updateTargetPopulation'
             ]
@@ -39,7 +39,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_1_wrong_comparis
                     'line': 3
                 }
             ],
-            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparison method']",
+            'message': 'size is INTEGER type filter and does not accept - CONTAINS comparison method',
             'path': [
                 'updateTargetPopulation'
             ]
@@ -59,7 +59,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_2_unknown_compar
                     'line': 3
                 }
             ],
-            'message': "['Unknown comparison method - BLABLA']",
+            'message': 'Unknown comparison method - BLABLA',
             'path': [
                 'updateTargetPopulation'
             ]
@@ -79,7 +79,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_3_unknown_flex_f
                     'line': 3
                 }
             ],
-            'message': '["Can\'t find any flex field attribute associated with foo_bar field name"]',
+            'message': "Can't find any flex field attribute associated with foo_bar field name",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -99,7 +99,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_4_unknown_core_f
                     'line': 3
                 }
             ],
-            'message': '["Can\'t find any core field attribute associated with foo_bar field name"]',
+            'message': "Can't find any core field attribute associated with foo_bar field name",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -169,7 +169,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                     'line': 3
                 }
             ],
-            'message': '["Name can\'t be changed when Target Population is in Locked status"]',
+            'message': "Name can't be changed when Target Population is in Locked status",
             'path': [
                 'updateTargetPopulation'
             ]

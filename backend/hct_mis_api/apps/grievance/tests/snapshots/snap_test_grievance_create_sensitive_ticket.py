@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_0_with_permission 1'] = {
@@ -18,20 +19,64 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'issueType': 12,
                     'language': 'Polish, English',
                     'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'household': None,
+                        'individual': None,
+                        'paymentRecord': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 12
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 15
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 18
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_1_without_permission 1'] = {
@@ -66,15 +111,9 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'issueType': 12,
                     'language': 'Polish, English',
                     'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
-                        }
+                        'household': None,
+                        'individual': None,
+                        'paymentRecord': None
                     }
                 },
                 {
@@ -85,20 +124,112 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'issueType': 12,
                     'language': 'Polish, English',
                     'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
-                        }
+                        'household': None,
+                        'individual': None,
+                        'paymentRecord': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 12
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 12
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                1,
+                'sensitiveTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 15
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 15
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                1,
+                'sensitiveTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 18
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'paymentRecord'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 18
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                1,
+                'sensitiveTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_with_two_payment_records_1_without_permission 1'] = {
@@ -176,17 +307,47 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'language': 'Polish, English',
                     'sensitiveTicketDetails': {
                         'household': None,
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'individual': None,
+                        'paymentRecord': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 15
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'individual'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 18
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_without_household_1_without_permission 1'] = {
@@ -221,18 +382,48 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'issueType': 12,
                     'language': 'Polish, English',
                     'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
+                        'household': None,
                         'individual': None,
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'paymentRecord': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 12
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 18
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'paymentRecord'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_without_individual_1_without_permission 1'] = {
@@ -307,18 +498,48 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'issueType': 12,
                     'language': 'Polish, English',
                     'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
+                        'household': None,
+                        'individual': None,
                         'paymentRecord': None
                     }
                 }
             ]
         }
-    }
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 12
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'household'
+            ]
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 15
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'createGrievanceTicket',
+                'grievanceTickets',
+                0,
+                'sensitiveTicketDetails',
+                'individual'
+            ]
+        }
+    ]
 }
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_without_payment_record_1_without_permission 1'] = {
