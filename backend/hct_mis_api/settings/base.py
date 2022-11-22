@@ -220,6 +220,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.household",
     "hct_mis_api.apps.payment",
     "hct_mis_api.apps.program",
+    "hct_mis_api.apps.changelog",
     "hct_mis_api.apps.power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
@@ -281,6 +282,7 @@ OTHER_APPS = [
     "drf_yasg",
     "flags",
     "admin_cursor_paginator",
+    "markdownify.apps.MarkdownifyConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
