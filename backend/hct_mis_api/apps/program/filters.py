@@ -50,11 +50,9 @@ class ProgramFilter(FilterSet):
                 distinct=True,
             )
         )
-        min_value = value.get("min")
-        max_value = value.get("max")
-        if min_value:
+        if min_value := value.get("min"):
             queryset = queryset.filter(total_number_of_households__gte=min_value)
-        if max_value:
+        if max_value := value.get("max"):
             queryset = queryset.filter(total_number_of_households__lte=max_value)
         return queryset
 
