@@ -1,6 +1,5 @@
-from django.db.models import Prefetch, Sum, Value
-
 import graphene
+from django.db.models import Prefetch, Sum, Value
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -13,7 +12,6 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.countries import Countries
-from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
@@ -22,12 +20,9 @@ from hct_mis_api.apps.core.schema import (
     _custom_dict_or_attr_resolver,
 )
 from hct_mis_api.apps.core.utils import (
-    chart_filters_decoder,
-    chart_permission_decorator,
     encode_ids,
     get_model_choices_fields,
     resolve_flex_fields_choices_to_string,
-    sum_lists_with_values,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.schema import AreaNode
@@ -60,28 +55,11 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     programs_with_delivered_quantity,
 )
-from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.schema import (
-    ChartDatasetNode,
-    ChartDetailedDatasetsNode,
     FlexFieldsScalar,
-    SectionTotalNode,
 )
-
-INDIVIDUALS_CHART_LABELS = [
-    "Females 0-5",
-    "Females 6-11",
-    "Females 12-17",
-    "Females 18-59",
-    "Females 60+",
-    "Males 0-5",
-    "Males 6-11",
-    "Males 12-17",
-    "Males 18-59",
-    "Males 60+",
-]
 
 
 class DocumentTypeNode(DjangoObjectType):
@@ -462,42 +440,6 @@ class Query(graphene.ObjectType):
         ),
     )
 
-    section_households_reached = graphene.Field(
-        SectionTotalNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True),
-        program=graphene.String(required=False),
-        administrative_area=graphene.String(required=False),
-    )
-    section_individuals_reached = graphene.Field(
-        SectionTotalNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True),
-        program=graphene.String(required=False),
-        administrative_area=graphene.String(required=False),
-    )
-    section_child_reached = graphene.Field(
-        SectionTotalNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True),
-        program=graphene.String(required=False),
-        administrative_area=graphene.String(required=False),
-    )
-    chart_individuals_reached_by_age_and_gender = graphene.Field(
-        ChartDatasetNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True),
-        program=graphene.String(required=False),
-        administrative_area=graphene.String(required=False),
-    )
-    chart_individuals_with_disability_reached_by_age = graphene.Field(
-        ChartDetailedDatasetsNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True),
-        program=graphene.String(required=False),
-        administrative_area=graphene.String(required=False),
-    )
-
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
@@ -562,151 +504,3 @@ class Query(graphene.ObjectType):
 
     def resolve_work_status_choices(self, info, **kwargs):
         return to_choice_object(WORK_STATUS_CHOICE)
-
-    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
-    def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
-        payment_records_qs = get_payment_records_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
-        return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
-
-    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
-    def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
-        households_individuals_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__female_age_group_18_59_count",
-            "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-            "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count",
-        ]
-        payment_records_qs = get_payment_records_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
-        individuals_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_individuals_params)
-            .distinct("household__id")
-        )
-        return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
-
-    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
-    def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
-        households_child_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-        ]
-        payment_records_qs = get_payment_records_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
-
-        household_child_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_child_params)
-            .distinct("household__id")
-        )
-        return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
-
-    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
-    def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
-        households_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__female_age_group_18_59_count",
-            "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-            "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count",
-        ]
-
-        payment_records_qs = get_payment_records_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
-
-        household_child_counts = (
-            payment_records_qs.select_related("household").values_list(*households_params).distinct("household__id")
-        )
-        return {
-            "labels": INDIVIDUALS_CHART_LABELS,
-            "datasets": [{"data": sum_lists_with_values(household_child_counts, len(households_params))}],
-        }
-
-    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    @cached_in_django_cache(24)
-    def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
-        households_params_with_disability = [
-            "household__female_age_group_0_5_disabled_count",
-            "household__female_age_group_6_11_disabled_count",
-            "household__female_age_group_12_17_disabled_count",
-            "household__female_age_group_18_59_disabled_count",
-            "household__female_age_group_60_disabled_count",
-            "household__male_age_group_0_5_disabled_count",
-            "household__male_age_group_6_11_disabled_count",
-            "household__male_age_group_12_17_disabled_count",
-            "household__male_age_group_18_59_disabled_count",
-            "household__male_age_group_60_disabled_count",
-        ]
-        households_params_total = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__female_age_group_18_59_count",
-            "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-            "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count",
-        ]
-
-        payment_records_qs = get_payment_records_for_dashboard(
-            year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
-        # aggregate with distinct by household__id is not possible
-        households_with_disability_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_with_disability)
-            .distinct("household__id")
-        )
-        sum_of_with_disability = sum_lists_with_values(
-            households_with_disability_counts, len(households_params_with_disability)
-        )
-
-        households_totals_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_total)
-            .distinct("household__id")
-        )
-        sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
-
-        sum_of_without_disability = []
-
-        for i, total in enumerate(sum_of_totals):
-            if not total:
-                sum_of_without_disability.append(0)
-            elif not sum_of_with_disability[i]:
-                sum_of_without_disability.append(total)
-            else:
-                sum_of_without_disability.append(total - sum_of_with_disability[i])
-
-        datasets = [
-            {"label": "with disability", "data": sum_of_with_disability},
-            {"label": "without disability", "data": sum_of_without_disability},
-            {"label": "total", "data": sum_of_totals},
-        ]
-        return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}

@@ -25,6 +25,7 @@ import hct_mis_api.apps.sanction_list.schema
 import hct_mis_api.apps.steficon.schema
 import hct_mis_api.apps.targeting.mutations
 import hct_mis_api.apps.targeting.schema
+import hct_mis_api.apps.dashboard.schema
 
 
 class Query(
@@ -42,6 +43,7 @@ class Query(
     hct_mis_api.apps.reporting.schema.Query,
     hct_mis_api.apps.activity_log.schema.Query,
     hct_mis_api.apps.geo.schema.Query,
+    hct_mis_api.apps.dashboard.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
