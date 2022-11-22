@@ -25,7 +25,7 @@ Feature: Grievance
         When I click the New Ticket button
         Then I should see the New Ticket page
         When I fill in the form without individual and household and save
-       Then I should see the Grievance details page
+        Then I should see the Grievance details page
 
 
     Scenario: Visit Grievance page and create a Grievance, approve and close the ticket (Individual Data Update)
@@ -39,8 +39,8 @@ Feature: Grievance
         When I change states and approve data
         Then I should see the ticket is closed and changes are approved
 
-     Scenario: Visit Grievance page and create a Grievance, approve and close the ticket (Household Data Update)
-       When I visit the main dashboard
+      Scenario: Visit Grievance page and create a Grievance, approve and close the ticket (Household Data Update)
+        When I visit the main dashboard
         Then I should see the side panel with Grievance option
         When I click on Grievance Tickets option
         When I click the New Ticket button

@@ -352,7 +352,10 @@ export const GrievanceDetailsToolbar = ({
               loading={loading}
               color='primary'
               variant='contained'
-              onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
+              onClick={() => {
+                console.log('set to in progress clicked');
+                changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
+              }}
               data-cy='button-set-to-in-progress'
             >
               {t('Set to in progress')}
