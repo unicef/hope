@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.views.generic import View
 
 from graphene_django.settings import graphene_settings
-from graphql.utils import schema_printer
+from graphql import print_schema
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.forms import StorageFileForm
@@ -30,7 +30,7 @@ def homepage(request):
 
 def schema(request):
     schema = graphene_settings.SCHEMA
-    my_schema_str = schema_printer.print_schema(schema)
+    my_schema_str = print_schema(schema)
     return HttpResponse(my_schema_str, content_type="application/graphlq", status=200)
 
 
