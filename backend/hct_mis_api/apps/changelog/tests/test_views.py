@@ -18,7 +18,7 @@ class APITestCase(TestCase):
     def tests_changelog_list_view(self):
         instance1 = ChangelogFactory()
         instance2 = ChangelogFactory()
-        url = reverse("changelog_Changelog_list")
+        url = reverse("changelog_changelog_list")
         # Log out
         self.client.logout()
         resp = self.client.get(url)
@@ -32,7 +32,7 @@ class APITestCase(TestCase):
     def tests_changelog_detail_view(self):
         instance = ChangelogFactory()
         url = reverse(
-            "changelog_Changelog_detail",
+            "changelog_changelog_detail",
             args=[
                 instance.pk,
             ],
