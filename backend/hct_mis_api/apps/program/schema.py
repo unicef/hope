@@ -1,3 +1,5 @@
+import graphene
+from django.core.cache import cache
 from django.db.models import (
     Case,
     Count,
@@ -8,8 +10,6 @@ from django.db.models import (
     Value,
     When,
 )
-
-import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -21,6 +21,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
+from hct_mis_api.apps.core.cache_keys import PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -29,13 +30,13 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_permission_decorator,
     to_choice_object,
+    save_data_in_cache,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.filters import CashPlanFilter, ProgramFilter
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
-from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -64,7 +65,8 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.history.all()
 
     def resolve_total_number_of_households(self, info, **kwargs):
-        return self.total_number_of_households
+        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
+        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -151,15 +153,6 @@ class Query(graphene.ObjectType):
                 output_field=IntegerField(),
             )
         )
-
-        if does_path_exist_in_query("edges.node.totalNumberOfHouseholds", info):
-            queryset = queryset.annotate(
-                total_number_of_households=Count(
-                    "cash_plans__payment_records__household",
-                    filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
-                    distinct=True,
-                )
-            )
 
         return queryset.order_by("custom_order", "start_date")
 
