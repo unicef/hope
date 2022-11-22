@@ -37,4 +37,4 @@ Feature: Grievance
         When I fill in the form individual data change and save
         Then I should see the Requested Data Change component with correct values
         When I change states and approve data
-        Then I should see the ticket is closed
+        Then I should see the ticket is closed and changes are approved

@@ -59,7 +59,7 @@ export const individualDataRow = (
           />
         ) : (
           isItemSelected && (
-            <GreenIcon>
+            <GreenIcon data-cy='green-tick'>
               <CheckCircleIcon />
             </GreenIcon>
           )
