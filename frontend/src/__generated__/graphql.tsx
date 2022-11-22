@@ -3451,7 +3451,8 @@ export type QueryAllAdminAreasArgs = {
   name?: Maybe<Scalars['String']>,
   name_Istartswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
-  level?: Maybe<Scalars['Int']>
+  level?: Maybe<Scalars['Int']>,
+  parentId?: Maybe<Scalars['String']>
 };
 
 
@@ -7217,7 +7218,8 @@ export type AllAdminAreasQueryVariables = {
   name?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   level?: Maybe<Scalars['Int']>,
-  first?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  parentId?: Maybe<Scalars['String']>
 };
 
 
@@ -13073,8 +13075,8 @@ export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
 export const AllAdminAreasDocument = gql`
-    query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int) {
-  allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level) {
+    query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int, $parentId: String) {
+  allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level, parentId: $parentId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -13125,6 +13127,7 @@ export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      level: // value for 'level'
  *      first: // value for 'first'
+ *      parentId: // value for 'parentId'
  *   },
  * });
  */
