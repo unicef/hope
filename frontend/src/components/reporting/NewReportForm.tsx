@@ -115,7 +115,7 @@ export const NewReportForm = (): React.ReactElement => {
     if (shouldSendAdminAreaField) {
       variables = {
         ...basicVariables,
-        adminArea: values.adminArea.map((el) => el.node.id),
+        adminArea2: values.adminArea2.map((el) => el.node.id),
       };
     }
     if (shouldSendProgramField) {
@@ -128,7 +128,8 @@ export const NewReportForm = (): React.ReactElement => {
       variables = {
         ...basicVariables,
         program: values.program,
-        adminArea: values.adminArea.map((el) => el.node.id),
+        adminArea1: values.adminArea1?.node?.id,
+        adminArea2: values.adminArea2?.map((el) => el.node.id),
       };
     }
     return variables || basicVariables;
