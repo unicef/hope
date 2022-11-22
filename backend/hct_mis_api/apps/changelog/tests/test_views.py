@@ -15,7 +15,7 @@ class APITestCase(TestCase):
         self.superuser = UserFactory(is_superuser=True, is_staff=True)
         self.user = UserFactory()
 
-    def tests_Changelog_list_view(self):
+    def tests_changelog_list_view(self):
         instance1 = ChangelogFactory()
         instance2 = ChangelogFactory()
         url = reverse("changelog_Changelog_list")
@@ -29,7 +29,7 @@ class APITestCase(TestCase):
         self.assertIn(str(instance1.version), resp.content.decode("utf-8"))
         self.assertIn(str(instance2.date), resp.content.decode("utf-8"))
 
-    def tests_Changelog_detail_view(self):
+    def tests_changelog_detail_view(self):
         instance = ChangelogFactory()
         url = reverse(
             "changelog_Changelog_detail",

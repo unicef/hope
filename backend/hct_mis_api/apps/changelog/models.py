@@ -18,4 +18,4 @@ class Changelog(models.Model):
         return f"{self.version}-{self.date}"
 
     def get_absolute_url(self):
-        return reverse("changelog_Changelog_detail", args=(self.pk,))
+        return reverse("changelog_changelog_detail", args=(self.pk,))
