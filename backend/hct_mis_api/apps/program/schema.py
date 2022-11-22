@@ -142,20 +142,22 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_programs(self, info, **kwargs):
-        return (
-            Program.objects.annotate(
-                custom_order=Case(
-                    When(status=Program.DRAFT, then=Value(1)),
-                    When(status=Program.ACTIVE, then=Value(2)),
-                    When(status=Program.FINISHED, then=Value(3)),
-                    output_field=IntegerField(),
-                )
-            )
-            .annotate(
-                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
-            )
-            .order_by("custom_order", "start_date")
-        )
+        # return (
+        #     Program.objects.annotate(
+        #         custom_order=Case(
+        #             When(status=Program.DRAFT, then=Value(1)),
+        #             When(status=Program.ACTIVE, then=Value(2)),
+        #             When(status=Program.FINISHED, then=Value(3)),
+        #             output_field=IntegerField(),
+        #         )
+        #     )
+        #     .annotate(
+        #         households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+        #     )
+        #     .order_by("custom_order", "start_date")
+        # )
+        # breakpoint()
+        return Program.objects.all()
 
     def resolve_program_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)
