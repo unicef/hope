@@ -60,7 +60,7 @@ export const householdDataRow = (
           />
         ) : (
           isItemSelected && (
-            <GreenIcon>
+            <GreenIcon data-cy='green-tick'>
               <CheckCircleIcon />
             </GreenIcon>
           )

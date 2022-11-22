@@ -140,7 +140,7 @@ export function RequestedHouseholdDataChange({
         <ApproveBox>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>{t('Requested Data Change')}</Typography>
+              <Typography variant='h6'>Requested Data Change</Typography>
               {shouldShowEditButton(values) ? (
                 <Button
                   onClick={() => setEdit(true)}
