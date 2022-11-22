@@ -29,7 +29,8 @@ class CreateReportInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
     date_from = graphene.Date(required=True)
     date_to = graphene.Date(required=True)
-    admin_area = graphene.List(graphene.ID)
+    admin_area_1 = graphene.ID()
+    admin_area_2 = graphene.List(graphene.ID)
     program = graphene.ID()
 
 
@@ -58,16 +59,25 @@ class CreateReport(ReportValidator, PermissionMutation):
             "date_to": report_data["date_to"],
         }
         admin_areas = None
-
+        admin_area_ids = None
         program_id = report_data.pop("program", None)
-        admin_area_ids = report_data.pop("admin_area", None)
+        admin_area_1_id = report_data.pop("admin_area_1", None)
+        admin_area_2_ids = report_data.pop("admin_area_2", None)
         if program_id:
             program = get_object_or_404(Program, id=decode_id_string(program_id), business_area=business_area)
             report_vars["program"] = program
 
+        if admin_area_1_id and not admin_area_2_ids:
+            parent = get_object_or_404(
+                Area, id=decode_id_string(admin_area_1_id), area_type__country__name=business_area.name
+            )
+            admin_area_ids = Area.objects.filter(parent=parent).values_list("id", flat=True)
+        if admin_area_2_ids:
+            admin_area_ids = [decode_id_string(admin_area_id) for admin_area_id in admin_area_2_ids]
+
         if admin_area_ids:
             admin_areas = [
-                get_object_or_404(Area, id=decode_id_string(admin_area_id), area_type__country__name=business_area.name)
+                get_object_or_404(Area, id=admin_area_id, area_type__country__name=business_area.name)
                 for admin_area_id in admin_area_ids
             ]
 

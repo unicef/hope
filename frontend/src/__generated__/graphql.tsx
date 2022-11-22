@@ -801,7 +801,8 @@ export type CreateReportInput = {
   businessAreaSlug: Scalars['String'],
   dateFrom: Scalars['Date'],
   dateTo: Scalars['Date'],
-  adminArea?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  adminArea1?: Maybe<Scalars['ID']>,
+  adminArea2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   program?: Maybe<Scalars['ID']>,
 };
 
@@ -4343,12 +4344,24 @@ export type ReportNode = Node & {
   dateTo: Scalars['Date'],
   numberOfRecords?: Maybe<Scalars['Int']>,
   program?: Maybe<ProgramNode>,
-  adminArea?: Maybe<AreaNodeConnection>,
+  adminArea: AreaNodeConnection,
   fileUrl?: Maybe<Scalars['String']>,
+  adminArea1?: Maybe<AreaNode>,
+  adminArea2?: Maybe<AreaNodeConnection>,
 };
 
 
 export type ReportNodeAdminAreaArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type ReportNodeAdminArea2Args = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -7021,7 +7034,7 @@ export type CreateReportMutation = (
       & { createdBy: (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: Maybe<(
+      ), adminArea: (
         { __typename?: 'AreaNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'AreaNodeEdge' }
@@ -7030,7 +7043,7 @@ export type CreateReportMutation = (
             & Pick<AreaNode, 'name'>
           )> }
         )>> }
-      )>, program: Maybe<(
+      ), program: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'name'>
       )> }
@@ -7053,7 +7066,7 @@ export type RestartCreateReportMutation = (
       & { createdBy: (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: Maybe<(
+      ), adminArea: (
         { __typename?: 'AreaNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'AreaNodeEdge' }
@@ -7062,7 +7075,7 @@ export type RestartCreateReportMutation = (
             & Pick<AreaNode, 'name'>
           )> }
         )>> }
-      )>, program: Maybe<(
+      ), program: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'name'>
       )> }
@@ -9281,7 +9294,7 @@ export type ReportQuery = (
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
-    ), adminArea: Maybe<(
+    ), adminArea2: Maybe<(
       { __typename?: 'AreaNodeConnection' }
       & { edges: Array<Maybe<(
         { __typename?: 'AreaNodeEdge' }
@@ -9290,6 +9303,9 @@ export type ReportQuery = (
           & Pick<AreaNode, 'name'>
         )> }
       )>> }
+    )>, adminArea1: Maybe<(
+      { __typename?: 'AreaNode' }
+      & Pick<AreaNode, 'name'>
     )>, program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'name'>
@@ -18068,12 +18084,15 @@ export const ReportDocument = gql`
       firstName
       lastName
     }
-    adminArea {
+    adminArea2 {
       edges {
         node {
           name
         }
       }
+    }
+    adminArea1 {
+      name
     }
     program {
       name
@@ -21414,8 +21433,10 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminAreaArgs>,
+  adminArea?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
   fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  adminArea1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  adminArea2?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminArea2Args>,
 };
 
 export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']> = {
