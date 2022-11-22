@@ -63,8 +63,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.history.all()
 
     def resolve_total_number_of_households(self, info, **kwargs):
-        # return self.total_number_of_households
-        return self.total_hh_count
+        return self.total_number_of_households
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -154,7 +153,7 @@ class Query(graphene.ObjectType):
 
         if does_path_exist_in_query("edges.node.totalNumberOfHouseholds", info):
             queryset = queryset.annotate(
-                total_hh_count=Count(
+                total_number_of_households=Count(
                     "cash_plans__payment_records__household",
                     filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
                     distinct=True,
