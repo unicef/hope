@@ -2,8 +2,8 @@ from django.db.models import QuerySet
 
 from django_filters import CharFilter, FilterSet
 
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.core.filters import IntegerFilter
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo.models import Area
 
 
