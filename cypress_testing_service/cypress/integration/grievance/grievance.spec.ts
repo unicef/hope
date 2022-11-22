@@ -128,6 +128,8 @@ When('I change states and approve data', () => {
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="button-send-for-approval"]').click({ force: true });
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('[type="checkbox"]').eq(0).check({ force: true });
+  cy.get('[type="checkbox"]').eq(1).check({ force: true });
   cy.get('[data-cy="button-approve"]').click({ force: true });
   cy.get('[data-cy="button-confirm"]').click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -135,8 +137,9 @@ When('I change states and approve data', () => {
   cy.get('[data-cy="button-confirm"]').click({ force: true });
 });
 
-Then('I should see the ticket is closed', () => {
+Then('I should see the ticket is closed and changes are approved', () => {
   cy.contains('Closed');
+  cy.get('[data-cy="green-tick"]').should('have.length', 2);
 });
 
 When('I edit the Grievance and save', () => {
