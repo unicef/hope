@@ -39,12 +39,12 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_number_of_households", "budget")
     )
 
     def filter_number_of_households(self, queryset, name, value):
         queryset = queryset.annotate(
-            total_hh_count=Count(
+            total_number_of_households=Count(
                 "cash_plans__payment_records__household",
                 filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
                 distinct=True,
@@ -53,9 +53,9 @@ class ProgramFilter(FilterSet):
         min_value = value.get("min")
         max_value = value.get("max")
         if min_value:
-            queryset = queryset.filter(total_hh_count__gte=min_value)
+            queryset = queryset.filter(total_number_of_households__gte=min_value)
         if max_value:
-            queryset = queryset.filter(total_hh_count__lte=max_value)
+            queryset = queryset.filter(total_number_of_households__lte=max_value)
         return queryset
 
     def search_filter(self, qs, name, value):
