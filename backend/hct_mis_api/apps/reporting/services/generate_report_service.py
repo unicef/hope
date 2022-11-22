@@ -309,7 +309,7 @@ class GenerateReportContentHelpers:
             program.frequency_of_payments,
             program.administrative_areas_of_implementation,
             program.population_goal,
-            program.get_total_number_of_households(),
+            program.total_number_of_households,
         )
 
     @staticmethod

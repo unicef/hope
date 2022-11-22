@@ -146,7 +146,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         the relevant ones (collectors etc.)""",
     )
 
-    def get_total_number_of_households(self):
+    @property
+    def total_number_of_households(self):
         return (
             self.cash_plans.filter(payment_records__delivered_quantity__gt=0)
             .distinct("payment_records__household__unicef_id")
