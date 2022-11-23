@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union, Any
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -259,7 +259,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root, info, input, **kwargs: Any):
         arg: Callable = lambda name, default=None: input.get(name, default)
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
 
@@ -1037,12 +1037,12 @@ class ReassignRoleMutation(graphene.Mutation):
         version = BigInt(required=False)
 
     @classmethod
-    def verify_role_choices(cls, role) -> None:
+    def verify_role_choices(cls, role: str) -> None:
         if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
-    def verify_if_role_exists(cls, household, current_individual, role) -> None:
+    def verify_if_role_exists(cls, household: Household, current_individual: Individual, role: str) -> None:
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
                 log_and_raise("This individual is not a head of provided household")
@@ -1128,7 +1128,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, **kwargs):
+    def mutate(cls, root: Any, info: Any, grievance_ticket_id: str, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -1184,7 +1184,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, **kwargs):
+    def mutate(cls, root: Any, info: Any, grievance_ticket_id: Optional[str], **kwargs: Any):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)

@@ -1,6 +1,6 @@
 import json
 from datetime import date
-from typing import Any
+from typing import Any, List, Set, Dict, TYPE_CHECKING
 
 from django.db.models import Prefetch, Q
 
@@ -53,6 +53,11 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
 
+if TYPE_CHECKING:
+    from uuid import UUID
+    from hct_mis_api.apps.geo.models import Country
+
+
 class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
     full_name = graphene.String()
@@ -61,14 +66,14 @@ class DeduplicationResultNode(graphene.ObjectType):
     location = graphene.String()
     age = graphene.Int()
 
-    def resolve_age(self, info):
+    def resolve_age(self, info: Any) -> int:
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()
             return relativedelta(today, parse(date_of_birth)).years
 
-    def resolve_location(self, info):
-        return self.get("location") or "Not provided"
+    def resolve_location(self, info: Any) -> str:
+        return self.get("location", "Not provided")
 
 
 class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -92,7 +97,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_country_origin(parent, info: Any) -> str:
         return parent.country_origin.name
 
-    def resolve_has_duplicates(parent, info):
+    def resolve_has_duplicates(parent, info: Any) -> bool:
         return parent.individuals.filter(
             Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
             | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
@@ -101,7 +106,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_individuals(parent, info):
+    def resolve_individuals(parent, info: Any) -> List[Set[UUID]]:
         imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(
             parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
@@ -117,7 +122,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             )
         )
 
-    def resolve_import_id(parent, info):
+    def resolve_import_id(parent, info: Any) -> str:
         row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
@@ -153,18 +158,18 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
 
-    def resolve_role(parent, info):
+    def resolve_role(parent, info: Any) -> str:
         role = parent.households_and_roles.first()
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
 
-    def resolve_deduplication_batch_results(parent, info):
+    def resolve_deduplication_batch_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
-    def resolve_deduplication_golden_record_results(parent, info):
+    def resolve_deduplication_golden_record_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
@@ -173,10 +178,10 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return resolve_flex_fields_choices_to_string(parent)
 
     @staticmethod
-    def resolve_age(parent, info):
+    def resolve_age(parent, info: Any) -> int:
         return parent.age
 
-    def resolve_import_id(parent, info):
+    def resolve_import_id(parent, info: Any) -> str:
         row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
@@ -187,10 +192,10 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
         return resp + row
 
-    def resolve_phone_no_valid(parent, info):
+    def resolve_phone_no_valid(parent, info: Any) -> bool:
         return parent.phone_no_valid
 
-    def resolve_phone_no_alternative_valid(parent, info):
+    def resolve_phone_no_alternative_valid(parent, info: Any) -> bool:
         return parent.phone_no_alternative_valid
 
     class Meta:
@@ -240,7 +245,7 @@ class ImportDataNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
 
-    def resolve_xlsx_validation_errors(parrent, info):
+    def resolve_xlsx_validation_errors(parrent, info: Any) -> List[str]:
         if not parrent.validation_errors:
             return []
         return json.loads(parrent.validation_errors)
@@ -254,7 +259,7 @@ class KoboImportDataNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
 
-    def resolve_kobo_validation_errors(parrent, info):
+    def resolve_kobo_validation_errors(parrent, info: Any) -> List[str]:
         if not parrent.validation_errors:
             return []
         return json.loads(parrent.validation_errors)
@@ -269,10 +274,10 @@ class ImportedDocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
     photo = graphene.String(description="Photo url")
 
-    def resolve_country(parent, info):
+    def resolve_country(parent, info: Any) -> str:
         return getattr(parent.country, "name", parent.country)
 
-    def resolve_photo(parent, info):
+    def resolve_photo(parent, info: Any) -> str:
         if parent.photo:
             return parent.photo.url
         return
@@ -289,7 +294,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
     country = graphene.String(description="Country")
 
     @staticmethod
-    def resolve_country(parent: ImportedIndividualIdentity, info):
+    def resolve_country(parent: ImportedIndividualIdentity, info: Any) -> Country:
         return getattr(parent.country, "name", parent.country)
 
     class Meta:
@@ -327,8 +332,8 @@ class Query(graphene.ObjectType):
     deduplication_batch_status_choices = graphene.List(ChoiceObject)
     deduplication_golden_record_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_deduplication_batch_status_choices(self, info, **kwargs):
+    def resolve_deduplication_batch_status_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE)
 
-    def resolve_deduplication_golden_record_status_choices(self, info, **kwargs):
+    def resolve_deduplication_golden_record_status_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE)
