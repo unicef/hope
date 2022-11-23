@@ -2,7 +2,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -43,6 +43,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.db.models.query import QuerySet
+    from hct_mis_api.apps.account.models import User
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -81,7 +87,7 @@ class FlexRegistrationService:
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name") -> RegistrationDataImport:
+    def create_rdi(self, imported_by: User, rdi_name: str = "rdi_name") -> RegistrationDataImport:
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
@@ -117,8 +123,8 @@ class FlexRegistrationService:
 
     def process_records(
         self,
-        rdi_id,
-        records_ids,
+        rdi_id: UUID,
+        records_ids: List[UUID],
     ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
@@ -187,7 +193,7 @@ class FlexRegistrationService:
 
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
-    ):
+    ) -> None:
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
         record_data_dict = record.get_data()
@@ -242,7 +248,7 @@ class FlexRegistrationService:
 
         ImportedDocument.objects.bulk_create(documents)
 
-    def _set_default_head_of_household(self, individuals_array) -> None:
+    def _set_default_head_of_household(self, individuals_array: QuerySet) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
@@ -267,7 +273,7 @@ class FlexRegistrationService:
             raise ValidationError(form.errors)
         return form.save()
 
-    def _prepare_household_data(self, household_dict, record, registration_data_import) -> Dict:
+    def _prepare_household_data(self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
@@ -366,7 +372,7 @@ class FlexRegistrationService:
 
         return documents
 
-    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number) -> Union[ContentFile, Any]:
+    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> Union[ContentFile, Any]:
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.md5(document_number.encode()).hexdigest()

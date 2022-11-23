@@ -1,5 +1,5 @@
 from operator import itemgetter
-from typing import Any, Dict
+from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -9,6 +9,7 @@ from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db.transaction import atomic
+from django.forms import Form
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -24,6 +25,12 @@ from hct_mis_api.apps.erp_datahub.models import DownPayment, FundsCommitment
 from hct_mis_api.apps.erp_datahub.tasks.sync_to_mis_datahub import SyncToMisDatahubTask
 from hct_mis_api.apps.mis_datahub import models as mis_models
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.db.models.query import QuerySet
+    from django.http import HttpRequest
 
 
 class NumberValidator(RegexValidator):
@@ -44,7 +51,7 @@ class FundsCommitmentAddForm(forms.ModelForm):
         model = FundsCommitment
         exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
 
-    def clean_business_area(self):
+    def clean_business_area(self) -> str:
         return self.cleaned_data["business_area"].code
 
 
@@ -58,7 +65,7 @@ class DownPaymentAddForm(forms.ModelForm):
         model = DownPayment
         exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
 
-    def clean_business_area(self):
+    def clean_business_area(self) -> str:
         return self.cleaned_data["business_area"].code
 
 
@@ -71,7 +78,7 @@ class FundsCommitmentAssignBusinessOffice(forms.ModelForm):
         model = FundsCommitment
         fields = ("business_office_code",)
 
-    def clean_business_office_code(self):
+    def clean_business_office_code(self) -> str:
         return self.cleaned_data["business_office_code"].code
 
 
@@ -88,7 +95,7 @@ class SplitBusinessAreaFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [(1, "Yes"), (2, "No")]
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> Optional[QuerySet]:
         if not self.value():
             return queryset
         from hct_mis_api.apps.core.models import BusinessArea
@@ -118,7 +125,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request, pk):
+    def assign_business_office(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
@@ -147,7 +154,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
 
     @button()
-    def execute_exchange_rate_sync(self, request):
+    def execute_exchange_rate_sync(self, request: HttpRequest) -> TemplateResponse:
         if request.method == "POST":
             from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
                 PullFromErpDatahubTask,
@@ -170,7 +177,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
                 template="admin_extra_buttons/confirm.html",
             )
 
-    def get_changeform_initial_data(self, request):
+    def get_changeform_initial_data(self, request: HttpRequest) -> Dict:
         initial: Dict[str, Any] = super().get_changeform_initial_data(request)
         initial["created_by"] = request.user.email
         initial["updated_by"] = request.user.email
@@ -178,7 +185,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         initial["status_date"] = timezone.now()
         return initial
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
+    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Union[FundsCommitmentAddForm, Form]:
         if not change:
             return FundsCommitmentAddForm
         return super().get_form(request, obj, change, **kwargs)
@@ -193,7 +200,7 @@ class DownPaymentAssignBusinessOffice(forms.ModelForm):
         model = DownPayment
         fields = ("business_office_code",)
 
-    def clean_business_office_code(self):
+    def clean_business_office_code(self) -> str:
         return self.cleaned_data["business_office_code"].code
 
 
@@ -210,7 +217,7 @@ class DownPaymentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request, pk):
+    def assign_business_office(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: DownPayment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)

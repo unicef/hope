@@ -1,7 +1,7 @@
 from typing import Optional, Type, TYPE_CHECKING
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
@@ -136,7 +136,7 @@ class ImportedIndividualDocumentAfghanistan(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_afghanistan"
         settings = index_settings
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="afghanistan")
 
 
@@ -146,7 +146,7 @@ class ImportedIndividualDocumentUkraine(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_ukraine"
         settings = index_settings
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="ukraine")
 
 
@@ -156,14 +156,14 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_others"
         settings = index_settings
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return ImportedIndividual.objects.exclude(
             Q(registration_data_import__business_area_slug="ukraine")
             | Q(registration_data_import__business_area_slug="afghanistan")
         )
 
 
-def get_imported_individual_doc(business_area_slug) -> Optional[Type[Document]]:
+def get_imported_individual_doc(business_area_slug: str) -> Optional[Type[Document]]:
     return {
         "afghanistan": ImportedIndividualDocumentAfghanistan,
         "ukraine": ImportedIndividualDocumentUkraine,

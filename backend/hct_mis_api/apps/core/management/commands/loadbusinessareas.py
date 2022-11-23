@@ -1,5 +1,6 @@
 import logging
 import xml.etree.ElementTree as ET
+from typing import Any
 
 from django.core.management import BaseCommand
 
@@ -23,7 +24,7 @@ class Command(BaseCommand):
             help="file",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         """
         <DocumentElement>
             <BusinessArea>

@@ -13,7 +13,7 @@ from snapshottest.django import TestRunner
 _worker_id = 0
 
 
-def _elastic_search_init_worker(counter):
+def _elastic_search_init_worker(counter: Any) -> None:
     global _worker_id
 
     with counter.get_lock():
