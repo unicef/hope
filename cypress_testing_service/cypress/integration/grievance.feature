@@ -3,6 +3,7 @@ Feature: Grievance
 
     Background:
         Given I am authenticated
+    #    Given there is one individual and household
 
 
    Scenario: Visit Grievance page and create and edit Grievance (Referral)
@@ -29,15 +30,15 @@ Feature: Grievance
 
 
     Scenario: Visit Grievance page and create a Grievance, approve and close the ticket (Individual Data Update)
-        When I visit the main dashboard
-        Then I should see the side panel with Grievance option
-        When I click on Grievance Tickets option
-        When I click the New Ticket button
-        Then I should see the New Ticket page
-        When I fill in the form individual data change and save
-        Then I should see the Requested Individual Data Change component with correct values
-        When I change states and approve data
-        Then I should see the ticket is closed and changes are approved
+       When I visit the main dashboard
+       Then I should see the side panel with Grievance option
+       When I click on Grievance Tickets option
+       When I click the New Ticket button
+       Then I should see the New Ticket page
+       When I fill in the form individual data change and save
+       Then I should see the Requested Individual Data Change component with correct values
+       When I change states and approve data
+       Then I should see the ticket is closed and changes are approved
 
       Scenario: Visit Grievance page and create a Grievance, approve and close the ticket (Household Data Update)
         When I visit the main dashboard
