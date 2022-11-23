@@ -801,9 +801,9 @@ export type CreateReportInput = {
   businessAreaSlug: Scalars['String'],
   dateFrom: Scalars['Date'],
   dateTo: Scalars['Date'],
+  program?: Maybe<Scalars['ID']>,
   adminArea1?: Maybe<Scalars['ID']>,
   adminArea2?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  program?: Maybe<Scalars['ID']>,
 };
 
 export type CreateTargetPopulationInput = {
@@ -4346,12 +4346,22 @@ export type ReportNode = Node & {
   program?: Maybe<ProgramNode>,
   adminArea: AreaNodeConnection,
   fileUrl?: Maybe<Scalars['String']>,
-  adminArea1?: Maybe<AreaNode>,
+  adminArea1?: Maybe<AreaNodeConnection>,
   adminArea2?: Maybe<AreaNodeConnection>,
 };
 
 
 export type ReportNodeAdminAreaArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type ReportNodeAdminArea1Args = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -9304,8 +9314,14 @@ export type ReportQuery = (
         )> }
       )>> }
     )>, adminArea1: Maybe<(
-      { __typename?: 'AreaNode' }
-      & Pick<AreaNode, 'name'>
+      { __typename?: 'AreaNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'AreaNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'name'>
+        )> }
+      )>> }
     )>, program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'name'>
@@ -18092,7 +18108,11 @@ export const ReportDocument = gql`
       }
     }
     adminArea1 {
-      name
+      edges {
+        node {
+          name
+        }
+      }
     }
     program {
       name
@@ -21435,7 +21455,7 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   adminArea?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
   fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  adminArea1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  adminArea1?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminArea1Args>,
   adminArea2?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminArea2Args>,
 };
 
