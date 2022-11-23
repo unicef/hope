@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Tuple, Type
 
+from django.db.models import QuerySet
 from django.db.models.functions import ExtractYear
 
 import graphene
@@ -18,6 +19,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -39,17 +41,20 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
 
     file_url = graphene.String()
-    admin_area_1 = graphene.Field(AreaNode)
+    admin_area_1 = DjangoFilterConnectionField(AreaNode)
     admin_area_2 = DjangoFilterConnectionField(AreaNode)
 
-    def resolve_admin_area_1(self, info, **kwargs):
-        return self.admin_area.first().parent
+    def resolve_file_url(self, info, **kwargs) -> str:
+        return self.file.url if self.file else ""
 
-    def resolve_admin_area_2(self, info, **kwargs):
+    def resolve_admin_area_1(self, info, **kwargs) -> QuerySet:
+        parent_ids = self.admin_area.all().values_list("parent_id")
+        return Area.objects.filter(id__in=parent_ids).distinct()
+
+    def resolve_admin_area_2(self, info, **kwargs) -> QuerySet:
         return self.admin_area.all()
 
-    def resolve_file_url(self, info, **kwargs):
-        return self.file.url if self.file else ""
+
 class Query(graphene.ObjectType):
     report = relay.Node.Field(ReportNode)
     all_reports = DjangoPermissionFilterConnectionField(

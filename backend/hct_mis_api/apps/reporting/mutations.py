@@ -29,9 +29,9 @@ class CreateReportInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
     date_from = graphene.Date(required=True)
     date_to = graphene.Date(required=True)
+    program = graphene.ID()
     admin_area_1 = graphene.ID()
     admin_area_2 = graphene.List(graphene.ID)
-    program = graphene.ID()
 
 
 class CreateReport(ReportValidator, PermissionMutation):
