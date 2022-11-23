@@ -175,8 +175,9 @@ class FieldAttributeNode(graphene.ObjectType):
             return resolved
 
     def resolve_hint(self, info):
-        # return _custom_dict_or_attr_resolver("hint", None, self, info)
-        return "123"
+        if isinstance(self, FlexibleAttribute):
+            return str(self.hint)
+        return str(self["hint"])
 
 
 class GroupAttributeNode(DjangoObjectType):
