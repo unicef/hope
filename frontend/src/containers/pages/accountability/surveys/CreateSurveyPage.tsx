@@ -261,6 +261,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
           confirm({
             title: t('Confirmation'),
             content: t('Are you sure you want to send this survey?'),
+            continueText: 'Save',
           }).then(async () => {
             try {
               const response = await mutate({
@@ -555,33 +556,15 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 >
                   {t('Back')}
                 </Button>
-
-                {activeStep === steps.length - 1 ? (
-                  <Button
-                    onClick={() =>
-                      confirm({
-                        content: t(
-                          'Are you sure you want to send this survey?',
-                        ),
-                        continueText: 'Save',
-                      }).then(() => submitForm())
-                    }
-                    variant='contained'
-                    color='primary'
-                  >
-                    {t('Save')}
-                  </Button>
-                ) : (
-                  <LoadingButton
-                    loading={loading}
-                    color='primary'
-                    variant='contained'
-                    onClick={submitForm}
-                    data-cy='button-submit'
-                  >
-                    {t('Next')}
-                  </LoadingButton>
-                )}
+                <LoadingButton
+                  loading={loading}
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                  data-cy='button-submit'
+                >
+                  {t(activeStep === steps.length - 1 ? 'Save' : 'Next')}
+                </LoadingButton>
               </Box>
             </Box>
           </PaperContainer>

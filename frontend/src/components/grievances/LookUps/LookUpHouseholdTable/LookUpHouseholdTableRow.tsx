@@ -69,6 +69,7 @@ export function LookUpHouseholdTableRow({
             color='primary'
             onClick={(event) => checkboxClickHandler(event, household.id)}
             checked={isItemSelected}
+            data-cy='input-checkbox-household'
             inputProps={{ 'aria-labelledby': household.id }}
           />
         ) : (
