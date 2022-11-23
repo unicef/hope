@@ -1,8 +1,7 @@
 import csv
 import logging
 from io import StringIO
-from typing import Any, Dict, List
-from uuid import UUID
+from typing import Any, Dict, List, TYPE_CHECKING, Tuple, Optional, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -64,6 +63,14 @@ from hct_mis_api.apps.utils.admin import (
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
 
+
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.http import HttpRequest
+    from django.db.models.query import QuerySet
+    from django.contrib.admin import ModelAdmin
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -98,13 +105,13 @@ class BusinessofficeFilter(SimpleListFilter):
     title = "Business Ofiice"
     parameter_name = "bo"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> List[Tuple[int, str]]:
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
     def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() == "2":
             return queryset.filter(parent_id__isnull=True)
         elif self.value() == "1":
@@ -116,7 +123,7 @@ class GroupConcat(Aggregate):
     function = "GROUP_CONCAT"
     template = "%(function)s(%(distinct)s%(expressions)s)"
 
-    def __init__(self, expression, distinct=False, **extra):
+    def __init__(self, expression: str, distinct: str = False, **extra: Any) -> None:
         super().__init__(
             expression,
             distinct="DISTINCT " if distinct else "",
@@ -140,7 +147,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field: JSONField, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -150,7 +157,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @choice(label="DOAP", change_list=False)
-    def doap(self, button):
+    def doap(self, button: button) -> None:
         button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
@@ -188,7 +195,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
-    def _get_doap_matrix(self, obj) -> List[Any]:
+    def _get_doap_matrix(self, obj: Any) -> List[Any]:
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
         fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
@@ -237,7 +244,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         return matrix
 
     @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
-    def force_sync_doap(self, request, pk):
+    def force_sync_doap(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         matrix = self._get_doap_matrix(obj)
@@ -362,7 +369,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
     @button(permission=is_root)
-    def mark_submissions(self, request, pk):
+    def mark_submissions(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
@@ -458,7 +465,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         "error_description",
     )
 
-    def import_status(self, obj):
+    def import_status(self, obj: Any) -> str:
         if obj.status == self.model.SUCCESSFUL:
             color = "89eb34"
         elif obj.status == self.model.UNSUCCESSFUL:
@@ -472,16 +479,16 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def original_file_name(self, obj):
+    def original_file_name(self, obj: Any) -> str:
         return obj.file_name
 
-    def get_form(self, request, obj=None, change=False, **kwargs) -> Any:
+    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request):
+    def download_last_valid_file(self, request: HttpRequest) -> Union[HttpResponseRedirect, str]:
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -495,7 +502,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         label="Rerun KOBO Import",
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
     )
-    def rerun_kobo_import(self, request, pk):
+    def rerun_kobo_import(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
             xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
@@ -562,7 +569,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 
         return TemplateResponse(request, "core/xls_form.html", payload)
 
-    def change_view(self, request, object_id=None, form_url="", extra_context=None):
+    def change_view(self, request: HttpRequest, object_id: Optional[Any] = None, form_url: str = "", extra_context: Dict = None):
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
         self.has_add_permission = lambda __: False  # type: ignore
@@ -588,20 +595,20 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
 class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return request.user.can_download_storage_files()
 
     @button(label="Create eDopomoga TP")
-    def create_tp(self, request, pk):
+    def create_tp(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse, HttpResponseRedirect]:
         storage_obj = StorageFile.objects.get(pk=pk)
         context = self.get_common_context(
             request,

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -55,7 +57,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "service_provider",
     )
 
-    def cash_plan_name(self, obj):
+    def cash_plan_name(self, obj: Any) -> str:
         return obj.cash_plan.name
 
     def get_queryset(self, request):

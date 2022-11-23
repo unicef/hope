@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, TYPE_CHECKING, Dict, Any
+from typing import Tuple, TYPE_CHECKING, Dict, Any, Optional, IO
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -42,6 +42,7 @@ from hct_mis_api.apps.registration_datahub.schema import (
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 if TYPE_CHECKING:
+    from uuid import UUID
     from hct_mis_api.apps.account.models import User
 
 
@@ -153,7 +154,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def validate_object_status(cls, rdi_obj, *args, **kwargs) -> None:
+    def validate_object_status(cls, rdi_obj: RegistrationDataImport, *args: Any, **kwargs: Any) -> None:
         if rdi_obj.status != RegistrationDataImport.DEDUPLICATION_FAILED:
             logger.error(
                 "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
@@ -164,7 +165,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, registration_data_import_datahub_id, **kwargs) -> "RegistrationDeduplicationMutation":
+    def mutate(cls, root: Any, info: Any, registration_data_import_datahub_id: Optional[str], **kwargs: Any) -> "RegistrationDeduplicationMutation":
         old_rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
@@ -189,7 +190,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
-    def check_is_not_empty(cls, import_data_id) -> None:
+    def check_is_not_empty(cls, import_data_id: Optional[str]) -> None:
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
         if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
             logger.error("Cannot import empty KoBo form")
@@ -199,7 +200,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def processed_mutate(cls, root, info, registration_data_import_data) -> RegistrationXlsxImportMutation:
+    def processed_mutate(cls, root: Any, info: Any, registration_data_import_data: Dict) -> RegistrationXlsxImportMutation:
         cls.check_is_not_empty(registration_data_import_data.import_data_id)
 
         (
@@ -237,7 +238,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def validate_object_status(cls, *args, **kwargs) -> None:
+    def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
             logger.error("Only In Review Registration Data Import can be merged into Population")
@@ -247,7 +248,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def mutate(cls, root, info, id, **kwargs) -> "MergeRegistrationDataImportMutation":
+    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "MergeRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
@@ -284,7 +285,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def validate_object_status(cls, *args, **kwargs) -> None:
+    def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
             logger.error("Only In Review Registration Data Import can be refused")
@@ -294,7 +295,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def mutate(cls, root, info, id, **kwargs) -> "RefuseRegistrationDataImportMutation":
+    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
         obj_hct = RegistrationDataImport.objects.get(id=decode_id)
@@ -323,7 +324,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, file, business_area_slug) -> "UploadImportDataXLSXFileAsync":
+    def mutate(cls, root: Any, info: Any, file: OI, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
         import_data = ImportData.objects.create(
@@ -347,7 +348,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, uid, business_area_slug, only_active_submissions) -> "SaveKoboProjectImportDataAsync":
+    def mutate(cls, root: Any, info: Any, uid: UUID, business_area_slug: str, only_active_submissions) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 
         import_data = KoboImportData.objects.create(

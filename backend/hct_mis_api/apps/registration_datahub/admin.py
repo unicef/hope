@@ -141,7 +141,7 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
         except KeyError:
             return ""
 
-    def batch_score(self, obj: ImportedIndividual) -> int:
+    def batch_score(self, obj: ImportedIndividual) -> Union[int, str]:
         try:
             return obj.deduplication_batch_results["score"]["max"]
         except KeyError:
@@ -447,7 +447,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
 
