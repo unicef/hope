@@ -50,7 +50,7 @@ class MicrosoftGraphAPI:
         token = json_response["access_token"]
         return token
 
-    def get_results(self, url) -> Dict:
+    def get_results(self, url: str) -> Dict:
         headers = {"Authorization": f"Bearer {self.access_token}"}
         response = requests.get(url, headers=headers)
         try:

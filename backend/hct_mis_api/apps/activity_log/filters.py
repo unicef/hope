@@ -1,8 +1,14 @@
+from typing import TYPE_CHECKING
+
 from django.db.models import Q
 
 from django_filters import CharFilter, FilterSet
 
 from hct_mis_api.apps.activity_log.models import LogEntry
+
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 
 class LogEntryFilter(FilterSet):
@@ -14,7 +20,7 @@ class LogEntryFilter(FilterSet):
         model = LogEntry
         fields = ("object_id",)
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[LogEntry]":
         values = value.split(" ")
         q_obj = Q()
         for value in values:

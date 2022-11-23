@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict, Tuple, Type
+from typing import Dict, Tuple, Type, Any, TYPE_CHECKING, List, Optional
 
 from django.core.files.storage import default_storage
 from django.db.models import Q
@@ -57,6 +57,13 @@ from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+    from hct_mis_api.apps.geo.models import Area
+    from hct_mis_api.apps.household.models import Household, Individual
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -106,31 +113,31 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
     @staticmethod
-    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info):
+    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket.related_tickets
 
     @staticmethod
-    def resolve_household(grievance_ticket: GrievanceTicket, info):
+    def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> "Household":
         return getattr(grievance_ticket.ticket_details, "household", None)
 
     @staticmethod
-    def resolve_individual(grievance_ticket: GrievanceTicket, info):
+    def resolve_individual(grievance_ticket: GrievanceTicket, info: Any) -> "Individual":
         return getattr(grievance_ticket.ticket_details, "individual", None)
 
     @staticmethod
-    def resolve_payment_record(grievance_ticket: GrievanceTicket, info):
+    def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any):
         return getattr(grievance_ticket.ticket_details, "payment_record", None)
 
     @staticmethod
-    def resolve_admin(grievance_ticket: GrievanceTicket, info):
+    def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> Optional[str]:
         return getattr(grievance_ticket.admin2, "name", None)
 
     @staticmethod
-    def resolve_admin2(grievance_ticket: GrievanceTicket, info):
+    def resolve_admin2(grievance_ticket: GrievanceTicket, info: Any) -> "Area":
         return grievance_ticket.admin2
 
     @staticmethod
-    def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
+    def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return (
             GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
             .filter(household_unicef_id=grievance_ticket.household_unicef_id)
@@ -171,7 +178,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_individual_data(self, info):
+    def resolve_individual_data(self, info: Any) -> Dict:
         individual_data: Dict = self.individual_data  # type: ignore
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
@@ -230,7 +237,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_individual_data(self, info):
+    def resolve_individual_data(self, info: Any) -> Dict:
         individual_data: Dict = self.individual_data  # type: ignore
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
@@ -291,10 +298,10 @@ class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
     possible_duplicate = graphene.List(DeduplicationResultNode)
 
-    def resolve_golden_records(self, info):
+    def resolve_golden_records(self, info) -> List[Dict]:
         return encode_ids(self.golden_records, "Individual", "hit_id")
 
-    def resolve_possible_duplicate(self, info):
+    def resolve_possible_duplicate(self, info) -> List[Dict]:
         return encode_ids(self.possible_duplicate, "Individual", "hit_id")
 
 
@@ -310,15 +317,15 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_extra_data(parent, info):
+    def resolve_extra_data(parent, info: Any) -> TicketNeedsAdjudicationDetailsExtraDataNode:
         golden_records = parent.extra_data.get("golden_records")
         possible_duplicate = parent.extra_data.get("possible_duplicate")
         return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
 
-    def resolve_possible_duplicates(self, info):
+    def resolve_possible_duplicates(self, info: Any) -> QuerySet:
         return self.possible_duplicates.all()
 
-    def resolve_selected_individuals(self, info):
+    def resolve_selected_individuals(self, info: Any) -> QuerySet:
         return self.selected_individuals.all()
 
 
@@ -369,7 +376,7 @@ class IssueTypesObject(graphene.ObjectType):
     label = graphene.String()
     sub_categories = graphene.List(ChoiceObject)
 
-    def resolve_sub_categories(self, info):
+    def resolve_sub_categories(self, info: Any) -> List[Dict[str, str]]:
         return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
 
 
@@ -430,7 +437,7 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
-    def resolve_all_grievance_ticket(self, info, **kwargs):
+    def resolve_all_grievance_ticket(self, info: Any, **kwargs) -> QuerySet:
         return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):

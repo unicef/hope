@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
 from django.db.models import Q, QuerySet
 
@@ -19,6 +21,10 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+
+
+if TYPE_CHECKING:
+    pass
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -119,7 +125,7 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -131,7 +137,7 @@ class GrievanceTicketFilter(FilterSet):
 
         return qs.filter(q_obj)
 
-    def fsp_filter(self, qs, name, value):
+    def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
             q_obj = Q()
             for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
@@ -140,12 +146,12 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(q_obj)
         return qs
 
-    def admin_filter(self, qs, name, value):
+    def admin_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-    def permissions_filter(self, qs, name, value) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
@@ -210,7 +216,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(fields=("id",))
 
-    def prepare_ticket_filters(self, lookup, obj) -> Q:
+    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
 
         q_obj = Q()
@@ -220,7 +226,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
                 q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
         return q_obj
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         cleaned_data = self.form.cleaned_data
 
         payment_record_objects = cleaned_data.pop("payment_record", None)
@@ -260,7 +266,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
         return queryset
 
-    def permissions_filter(self, qs, name, value):
+    def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
 
 

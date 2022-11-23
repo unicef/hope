@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from typing import Any
 
 from django.db.models import Prefetch, Q
 
@@ -85,10 +86,10 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     import_id = graphene.String()
 
-    def resolve_country(parent, info):
+    def resolve_country(parent, info: Any) -> str:
         return parent.country.name
 
-    def resolve_country_origin(parent, info):
+    def resolve_country_origin(parent, info: Any) -> str:
         return parent.country_origin.name
 
     def resolve_has_duplicates(parent, info):

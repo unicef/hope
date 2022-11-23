@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @app.task(queue="priority")
 @log_start_and_end
 @sentry_tags
-def deduplicate_and_check_against_sanctions_list_task(should_populate_index: bool, individuals_ids: List[str]):
+def deduplicate_and_check_against_sanctions_list_task(should_populate_index: bool, individuals_ids: List[str]) -> None:
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             DeduplicateAndCheckAgainstSanctionsListTask,
