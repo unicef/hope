@@ -8,7 +8,7 @@ backlog = 2048
 worker_class = "gthread"
 timeout = 30
 keepalive = 2
-workers = os.getenv("GUNICORN_WORKERS") if os.getenv("GUNICORN_WORKERS") else int(multiprocessing.cpu_count() / 2)
+workers = 1
 threads = os.getenv("GUNICORN_THREADS") if os.getenv("GUNICORN_THREADS") else multiprocessing.cpu_count()
 
 proc_name = None
