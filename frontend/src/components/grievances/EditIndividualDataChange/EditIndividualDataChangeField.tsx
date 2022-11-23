@@ -98,6 +98,7 @@ export const EditIndividualDataChangeField = ({
           variant='outlined'
           label={field.labelEn}
           required={field.required}
+          data-cy={`input-individual-data-${field.labelEn}`}
           {...fieldProps}
         />
       </Grid>

@@ -53,9 +53,18 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             {extraContent}
           </Typography>
         ) : null}
-        <Typography variant='body2' style={{ marginBottom: warningContent ? '16px' : 'inherit' }}>{content}</Typography>
+        <Typography
+          variant='body2'
+          style={{ marginBottom: warningContent ? '16px' : 'inherit' }}
+        >
+          {content}
+        </Typography>
         {warningContent ? (
-          <Typography color='primary' variant='body2' style={{ fontWeight: 'bold' }}>
+          <Typography
+            color='primary'
+            variant='body2'
+            style={{ fontWeight: 'bold' }}
+          >
             {warningContent}
           </Typography>
         ) : null}
@@ -70,6 +79,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             color='primary'
             disabled={disabled}
             onClick={onSubmit}
+            data-cy='button-confirm'
           >
             {continueText || t('Continue')}
           </Button>

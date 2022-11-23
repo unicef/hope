@@ -29,11 +29,11 @@ export const Verification = ({
   const { t } = useTranslation();
   return (
     <BoxWithBorders>
-      {values.selectedHousehold && (
-        <>
-          <Typography variant='subtitle1'>
-            {t('Select correctly answered questions (minimum 5)')}
-          </Typography>
+      <>
+        <Typography variant='subtitle1'>
+          {t('Select correctly answered questions (minimum 5)')}
+        </Typography>
+        {values.selectedHousehold && (
           <Box py={4}>
             <Typography variant='subtitle2'>
               {t('Household Questionnaire')}
@@ -42,15 +42,19 @@ export const Verification = ({
               <HouseholdQuestionnaire values={values} />
             </Box>
           </Box>
-          <Typography variant='subtitle2'>
-            {t('Individual Questionnaire')}
-          </Typography>
-          <Box py={4}>
-            <IndividualQuestionnaire values={values} />
-          </Box>
-          <BoxWithBorderBottom />
-        </>
-      )}
+        )}
+        {values.selectedIndividual && (
+          <>
+            <Typography variant='subtitle2'>
+              {t('Individual Questionnaire')}
+            </Typography>
+            <Box py={4}>
+              <IndividualQuestionnaire values={values} />
+            </Box>
+            <BoxWithBorderBottom />
+          </>
+        )}
+      </>
       <Consent />
       <Field
         name='consent'

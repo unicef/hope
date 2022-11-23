@@ -64,9 +64,12 @@ export function RequestedIndividualDataChange({
   delete individualData.documents;
   delete individualData.identities;
   delete individualData.documents_to_remove;
+  delete individualData.documents_to_edit;
   delete individualData.payment_channels;
   delete individualData.payment_channels_to_remove;
+  delete individualData.payment_channels_to_edit;
   delete individualData.identities_to_remove;
+  delete individualData.identities_to_edit;
   delete individualData.previous_documents;
   delete individualData.previous_identities;
   delete individualData.previous_payment_channels;
@@ -200,7 +203,11 @@ export function RequestedIndividualDataChange({
       documentsToEdit.length +
       identities.length +
       identitiesToRemove.length +
-      identitiesToEdit.length;
+      identitiesToEdit.length +
+      paymentChannels.length +
+      paymentChannelsToRemove.length +
+      paymentChannelsToEdit.length;
+
     return allSelected === countAll;
   };
 
@@ -212,6 +219,7 @@ export function RequestedIndividualDataChange({
           variant='contained'
           color='primary'
           disabled={!approveEnabled}
+          data-cy='button-approve'
         >
           {t('Approve')}
         </Button>
@@ -230,6 +238,7 @@ export function RequestedIndividualDataChange({
         variant='contained'
         color='primary'
         disabled={!approveEnabled}
+        data-cy='button-approve'
       >
         {t('Approve')}
       </Button>

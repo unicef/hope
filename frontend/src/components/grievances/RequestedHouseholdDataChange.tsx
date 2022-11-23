@@ -67,6 +67,7 @@ export function RequestedHouseholdDataChange({
           variant='contained'
           color='primary'
           disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          data-cy='button-approve'
         >
           {t('Approve')}
         </Button>
@@ -85,6 +86,7 @@ export function RequestedHouseholdDataChange({
         variant='contained'
         color='primary'
         disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+        data-cy='button-approve'
       >
         {t('Approve')}
       </Button>
@@ -138,7 +140,7 @@ export function RequestedHouseholdDataChange({
         <ApproveBox>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>{t('Requested Data Change')}</Typography>
+              <Typography variant='h6'>Requested Data Change</Typography>
               {shouldShowEditButton(values) ? (
                 <Button
                   onClick={() => setEdit(true)}
