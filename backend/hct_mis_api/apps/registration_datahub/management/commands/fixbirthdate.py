@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -21,7 +22,7 @@ def update_birth_date() -> None:
 class Command(BaseCommand):
     help = "Fix birth date"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Fix birth date - start")
         try:
             with transaction.atomic():

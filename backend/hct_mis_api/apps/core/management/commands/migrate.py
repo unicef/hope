@@ -1,4 +1,5 @@
 import time
+from argparse import ArgumentParser
 from collections import OrderedDict
 from importlib import import_module
 from typing import Any, List, Optional, Tuple
@@ -20,7 +21,7 @@ from django.utils.text import Truncator
 class Command(BaseCommand):
     help = "Updates database schema. Manages both apps with migrations and those without."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "app_label",
             nargs="?",

@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from typing import Union
+from typing import Union, Any, List
 
 from django.core.files import File
 from django.core.management import BaseCommand
@@ -20,7 +20,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
 )
 
 
-def _get_file(attachments, value, business_area_slug) -> Union[File, str]:
+def _get_file(attachments: List, value: Any, business_area_slug: str) -> Union[File, str]:
     # TODO: refactor
     download_url = ""
     for attachment in attachments:
@@ -120,6 +120,6 @@ def fix_document_photos() -> None:
 class Command(BaseCommand):
     help = "Fix document photos in Individuals existing data"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         fix_document_photos()
         self.stdout.write("Individuals photos fixed")

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management.base import BaseCommand
 
 from elasticsearch import Elasticsearch
@@ -46,7 +48,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"Documents for index: {index} created"))
 
-    def handle(self, *args, **options) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         business_area_slug = options.pop("business_area", None)
         indices_options = ("afghanistan", "ukraine", "others")
 

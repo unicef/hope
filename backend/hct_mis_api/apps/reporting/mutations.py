@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import Dict, Any
 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -41,7 +42,7 @@ class CreateReport(ReportValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, report_data):
+    def mutate(cls, root: Any, info: Any, report_data: Dict) -> "CreateReport":
         business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
 

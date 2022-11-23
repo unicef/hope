@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -64,7 +65,7 @@ def fix_disability_fields(business_area=None, **kwargs) -> None:
 class Command(BaseCommand):
     help = "Go through all grievance tickets, look for wrongly formatted data and fix it"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Fixing grievance tickets")
 
         fix_disability_fields()  # PR #1608
