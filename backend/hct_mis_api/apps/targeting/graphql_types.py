@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Any
 
 import graphene
 from graphene import relay
@@ -38,7 +38,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
 
-    def resolve_arguments(self, info):
+    def resolve_arguments(self, info: Any) -> List:
         return self.arguments
 
     def resolve_field_attribute(parent, info):
@@ -56,7 +56,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
 
-    def resolve_arguments(self, info):
+    def resolve_arguments(self, info: Any) -> List:
         return self.arguments
 
     def resolve_field_attribute(parent, info):
