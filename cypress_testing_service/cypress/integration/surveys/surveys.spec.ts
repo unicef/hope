@@ -46,10 +46,11 @@ When('I fill in the form and save', () => {
   cy.get('[data-cy="input-radio-program"]').eq(0).click();
   cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
-  cy.get('[data-cy="input-title"]').click().type('Some title');
+  cy.get('[data-cy="input-title"]').eq(0).click().type('Some title');
   cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="button-confirm"]').click({ force: true });
 });
 
-Then('I should see the Feedback details page', () => {
+Then('I should see the Survey details page', () => {
   cy.contains('Survey ID:');
 });
