@@ -57,7 +57,7 @@ class Rule(models.Model):
 
     objects = RuleManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     def __init__(self, *args, **kwargs) -> None:
@@ -206,7 +206,7 @@ class RuleCommit(models.Model):
         ordering = ("-version",)
         get_latest_by = "-version"
 
-    def __str__(self):
+    def __str__(self) -> str:
         value = f"{self.rule} #{self.id}"
         if not self.enabled:
             value = f"{value} (Disabled)"

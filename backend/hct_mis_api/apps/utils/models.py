@@ -166,7 +166,7 @@ class AbstractSession(models.Model):
 
         return self.sentry_id
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"#{self.id} on {self.timestamp}"
 
 
