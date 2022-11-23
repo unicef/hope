@@ -125,6 +125,7 @@ drf-yasg = "^1.21.3"
 django-front-door = "^0.2.0"
 drf-jwt = "^1.19.2"
 django-auditlog = "^2.1.1"
+newrelic = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.10"
