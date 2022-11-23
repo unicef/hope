@@ -1,5 +1,6 @@
 import datetime
 import random
+from argparse import ArgumentParser
 from typing import Any
 
 from django.conf import settings
@@ -31,7 +32,7 @@ class Command(BaseCommand):
 
     help = "Generate fake file for RDI"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--households",
             dest="households_count",

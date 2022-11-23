@@ -1,11 +1,9 @@
-from typing import TYPE_CHECKING, Any
+from argparse import ArgumentParser
+from typing import Any
 
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.core.exchange_rates.utils import fix_exchange_rates
-
-if TYPE_CHECKING:
-    from argparse import ArgumentParser
 
 
 class Command(BaseCommand):

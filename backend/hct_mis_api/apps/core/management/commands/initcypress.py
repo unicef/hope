@@ -1,10 +1,11 @@
+from argparse import ArgumentParser
 from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--skip-drop",
             action="store_true",

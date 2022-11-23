@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Union, Optional, TYPE_CHECKING
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -19,6 +19,12 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.household.models import Household, Individual
+    from hct_mis_api.apps.payment.models import PaymentRecord
+
 
 logger = logging.getLogger(__name__)
 
@@ -347,7 +353,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return self.get_category_display()
 
     @property
-    def issue_type_log(self):
+    def issue_type_log(self) -> Optional[Dict]:
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -372,7 +378,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
@@ -501,7 +507,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self):
+    def household(self) -> Household:
         return self.individual.household
 
 
@@ -537,7 +543,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
 
     @property
-    def household(self):
+    def household(self) -> Household:
         return self.individual.household
 
 
@@ -579,11 +585,11 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self):
+    def household(self) -> Household:
         return self.golden_records_individual.household
 
     @property
-    def individual(self):
+    def individual(self) -> Individual:
         return self.golden_records_individual
 
 
@@ -609,7 +615,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     score_max = models.FloatField(default=0.0)
 
     @property
-    def has_duplicated_document(self):
+    def has_duplicated_document(self) -> bool:
         if not self.is_multiple_duplicates_version:
             documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
             documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
@@ -630,11 +636,11 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             return False
 
     @property
-    def household(self):
+    def household(self) -> Household:
         return self.golden_records_individual.household
 
     @property
-    def individual(self):
+    def individual(self) -> Individual:
         return self.golden_records_individual
 
 
@@ -663,19 +669,19 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
 
     @property
-    def has_multiple_payment_verifications(self):
+    def has_multiple_payment_verifications(self) -> bool:
         return bool(self.payment_verifications.count())
 
     @property
-    def household(self):
+    def household(self) -> Optional[Household]:
         return getattr(self.payment_record, "household", None)
 
     @property
-    def individual(self):
+    def individual(self) -> Optional[Individual]:
         return getattr(self.payment_record, "head_of_household", None)
 
     @property
-    def payment_record(self):
+    def payment_record(self) -> Optional[PaymentRecord]:
         return getattr(self.payment_verification, "payment_record", None)
 
 

@@ -4,7 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -26,6 +26,10 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import DashboardReport
+
+if TYPE_CHECKING:
+    from openpyxl.worksheet.worksheet import Worksheet
+
 
 logger = logging.getLogger(__name__)
 
@@ -511,7 +515,7 @@ class GenerateDashboardReportContentHelpers:
                 return (instance.code,) + shared_cells
 
     @staticmethod
-    def format_payment_verifications_row(instance: Program, *args):
+    def format_payment_verifications_row(instance: Program, *args: Any) -> Tuple:
         return (
             instance.business_area.code,
             instance.business_area.name,
@@ -865,7 +869,7 @@ class GenerateDashboardReportService:
     META_SHEET = "Meta data"
     MAX_COL_WIDTH = 75
 
-    def __init__(self, report: DashboardReport):
+    def __init__(self, report: DashboardReport) -> None:
         self.report = report
         self.report_types = report.report_type
         self.business_area = report.business_area
@@ -978,7 +982,7 @@ class GenerateDashboardReportService:
         msg.send()
 
     @staticmethod
-    def _adjust_column_width_from_col(ws, min_col, max_col, min_row) -> None:
+    def _adjust_column_width_from_col(ws: Worksheet, min_col: int, max_col: int, min_row: int) -> None:
         column_widths = []
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
             for cell in col:
@@ -1006,7 +1010,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def _add_font_style_to_sheet(ws, totals_row=None) -> None:
+    def _add_font_style_to_sheet(ws: Worksheet, totals_row=None) -> None:
         bold_font = Font(bold=True)
         for cell in ws["1:1"]:
             cell.font = bold_font
@@ -1014,7 +1018,7 @@ class GenerateDashboardReportService:
             ws[f"B{totals_row}"].font = bold_font
 
     @staticmethod
-    def _report_type_to_str(report_type) -> str:
+    def _report_type_to_str(report_type: str) -> str:
         types_dict = dict(DashboardReport.REPORT_TYPES)
         label = str(types_dict.get(report_type, ""))
         return label[:31]

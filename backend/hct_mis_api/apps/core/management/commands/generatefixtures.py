@@ -1,5 +1,6 @@
 import random
 import time
+from argparse import ArgumentParser
 from decimal import Decimal
 from functools import partial
 from typing import Callable, Dict, Any, TYPE_CHECKING
@@ -48,10 +49,6 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-
-
-if TYPE_CHECKING:
-    from argparse import ArgumentParser
 
 
 class Command(BaseCommand):

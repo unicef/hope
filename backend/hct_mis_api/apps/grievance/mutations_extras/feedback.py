@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any, Dict
 
 import graphene
 
@@ -37,7 +37,7 @@ def update_positive_feedback_extras(root, info, input, grievance_ticket, extras,
     return grievance_ticket
 
 
-def save_negative_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_negative_feedback_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras, "negative_feedback_ticket_extras")
 
     create_new_negative_feedback_ticket(grievance_ticket, household, individual)
@@ -45,7 +45,7 @@ def save_negative_feedback_extras(root, info, input, grievance_ticket, extras, *
     return [grievance_ticket]
 
 
-def update_negative_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
+def update_negative_feedback_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras, "negative_feedback_ticket_extras")
 
     update_ticket(grievance_ticket.negative_feedback_ticket_details, household, individual)
@@ -63,7 +63,7 @@ def fetch_household_and_individual(extras, ticket_type) -> Tuple[Optional[Househ
     return household, individual
 
 
-def create_new_positive_feedback_ticket(grievance_ticket, household, individual) -> None:
+def create_new_positive_feedback_ticket(grievance_ticket: GrievanceTicket, household: Household, individual: Individual) -> None:
     TicketPositiveFeedbackDetails.objects.create(
         individual=individual,
         household=household,
@@ -71,7 +71,7 @@ def create_new_positive_feedback_ticket(grievance_ticket, household, individual)
     )
 
 
-def update_ticket(ticket_details, household, individual) -> None:
+def update_ticket(ticket_details: Any, household: Household, individual: Individual) -> None:
     if individual:
         ticket_details.individual = individual
     if household:
@@ -79,7 +79,7 @@ def update_ticket(ticket_details, household, individual) -> None:
     ticket_details.save()
 
 
-def create_new_negative_feedback_ticket(grievance_ticket, household, individual) -> None:
+def create_new_negative_feedback_ticket(grievance_ticket: GrievanceTicket, household: Household, individual: Individual) -> None:
     TicketNegativeFeedbackDetails.objects.create(
         individual=individual,
         household=household,

@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+from argparse import ArgumentParser
+from typing import Any, Dict, List, TYPE_CHECKING
 
 from django.core.management import BaseCommand
 from django.db.models import Q
@@ -10,7 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 class Command(BaseCommand):
     help = "Generate roles"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--delete_all",
             action="store_true",

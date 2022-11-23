@@ -1,10 +1,11 @@
 import logging
+from uuid import UUID
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -38,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 class HUBAdminMixin(HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
-    def truncate(self, request):
+    def truncate(self, request: HttpRequest) -> TemplateResponse:
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
             self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
             return
@@ -89,7 +90,7 @@ class HouseholdAdmin(HUBAdminMixin):
             button.visible = False
 
     @button()
-    def see_hope_record(self, request, pk):
+    def see_hope_record(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = self.get_object(request, pk)
         hh = households.Household.objects.get(id=obj.mis_id)
         url = reverse("admin:household_individual_change", args=[hh.pk])
@@ -179,7 +180,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             button.visible = False
 
     @button(permission="account.can_inspect")
-    def inspect(self, request, pk):
+    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         obj = context["original"]
         context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
@@ -198,7 +199,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
-    def reset_sync_date(self, request, pk):
+    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         if request.method == "POST":
             try:
                 with atomic():
