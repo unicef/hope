@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 from zipfile import BadZipfile
 
+from PIL.Image import Image
 from django.core import validators as django_core_validators
 
 import openpyxl
@@ -102,7 +103,7 @@ class ImportDataValidator(BaseValidator):
     }
 
     @classmethod
-    def validate(cls, *args, **kwargs):
+    def validate(cls, *args, **kwargs) -> List:
         try:
             validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -119,7 +120,7 @@ class ImportDataValidator(BaseValidator):
             raise
 
     @classmethod
-    def documents_validator(cls, documents_numbers_dict, is_xlsx=True, *args, **kwargs):
+    def documents_validator(cls, documents_numbers_dict: Dict, is_xlsx=True) -> List:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -188,7 +189,7 @@ class ImportDataValidator(BaseValidator):
             raise
 
     @classmethod
-    def identity_validator(cls, identities_numbers_dict, is_xlsx=True, *args, **kwargs):
+    def identity_validator(cls, identities_numbers_dict: Dict, is_xlsx: bool = True) -> List:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
@@ -293,7 +294,7 @@ class ImportDataInstanceValidator:
             logger.exception(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict, is_xlsx=True, *args, **kwargs) -> List:
+    def documents_validator(self, documents_numbers_dict: Dict, is_xlsx: bool = True) -> List:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -361,7 +362,7 @@ class ImportDataInstanceValidator:
             logger.exception(e)
             raise
 
-    def identity_validator(self, identities_numbers_dict, is_xlsx=True, *args, **kwargs) -> List[Dict[str, Any]]:
+    def identity_validator(self, identities_numbers_dict: Dict, is_xlsx: bool = True) -> List[Dict[str, Any]]:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
@@ -418,7 +419,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def string_validator(self, value, header, *args, **kwargs):
+    def string_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -428,7 +429,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def integer_validator(self, value, header, *args, **kwargs) -> bool:
+    def integer_validator(self, value: int, header: str, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -446,7 +447,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def float_validator(self, value, header, *args, **kwargs):
+    def float_validator(self, value: float, header: str, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -460,7 +461,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def geolocation_validator(self, value, header, *args, **kwargs) -> bool:
+    def geolocation_validator(self, value: str, header: str, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -473,7 +474,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def date_validator(self, value, header, *args, **kwargs) -> bool:
+    def date_validator(self, value: datetime, header: str, *args, **kwargs) -> bool:
         try:
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
@@ -491,7 +492,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def phone_validator(self, value, header, *args, **kwargs) -> bool:
+    def phone_validator(self, value: str, header: str, *args, **kwargs) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -507,7 +508,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def choice_validator(self, value, header, *args, **kwargs) -> bool:
+    def choice_validator(self, value: str, header: str, *args, **kwargs) -> bool:
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -555,14 +556,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def not_empty_validator(self, value, *args, **kwargs) -> bool:
+    def not_empty_validator(self, value: str, *args, **kwargs) -> bool:
         try:
             return not (value is None or value == "")
         except Exception as e:
             logger.exception(e)
             raise
 
-    def bool_validator(self, value, header, *args, **kwargs):
+    def bool_validator(self, value: bool, header: str, *args, **kwargs) -> bool:
         try:
             if isinstance(value, bool):
                 return True
@@ -577,7 +578,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def required_validator(self, value, header, *args, **kwargs) -> bool:
+    def required_validator(self, value: str, header: str, *args, **kwargs) -> bool:
         try:
             is_required = self.all_fields[header]["required"]
             is_not_empty = self.not_empty_validator(value)
@@ -590,7 +591,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def image_validator(self, value, header, cell, *args, **kwargs):
+    def image_validator(self, value: Image, header: str, cell, *args, **kwargs):
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True

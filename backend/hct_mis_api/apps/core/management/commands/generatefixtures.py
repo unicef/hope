@@ -2,7 +2,7 @@ import random
 import time
 from decimal import Decimal
 from functools import partial
-from typing import Callable, Dict
+from typing import Callable, Dict, Any, TYPE_CHECKING
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -50,10 +50,14 @@ from hct_mis_api.apps.targeting.fixtures import (
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 
+if TYPE_CHECKING:
+    from argparse import ArgumentParser
+
+
 class Command(BaseCommand):
     help = "Generate fixtures data for project"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--program",
             dest="programs_amount",
@@ -113,7 +117,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _generate_program_with_dependencies(options, business_area_index) -> None:
+    def _generate_program_with_dependencies(options: Dict, business_area_index: int) -> None:
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
 
@@ -200,7 +204,7 @@ class Command(BaseCommand):
         PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")

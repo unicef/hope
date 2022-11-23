@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Optional, Type, TYPE_CHECKING
 
 from django.conf import settings
 from django.db.models import Q
@@ -9,7 +9,12 @@ from django_elasticsearch_dsl.registries import registry
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
-from .models import ImportedIndividual
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
+
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.geo.models import Area
+
 
 index_settings = {
     "number_of_shards": 1,
@@ -98,22 +103,22 @@ class ImportedIndividualDocument(Document):
         }
     )
 
-    def prepare_admin1(self, instance):
+    def prepare_admin1(self, instance: ImportedIndividual) -> Optional[Area]:
         household = instance.household
         if household:
             return instance.household.admin1
         return
 
-    def prepare_admin2(self, instance):
+    def prepare_admin2(self, instance: ImportedIndividual) -> Optional[Area]:
         household = instance.household
         if household:
             return instance.household.admin2
         return
 
-    def prepare_hash_key(self, instance):
+    def prepare_hash_key(self, instance: ImportedIndividual) -> str:
         return instance.get_hash_key
 
-    def prepare_business_area(self, instance):
+    def prepare_business_area(self, instance: ImportedIndividual) -> str:
         return instance.registration_data_import.business_area_slug
 
     class Django:

@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict, Any
 
 import factory
 from factory import enums, fuzzy
@@ -120,7 +120,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
     @classmethod
-    def build(cls, **kwargs) -> Household:
+    def build(cls, **kwargs: Any) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
         if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
@@ -220,7 +220,7 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
 
 
-def create_household(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
+def create_household(household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -262,7 +262,7 @@ def create_household(household_args=None, individual_args=None) -> Tuple[Househo
     return household, individuals
 
 
-def create_household_for_fixtures(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
+def create_household_for_fixtures(household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -304,7 +304,7 @@ def create_household_for_fixtures(household_args=None, individual_args=None) -> 
 
 
 def create_household_and_individuals(
-    household_data=None, individuals_data=None, imported=False
+    household_data: Optional[Dict] = None, individuals_data: Optional[Dict] = None, imported: bool = False
 ) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
@@ -323,7 +323,7 @@ def create_household_and_individuals(
     return household, individuals
 
 
-def create_individual_document(individual, document_type=None) -> Document:
+def create_individual_document(individual: Individual, document_type: Optional[str] = None) -> Document:
     additional_fields = {}
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)

@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Union
 
 from django.conf import settings
 from django.db.models import Q
@@ -10,6 +10,8 @@ from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_a
 from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
+
+RelatedInstanceType = Union[Document, Household, IndividualIdentity, IndividualRoleInHousehold]
 
 index_settings = {
     "number_of_shards": 1,
@@ -99,28 +101,28 @@ class IndividualDocument(Document):
         }
     )
 
-    def prepare_phone_no_text(self, instance):
+    def prepare_phone_no_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_phone_no_alternative_text(self, instance):
+    def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_admin1(self, instance):
+    def prepare_admin1(self, instance: Individual) -> str:
         household = instance.household
         if household:
             if household.admin1:
                 return household.admin1.name
 
-    def prepare_admin2(self, instance):
+    def prepare_admin2(self, instance: Individual) -> str:
         household = instance.household
         if household:
             if household.admin2:
                 return household.admin2.name
 
-    def prepare_hash_key(self, instance):
+    def prepare_hash_key(self, instance: Individual) -> str:
         return instance.get_hash_key
 
-    def prepare_business_area(self, instance):
+    def prepare_business_area(self, instance: Individual) -> str:
         return instance.business_area.slug
 
     class Django:
@@ -135,7 +137,7 @@ class IndividualDocument(Document):
 
         related_models = [Household, Document, IndividualIdentity, IndividualRoleInHousehold]
 
-    def get_instances_from_related(self, related_instance):
+    def get_instances_from_related(self, related_instance: RelatedInstanceType):
         if isinstance(related_instance, (Document, IndividualIdentity, IndividualRoleInHousehold)):
             return related_instance.individual
         if isinstance(related_instance, Household):
@@ -196,17 +198,17 @@ class HouseholdDocument(Document):
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
 
-    def prepare_admin1(self, household):
+    def prepare_admin1(self, household: Household) -> str:
         if household:
             if household.admin1:
                 return household.admin1.name
 
-    def prepare_admin2(self, household):
+    def prepare_admin2(self, household: Household) -> str:
         if household:
             if household.admin2:
                 return household.admin2.name
 
-    def prepare_business_area(self, instance):
+    def prepare_business_area(self, instance: Household) -> str:
         return instance.business_area.slug
 
     class Django:
@@ -216,7 +218,7 @@ class HouseholdDocument(Document):
 
         related_models = [Individual]
 
-    def get_instances_from_related(self, related_instance):
+    def get_instances_from_related(self, related_instance: Individual):
         if isinstance(related_instance, Individual):
             return related_instance.household
 

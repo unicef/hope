@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from django.contrib.gis.db.models import GeometryField
 from django.forms import MultipleChoiceField
@@ -13,7 +14,7 @@ from hct_mis_api.apps.core.scalars import BigInt
 
 class GeoJSON(graphene.Scalar):
     @classmethod
-    def serialize(cls, value):
+    def serialize(cls, value: Any):
         return json.loads(value.geojson)
 
 

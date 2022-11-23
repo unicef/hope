@@ -4,6 +4,7 @@ import os
 import tempfile
 from datetime import datetime
 from functools import wraps
+from uuid import UUID
 
 from django.db import transaction
 from django.utils import timezone
@@ -80,7 +81,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
 @app.task
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -96,7 +97,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id, program_id, tp_name):
+def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
     program = Program.objects.get(id=program_id)
 
