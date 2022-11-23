@@ -58,7 +58,6 @@ export const EditIndividualDataChangeFieldRow = ({
               value: item.name,
               name: item.labelEn,
             }))}
-          data-cy='select-field-chooser'
         />
       </Grid>
 
