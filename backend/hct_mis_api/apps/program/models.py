@@ -164,7 +164,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         unique_together = ("name", "business_area")
         verbose_name = "Programme"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -250,7 +250,7 @@ class CashPlan(TimeStampedUUIDModel):
         null=True,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property

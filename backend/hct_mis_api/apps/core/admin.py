@@ -2,6 +2,7 @@ import csv
 import logging
 from io import StringIO
 from typing import Any, Dict, List
+from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
@@ -16,7 +17,7 @@ from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.db.models import Aggregate, CharField
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -153,7 +154,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
-    def split_business_area(self, request, pk):
+    def split_business_area(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         opts = self.object._meta
         if request.POST:
@@ -245,7 +246,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
     @view(label="Send DOAP", group="doap")
-    def send_doap(self, request, pk):
+    def send_doap(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         try:
@@ -284,7 +285,7 @@ UNICEF HOPE""",
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
     @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
-    def export_doap(self, request, pk):
+    def export_doap(self, request: HttpRequest, pk: UUID) -> HttpResponse:
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
         environment = Site.objects.first().name
@@ -309,7 +310,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/admin/ca_doap.html", context)
 
     @button(permission="account.view_user")
-    def members(self, request, pk):
+    def members(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
@@ -325,7 +326,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/admin/ba_members.html", context)
 
     @button(label="Test RapidPro Connection")
-    def _test_rapidpro_connection(self, request, pk):
+    def _test_rapidpro_connection(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
