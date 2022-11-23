@@ -107,7 +107,6 @@ When('I fill in the form individual data change and save', () => {
   cy.contains('Widowed').click({ force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 When('I fill in the form household data change and save', () => {
@@ -137,7 +136,7 @@ When('I fill in the form household data change and save', () => {
   cy.get('[data-cy="select-householdDataUpdateFields[0].fieldValue"]').click({
     force: true,
   });
-  cy.contains('Belarus').click({ force: true });
+  cy.get('[data-value="ALB"]').click({ force: true });
   cy.get('[data-cy="button-add-new-field"]').click({ force: true });
   cy.get('[data-cy="select-householdDataUpdateFields[1].fieldName"]').click({
     force: true,
@@ -150,7 +149,6 @@ When('I fill in the form household data change and save', () => {
     .type('Some Address', { force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 Then('I should see the Grievance details page', () => {
@@ -160,6 +158,7 @@ Then('I should see the Grievance details page', () => {
 Then(
   'I should see the Requested Individual Data Change component with correct values',
   () => {
+    cy.contains('Requested Data Change');
     cy.contains('Kovalsky');
     cy.contains('Widowed');
   },
@@ -168,16 +167,14 @@ Then(
 Then(
   'I should see the Requested Household Data Change component with correct values',
   () => {
-    cy.contains('Belarus');
+    cy.contains('Requested Data Change');
+    cy.contains('Albania');
     cy.contains('Some Address');
   },
 );
 
 When('I change states and approve data', () => {
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.reload();
   cy.get('[data-cy="button-set-to-in-progress"]').click({ force: true });
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="button-send-for-approval"]').click({ force: true });
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[type="checkbox"]').eq(0).check({ force: true });
@@ -202,6 +199,5 @@ When('I edit the Grievance and save', () => {
 });
 
 Then('I should see the updated Grievance', () => {
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.contains('EDITED');
 });
