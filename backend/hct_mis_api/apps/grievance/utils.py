@@ -24,7 +24,7 @@ def select_individual(
     selected_individual: Individual,
     ticket_duplicates: List[Individual],
     ticket_individuals: List[Individual],
-):
+) -> None:
     if selected_individual in ticket_duplicates and selected_individual not in ticket_individuals:
         ticket_details.selected_individuals.add(selected_individual)
 

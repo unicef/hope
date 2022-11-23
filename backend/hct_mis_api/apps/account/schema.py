@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Set
+from typing import Set, Any, TYPE_CHECKING, List, Dict
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -34,7 +34,13 @@ from hct_mis_api.apps.core.utils import to_choice_object
 logger = logging.getLogger(__name__)
 
 
-def permissions_resolver(user_roles) -> Set:
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+    from graphene import Node
+    from hct_mis_api.apps.account.models import UserRole, User
+
+
+def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
     all_user_roles = user_roles
     permissions_set = set()
     for user_role in all_user_roles:
@@ -58,7 +64,7 @@ class RoleNode(DjangoObjectType):
 class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
-    def resolve_permissions(self, info):
+    def resolve_permissions(self, info: Any):
         user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
         return permissions_resolver(user_roles)
 
@@ -72,7 +78,7 @@ class UserBusinessAreaNode(DjangoObjectType):
 class UserObjectType(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
-    def resolve_business_areas(self, info):
+    def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
         return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
     class Meta:
@@ -88,7 +94,7 @@ class PartnerType(DjangoObjectType):
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
-    def resolve_business_areas(self, info):
+    def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
         return BusinessArea.objects.filter(user_roles__user=self).distinct()
 
     class Meta:
@@ -100,7 +106,7 @@ class UserNode(DjangoObjectType):
 
 
 class LazyEncoder(DjangoJSONEncoder):
-    def default(self, obj):
+    def default(self, obj: Any):
         if isinstance(obj, Promise):
             return force_str(obj)
         return super().default(obj)
@@ -115,16 +121,16 @@ class JSONLazyString(graphene.Scalar):
     """
 
     @staticmethod
-    def serialize(dt):
+    def serialize(dt: Any):
         return json.dumps(dt, cls=LazyEncoder)
 
     @staticmethod
-    def parse_literal(node):
+    def parse_literal(node: Node):
         if isinstance(node, graphene.String):
             return json.loads(node.value)
 
     @staticmethod
-    def parse_value(value):
+    def parse_value(value: Any):
         return json.loads(value)
 
 
@@ -143,24 +149,24 @@ class Query(graphene.ObjectType):
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
-    def resolve_all_users(self, info, **kwargs):
+    def resolve_all_users(self, info: Any, **kwargs) -> "QuerySet[User]":
         return User.objects.all().distinct()
 
-    def resolve_me(self, info, **kwargs):
+    def resolve_me(self, info: Any, **kwargs) -> "User":
         if not info.context.user.is_authenticated:
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         return info.context.user
 
-    def resolve_user_roles_choices(self, info, **kwargs):
+    def resolve_user_roles_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Role.get_roles_as_choices())
 
-    def resolve_user_status_choices(self, info, **kwargs):
+    def resolve_user_status_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
-    def resolve_user_partner_choices(self, info, **kwargs):
+    def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Partner.get_partners_as_choices())
 
-    def resolve_has_available_users_to_export(self, info, business_area_slug, **kwargs):
+    def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> "QuerySet[User]":
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
