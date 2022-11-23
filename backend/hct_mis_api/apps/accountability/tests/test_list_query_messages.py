@@ -57,6 +57,18 @@ class TestListQueryMessage(APITestCase):
     }
 """
 
+    QUERY_RECIPIENT = """
+ query AccountabilityCommunicationMessageRecipient ($id: ID!) {
+  accountabilityCommunicationMessageRecipient(id: $id) {
+    id
+    size
+    headOfHousehold {
+      fullName
+    }
+  }
+}
+    """
+
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -65,12 +77,13 @@ class TestListQueryMessage(APITestCase):
 
         cls.tp = TargetPopulationFactory(business_area=cls.business_area)
         households = [create_household()[0] for _ in range(14)]
+        cls.household = households[0]
         HouseholdSelection.objects.bulk_create(
             [HouseholdSelection(household=household, target_population=cls.tp) for household in households]
         )
 
         for i in range(1, 11):
-            CommunicationMessageFactory(
+            cls.communication_message = CommunicationMessageFactory(
                 title=f"You got credit of USD {i}",
                 body=f"Greetings, we have sent you USD {i} in your registered account on 2022-09-19 20:00:00 UTC",
                 business_area=cls.business_area,
@@ -152,7 +165,7 @@ class TestListQueryMessage(APITestCase):
                 {},
             ),
             (
-                "with_view_details_permission",
+                "with_as_creator_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
                 {},
             ),
@@ -163,7 +176,7 @@ class TestListQueryMessage(APITestCase):
             ),
         )
     )
-    def test_list_communication_messages_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
+    def test_list_communication_message_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
         self.create_user_role_with_permissions(
             self.user,
             permissions,
@@ -175,6 +188,41 @@ class TestListQueryMessage(APITestCase):
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                **variables,
+            },
+        )
+
+    @parameterized.expand(
+        (
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                {},
+            ),
+            (
+                "with_as_creator_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
+                {},
+            ),
+            (
+                "without_permission",
+                [],
+                {},
+            ),
+        )
+    )
+    def test_list_communication_message_recipient(self, _: str, permissions: Sequence[str], variables: dict) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_RECIPIENT,
+            context={"user": self.user},
+            variables={
+                "id": self.id_to_base64(self.communication_message.id, "CommunicationMessage"),
                 **variables,
             },
         )

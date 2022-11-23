@@ -7,6 +7,48 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestListQueryMessage::test_list_communication_message_recipient_0_with_view_details_permission 1'] = {
+    'data': {
+        'accountabilityCommunicationMessageRecipient': None
+    }
+}
+
+snapshots['TestListQueryMessage::test_list_communication_message_recipient_1_with_as_creator_permission 1'] = {
+    'data': {
+        'accountabilityCommunicationMessageRecipient': None
+    }
+}
+
+snapshots['TestListQueryMessage::test_list_communication_message_recipient_2_without_permission 1'] = {
+    'data': {
+        'accountabilityCommunicationMessageRecipient': None
+    }
+}
+
+snapshots['TestListQueryMessage::test_list_communication_message_recipients_0_with_view_details_permission 1'] = {
+    'data': {
+        'allAccountabilityCommunicationMessageRecipients': {
+            'totalCount': 14
+        }
+    }
+}
+
+snapshots['TestListQueryMessage::test_list_communication_message_recipients_1_with_as_creator_permission 1'] = {
+    'data': {
+        'allAccountabilityCommunicationMessageRecipients': {
+            'totalCount': 14
+        }
+    }
+}
+
+snapshots['TestListQueryMessage::test_list_communication_message_recipients_2_without_permission 1'] = {
+    'data': {
+        'allAccountabilityCommunicationMessageRecipients': {
+            'totalCount': 14
+        }
+    }
+}
+
 snapshots['TestListQueryMessage::test_list_communication_messages_0_with_list_permission_full_sampling 1'] = {
     'data': {
         'allAccountabilityCommunicationMessages': {
@@ -854,30 +896,6 @@ snapshots['TestListQueryMessage::test_list_communication_messages_8_without_perm
                     }
                 }
             ]
-        }
-    }
-}
-
-snapshots['TestListQueryMessage::test_list_communication_messages_recipients_0_with_view_details_permission 1'] = {
-    'data': {
-        'allAccountabilityCommunicationMessageRecipients': {
-            'totalCount': 14
-        }
-    }
-}
-
-snapshots['TestListQueryMessage::test_list_communication_messages_recipients_1_with_view_details_permission 1'] = {
-    'data': {
-        'allAccountabilityCommunicationMessageRecipients': {
-            'totalCount': 14
-        }
-    }
-}
-
-snapshots['TestListQueryMessage::test_list_communication_messages_recipients_2_without_permission 1'] = {
-    'data': {
-        'allAccountabilityCommunicationMessageRecipients': {
-            'totalCount': 14
         }
     }
 }
