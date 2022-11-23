@@ -971,14 +971,14 @@ class SimpleApproveMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, approve_status, reason_hh_id=None, **kwargs):
+    def mutate(cls, root: Any, info: Any, grievance_ticket_id: Optional[str], approve_status: int, reason_hh_id: Optional[str] = None, **kwargs: Any) -> "SimpleApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
-        if grievance_ticket.category in [
+        if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-        ]:
+        ):
             cls.has_creator_or_owner_permission(
                 info,
                 grievance_ticket.business_area,

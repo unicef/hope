@@ -1,3 +1,5 @@
+from typing import Any, Dict, TYPE_CHECKING, List
+
 import graphene
 
 from hct_mis_api.apps.core.utils import decode_and_get_object
@@ -6,6 +8,9 @@ from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+
 
 class SensitiveGrievanceTicketExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=False)
@@ -13,7 +18,7 @@ class SensitiveGrievanceTicketExtras(graphene.InputObjectType):
     payment_record = graphene.List(graphene.ID)
 
 
-def save_sensitive_grievance_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_sensitive_grievance_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     sensitive_grievance_extras = extras.get("category", {})
     sensitive_grievance_complaint_category_extras = sensitive_grievance_extras.get(
         "sensitive_grievance_ticket_extras", {}

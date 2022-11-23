@@ -22,14 +22,14 @@ class NegativeFeedbackTicketExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=False)
 
 
-def save_positive_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_positive_feedback_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras, "positive_feedback_ticket_extras")
     create_new_positive_feedback_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
 
-def update_positive_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
+def update_positive_feedback_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras, "positive_feedback_ticket_extras")
 
     update_ticket(grievance_ticket.positive_feedback_ticket_details, household, individual)
@@ -53,7 +53,7 @@ def update_negative_feedback_extras(root: Any, info: Any, input: Dict, grievance
     return grievance_ticket
 
 
-def fetch_household_and_individual(extras, ticket_type) -> Tuple[Optional[Household], Optional[Individual]]:
+def fetch_household_and_individual(extras: Dict, ticket_type: str) -> Tuple[Optional[Household], Optional[Individual]]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get(ticket_type, {})
     individual_encoded_id = feedback_ticket_extras.get("individual")

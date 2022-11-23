@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Union, Optional
 
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, QuerySet, Q
 
 import graphene
 from graphene import relay
@@ -31,7 +31,7 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 
 def targeting_criteria_object_type_to_query(
     targeting_criteria_object_type: TargetingCriteriaObjectType, program: Union[str, Program], excluded_ids: str = ""
-):
+) -> Q:
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     given_program: Program = decode_and_get_object_required(program, Program) if isinstance(program, str) else program
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
@@ -90,14 +90,14 @@ class Query(graphene.ObjectType):
     )
     target_population_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_target_population_status_choices(self, info: Any, **kwargs) -> List[Dict[str, Any]]:
+    def resolve_target_population_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(target_models.TargetPopulation.STATUS_CHOICES)
 
     def resolve_target_population_households(
         parent,
         info: Any,
         target_population: target_models.TargetPopulation,
-        **kwargs
+        **kwargs: Any
     ) -> QuerySet:
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
@@ -109,7 +109,7 @@ class Query(graphene.ObjectType):
         targeting_criteria: target_models.TargetPopulation,
         program: Program,
         excluded_ids: str,
-        **kwargs
+        **kwargs: Any
     ) -> QuerySet:
         household_queryset = Household.objects
         return prefetch_selections(
