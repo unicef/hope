@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TYPE_CHECKING
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
@@ -39,10 +39,15 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program
 
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import BusinessArea
+
+
 QueryType = List[Dict[str, Dict[str, Dict[str, str]]]]
 
 
-def _prepare_kobo_asset_id_value(code) -> str:
+def _prepare_kobo_asset_id_value(code: str) -> str:
     """
     preparing value for filter by kobo_asset_id
     value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
@@ -119,7 +124,7 @@ class HouseholdFilter(FilterSet):
         )
     )
 
-    def _search_es(self, qs, value) -> QuerySet:
+    def _search_es(self, qs: QuerySet, value: Any) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
@@ -138,12 +143,12 @@ class HouseholdFilter(FilterSet):
                 inner_query |= Q(kobo_asset_id__endswith=_value)
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
-    def _search_db(self, qs, value) -> QuerySet:
+    def _search_db(self, qs: QuerySet, value: str) -> QuerySet:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -211,7 +216,7 @@ class IndividualFilter(FilterSet):
         )
     )
 
-    def flags_filter(self, qs, name, value):
+    def flags_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()
         if NEEDS_ADJUDICATION in value:
             q_obj |= Q(deduplication_golden_record_status=NEEDS_ADJUDICATION)
@@ -224,7 +229,7 @@ class IndividualFilter(FilterSet):
 
         return qs.filter(q_obj)
 
-    def _search_es(self, qs, value) -> QuerySet:
+    def _search_es(self, qs: QuerySet, value: str) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
@@ -233,12 +238,12 @@ class IndividualFilter(FilterSet):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
-    def search_filter(self, qs, name, value) -> QuerySet:
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
-    def _search_db(self, qs, value) -> QuerySet:
+    def _search_db(self, qs: QuerySet, value: str) -> QuerySet:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -259,7 +264,7 @@ class IndividualFilter(FilterSet):
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
-    def status_filter(self, qs, name, value):
+    def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()
         if STATUS_DUPLICATE in value:
             q_obj |= Q(duplicate=True)
@@ -274,7 +279,7 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
 
-def get_elasticsearch_query_for_individuals(value, business_area) -> Dict:
+def get_elasticsearch_query_for_individuals(value: str, business_area: BusinessArea) -> Dict:
     match_fields = [
         "phone_no_text",
         "phone_no_alternative",

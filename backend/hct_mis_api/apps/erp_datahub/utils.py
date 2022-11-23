@@ -1,11 +1,12 @@
 from decimal import Decimal
+from typing import Optional
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
 
 
-def get_exchange_rate_for_cash_plan(cash_plan: CashPlan, exchange_rates_client=None):
+def get_exchange_rate_for_cash_plan(cash_plan: CashPlan, exchange_rates_client=None) -> Optional[float]:
     if exchange_rates_client is None:
         exchange_rates_client = ExchangeRates()
 

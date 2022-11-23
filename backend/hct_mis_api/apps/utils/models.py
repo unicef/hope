@@ -1,6 +1,7 @@
 # Create your models here.
 import logging
 import sys
+from typing import Any, Tuple, TYPE_CHECKING, Optional
 
 from django.db import models
 from django.utils import timezone
@@ -11,6 +12,11 @@ from model_utils.models import UUIDModel
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +46,7 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -54,7 +60,7 @@ class SoftDeletableModelWithDate(models.Model):
 
 
 class SoftDeletionTreeManager(TreeManager):
-    def get_queryset(self, *args, **kwargs):
+    def get_queryset(self, *args: Any, **kwargs: Any) -> QuerySet:
         """
         Return queryset limited to not removed entries.
         """
@@ -187,7 +193,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -212,7 +218,7 @@ class UnicefIdentifiedModel(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
         if self._state.adding:
             # due to existence of "CREATE TRIGGER" in migrations

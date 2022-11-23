@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 from django.db.models import Prefetch, QuerySet
 
@@ -30,7 +30,7 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 
 
 def targeting_criteria_object_type_to_query(
-    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
+    targeting_criteria_object_type: TargetingCriteriaObjectType, program: Union[str, Program], excluded_ids: str = ""
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     given_program: Program = decode_and_get_object_required(program, Program) if isinstance(program, str) else program
@@ -56,7 +56,7 @@ def targeting_criteria_object_type_to_query(
     return targeting_criteria_querying.get_query()
 
 
-def prefetch_selections(qs, target_population=None) -> QuerySet:
+def prefetch_selections(qs: QuerySet, target_population: Optional[target_models.TargetPopulation] = None) -> QuerySet:
     return qs.prefetch_related(
         Prefetch(
             "selections",
@@ -90,16 +90,26 @@ class Query(graphene.ObjectType):
     )
     target_population_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_target_population_status_choices(self, info, **kwargs) -> List[Dict[str, Any]]:
+    def resolve_target_population_status_choices(self, info: Any, **kwargs) -> List[Dict[str, Any]]:
         return to_choice_object(target_models.TargetPopulation.STATUS_CHOICES)
 
-    def resolve_target_population_households(parent, info, target_population, **kwargs) -> QuerySet:
+    def resolve_target_population_households(
+        parent,
+        info: Any,
+        target_population: target_models.TargetPopulation,
+        **kwargs
+    ) -> QuerySet:
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
         return prefetch_selections(target_population_model.household_list, target_population_model)
 
     def resolve_golden_record_by_targeting_criteria(
-        parent, info, targeting_criteria, program, excluded_ids, **kwargs
+        parent,
+        info: Any,
+        targeting_criteria: target_models.TargetPopulation,
+        program: Program,
+        excluded_ids: str,
+        **kwargs
     ) -> QuerySet:
         household_queryset = Household.objects
         return prefetch_selections(
