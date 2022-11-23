@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -eq 0 ]; then
-    exec gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
+    exec python manage.py runserver 0.0.0.0:8000
 else
     case "$1" in
         "dev")
