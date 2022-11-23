@@ -1,5 +1,6 @@
 import logging
 import xml.etree.ElementTree as ET
+from argparse import ArgumentParser
 from typing import Any
 
 from django.core.management import BaseCommand
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "load_business_areas"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--file",
             dest="file",

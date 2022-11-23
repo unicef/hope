@@ -259,7 +259,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs: Any):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateGrievanceTicketMutation":
         arg: Callable = lambda name, default=None: input.get(name, default)
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
 
@@ -292,7 +292,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         return cls(grievance_tickets=grievances)
 
     @classmethod
-    def save_basic_data(cls, root, info, input, **kwargs) -> Tuple[GrievanceTicket, Dict]:
+    def save_basic_data(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> Tuple[GrievanceTicket, Dict]:
         arg: Callable = lambda name, default=None: input.get(name, default)
         user = info.context.user
         assigned_to_id = decode_id_string(arg("assigned_to"))
@@ -396,7 +396,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "UpdateGrievanceTicketMutation":
         arg: Callable = lambda name, default=None: input.get(name, default)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
@@ -482,7 +482,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
     @classmethod
-    def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs) -> Tuple[GrievanceTicket, Dict]:
+    def update_basic_data(cls, root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, **kwargs: Any) -> Tuple[GrievanceTicket, Dict]:
         old_status = grievance_ticket.status
         old_assigned_to = grievance_ticket.assigned_to
         arg: Callable = lambda name, default=None: input.get(name, default)
@@ -660,7 +660,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def get_close_function(cls, category, issue_type) -> Optional[Callable]:
+    def get_close_function(cls, category: int, issue_type: int) -> Optional[Callable]:
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
         if isinstance(function_or_nested_issue_types, dict) and issue_type:
             return function_or_nested_issue_types.get(issue_type)
@@ -671,7 +671,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, status, **kwargs):
+    def mutate(cls, root: Any, info: Any, grievance_ticket_id: Optional[str], status: int, **kwargs: Any) -> "GrievanceStatusChangeMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
@@ -770,7 +770,7 @@ class CreateTicketNoteMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, note_input, **kwargs):
+    def mutate(cls, root: Any, info: Any, note_input: Dict, **kwargs: Any) -> "CreateTicketNoteMutation":
         grievance_ticket_id = decode_id_string(note_input["ticket"])
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -840,7 +840,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_remove,
         flex_fields_approve_data,
         **kwargs,
-    ):
+    ) -> "IndividualDataChangeApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -914,13 +914,13 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
     @transaction.atomic
     def mutate(
         cls,
-        root,
-        info,
-        grievance_ticket_id,
-        household_approve_data,
-        flex_fields_approve_data,
-        **kwargs,
-    ):
+        root: Any,
+        info: Any,
+        grievance_ticket_id: Optional[str],
+        household_approve_data: Dict,
+        flex_fields_approve_data: Dict,
+        **kwargs: Any,
+    ) -> "HouseholdDataChangeApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -1059,14 +1059,14 @@ class ReassignRoleMutation(graphene.Mutation):
     @transaction.atomic
     def mutate(
         cls,
-        root,
-        info,
-        household_id,
-        individual_id,
-        grievance_ticket_id,
-        role,
-        **kwargs,
-    ):
+        root: Any,
+        info: Any,
+        household_id: Optional[str],
+        individual_id: Optional[str],
+        grievance_ticket_id: Optional[str],
+        role: Any,
+        **kwargs: Any,
+    ) -> "ReassignRoleMutation":
         cls.verify_role_choices(role)
         decoded_household_id = decode_id_string(household_id)
         decoded_individual_id = decode_id_string(individual_id)
@@ -1128,7 +1128,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, grievance_ticket_id: str, **kwargs):
+    def mutate(cls, root: Any, info: Any, grievance_ticket_id: Optional[str], **kwargs: Any) -> "NeedsAdjudicationApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -1184,7 +1184,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, grievance_ticket_id: Optional[str], **kwargs: Any):
+    def mutate(cls, root: Any, info: Any, grievance_ticket_id: Optional[str], **kwargs: Any) -> "PaymentDetailsApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)

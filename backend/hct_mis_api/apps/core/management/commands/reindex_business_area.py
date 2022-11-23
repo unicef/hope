@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management.base import BaseCommand
 
 from elasticsearch import Elasticsearch
@@ -25,7 +27,7 @@ class Command(BaseCommand):
         parser.add_argument("index", type=str)
         parser.add_argument("business_area", type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         from django.conf import settings
 
         es = Elasticsearch(settings.ELASTICSEARCH_HOST)

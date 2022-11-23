@@ -1,14 +1,12 @@
+from argparse import ArgumentParser
 from time import time
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_households,
 )
-
-if TYPE_CHECKING:
-    from argparse import ArgumentParser
 
 
 class Command(BaseCommand):

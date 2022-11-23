@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.utils import timezone
 
 import graphene
@@ -5,11 +7,15 @@ import graphene
 from hct_mis_api.apps.payment.models import PaymentVerification
 
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+
+
 class PaymentVerificationTicketExtras(graphene.InputObjectType):
     pass
 
 
-def save_payment_verification_extras(grievance_ticket, info):
+def save_payment_verification_extras(grievance_ticket: GrievanceTicket, info: Any) -> None:
     payment_verification_details = grievance_ticket.payment_verification_ticket_details
     payment_verification = payment_verification_details.payment_verification
     if not (

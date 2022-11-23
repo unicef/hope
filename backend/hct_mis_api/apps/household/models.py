@@ -934,7 +934,7 @@ class Individual(
             return False
         return self.household.head_of_household.id == self.id
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, Individual)
         super().save(*args, **kwargs)
 
@@ -983,7 +983,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:
