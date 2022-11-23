@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.core.management import BaseCommand
 
@@ -21,7 +22,7 @@ class Command(BaseCommand):
             help="file",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         file = options["file"]
         importer = FlexibleAttributeImporter()
         importer.import_xls(file)

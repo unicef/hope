@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand, call_command
 
 
@@ -10,7 +12,7 @@ class Command(BaseCommand):
             help="Skip migrating - just reload the data",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if options["skip_drop"] is False:
             call_command("dropalldb")
             call_command("migratealldb")

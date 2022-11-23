@@ -31,22 +31,22 @@ def escapescript(parser, token) -> EscapeScriptNode:
 
 
 @register.filter
-def islist(value) -> bool:
+def islist(value: Any) -> bool:
     return isinstance(value, (list, tuple))
 
 
 @register.filter
-def isstring(value) -> bool:
-    return isinstance(value, (str,))
+def isstring(value: Any) -> bool:
+    return isinstance(value, (str, ))
 
 
 @register.filter
-def isdict(value) -> bool:
+def isdict(value: Any) -> bool:
     return isinstance(value, (dict,))
 
 
 @register.inclusion_tag("dump/dump.html")
-def dump(value, key=None, original=None) -> Dict:
+def dump(value: Any, key=None, original=None) -> Dict:
     return {"value": value, "key": key, "original": original}
 
 
@@ -84,7 +84,7 @@ def is_image(element) -> bool:
 
 
 @register.filter()
-def is_base64(element) -> bool:
+def is_base64(element: Any) -> bool:
     expression = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
     try:
         if isinstance(element, str) and element.strip().endswith("=="):
@@ -95,6 +95,6 @@ def is_base64(element) -> bool:
 
 
 @register.filter
-def concat(a, b) -> str:
+def concat(a: Any, b: Any) -> str:
     """concatenate arg1 & arg2"""
     return "".join(map(str, (a, b)))

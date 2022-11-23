@@ -27,7 +27,6 @@ from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-    from hct_mis_api.apps.geo.models import Area
 
 
 TReportNode = TypeVar("TReportNode", bound="ReportNode")
@@ -50,10 +49,10 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
     file_url = graphene.String()
     admin_area = DjangoFilterConnectionField(AreaNode)
 
-    def resolve_file_url(self: TReportNode, info: Any, **kwargs: Any) -> str:
+    def resolve_file_url(self, info: Any, **kwargs: Any) -> str:
         return self.file.url if self.file else ""
 
-    def resolve_admin_area(self: TReportNode, info: Any, **kwargs: Any) -> "QuerySet[Area]":
+    def resolve_admin_area(self, info: Any, **kwargs: Any) -> QuerySet:
         return self.admin_area.all()
 
 
@@ -74,13 +73,13 @@ class Query(graphene.ObjectType):
     dashboard_report_types_choices = graphene.List(ChoiceObject, business_area_slug=graphene.String(required=True))
     dashboard_years_choices = graphene.List(graphene.String, business_area_slug=graphene.String(required=True))
 
-    def resolve_report_types_choices(self: TQuery, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_report_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Report.REPORT_TYPES)
 
-    def resolve_report_status_choices(self: TQuery, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_report_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Report.STATUSES)
 
-    def resolve_dashboard_report_types_choices(self: TQuery, info: Any, business_area_slug: str, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_dashboard_report_types_choices(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[Dict[str, Any]]:
         if business_area_slug == "global":
             return to_choice_object(
                 [
@@ -98,7 +97,7 @@ class Query(graphene.ObjectType):
                 ]
             )
 
-    def resolve_dashboard_years_choices(self: TQuery, info: Any, business_area_slug: str, **kwargs: Any) -> List[int]:
+    def resolve_dashboard_years_choices(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[int]:
         current_year = datetime.today().year
         years_list = [*range(current_year, current_year - 5, -1)]
         models = [

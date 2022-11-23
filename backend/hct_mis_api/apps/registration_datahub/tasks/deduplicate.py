@@ -54,7 +54,7 @@ class Thresholds:
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE: int = 0
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         for f in fields(self):
             setattr(self, f.name, getattr(config, f.name))
 

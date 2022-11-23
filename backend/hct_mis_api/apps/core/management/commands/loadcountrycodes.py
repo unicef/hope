@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from django.core.management import BaseCommand
 
@@ -23,7 +24,7 @@ class Command(BaseCommand):
             help="file",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         with Path(options["file"]).open() as f:
             for line in f.readlines():
                 iso_code, ca_code = line.split()
