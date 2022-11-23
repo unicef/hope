@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
@@ -18,7 +19,7 @@ class Command(BaseCommand):
             help="Skip migrating - just reload the data",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         db_connection = connections["default"]
         connected = False
 

@@ -73,8 +73,7 @@ class Command(BaseCommand):
         return issues
 
     @no_translations
-    def handle(self, *args, **options):
-
+    def handle(self, *args: Any, **options: Any) -> None:
         self.verbosity = options["verbosity"]
         self.interactive = options["interactive"]
         # Import the 'management' module within each installed app, to register

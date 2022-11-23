@@ -13,15 +13,15 @@ from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_att
 logger = logging.getLogger(__name__)
 
 
-def attr_resolver(attname, default_value, obj) -> Any:
+def attr_resolver(attname: str, default_value: Any, obj: Any) -> Any:
     return getattr(obj, attname, default_value)
 
 
-def dict_resolver(attname, default_value, obj) -> Optional[Any]:
+def dict_resolver(attname: str, default_value: Any, obj: Any) -> Optional[Any]:
     return obj.get(attname, default_value)
 
 
-def _custom_dict_or_attr_resolver(attname, default_value, obj) -> Optional[Any]:
+def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) -> Optional[Any]:
     resolver: Optional[Callable] = attr_resolver
     if isinstance(obj, dict):
         resolver = dict_resolver
@@ -30,7 +30,7 @@ def _custom_dict_or_attr_resolver(attname, default_value, obj) -> Optional[Any]:
     return resolver(attname, default_value, obj)
 
 
-def resolve_label(obj) -> List[Dict[str, Any]]:
+def resolve_label(obj: Any) -> List[Dict[str, Any]]:
     return [{"language": k, "label": v} for k, v in obj.items()]
 
 

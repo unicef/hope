@@ -9,11 +9,11 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = "Create Groups for setup permissions in django admin page"
 
-    def create_group_and_set_permissions(self, group_name: str, perms: list):
+    def create_group_and_set_permissions(self, group_name: str, perms: list) -> None:
         group, _ = Group.objects.get_or_create(name=group_name)
         group.permissions.set(perms)
 
-    def _create_custom_group(self, codename, action, group_name) -> None:
+    def _create_custom_group(self, codename: str, action: str, group_name: str) -> None:
         perm = Permission.objects.filter(codename=codename).first()
         if perm:
             self.create_group_and_set_permissions(group_name, [perm])

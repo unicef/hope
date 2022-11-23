@@ -98,7 +98,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:
             self.parent.is_split = True
@@ -124,7 +124,7 @@ class BusinessArea(TimeStampedUUIDModel):
         return self.code_to_cash_assist_mapping.get(self.code, self.code)
 
     @cash_assist_code.setter
-    def cash_assist_code(self, value) -> None:
+    def cash_assist_code(self, value: Any) -> None:
         self.code = self.cash_assist_to_code_mapping.get(value, value)
 
     @property
@@ -141,7 +141,7 @@ class BusinessArea(TimeStampedUUIDModel):
     def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
 
-    def get_sys_option(self, key, default=None) -> Any:
+    def get_sys_option(self, key: str, default: None = None) -> Any:
         if "hope" in self.custom_fields:
             return self.custom_fields["hope"].get(key, default)
         return default
@@ -195,7 +195,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
 
 class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
-    def get_by_natural_key(self, name) -> "FlexibleAttributeGroup":
+    def get_by_natural_key(self, name: str) -> "FlexibleAttributeGroup":
         return self.get(name=name)
 
 
@@ -219,7 +219,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         return f"name: {self.name}"
 
     def natural_key(self) -> Tuple[str]:
-        return (self.name,)
+        return self.name,
 
 
 class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
@@ -290,12 +290,12 @@ class CountryCodeMapManager(models.Manager):
         self._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         super().__init__()
 
-    def get_code(self, iso_code) -> Optional[str]:
+    def get_code(self, iso_code: str) -> Optional[str]:
         iso_code = iso_code.upper()
         self.build_cache()
         return self._cache[len(iso_code)].get(iso_code, iso_code)
 
-    def get_iso3_code(self, ca_code) -> Optional[str]:
+    def get_iso3_code(self, ca_code: str) -> Optional[str]:
         ca_code = ca_code.upper()
         self.build_cache()
 
@@ -332,7 +332,7 @@ class CustomModelEntry(ModelEntry):
     """
 
     @classmethod
-    def from_entry(cls, name, app=None, **entry) -> "CustomModelEntry":
+    def from_entry(cls, name: str, app: Optional[str] = None, **entry: Any) -> "CustomModelEntry":
         obj, _ = PeriodicTask._default_manager.get_or_create(
             name=name,
             defaults=cls._unpack_fields(**entry),

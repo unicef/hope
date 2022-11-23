@@ -1,5 +1,6 @@
 import datetime
 import random
+from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -41,7 +42,7 @@ class Command(BaseCommand):
             help="Creates provided amount of program objects.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         wb = TemplateFileGenerator.get_template_file()
         households_ws = wb["Households"]
         individuals_ws = wb["Individuals"]

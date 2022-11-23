@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -8,7 +10,7 @@ GREEN = "\033[92m"
 class Command(BaseCommand):
     help = "Migrate all databases specified in settings"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         for db in settings.DATABASES:
             self.stdout.write(self.style.WARNING(f"Migrating {db} database"))
             if db == "read_only":

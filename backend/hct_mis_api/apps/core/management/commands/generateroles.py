@@ -22,8 +22,7 @@ class Command(BaseCommand):
             help="Should delete all current incompatible roles, but only update Roles.",
         )
 
-    def handle(self, *args, **options):
-
+    def handle(self, *args: Any, **options: Any) -> None:
         default_roles_matrix: List[Dict[str, Any]] = [
             {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_COUNTRY]},
             {

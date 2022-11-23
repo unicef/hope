@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import List
+from typing import List, TYPE_CHECKING, Optional
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter
@@ -17,6 +17,10 @@ from smart_admin.mixins import FieldsetMixin
 
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +57,7 @@ class ActiveRecordFilter(ListFilter):
                 "display": title,
             }
 
-    def queryset(self, request, queryset: QuerySet) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() == "1":
             queryset = queryset.filter(valid_until__isnull=True)
         elif self.value() == "0":
@@ -62,7 +66,7 @@ class ActiveRecordFilter(ListFilter):
 
 
 class ValidityManagerMixin:
-    def get_list_filter(self, request):
+    def get_list_filter(self, request: HttpRequest) -> List:
         return list(self.list_filter) + [ActiveRecordFilter]
 
 
@@ -94,7 +98,7 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request):
+    def get_list_display(self, request: HttpRequest) -> List:
         ret = super().get_list_display(request)
         return ret
 
@@ -169,7 +173,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     )
 
     @button()
-    def import_areas(self, request):
+    def import_areas(self, request: HttpRequest) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)

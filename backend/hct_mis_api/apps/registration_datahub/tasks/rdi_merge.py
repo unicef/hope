@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, List, Tuple
+from uuid import UUID
 
 from django.db import transaction
 from django.forms import model_to_dict
@@ -136,8 +137,8 @@ class RdiMergeTask:
 
     def merge_admin_area(
         self,
-        imported_household,
-        household,
+        imported_household: ImportedHousehold,
+        household: Household,
     ) -> None:
         admin1 = imported_household.admin1
         admin2 = imported_household.admin2
@@ -153,7 +154,7 @@ class RdiMergeTask:
         except Area.DoesNotExist as e:
             logger.exception(e)
 
-    def _prepare_households(self, imported_households, obj_hct) -> Dict:
+    def _prepare_households(self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport) -> Dict:
         households_dict = {}
         countries = {}
         for imported_household in imported_households:
@@ -182,7 +183,7 @@ class RdiMergeTask:
 
         return households_dict
 
-    def _prepare_individual_documents_and_identities(self, imported_individual, individual) -> Tuple[List, List]:
+    def _prepare_individual_documents_and_identities(self, imported_individual: ImportedIndividual, individual: Individual) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
@@ -209,7 +210,7 @@ class RdiMergeTask:
 
         return documents_to_create, identities_to_create
 
-    def _prepare_individuals(self, imported_individuals, households_dict, obj_hct) -> Tuple[Dict, List, List]:
+    def _prepare_individuals(self, imported_individuals: List[ImportedIndividual], households_dict: Dict, obj_hct: RegistrationDataImport) -> Tuple[Dict, List, List]:
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
@@ -238,7 +239,7 @@ class RdiMergeTask:
 
         return individuals_dict, documents_to_create, identities_to_create
 
-    def _prepare_roles(self, imported_roles, households_dict, individuals_dict) -> List:
+    def _prepare_roles(self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict) -> List:
         roles_to_create = []
         for imported_role in imported_roles:
             role = IndividualRoleInHousehold(
@@ -250,7 +251,7 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _prepare_bank_account_info(self, imported_bank_account_infos, individuals_dict) -> List:
+    def _prepare_bank_account_info(self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
             role = BankAccountInfo(
@@ -263,7 +264,7 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _update_individuals_and_households(self, individual_ids) -> None:
+    def _update_individuals_and_households(self, individual_ids: List[UUID]) -> None:
         # update mis_unicef_id for ImportedIndividual
         individual_qs = Individual.objects.filter(id__in=individual_ids)
         for individual in individual_qs:
@@ -275,7 +276,7 @@ class RdiMergeTask:
                 imported_individual.household.mis_unicef_id = individual.household.unicef_id
                 imported_individual.household.save()
 
-    def execute(self, registration_data_import_id) -> None:
+    def execute(self, registration_data_import_id: UUID) -> None:
         individual_ids = []
         try:
             with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
