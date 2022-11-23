@@ -116,6 +116,7 @@ export const EditIndividualDataChange = ({
                       arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
                     startIcon={<AddCircleOutline />}
+                    data-cy='button-add-new-field'
                   >
                     {t('Add new field')}
                   </Button>

@@ -245,6 +245,7 @@ export function validateUsingSteps(
     'birthDate',
     'phoneNo',
     'relationship',
+    'sex',
   ];
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
@@ -292,9 +293,6 @@ export function validateUsingSteps(
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-      if (!values.selectedIndividual && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedIndividual = 'Individual is Required';
-      }
       if (
         values.selectedIndividual &&
         values.individualDataUpdateFields?.length &&
