@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Any
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -42,7 +42,7 @@ class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod
@@ -74,19 +74,19 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         help_text="System field used to check if changes need to be sent to CA",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.partner:
             self.partner = Partner.objects.get(name="UNICEF")
         if not self.partner.pk:
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug) -> List:
+    def permissions_in_business_area(self, business_area_slug: str) -> List:
         all_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
@@ -105,7 +105,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
         return query.count() > 0
 
-    def can_download_storage_files(self):
+    def can_download_storage_files(self) -> bool:
         return any(
             self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
             for role in self.user_roles.all()
@@ -142,7 +142,7 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ("business_area", "user", "role")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} {self.role} in {self.business_area}"
 
 
@@ -154,7 +154,7 @@ class UserGroup(NaturalKeyModel, models.Model):
     class Meta:
         unique_together = ("business_area", "user", "group")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} {self.group} in {self.business_area}"
 
 
@@ -187,14 +187,14 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True,
     )
 
-    def clean(self):
+    def clean(self) -> None:
         if self.subsystem != Role.HOPE and self.permissions:
             raise ValidationError("Only HOPE roles can have permissions")
 
     class Meta:
         unique_together = ("name", "subsystem")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
@@ -235,7 +235,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
 
     objects = IncompatibleRolesManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.role_one.name} and {self.role_two.name}"
 
     class Meta:
@@ -243,7 +243,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         verbose_name_plural = "incompatible roles"
         unique_together = ("role_one", "role_two")
 
-    def clean(self):
+    def clean(self) -> None:
         super().clean()
         if self.role_one == self.role_two:
             logger.error(f"Provided roles are the same role={self.role_one}")

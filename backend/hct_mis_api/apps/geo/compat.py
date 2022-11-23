@@ -1,3 +1,5 @@
+from typing import Any, Optional, List
+
 from django.db import models
 from django.db.models import BLANK_CHOICE_DASH
 from django.utils.functional import lazy
@@ -31,7 +33,7 @@ class GeoCountryDescriptor:
 class GeoCountryField(models.CharField):
     descriptor_class = GeoCountryDescriptor
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.multiple = kwargs.pop("multiple", None)
         self.blank_label = kwargs.pop("blank_label", None)
         kwargs["choices"] = [(None, None)]
@@ -42,7 +44,7 @@ class GeoCountryField(models.CharField):
                 kwargs["max_length"] = 2
         super().__init__(*args, **kwargs)
 
-    def get_choices(self, include_blank=True, blank_choice=None, *args, **kwargs):
+    def get_choices(self, include_blank: Optional[bool] = True, blank_choice: Optional[bool] = None, *args: Any, **kwargs: Any) -> List:
         # TODO: refactor
         if self.choices[0] == (None, None):  # type: ignore
             self.choices = Country.objects.all().values_list("iso_code2", "name")

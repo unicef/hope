@@ -72,7 +72,7 @@ class APITokenForm(forms.ModelForm):
         model = APIToken
         exclude = ("key",)
 
-    def __init__(self, *args, instance=None, **kwargs) -> None:
+    def __init__(self, *args: Any, instance=None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(user_roles__user=instance.user).distinct()

@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from django.db import transaction
 from django.db.models import Count
@@ -88,7 +88,7 @@ class PullFromDatahubTask:
         "vision_id": "vision_id",
     }
 
-    def __init__(self, exchange_rates_client: ExchangeRates = None):
+    def __init__(self, exchange_rates_client: Optional[ExchangeRates] = None) -> None:
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
     def execute(self):

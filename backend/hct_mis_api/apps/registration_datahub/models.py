@@ -348,7 +348,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         ordering = ("name",)
         permissions = (["api_upload", "Can upload"],)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property

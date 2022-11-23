@@ -1,12 +1,14 @@
 import base64
 import logging
 from typing import Any, Dict, Generator, Iterable, Optional, Tuple
+from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
+from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -86,7 +88,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         return None
 
     @button()
-    def inspect(self, request, pk) -> TemplateResponse:
+    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         obj: RegistrationDataImportDatahub = context["original"]
         context["title"] = f"Import {obj.name} - {obj.import_done}"

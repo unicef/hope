@@ -3,6 +3,7 @@ from django.db.models import QuerySet
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
+from django.http import HttpRequest
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.grievance.models import (
@@ -59,7 +60,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     readonly_fields = ("unicef_id",)
 
-    def get_queryset(self, request) -> QuerySet["GrievanceTicket"]:
+    def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
         return (
             super()
             .get_queryset(request)
