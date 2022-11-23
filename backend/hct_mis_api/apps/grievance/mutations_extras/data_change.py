@@ -267,19 +267,19 @@ class HouseholdDeleteIssueTypeExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=True)
 
 
-def to_date_string(dict, field_name) -> None:
+def to_date_string(dict: Dict, field_name: str) -> None:
     date = dict.get(field_name)
     if date:
         dict[field_name] = date.isoformat()
 
 
-def to_phone_number_str(dict, field_name) -> None:
+def to_phone_number_str(dict: Dict, field_name: str) -> None:
     phone_number = dict.get(field_name)
     if phone_number:
         dict[field_name] = str(phone_number)
 
 
-def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_data_change_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     issue_type = input.get("issue_type")
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
@@ -294,7 +294,7 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
     raise Exception("Invalid issue type")
 
 
-def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
+def update_data_change_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
@@ -305,7 +305,7 @@ def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwa
     return grievance_ticket
 
 
-def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_household_data_update_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
 
@@ -346,7 +346,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     return [grievance_ticket]
 
 
-def update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
+def update_household_data_update_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     household_data_update_new_extras = extras.get("household_data_update_issue_type_extras")
     household = ticket_details.household
@@ -379,7 +379,7 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
     return grievance_ticket
 
 
-def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_individual_data_update_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
 
@@ -477,7 +477,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
 
 
 def update_individual_data_update_extras(
-    root, info, input, grievance_ticket, extras, **kwargs
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
 ) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
 
@@ -572,7 +572,7 @@ def update_individual_data_update_extras(
     return grievance_ticket
 
 
-def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_individual_delete_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
 
@@ -588,7 +588,7 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     return [grievance_ticket]
 
 
-def save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_household_delete_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
     household_encoded_id = household_data_update_issue_type_extras.get("household")
@@ -603,7 +603,7 @@ def save_household_delete_extras(root, info, input, grievance_ticket, extras, **
     return [grievance_ticket]
 
 
-def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_add_individual_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     add_individual_issue_type_extras = data_change_extras.get("add_individual_issue_type_extras")
 
@@ -635,7 +635,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     return [grievance_ticket]
 
 
-def update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def update_add_individual_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.add_individual_ticket_details
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
@@ -663,7 +663,7 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
 
 
 @transaction.atomic
-def close_add_individual_grievance_ticket(grievance_ticket, info) -> None:
+def close_add_individual_grievance_ticket(grievance_ticket: GrievanceTicket, info: Any) -> None:
     ticket_details = grievance_ticket.add_individual_ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
@@ -721,7 +721,7 @@ def close_add_individual_grievance_ticket(grievance_ticket, info) -> None:
     )
 
 
-def is_approved(item) -> bool:
+def is_approved(item: Dict) -> bool:
     return item.get("approve_status") is True
 
 
@@ -730,7 +730,7 @@ def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
 
 
 @transaction.atomic
-def close_update_individual_grievance_ticket(grievance_ticket, info) -> None:
+def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, info: Any) -> None:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
         return
@@ -862,7 +862,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info) -> None:
     )
 
 
-def cast_flex_fields(flex_fields) -> None:
+def cast_flex_fields(flex_fields: Dict[str, Any]) -> None:
     decimals_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
     integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
     for key, value in flex_fields.items():
@@ -873,7 +873,7 @@ def cast_flex_fields(flex_fields) -> None:
 
 
 @transaction.atomic
-def close_update_household_grievance_ticket(grievance_ticket, info) -> None:
+def close_update_household_grievance_ticket(grievance_ticket: GrievanceTicket, info: Any) -> None:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     if not ticket_details:
         return
@@ -920,7 +920,7 @@ def close_update_household_grievance_ticket(grievance_ticket, info) -> None:
 
 
 @transaction.atomic
-def close_delete_individual_ticket(grievance_ticket, info) -> None:
+def close_delete_individual_ticket(grievance_ticket: GrievanceTicket, info: Any) -> None:
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
@@ -935,7 +935,7 @@ def close_delete_individual_ticket(grievance_ticket, info) -> None:
         recalculate_data(household)
 
 
-def check_external_collector(household) -> None:
+def check_external_collector(household: Household) -> None:
     individuals = household.individuals.all()
     external_collectors = IndividualRoleInHousehold.objects.filter(individual__in=individuals).exclude(
         household=household
@@ -945,7 +945,7 @@ def check_external_collector(household) -> None:
 
 
 @transaction.atomic
-def close_delete_household_ticket(grievance_ticket, info) -> None:
+def close_delete_household_ticket(grievance_ticket: GrievanceTicket, info: Any) -> None:
     from django.db.models import Q
 
     from hct_mis_api.apps.grievance.models import (

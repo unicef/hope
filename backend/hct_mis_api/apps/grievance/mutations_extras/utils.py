@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -30,7 +30,11 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 logger = logging.getLogger(__name__)
 
 
-def handle_role(role, household, individual) -> None:
+if TYPE_CHECKING:
+    from hct_mis_api.apps.household.models import IndividualRoleInHousehold
+
+
+def handle_role(role: IndividualRoleInHousehold, household: Household, individual: Individual) -> None:
     from hct_mis_api.apps.household.models import (
         ROLE_ALTERNATE,
         ROLE_PRIMARY,
