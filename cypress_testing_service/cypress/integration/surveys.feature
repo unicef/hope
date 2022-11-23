@@ -3,8 +3,8 @@ Feature: Surveys
 
     Background:
         Given I am authenticated
-        Given I have a Target Population
-        Given I have a Program
+       # Given I have a Target Population
+       # Given I have a Program
 
     Scenario: Visit Surveys page and create one
         When I visit the main dashboard

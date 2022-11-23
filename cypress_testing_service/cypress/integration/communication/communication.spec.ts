@@ -44,14 +44,15 @@ Then('I should see the New Message page', () => {
 });
 
 When('I fill in the form and save', () => {
-  cy.get('[data-cy="input-radio-household"]').eq(0).click();
+  cy.get('[data-cy="input-checkbox-household"]').eq(0).click();
   cy.get('[data-cy="button-submit"]').click({ force: true });
   cy.get('[data-cy="button-submit"]').click({ force: true });
-  cy.get('[data-cy="input-title"]').click().type('Some title');
-  cy.get('[data-cy="input-body"]').click().type('Some message');
+  cy.get('[data-cy="input-title"]').eq(0).click().type('Some title');
+  cy.get('[data-cy="input-body"]').eq(0).click().type('Some message');
   cy.get('[data-cy="button-submit"]').click({ force: true });
+  cy.get('[data-cy="button-confirm"]').click({ force: true });
 });
 
 Then('I should see the Message details page', () => {
-  cy.contains('Message ID:');
+  cy.contains('MSG');
 });
