@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING, Dict, Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -41,13 +41,17 @@ from hct_mis_api.apps.registration_datahub.schema import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
+
 logger = logging.getLogger(__name__)
 
 
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(
-    registration_data_import_data, user, data_source
+    registration_data_import_data: RegistrationDataImport, user: User, data_source: Dict
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -113,7 +117,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def processed_mutate(cls, root, info, registration_data_import_data) -> "RegistrationXlsxImportMutation":
+    def processed_mutate(cls, root: Any, info: Any, registration_data_import_data: Dict) -> "RegistrationXlsxImportMutation":
         (
             created_obj_datahub,
             created_obj_hct,

@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 
 import graphene
 
@@ -13,14 +13,14 @@ class ReferralTicketExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=False)
 
 
-def save_referral_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_referral_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
     create_new_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
 
-def update_referral_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
+def update_referral_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras)
 
     update_ticket(grievance_ticket, household, individual)
@@ -28,7 +28,7 @@ def update_referral_extras(root, info, input, grievance_ticket, extras, **kwargs
     return grievance_ticket
 
 
-def create_new_ticket(grievance_ticket, household, individual) -> None:
+def create_new_ticket(grievance_ticket: GrievanceTicket, household: Household, individual: Individual) -> None:
     TicketReferralDetails.objects.create(
         individual=individual,
         household=household,
@@ -36,7 +36,7 @@ def create_new_ticket(grievance_ticket, household, individual) -> None:
     )
 
 
-def fetch_household_and_individual(extras) -> Tuple[Optional[Household], Optional[Individual]]:
+def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], Optional[Individual]]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
     individual_encoded_id = feedback_ticket_extras.get("individual")
@@ -46,7 +46,7 @@ def fetch_household_and_individual(extras) -> Tuple[Optional[Household], Optiona
     return household, individual
 
 
-def update_ticket(grievance_ticket, household, individual) -> None:
+def update_ticket(grievance_ticket: GrievanceTicket, household: Household, individual: Individual) -> None:
     ticket_details = grievance_ticket.referral_ticket_details
     if individual:
         ticket_details.individual = individual

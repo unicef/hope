@@ -1,17 +1,18 @@
 import base64
 import logging
-from typing import Any, Dict, Generator, Iterable, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, Optional, Tuple, Union, List
 from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter
+from django.contrib.admin import SimpleListFilter, ModelAdmin
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
 from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 
 import requests
@@ -76,7 +77,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         href=None,
         label="RDI",
     )
-    def hub(self, button) -> Optional[str]:
+    def hub(self, button: button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
             if obj.hct_id:
@@ -290,7 +291,7 @@ class AlexisFilter(SimpleListFilter):
     title = "Alexis"
     parameter_name = "alexis"
 
-    def __init__(self, request, params, model, model_admin) -> None:
+    def __init__(self, request: HttpRequest, params: MultiValueDict[str, str], model: Any, model_admin: ModelAdmin) -> None:
         super().__init__(request, params, model, model_admin)
         self.lookup_kwarg = self.parameter_name
         self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
@@ -316,7 +317,7 @@ class AlexisFilter(SimpleListFilter):
             queryset = queryset.filter(data__w_counters__collector_bank_account=True)
         return queryset
 
-    def lookups(self, request, model_admin) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Optional[Iterable[Tuple[Any, str]]]:
         return (
             ("1", "Household size match"),
             ("2", "Only one collector"),
@@ -329,7 +330,7 @@ class AlexisFilter(SimpleListFilter):
             ("9", "Collector has BankAccount"),
         )
 
-    def choices(self, changelist) -> Generator:
+    def choices(self, changelist: List) -> Generator:
         for lookup, title in self.lookup_choices:
             qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
             qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
@@ -374,7 +375,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs

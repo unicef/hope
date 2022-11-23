@@ -86,7 +86,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
-    def check_node_permission(cls, info, object_instance) -> None:
+    def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
@@ -118,15 +118,15 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return grievance_ticket.related_tickets
 
     @staticmethod
-    def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Household:
+    def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "household", None)
 
     @staticmethod
-    def resolve_individual(grievance_ticket: GrievanceTicket, info: Any) -> Individual:
+    def resolve_individual(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "individual", None)
 
     @staticmethod
-    def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> PaymentRecord:
+    def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "payment_record", None)
 
     @staticmethod
@@ -477,7 +477,7 @@ class Query(graphene.ObjectType):
         return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_grievances(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> QuerySet:
+    def resolve_chart_grievances(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> "QuerySet[Any, Any]":
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket,
             year,
