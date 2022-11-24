@@ -63,6 +63,7 @@ from hct_mis_api.apps.household.services.household_programs_with_delivered_quant
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -513,6 +514,15 @@ class Query(graphene.ObjectType):
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
+
+    def resolve_all_individuals(self, info, **kwargs):
+        queryset = Individual.objects
+        if does_path_exist_in_query("edges.node.household", info):
+            queryset = queryset.select_related("household")
+        if does_path_exist_in_query("edges.node.household.admin2", info):
+            queryset = queryset.select_related("household__admin_area")
+            queryset = queryset.select_related("household__admin_area__area_type")
+        return queryset
 
     def resolve_all_households_flex_fields_attributes(self, info, **kwargs):
         yield from FlexibleAttribute.objects.filter(
