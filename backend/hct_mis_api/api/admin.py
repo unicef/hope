@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Optional, Union, TYPE_CHECKING
 
 from django import forms
 from django.contrib import admin, messages
@@ -8,7 +8,9 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.http import HttpResponseRedirect
+from django.forms import Form
+from django.http import HttpResponseRedirect, HttpRequest, HttpResponse
+from django.template import Template
 from django.urls import reverse
 
 from admin_extra_buttons.decorators import button
@@ -18,6 +20,13 @@ from smart_admin.modeladmin import SmartModelAdmin
 from hct_mis_api.api.models import APILogEntry, APIToken
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.core.models import BusinessArea
+
+
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.forms import Form
+    from django.template import Template
+
 
 TOKEN_INFO_EMAIL = """
 Dear {friendly_name},
@@ -72,7 +81,7 @@ class APITokenForm(forms.ModelForm):
         model = APIToken
         exclude = ("key",)
 
-    def __init__(self, *args: Any, instance=None, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, instance: Optional[Any] = None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(user_roles__user=instance.user).distinct()
@@ -105,20 +114,20 @@ class APITokenAdmin(SmartModelAdmin):
     form = APITokenForm
     search_fields = ("id",)
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("user")
 
-    def get_fields(self, request, obj=None) -> Tuple[str, ...]:
+    def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> Tuple[str, ...]:
         if obj:
             return super().get_fields(request, obj)
         return "user", "grants", "valid_to"
 
-    def get_readonly_fields(self, request, obj=None) -> Tuple[str, ...]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> Tuple[str, ...]:
         if obj:
             return "user", "valid_from"
         return tuple()
 
-    def _get_email_context(self, request, obj) -> Dict[str, Any]:
+    def _get_email_context(self, request: HttpRequest, obj: Any) -> Dict[str, Any]:
         return {
             "obj": obj,
             "friendly_name": obj.user.first_name or obj.user.username,
@@ -126,7 +135,7 @@ class APITokenAdmin(SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request, obj, template) -> None:
+    def _send_token_email(self, request: HttpRequest, obj: Any, template: Template) -> None:
         try:
             send_mail(
                 f"HOPE API Token {obj} infos",
@@ -139,22 +148,23 @@ class APITokenAdmin(SmartModelAdmin):
             self.message_user(request, f"Unable to send notification email to {obj.user.email}", messages.ERROR)
 
     @button()
-    def resend_email(self, request, pk) -> None:
+    def resend_email(self, request: HttpRequest, pk: UUID) -> None:
         obj = self.get_object(request, pk)
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None) -> HttpResponseRedirect:
+    def changeform_view(self, request: HttpRequest, object_id: Optional[Any] = None, form_url: str = "", extra_context: Optional[Any] = None) -> \
+    Union[HttpResponse, HttpResponse, HttpResponseRedirect]:
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:
             self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
             return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))
 
-    def log_addition(self, request, object, message) -> LogEntry:
+    def log_addition(self, request: HttpRequest, object: Any, message: str) -> LogEntry:
         return super().log_addition(request, object, message)
 
     @atomic()
-    def save_model(self, request, obj, form, change) -> None:
+    def save_model(self, request: HttpRequest, obj: Any, form: Form, change: bool) -> None:
         obj.save()
         obj.valid_for.set(BusinessArea.objects.filter(user_roles__user=obj.user))
         obj.save()
@@ -170,8 +180,8 @@ class APILogEntryAdmin(SmartModelAdmin):
     list_filter = (("token", AutoCompleteFilter),)
     date_hierarchy = "timestamp"
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False

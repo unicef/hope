@@ -99,7 +99,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 class CollectDataMixin(serializers.Serializer):
     collect_individual_data = serializers.CharField(required=True)
 
-    def validate_collect_individual_data(self, value: str) -> None:
+    def validate_collect_individual_data(self, value: str):
         v = value.upper()
         if v in [COLLECT_TYPE_FULL, "FULL", "F"]:
             return COLLECT_TYPE_FULL
@@ -177,7 +177,7 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
         ret.pop("members", None)
         return ret
 
-    def validate(self, attrs: Dict) -> int:
+    def validate(self, attrs: Dict) -> Dict:
         def get_related() -> int:
             return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 

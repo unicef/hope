@@ -144,7 +144,7 @@ class DeduplicateTask:
         return cls._prepare_queries_for_names(given_name, family_name, full_name)
 
     @classmethod
-    def _prepare_households_and_roles_queries_from_fields(cls, fields: Dict) -> List[Dict]:
+    def _prepare_households_and_roles_queries_from_fields(cls, fields: Dict) -> List[Dict[Any, Any]]:
         households_and_roles = fields.pop("households_and_roles", [])
         households_and_roles_queries = cls._prepare_households_and_roles_queries(households_and_roles)
         return households_and_roles_queries
@@ -162,7 +162,7 @@ class DeduplicateTask:
         return documents_queries
 
     @staticmethod
-    def _prepare_fields(individual: List[Individual], fields_names, dict_fields) -> Dict[str, Any]:
+    def _prepare_fields(individual: List[Individual], fields_names: List[str], dict_fields: List[Any]) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
@@ -171,7 +171,8 @@ class DeduplicateTask:
         return fields
 
     @classmethod
-    def _prepare_households_and_roles_queries(cls, households_and_roles: List[Dict]) -> List[Dict]:
+    def _prepare_households_and_roles_queries(cls, households_and_roles: List[Dict]) -> list[dict[str, dict[str, Union[
+        list[Union[dict[str, dict[str, dict[str, Optional[Any]]]], dict[str, dict[str, dict[str, str]]]]], int]]]]:
         """
         Not needed
         Not working
@@ -240,7 +241,7 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_identities_or_documents_query(cls, data, data_type) -> List[Dict]:
+    def _prepare_identities_or_documents_query(cls, data: Dict, data_type: str) -> List[Dict]:
         queries = []
         document_type_key = "partner" if data_type.lower() == "identity" else "type"
         prefix = "identities" if data_type.lower() == "identity" else "documents"

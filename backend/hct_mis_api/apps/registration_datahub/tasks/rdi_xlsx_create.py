@@ -132,7 +132,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     "value": value,
                 }
 
-    def _handle_document_photo_fields(self, cell: Any, row_num: int, individual: ImportedIndividual, header: str, *args: Any, **kwargs: Any):
+    def _handle_document_photo_fields(self, cell: Any, row_num: int, individual: ImportedIndividual, header: str, *args: Any, **kwargs: Any) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
         header = header.replace("_photo_i_c", "_i_c")
@@ -218,7 +218,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_datetime(self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any) -> datetime:
         return timezone_datetime(cell.value)
 
-    def _handle_identity_fields(self, value, header, row_num, individual, *args, **kwargs):
+    def _handle_identity_fields(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
         if value is None:
             return
 
@@ -236,7 +236,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "partner": partner,
             }
 
-    def _handle_identity_photo(self, cell, row_num, header, individual, *args, **kwargs):
+    def _handle_identity_photo(self, cell: Any, row_num: int, header: str, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
 
@@ -278,7 +278,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "partner": partner,
             }
 
-    def _handle_collectors(self, value, header, individual, *args, **kwargs):
+    def _handle_collectors(self, value: Any, header: str, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
         list_of_ids = collectors_str_ids_to_list(value)
         if list_of_ids is None:
             return

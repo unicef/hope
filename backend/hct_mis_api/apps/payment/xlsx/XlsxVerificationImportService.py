@@ -1,9 +1,11 @@
+import typing
 from decimal import Decimal
 
 import openpyxl
 from graphql import GraphQLError
+from xlwt import Row
 
-from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
 from hct_mis_api.apps.payment.utils import (
     float_to_decimal,
     from_received_yes_no_to_status,
@@ -25,7 +27,7 @@ class XlsxVerificationImportService:
     }
     COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
-    def __init__(self, cashplan_payment_verification, file) -> None:
+    def __init__(self, cashplan_payment_verification: CashPlanPaymentVerification, file: typing.IO) -> None:
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
@@ -113,7 +115,7 @@ class XlsxVerificationImportService:
                 )
             column += 1
 
-    def _validate_row_types(self, row) -> None:
+    def _validate_row_types(self, row: Row) -> None:
         column = 0
         for cell in row:
             if cell.value is None:

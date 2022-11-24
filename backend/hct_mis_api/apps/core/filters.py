@@ -59,7 +59,7 @@ class DateRangeField(Field):
 class BaseRangeFilter(Filter):
     field_class: Optional[Type[Field]] = None
 
-    def filter(self, qs: QuerySet, values: Dict) -> QuerySet:
+    def filter(self, qs: QuerySet, values: Tuple) -> QuerySet:
         if values:
             min_value = values.get("min")
             max_value = values.get("max")
@@ -137,7 +137,7 @@ def filter_age(field_name: str, qs: QuerySet, min: Optional[int], max: Optional[
 class AgeRangeFilter(Filter):
     field_class = IntegerRangeField
 
-    def filter(self, qs: QuerySet, values: Dict[str, int]) -> QuerySet:
+    def filter(self, qs: QuerySet, values: Tuple[date, date]) -> QuerySet:
         if values:
             min_value = values.get("min")  # 20
             max_value = values.get("max")  # 21

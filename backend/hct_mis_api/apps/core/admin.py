@@ -17,7 +17,7 @@ from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.db.models import Aggregate, CharField
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -162,7 +162,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
-    def split_business_area(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def split_business_area(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         context = self.get_common_context(request, pk)
         opts = self.object._meta
         if request.POST:
@@ -307,7 +307,7 @@ UNICEF HOPE""",
         return response
 
     @view(permission="core.can_send_doap")
-    def view_ca_doap(self, request, pk):
+    def view_ca_doap(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="DOAP matrix")
         context["aeu_groups"] = ["doap"]
         obj = context["original"]
@@ -370,7 +370,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
     @button(permission=is_root)
-    def mark_submissions(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def mark_submissions(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
@@ -489,7 +489,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request: HttpRequest) -> Union[HttpResponseRedirect, str]:
+    def download_last_valid_file(self, request: HttpRequest) -> HttpResponsePermanentRedirect:
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -503,14 +503,14 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         label="Rerun KOBO Import",
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
     )
-    def rerun_kobo_import(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def rerun_kobo_import(self, request: HttpRequest, pk: UUID) -> HttpResponsePermanentRedirect:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
             xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
         )
         return redirect(".")
 
-    def add_view(self, request, form_url="", extra_context=None):
+    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> TemplateResponse:
         if not self.has_add_permission(request):
             logger.error("The user did not have permission to do that")
             raise PermissionDenied
@@ -571,8 +571,8 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(
-        self, request: HttpRequest, object_id: Optional[Any] = None, form_url: str = "", extra_context: Dict = None
-    ):
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context:  Optional[Dict[str, Any]] = None
+    ) -> Union[HttpResponse, HttpResponse]:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
         self.has_add_permission = lambda __: False  # type: ignore
@@ -587,10 +587,10 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
 
-    def alpha2(self, obj):
+    def alpha2(self, obj: Any) -> str:
         return obj.country.iso_code2
 
-    def alpha3(self, obj):
+    def alpha3(self, obj: Any) -> str:
         return obj.country.iso_code3
 
 
@@ -611,7 +611,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return request.user.can_download_storage_files()
 
     @button(label="Create eDopomoga TP")
-    def create_tp(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse, HttpResponseRedirect]:
+    def create_tp(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         storage_obj = StorageFile.objects.get(pk=pk)
         context = self.get_common_context(
             request,
