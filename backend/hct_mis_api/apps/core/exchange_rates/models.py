@@ -9,7 +9,7 @@ from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateAPI
 
 
 class HistoryExchangeRate:
-    def __init__(self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str):
+    def __init__(self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str) -> None:
         self.valid_from = parse(VALID_FROM)
         self.valid_to = parse(VALID_TO)
         self.past_xrate = float(PAST_XRATE)
@@ -36,7 +36,7 @@ class SingleExchangeRate:
         RATIO: str,
         NO_OF_DECIMAL: str,
         PAST_XRATE: Optional[Dict],
-    ):
+    ) -> None:
         self.currency_code = CURRENCY_CODE
         self.currency_name = CURRENCY_NAME
         self.x_rate = float(X_RATE)
@@ -53,7 +53,7 @@ class SingleExchangeRate:
 
         self.historical_exchange_rates = [HistoryExchangeRate(**past_xrate) for past_xrate in past_xrates]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
 
     def get_exchange_rate_by_dispersion_date(self, dispersion_date: Optional[datetime]) -> Optional[float]:
@@ -78,7 +78,7 @@ class SingleExchangeRate:
 
 
 class ExchangeRates:
-    def __init__(self, with_history: bool = True, api_client: Optional[ExchangeRateAPI] = None):
+    def __init__(self, with_history: bool = True, api_client: Optional[ExchangeRateAPI] = None) -> None:
         if api_client is None:
             api = ExchangeRateAPI()
         else:

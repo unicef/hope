@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 from django.db.models import Case, Prefetch, QuerySet, Sum, Value, When
 
 import graphene
-from graphene import relay, Field
+from graphene import relay, Field, Int, DateTime, Boolean, String, Enum
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -128,7 +128,7 @@ class DocumentNode(DjangoObjectType):
     def resolve_country_iso3(parent: Document, info: Any) -> str:
         return parent.country.iso_code3
 
-    def resolve_photo(parent: Document, info: Any) -> Optional[str]:
+    def resolve_photo(parent: Document, info: Any) -> Optional[String]:
         if parent.photo:
             return parent.photo.url
         return
@@ -231,7 +231,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             return parent.country_origin.name
         return ""
 
-    def resolve_selection(parent, info: Any):
+    def resolve_selection(parent, info: Any) -> Any:
         selection = parent.selections.first()
         return selection
 
@@ -256,7 +256,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.active_individuals.count()
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info: Any, object_instance: Household) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
 
@@ -359,7 +359,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
-    def resolve_relationship(parent, info: Any):
+    def resolve_relationship(parent, info: Any) -> Enum:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
         if not parent.relationship:
             return None
@@ -368,21 +368,21 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_photo(parent, info: Any) -> Optional[str]:
         if parent.photo:
             return parent.photo.url
-        return
+        return None
 
     def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_age(parent, info: Any) -> int:
+    def resolve_age(parent, info: Any) -> Int:
         return parent.age
 
-    def resolve_sanction_list_last_check(parent, info: Any) -> bool:
+    def resolve_sanction_list_last_check(parent, info: Any) -> DateTime:
         return parent.sanction_list_last_check
 
-    def resolve_phone_no_valid(parent, info: Any) -> bool:
+    def resolve_phone_no_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_valid
 
-    def resolve_phone_no_alternative_valid(parent, info: Any) -> bool:
+    def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
     @classmethod

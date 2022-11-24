@@ -168,7 +168,7 @@ class Query(graphene.ObjectType):
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Partner.get_partners_as_choices())
 
-    def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> "QuerySet[User]":
+    def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> bool:
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")

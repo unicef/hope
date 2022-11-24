@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Type, TYPE_CHECKING, Dict, Union
+from typing import Any, List, Tuple, Type, TYPE_CHECKING, Dict, Union, Optional
 
 import graphene
 from graphene import relay
@@ -21,10 +21,11 @@ from hct_mis_api.apps.utils.schema import Arg
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+    from graphene.types.structures import List as GrapheneList
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
-def get_field_by_name(field_name: str) -> Any:
+def get_field_by_name(field_name: str) -> Optional[Any]:
     field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name").get(field_name)
     choices = field.get("choices")
     if choices and callable(choices):
@@ -43,10 +44,10 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
 
-    def resolve_arguments(self, info: Any) -> List:
+    def resolve_arguments(self, info: Any) -> GrapheneList:
         return self.arguments
 
-    def resolve_field_attribute(parent, info):
+    def resolve_field_attribute(parent, info: Any) -> Dict:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
@@ -61,10 +62,10 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
 
-    def resolve_arguments(self, info: Any) -> List:
+    def resolve_arguments(self, info: Any) -> GrapheneList:
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Union[Dict,FlexibleAttribute]:
+    def resolve_field_attribute(parent, info: Any) -> Union[Dict, FlexibleAttribute]:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
@@ -102,7 +103,7 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
 class TargetingCriteriaNode(DjangoObjectType):
     rules = graphene.List(TargetingCriteriaRuleNode)
 
-    def resolve_rules(self, info: Any):
+    def resolve_rules(self, info: Any) -> QuerySet:
         return self.rules.all()
 
     class Meta:

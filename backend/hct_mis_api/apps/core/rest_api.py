@@ -71,7 +71,7 @@ class FieldAttributeSerializer(serializers.Serializer):
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
 
-    def get_labels(self, obj):
+    def get_labels(self, obj:Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
     def get_label_en(self, obj: Any) -> Optional[str]:
@@ -84,7 +84,7 @@ class FieldAttributeSerializer(serializers.Serializer):
             return True
         return False
 
-    def get_associated_with(self, obj: Any) -> Union[str, int]:
+    def get_associated_with(self, obj: Any) -> Optional[Any]:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
         if resolved == 0:
             return "Household"

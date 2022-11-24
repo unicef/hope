@@ -2,6 +2,7 @@ import itertools
 import logging
 import pickle
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from uuid import UUID
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -37,7 +38,7 @@ mimetype_map = {
 }
 
 
-def validate_queryargs(value) -> None:
+def validate_queryargs(value: Any) -> None:
     try:
         if not isinstance(value, dict):
             raise ValidationError("QueryArgs must be a dict")
@@ -71,7 +72,7 @@ class Parametrizer(NaturalKeyModel, models.Model):
         product = list(itertools.product(*self.value.values()))
         return [dict(zip(self.value.keys(), e)) for e in product]
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
         if not self.code:
             self.code = slugify(self.name)
         super().save(force_insert, force_update, using, update_fields)
@@ -107,22 +108,22 @@ class Query(NaturalKeyModel, models.Model):
         verbose_name_plural = "Power Queries"
         ordering = ("name",)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
         self.error = None
         super().save(force_insert, force_update, using, update_fields)
 
-    def _invoke(self, query_id, arguments) -> Dict:
+    def _invoke(self, query_id: UUID, arguments: List) -> Dict:
         query = Query.objects.get(id=query_id)
         result = query.run(persist=False, arguments=arguments)
         return result
 
-    def update_results(self, results) -> None:
+    def update_results(self, results: List) -> None:
         self.info["last_run_results"] = results
         self.save()
 
-    def execute_matrix(self, persist=True, **kwargs) -> Dict[str, str]:
+    def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Dict[str, str]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
         else:
@@ -141,7 +142,7 @@ class Query(NaturalKeyModel, models.Model):
             self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist=False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
+    def run(self, persist: bool = False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)

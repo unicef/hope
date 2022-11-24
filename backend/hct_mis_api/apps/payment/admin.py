@@ -91,7 +91,7 @@ class CashPlanPaymentVerificationAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return HttpResponseRedirect(url)
 
     @button()
-    def execute_sync_rapid_pro(self, request: HttpRequest) -> TemplateResponse:
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> HttpResponseRedirect:
         if request.method == "POST":
             from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
                 CheckRapidProVerificationTask,

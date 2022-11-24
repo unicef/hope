@@ -45,11 +45,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 if TYPE_CHECKING:
     from uuid import UUID
-
     from django.db.models.query import QuerySet
-
-    from hct_mis_api.apps.account.models import User
-
+    from hct_mis_api.apps.account.models import User, Role
 
 logger = logging.getLogger(__name__)
 
@@ -256,7 +253,7 @@ class FlexRegistrationService:
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role, individual, household) -> None:
+    def _create_role(self, role: Role, individual: ImportedIndividual, household: ImportedHousehold) -> None:
         if role == "y":
             defaults = dict(individual=individual, household=household)
             if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
@@ -402,7 +399,7 @@ class FlexRegistrationService:
         }
         return bank_account_info_data
 
-    def validate_household(self, individuals_array) -> None:
+    def validate_household(self, individuals_array: List[ImportedIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -410,5 +407,5 @@ class FlexRegistrationService:
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def _has_head(self, individuals_array) -> bool:
+    def _has_head(self, individuals_array: List[ImportedIndividual]) -> bool:
         return any(individual_data.get("relationship_i_c") == "head" for individual_data in individuals_array)
