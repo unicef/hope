@@ -1,4 +1,5 @@
 import logging
+from typing import Union, Tuple, TYPE_CHECKING, Optional
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -34,12 +35,17 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 from hct_mis_api.apps.utils.security import is_root
 
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
+
 logger = logging.getLogger(__name__)
 
 
 class HUBAdminMixin(HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
-    def truncate(self, request: HttpRequest) -> TemplateResponse:
+    def truncate(self, request: HttpRequest) -> Optional[TemplateResponse]:
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
             self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
             return
@@ -80,7 +86,7 @@ class HouseholdAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def members_sent_to_the_hub(self, button):
+    def members_sent_to_the_hub(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
@@ -110,7 +116,7 @@ class IndividualAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def household(self, button):
+    def household(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
@@ -153,7 +159,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     search_fields = ("id",)
 
     @link()
-    def target_population(self, button):
+    def target_population(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_targetpopulation_changelist")
@@ -162,7 +168,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             button.visible = False
 
     @link()
-    def individuals(self, button):
+    def individuals(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
@@ -171,7 +177,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             button.visible = False
 
     @link()
-    def households(self, button):
+    def households(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
@@ -247,12 +253,12 @@ class TargetPopulationAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
     search_fields = ("name",)
 
-    def get_search_results(self, request, queryset, search_term):
+    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> Tuple:
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         return queryset, use_distinct
 
     @link()
-    def individuals(self, button):
+    def individuals(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
@@ -261,7 +267,7 @@ class TargetPopulationAdmin(HUBAdminMixin):
             button.visible = False
 
     @link()
-    def households(self, button):
+    def households(self, button: button) -> Union[str, None]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")

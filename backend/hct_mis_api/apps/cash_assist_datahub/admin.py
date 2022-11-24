@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 from uuid import UUID
 
 from django.conf import settings
@@ -73,7 +73,7 @@ class SessionAdmin(HOPEModelAdminBase):
                 return elapsed
 
     @button(permission="account.can_debug")
-    def pull(self, request):
+    def pull(self, request: HttpRequest) -> None:
         from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
             PullFromDatahubTask,
         )
@@ -128,7 +128,7 @@ class SessionAdmin(HOPEModelAdminBase):
             )
 
     @link(html_attrs={"target": "_new"}, permission="account.can_debug")
-    def view_error_on_sentry(self, button):
+    def view_error_on_sentry(self, button: button) -> Union[str, bool]:
         if "original" in button.context:
             obj = button.context["original"]
             if obj.sentry_id:
@@ -236,7 +236,7 @@ class CashPlanAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
 
     @link()
-    def payment_records(self, button):
+    def payment_records(self, button: button) -> Union[str, bool]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:cash_assist_datahub_paymentrecord_changelist")

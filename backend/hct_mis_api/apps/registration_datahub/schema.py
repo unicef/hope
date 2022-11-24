@@ -1,13 +1,13 @@
 import json
 from datetime import date
-from typing import TYPE_CHECKING, Any, Dict, List, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 from django.db.models import Prefetch, Q
 
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from graphene import relay
+from graphene import relay, Boolean, Int, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -103,7 +103,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
         ).exists()
 
-    def resolve_flex_fields(parent, info):
+    def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
     def resolve_individuals(parent, info: Any) -> List[Set[UUID]]:
@@ -174,14 +174,14 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
-    def resolve_flex_fields(parent, info):
+    def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
     @staticmethod
-    def resolve_age(parent, info: Any) -> int:
+    def resolve_age(parent, info: Any) -> Int:
         return parent.age
 
-    def resolve_import_id(parent, info: Any) -> str:
+    def resolve_import_id(parent, info: Any) -> String:
         row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
@@ -192,10 +192,10 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
         return resp + row
 
-    def resolve_phone_no_valid(parent, info: Any) -> bool:
+    def resolve_phone_no_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_valid
 
-    def resolve_phone_no_alternative_valid(parent, info: Any) -> bool:
+    def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
     class Meta:
@@ -277,7 +277,7 @@ class ImportedDocumentNode(DjangoObjectType):
     def resolve_country(parent, info: Any) -> str:
         return getattr(parent.country, "name", parent.country)
 
-    def resolve_photo(parent, info: Any) -> str:
+    def resolve_photo(parent, info: Any) -> Union[String, None]:
         if parent.photo:
             return parent.photo.url
         return
