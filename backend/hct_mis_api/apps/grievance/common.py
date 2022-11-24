@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple, Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -7,12 +7,12 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
-
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-    from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.household.models import Individual
+    from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ def create_needs_adjudication_tickets(
     individuals_queryset: "QuerySet[Individual]",
     results_key: str,
     business_area: "BusinessArea",
-    registration_data_import: RegistrationDataImport = None
+    registration_data_import: RegistrationDataImport = None,
 ) -> Optional[List[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.household.models import Individual
 

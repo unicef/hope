@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone

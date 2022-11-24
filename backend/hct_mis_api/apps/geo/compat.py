@@ -1,4 +1,4 @@
-from typing import Any, Optional, List
+from typing import Any, List, Optional
 
 from django.db import models
 from django.db.models import BLANK_CHOICE_DASH
@@ -44,7 +44,9 @@ class GeoCountryField(models.CharField):
                 kwargs["max_length"] = 2
         super().__init__(*args, **kwargs)
 
-    def get_choices(self, include_blank: Optional[bool] = True, blank_choice: Optional[bool] = None, *args: Any, **kwargs: Any) -> List:
+    def get_choices(
+        self, include_blank: Optional[bool] = True, blank_choice: Optional[bool] = None, *args: Any, **kwargs: Any
+    ) -> List:
         # TODO: refactor
         if self.choices[0] == (None, None):  # type: ignore
             self.choices = Country.objects.all().values_list("iso_code2", "name")

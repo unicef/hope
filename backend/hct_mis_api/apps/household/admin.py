@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Any, Iterable, List, Optional, Dict
+from typing import Any, Dict, Iterable, List, Optional
 from uuid import UUID
 
 from django import forms
@@ -13,7 +13,7 @@ from django.db import transaction
 from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpResponseRedirect, HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -203,7 +203,7 @@ class HouseholdAdmin(
         hh: Household,
         tickets: Optional[Iterable] = None,
         comment: Optional[str] = None,
-        tag: Optional[str] = None
+        tag: Optional[str] = None,
     ) -> HouseholdWithdraw:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 

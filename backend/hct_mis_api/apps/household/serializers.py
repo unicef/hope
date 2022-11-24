@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Dict, Tuple, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Individual
@@ -37,7 +36,9 @@ def get_individual_info(individual: Individual, tax_id: str) -> Dict:
     }
 
 
-def get_household_info(household: Household, individual: Optional[Individual] = None, tax_id: Optional[str] = None) -> Dict:
+def get_household_info(
+    household: Household, individual: Optional[Individual] = None, tax_id: Optional[str] = None
+) -> Dict:
     status, date = get_household_status(household)
     output = {"status": status, "date": date}
     if individual:

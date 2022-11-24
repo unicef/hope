@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Optional, Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.models import QuerySet
 from django.db.transaction import atomic
@@ -23,7 +23,6 @@ from .base import HOPEAPIBusinessAreaView, HOPEAPIView
 from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
 
-
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
 
@@ -33,7 +32,7 @@ class RDISerializer(serializers.ModelSerializer):
         model = RegistrationDataImportDatahub
         exclude = ("business_area_slug", "import_data", "hct_id")
 
-    def create(self, validated_data: Dict):
+    def create(self, validated_data: Dict) -> None:
         return super().create(validated_data)
 
 
@@ -46,7 +45,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     def get_queryset(self) -> QuerySet:
         return RegistrationDataImportDatahub.objects.filter(business_area=self.selected_business_area)
 
-    def dispatch(self, request, *args, **kwargs) -> HttpResponseBase:
+    def dispatch(self, request: Request, *args: Any, **kwargs: Any) -> HttpResponseBase:
         return super().dispatch(request, *args, **kwargs)
 
     @atomic()
@@ -152,7 +151,7 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
         )
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> None:
-        return self.update(request, *args, **kwargs)
+        self.update(request, *args, **kwargs)
 
     @atomic()
     @atomic(using="registration_datahub")

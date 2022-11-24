@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import graphene
 
@@ -13,14 +13,18 @@ class ReferralTicketExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=False)
 
 
-def save_referral_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_referral_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
     create_new_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
 
-def update_referral_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
+def update_referral_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras)
 
     update_ticket(grievance_ticket, household, individual)

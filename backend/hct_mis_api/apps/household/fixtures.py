@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple, Optional, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import factory
 from factory import enums, fuzzy
@@ -220,7 +220,9 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
 
 
-def create_household(household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None) -> Tuple[Household, Individual]:
+def create_household(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -262,7 +264,9 @@ def create_household(household_args: Optional[Dict] = None, individual_args: Opt
     return household, individuals
 
 
-def create_household_for_fixtures(household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None) -> Tuple[Household, Individual]:
+def create_household_for_fixtures(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:

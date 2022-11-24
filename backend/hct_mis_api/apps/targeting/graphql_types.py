@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type, Any
+from typing import Any, List, Tuple, Type
 
 import graphene
 from graphene import relay

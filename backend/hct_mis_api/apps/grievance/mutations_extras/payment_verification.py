@@ -6,7 +6,6 @@ import graphene
 
 from hct_mis_api.apps.payment.models import PaymentVerification
 
-
 if TYPE_CHECKING:
     from hct_mis_api.apps.grievance.models import GrievanceTicket
 

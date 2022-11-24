@@ -7,7 +7,6 @@ from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.export_users_xlsx import ExportUsersXlsx
 
-
 if TYPE_CHECKING:
     from django.http import HttpRequest
 

@@ -22,7 +22,6 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 
-
 if TYPE_CHECKING:
     pass
 

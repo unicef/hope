@@ -37,7 +37,7 @@ def islist(value: Any) -> bool:
 
 @register.filter
 def isstring(value: Any) -> bool:
-    return isinstance(value, (str, ))
+    return isinstance(value, (str,))
 
 
 @register.filter

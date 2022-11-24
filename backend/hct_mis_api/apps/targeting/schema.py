@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from django.db.models import Prefetch, QuerySet, Q
+from django.db.models import Prefetch, Q, QuerySet
 
 import graphene
 from graphene import relay
@@ -94,10 +94,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(target_models.TargetPopulation.STATUS_CHOICES)
 
     def resolve_target_population_households(
-        parent,
-        info: Any,
-        target_population: target_models.TargetPopulation,
-        **kwargs: Any
+        parent, info: Any, target_population: target_models.TargetPopulation, **kwargs: Any
     ) -> QuerySet:
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)

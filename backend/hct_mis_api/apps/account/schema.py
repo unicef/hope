@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Set, Any, TYPE_CHECKING, List, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Set
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -36,8 +36,10 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from graphene import Node
-    from hct_mis_api.apps.account.models import UserRole, User
+
+    from hct_mis_api.apps.account.models import User, UserRole
 
 
 def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
@@ -106,7 +108,7 @@ class UserNode(DjangoObjectType):
 
 
 class LazyEncoder(DjangoJSONEncoder):
-    def default(self, obj: Any):
+    def default(self, obj: Any) -> str:
         if isinstance(obj, Promise):
             return force_str(obj)
         return super().default(obj)
@@ -121,16 +123,16 @@ class JSONLazyString(graphene.Scalar):
     """
 
     @staticmethod
-    def serialize(dt: Any):
+    def serialize(dt: Any) -> str:
         return json.dumps(dt, cls=LazyEncoder)
 
     @staticmethod
-    def parse_literal(node: Node):
+    def parse_literal(node: Node) -> Dict:
         if isinstance(node, graphene.String):
             return json.loads(node.value)
 
     @staticmethod
-    def parse_value(value: Any):
+    def parse_value(value: Any) -> Dict:
         return json.loads(value)
 
 
@@ -149,10 +151,10 @@ class Query(graphene.ObjectType):
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
-    def resolve_all_users(self, info: Any, **kwargs) -> "QuerySet[User]":
+    def resolve_all_users(self, info: Any, **kwargs: Any) -> "QuerySet[User]":
         return User.objects.all().distinct()
 
-    def resolve_me(self, info: Any, **kwargs) -> "User":
+    def resolve_me(self, info: Any, **kwargs: Any) -> "User":
         if not info.context.user.is_authenticated:
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         return info.context.user
