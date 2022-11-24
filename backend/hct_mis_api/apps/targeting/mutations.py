@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional, Type, Dict
+from typing import Any, Dict, List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -254,7 +254,9 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         return cls(target_population=target_population)
 
     @classmethod
-    def rebuild_tp(cls, should_rebuild_list: List, should_rebuild_stats: bool, target_population: TargetPopulation) -> None:
+    def rebuild_tp(
+        cls, should_rebuild_list: List, should_rebuild_stats: bool, target_population: TargetPopulation
+    ) -> None:
         rebuild_list = target_population.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
         if rebuild_list or rebuild_stats:
@@ -272,7 +274,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population: TargetPopulation,
         targeting_criteria_input: Dict,
         vulnerability_score_max: int,
-        vulnerability_score_min: int
+        vulnerability_score_min: int,
     ) -> None:
         if not target_population.is_locked() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
@@ -518,7 +520,9 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
 
     @classmethod
     @is_authenticated
-    def mutate_and_get_payload(cls, _root: Any, _info: Any, **kwargs: Any) -> "SetSteficonRuleOnTargetPopulationMutation":
+    def mutate_and_get_payload(
+        cls, _root: Any, _info: Any, **kwargs: Any
+    ) -> "SetSteficonRuleOnTargetPopulationMutation":
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)

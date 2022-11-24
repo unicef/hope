@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Union, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -19,7 +19,6 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual

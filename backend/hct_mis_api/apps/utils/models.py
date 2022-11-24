@@ -1,7 +1,7 @@
 # Create your models here.
 import logging
 import sys
-from typing import Any, Tuple, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 from django.db import models
 from django.utils import timezone
@@ -12,7 +12,6 @@ from model_utils.models import UUIDModel
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -193,7 +192,9 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:
+    def delete(
+        self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.

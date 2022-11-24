@@ -1,10 +1,9 @@
 import logging
 from enum import auto
-from typing import Any, Callable, Dict, List, TYPE_CHECKING, Tuple, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-
 from django.template.loader import render_to_string
 from django.utils import timezone
 
@@ -19,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+
     from hct_mis_api.apps.account.models import User
 
 

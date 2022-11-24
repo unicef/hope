@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Tuple, Type, TYPE_CHECKING, Any, List, Dict, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar
 
 from django.db.models.functions import ExtractYear
 
@@ -23,7 +23,6 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.reporting.filters import ReportFilter
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
-
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -79,7 +78,9 @@ class Query(graphene.ObjectType):
     def resolve_report_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Report.STATUSES)
 
-    def resolve_dashboard_report_types_choices(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_dashboard_report_types_choices(
+        self, info: Any, business_area_slug: str, **kwargs: Any
+    ) -> List[Dict[str, Any]]:
         if business_area_slug == "global":
             return to_choice_object(
                 [

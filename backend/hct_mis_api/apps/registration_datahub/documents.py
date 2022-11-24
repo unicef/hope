@@ -1,4 +1,4 @@
-from typing import Optional, Type, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Type
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -7,10 +7,8 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
-from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
-
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
-
+from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.geo.models import Area

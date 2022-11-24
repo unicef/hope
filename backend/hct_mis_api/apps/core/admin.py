@@ -1,7 +1,7 @@
 import csv
 import logging
 from io import StringIO
-from typing import Any, Dict, List, TYPE_CHECKING, Tuple, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -16,7 +16,7 @@ from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.db.models import Aggregate, CharField
-from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -63,12 +63,12 @@ from hct_mis_api.apps.utils.admin import (
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
 
-
 if TYPE_CHECKING:
     from uuid import UUID
-    from django.http import HttpRequest
-    from django.db.models.query import QuerySet
+
     from django.contrib.admin import ModelAdmin
+    from django.db.models.query import QuerySet
+    from django.http import HttpRequest
 
 
 logger = logging.getLogger(__name__)
@@ -569,7 +569,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 
         return TemplateResponse(request, "core/xls_form.html", payload)
 
-    def change_view(self, request: HttpRequest, object_id: Optional[Any] = None, form_url: str = "", extra_context: Dict = None):
+    def change_view(
+        self, request: HttpRequest, object_id: Optional[Any] = None, form_url: str = "", extra_context: Dict = None
+    ):
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
         self.has_add_permission = lambda __: False  # type: ignore

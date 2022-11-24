@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Count, DecimalField, Max, Min, Q, Sum, QuerySet
+from django.db.models import Count, DecimalField, Max, Min, Q, QuerySet, Sum
 from django.template.loader import render_to_string
 
 import openpyxl

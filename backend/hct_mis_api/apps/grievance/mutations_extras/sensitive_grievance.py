@@ -1,4 +1,4 @@
-from typing import Any, Dict, TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import graphene
 
@@ -18,7 +18,9 @@ class SensitiveGrievanceTicketExtras(graphene.InputObjectType):
     payment_record = graphene.List(graphene.ID)
 
 
-def save_sensitive_grievance_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_sensitive_grievance_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     sensitive_grievance_extras = extras.get("category", {})
     sensitive_grievance_complaint_category_extras = sensitive_grievance_extras.get(
         "sensitive_grievance_ticket_extras", {}

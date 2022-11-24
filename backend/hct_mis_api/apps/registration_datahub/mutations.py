@@ -1,5 +1,6 @@
 import logging
-from typing import Tuple, TYPE_CHECKING, Dict, Any, Optional, IO
+import typing
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -43,6 +44,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 if TYPE_CHECKING:
     from uuid import UUID
+
     from hct_mis_api.apps.account.models import User
 
 
@@ -118,7 +120,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, registration_data_import_data: Dict) -> "RegistrationXlsxImportMutation":
+    def processed_mutate(
+        cls, root: Any, info: Any, registration_data_import_data: Dict
+    ) -> "RegistrationXlsxImportMutation":
         (
             created_obj_datahub,
             created_obj_hct,
@@ -165,7 +169,9 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, registration_data_import_datahub_id: Optional[str], **kwargs: Any) -> "RegistrationDeduplicationMutation":
+    def mutate(
+        cls, root: Any, info: Any, registration_data_import_datahub_id: Optional[str], **kwargs: Any
+    ) -> "RegistrationDeduplicationMutation":
         old_rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
@@ -200,7 +206,9 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, registration_data_import_data: Dict) -> RegistrationXlsxImportMutation:
+    def processed_mutate(
+        cls, root: Any, info: Any, registration_data_import_data: Dict
+    ) -> RegistrationXlsxImportMutation:
         cls.check_is_not_empty(registration_data_import_data.import_data_id)
 
         (
@@ -324,7 +332,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, file: OI, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
+    def mutate(cls, root: Any, info: Any, file: typing.OI, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
         import_data = ImportData.objects.create(
@@ -348,7 +356,9 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, uid: UUID, business_area_slug: str, only_active_submissions) -> "SaveKoboProjectImportDataAsync":
+    def mutate(
+        cls, root: Any, info: Any, uid: UUID, business_area_slug: str, only_active_submissions: bool
+    ) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 
         import_data = KoboImportData.objects.create(
@@ -371,7 +381,7 @@ class DeleteRegistrationDataImport(graphene.Mutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, **kwargs) -> "DeleteRegistrationDataImport":
+    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "DeleteRegistrationDataImport":
         decoded_id = decode_id_string(kwargs.get("registration_data_import_id"))
         rdi_obj = RegistrationDataImport.objects.get(id=decoded_id)
         rdi_obj.delete()

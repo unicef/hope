@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
@@ -19,17 +19,18 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models import QuerySet
+
     from hct_mis_api.apps.core.models import BusinessArea
 
 
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id, e) -> None:
+def handle_rdi_exception(datahub_rdi_id: UUID, e: BaseException) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -43,7 +44,7 @@ def handle_rdi_exception(datahub_rdi_id, e) -> None:
 
 
 @contextmanager
-def locked_cache(key) -> Any:
+def locked_cache(key: Union[int, str]) -> Any:
     try:
         # ``blocking_timeout`` indicates the maximum amount of time in seconds to
         # spend trying to acquire the lock.
@@ -63,9 +64,7 @@ def locked_cache(key) -> Any:
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
-    registration_data_import_id: "UUID",
-    import_data_id: "UUID",
-    business_area: "BusinessArea"
+    registration_data_import_id: "UUID", import_data_id: "UUID", business_area: "BusinessArea"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -99,9 +98,7 @@ def registration_xlsx_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    registration_data_import_id: "UUID",
-    import_data_id: "UUID",
-    business_area: "BusinessArea"
+    registration_data_import_id: "UUID", import_data_id: "UUID", business_area: "BusinessArea"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -321,7 +318,7 @@ def extract_records_task(max_records: int = 500) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def fresh_extract_records_task(records_ids: Optional[List] = None) -> None:
+def fresh_extract_records_task(records_ids: Optional[List] = None) -> "_QuerySet[Any, Any]":
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
@@ -334,9 +331,9 @@ def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,
     template: str = "ukraine rdi {date}",
-    auto_merge=False,
-    fix_tax_id=False,
-    **filters,
+    auto_merge: bool = False,
+    fix_tax_id: bool = False,
+    **filters: Any,
 ) -> Optional[List]:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
@@ -406,7 +403,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(
-    page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters
+    page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
@@ -432,7 +429,9 @@ def automate_registration_diia_import_task(
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_diia_import_task(diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters) -> List:
+def registration_diia_import_task(
+    diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,

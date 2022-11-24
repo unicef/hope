@@ -9,13 +9,13 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 from zipfile import BadZipfile
 
-from PIL.Image import Image
 from django.core import validators as django_core_validators
 
 import openpyxl
 import phonenumbers
 from dateutil import parser
 from openpyxl import load_workbook
+from PIL.Image import Image
 
 from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,

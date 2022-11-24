@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD, config
 

@@ -9,10 +9,11 @@ from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models.query import QuerySet
+
     from hct_mis_api.apps.account.models import User
 
 

@@ -6,7 +6,6 @@ from django_filters import CharFilter, FilterSet
 
 from hct_mis_api.apps.activity_log.models import LogEntry
 
-
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
 

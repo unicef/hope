@@ -1,7 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, Any, List
 
 import factory
 from factory import fuzzy
@@ -29,7 +29,6 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
@@ -370,7 +369,7 @@ def create_payment_verification_plan_with_status(
     business_area: BusinessArea,
     program: Program,
     target_population: TargetPopulation,
-    status: str
+    status: str,
 ) -> CashPlanPaymentVerification:
     cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
     cash_plan_payment_verification.status = status
