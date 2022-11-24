@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Optional
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -66,7 +66,7 @@ class RoleNode(DjangoObjectType):
 class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
-    def resolve_permissions(self, info: Any):
+    def resolve_permissions(self, info: Any) -> Set:
         user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
         return permissions_resolver(user_roles)
 
@@ -127,7 +127,7 @@ class JSONLazyString(graphene.Scalar):
         return json.dumps(dt, cls=LazyEncoder)
 
     @staticmethod
-    def parse_literal(node: Node) -> Dict:
+    def parse_literal(node: Node) -> Optional[Dict]:
         if isinstance(node, graphene.String):
             return json.loads(node.value)
 

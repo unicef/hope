@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Iterable, Optional, Tuple, Type
+from typing import Iterable, Optional, Tuple, Type, Any
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     # TODO: signature differs from superclass
-    def _generate_next_value_(name, *args):  # type: ignore
+    def _generate_next_value_(name, *args: Any) -> str:  # type: ignore
         return name
 
     # RDI
@@ -358,13 +358,13 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
 class BaseMutationPermissionMixin:
     @classmethod
-    def is_authenticated(cls, info) -> bool:
+    def is_authenticated(cls, info: Any) -> bool:
         if not info.context.user.is_authenticated:
             cls.raise_permission_denied_error(True)
         return True
 
     @classmethod
-    def has_permission(cls, info, permission: Iterable, business_area_arg, raise_error=True) -> bool:
+    def has_permission(cls, info: Any, permission: Iterable, business_area_arg: str, raise_error: bool = True) -> bool:
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):
@@ -407,7 +407,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @staticmethod
-    def raise_permission_denied_error(not_authenticated=False, raise_error=True) -> bool:
+    def raise_permission_denied_error(not_authenticated: bool = False, raise_error: bool = True) -> bool:
         if not raise_error:
             return False
         if not_authenticated:
@@ -420,11 +420,11 @@ class BaseMutationPermissionMixin:
 
 class PermissionMutation(BaseMutationPermissionMixin, Mutation):
     @classmethod
-    def mutate(cls, root, info, **kwargs):
+    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> None:
         return super().mutate(root, info, **kwargs)
 
 
 class PermissionRelayMutation(BaseMutationPermissionMixin, ClientIDMutation):
     @classmethod
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root: Any, info: Any, **kwargs: Any) -> None:
         return super().mutate_and_get_payload(root, info, **kwargs)
