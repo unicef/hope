@@ -24,6 +24,7 @@ from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
 
 if TYPE_CHECKING:
+    from rest_framework.views import View
     from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -45,7 +46,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     def get_queryset(self) -> QuerySet:
         return RegistrationDataImportDatahub.objects.filter(business_area=self.selected_business_area)
 
-    def dispatch(self, request: Request, *args: Any, **kwargs: Any) -> HttpResponseBase:
+    def dispatch(self, request: Request, *args: Any, **kwargs: Any) -> View:
         return super().dispatch(request, *args, **kwargs)
 
     @atomic()

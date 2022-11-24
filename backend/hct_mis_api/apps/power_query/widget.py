@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.templatetags.static import static
@@ -6,7 +8,7 @@ from django.templatetags.static import static
 class FormatterEditor(forms.Textarea):
     template_name = "steficon/widgets/codewidget.html"
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         theme = kwargs.pop("theme", "midnight")
         super().__init__(*args, **kwargs)
         self.attrs["class"] = "formatter-editor"
@@ -62,5 +64,5 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj):
+    def label_from_instance(self, obj :Any) -> str:
         return f"{obj.name.title()} ({obj.app_label})"
