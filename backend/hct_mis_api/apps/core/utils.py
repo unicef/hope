@@ -708,8 +708,8 @@ def timezone_datetime(value):
 
 
 def save_data_in_cache(cache_key, data_lambda, timeout=60 * 60 * 24):
-    cache_data = cache.get(cache_key)
-    if cache_data is None:
+    cache_data = cache.get(cache_key, "NOT_CACHED")
+    if cache_data == "NOT_CACHED":
         cache_data = data_lambda()
         cache.set(cache_key, cache_data, timeout=timeout)
     return cache_data
