@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 from django.core.cache import cache
 
@@ -9,6 +9,11 @@ from rest_framework.response import Response
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
 from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
+
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,15 +46,15 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     admin = serializers.CharField(default=None)
     list_name = serializers.CharField(default=None)
 
-    def get_labels(self, obj):
+    def get_labels(self, obj: Any) -> Any:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_value(self, obj) -> Union[str, Optional[Any]]:
+    def get_value(self, obj: Any) -> Union[str, Optional[Any]]:
         if isinstance(obj, FlexibleAttributeChoice):
             return obj.name
         return _custom_dict_or_attr_resolver("value", None, obj)
 
-    def get_label_en(self, obj) -> Optional[str]:
+    def get_label_en(self, obj: Any) -> Optional[str]:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
@@ -69,17 +74,17 @@ class FieldAttributeSerializer(serializers.Serializer):
     def get_labels(self, obj):
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_label_en(self, obj) -> Optional[str]:
+    def get_label_en(self, obj: Any) -> Optional[str]:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
 
-    def get_is_flex_field(self, obj):
+    def get_is_flex_field(self, obj: Any) -> bool:
         if isinstance(obj, FlexibleAttribute):
             return True
         return False
 
-    def get_associated_with(self, obj):
+    def get_associated_with(self, obj: Any) -> Union[str, int]:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
         if resolved == 0:
             return "Household"
@@ -90,7 +95,7 @@ class FieldAttributeSerializer(serializers.Serializer):
 
 
 @api_view()
-def all_fields_attributes(request):
+def all_fields_attributes(request: Request) -> Response:
     business_area_slug = request.data.get("business_area_slug")
 
     records = cache.get(business_area_slug)

@@ -117,7 +117,7 @@ class GenerateDashboardReportContentHelpers:
             valid_payment_records_in_instance_filter_key,
         ) = cls._get_business_areas_or_programs(report, valid_payment_records)
 
-        def aggregate_by_delivery_type(payment_records) -> Dict:
+        def aggregate_by_delivery_type(payment_records: QuerySet[PaymentRecord]) -> Dict:
             result = dict()
             for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
                 value = delivery_type[0]
@@ -163,7 +163,7 @@ class GenerateDashboardReportContentHelpers:
                     cash_plans__payment_records__delivery_date__month=month,
                 )
 
-        def get_annotation(index_number: int, cash=True) -> Dict:
+        def get_annotation(index_number: int, cash: bool = True) -> Dict:
             key_label = months_labels[index_number]
             label = f"{key_label}_cash" if cash else f"{key_label}_voucher"
             return {
@@ -280,7 +280,7 @@ class GenerateDashboardReportContentHelpers:
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
         path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
 
-        def format_status_filter(status) -> Q:
+        def format_status_filter(status: str) -> Q:
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
 
         programs = (
@@ -374,7 +374,7 @@ class GenerateDashboardReportContentHelpers:
         return business_areas, totals
 
     @classmethod
-    def get_total_transferred_by_admin_area(cls, report: DashboardReport):
+    def get_total_transferred_by_admin_area(cls, report: DashboardReport) -> Tuple:
         # only for country dashboard
         valid_payment_records = cls._get_payment_records_for_report(report)
         admin_areas = (
@@ -414,7 +414,7 @@ class GenerateDashboardReportContentHelpers:
         return admin_areas, totals
 
     @staticmethod
-    def format_beneficiaries_row(instance: Dict, is_totals: bool, *args) -> Tuple:
+    def format_beneficiaries_row(instance: Dict, is_totals: bool, *args: Any) -> Tuple:
         return (
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total Distinct",
@@ -424,7 +424,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_individuals_row(cls, instance: Dict, is_totals: bool, *args) -> Tuple:
+    def format_individuals_row(cls, instance: Dict, is_totals: bool, *args: Any) -> Tuple:
         all_count_fields = cls._get_all_with_disabled_individual_count_fields()
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
@@ -435,7 +435,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @staticmethod
-    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args):
+    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args: Any):
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
@@ -446,7 +446,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @classmethod
-    def format_programs_row(cls, instance: Program, *args) -> Tuple:
+    def format_programs_row(cls, instance: Program, *args: Any) -> Tuple:
         result: List = [
             instance.business_area.code,
             instance.business_area.name,
@@ -466,7 +466,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @staticmethod
-    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
+    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args: Any) -> tuple:
         if is_totals:
             return (
                 "",
@@ -483,7 +483,7 @@ class GenerateDashboardReportContentHelpers:
             )
 
     @staticmethod
-    def format_grievances_row(instance, is_totals: bool, is_hq: bool):
+    def format_grievances_row(instance: GrievanceTicket, is_totals: bool, is_hq: bool):
         if is_totals and not is_hq:
             # no totals row for country report
             return ()
@@ -532,7 +532,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_total_transferred_by_admin_area_row(cls, instance, is_totals: bool, *args):
+    def format_total_transferred_by_admin_area_row(cls, instance: Area, is_totals: bool, *args: Any) -> str:
         fields_list = cls._get_all_individual_count_fields()
 
         shared_cells = tuple(instance.get(f"{field_name}__sum", 0) for field_name in fields_list)
@@ -578,7 +578,7 @@ class GenerateDashboardReportContentHelpers:
         return filter_vars
 
     @classmethod
-    def _format_filters_for_payment_records(self, report: DashboardReport):
+    def _format_filters_for_payment_records(self, report: DashboardReport) -> Dict:
         return self._format_filters(
             report,
             {"delivered_quantity_usd__gt": 0},
@@ -589,11 +589,11 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def _get_payment_records_for_report(self, report) -> QuerySet[PaymentRecord]:
+    def _get_payment_records_for_report(self, report: DashboardReport) -> QuerySet[PaymentRecord]:
         return PaymentRecord.objects.filter(**self._format_filters_for_payment_records(report))
 
     @classmethod
-    def _get_business_areas_or_programs(cls, report, valid_payment_records) -> Tuple[Any, str]:
+    def _get_business_areas_or_programs(cls, report: DashboardReport, valid_payment_records: List[PaymentRecord]) -> Tuple[Any, str]:
         if cls._is_report_global(report):
             business_area_code_path = "code"
             instances = BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
@@ -611,7 +611,7 @@ class GenerateDashboardReportContentHelpers:
         return instances, valid_payment_records_in_instance_filter_key
 
     @staticmethod
-    def _aggregate_instances_sum(instances, field_list: List) -> Dict:
+    def _aggregate_instances_sum(instances: Any, field_list: List) -> Dict:
         aggregation_list = [Sum(field_name) for field_name in field_list]
         return instances.aggregate(*aggregation_list)
 
@@ -1037,7 +1037,7 @@ class GenerateDashboardReportService:
         return tuple(str_row)
 
     @staticmethod
-    def _format_date(date) -> str:
+    def _format_date(date: datetime) -> str:
         return date.strftime("%Y-%m-%d") if date else ""
 
     @staticmethod
@@ -1047,7 +1047,7 @@ class GenerateDashboardReportService:
         )
 
     @staticmethod
-    def _remove_empty_columns(ws, totals_row, min_col=1, max_col=2) -> int:
+    def _remove_empty_columns(ws: Worksheet, totals_row: int, min_col: int = 1, max_col: int = 2) -> int:
         to_remove_columns = []
         for col_idx in range(min_col, max_col):
             col_letter = get_column_letter(col_idx)

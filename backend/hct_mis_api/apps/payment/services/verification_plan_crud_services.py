@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Dict
+
 from django.db.models import QuerySet
 
 from graphql import GraphQLError
@@ -16,7 +18,11 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 
 
-def get_payment_records(cash_plan, verification_channel) -> QuerySet:
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import CashPlan
+
+
+def get_payment_records(cash_plan: CashPlan, verification_channel: str) -> QuerySet:
     if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
         return cash_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return cash_plan.available_payment_records()
@@ -24,7 +30,7 @@ def get_payment_records(cash_plan, verification_channel) -> QuerySet:
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, cash_plan, input_data) -> CashPlanPaymentVerification:
+    def create(cls, cash_plan: CashPlan, input_data: Dict) -> CashPlanPaymentVerification:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
@@ -46,7 +52,7 @@ class VerificationPlanCrudServices:
         return cash_plan_verification
 
     @classmethod
-    def update(cls, cash_plan_verification, input_data) -> CashPlanPaymentVerification:
+    def update(cls, cash_plan_verification: CashPlanPaymentVerification, input_data: Dict) -> CashPlanPaymentVerification:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
@@ -67,7 +73,7 @@ class VerificationPlanCrudServices:
         return cash_plan_verification
 
     @classmethod
-    def delete(cls, cash_plan_verification) -> None:
+    def delete(cls, cash_plan_verification: CashPlanPaymentVerification) -> None:
         if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can delete only PENDING verification")
 
