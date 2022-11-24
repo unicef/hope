@@ -15,6 +15,7 @@ from graphene_django.filter.utils import (
 )
 from graphql import GraphQLError
 
+from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -280,7 +281,7 @@ class BaseNodePermissionMixin:
             raise GraphQLError("Permission Denied")
 
 
-class DjangoPermissionFilterConnectionField(DjangoConnectionField):
+class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
         type,
