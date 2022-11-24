@@ -1,5 +1,6 @@
 from calendar import timegm
 from hashlib import md5
+from typing import TYPE_CHECKING
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -12,14 +13,19 @@ from .models import Report, ReportDocument
 from .utils import basicauth
 
 
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.http import HttpRequest, HttpResponse
+
+
 @login_required()
-def report_list(request):
+def report_list(request: HttpRequest) -> HttpResponse:
     reports: [Report] = Report.objects.all()
     return render(request, "power_query/list.html", {"reports": reports})
 
 
 @login_required()
-def report(request, pk):
+def report(request: HttpRequest, pk: UUID) -> HttpResponse:
     report: Report = get_object_or_404(Report, pk=pk)
     if request.user.has_perm("power_query.view_report", report):
         if not report.documents.exists():
@@ -30,8 +36,8 @@ def report(request, pk):
 
 
 @login_required()
-def document(request, report, pk):
-    doc: ReportDocument = get_object_or_404(ReportDocument, pk=pk, report_id=report)
+def document(request: HttpRequest, report_id: UUID, pk: UUID) -> HttpResponse:
+    doc: ReportDocument = get_object_or_404(ReportDocument, pk=pk, report_id=report_id)
     res_etag = md5(doc.data.encode()).hexdigest()
     res_last_modified = timegm(doc.timestamp.utctimetuple())
 
@@ -55,7 +61,7 @@ def document(request, report, pk):
 
 
 @basicauth
-def data(request, pk):
+def data(request: HttpRequest, pk: UUID) -> HttpResponse:
     doc: ReportDocument = get_object_or_404(ReportDocument, pk=pk)
     report: Report = doc.report
     if request.user.has_perm("power_query.view_reportdocument", doc):

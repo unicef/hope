@@ -9,7 +9,6 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.household.models import Individual
     from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -25,11 +24,11 @@ def _get_min_max_score(golden_records: List[Dict[str, Any]]) -> Tuple[float, flo
 
 
 def create_grievance_ticket_with_details(
-    main_individual: "Individual",
-    possible_duplicate: "Individual",
-    business_area: "BusinessArea",
-    possible_duplicates: "List[Individual]" = None,
-    registration_data_import: "RegistrationDataImport" = None,
+    main_individual: Individual,
+    possible_duplicate: Individual,
+    business_area: BusinessArea,
+    possible_duplicates: Optional[List[Individual]] = None,
+    registration_data_import: Optional[RegistrationDataImport] = None,
     is_multiple_duplicates_version: bool = False,
 ) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.grievance.models import (
@@ -87,10 +86,10 @@ def create_grievance_ticket_with_details(
 
 
 def create_needs_adjudication_tickets(
-    individuals_queryset: "QuerySet[Individual]",
+    individuals_queryset: QuerySet[Individual],
     results_key: str,
-    business_area: "BusinessArea",
-    registration_data_import: RegistrationDataImport = None,
+    business_area: BusinessArea,
+    registration_data_import: Optional[RegistrationDataImport] = None,
 ) -> Optional[List[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.household.models import Individual
 

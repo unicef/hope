@@ -94,7 +94,7 @@ class RestartCreateReport(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, report_data):
+    def mutate(cls, root: Any, info: Any, report_data: Dict) -> "RestartCreateReport":
         business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
         report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
@@ -126,7 +126,7 @@ class CreateDashboardReport(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, report_data):
+    def mutate(cls, root: Any, info: Any, report_data: Dict) -> "CreateDashboardReport":
         business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
         cls.has_permission(info, Permissions.DASHBOARD_EXPORT, business_area)
 

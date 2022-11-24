@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.core.cache import cache
 from django.db import transaction
@@ -14,12 +15,17 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 from ..targeting.models import HouseholdSelection, TargetPopulation
 from .services.targeting_stats_refresher import full_rebuild, refresh_stats
 
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+
 logger = logging.getLogger(__name__)
 
 
 @app.task(queue="priority")
 @sentry_tags
-def target_population_apply_steficon(target_population_id):
+def target_population_apply_steficon(target_population_id: UUID) -> None:
     from hct_mis_api.apps.steficon.models import RuleCommit
 
     try:
@@ -58,7 +64,7 @@ def target_population_apply_steficon(target_population_id):
 
 
 @app.task(queue="priority")
-def target_population_rebuild_stats(target_population_id):
+def target_population_rebuild_stats(target_population_id: UUID) -> None:
     with cache.lock(
         f"target_population_rebuild_stats_{target_population_id}", blocking_timeout=60 * 10, timeout=60 * 60 * 2
     ):
@@ -77,7 +83,7 @@ def target_population_rebuild_stats(target_population_id):
 
 
 @app.task(queue="priority")
-def target_population_full_rebuild(target_population_id):
+def target_population_full_rebuild(target_population_id: UUID) -> None:
     with cache.lock(
         f"target_population_full_rebuild_{target_population_id}", blocking_timeout=60 * 10, timeout=60 * 60 * 2
     ):
