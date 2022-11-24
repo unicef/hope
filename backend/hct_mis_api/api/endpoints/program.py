@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers, status
 from rest_framework.mixins import CreateModelMixin
@@ -6,6 +8,11 @@ from rest_framework.response import Response
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.program.models import Program
+
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+    from rest_framework.serializers import Serializer
 
 
 class ProgramSerializer(serializers.ModelSerializer):
@@ -29,11 +36,11 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
     model = Program
     permission = Grant.API_PROGRAM_CREATE
 
-    def perform_create(self, serializer) -> None:
+    def perform_create(self, serializer: Serializer) -> None:
         serializer.save(business_area=self.selected_business_area)
 
     @swagger_auto_schema(request_body=ProgramSerializer)
-    def create(self, request, *args, **kwargs) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.selected_business_area
         serializer = ProgramSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

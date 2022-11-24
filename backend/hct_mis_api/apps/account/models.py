@@ -1,5 +1,5 @@
 import logging
-from typing import List, Any
+from typing import Any, List
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group

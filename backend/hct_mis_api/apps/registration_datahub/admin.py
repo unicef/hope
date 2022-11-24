@@ -1,11 +1,11 @@
 import base64
 import logging
-from typing import Any, Dict, Generator, Iterable, Optional, Tuple, Union, List
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter, ModelAdmin
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
 from django.http import HttpRequest
@@ -291,7 +291,9 @@ class AlexisFilter(SimpleListFilter):
     title = "Alexis"
     parameter_name = "alexis"
 
-    def __init__(self, request: HttpRequest, params: MultiValueDict[str, str], model: Any, model_admin: ModelAdmin) -> None:
+    def __init__(
+        self, request: HttpRequest, params: MultiValueDict[str, str], model: Any, model_admin: ModelAdmin
+    ) -> None:
         super().__init__(request, params, model, model_admin)
         self.lookup_kwarg = self.parameter_name
         self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])

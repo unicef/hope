@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from typing import Union, Any, List
+from typing import Any, List, Union
 
 from django.core.files import File
 from django.core.management import BaseCommand

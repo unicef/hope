@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import List, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter

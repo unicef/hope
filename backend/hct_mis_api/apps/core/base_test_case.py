@@ -2,7 +2,7 @@ import base64
 import os
 import random
 import sys
-from typing import Dict, Optional, TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.wsgi import WSGIRequest
@@ -15,7 +15,6 @@ from snapshottest.django import TestCase as SnapshotTestTestCase
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
@@ -52,7 +51,9 @@ class APITestCase(SnapshotTestTestCase):
                     print(f"Seed: {self.seed}", file=sys.stderr)
                     print("%s: %s\n%s" % (typ, self.id(), msg), file=sys.stderr)
 
-    def snapshot_graphql_request(self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None) -> None:
+    def snapshot_graphql_request(
+        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
+    ) -> None:
         if context is None:
             context = {}
 
@@ -64,7 +65,9 @@ class APITestCase(SnapshotTestTestCase):
             )
         )
 
-    def graphql_request(self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None) -> Dict:
+    def graphql_request(
+        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
+    ) -> Dict:
         if context is None:
             context = {}
 

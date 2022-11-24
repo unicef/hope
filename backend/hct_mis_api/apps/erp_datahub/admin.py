@@ -1,10 +1,10 @@
 from operator import itemgetter
-from typing import Any, Dict, TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, List, Tuple
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter
+from django.contrib.admin import SimpleListFilter, ModelAdmin
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
@@ -26,9 +26,9 @@ from hct_mis_api.apps.erp_datahub.tasks.sync_to_mis_datahub import SyncToMisData
 from hct_mis_api.apps.mis_datahub import models as mis_models
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models.query import QuerySet
     from django.http import HttpRequest
 
@@ -82,7 +82,7 @@ class FundsCommitmentAssignBusinessOffice(forms.ModelForm):
         return self.cleaned_data["business_office_code"].code
 
 
-def should_show_assign_business_office(request, obj):
+def should_show_assign_business_office(request: HttpRequest, obj: Any) -> bool:
     business_area = BusinessArea.objects.get(code=obj.business_area)
     return business_area.is_split and obj.business_office_code is None
 
@@ -92,7 +92,7 @@ class SplitBusinessAreaFilter(SimpleListFilter):
     title = "Split Business Area"
     parameter_name = "split"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> List[Tuple[int, str]]:
         return [(1, "Yes"), (2, "No")]
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> Optional[QuerySet]:
@@ -125,7 +125,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def assign_business_office(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse, TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
@@ -185,7 +185,9 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         initial["status_date"] = timezone.now()
         return initial
 
-    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Union[FundsCommitmentAddForm, Form]:
+    def get_form(
+        self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
+    ) -> Union[FundsCommitmentAddForm, Form, Form]:
         if not change:
             return FundsCommitmentAddForm
         return super().get_form(request, obj, change, **kwargs)

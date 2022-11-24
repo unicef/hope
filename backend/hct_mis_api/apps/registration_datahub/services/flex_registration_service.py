@@ -2,7 +2,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import Any, Dict, List, Optional, Type, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -45,7 +45,9 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models.query import QuerySet
+
     from hct_mis_api.apps.account.models import User
 
 
@@ -273,7 +275,9 @@ class FlexRegistrationService:
             raise ValidationError(form.errors)
         return form.save()
 
-    def _prepare_household_data(self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport) -> Dict:
+    def _prepare_household_data(
+        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
+    ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,

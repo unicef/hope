@@ -3,7 +3,7 @@ import enum
 import logging
 from datetime import datetime
 from functools import reduce
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -1708,7 +1708,9 @@ CORE_FIELDS_ATTRIBUTES = [
 
 
 class FieldFactory(list):
-    def __init__(self, fields: Optional[Any] = None, scopes: Optional[list[Scope]] = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, fields: Optional[Any] = None, scopes: Optional[list[Scope]] = None, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)

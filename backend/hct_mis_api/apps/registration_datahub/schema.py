@@ -1,6 +1,6 @@
 import json
 from datetime import date
-from typing import Any, List, Set, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Set
 
 from django.db.models import Prefetch, Q
 
@@ -52,9 +52,9 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from hct_mis_api.apps.geo.models import Country
 
 

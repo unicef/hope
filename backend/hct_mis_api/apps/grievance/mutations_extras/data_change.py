@@ -279,7 +279,9 @@ def to_phone_number_str(dict: Dict, field_name: str) -> None:
         dict[field_name] = str(phone_number)
 
 
-def save_data_change_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_data_change_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     issue_type = input.get("issue_type")
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
@@ -294,7 +296,9 @@ def save_data_change_extras(root: Any, info: Any, input: Dict, grievance_ticket:
     raise Exception("Invalid issue type")
 
 
-def update_data_change_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
+def update_data_change_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
@@ -305,7 +309,9 @@ def update_data_change_extras(root: Any, info: Any, input: Dict, grievance_ticke
     return grievance_ticket
 
 
-def save_household_data_update_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_household_data_update_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
 
@@ -346,7 +352,9 @@ def save_household_data_update_extras(root: Any, info: Any, input: Dict, grievan
     return [grievance_ticket]
 
 
-def update_household_data_update_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> GrievanceTicket:
+def update_household_data_update_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> GrievanceTicket:
     ticket_details = grievance_ticket.household_data_update_ticket_details
     household_data_update_new_extras = extras.get("household_data_update_issue_type_extras")
     household = ticket_details.household
@@ -379,7 +387,9 @@ def update_household_data_update_extras(root: Any, info: Any, input: Dict, griev
     return grievance_ticket
 
 
-def save_individual_data_update_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_individual_data_update_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
 
@@ -572,7 +582,9 @@ def update_individual_data_update_extras(
     return grievance_ticket
 
 
-def save_individual_delete_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_individual_delete_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
 
@@ -588,7 +600,9 @@ def save_individual_delete_extras(root: Any, info: Any, input: Dict, grievance_t
     return [grievance_ticket]
 
 
-def save_household_delete_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_household_delete_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
     household_encoded_id = household_data_update_issue_type_extras.get("household")
@@ -603,7 +617,9 @@ def save_household_delete_extras(root: Any, info: Any, input: Dict, grievance_ti
     return [grievance_ticket]
 
 
-def save_add_individual_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def save_add_individual_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     add_individual_issue_type_extras = data_change_extras.get("add_individual_issue_type_extras")
 
@@ -635,7 +651,9 @@ def save_add_individual_extras(root: Any, info: Any, input: Dict, grievance_tick
     return [grievance_ticket]
 
 
-def update_add_individual_extras(root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any) -> List[GrievanceTicket]:
+def update_add_individual_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     ticket_details = grievance_ticket.add_individual_ticket_details
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 

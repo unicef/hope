@@ -4,6 +4,7 @@ import os
 import tempfile
 from datetime import datetime
 from functools import wraps
+from typing import Any, Callable
 from uuid import UUID
 
 from django.db import transaction
@@ -35,13 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 class transaction_celery_task:  # used as decorator
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.task_args = args
         self.task_kwargs = kwargs
 
-    def __call__(self, func):
+    def __call__(self, func: Callable):
         @wraps(func)
-        def wrapper_func(*args, **kwargs):
+        def wrapper_func(*args: Any, **kwargs: Any):
             try:
                 with transaction.atomic():
                     return func(*args, **kwargs)
@@ -55,7 +56,7 @@ class transaction_celery_task:  # used as decorator
 @app.task(bind=True, default_retry_delay=60)
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,

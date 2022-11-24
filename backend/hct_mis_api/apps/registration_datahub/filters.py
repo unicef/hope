@@ -13,7 +13,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
 )
 
-
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
 
@@ -69,5 +68,5 @@ class ImportedHouseholdFilter(FilterSet):
         )
     )
 
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) ->"QuerySet":
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
         return queryset.filter(registration_data_import__hct_id=decode_id_string(value))

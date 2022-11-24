@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List
 from uuid import UUID
 
 from django.conf import settings
@@ -33,10 +33,11 @@ from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 
-
 if TYPE_CHECKING:
     from datetime import datetime
+
     from django.http import HttpRequest
+
     from hct_mis_api.apps.utils.models import AbstractSession
 
 

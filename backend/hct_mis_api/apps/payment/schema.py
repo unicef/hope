@@ -313,14 +313,18 @@ class Query(graphene.ObjectType):
     def resolve_cash_plan_verification_sampling_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(CashPlanPaymentVerification.SAMPLING_CHOICES)
 
-    def resolve_cash_plan_verification_verification_channel_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_cash_plan_verification_verification_channel_choices(
+        self, info: Any, **kwargs: Any
+    ) -> List[Dict[str, Any]]:
         return to_choice_object(CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES)
 
     def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_payment_verification(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
+    def resolve_chart_payment_verification(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
         payment_verifications = chart_get_filtered_qs(
@@ -373,7 +377,9 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_volume_by_delivery_mechanism(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
+    def resolve_chart_volume_by_delivery_mechanism(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
@@ -407,7 +413,9 @@ class Query(graphene.ObjectType):
         return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_total_transferred(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
+    def resolve_section_total_transferred(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
         payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
         return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 

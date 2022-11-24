@@ -1,9 +1,9 @@
-from typing import Tuple, Type, Any, Dict, Optional, List, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from django.db.models import Case, Prefetch, Sum, Value, When, QuerySet
+from django.db.models import Case, Prefetch, QuerySet, Sum, Value, When
 
 import graphene
-from graphene import relay
+from graphene import relay, Field
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -128,7 +128,7 @@ class DocumentNode(DjangoObjectType):
     def resolve_country_iso3(parent: Document, info: Any) -> str:
         return parent.country.iso_code3
 
-    def resolve_photo(parent: Document, info: Any) -> str:
+    def resolve_photo(parent: Document, info: Any) -> Optional[str]:
         if parent.photo:
             return parent.photo.url
         return
@@ -204,13 +204,13 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     active_individuals_count = graphene.Int()
     admin_area = graphene.Field(AreaNode)
 
-    def resolve_admin1(parent, info: Any) -> Area:
+    def resolve_admin1(parent, info: Any) -> Field:
         return parent.admin1
 
-    def resolve_admin2(parent, info: Any) -> Area:
+    def resolve_admin2(parent, info: Any) -> Field:
         return parent.admin2
 
-    def resolve_admin_area(parent, info: Any) -> Area:
+    def resolve_admin_area(parent, info: Any) -> Field:
         return parent.admin_area
 
     def resolve_admin_area_title(parent, info: Any) -> str:
@@ -546,14 +546,18 @@ class Query(graphene.ObjectType):
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_households_reached(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, int]:
+    def resolve_section_households_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
         payment_records_qs = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_individuals_reached(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, int]:
+    def resolve_section_individuals_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
         households_individuals_params = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
@@ -577,7 +581,9 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_child_reached(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, int]:
+    def resolve_section_child_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
         households_child_params = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
@@ -598,7 +604,9 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_individuals_reached_by_age_and_gender(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
+    def resolve_chart_individuals_reached_by_age_and_gender(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
         households_params = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
@@ -625,7 +633,9 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_individuals_with_disability_reached_by_age(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
+    def resolve_chart_individuals_with_disability_reached_by_age(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
         households_params_with_disability = [
             "household__female_age_group_0_5_disabled_count",
             "household__female_age_group_6_11_disabled_count",

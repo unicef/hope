@@ -1,4 +1,4 @@
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 from uuid import UUID
 
 from rest_framework.permissions import IsAuthenticated
@@ -21,7 +21,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
 )
 from hct_mis_api.apps.utils.profiling import profiling
-
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

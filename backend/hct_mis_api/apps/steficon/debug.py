@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional
 
 from django.http import HttpRequest
 from django.template.response import TemplateResponse

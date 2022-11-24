@@ -219,7 +219,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         return f"name: {self.name}"
 
     def natural_key(self) -> Tuple[str]:
-        return self.name,
+        return (self.name,)
 
 
 class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):

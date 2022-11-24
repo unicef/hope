@@ -1,4 +1,4 @@
-from typing import Any, IO
+from typing import IO, Any
 
 import graphene
 from graphene_file_upload.scalars import Upload

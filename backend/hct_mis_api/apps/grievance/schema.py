@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict, Tuple, Type, Any, TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from django.core.files.storage import default_storage
 from django.db.models import Q
@@ -57,9 +57,9 @@ from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
-
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from hct_mis_api.apps.geo.models import Area
     from hct_mis_api.apps.household.models import Household, Individual
     from hct_mis_api.apps.payment.models import PaymentRecord
@@ -477,7 +477,9 @@ class Query(graphene.ObjectType):
         return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_grievances(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> "QuerySet[Any, Any]":
+    def resolve_chart_grievances(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> "QuerySet[Any, Any]":
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket,
             year,

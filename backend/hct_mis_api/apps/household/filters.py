@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, Dict, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
@@ -38,7 +38,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.program.models import Program
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea

@@ -1,7 +1,7 @@
 import logging
 import math
 from decimal import Decimal
-from typing import Any, IO, Optional, Dict
+from typing import IO, Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -45,7 +45,6 @@ from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
-
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +155,9 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, cash_plan_verification_id: str, **kwargs: Any) -> "FinishCashPlanVerificationMutation":
+    def mutate(
+        cls, root: Any, info: Any, cash_plan_verification_id: str, **kwargs: Any
+    ) -> "FinishCashPlanVerificationMutation":
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
         check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
@@ -187,7 +188,9 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any) -> "DiscardCashPlanVerificationMutation":
+    def mutate(
+        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
+    ) -> "DiscardCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -219,7 +222,9 @@ class InvalidCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any) -> "InvalidCashPlanVerificationMutation":
+    def mutate(
+        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
+    ) -> "InvalidCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -251,7 +256,9 @@ class DeleteCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any) -> "DeleteCashPlanVerificationMutation":
+    def mutate(
+        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
+    ) -> "DeleteCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
         cash_plan = cash_plan_verification.cash_plan

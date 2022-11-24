@@ -154,7 +154,9 @@ class RdiMergeTask:
         except Area.DoesNotExist as e:
             logger.exception(e)
 
-    def _prepare_households(self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport) -> Dict:
+    def _prepare_households(
+        self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
+    ) -> Dict:
         households_dict = {}
         countries = {}
         for imported_household in imported_households:
@@ -183,7 +185,9 @@ class RdiMergeTask:
 
         return households_dict
 
-    def _prepare_individual_documents_and_identities(self, imported_individual: ImportedIndividual, individual: Individual) -> Tuple[List, List]:
+    def _prepare_individual_documents_and_identities(
+        self, imported_individual: ImportedIndividual, individual: Individual
+    ) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
@@ -210,7 +214,9 @@ class RdiMergeTask:
 
         return documents_to_create, identities_to_create
 
-    def _prepare_individuals(self, imported_individuals: List[ImportedIndividual], households_dict: Dict, obj_hct: RegistrationDataImport) -> Tuple[Dict, List, List]:
+    def _prepare_individuals(
+        self, imported_individuals: List[ImportedIndividual], households_dict: Dict, obj_hct: RegistrationDataImport
+    ) -> Tuple[Dict, List, List]:
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
@@ -239,7 +245,9 @@ class RdiMergeTask:
 
         return individuals_dict, documents_to_create, identities_to_create
 
-    def _prepare_roles(self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict) -> List:
+    def _prepare_roles(
+        self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict
+    ) -> List:
         roles_to_create = []
         for imported_role in imported_roles:
             role = IndividualRoleInHousehold(
@@ -251,7 +259,9 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _prepare_bank_account_info(self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict) -> List:
+    def _prepare_bank_account_info(
+        self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
+    ) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
             role = BankAccountInfo(

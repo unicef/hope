@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Tuple, Type
+from typing import Dict, Optional, Tuple, Type, TYPE_CHECKING
 
 from django.core.cache import cache
 from django.db import transaction
@@ -27,12 +27,17 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
+
 log = logging.getLogger(__name__)
 
 
 class CheckAgainstSanctionListPreMergeTask:
     @staticmethod
-    def _get_query_dict(individual) -> Dict:
+    def _get_query_dict(individual: Individual) -> Dict:
         documents = [
             doc
             for doc in individual.documents.all()
@@ -76,7 +81,7 @@ class CheckAgainstSanctionListPreMergeTask:
 
     @classmethod
     @transaction.atomic
-    def execute(cls, individuals=None, registration_data_import: Optional[RegistrationDataImport] = None) -> None:
+    def execute(cls, individuals: QuerySet[SanctionListIndividual] = None, registration_data_import: Optional[RegistrationDataImport] = None) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE

@@ -4,7 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
-from typing import Any, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site

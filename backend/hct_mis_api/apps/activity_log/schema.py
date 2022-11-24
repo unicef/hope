@@ -1,4 +1,4 @@
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 
 from django.contrib.contenttypes.models import ContentType
 
