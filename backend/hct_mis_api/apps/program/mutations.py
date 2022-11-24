@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, Dict
 
 from django.db import transaction
 
@@ -64,7 +65,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
 
     @classmethod
     @is_authenticated
-    def processed_mutate(cls, root, info, program_data):
+    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
@@ -95,7 +96,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root, info, program_data, **kwargs):
+    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)
@@ -139,7 +140,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, **kwargs):
+    def mutate(cls, root: Any, info: Any, **kwargs:Any) -> "DeleteProgram":
         decoded_id = decode_id_string(kwargs.get("program_id"))
         program = Program.objects.get(id=decoded_id)
         old_program = Program.objects.get(id=decoded_id)

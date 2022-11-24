@@ -251,7 +251,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_list_template = None
     search_fields = ("name",)
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> Optional[Any]:
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Any]:
@@ -302,7 +302,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "admin/power_query/queryargs/preview.html", context)
 
     @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
-    def refresh(self, request, pk) -> None:
+    def refresh(self, request: HttpRequest, pk: UUID) -> None:
         if not (obj := self.get_object(request, pk)):
             raise Exception("Parametrizer not found")
         obj.refresh()

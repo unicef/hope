@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from django.db import models
 from django.db.models import BLANK_CHOICE_DASH
@@ -8,10 +8,10 @@ from .models import Country
 
 
 class GeoCountryDescriptor:
-    def __init__(self, field):
+    def __init__(self, field: Any) -> None:
         self.field = field
 
-    def __get__(self, instance=None, owner=None):
+    def __get__(self, instance: Optional[Any] = None, owner: Optional[Any] = None) -> Union[List[Country], Country]:
         if instance is None:
             return self
         # Check in case this field was deferred.
@@ -25,7 +25,7 @@ class GeoCountryDescriptor:
     def country(self, code: str) -> Country:
         return Country.objects.get(iso_code2=code)
 
-    def __set__(self, instance, value):
+    def __set__(self, instance: Country, value: Any) -> None:
         value = self.field.get_clean_value(value)
         instance.__dict__[self.field.name] = value
 

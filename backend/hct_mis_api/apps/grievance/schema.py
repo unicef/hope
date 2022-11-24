@@ -58,7 +58,7 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
+    from django.db.models.query import QuerySet, _QuerySet
 
     from hct_mis_api.apps.geo.models import Area
     from hct_mis_api.apps.household.models import Household, Individual
@@ -479,7 +479,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> "QuerySet[Any, Any]":
+    ) -> "_QuerySet[Any, Any]":
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket,
             year,

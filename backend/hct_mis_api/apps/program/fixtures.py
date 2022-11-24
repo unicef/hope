@@ -1,5 +1,6 @@
 from datetime import timedelta
 from random import randint
+from typing import Any
 
 import factory
 from factory import fuzzy
@@ -66,7 +67,7 @@ class ProgramFactory(factory.DjangoModelFactory):
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
 
     @factory.post_generation
-    def locations(self, create, extracted, **kwargs):
+    def locations(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             self.locations.add(AreaFactory())
 
@@ -142,7 +143,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def cash_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 

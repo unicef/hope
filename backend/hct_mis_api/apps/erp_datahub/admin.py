@@ -1,5 +1,5 @@
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, List, Tuple, Type
 
 from django import forms
 from django.conf import settings
@@ -9,7 +9,7 @@ from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db.transaction import atomic
-from django.forms import Form
+from django.forms import Form, ModelForm
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.db.models.query import QuerySet
-    from django.http import HttpRequest
+    from django.http import HttpRequest, HttpResponsePermanentRedirect
 
 
 class NumberValidator(RegexValidator):
@@ -125,7 +125,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse, TemplateResponse]:
+    def assign_business_office(self, request: HttpRequest, pk: UUID) -> HttpResponsePermanentRedirect:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
@@ -154,7 +154,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
 
     @button()
-    def execute_exchange_rate_sync(self, request: HttpRequest) -> TemplateResponse:
+    def execute_exchange_rate_sync(self, request: HttpRequest) -> None:
         if request.method == "POST":
             from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
                 PullFromErpDatahubTask,
@@ -187,7 +187,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
 
     def get_form(
         self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
-    ) -> Union[FundsCommitmentAddForm, Form, Form]:
+    ) -> Type[ModelForm[Any]]:
         if not change:
             return FundsCommitmentAddForm
         return super().get_form(request, obj, change, **kwargs)
@@ -219,7 +219,7 @@ class DownPaymentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def assign_business_office(self, request: HttpRequest, pk: UUID) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: DownPayment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
