@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from django import forms
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.contrib.admin import register
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import QuerySet
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -30,6 +30,11 @@ from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocum
 from .utils import to_dataset
 from .widget import FormatterEditor
 
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,10 +44,10 @@ class QueryResource(resources.ModelResource):
         fields = ("name", "description", "target", "code", "info")
         import_id_fields = ("name",)
 
-    def dehydrate_target(self, obj) -> str:
+    def dehydrate_target(self, obj: Any) -> str:
         return f"{obj.target.app_label}.{obj.target.model}"
 
-    def before_import_row(self, row, row_number=None, **kwargs) -> None:
+    def before_import_row(self, row: Dict, row_number: Optional[int] = None, **kwargs: Any) -> None:
         ct = row.get("target")
         app_label, model_name = ct.split(".")
         try:
@@ -65,7 +70,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_form_template = None
     resource_class = QueryResource
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Optional[forms.fields.Field]:
+    def formfield_for_dbfield(self, db_field, request: H, **kwargs: Any) -> Optional[forms.fields.Field]:
         if db_field.name == "code":
             kwargs = {"widget": PythonEditor}
         elif db_field.name == "description":
@@ -79,7 +84,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
     @button()
-    def datasets(self, request, pk) -> Optional[HttpResponseRedirect]:
+    def datasets(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponseRedirect]:
         obj = self.get_object(request, pk)
         try:
             url = reverse("admin:power_query_dataset_changelist")
@@ -152,20 +157,20 @@ class DatasetAdmin(HOPEModelAdminBase):
     readonly_fields = ("last_run", "query", "info")
     date_hierarchy = "last_run"
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def arguments(self, obj) -> str:
+    def arguments(self, obj: Any) -> str:
         return obj.info.get("arguments")
 
-    def dataset_type(self, obj) -> str:
+    def dataset_type(self, obj: Any) -> str:
         return obj.info.get("type")
 
-    def target_type(self, obj) -> str:
+    def target_type(self, obj: Any) -> str:
         return obj.query.target
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def preview(self, request, pk) -> Optional[HttpResponse]:
+    def preview(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         obj = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
@@ -197,7 +202,7 @@ class FormatterAdmin(ImportExportMixin, HOPEModelAdminBase):
     }
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def test(self, request, pk) -> HttpResponse:
+    def test(self, request: HttpRequest, pk: UUID) -> HttpResponse:
         context = self.get_common_context(request, pk)
         form = FormatterTestForm()
         try:
@@ -246,10 +251,10 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_list_template = None
     search_fields = ("name",)
 
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
-    def get_changeform_initial_data(self, request) -> Dict[str, Any]:
+    def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Any]:
         kwargs = {"owner": request.user}
         if "q" in request.GET:
             q = Query.objects.get(pk=request.GET["q"])
@@ -259,7 +264,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return kwargs
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def execute(self, request, pk) -> None:
+    def execute(self, request: HttpRequest, pk: UUID) -> None:
         if not (obj := self.get_object(request, pk)):
             raise Exception("Report not found")
         try:
@@ -277,7 +282,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
-    def refresh(self, request) -> None:
+    def refresh(self, request: HttpRequest) -> None:
         try:
             refresh_reports.delay()
             self.message_user(request, "Reports refresh queued", messages.SUCCESS)
@@ -292,7 +297,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     search_fields = ("name", "code")
 
     @button()
-    def preview(self, request, pk) -> TemplateResponse:
+    def preview(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Execution Plan")
         return TemplateResponse(request, "admin/power_query/queryargs/preview.html", context)
 
@@ -313,6 +318,6 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return len(obj.output or "")
 
     @button()
-    def view(self, request, pk) -> HttpResponseRedirect:
+    def view(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         url = reverse("power_query:report", args=[pk])
         return HttpResponseRedirect(url)

@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
@@ -11,11 +12,17 @@ from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
 
+
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.http import HttpRequest, HttpResponse
+
+
 logger = logging.getLogger(__name__)
 
 
 @staff_member_required
-def download_xlsx_households(request, target_population_id):
+def download_xlsx_households(request: HttpRequest, target_population_id: UUID) -> HttpResponse:
     target_population = get_object_or_404(TargetPopulation, id=target_population_id)
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     filename = f"{target_population.name}.xlsx"

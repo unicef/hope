@@ -264,7 +264,7 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
-        def get_payment_records(cash_plan: CashPlan, payment_verification_plan, verification_channel) -> QuerySet:
+        def get_payment_records(cash_plan: CashPlan, payment_verification_plan: Optional[CashPlanPaymentVerification], verification_channel: str) -> QuerySet:
             if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
                 return cash_plan.available_payment_records(
                     payment_verification_plan=payment_verification_plan,
