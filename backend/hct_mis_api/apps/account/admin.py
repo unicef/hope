@@ -3,14 +3,14 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, TYPE_CHECKING
 from urllib.parse import unquote
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.options import IncorrectLookupParameters
+from django.contrib.admin.options import IncorrectLookupParameters, ModelAdmin
 from django.contrib.admin.utils import construct_change_message
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth import get_user_model
@@ -26,7 +26,7 @@ from django.db.transaction import atomic
 from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -57,6 +57,13 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
+
+
+if TYPE_CHECKING:
+    from uuid import UUID
+    from django.db.models.query import QuerySet
+    from django.forms import Form
+
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +102,7 @@ class UserRoleAdminForm(ModelForm):
 class UserRoleInlineFormSet(BaseInlineFormSet):
     model = account_models.UserRole
 
-    def add_fields(self, form, index) -> None:
+    def add_fields(self, form: Form, index: int) -> None:
         super().add_fields(form, index)
         form.fields["business_area"].choices = [
             (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
@@ -159,7 +166,7 @@ class DjAdminManager:
     class ResponseException(Exception):
         pass
 
-    def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL) -> None:
+    def __init__(self, kf_host: str = settings.KOBO_KF_URL, kc_host: str = settings.KOBO_KC_URL) -> None:
         self.admin_path = "/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
@@ -173,11 +180,11 @@ class DjAdminManager:
         self._password = None
         self.form_errors = []
 
-    def extract_errors(self, res) -> List:
+    def extract_errors(self, res: Response) -> List:
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: List[int], location: Optional[str] = None, custom_error="") -> None:
+    def assert_response(self, status: List[int], location: Optional[str] = None, custom_error: str = "") -> None:
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
@@ -201,7 +208,7 @@ class DjAdminManager:
         )
         return client
 
-    def logout(self, request) -> None:
+    def logout(self, request: HttpRequest) -> None:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
@@ -235,16 +242,16 @@ class DjAdminManager:
             logger.exception(e)
             raise
 
-    def _get(self, url) -> Any:
+    def _get(self, url: str) -> Any:
         self._last_response = self.client.get(url, allow_redirects=False)
         self.client.headers["Referer"] = url
         return self._last_response
 
-    def _post(self, url, data) -> Any:
+    def _post(self, url: str, data: Dict) -> Any:
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
-    def list_users(self, q="") -> Generator:
+    def list_users(self, q: str = "") -> Generator:
         regex = re.compile(
             r'action-checkbox.*value="(?P<id>\d+)".*</td>.*field-username.*<a.*?>(?P<username>.*)</a></t.>.*field-email">(?P<mail>.*?)<',
             re.MULTILINE + re.IGNORECASE,
@@ -271,7 +278,7 @@ class DjAdminManager:
         except Exception:
             raise ValueError("Unable to get CSRF token from Kobo")
 
-    def delete_user(self, username, pk) -> None:
+    def delete_user(self, username: str, pk: UUID) -> None:
         self.login()
         for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
             self._get(url)
@@ -290,10 +297,10 @@ class HasKoboAccount(SimpleListFilter):
     parameter_name = "kobo_account"
     title = "Has Kobo Access"
 
-    def lookups(self, request, model_admin) -> Tuple:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Tuple:
         return (1, "Yes"), (0, "No")
 
-    def queryset(self, request, queryset) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() == "0":
             return queryset.filter(Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None))
         elif self.value() == "1":
@@ -306,10 +313,10 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request, model_admin) -> Any:  # TODO: typing
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Any:  # TODO: typing
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
-    def queryset(self, request, queryset) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         return queryset.filter(user_roles__business_area=self.value()).distinct() if self.value() else queryset
 
 
@@ -412,7 +419,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -421,7 +428,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             )
         )
 
-    def get_fields(self, request, obj=None) -> List[str]:
+    def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> List[str]:
         return [
             "last_name",
             "first_name",
@@ -430,15 +437,15 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             "job_title",
         ]
 
-    def get_fieldsets(self, request, obj=None) -> Any:
+    def get_fieldsets(self, request: HttpRequest, obj: Optional[Any] = None) -> Any:
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)
         return [(None, {"fields": self.get_fields(request, obj)})]
 
-    def kobo_user(self, obj) -> str:
+    def kobo_user(self, obj: Any) -> str:
         return obj.custom_fields.get("kobo_username")
 
-    def get_deleted_objects(self, objs, request) -> Any:
+    def get_deleted_objects(self, objs: List[Any], request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -447,7 +454,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             to_delete.append(f"Kobo: {kobo_username}")
         return to_delete, model_count, perms_needed, protected
 
-    def delete_view(self, request, object_id, extra_context=None) -> HttpResponse:
+    def delete_view(self, request: HttpRequest, object_id: UUID, extra_context: Optional[Dict] = None) -> HttpResponse:
         if request.POST:  # The user has confirmed the deletion.
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)
@@ -472,7 +479,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
 
         return res
 
-    def delete_model(self, request, obj) -> None:
+    def delete_model(self, request: HttpRequest, obj: Any) -> None:
         try:
             if "kobo_username" in obj.custom_fields:
                 api = DjAdminManager()
@@ -485,7 +492,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             raise
 
     @button()
-    def privileges(self, request, pk) -> TemplateResponse:
+    def privileges(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         user: account_models.User = context["original"]
         all_perms = user.get_all_permissions()
@@ -502,7 +509,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         context["business_ares_roles"] = dict(ba_roles)
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    def get_actions(self, request) -> Dict:
+    def get_actions(self, request: HttpRequest) -> Dict:
         actions = super().get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
             if "create_kobo_user_qs" in actions:
@@ -512,7 +519,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
                 del actions["add_business_area_role"]
         return actions
 
-    def add_business_area_role(self, request, queryset) -> HttpResponse:
+    def add_business_area_role(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         if "apply" in request.POST:
             form = AddRoleForm(request.POST)
             if form.is_valid():
@@ -558,7 +565,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
-    def _grant_kobo_accesss_to_user(self, user, notify=True, sync=True) -> None:
+    def _grant_kobo_accesss_to_user(self, user: User, notify: bool = True, sync: bool = True) -> None:
         password = get_random_string(length=12)
         url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
         username = get_valid_kobo_username(user)
@@ -596,7 +603,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         user.custom_fields["kobo_username"] = user.username
         user.save()
 
-    def create_kobo_user_qs(self, request, queryset) -> None:
+    def create_kobo_user_qs(self, request: HttpRequest, queryset: QuerySet) -> None:
         for user in queryset.all():
             try:
                 self._grant_kobo_accesss_to_user(request, user)
@@ -613,7 +620,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         permission="account.can_create_kobo_user",
         enabled=lambda b: not b.original.custom_fields.get("kobo_username"),
     )
-    def create_kobo_user(self, request, pk) -> None:
+    def create_kobo_user(self, request: HttpRequest, pk: UUID) -> None:
         try:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
             self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
@@ -625,7 +632,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         permission="account.can_create_kobo_user",
         enabled=lambda b: not b.custom_fields.get("kobo_username"),
     )
-    def remove_kobo_access(self, request, pk) -> None:
+    def remove_kobo_access(self, request: HttpRequest, pk: UUID) -> None:
         try:
             obj = self.get_object(request, pk)
             api = DjAdminManager()
@@ -643,7 +650,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
-    def import_csv(self, request) -> TemplateResponse:
+    def import_csv(self, request: HttpRequest) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
 
         context = self.get_common_context(request, processed=False)
@@ -732,7 +739,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
     @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
-    def kobo_users_sync(self, request) -> TemplateResponse:
+    def kobo_users_sync(self, request: HttpRequest) -> TemplateResponse:
         ctx = self.get_common_context(request)
         users = []
         if request.method == "POST":
@@ -775,7 +782,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     def __init__(self, model, admin_site) -> None:
         super().__init__(model, admin_site)
 
-    def _sync_ad_data(self, user) -> None:
+    def _sync_ad_data(self, user: User) -> None:
         ms_graph = MicrosoftGraphAPI()
         if user.ad_uuid:
             filters = [{"uuid": user.ad_uuid}, {"email": user.email}]
@@ -796,7 +803,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             raise Http404
 
     @button(label="AD Sync", permission="account.can_sync_with_ad")
-    def sync_multi(self, request) -> None:
+    def sync_multi(self, request: HttpRequest) -> None:
         not_found = []
         try:
             for user in account_models.User.objects.all():
@@ -821,7 +828,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             self.message_user(request, str(e), messages.ERROR)
 
     @button(label="Sync", permission="account.can_sync_with_ad")
-    def sync_single(self, request, pk) -> None:
+    def sync_single(self, request: HttpRequest, pk: UUID) -> None:
         try:
             self._sync_ad_data(self.get_object(request, pk))
             self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
@@ -830,7 +837,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission="account.can_load_from_ad")
-    def load_ad_users(self, request) -> TemplateResponse:
+    def load_ad_users(self, request: HttpRequest) -> TemplateResponse:
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
         ctx = self.get_common_context(
@@ -915,10 +922,10 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request, model_admin) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Optional[Iterable[Tuple[Any, str]]]:
         return Permissions.choices()
 
-    def queryset(self, request, queryset) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if not self.value():
             return queryset
         return queryset.filter(permissions__contains=[self.value()])
@@ -941,12 +948,12 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     change_list_template = "admin/account/role/change_list.html"
 
     @button()
-    def members(self, request, pk) -> HttpResponseRedirect:
+    def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
 
     @button()
-    def matrix(self, request) -> TemplateResponse:
+    def matrix(self, request: HttpRequest) -> TemplateResponse:
         ctx = self.get_common_context(request, action="Matrix")
         matrix1 = {}
         matrix2 = {}
@@ -976,10 +983,10 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         ctx["matrix2"] = matrix2
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
-    def _perms(self, request, object_id) -> set:
+    def _perms(self, request: HttpRequest, object_id: UUID) -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None) -> HttpResponse:
+    def changeform_view(self, request: HttpRequest, object_id: Optional[UUID] = None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
@@ -1009,7 +1016,7 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         ("role__subsystem", AllValuesComboFilter),
     )
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -1020,10 +1027,10 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
             )
         )
 
-    def check_sync_permission(self, request, obj=None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request, obj=None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
     def _get_data(self, record) -> str:
@@ -1045,11 +1052,11 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request, model_admin) -> List:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> List:
         types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
-    def queryset(self, request, queryset) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if not self.value():
             return queryset
         try:
@@ -1082,16 +1089,16 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
     change_list_template = "admin/account/group/change_list.html"
 
     @button(permission=lambda request, group: request.user.is_superuser)
-    def import_fixture(self, request) -> TemplateResponse:
+    def import_fixture(self, request: HttpRequest) -> TemplateResponse:
         from adminactions.helpers import import_fixture as _import_fixture
 
         return _import_fixture(self, request)
 
-    def _perms(self, request, object_id) -> set:
+    def _perms(self, request: HttpRequest, object_id: UUID) -> set:
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
 
     @button()
-    def users(self, request, pk) -> HttpResponse:
+    def users(self, request: HttpRequest, pk: UUID) -> HttpResponse:
         User = get_user_model()
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
@@ -1101,7 +1108,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         context["data"] = users
         return render(request, "admin/account/group/members.html", context)
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None) -> HttpResponse:
+    def changeform_view(self, request: HttpRequest, object_id: Optional[UUID]= None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
@@ -1129,7 +1136,7 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         ("group", AutoCompleteFilter),
     )
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -1140,10 +1147,10 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
             )
         )
 
-    def check_sync_permission(self, request, obj=None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request, obj=None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
     def _get_data(self, record) -> str:

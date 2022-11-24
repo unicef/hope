@@ -21,7 +21,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
-def _clean_data_for_range_field(value, field) -> Optional[Dict]:
+def _clean_data_for_range_field(value: Any, field: Any) -> Optional[Dict]:
     if value:
         clean_data = {}
         values = json.loads(value)
@@ -37,29 +37,29 @@ def _clean_data_for_range_field(value, field) -> Optional[Dict]:
 
 
 class IntegerRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, IntegerField)
 
 
 class DecimalRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, DecimalField)
 
 
 class DateTimeRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, DateTimeField)
 
 
 class DateRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, DateField)
 
 
 class BaseRangeFilter(Filter):
     field_class: Optional[Type[Field]] = None
 
-    def filter(self, qs, values):
+    def filter(self, qs: QuerySet, values: Dict) -> QuerySet:
         if values:
             min_value = values.get("min")
             max_value = values.get("max")

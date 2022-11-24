@@ -1,5 +1,6 @@
 import csv
 import logging
+from dataclasses import Field
 from io import StringIO
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
@@ -147,7 +148,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    def formfield_for_dbfield(self, db_field: JSONField, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: Field[Any, Any], request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
