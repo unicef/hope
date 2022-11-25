@@ -1,4 +1,4 @@
-from typing import Type, Union, Optional
+from typing import Optional, Type, Union
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -137,7 +137,9 @@ class IndividualDocument(Document):
 
         related_models = [Household, Document, IndividualIdentity, IndividualRoleInHousehold]
 
-    def get_instances_from_related(self, related_instance: RelatedInstanceType) -> Union[Individual, QuerySet[Individual]]:
+    def get_instances_from_related(
+        self, related_instance: RelatedInstanceType
+    ) -> Union[Individual, QuerySet[Individual]]:
         if isinstance(related_instance, (Document, IndividualIdentity, IndividualRoleInHousehold)):
             return related_instance.individual
         if isinstance(related_instance, Household):

@@ -1,7 +1,7 @@
 import json
 import numbers
 from collections import defaultdict
-from typing import Optional, Union, Any, List, Dict
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from django.contrib.gis.geos import Point
@@ -124,7 +124,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return float(value)
         return value
 
-    def _cast_and_assign(self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]) -> None:
+    def _cast_and_assign(
+        self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]
+    ) -> None:
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,

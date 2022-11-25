@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from django import forms
 from django.utils.safestring import mark_safe

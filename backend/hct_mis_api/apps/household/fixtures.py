@@ -1,8 +1,9 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-import factory
 from django.db.models import Model
+
+import factory
 from factory import enums, fuzzy
 from faker import Faker
 from pytz import utc

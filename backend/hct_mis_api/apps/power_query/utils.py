@@ -2,17 +2,17 @@ import base64
 import hashlib
 import inspect
 import json
-from typing import Any, Dict, Callable
+from typing import Any, Callable, Dict
 
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db.models import QuerySet
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.utils.safestring import mark_safe
+from django.views import View
 
 import tablib
 from concurrency.utils import get_classname
-from django.views import View
 
 
 def fqn(o: Any) -> str:

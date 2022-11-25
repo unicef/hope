@@ -17,7 +17,9 @@ class AccountConfig(AppConfig):
 
 
 # TODO: LogEntry model is not available at this point, use narrower type
-def log_impersonate(sender: Any, request: HttpRequest, hijacker: Any, hijacked: bool, *args: Any, **kwargs: Any) -> LogEntry:
+def log_impersonate(
+    sender: Any, request: HttpRequest, hijacker: Any, hijacked: bool, *args: Any, **kwargs: Any
+) -> LogEntry:
     from django.contrib.admin.models import LogEntry
 
     return LogEntry.objects.log_action(

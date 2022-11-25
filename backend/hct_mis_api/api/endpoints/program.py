@@ -9,10 +9,9 @@ from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.program.models import Program
 
-
 if TYPE_CHECKING:
     from rest_framework.request import Request
-    from rest_framework.serializers import Serializer, BaseSerializer
+    from rest_framework.serializers import BaseSerializer, Serializer
 
 
 class ProgramSerializer(serializers.ModelSerializer):

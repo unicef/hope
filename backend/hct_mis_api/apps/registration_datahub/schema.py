@@ -7,7 +7,7 @@ from django.db.models import Prefetch, Q
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from graphene import relay, Boolean, Int, String
+from graphene import Boolean, Int, String, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 

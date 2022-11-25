@@ -11,15 +11,15 @@ from uuid import UUID
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
+from django.core.files import File
 
 import openpyxl
 import phonenumbers
 from dateutil import parser
-from django.core.files import File
-from openpyxl import load_workbook, Workbook
-from PIL.Image import Image
+from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
+from PIL.Image import Image
 
 from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
@@ -1050,7 +1050,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def image_validator(self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any) -> Union[str, None]:
+    def image_validator(
+        self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
+    ) -> Union[str, None]:
         try:
             allowed_extensions = django_core_validators.get_available_image_extensions()
             file_extension = value.split(".")[-1]

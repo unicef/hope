@@ -1,4 +1,4 @@
-from typing import Tuple, Type, Any, Dict, List
+from typing import Any, Dict, List, Tuple, Type
 
 from django.db.models import (
     Case,
@@ -6,14 +6,15 @@ from django.db.models import (
     DecimalField,
     IntegerField,
     Q,
+    QuerySet,
     Sum,
     Value,
-    When, QuerySet,
+    When,
 )
 from django.db.models.functions import Coalesce
 
 import graphene
-from graphene import relay, Int, Boolean
+from graphene import Boolean, Int, relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -226,7 +227,9 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_total_transferred_by_month(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
+    def resolve_chart_total_transferred_by_month(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )

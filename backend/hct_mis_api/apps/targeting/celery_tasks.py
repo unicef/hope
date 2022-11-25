@@ -15,7 +15,6 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 from ..targeting.models import HouseholdSelection, TargetPopulation
 from .services.targeting_stats_refresher import full_rebuild, refresh_stats
 
-
 if TYPE_CHECKING:
     from uuid import UUID
 

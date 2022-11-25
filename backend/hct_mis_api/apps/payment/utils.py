@@ -1,11 +1,15 @@
 from decimal import Decimal
 from math import ceil
-from typing import Union, Dict, Literal
+from typing import Dict, Literal, Union
 
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentRecord,
+    PaymentVerification,
+)
 
 
 def get_number_of_samples(payment_records_sample_count: int, confidence_interval: int, margin_of_error: int) -> int:

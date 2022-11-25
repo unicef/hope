@@ -12,9 +12,9 @@ from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.http import HttpRequest, HttpResponse
 
 

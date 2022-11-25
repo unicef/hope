@@ -6,7 +6,9 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
 
 
-def get_exchange_rate_for_cash_plan(cash_plan: CashPlan, exchange_rates_client: Optional[ExchangeRates] = None) -> Optional[float]:
+def get_exchange_rate_for_cash_plan(
+    cash_plan: CashPlan, exchange_rates_client: Optional[ExchangeRates] = None
+) -> Optional[float]:
     if exchange_rates_client is None:
         exchange_rates_client = ExchangeRates()
 

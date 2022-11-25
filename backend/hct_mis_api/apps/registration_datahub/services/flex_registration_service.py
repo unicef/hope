@@ -46,8 +46,10 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models.query import QuerySet
-    from hct_mis_api.apps.account.models import User, Role
+
+    from hct_mis_api.apps.account.models import Role, User
 
 logger = logging.getLogger(__name__)
 

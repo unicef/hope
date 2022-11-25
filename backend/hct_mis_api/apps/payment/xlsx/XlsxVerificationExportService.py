@@ -1,6 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from django.conf import settings
 from django.core.files import File
@@ -15,10 +15,10 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
     PaymentVerification,
-    XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
 )
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User

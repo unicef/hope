@@ -140,7 +140,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, **kwargs:Any) -> "DeleteProgram":
+    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "DeleteProgram":
         decoded_id = decode_id_string(kwargs.get("program_id"))
         program = Program.objects.get(id=decoded_id)
         old_program = Program.objects.get(id=decoded_id)

@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib import admin
 from django.http import HttpResponseRedirect
@@ -18,11 +18,11 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminM
 from .models import HouseholdSelection, TargetPopulation
 from .steficon import SteficonExecutorMixin
 
-
 if TYPE_CHECKING:
     from uuid import UUID
-    from django.http import HttpRequest, HttpResponse
+
     from django.db.models.query import QuerySet
+    from django.http import HttpRequest, HttpResponse
 
 
 @admin.register(TargetPopulation)

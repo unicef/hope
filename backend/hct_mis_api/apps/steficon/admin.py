@@ -2,7 +2,7 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import Dict, List, Optional, Any, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
@@ -11,10 +11,10 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import QuerySet, Model
+from django.db.models import Model, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -51,7 +51,15 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(self, model: Model, admin_site: str, attrs: Optional[List] = None, choices: Tuple = (), using: Optional[Any] = None, pk_field: str = "id") -> None:
+    def __init__(
+        self,
+        model: Model,
+        admin_site: str,
+        attrs: Optional[List] = None,
+        choices: Tuple = (),
+        using: Optional[Any] = None,
+        pk_field: str = "id",
+    ) -> None:
         self.model = model
         self.pk_field = pk_field
         self.admin_site = admin_site
@@ -309,7 +317,9 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
 
-    def delete_view(self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None) -> Union[HttpResponse, HttpResponse]:
+    def delete_view(
+        self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None
+    ) -> Union[HttpResponse, HttpResponse]:
         return super().delete_view(request, object_id, extra_context)
 
     def render_delete_form(self, request: HttpRequest, context: Dict) -> Form:
@@ -466,16 +476,22 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    def change_view(self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
+    def change_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None
+    ) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 
-    def _changeform_view(self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
+    def _changeform_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None
+    ) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None
         return super()._changeform_view(request, object_id, form_url, extra_context)
 
     @atomic()
-    def save_model(self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Optional[Any] = None) -> None:
+    def save_model(
+        self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Optional[Any] = None
+    ) -> None:
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user

@@ -1,7 +1,7 @@
 # Create your models here.
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Tuple, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from django.db import models
 from django.http import HttpRequest
@@ -46,7 +46,7 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]: # type: ignore
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:  # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -81,7 +81,9 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = models.Manager()
 
-    def delete(self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Optional[Tuple[int, dict[str, int]]]:
+    def delete(
+        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.

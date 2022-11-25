@@ -1,4 +1,4 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.postgres.fields import IntegerRangeField
 from django.db.models import DateTimeField, Q
@@ -16,7 +16,6 @@ import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
-
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet

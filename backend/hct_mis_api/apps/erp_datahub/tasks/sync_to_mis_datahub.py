@@ -1,6 +1,6 @@
 from typing import Dict
 
-from django.db.models import Q, Model
+from django.db.models import Model, Q
 from django.db.transaction import atomic
 from django.utils import timezone
 

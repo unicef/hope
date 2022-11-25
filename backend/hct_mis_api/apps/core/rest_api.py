@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from django.core.cache import cache
 
@@ -9,7 +9,6 @@ from rest_framework.response import Response
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
 from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
-
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -71,7 +70,7 @@ class FieldAttributeSerializer(serializers.Serializer):
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
 
-    def get_labels(self, obj:Any) -> list[dict[str, Any]]:
+    def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
     def get_label_en(self, obj: Any) -> Optional[str]:

@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Any
+from typing import Any, Union
 
 from django.db.transaction import atomic
 from django.utils import timezone

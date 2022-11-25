@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -47,10 +47,10 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
-
 if TYPE_CHECKING:
-    from xlrd.sheet import Sheet
     from uuid import UUID
+
+    from xlrd.sheet import Sheet
 
 
 class RdiXlsxCreateTask(RdiBaseCreateTask):
@@ -71,7 +71,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
 
-    def _handle_collect_individual_data(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> str:
+    def _handle_collect_individual_data(
+        self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> str:
         try:
             return {
                 "FULL": COLLECT_TYPE_FULL,
@@ -82,7 +84,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         except KeyError:
             return COLLECT_TYPE_UNKNOWN
 
-    def _handle_bank_account_fields(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_bank_account_fields(
+        self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         if value is None:
             return
 
@@ -91,7 +95,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
         self.bank_accounts[f"individual_{row_num}"][name] = value
 
-    def _handle_document_fields(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_document_fields(
+        self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         if value is None:
             return
         common_header = header.replace("_no", "")
@@ -132,7 +138,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     "value": value,
                 }
 
-    def _handle_document_photo_fields(self, cell: Any, row_num: int, individual: ImportedIndividual, header: str, *args: Any, **kwargs: Any) -> None:
+    def _handle_document_photo_fields(
+        self, cell: Any, row_num: int, individual: ImportedIndividual, header: str, *args: Any, **kwargs: Any
+    ) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
         header = header.replace("_photo_i_c", "_i_c")
@@ -152,7 +160,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "photo": file,
             }
 
-    def _handle_document_issuing_country_fields(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_document_issuing_country_fields(
+        self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         if value is None:
             return
         header = header.replace("_issuer_i_c", "_i_c")
@@ -188,7 +198,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return file
         return "" if is_field_required is True else None
 
-    def _handle_decimal_field(self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any) -> Any:
+    def _handle_decimal_field(
+        self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any
+    ) -> Any:
         value = cell.value
         if not is_flex_field:
             return value
@@ -196,7 +208,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return float(value)
         return value
 
-    def _handle_bool_field(self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any) -> Any:
+    def _handle_bool_field(
+        self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any
+    ) -> Any:
         value = cell.value
         if isinstance(value, str):
             if value.lower() == "false":
@@ -215,10 +229,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return Point(x=float(longitude), y=float(latitude), srid=4326)
 
-    def _handle_datetime(self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any) -> datetime:
+    def _handle_datetime(
+        self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any
+    ) -> datetime:
         return timezone_datetime(cell.value)
 
-    def _handle_identity_fields(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_identity_fields(
+        self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         if value is None:
             return
 
@@ -236,7 +254,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "partner": partner,
             }
 
-    def _handle_identity_photo(self, cell: Any, row_num: int, header: str, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_identity_photo(
+        self, cell: Any, row_num: int, header: str, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
 
@@ -261,7 +281,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "partner": partner,
             }
 
-    def _handle_identity_issuing_country_fields(self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_identity_issuing_country_fields(
+        self, value: Any, header: str, row_num: int, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         if value is None:
             return
 
@@ -278,7 +300,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "partner": partner,
             }
 
-    def _handle_collectors(self, value: Any, header: str, individual: ImportedIndividual, *args: Any, **kwargs: Any) -> None:
+    def _handle_collectors(
+        self, value: Any, header: str, individual: ImportedIndividual, *args: Any, **kwargs: Any
+    ) -> None:
         list_of_ids = collectors_str_ids_to_list(value)
         if list_of_ids is None:
             return

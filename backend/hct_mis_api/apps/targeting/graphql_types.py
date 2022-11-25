@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Type, TYPE_CHECKING, Dict, Union, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import graphene
 from graphene import relay
@@ -18,10 +18,11 @@ from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
-
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from graphene.types.structures import List as GrapheneList
+
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 

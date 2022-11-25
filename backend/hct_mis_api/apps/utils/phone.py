@@ -1,7 +1,8 @@
 from typing import Any
 
-import phonenumbers
 from django.db.models import Model
+
+import phonenumbers
 
 
 def is_valid_phone_number(phone_number: Any) -> bool:

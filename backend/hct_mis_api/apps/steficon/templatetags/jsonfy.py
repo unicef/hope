@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Union, Any
+from typing import Any, Dict, Union
 
 from django import template
 from django.core import serializers
