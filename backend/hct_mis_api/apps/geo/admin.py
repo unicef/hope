@@ -1,11 +1,11 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Generator, Any
 
 from django.contrib import admin, messages
-from django.contrib.admin import ListFilter, RelatedFieldListFilter
+from django.contrib.admin import ListFilter, RelatedFieldListFilter, ModelAdmin
 from django.contrib.admin.utils import prepare_lookup_value
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Model
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -33,7 +33,7 @@ class ActiveRecordFilter(ListFilter):
     title = "Active"
     parameter_name = "active"
 
-    def __init__(self, request, params, model, model_admin) -> None:
+    def __init__(self, request: HttpRequest, params: List[str], model: Model, model_admin: ModelAdmin) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
             if p in params:
@@ -49,7 +49,7 @@ class ActiveRecordFilter(ListFilter):
     def expected_parameters(self) -> List:
         return [self.parameter_name]
 
-    def choices(self, changelist):
+    def choices(self, changelist: List) -> Generator:
         for lookup, title in ((None, "All"), ("1", "Yes"), ("0", "No")):
             yield {
                 "selected": self.value() == lookup,
@@ -92,7 +92,7 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
@@ -133,7 +133,7 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field, request, model_admin):
+    def field_choices(self, field: Any, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet[AreaType]:
         if "area_type__country__exact" not in request.GET:
             return []
         return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")

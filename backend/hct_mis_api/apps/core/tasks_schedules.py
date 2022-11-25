@@ -1,5 +1,6 @@
 from celery.schedules import crontab
 
+
 TASKS_SCHEDULES = {
     "sync_sanction_list": {
         "task": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",

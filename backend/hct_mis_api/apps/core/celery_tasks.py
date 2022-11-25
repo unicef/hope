@@ -40,9 +40,9 @@ class transaction_celery_task:  # used as decorator
         self.task_args = args
         self.task_kwargs = kwargs
 
-    def __call__(self, func: Callable):
+    def __call__(self, func: Callable) -> Any:
         @wraps(func)
-        def wrapper_func(*args: Any, **kwargs: Any):
+        def wrapper_func(*args: Any, **kwargs: Any) -> None:
             try:
                 with transaction.atomic():
                     return func(*args, **kwargs)

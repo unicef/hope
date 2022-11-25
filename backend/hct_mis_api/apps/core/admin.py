@@ -124,7 +124,7 @@ class GroupConcat(Aggregate):
     function = "GROUP_CONCAT"
     template = "%(function)s(%(distinct)s%(expressions)s)"
 
-    def __init__(self, expression: str, distinct: str = False, **extra: Any) -> None:
+    def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
         super().__init__(
             expression,
             distinct="DISTINCT " if distinct else "",
@@ -148,7 +148,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    def formfield_for_dbfield(self, db_field: "Field[Any, Any]", request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

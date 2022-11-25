@@ -2,6 +2,7 @@ import random
 from typing import Any, Dict, List, Optional, Tuple
 
 import factory
+from django.db.models import Model
 from factory import enums, fuzzy
 from faker import Faker
 from pytz import utc
@@ -34,7 +35,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 faker = Faker()
 
 
-def flex_field_households(o):
+def flex_field_households(o: Any) -> Dict:
     return {
         "treatment_facility_h_f": random.sample(
             [
@@ -52,7 +53,7 @@ def flex_field_households(o):
     }
 
 
-def flex_field_individual(o):
+def flex_field_individual(o: Any) -> Dict:
     return {
         "wellbeing_index_i_f": random.choice(["24", "150d", "666", None]),
         "school_enrolled_before_i_f": random.choice(["0", "1", None]),
@@ -127,7 +128,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs) -> Household:
+    def _create(cls, model_class: Model, *args: Any, **kwargs: Any) -> Household:
         if not (hoh := kwargs.get("head_of_household", None)):
             hoh = IndividualFactory(household=None)
             kwargs["head_of_household"] = hoh

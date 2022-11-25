@@ -82,7 +82,7 @@ class PostgresTestRunner(TestRunner):
             "output": output,
         }
 
-    def run_suite(self, suite, **kwargs) -> Any:
+    def run_suite(self, suite: Any, **kwargs: Any) -> Any:
         runner_kwargs = self.get_test_runner_kwargs()
         runner = self.test_runner(**runner_kwargs)
         results = runner.run(suite)
