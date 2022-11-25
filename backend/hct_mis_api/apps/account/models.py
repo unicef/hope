@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, TYPE_CHECKING
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -18,12 +18,17 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.permissions import Permissions, BasePermission
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import BusinessArea
+
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +102,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
-    def has_permission(self, permission, business_area, write=False) -> bool:
+    def has_permission(self, permission: BasePermission, business_area: BusinessArea, write: bool = False) -> bool:
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
@@ -125,7 +130,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
 
 class ChoiceArrayField(ArrayField):
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs: Any) -> Any:
         defaults = {
             "form_class": forms.MultipleChoiceField,
             "choices": self.base_field.choices,
@@ -203,7 +208,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user, business_area, role) -> None:
+    def validate_user_role(self, user: User, business_area: BusinessArea, role: UserRole) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
@@ -271,7 +276,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
                 )
             )
 
-    def validate_unique(self, *args, **kwargs):
+    def validate_unique(self, *args: Any, **kwargs: Any) -> None:
         super().validate_unique(*args, **kwargs)
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well

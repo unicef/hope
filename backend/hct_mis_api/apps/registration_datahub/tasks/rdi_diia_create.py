@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Dict
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -319,7 +319,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_hh_doc(self, data) -> None:
+    def _add_hh_doc(self, data: Dict) -> None:
         doc_type = self.national_passport_document_type if data.get("type") == "passport" else self.other_document_type
 
         self.documents.append(

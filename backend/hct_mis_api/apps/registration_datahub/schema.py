@@ -178,7 +178,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return resolve_flex_fields_choices_to_string(parent)
 
     @staticmethod
-    def resolve_age(parent, info: Any) -> Int:
+    def resolve_age(parent: Any, info: Any) -> Int:
         return parent.age
 
     def resolve_import_id(parent, info: Any) -> str:

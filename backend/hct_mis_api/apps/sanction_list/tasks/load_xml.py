@@ -367,7 +367,7 @@ class LoadSanctionListXMLTask:
         return {i.reference_number for i in individuals_from_file}
 
     @staticmethod
-    def _cast_field_value_to_correct_type(model: Any, field_name: str, value: Any):
+    def _cast_field_value_to_correct_type(model: Any, field_name: str, value: Any) -> Any:
         field = model._meta.get_field(field_name)
         # silencing lxml warning
         with open(os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):

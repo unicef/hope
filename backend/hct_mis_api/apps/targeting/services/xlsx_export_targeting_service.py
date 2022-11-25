@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 from django.db.models import Q, QuerySet
 
 import openpyxl
+from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -50,7 +51,7 @@ class XlsxExportTargetingService:
             .distinct()
         )
 
-    def generate_workbook(self) -> Worksheet:
+    def generate_workbook(self) -> Workbook:
         self._create_workbook()
         self._add_version()
         self._add_standard_columns_headers()

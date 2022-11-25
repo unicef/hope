@@ -69,7 +69,7 @@ def get_sentry_url(event_id: int, html: bool = False) -> str:
     return url
 
 
-def basicauth(view: Callable):
+def basicauth(view: Callable) -> Callable:
     def wrap(request: HttpRequest, *args: Any, **kwargs: Any) -> view:
         if request.user.is_authenticated:
             return view(request, *args, **kwargs)
