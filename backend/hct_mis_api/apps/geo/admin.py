@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, List, Optional, Generator, Any
+from typing import TYPE_CHECKING, List, Optional, Generator, Any, Tuple
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter, ModelAdmin
@@ -19,8 +19,7 @@ from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 if TYPE_CHECKING:
-    from django.http import HttpRequest
-
+    from django.http import HttpRequest, HttpResponsePermanentRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +132,7 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field: Any, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet[AreaType]:
+    def field_choices(self, field: Any, request: HttpRequest, model_admin: ModelAdmin) -> List[Tuple[str, str]]:
         if "area_type__country__exact" not in request.GET:
             return []
         return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
@@ -173,7 +172,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     )
 
     @button()
-    def import_areas(self, request: HttpRequest) -> Optional[TemplateResponse]:
+    def import_areas(self, request: HttpRequest) -> HttpResponsePermanentRedirect:
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)

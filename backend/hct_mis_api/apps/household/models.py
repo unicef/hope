@@ -455,7 +455,7 @@ class Household(
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         from hct_mis_api.apps.targeting.models import (
             HouseholdSelection,
             TargetPopulation,
@@ -471,7 +471,7 @@ class Household(
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag=None) -> None:
+    def withdraw(self, tag: Optional[Any] = None) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         user_fields = self.user_fields or {}
@@ -484,12 +484,12 @@ class Household(
         self.withdrawn_date = None
         self.save()
 
-    def set_sys_field(self, key, value) -> None:
+    def set_sys_field(self, key: str, value: Any) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key) -> Any:
+    def get_sys_field(self, key: str) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
@@ -865,7 +865,7 @@ class Individual(
         self.withdrawn_date = None
         self.save()
 
-    def mark_as_duplicate(self, original_individual=None) -> None:
+    def mark_as_duplicate(self, original_individual: Optional[Individual] = None) -> None:
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
         self.documents.update(status=Document.STATUS_INVALID)
@@ -880,12 +880,12 @@ class Individual(
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
 
-    def set_sys_field(self, key, value) -> None:
+    def set_sys_field(self, key: str, value: Any) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key) -> Any:
+    def get_sys_field(self, key: str) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None

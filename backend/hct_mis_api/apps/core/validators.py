@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Iterable, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, IO, Iterable, TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 
@@ -21,7 +21,6 @@ from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_
 
 
 if TYPE_CHECKING:
-    from django.core.files import File
     from openpyxl.worksheet.worksheet import Worksheet
 
 
@@ -65,7 +64,7 @@ class BaseValidator:
 
 class CommonValidator(BaseValidator):
     @classmethod
-    def validate_start_end_date(cls, *args: Any, **kwargs: Any):
+    def validate_start_end_date(cls, *args: Any, **kwargs: Any) -> None:
         start_date = kwargs.get("start_date")
         end_date = kwargs.get("end_date")
         if start_date and end_date:
@@ -222,7 +221,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_field_type(cls, core_field: Any, core_field_from_file: File, field_type: str) -> Optional[Dict]:
+    def _check_field_type(cls, core_field: Any, core_field_from_file: IO, field_type: str) -> Optional[Dict]:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -231,7 +230,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_is_field_required(cls, core_field: Any, core_field_from_file: File) -> Optional[Dict]:
+    def _check_is_field_required(cls, core_field: Any, core_field_from_file: IO) -> Optional[Dict]:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":
@@ -242,7 +241,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field: Any, core_field_from_file: File, field_choices: Dict) -> Optional[List]:
+    def _check_field_choices(cls, core_field: Any, core_field_from_file: IO, field_choices: Dict) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 

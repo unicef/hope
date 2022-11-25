@@ -436,7 +436,7 @@ def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def withdraw_individual_and_reassign_roles(ticket_details: List[GrievanceTicket], individual_to_remove, info) -> None:
+def withdraw_individual_and_reassign_roles(ticket_details: List[GrievanceTicket], individual_to_remove: Individual, info: Any) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
@@ -674,7 +674,7 @@ def log_and_withdraw_household_if_needed(
         removed_individual_household.withdraw()
 
 
-def save_images(flex_fields: str, associated_with: str) -> None:
+def save_images(flex_fields: Dict, associated_with: str) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
