@@ -107,7 +107,7 @@ class ImportDataValidator(BaseValidator):
     }
 
     @classmethod
-    def validate(cls, *args: Any, **kwargs: Any) -> List:
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:
         try:
             validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 

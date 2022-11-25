@@ -63,7 +63,7 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
     )
     background = forms.BooleanField(label="Run in background", required=False)
 
-    def clean_results(self):
+    def clean_results(self) -> Dict:
         try:
             return self.cleaned_data["results"].split(",")
         except Exception as e:

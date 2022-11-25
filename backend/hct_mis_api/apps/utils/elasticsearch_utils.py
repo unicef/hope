@@ -4,6 +4,7 @@ from time import sleep
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from uuid import UUID
 
+from django.db.models import Model
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search, connections
 
@@ -22,25 +23,25 @@ def populate_index(queryset: QuerySet, doc: Any, parallel: bool = False) -> None
     doc().update(qs, parallel=parallel)
 
 
-def _create(models) -> None:
+def _create(models: List[Model]) -> None:
     for index in registry.get_indices(models):
         index.create()
 
 
-def _populate(models, options: Dict) -> None:
+def _populate(models: List[Model], options: Dict) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
 
 
-def _delete(models) -> bool:
+def _delete(models: List[Model]) -> bool:
     for index in registry.get_indices(models):
         index.delete(ignore=404)
     return True
 
 
-def _rebuild(models, options: Dict) -> None:
+def _rebuild(models: List[Model], options: Dict) -> None:
     if not _delete(models, options):
         return
 
@@ -48,7 +49,7 @@ def _rebuild(models, options: Dict) -> None:
     _populate(models, options)
 
 
-def rebuild_search_index(models=None, options: Optional[Dict] = None) -> None:
+def rebuild_search_index(models: Optional[List[Model]] = None, options: Optional[Dict] = None) -> None:
     if options is None:
         options = {"parallel": False, "quiet": True}
     _rebuild(models=models, options=options)

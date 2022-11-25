@@ -131,7 +131,7 @@ class DocumentNode(DjangoObjectType):
     def resolve_photo(parent: Document, info: Any) -> Optional[String]:
         if parent.photo:
             return parent.photo.url
-        return
+        return None
 
     class Meta:
         model = Document
@@ -218,7 +218,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             return parent.admin_area.name
         return ""
 
-    def resolve_programs_with_delivered_quantity(parent, info: Any) -> Dict:
+    def resolve_programs_with_delivered_quantity(parent, info: Any) -> List:
         return programs_with_delivered_quantity(parent)
 
     def resolve_country(parent, info: Any) -> str:
@@ -334,7 +334,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_channels = graphene.List(BankAccountInfoNode)
 
     @staticmethod
-    def resolve_payment_channels(parent: Individual, info):
+    def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
         return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
     def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
@@ -359,7 +359,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
-    def resolve_relationship(parent, info: Any) -> Enum:
+    def resolve_relationship(parent, info: Any) -> Optional[Enum]:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
         if not parent.relationship:
             return None

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-def aggregate_optionally(household, **kwargs) -> Dict:
+def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
     if household.collect_individual_data == COLLECT_TYPE_PARTIAL:
         return {key: None for key, _ in kwargs.items()}
     return household.individuals.aggregate(**kwargs)

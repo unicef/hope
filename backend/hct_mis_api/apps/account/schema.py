@@ -127,7 +127,7 @@ class JSONLazyString(graphene.Scalar):
         return json.dumps(dt, cls=LazyEncoder)
 
     @staticmethod
-    def parse_literal(node: Node) -> Optional[Dict]:
+    def parse_literal(node: Node) -> Dict:
         if isinstance(node, graphene.String):
             return json.loads(node.value)
 

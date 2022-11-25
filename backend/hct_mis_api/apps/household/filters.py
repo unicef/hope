@@ -274,7 +274,7 @@ class IndividualFilter(FilterSet):
 
         return qs.filter(q_obj).distinct()
 
-    def filter_excluded_id(self, qs, name, value):
+    def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         return qs.exclude(id=decode_id_string(value))
 
 
@@ -400,7 +400,7 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: BusinessA
     return query
 
 
-def get_elasticsearch_query_for_households(value, business_area) -> Dict:
+def get_elasticsearch_query_for_households(value: Any, business_area: BusinessArea) -> Dict:
     match_fields = [
         "admin1",
         "admin2",

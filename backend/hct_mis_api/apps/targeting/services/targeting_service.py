@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
@@ -71,7 +71,7 @@ class TargetingCriteriaRuleQueryingBase:
     combines individual filters block with household filters
     """
 
-    def __init__(self, filters=None, individuals_filters_blocks=None) -> None:
+    def __init__(self, filters: Optional[Any] = None, individuals_filters_blocks: Optional[Any] = None) -> None:
         if filters is not None:
             self.filters = filters
         if individuals_filters_blocks is not None:
@@ -109,7 +109,7 @@ class TargetingCriteriaRuleQueryingBase:
 
 
 class TargetingIndividualRuleFilterBlockBase:
-    def __init__(self, individual_block_filters=None, target_only_hoh=None) -> None:
+    def __init__(self, individual_block_filters: Optional[Any] = None, target_only_hoh: List[Household] = None) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
         if target_only_hoh is not None:
@@ -222,10 +222,10 @@ class TargetingCriteriaFilterBase:
     def get_criteria_string(self) -> str:
         return f"{{{self.field_name} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
 
-    def get_lookup_prefix(self, associated_with) -> str:
+    def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments: List, field_attr) -> List:
+    def prepare_arguments(self, arguments: List, field_attr: str) -> List:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -238,8 +238,8 @@ class TargetingCriteriaFilterBase:
 
     def get_query_for_lookup(
         self,
-        lookup,
-        field_attr,
+        lookup: str,
+        field_attr: str,
     ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
