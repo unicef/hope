@@ -225,7 +225,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     def test_approve_needs_adjudication(self, _, permissions):
         print(f"test_approve_needs_adjudication: {_} {permissions}")
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        breakpoint()
         self.snapshot_graphql_request(
             request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
             context={"user": self.user},

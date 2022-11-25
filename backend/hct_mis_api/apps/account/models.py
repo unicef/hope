@@ -98,11 +98,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         ]
 
     def has_permission(self, permission, business_area, write=False) -> bool:
+        print(f"user.has_permission {permission} {business_area} {write}")
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
             user_roles__business_area=business_area,
         )
+        print("query count", query.count())
         return query.count() > 0
 
     def can_download_storage_files(self):

@@ -216,6 +216,7 @@ def hopePermissionClass(permission) -> Type[BasePermission]:
                 business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
                 if business_area is None:
                     return False
+            print("IS AUTH", info.context.user.is_authenticated)
             print("Check user perm", info.context.user.has_permission(permission.name, business_area))
             return info.context.user.is_authenticated and info.context.user.has_permission(
                 permission.name, business_area
@@ -252,7 +253,7 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance) -> None:
         business_area = object_instance.business_area
-        print("INFO", info.context)
+        print("-" * 20)
         for perm in cls.permission_classes:
             print(perm.perm, perm.has_permission(info, business_area=business_area))
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
