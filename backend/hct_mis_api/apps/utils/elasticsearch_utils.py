@@ -14,7 +14,6 @@ DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
     from django_elasticsearch_dsl import Document
 
 

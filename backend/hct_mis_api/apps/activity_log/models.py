@@ -1,3 +1,5 @@
+from typing import Dict, Any, Optional, TYPE_CHECKING
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -7,6 +9,10 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
+
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
 
 
 class LogEntry(models.Model):
@@ -58,7 +64,7 @@ class LogEntry(models.Model):
         verbose_name_plural = _("log entries")
 
 
-def log_create(mapping, business_area_field, user=None, old_object=None, new_object=None) -> LogEntry:
+def log_create(mapping: Dict, business_area_field: Any, user: Optional[User] = None, old_object: Optional[Any] = None, new_object: Optional[Any] = None) -> LogEntry:
     if new_object:
         instance = new_object
     else:
