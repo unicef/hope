@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 from uuid import UUID
 
 from django.conf import settings
@@ -34,7 +34,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 
 if TYPE_CHECKING:
-    from datetime import datetime
+    from datetime import datetime, timedelta
 
     from django.http import HttpRequest
 
@@ -66,7 +66,7 @@ class SessionAdmin(HOPEModelAdminBase):
     exclude = ("traceback",)
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
 
-    def run_time(self, obj: AbstractSession) -> datetime:
+    def run_time(self, obj: AbstractSession) -> timedelta:
         if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
             elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
@@ -89,7 +89,7 @@ class SessionAdmin(HOPEModelAdminBase):
             self.message_user(request, msg, messages.ERROR)
 
     @button()
-    def simulate_import(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def simulate_import(self, request: HttpRequest, pk: UUID) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, pk, title="Test Import")
         session: Session = context["original"]
         if request.method == "POST":

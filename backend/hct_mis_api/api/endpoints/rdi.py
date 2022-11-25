@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.models import QuerySet
 from django.db.transaction import atomic
+from django.http import HttpRequest
 from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
@@ -46,7 +47,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     def get_queryset(self) -> QuerySet:
         return RegistrationDataImportDatahub.objects.filter(business_area=self.selected_business_area)
 
-    def dispatch(self, request: Request, *args: Any, **kwargs: Any) -> View:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         return super().dispatch(request, *args, **kwargs)
 
     @atomic()

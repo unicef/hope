@@ -41,7 +41,7 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
 
     @swagger_auto_schema(request_body=ProgramSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        self.selected_business_area
+        self.selected_business_area  # TODO does it work? It should be called
         serializer = ProgramSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

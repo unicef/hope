@@ -125,7 +125,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request: HttpRequest, pk: UUID) -> HttpResponsePermanentRedirect:
+    def assign_business_office(self, request: HttpRequest, pk: UUID) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)

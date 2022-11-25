@@ -1,9 +1,12 @@
 import logging
+from typing import Any, Optional, Dict, Union
 
 from django import forms
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 
 from elasticsearch_dsl.connections import create_connection
@@ -29,10 +32,10 @@ class EsForm(forms.Form):
 class ElasticsearchPanel:
     __name__ = "Elasticsearch"
 
-    def rebuild_search_index(self, request):
+    def rebuild_search_index(self, request: HttpRequest) -> None:
         rebuild_search_index()
 
-    def __call__(self, model_admin, request, extra_context=None):
+    def __call__(self, model_admin: Any, request: HttpRequest, extra_context: Optional[Dict] = None) -> HttpResponse:
         context = model_admin.each_context(request)
         context["config"] = {
             "ELASTICSEARCH_HOST": settings.ELASTICSEARCH_HOST,
