@@ -413,7 +413,7 @@ class GenerateReportContentHelpers:
                 return ""
             return " ".join(filter(None, [user.first_name, user.last_name]))
 
-        def get_username(user) -> str:
+        def get_username(user: User) -> str:
             if not user:
                 return ""
             return user.username

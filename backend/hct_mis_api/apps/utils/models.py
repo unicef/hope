@@ -46,7 +46,7 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]: # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -195,7 +195,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
 
     def delete(
         self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Tuple[int, dict[str, int]]:
+    ) -> Tuple[int, dict[str, int]]: # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.

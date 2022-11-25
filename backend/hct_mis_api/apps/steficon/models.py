@@ -64,7 +64,7 @@ class Rule(models.Model):
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
-    def get_flag(self, name: str, default: Optional[str] = None):
+    def get_flag(self, name: str, default: Optional[str] = None) -> str:
         return self.flags.get(name, default)
 
     def as_dict(self) -> Dict:
@@ -77,7 +77,7 @@ class Rule(models.Model):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False):
+    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:
         self.enabled = False
         self.save()
 
@@ -225,7 +225,7 @@ class RuleCommit(models.Model):
         return self.rule.history.order_by("version").filter(id__gt=self.id).first()
 
     @atomic
-    def revert(self, fields: Optional[Tuple[str]] = MONITORED_FIELDS) -> None:
+    def revert(self, fields: Tuple[str, str, str, str, str] = MONITORED_FIELDS) -> None:
         for field in fields:
             setattr(self.rule, field, self.after[field])
         self.rule.save()

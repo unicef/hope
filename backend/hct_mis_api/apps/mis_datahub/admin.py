@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Tuple, TYPE_CHECKING, Optional
+from typing import Union, Tuple, TYPE_CHECKING, Optional, Any
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -37,8 +37,7 @@ from hct_mis_api.apps.utils.security import is_root
 
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
+    from django.db.models.query import QuerySet, _QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +252,7 @@ class TargetPopulationAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
     search_fields = ("name",)
 
-    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> Tuple:
+    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> Tuple[_QuerySet[Any, Any], bool]:
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         return queryset, use_distinct
 
