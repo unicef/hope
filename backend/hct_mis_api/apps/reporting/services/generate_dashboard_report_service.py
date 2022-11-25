@@ -435,7 +435,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @staticmethod
-    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args: Any):
+    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args: Any) -> Tuple:
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
@@ -466,7 +466,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @staticmethod
-    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args: Any) -> tuple:
+    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args: Any) -> Tuple:
         if is_totals:
             return (
                 "",
@@ -483,7 +483,7 @@ class GenerateDashboardReportContentHelpers:
             )
 
     @staticmethod
-    def format_grievances_row(instance: GrievanceTicket, is_totals: bool, is_hq: bool):
+    def format_grievances_row(instance: GrievanceTicket, is_totals: bool, is_hq: bool) -> Tuple:
         if is_totals and not is_hq:
             # no totals row for country report
             return ()
@@ -532,7 +532,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_total_transferred_by_admin_area_row(cls, instance: Area, is_totals: bool, *args: Any) -> str:
+    def format_total_transferred_by_admin_area_row(cls, instance: Area, is_totals: bool, *args: Any) -> Tuple:
         fields_list = cls._get_all_individual_count_fields()
 
         shared_cells = tuple(instance.get(f"{field_name}__sum", 0) for field_name in fields_list)
@@ -894,13 +894,13 @@ class GenerateDashboardReportService:
         )
         self.ws_meta.append(info_row)
 
-    def _add_headers(self, active_sheet, report_type) -> int:
+    def _add_headers(self, active_sheet: Worksheet, report_type: str) -> int:
         headers_row = self.HEADERS[report_type][self.hq_or_country] + self.HEADERS[report_type][self.SHARED]
         headers_row = self._stringify_all_values(headers_row)
         active_sheet.append(headers_row)
         return len(headers_row)
 
-    def _add_rows(self, active_sheet, report_type) -> int:
+    def _add_rows(self, active_sheet: Worksheet, report_type: str) -> int:
         is_hq_report = self.hq_or_country == self.HQ
         get_row_methods: Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]] = self.ROW_CONTENT_METHODS[
             report_type
@@ -1010,7 +1010,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def _add_font_style_to_sheet(ws: Worksheet, totals_row=None) -> None:
+    def _add_font_style_to_sheet(ws: Worksheet, totals_row: Optional[int] = None) -> None:
         bold_font = Font(bold=True)
         for cell in ws["1:1"]:
             cell.font = bold_font
@@ -1037,7 +1037,7 @@ class GenerateDashboardReportService:
         return tuple(str_row)
 
     @staticmethod
-    def _format_date(date: datetime) -> str:
+    def _format_date(date: datetime.date) -> str:
         return date.strftime("%Y-%m-%d") if date else ""
 
     @staticmethod

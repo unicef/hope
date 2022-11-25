@@ -1,6 +1,6 @@
 import datetime as dt
 import random
-from typing import Any, List, Iterable
+from typing import Any, List, Iterable, Optional
 
 import factory
 from pytz import utc
@@ -31,7 +31,7 @@ def comparison_method_resolver(obj: Any) -> str:
         return "CONTAINS"
 
 
-def arguments_resolver(obj: Any) -> List[int]:
+def arguments_resolver(obj: Any) -> Optional[List[int]]:
     min = None
     max = None
     if obj.field_name == "age":

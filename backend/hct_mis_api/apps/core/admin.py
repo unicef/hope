@@ -148,7 +148,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    def formfield_for_dbfield(self, db_field: Field[Any, Any], request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: "Field[Any, Any]", request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -162,7 +162,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
-    def split_business_area(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def split_business_area(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk)
         opts = self.object._meta
         if request.POST:
@@ -489,7 +489,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request: HttpRequest) -> HttpResponsePermanentRedirect:
+    def download_last_valid_file(self, request: HttpRequest) -> Optional[HttpResponsePermanentRedirect]:
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -510,7 +510,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         )
         return redirect(".")
 
-    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> TemplateResponse:
+    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         if not self.has_add_permission(request):
             logger.error("The user did not have permission to do that")
             raise PermissionDenied
@@ -572,7 +572,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 
     def change_view(
         self, request: HttpRequest, object_id: str, form_url: str = "", extra_context:  Optional[Dict[str, Any]] = None
-    ) -> Union[HttpResponse, HttpResponse]:
+    ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
         self.has_add_permission = lambda __: False  # type: ignore
@@ -611,7 +611,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return request.user.can_download_storage_files()
 
     @button(label="Create eDopomoga TP")
-    def create_tp(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def create_tp(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse,HttpResponsePermanentRedirect]:
         storage_obj = StorageFile.objects.get(pk=pk)
         context = self.get_common_context(
             request,

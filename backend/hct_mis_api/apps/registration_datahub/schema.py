@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 from django.db.models import Prefetch, Q
@@ -178,7 +178,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return resolve_flex_fields_choices_to_string(parent)
 
     @staticmethod
-    def resolve_age(parent, info: Any) -> int:
+    def resolve_age(parent, info: Any) -> Int:
         return parent.age
 
     def resolve_import_id(parent, info: Any) -> str:
@@ -280,7 +280,7 @@ class ImportedDocumentNode(DjangoObjectType):
     def resolve_photo(parent, info: Any) -> Union[String, None]:
         if parent.photo:
             return parent.photo.url
-        return
+        return None
 
     class Meta:
         model = ImportedDocument
