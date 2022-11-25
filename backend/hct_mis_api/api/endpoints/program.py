@@ -12,7 +12,7 @@ from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
-    from rest_framework.serializers import Serializer
+    from rest_framework.serializers import Serializer, BaseSerializer
 
 
 class ProgramSerializer(serializers.ModelSerializer):
@@ -36,7 +36,7 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
     model = Program
     permission = Grant.API_PROGRAM_CREATE
 
-    def perform_create(self, serializer: Serializer) -> None:
+    def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(business_area=self.selected_business_area)
 
     @swagger_auto_schema(request_body=ProgramSerializer)

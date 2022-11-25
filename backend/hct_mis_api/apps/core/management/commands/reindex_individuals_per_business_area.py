@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from typing import Any
 
 from django.core.management.base import BaseCommand
@@ -15,10 +16,10 @@ class Command(BaseCommand):
     help = "Re-index elasticsearch individuals' documents per business_area (index)"
     es = Elasticsearch("http://elasticsearch:9200")
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("business_area", type=str, default=None)
 
-    def load_batches(self, index, business_area_slug) -> None:
+    def load_batches(self, index: str, business_area_slug: str) -> None:
         if business_area_slug in ("afghanistan", "ukraine"):
             qs = Individual.objects.filter(business_area__slug=business_area_slug)
         else:
@@ -37,7 +38,7 @@ class Command(BaseCommand):
             bulk(self.es, document_list, index=index)
             i += 1
 
-    def reindex_business_area(self, business_area_slug) -> None:
+    def reindex_business_area(self, business_area_slug: str) -> None:
         index = f"individuals_{business_area_slug}"
         if self.es.indices.exists(index=index):
             self.es.delete_by_query(index=index, body={"query": {"match_all": {}}})

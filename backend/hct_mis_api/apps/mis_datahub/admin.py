@@ -48,7 +48,7 @@ class HUBAdminMixin(HOPEModelAdminBase):
     def truncate(self, request: HttpRequest) -> Optional[TemplateResponse]:
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
             self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
-            return
+            return None
         if request.method == "POST":
             with atomic():
                 LogEntry.objects.log_action(

@@ -135,7 +135,7 @@ class XlsxVerificationImportService:
                 )
             column += 1
 
-    def _validate_payment_record_id(self, row) -> None:
+    def _validate_payment_record_id(self, row: Row) -> None:
         cell = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX]
         if cell.value not in self.payment_record_ids:
             self.errors.append(
@@ -146,7 +146,7 @@ class XlsxVerificationImportService:
                 )
             )
 
-    def _validate_row_received(self, row) -> None:
+    def _validate_row_received(self, row: Row) -> None:
         valid_received = [None, "YES", "NO"]
         cell = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX]
         if cell.value not in valid_received:
@@ -159,7 +159,7 @@ class XlsxVerificationImportService:
                 )
             )
 
-    def _validate_received_to_received_amount(self, row) -> None:
+    def _validate_received_to_received_amount(self, row: Row) -> None:
         payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
         payment_record = self.payment_records_dict.get(payment_record_id)
         if payment_record is None:
@@ -213,7 +213,7 @@ class XlsxVerificationImportService:
             self._validate_row_received(row)
             self._validate_received_to_received_amount(row)
 
-    def _import_row(self, row) -> None:
+    def _import_row(self, row: Row) -> None:
 
         payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
         received = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX].value

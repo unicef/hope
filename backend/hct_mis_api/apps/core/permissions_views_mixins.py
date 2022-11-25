@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import PermissionDenied
+from django.http import HttpRequest
 
 from hct_mis_api.apps.account.permissions import Permissions
 
@@ -10,7 +11,7 @@ class ViewPermissionsMixinBase(AccessMixin):
     def has_permissions(self) -> bool:
         return NotImplemented
 
-    def dispatch(self, request, *args, **kwargs) -> Any:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Any:
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if not self.has_permissions():
