@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
 from django import forms
@@ -302,7 +302,7 @@ class HouseholdAdmin(
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.can_withdrawn")
-    def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def withdraw(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         context = self.get_common_context(request, pk)

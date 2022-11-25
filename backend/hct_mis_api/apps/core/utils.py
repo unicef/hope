@@ -439,7 +439,7 @@ def check_concurrency_version_in_mutation(version: int, target: Any) -> None:
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file: File) -> None:
+def update_labels_mapping(csv_file: str) -> None:
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
 

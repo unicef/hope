@@ -92,7 +92,7 @@ def basicauth(view: Callable) -> Callable:
     return wrap
 
 
-def sizeof(num: int, suffix: str = "") -> str:
+def sizeof(num: float, suffix: str = "") -> str:
     for unit in ["&nbsp;&nbsp;", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb"]:
         if abs(num) < 1024.0:
             return f"{num:3.1f} {unit}{suffix} "

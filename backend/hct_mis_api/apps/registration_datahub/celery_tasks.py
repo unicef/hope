@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
+from django.db.models.query import _QuerySet
 from django.utils import timezone
 
 from redis.exceptions import LockError
@@ -318,7 +319,7 @@ def extract_records_task(max_records: int = 500) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def fresh_extract_records_task(records_ids: Optional[List] = None) -> "_QuerySet[Any, Any]":
+def fresh_extract_records_task(records_ids: Optional[_QuerySet[Any, Any]] = None) -> None:
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
