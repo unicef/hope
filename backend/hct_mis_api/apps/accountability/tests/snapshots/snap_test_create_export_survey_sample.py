@@ -19,7 +19,7 @@ snapshots['TestSurveyQueries::test_create_export_survey_sample_with_invalid_surv
                     'line': 3
                 }
             ],
-            'message': "['“100” is not a valid UUID.']",
+            'message': 'No Survey matches the given query.',
             'path': [
                 'exportSurveySample'
             ]
@@ -32,7 +32,7 @@ snapshots['TestSurveyQueries::test_create_export_survey_sample_with_valid_survey
         'exportSurveySample': {
             'survey': {
                 'targetPopulation': {
-                    'name': 'Radio state discover.'
+                    'name': 'Test Target Population'
                 },
                 'title': 'Test survey'
             }

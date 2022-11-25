@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from uuid import uuid4
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -27,7 +28,7 @@ mutation ExportSurveySample($surveyId: ID!) {
     def setUpTestData(cls):
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
-        cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
+        cls.target_population = TargetPopulationFactory(business_area=cls.business_area, name="Test Target Population")
 
         households = [create_household()[0] for _ in range(14)]
         cls.target_population.households.set(households)
@@ -75,6 +76,6 @@ mutation ExportSurveySample($surveyId: ID!) {
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "surveyId": self.id_to_base64(100, "SurveyNode"),
+                "surveyId": self.id_to_base64(uuid4(), "SurveyNode"),
             },
         )
