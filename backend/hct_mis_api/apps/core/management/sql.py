@@ -1,3 +1,6 @@
+from django.db import connections
+
+
 def sql_drop_tables(connection):
     tables = connection.introspection.django_table_names(only_existing=True, include_views=False)
     tables.append("django_migrations")
