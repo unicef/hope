@@ -1,8 +1,6 @@
 from django.core.management import BaseCommand, call_command
 from django.db import connections
 
-from hct_mis_api.apps.core.management.sql import sql_drop_tables
-
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
@@ -15,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options["skip_drop"] is False:
-            self._drop_databases()
+            call_command("dropalldb")
             call_command("migratealldb")
 
         call_command("flush", "--noinput")
