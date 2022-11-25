@@ -202,8 +202,11 @@ class AllowAuthenticated(BasePermission):
 
 def hopePermissionClass(permission) -> Type[BasePermission]:
     class XDPerm(BasePermission):
+        perm = permission
+
         @classmethod
         def has_permission(cls, info, **kwargs):
+            print(f"XD {cls.perm} {info.context.user}")
             business_area_arg = kwargs.get("business_area")
             if isinstance(business_area_arg, BusinessArea):
                 business_area = business_area_arg
@@ -213,6 +216,7 @@ def hopePermissionClass(permission) -> Type[BasePermission]:
                 business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
                 if business_area is None:
                     return False
+            print("Check user perm", info.context.user.has_permission(permission.name, business_area))
             return info.context.user.is_authenticated and info.context.user.has_permission(
                 permission.name, business_area
             )
@@ -248,6 +252,9 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance) -> None:
         business_area = object_instance.business_area
+        print("INFO", info.context)
+        for perm in cls.permission_classes:
+            print(perm.perm, perm.has_permission(info, business_area=business_area))
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
             log_and_raise("Permission Denied")
 
@@ -359,14 +366,15 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 class BaseMutationPermissionMixin:
     @classmethod
     def is_authenticated(cls, info) -> bool:
-        if not info.context.user.is_authenticated:
-            cls.raise_permission_denied_error(True)
+        # if not info.context.user.is_authenticated:
+        #     cls.raise_permission_denied_error(not_authenticated=True)
         return True
 
     @classmethod
     def has_permission(cls, info, permission: Iterable, business_area_arg, raise_error=True) -> bool:
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
+        print(f"CHECK PERMISSIONS: {permissions}")
         if isinstance(business_area_arg, BusinessArea):
             business_area = business_area_arg
         else:

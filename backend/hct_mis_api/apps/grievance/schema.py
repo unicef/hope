@@ -319,6 +319,7 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
         return self.possible_duplicates.all()
 
     def resolve_selected_individuals(self, info):
+        print("resolve_selected_individuals")
         return self.selected_individuals.all()
 
 

@@ -386,6 +386,8 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
+        # return True
+        # breakpoint()
         super().check_node_permission(info, object_instance)
         user = info.context.user
         # if user can't simply view all individuals, we check if they can do it because of grievance

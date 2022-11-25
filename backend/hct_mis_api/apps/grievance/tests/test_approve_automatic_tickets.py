@@ -223,6 +223,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         ]
     )
     def test_approve_needs_adjudication(self, _, permissions):
+        print(f"test_approve_needs_adjudication: {_} {permissions}")
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

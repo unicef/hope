@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
+from graphene import Mutation
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -1116,7 +1117,8 @@ class ReassignRoleMutation(graphene.Mutation):
         return cls(household=household, individual=individual)
 
 
-class NeedsAdjudicationApproveMutation(PermissionMutation):
+# class NeedsAdjudicationApproveMutation(PermissionMutation):
+class NeedsAdjudicationApproveMutation(Mutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -1129,18 +1131,19 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, grievance_ticket_id, **kwargs):
+        print("Needs adj mutation")
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
-        cls.has_creator_or_owner_permission(
-            info,
-            grievance_ticket.business_area,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-            grievance_ticket.created_by == info.context.user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-            grievance_ticket.assigned_to == info.context.user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-        )
+        # cls.has_creator_or_owner_permission(
+        #     info,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+        #     grievance_ticket.created_by == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        # )
 
         selected_individual_id = kwargs.get("selected_individual_id", None)
         selected_individual_ids = kwargs.get("selected_individual_ids", None)
@@ -1170,6 +1173,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         ticket_details.save()
         grievance_ticket.refresh_from_db()
 
+        print("Needs adj mutation end")
         return cls(grievance_ticket=grievance_ticket)
 
 
