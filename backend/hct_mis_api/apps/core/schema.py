@@ -117,7 +117,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args) -> Any:
+def _custom_dict_or_attr_resolver(attname: str, default_value: str, root: Any, info: Any, **args: Any) -> Callable:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
@@ -125,7 +125,7 @@ def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args) ->
 
 
 def sort_by_attr(options: Dict, attrs: str) -> List:
-    def key_extractor(el):
+    def key_extractor(el: Any) -> Any:
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
         return el
@@ -193,10 +193,10 @@ class GroupAttributeNode(DjangoObjectType):
         model = FlexibleAttributeGroup
         fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
-    def resolve_label_en(self, info):
+    def resolve_label_en(self, info: Any) -> str:
         return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
-    def resolve_flex_attributes(self, info):
+    def resolve_flex_attributes(self, info: Any) -> QuerySet:
         return self.flex_attributes.all()
 
 
@@ -215,7 +215,7 @@ class KoboAssetObject(graphene.ObjectType):
 class KoboAssetObjectConnection(Connection):
     total_count = graphene.Int()
 
-    def resolve_total_count(self, info, **kwargs):
+    def resolve_total_count(self, info: Any, **kwargs: Any) -> int:
         return len(self.iterable)
 
     class Meta:
@@ -231,7 +231,7 @@ def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[st
         )
 
 
-def resolve_assets(business_area_slug, uid: Optional[str] = None, *args: Any, **kwargs: Any) -> Tuple:
+def resolve_assets(business_area_slug: str, uid: Optional[str] = None, *args: Any, **kwargs: Any) -> Tuple:
     method: Iterable
     return_method: Callable
     method, return_method = (
@@ -297,8 +297,8 @@ class Query(graphene.ObjectType):
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
 
-    def resolve_all_fields_attributes(parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None) -> Union[bool, Dict]:
-        def is_a_killer_filter(field) -> bool:
+    def resolve_all_fields_attributes(parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None) -> List[Any]:
+        def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
                 name = field.name
                 associated_with = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[field.associated_with][1]

@@ -1,6 +1,6 @@
 import logging
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from django.db.transaction import atomic
@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 
 class BirthDateValidator:
-    def __call__(self, value: Field[Any, Any, Any, Any]) -> None:
+    def __call__(self, value: date) -> None:
         if value >= datetime.today().date():
             raise ValidationError("Birth date must be in the past")
 
@@ -99,7 +99,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 class CollectDataMixin(serializers.Serializer):
     collect_individual_data = serializers.CharField(required=True)
 
-    def validate_collect_individual_data(self, value: str):
+    def validate_collect_individual_data(self, value: str) -> str:
         v = value.upper()
         if v in [COLLECT_TYPE_FULL, "FULL", "F"]:
             return COLLECT_TYPE_FULL

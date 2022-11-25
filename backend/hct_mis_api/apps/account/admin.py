@@ -3,7 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union, Sequence
 from urllib.parse import unquote
 
 from django import forms
@@ -21,7 +21,7 @@ from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import router, transaction
-from django.db.models import JSONField, Q, QuerySet
+from django.db.models import JSONField, Q, QuerySet, Model
 from django.db.transaction import atomic
 from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
@@ -61,7 +61,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 
 if TYPE_CHECKING:
     from uuid import UUID
-    from django.db.models.query import QuerySet
+    from django.db.models.query import QuerySet, _QuerySet
     from django.forms import Form
 
 
@@ -102,7 +102,7 @@ class UserRoleAdminForm(ModelForm):
 class UserRoleInlineFormSet(BaseInlineFormSet):
     model = account_models.UserRole
 
-    def add_fields(self, form: Form, index: int) -> None:
+    def add_fields(self, form: Form, index: Optional[int]) -> None:
         super().add_fields(form, index)
         form.fields["business_area"].choices = [
             (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
@@ -212,7 +212,7 @@ class DjAdminManager:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
-    def login(self, request=None, twin=None) -> None:
+    def login(self, request: Optional[HttpRequest] = None, twin: Optional[Any] = None) -> None:
         try:
             username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         except ValueError:
@@ -297,7 +297,7 @@ class HasKoboAccount(SimpleListFilter):
     parameter_name = "kobo_account"
     title = "Has Kobo Access"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Tuple:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Tuple:
         return (1, "Yes"), (0, "No")
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -313,7 +313,7 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Any:  # TODO: typing
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Any:  # TODO: typing
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -445,7 +445,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     def kobo_user(self, obj: Any) -> str:
         return obj.custom_fields.get("kobo_username")
 
-    def get_deleted_objects(self, objs: List[Any], request: HttpRequest) -> Any:
+    def get_deleted_objects(self, objs: Union[Sequence[Any], _QuerySet[Any, Any]], request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -454,7 +454,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             to_delete.append(f"Kobo: {kobo_username}")
         return to_delete, model_count, perms_needed, protected
 
-    def delete_view(self, request: HttpRequest, object_id: UUID, extra_context: Optional[Dict] = None) -> HttpResponse:
+    def delete_view(self, request: HttpRequest, object_id: str, extra_context: Optional[Dict] = None) -> HttpResponse:
         if request.POST:  # The user has confirmed the deletion.
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)
@@ -779,7 +779,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)
 
-    def __init__(self, model, admin_site) -> None:
+    def __init__(self, model: Model, admin_site: Any) -> None:
         super().__init__(model, admin_site)
 
     def _sync_ad_data(self, user: User) -> None:
@@ -922,7 +922,7 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Optional[Iterable[Tuple[Any, str]]]:
         return Permissions.choices()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -986,12 +986,12 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     def _perms(self, request: HttpRequest, object_id: UUID) -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
-    def changeform_view(self, request: HttpRequest, object_id: Optional[UUID] = None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
+    def changeform_view(self, request: HttpRequest, object_id: Optional[str] = None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request, form, formsets, add=False) -> List[Dict]:
+    def construct_change_message(self, request: HttpRequest, form: Form, formsets: Any, add: bool = False) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
@@ -1052,7 +1052,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> List:
+    def lookups(self, request: HttpRequest, model_admin: Optional[str]) -> List:
         types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
@@ -1108,12 +1108,12 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         context["data"] = users
         return render(request, "admin/account/group/members.html", context)
 
-    def changeform_view(self, request: HttpRequest, object_id: Optional[UUID]= None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
+    def changeform_view(self, request: HttpRequest, object_id: Optional[str] = None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request, form, formsets, add=False) -> List[Dict]:
+    def construct_change_message(self, request: HttpRequest, form: Form, formsets: Any, add: bool = False) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
@@ -1153,7 +1153,7 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
     def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
-    def _get_data(self, record) -> str:
+    def _get_data(self, record: Any) -> str:
         groups = Group.objects.all()
         collector = ForeignKeysCollector(None)
         objs = []

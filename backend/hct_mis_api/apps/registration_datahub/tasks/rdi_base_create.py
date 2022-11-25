@@ -37,7 +37,7 @@ class RdiBaseCreateTask:
 
         return household_obj
 
-    def _cast_value(self, value, header) -> Any:
+    def _cast_value(self, value: Any, header: str) -> Any:
         if isinstance(value, str):
             value = value.strip()
 

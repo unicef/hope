@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import List, Union
+from typing import List, Union, Tuple, Any
 
 from django_countries import countries as internal_countries
 from django_countries.fields import Country
@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 class Countries:
     @classmethod
     @lru_cache(maxsize=None)
-    def get_countries(cls):
+    def get_countries(cls) -> List[Tuple[str, str, str]]:
         return [(label, alpha2, Country(alpha2).alpha3) for alpha2, label in internal_countries]
 
     @classmethod
-    def get_choices(cls, output_code="alpha2") -> List:
+    def get_choices(cls, output_code: str = "alpha2") -> List:
         if output_code not in ("alpha2", "alpha3"):
             logger.error(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
@@ -32,7 +32,7 @@ class Countries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.get_countries())
 
     @classmethod
-    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> Union[str, None]:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> Union[str, None]:
         index_map = {
             "name": 0,
             "alpha2": 1,
@@ -1275,7 +1275,7 @@ class SanctionListCountries:
     }
 
     @classmethod
-    def get_choices(cls, output_code="alpha2") -> List:
+    def get_choices(cls, output_code: str = "alpha2") -> List:
         if output_code not in ("alpha2", "alpha3"):
             logger.error(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
@@ -1289,7 +1289,7 @@ class SanctionListCountries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.COUNTRIES)
 
     @classmethod
-    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> Union[str, None]:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> Union[str, None]:
         index_map = {
             "name": 0,
             "alpha2": 1,

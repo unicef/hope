@@ -9,7 +9,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
@@ -147,7 +147,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
 
     @property
-    def total_number_of_households(self):
+    def total_number_of_households(self) -> QuerySet:
         return (
             self.cash_plans.filter(payment_records__delivered_quantity__gt=0)
             .distinct("payment_records__household__unicef_id")
@@ -157,7 +157,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         )
 
     @property
-    def admin_areas_log(self):
+    def admin_areas_log(self) -> str:
         return ", ".join(self.admin_areas.all())
 
     class Meta:
@@ -254,34 +254,34 @@ class CashPlan(TimeStampedUUIDModel):
         return self.name
 
     @property
-    def payment_records_count(self):
+    def payment_records_count(self) -> int:
         return self.payment_records.count()
 
     @property
-    def bank_reconciliation_success(self):
+    def bank_reconciliation_success(self) -> QuerySet[PaymentRecord]:
         return self.payment_records.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
 
     @property
-    def bank_reconciliation_error(self):
+    def bank_reconciliation_error(self) -> QuerySet[PaymentRecord]:
         return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
 
     @cached_property
-    def total_number_of_households(self):
+    def total_number_of_households(self) -> int:
         # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
         return self.payment_records.count()
 
     @property
-    def currency(self):
+    def currency(self) -> Optional[str]:
         payment_record = self.payment_records.first()
         return payment_record.currency if payment_record else None
 
     @property
-    def can_create_payment_verification_plan(self):
+    def can_create_payment_verification_plan(self) -> bool:
         return self.available_payment_records().count() > 0
 
     def available_payment_records(
         self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None, extra_validation=None
-    ):
+    ) -> QuerySet[PaymentRecord]:
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
