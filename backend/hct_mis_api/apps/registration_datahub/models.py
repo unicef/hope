@@ -253,6 +253,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
+    def __init__(self: _Self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.bank_name = None
+
     @property
     def age(self) -> int:
         today = date.today()

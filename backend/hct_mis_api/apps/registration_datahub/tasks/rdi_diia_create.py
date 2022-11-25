@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional, TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -45,6 +46,11 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,7 +76,7 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name") -> RegistrationDataImport:
+    def create_rdi(self, imported_by: ImportedIndividual, rdi_name: str = "rdi_name") -> RegistrationDataImport:
 
         number_of_individuals = 0
         number_of_households = 0
@@ -106,7 +112,7 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id, diia_hh_ids=None, diia_hh_count=None) -> None:
+    def execute(self, registration_data_import_id: UUID, diia_hh_ids: Optional[List[UUID]] = None, diia_hh_count: Optional[int] = None) -> None:
         if diia_hh_ids and diia_hh_count:
             raise ValueError("You can't set two args diia_hh_ids and diia_hh_count")
 
@@ -280,7 +286,7 @@ class RdiDiiaCreateTask:
                 registration_data_import_datahub=registration_data_import_data_hub
             )
 
-    def _add_bank_account(self, individual, individual_obj) -> None:
+    def _add_bank_account(self, individual: ImportedIndividual, individual_obj: ImportedIndividual) -> None:
         self.bank_accounts.append(
             ImportedBankAccountInfo(
                 individual=individual_obj,
@@ -289,7 +295,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_vpo_document(self, head_of_household, household) -> None:
+    def _add_vpo_document(self, head_of_household: ImportedIndividual, household: ImportedHousehold) -> None:
         vpo_doc_date = dateutil.parser.parse(household.vpo_doc_date)
 
         self.documents.append(
@@ -303,7 +309,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_birth_document(self, individual, individual_obj) -> None:
+    def _add_birth_document(self, individual: ImportedIndividual, individual_obj: ImportedIndividual) -> None:
         self.documents.append(
             ImportedDocument(
                 country=Country("UA"),
@@ -326,7 +332,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_tax_id_document(self, tax_id, individual_obj) -> None:
+    def _add_tax_id_document(self, tax_id: UUID, individual_obj: ImportedIndividual) -> None:
         self.documents.append(
             ImportedDocument(
                 country=Country("UA"),
@@ -353,7 +359,7 @@ class RdiDiiaCreateTask:
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 
-    def tax_id_exists(self, tax_id) -> bool:
+    def tax_id_exists(self, tax_id: UUID) -> bool:
         return (
             ImportedDocument.objects.filter(document_number=tax_id, type=self.imported_doc_type_for_tax_id).exists()
             or Document.objects.filter(document_number=tax_id, type=self.doc_type_for_tax_id).exists()
