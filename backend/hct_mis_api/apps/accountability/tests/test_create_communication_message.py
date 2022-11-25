@@ -73,7 +73,6 @@ mutation CreateAccountabilityCommunicationMessage (
     def test_create_accountability_communication_message_without_permission(self):
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
@@ -100,7 +99,6 @@ mutation CreateAccountabilityCommunicationMessage (
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
@@ -127,7 +125,6 @@ mutation CreateAccountabilityCommunicationMessage (
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
