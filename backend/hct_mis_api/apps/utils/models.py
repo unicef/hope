@@ -144,7 +144,7 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
-    def process_exception(self, exc: BaseException, request: Optional[HttpRequest] = None):
+    def process_exception(self, exc: BaseException, request: Optional[HttpRequest] = None) -> Optional[int]:
         try:
             from sentry_sdk import capture_exception
 
@@ -193,9 +193,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(
-        self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Tuple[int, dict[str, int]]: # type: ignore
+    def delete(self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:  # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.

@@ -1,12 +1,12 @@
 import logging
-from typing import Union, Tuple, TYPE_CHECKING, Optional, Any
+from typing import Union, Tuple, TYPE_CHECKING, Optional, Any, Callable, NoReturn
 from uuid import UUID
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 class HUBAdminMixin(HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
-    def truncate(self, request: HttpRequest) -> Optional[TemplateResponse]:
+    def truncate(self, request: HttpRequest) -> None:
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
             self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
             return None
@@ -115,7 +115,7 @@ class IndividualAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def household(self, button: button) -> Optional[str]:
+    def household(self, button: button) -> Union[str, NoReturn]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")

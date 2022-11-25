@@ -2,7 +2,7 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Tuple
 from uuid import UUID
 
 from django import forms
@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Model
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id") -> None:
+    def __init__(self, model: Model, admin_site: str, attrs: Optional[List] = None, choices: Tuple = (), using: Optional[Any] = None, pk_field: str = "id") -> None:
         self.model = model
         self.pk_field = pk_field
         self.admin_site = admin_site
@@ -62,26 +62,26 @@ class AutocompleteWidget(forms.Widget):
     def get_url(self) -> str:
         return reverse("admin:autocomplete")
 
-    def get_context(self, name: str, value: Any, attrs: Dict) -> Dict:
-        context = {}
-        context["widget"] = {
-            "query_string": "",
-            "lookup_kwarg": "term",
-            "url": self.get_url(),
-            "target_opts": {
-                "app_label": self.model._meta.app_label,
-                "model_name": self.model._meta.model_name,
-                "target_field": self.pk_field,
-            },
-            "name": name,
-            "media": self.media,
-            "is_hidden": self.is_hidden,
-            "required": self.is_required,
-            "value": self.format_value(value),
-            "attrs": self.build_attrs(self.attrs, attrs),
-            "template_name": self.template_name,
+    def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
+        return {
+            "widget": {
+                "query_string": "",
+                "lookup_kwarg": "term",
+                "url": self.get_url(),
+                "target_opts": {
+                    "app_label": self.model._meta.app_label,
+                    "model_name": self.model._meta.model_name,
+                    "target_field": self.pk_field,
+                },
+                "name": name,
+                "media": self.media,
+                "is_hidden": self.is_hidden,
+                "required": self.is_required,
+                "value": self.format_value(value),
+                "attrs": self.build_attrs(self.attrs, attrs),
+                "template_name": self.template_name,
+            }
         }
-        return context
 
     @property
     def media(self) -> forms.Media:

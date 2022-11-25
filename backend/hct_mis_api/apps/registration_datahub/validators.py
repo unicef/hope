@@ -1026,7 +1026,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             if field_type == "INTEGER":
                 try:
                     int(value)
-                    return
+                    return None
                 except Exception:
                     return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type int"
             elif field_type == "STRING":
@@ -1037,7 +1037,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         phonenumbers.parse(value, None)
                     except (phonenumbers.NumberParseException, TypeError):
                         return f"Invalid phone number {value} for field {field}"
-                return
+                return None
 
             elif field_type == "BOOL":
                 # Important! if value == 0 or 1 it's also evaluated to True

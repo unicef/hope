@@ -331,7 +331,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, file: OI, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
+    def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
         import_data = ImportData.objects.create(
