@@ -15,7 +15,7 @@ class HistoryExchangeRate:
         self.past_xrate = float(PAST_XRATE)
         self.past_ratio = float(PAST_RATIO)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"HistoryExchangeRate(valid_from: {self.valid_from.isoformat()}, valid_to: {self.valid_to.isoformat()}, "
             f"ratio: {self.past_ratio}, x_rate: {self.past_xrate})"

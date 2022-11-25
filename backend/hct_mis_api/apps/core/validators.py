@@ -221,7 +221,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_field_type(cls, core_field: Any, core_field_from_file: IO, field_type: str) -> Optional[Dict]:
+    def _check_field_type(cls, core_field: Any, core_field_from_file: Dict, field_type: str) -> Optional[Dict]:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -230,7 +230,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_is_field_required(cls, core_field: Any, core_field_from_file: IO) -> Optional[Dict]:
+    def _check_is_field_required(cls, core_field: Any, core_field_from_file: Dict) -> Optional[Dict]:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":

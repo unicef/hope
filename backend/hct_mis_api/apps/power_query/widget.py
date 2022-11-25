@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -40,15 +40,15 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
     def __init__(
         self,
         *,
-        empty_label="---------",
-        required=True,
-        widget=None,
-        label=None,
-        initial=None,
-        help_text="",
-        to_field_name=None,
-        limit_choices_to=None,
-        **kwargs,
+        empty_label: str = "---------",
+        required: bool = True,
+        widget: Optional[Any] = None,
+        label: Optional[Any] = None,
+        initial: Optional[Any] = None,
+        help_text: str = "",
+        to_field_name: Optional[str] = None,
+        limit_choices_to: Optional[int] = None,
+        **kwargs: Any,
     ):
         queryset = ContentType.objects.order_by("model", "app_label")
         super().__init__(
@@ -64,5 +64,5 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj :Any) -> str:
+    def label_from_instance(self, obj: Any) -> str:
         return f"{obj.name.title()} ({obj.app_label})"

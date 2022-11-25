@@ -105,7 +105,7 @@ class ImportedIndividualDocument(Document):
         household = instance.household
         if household:
             return instance.household.admin1
-        return
+        return None
 
     def prepare_admin2(self, instance: ImportedIndividual) -> Optional[Area]:
         household = instance.household

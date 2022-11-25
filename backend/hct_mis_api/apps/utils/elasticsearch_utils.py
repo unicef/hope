@@ -42,10 +42,10 @@ def _delete(models: List[Model]) -> bool:
 
 
 def _rebuild(models: List[Model], options: Dict) -> None:
-    if not _delete(models, options):
+    if not _delete(models):
         return
 
-    _create(models, options)
+    _create(models)
     _populate(models, options)
 
 

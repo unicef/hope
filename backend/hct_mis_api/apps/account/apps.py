@@ -1,7 +1,10 @@
 from typing import Any
 
 from django.apps import AppConfig
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import get_content_type_for_model
+from django.db.models import QuerySet
+from django.http import HttpRequest
 
 
 class AccountConfig(AppConfig):
@@ -14,7 +17,7 @@ class AccountConfig(AppConfig):
 
 
 # TODO: LogEntry model is not available at this point, use narrower type
-def log_impersonate(sender, request, hijacker, hijacked, *args, **kwargs) -> Any:
+def log_impersonate(sender: Any, request: HttpRequest, hijacker: Any, hijacked: bool, *args: Any, **kwargs: Any) -> LogEntry:
     from django.contrib.admin.models import LogEntry
 
     return LogEntry.objects.log_action(

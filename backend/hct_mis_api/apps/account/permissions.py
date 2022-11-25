@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     # TODO: signature differs from superclass
-    def _generate_next_value_(name, *args: Any) -> str:  # type: ignore
+    def _generate_next_value_(name, *args: Any) -> "Permissions":
         return name
 
     # RDI
@@ -203,7 +203,7 @@ class AllowAuthenticated(BasePermission):
 def hopePermissionClass(permission: BasePermission) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
-        def has_permission(cls, info, **kwargs):
+        def has_permission(cls, info: Any, **kwargs: Any) -> bool:
             business_area_arg = kwargs.get("business_area")
             if isinstance(business_area_arg, BusinessArea):
                 business_area = business_area_arg
@@ -223,7 +223,7 @@ def hopePermissionClass(permission: BasePermission) -> Type[BasePermission]:
 def hopeOneOfPermissionClass(*permissions: BasePermission) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
-        def has_permission(cls, info, **kwargs) -> bool:
+        def has_permission(cls, info: Any, **kwargs: Any) -> bool:
             if info.context.user.is_authenticated:
                 business_area_arg = kwargs.get("business_area")
                 if isinstance(business_area_arg, BusinessArea):
@@ -289,7 +289,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,
         filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[BasePermission] =(AllowAny,),
+        permission_classes: Tuple[BasePermission] = (AllowAny, ),
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -306,7 +306,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         return to_arguments(self._base_args or OrderedDict(), self.filtering_args)
 
     @args.setter
-    def args(self, args) -> None:
+    def args(self, args: Any) -> None:
         self._base_args = args
 
     @property
@@ -358,7 +358,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
 class BaseMutationPermissionMixin:
     @classmethod
-    def is_authenticated(cls, info: Any) -> bool:
+    def is_authenticated(cls, info: Any) -> Optional[bool]:
         if not info.context.user.is_authenticated:
             cls.raise_permission_denied_error(True)
         return True
