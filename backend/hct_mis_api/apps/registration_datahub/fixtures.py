@@ -141,7 +141,7 @@ def create_imported_household(
 
 
 def create_imported_household_and_individuals(
-    household_data=None, individuals_data=None
+    household_data: Optional[Dict] = None, individuals_data: Optional[Dict] = None
 ) -> Tuple[ImportedHousehold, List[ImportedIndividual]]:
     if household_data is None:
         household_data = {}

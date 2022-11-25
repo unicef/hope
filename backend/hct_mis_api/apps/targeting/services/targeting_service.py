@@ -28,7 +28,7 @@ class TargetingCriteriaQueryingBase:
     this mixin connects OR blocks
     """
 
-    def __init__(self, rules=None, excluded_household_ids=None):
+    def __init__(self, rules: Optional[List] = None, excluded_household_ids: Optional[List] = None) -> None:
         if rules is None:
             return
         self.rules = rules
@@ -57,7 +57,7 @@ class TargetingCriteriaQueryingBase:
     def get_basic_query(self) -> Q:
         return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
 
-    def get_query(self):
+    def get_query(self) -> Q:
         rules = self.get_rules()
         query = Q()
         for rule in rules:

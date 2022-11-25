@@ -121,7 +121,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     country_origin = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
-    birth_date = serializers.DateField(validators=[BirthDateValidator()])  # type: ignore
+    birth_date = serializers.DateField(validators=[BirthDateValidator()])
 
     class Meta:
         model = ImportedIndividual

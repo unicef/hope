@@ -371,7 +371,7 @@ class TargetingIndividualRuleFilterBlock(
     )
     target_only_hoh = models.BooleanField(default=False)
 
-    def get_individual_block_filters(self):
+    def get_individual_block_filters(self) -> QuerySet:
         return self.individual_block_filters.all()
 
 

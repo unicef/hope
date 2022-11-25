@@ -1756,7 +1756,7 @@ class FieldFactory(list):
     def associated_with_household(self) -> "FieldFactory":
         return self._associated_with(_HOUSEHOLD)
 
-    def _associated_with(self, associated_with) -> "FieldFactory":
+    def _associated_with(self, associated_with: str) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
             if item.get("associated_with") == associated_with:
