@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-from typing import Type, Any, Optional, List, Dict
+from typing import Any, Dict, List, Optional, Type
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType

@@ -12,15 +12,20 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
-
 if TYPE_CHECKING:
-    from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
+    from django.http import (
+        HttpRequest,
+        HttpResponsePermanentRedirect,
+        HttpResponseRedirect,
+    )
 
 logger = logging.getLogger(__name__)
 
 
 @login_required
-def download_cash_plan_payment_verification(request: HttpRequest, verification_id: str) -> Union[HttpResponseRedirect, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponsePermanentRedirect]:
+def download_cash_plan_payment_verification(
+    request: HttpRequest, verification_id: str
+) -> Union[HttpResponseRedirect, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponsePermanentRedirect]:
     cash_plan_payment_verification_id = decode_id_string(verification_id)
     cash_plan_payment_verification = get_object_or_404(
         CashPlanPaymentVerification, id=cash_plan_payment_verification_id

@@ -4,7 +4,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional
 
-from django.template import Library, Node, Context
+from django.template import Context, Library, Node
 
 from PIL import Image, UnidentifiedImageError
 

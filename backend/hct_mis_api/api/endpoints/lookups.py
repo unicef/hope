@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from django_countries import Countries
 from rest_framework.response import Response
@@ -15,7 +15,6 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
 )
 from hct_mis_api.apps.program.models import Program
-
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

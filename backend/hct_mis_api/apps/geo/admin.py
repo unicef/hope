@@ -1,11 +1,11 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, List, Optional, Generator, Any, Tuple, Callable, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Tuple, Union
 
 from django.contrib import admin, messages
-from django.contrib.admin import ListFilter, RelatedFieldListFilter, ModelAdmin
+from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
-from django.db.models import QuerySet, Model
+from django.db.models import Model, QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -97,7 +97,9 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request: HttpRequest) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
+    def get_list_display(
+        self, request: HttpRequest
+    ) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
         ret = super().get_list_display(request)
         return ret
 

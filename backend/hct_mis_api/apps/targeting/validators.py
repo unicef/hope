@@ -13,7 +13,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 
-
 if TYPE_CHECKING:
     from hct_mis_api.apps.steficon.models import Rule
 

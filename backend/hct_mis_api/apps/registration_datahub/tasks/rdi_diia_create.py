@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -45,7 +45,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -112,7 +111,12 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: UUID, diia_hh_ids: Optional[List[UUID]] = None, diia_hh_count: Optional[int] = None) -> None:
+    def execute(
+        self,
+        registration_data_import_id: UUID,
+        diia_hh_ids: Optional[List[UUID]] = None,
+        diia_hh_count: Optional[int] = None,
+    ) -> None:
         if diia_hh_ids and diia_hh_count:
             raise ValueError("You can't set two args diia_hh_ids and diia_hh_count")
 

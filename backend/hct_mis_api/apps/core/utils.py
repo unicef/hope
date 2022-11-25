@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, Generator, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
 
 from django.utils import timezone
 
@@ -16,10 +16,10 @@ from PIL import Image
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
-
 if TYPE_CHECKING:
     from django.core.files import File
-    from django.db.models import QuerySet, Model
+    from django.db.models import Model, QuerySet
+
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -54,7 +54,13 @@ def encode_id_base64(id_string: str, model_name: str) -> Optional[str]:
     return encode_id_base64_required(id_string, model_name)
 
 
-def unique_slugify(instance: Model, value: Any, slug_field_name: str = "slug", queryset: Optional[QuerySet] = None, slug_separator: str = "-") -> None:
+def unique_slugify(
+    instance: Model,
+    value: Any,
+    slug_field_name: str = "slug",
+    queryset: Optional[QuerySet] = None,
+    slug_separator: str = "-",
+) -> None:
     """
     Calculates and stores a unique slug of ``value`` for an instance.
 
@@ -551,7 +557,9 @@ def sum_lists_with_values(qs_values: List, list_len: int) -> List[int]:
     return data
 
 
-def chart_permission_decorator(chart_resolve: Optional[Callable] = None, permissions: Optional[List] = None) -> Callable:
+def chart_permission_decorator(
+    chart_resolve: Optional[Callable] = None, permissions: Optional[List] = None
+) -> Callable:
     if chart_resolve is None:
         return functools.partial(chart_permission_decorator, permissions=permissions)
 
@@ -574,7 +582,9 @@ def chart_filters_decoder(filters: Dict) -> Dict:
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas") -> Dict:
+def chart_create_filter_query(
+    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+) -> Dict:
     filter_query = {}
     if filters.get("program") is not None:
         filter_query.update({program_id_path: filters.get("program")})

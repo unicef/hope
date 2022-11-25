@@ -4,7 +4,6 @@ from django.db.models import Sum
 
 from hct_mis_api.apps.payment.models import PaymentRecord
 
-
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household
 

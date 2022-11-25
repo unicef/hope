@@ -1,16 +1,16 @@
-from typing import Any, Tuple, Optional, Union, Sequence, Dict
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 from uuid import UUID
 
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.admin import SimpleListFilter, ModelAdmin
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.db.models import JSONField, QuerySet
+from django.http import HttpRequest, HttpResponse
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.mixin import AdminFiltersMixin
-from django.http import HttpRequest, HttpResponse
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 

@@ -9,7 +9,7 @@ from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import ACTIVE, Role, UserRole, User
+from hct_mis_api.apps.account.models import ACTIVE, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,9 @@ def social_details(backend: Any, details: Dict, response: HttpRequest, *args: An
     return r
 
 
-def user_details(strategy: Any, details: Dict, backend: Any, user: Optional[Any] = None, *args: Any, **kwargs: Any) -> HttpResponse:
+def user_details(
+    strategy: Any, details: Dict, backend: Any, user: Optional[Any] = None, *args: Any, **kwargs: Any
+) -> HttpResponse:
     logger.debug(f"user_details for user {user} details:\n{details}")
     # social_core_user.user_details use details dict to override some fields on User instance
     # in order to prevent it setting first and last name fields to empty values (which seems we always get from api)
@@ -46,7 +48,9 @@ def user_details(strategy: Any, details: Dict, backend: Any, user: Optional[Any]
     return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
 
 
-def require_email(strategy: Any, details: Dict, user: Optional[User] = None, is_new: bool = False, *args: Any, **kwargs: Any) -> None:
+def require_email(
+    strategy: Any, details: Dict, user: Optional[User] = None, is_new: bool = False, *args: Any, **kwargs: Any
+) -> None:
     if user and user.email:
         return
     elif is_new and not details.get("email"):
@@ -54,7 +58,9 @@ def require_email(strategy: Any, details: Dict, user: Optional[User] = None, is_
         raise InvalidEmail(strategy)
 
 
-def create_user(strategy: Any, details: Dict, backend: Any, user: Optional[User] = None, *args: Any, **kwargs: Any) -> Optional[Dict[str, Union[bool, User]]]:
+def create_user(
+    strategy: Any, details: Dict, backend: Any, user: Optional[User] = None, *args: Any, **kwargs: Any
+) -> Optional[Dict[str, Union[bool, User]]]:
     if user:
         return {"is_new": False}
 

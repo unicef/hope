@@ -1,10 +1,10 @@
 import logging
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
+    PaymentRecord,
     PaymentVerification,
-    PaymentRecord
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status

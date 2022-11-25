@@ -26,6 +26,7 @@ from .upload import HouseholdSerializer
 
 if TYPE_CHECKING:
     from rest_framework.views import View
+
     from hct_mis_api.apps.core.models import BusinessArea
 
 

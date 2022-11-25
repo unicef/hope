@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import List, Optional, Set, Any, Union, Dict
+from typing import Any, Dict, List, Optional, Set, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -83,7 +83,9 @@ class FlexibleAttributeImporter:
             "choice": self.CHOICE_MODEL_FIELDS,
         }.get(object_type_to_add)
 
-    def _assign_field_values(self, value: Any, header_name: str, object_type_to_add: Any, row: Row, row_number: int) -> None:
+    def _assign_field_values(
+        self, value: Any, header_name: str, object_type_to_add: Any, row: Row, row_number: int
+    ) -> None:
         if not (model_fields := self._get_model_fields(object_type_to_add)):
             return
 

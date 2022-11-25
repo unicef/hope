@@ -3,7 +3,7 @@ from uuid import UUID
 
 from django.contrib import admin, messages
 from django.db.models import QuerySet
-from django.http import HttpResponseRedirect, HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe

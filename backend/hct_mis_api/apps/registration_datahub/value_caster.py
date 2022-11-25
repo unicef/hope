@@ -1,6 +1,6 @@
 import abc
 from datetime import date, datetime
-from typing import Any, Optional, List, Union
+from typing import Any, List, Optional, Union
 
 from dateutil.parser import parse
 

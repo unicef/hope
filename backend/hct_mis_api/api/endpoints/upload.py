@@ -1,7 +1,7 @@
 import logging
 from dataclasses import asdict
-from datetime import datetime, date
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -39,6 +39,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
+
     from hct_mis_api.apps.core.models import BusinessArea
 
 

@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Iterable, Optional, Tuple, Type, Any, List, Dict, Callable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -289,7 +289,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,
         filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[BasePermission] = (AllowAny, ),
+        permission_classes: Tuple[BasePermission] = (AllowAny,),
         *args: Any,
         **kwargs: Any,
     ) -> None:

@@ -1,9 +1,8 @@
-from typing import Tuple, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Tuple
 
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
@@ -12,7 +11,6 @@ from rest_framework.permissions import IsAuthenticated
 from hct_mis_api.apps.account.models import User
 
 from .models import APIToken
-
 
 if TYPE_CHECKING:
     from requests import Request

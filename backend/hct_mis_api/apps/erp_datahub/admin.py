@@ -1,10 +1,10 @@
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, List, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter, ModelAdmin
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
@@ -125,7 +125,9 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request: HttpRequest, pk: UUID) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+    def assign_business_office(
+        self, request: HttpRequest, pk: UUID
+    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
@@ -219,7 +221,9 @@ class DownPaymentAdmin(HOPEModelAdminBase):
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
-    def assign_business_office(self, request: HttpRequest, pk: UUID) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+    def assign_business_office(
+        self, request: HttpRequest, pk: UUID
+    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: DownPayment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)

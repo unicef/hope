@@ -27,7 +27,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
-
 if TYPE_CHECKING:
     from hct_mis_api.apps.grievance.models import GrievanceTicket
     from hct_mis_api.apps.household.models import IndividualRoleInHousehold
@@ -279,7 +278,9 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[I
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status: List[Dict]) -> Dict[Optional[Any], Dict[str, Any]]:
+def prepare_previous_payment_channels(
+    payment_channels_to_remove_with_approve_status: List[Dict],
+) -> Dict[Optional[Any], Dict[str, Any]]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -436,7 +437,9 @@ def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def withdraw_individual_and_reassign_roles(ticket_details: List[GrievanceTicket], individual_to_remove: Individual, info: Any) -> None:
+def withdraw_individual_and_reassign_roles(
+    ticket_details: List[GrievanceTicket], individual_to_remove: Individual, info: Any
+) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
@@ -625,7 +628,12 @@ def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, i
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
 
-def withdraw_individual(individual_to_remove: Individual, info: Any, old_individual_to_remove: Individual, removed_individual_household: Household) -> None:
+def withdraw_individual(
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
+) -> None:
     from hct_mis_api.apps.household.models import Document
 
     individual_to_remove.withdraw()
@@ -658,7 +666,10 @@ def mark_as_duplicate_individual(
 
 
 def log_and_withdraw_household_if_needed(
-    individual_to_remove: Individual, info: Any, old_individual_to_remove: Individual, removed_individual_household: Household
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
 

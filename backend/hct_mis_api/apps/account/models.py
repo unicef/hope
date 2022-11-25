@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -18,13 +18,12 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
-from hct_mis_api.apps.account.permissions import Permissions, BasePermission
+from hct_mis_api.apps.account.permissions import BasePermission, Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea

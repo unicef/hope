@@ -1,6 +1,6 @@
 import datetime as dt
 import random
-from typing import Any, List, Iterable, Optional, AnyStr, Union
+from typing import Any, AnyStr, Iterable, List, Optional, Union
 
 import factory
 from pytz import utc

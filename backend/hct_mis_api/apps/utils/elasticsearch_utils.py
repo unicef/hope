@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from uuid import UUID
 
 from django.db.models import Model
+
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search, connections
 
@@ -15,6 +16,7 @@ DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from django_elasticsearch_dsl import Document
 
 

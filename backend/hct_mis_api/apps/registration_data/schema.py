@@ -1,4 +1,4 @@
-from typing import Any, Union, Dict, List
+from typing import Any, Dict, List, Union
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -48,11 +48,15 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
         batch_duplicates = root.all_imported_individuals.filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
         return get_count_and_percentage(batch_duplicates, root.all_imported_individuals)
 
-    def resolve_golden_record_duplicates_count_and_percentage(root, info: Any, **kwargs: Any) -> Dict[str, Union[int, float]]:
+    def resolve_golden_record_duplicates_count_and_percentage(
+        root, info: Any, **kwargs: Any
+    ) -> Dict[str, Union[int, float]]:
         gr_duplicates = root.all_imported_individuals.filter(deduplication_golden_record_status=DUPLICATE)
         return get_count_and_percentage(gr_duplicates, root.all_imported_individuals)
 
-    def resolve_golden_record_possible_duplicates_count_and_percentage(root, info: Any, **kwargs: Any) -> Dict[str, Union[int, float]]:
+    def resolve_golden_record_possible_duplicates_count_and_percentage(
+        root, info: Any, **kwargs: Any
+    ) -> Dict[str, Union[int, float]]:
         gr_similar = root.all_imported_individuals.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         return get_count_and_percentage(gr_similar, root.all_imported_individuals)
 
@@ -60,7 +64,9 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
         unique = root.all_imported_individuals.filter(deduplication_batch_status=UNIQUE_IN_BATCH)
         return get_count_and_percentage(unique, root.all_imported_individuals)
 
-    def resolve_golden_record_unique_count_and_percentage(root, info: Any, **kwargs: Any) -> Dict[str, Union[int, float]]:
+    def resolve_golden_record_unique_count_and_percentage(
+        root, info: Any, **kwargs: Any
+    ) -> Dict[str, Union[int, float]]:
         unique = root.all_imported_individuals.filter(deduplication_golden_record_status=UNIQUE)
         return get_count_and_percentage(unique, root.all_imported_individuals)
 

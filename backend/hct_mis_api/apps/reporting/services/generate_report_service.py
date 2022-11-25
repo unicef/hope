@@ -2,7 +2,7 @@ import copy
 import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -31,7 +31,6 @@ from hct_mis_api.apps.program.models import (
     Program,
 )
 from hct_mis_api.apps.reporting.models import Report
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User

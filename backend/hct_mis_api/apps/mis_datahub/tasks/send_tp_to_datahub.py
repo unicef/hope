@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.db import transaction
 from django.db.models import F, Q, QuerySet
@@ -17,10 +17,9 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 
-
 if TYPE_CHECKING:
-    from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
     from hct_mis_api.apps.program.models import Program
+    from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 logger = logging.getLogger(__name__)
@@ -286,7 +285,9 @@ class SendTPToDatahubTask:
         )
         return dh_document
 
-    def _prepare_datahub_object_target_entry(self, target_population_selection: HouseholdSelection) -> dh_mis_models.TargetPopulationEntry:
+    def _prepare_datahub_object_target_entry(
+        self, target_population_selection: HouseholdSelection
+    ) -> dh_mis_models.TargetPopulationEntry:
         household_unhcr_id = self._get_unhcr_household_id(target_population_selection.household)
         return dh_mis_models.TargetPopulationEntry(
             target_population_mis_id=target_population_selection.target_population.id,
