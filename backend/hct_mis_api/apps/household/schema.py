@@ -547,7 +547,7 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        queryset = Household.objects
+        queryset = Household.objects.order_by("created_at")
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.prefetch_related("admin_area")
             queryset = queryset.prefetch_related("admin_area__area_type")
