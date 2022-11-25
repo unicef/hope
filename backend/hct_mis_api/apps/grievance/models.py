@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketManager(models.Manager):
-    def belong_household(self, household) -> Iterable:
+    def belong_household(self, household: Household) -> Iterable:
         individuals = household.individuals.values_list("id", flat=True)
         return chain(
             (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
@@ -313,7 +313,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t) -> List:
+    def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]
 
     @property
@@ -352,7 +352,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return self.get_category_display()
 
     @property
-    def issue_type_log(self) -> Optional[Dict]:
+    def issue_type_log(self) -> Optional[str]:
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -757,6 +757,6 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 @receiver(post_save, sender=TicketSystemFlaggingDetails)
 @receiver(post_save, sender=TicketNeedsAdjudicationDetails)
 @receiver(post_save, sender=TicketPaymentVerificationDetails)
-def update_household_unicef_id(sender, instance, *args, **kwargs):
+def update_household_unicef_id(sender: Any, instance: GrievanceTicket, *args: Any, **kwargs: Any) -> None:
     instance.ticket.household_unicef_id = getattr(instance.household, "unicef_id", None)
     instance.ticket.save(update_fields=("household_unicef_id",))

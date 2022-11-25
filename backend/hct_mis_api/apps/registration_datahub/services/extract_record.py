@@ -7,7 +7,7 @@ from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is
 logger = logging.getLogger(__name__)
 
 
-def extract(records_ids: List[int], raise_exception=False) -> Any:
+def extract(records_ids: List[int], raise_exception: bool = False) -> Any:
     def _filter(d) -> Any:
         if isinstance(d, list):
             return [_filter(v) for v in d]

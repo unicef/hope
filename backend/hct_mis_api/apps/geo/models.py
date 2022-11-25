@@ -16,7 +16,7 @@ from mptt.querysets import TreeQuerySet
 
 
 class ValidityQuerySet(TreeQuerySet):
-    def active(self, *args, **kwargs):
+    def active(self, *args: Any, **kwargs: Any) -> "ValidityQuerySet":
         return super().filter(valid_until__isnull=True).filter(*args, **kwargs)
 
 

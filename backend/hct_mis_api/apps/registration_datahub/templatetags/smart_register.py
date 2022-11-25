@@ -2,9 +2,9 @@ import base64
 import io
 import logging
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
-from django.template import Library, Node
+from django.template import Library, Node, Context
 
 from PIL import Image, UnidentifiedImageError
 
@@ -13,18 +13,18 @@ register = Library()
 
 
 class EscapeScriptNode(Node):
-    def __init__(self, nodelist) -> None:
+    def __init__(self, nodelist: List[Node]) -> None:
         super(EscapeScriptNode, self).__init__()
         self.nodelist = nodelist
 
-    def render(self, context) -> str:
+    def render(self, context: Context) -> str:
         out = self.nodelist.render(context)
         escaped_out = out.replace("</script>", "<\\/script>")
         return escaped_out
 
 
 @register.tag()
-def escapescript(parser, token) -> EscapeScriptNode:
+def escapescript(parser: Any, token: Any) -> EscapeScriptNode:
     nodelist = parser.parse(("endescapescript",))
     parser.delete_first_token()
     return EscapeScriptNode(nodelist)
@@ -46,32 +46,32 @@ def isdict(value: Any) -> bool:
 
 
 @register.inclusion_tag("dump/dump.html")
-def dump(value: Any, key=None, original=None) -> Dict:
+def dump(value: Any, key: Optional[Any] = None, original: Optional[Any] = None) -> Dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/list.html")
-def dump_list(value, key=None, original=None) -> Dict:
+def dump_list(value: Any, key: Optional[Any] = None, original: Optional[Any] = None) -> Dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/dict.html")
-def dump_dict(value, key=None, original=None) -> Dict:
+def dump_dict(value: Any, key: Optional[Any] = None, original: Optional[Any] = None) -> Dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.filter(name="smart")
-def smart_attr(field, attr) -> Any:
+def smart_attr(field: Any, attr: Any) -> Any:
     return field.field.flex_field.advanced.get("smart", {}).get(attr, "")
 
 
 @register.filter(name="lookup")
-def lookup(value, arg) -> Any:
+def lookup(value: Any, arg: Any) -> Any:
     return value.get(arg, None)
 
 
 @register.filter()
-def is_image(element) -> bool:
+def is_image(element: Any) -> bool:
     if not isinstance(element, str) or len(element) < 200 or (isinstance(element, str) and not element.isascii()):
         return False
     try:

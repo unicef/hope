@@ -309,7 +309,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
 
-    def delete_view(self, request: HttpRequest, object_id: Optional[UUID] = None, extra_context: Optional[Any] = None) -> Union[HttpResponse, HttpResponse]:
+    def delete_view(self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None) -> Union[HttpResponse, HttpResponse]:
         return super().delete_view(request, object_id, extra_context)
 
     def render_delete_form(self, request: HttpRequest, context: Dict) -> Form:
@@ -437,7 +437,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return HttpResponseRedirect(reverse("admin:index"))
 
     @button(visible=lambda btn: "/change/" in btn.request.path)
-    def diff(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def diff(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
         try:
             context = self.get_common_context(request, pk, action="Code history")
             state_pk = request.GET.get("state_pk")
@@ -466,16 +466,16 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    def change_view(self, request: HttpRequest, object_id: UUID, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
+    def change_view(self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 
-    def _changeform_view(self, request: HttpRequest, object_id: UUID, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
+    def _changeform_view(self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None
         return super()._changeform_view(request, object_id, form_url, extra_context)
 
     @atomic()
-    def save_model(self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Optional[Any] = None) -> HttpResponse:
+    def save_model(self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Optional[Any] = None) -> None:
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user

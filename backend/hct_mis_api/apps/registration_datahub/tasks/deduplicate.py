@@ -199,7 +199,7 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_household_query(cls, household_data: Dict) -> Dict:
+    def _prepare_household_query(cls, household_data: Dict) -> List[Dict[str, Dict[Any, Dict[str, Any]]]]:
         queries = []
         important_fields = (
             "address",
@@ -337,7 +337,7 @@ class DeduplicateTask:
 
     @classmethod
     def _get_duplicates_tuple(
-        cls, query_dict, duplicate_score, document, individual
+        cls, query_dict: Dict, duplicate_score: int, document: Document, individual: Individual
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         duplicates = []
         possible_duplicates = []
@@ -629,11 +629,11 @@ class DeduplicateTask:
 
     @staticmethod
     def _mark_individuals(
-        all_duplicates,
-        all_possible_duplicates,
-        to_bulk_update_results,
-        all_original_individuals_ids_duplicates,
-        all_original_individuals_ids_possible_duplicates,
+        all_duplicates: List[Individual],
+        all_possible_duplicates: List[Individual],
+        to_bulk_update_results: List,
+        all_original_individuals_ids_duplicates: List[Individual],
+        all_original_individuals_ids_possible_duplicates: List[Individual],
     ) -> None:
         Individual.objects.filter(
             id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
@@ -927,11 +927,11 @@ class DeduplicateTask:
     @classmethod
     def prepare_grievance_ticket_documents_deduplication(
         cls,
-        main_individual,
-        possible_duplicates_individuals,
-        business_area,
-        registration_data_import,
-        possible_duplicates_through_dict,
+        main_individual: Individual,
+        possible_duplicates_individuals: List[Individual],
+        business_area: BusinessArea,
+        registration_data_import: RegistrationDataImport,
+        possible_duplicates_through_dict: Dict,
     ) -> Optional[NamedTuple]:
         from hct_mis_api.apps.grievance.models import (
             GrievanceTicket,

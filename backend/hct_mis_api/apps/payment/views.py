@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -14,14 +14,13 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
 if TYPE_CHECKING:
-    from django.http import HttpRequest, HttpResponse
-
+    from django.http import HttpRequest, HttpResponsePermanentRedirect
 
 logger = logging.getLogger(__name__)
 
 
 @login_required
-def download_cash_plan_payment_verification(request: HttpRequest, verification_id: str) -> HttpResponse:
+def download_cash_plan_payment_verification(request: HttpRequest, verification_id: str) -> HttpResponsePermanentRedirect:
     cash_plan_payment_verification_id = decode_id_string(verification_id)
     cash_plan_payment_verification = get_object_or_404(
         CashPlanPaymentVerification, id=cash_plan_payment_verification_id

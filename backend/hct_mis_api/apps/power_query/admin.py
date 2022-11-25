@@ -70,7 +70,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_form_template = None
     resource_class = QueryResource
 
-    def formfield_for_dbfield(self, db_field, request: HttpRequest, **kwargs: Any) -> Optional[forms.fields.Field]:
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Optional[forms.fields.Field]:
         if db_field.name == "code":
             kwargs = {"widget": PythonEditor}
         elif db_field.name == "description":

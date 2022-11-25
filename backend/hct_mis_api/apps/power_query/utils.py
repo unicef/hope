@@ -2,7 +2,7 @@ import base64
 import hashlib
 import inspect
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Callable
 
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -12,6 +12,7 @@ from django.utils.safestring import mark_safe
 
 import tablib
 from concurrency.utils import get_classname
+from django.views import View
 
 
 def fqn(o: Any) -> str:
@@ -68,7 +69,7 @@ def get_sentry_url(event_id: int, html: bool = False) -> str:
     return url
 
 
-def basicauth(view):
+def basicauth(view: Callable):
     def wrap(request: HttpRequest, *args: Any, **kwargs: Any) -> view:
         if request.user.is_authenticated:
             return view(request, *args, **kwargs)

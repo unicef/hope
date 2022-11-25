@@ -1,14 +1,14 @@
 from decimal import Decimal
 from math import ceil
-from typing import Union
+from typing import Union, Dict, Literal
 
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
 
 
-def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error) -> int:
+def get_number_of_samples(payment_records_sample_count: int, confidence_interval: int, margin_of_error: int) -> int:
     from statistics import NormalDist
 
     variable = 0.5
@@ -20,7 +20,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(received, received_amount, delivered_amount) -> str:
+def from_received_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
     received_amount_dec = float_to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
@@ -41,7 +41,7 @@ def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
     return received_amount
 
 
-def from_received_yes_no_to_status(received, received_amount, delivered_amount) -> str:
+def from_received_yes_no_to_status(received: bool, received_amount: float, delivered_amount: float) -> Union[str, Literal["YES", "NO"]]:
     received_bool = None
     if received == "YES":
         received_bool = True
@@ -50,7 +50,7 @@ def from_received_yes_no_to_status(received, received_amount, delivered_amount) 
     return from_received_to_status(received_bool, received_amount, delivered_amount)
 
 
-def calculate_counts(cash_plan_verification) -> None:
+def calculate_counts(cash_plan_verification: CashPlanPaymentVerification) -> None:
     cash_plan_verification.responded_count = cash_plan_verification.payment_record_verifications.filter(
         ~Q(status=PaymentVerification.STATUS_PENDING)
     ).count()
@@ -66,7 +66,7 @@ def calculate_counts(cash_plan_verification) -> None:
 
 
 def get_payment_records_for_dashboard(
-    year, business_area_slug, filters, only_with_delivered_quantity=False
+    year: int, business_area_slug: str, filters: Dict, only_with_delivered_quantity: bool = False
 ) -> QuerySet:
     additional_filters = {}
     if only_with_delivered_quantity:

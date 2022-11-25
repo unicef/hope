@@ -295,13 +295,13 @@ class CountryCodeMapManager(models.Manager):
         self.build_cache()
         return self._cache[len(iso_code)].get(iso_code, iso_code)
 
-    def get_iso3_code(self, ca_code: str) -> None:
+    def get_iso3_code(self, ca_code: str) -> str:
         ca_code = ca_code.upper()
         self.build_cache()
 
         return self._cache["ca3"].get(ca_code, ca_code)
 
-    def get_iso2_code(self, ca_code: str) -> None:
+    def get_iso2_code(self, ca_code: str) -> str:
         ca_code = ca_code.upper()
         self.build_cache()
 
