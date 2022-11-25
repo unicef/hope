@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, IO
+from typing import IO, Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet

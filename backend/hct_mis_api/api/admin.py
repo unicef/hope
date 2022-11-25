@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpResponseRedirect, HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template import Template
 from django.urls import reverse
 
@@ -21,9 +21,9 @@ from hct_mis_api.api.models import APILogEntry, APIToken
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.core.models import BusinessArea
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.forms import Form
     from django.template import Template
 
@@ -152,8 +152,13 @@ class APITokenAdmin(SmartModelAdmin):
         obj = self.get_object(request, pk)
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
 
-    def changeform_view(self, request: HttpRequest, object_id: Optional[Any] = None, form_url: str = "", extra_context: Optional[Any] = None) -> \
-    Union[HttpResponse, HttpResponse, HttpResponseRedirect]:
+    def changeform_view(
+        self,
+        request: HttpRequest,
+        object_id: Optional[Any] = None,
+        form_url: str = "",
+        extra_context: Optional[Any] = None,
+    ) -> Union[HttpResponse, HttpResponse, HttpResponseRedirect]:
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:

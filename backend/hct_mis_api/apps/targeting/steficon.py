@@ -13,9 +13,9 @@ from hct_mis_api.apps.steficon.debug import get_error_info
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.http import HttpRequest
 
 

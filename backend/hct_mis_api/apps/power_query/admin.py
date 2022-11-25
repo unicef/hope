@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django import forms
 from django.conf import settings
@@ -29,7 +29,6 @@ from .forms import FormatterTestForm
 from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
 from .utils import to_dataset
 from .widget import FormatterEditor
-
 
 if TYPE_CHECKING:
     from uuid import UUID

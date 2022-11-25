@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied

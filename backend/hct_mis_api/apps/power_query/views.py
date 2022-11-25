@@ -12,9 +12,9 @@ from django.utils.http import http_date
 from .models import Report, ReportDocument
 from .utils import basicauth
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.http import HttpRequest, HttpResponse
 
 

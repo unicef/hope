@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 from django import forms
 from django.conf import settings

@@ -1,12 +1,12 @@
 import logging
-from typing import Union, Tuple, TYPE_CHECKING, Optional, Any, Callable, NoReturn
+from typing import TYPE_CHECKING, Any, Callable, NoReturn, Optional, Tuple, Union
 from uuid import UUID
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -34,7 +34,6 @@ from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 from hct_mis_api.apps.utils.security import is_root
-
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet, _QuerySet
@@ -252,7 +251,9 @@ class TargetPopulationAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
     search_fields = ("name",)
 
-    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> Tuple[_QuerySet[Any, Any], bool]:
+    def get_search_results(
+        self, request: HttpRequest, queryset: QuerySet, search_term: str
+    ) -> Tuple[_QuerySet[Any, Any], bool]:
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         return queryset, use_distinct
 

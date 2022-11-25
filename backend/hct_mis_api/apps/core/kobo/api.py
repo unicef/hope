@@ -2,7 +2,7 @@ import logging
 import time
 import typing
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple, Union, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -60,7 +60,13 @@ class KoboAPI:
             results.extend(data["results"])
         return results
 
-    def _get_url(self, endpoint: str, append_api: bool = True, add_limit: bool = True, additional_query_params: Optional[Any] = None) -> str:
+    def _get_url(
+        self,
+        endpoint: str,
+        append_api: bool = True,
+        add_limit: bool = True,
+        additional_query_params: Optional[Any] = None,
+    ) -> str:
         endpoint.strip("/")
         if endpoint != "token" and append_api is True:
             endpoint = f"api/v2/{endpoint}"
@@ -93,11 +99,15 @@ class KoboAPI:
             raise
         return response.json()
 
-    def _post_request(self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None) -> requests.Response:
+    def _post_request(
+        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
+    ) -> requests.Response:
         response = self._client.post(url=url, data=data, files=files)
         return response
 
-    def _patch_request(self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None) -> requests.Response:
+    def _patch_request(
+        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
+    ) -> requests.Response:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 

@@ -1,5 +1,5 @@
 import abc
-from typing import Optional, Any
+from typing import Any, Optional
 
 from django.db.models import Q
 

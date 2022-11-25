@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, IO, Iterable, TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
 
@@ -18,7 +18,6 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
-
 
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
@@ -175,7 +174,9 @@ class KoboTemplateValidator:
         return columns_names_and_numbers_mapping
 
     @classmethod
-    def _get_core_fields_from_file(cls, survey_sheet: Worksheet, choices_mapping: Dict, columns_names_and_numbers_mapping: Dict) -> Dict:
+    def _get_core_fields_from_file(
+        cls, survey_sheet: Worksheet, choices_mapping: Dict, columns_names_and_numbers_mapping: Dict
+    ) -> Dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):
             field_name = row[columns_names_and_numbers_mapping["name"]].value

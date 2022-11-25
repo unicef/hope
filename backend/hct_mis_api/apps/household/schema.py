@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 from django.db.models import Case, Prefetch, QuerySet, Sum, Value, When
 
 import graphene
-from graphene import relay, Field, Int, DateTime, Boolean, String, Enum
+from graphene import Boolean, DateTime, Enum, Field, Int, String, relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (

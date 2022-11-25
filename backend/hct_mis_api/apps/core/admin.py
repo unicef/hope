@@ -17,7 +17,12 @@ from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.db.models import Aggregate, CharField
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -510,7 +515,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         )
         return redirect(".")
 
-    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+    def add_view(
+        self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
+    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         if not self.has_add_permission(request):
             logger.error("The user did not have permission to do that")
             raise PermissionDenied
@@ -571,7 +578,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context:  Optional[Dict[str, Any]] = None
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
@@ -611,7 +618,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return request.user.can_download_storage_files()
 
     @button(label="Create eDopomoga TP")
-    def create_tp(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse,HttpResponsePermanentRedirect]:
+    def create_tp(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse, HttpResponsePermanentRedirect]:
         storage_obj = StorageFile.objects.get(pk=pk)
         context = self.get_common_context(
             request,

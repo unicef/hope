@@ -1,6 +1,17 @@
 import logging
 from collections.abc import Iterable
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Type, TYPE_CHECKING, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -28,9 +39,9 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
 )
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models.query import QuerySet
 
 
@@ -297,7 +308,9 @@ class Query(graphene.ObjectType):
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
 
-    def resolve_all_fields_attributes(parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None) -> List[Any]:
+    def resolve_all_fields_attributes(
+        parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None
+    ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
                 name = field.name

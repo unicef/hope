@@ -72,7 +72,13 @@ class Parametrizer(NaturalKeyModel, models.Model):
         product = list(itertools.product(*self.value.values()))
         return [dict(zip(self.value.keys(), e)) for e in product]
 
-    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if not self.code:
             self.code = slugify(self.name)
         super().save(force_insert, force_update, using, update_fields)
@@ -108,7 +114,13 @@ class Query(NaturalKeyModel, models.Model):
         verbose_name_plural = "Power Queries"
         ordering = ("name",)
 
-    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
         self.error = None
@@ -251,7 +263,13 @@ class Report(NaturalKeyModel, models.Model):
 
     last_run = models.DateTimeField(null=True, blank=True)
 
-    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if not self.document_title:
             self.document_title = self.name
         super().save(force_insert, force_update, using, update_fields)

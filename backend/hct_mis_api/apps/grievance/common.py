@@ -9,6 +9,7 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.household.models import Individual
     from hct_mis_api.apps.registration_data.models import RegistrationDataImport

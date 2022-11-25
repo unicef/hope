@@ -17,7 +17,6 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
 
-
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import CashPlan
 
@@ -52,7 +51,9 @@ class VerificationPlanCrudServices:
         return cash_plan_verification
 
     @classmethod
-    def update(cls, cash_plan_verification: CashPlanPaymentVerification, input_data: Dict) -> CashPlanPaymentVerification:
+    def update(
+        cls, cash_plan_verification: CashPlanPaymentVerification, input_data: Dict
+    ) -> CashPlanPaymentVerification:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")

@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from django.db import transaction
 from django.db.models import Count
@@ -25,7 +25,6 @@ from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
 )
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.utils.models import AbstractSession

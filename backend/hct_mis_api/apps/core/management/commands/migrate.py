@@ -279,7 +279,9 @@ class Command(BaseCommand):
             plan=plan,
         )
 
-    def migration_progress_callback(self, action: str, migration: Optional[str] = None, fake: Optional[bool] = False) -> None:
+    def migration_progress_callback(
+        self, action: str, migration: Optional[str] = None, fake: Optional[bool] = False
+    ) -> None:
         if self.verbosity >= 1:
             compute_time = self.verbosity > 1
             if action == "apply_start":

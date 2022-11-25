@@ -1,6 +1,6 @@
 import logging
 from decimal import Decimal, InvalidOperation
-from typing import Dict, List, Optional, Tuple, Union, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django.conf import settings
@@ -10,7 +10,6 @@ import requests
 from constance import config
 
 from hct_mis_api.apps.core.models import BusinessArea
-
 
 if TYPE_CHECKING:
     from rest_framework.response import Response

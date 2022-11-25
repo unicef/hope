@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from django import forms
 from django.contrib import messages
@@ -21,9 +21,9 @@ from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.permissions_views_mixins import UploadFilePermissionMixin
 from hct_mis_api.apps.reporting.models import DashboardReport
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.forms import Form
 
 

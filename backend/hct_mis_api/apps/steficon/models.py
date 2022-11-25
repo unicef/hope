@@ -93,7 +93,13 @@ class Rule(models.Model):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if "individual_data_needed" not in self.flags:
             self.flags["individual_data_needed"] = False
         with atomic():

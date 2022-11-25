@@ -3,7 +3,18 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union, Sequence
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 from urllib.parse import unquote
 
 from django import forms
@@ -21,7 +32,7 @@ from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import router, transaction
-from django.db.models import JSONField, Q, QuerySet, Model
+from django.db.models import JSONField, Model, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
@@ -58,9 +69,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 
-
 if TYPE_CHECKING:
     from uuid import UUID
+
     from django.db.models.query import QuerySet, _QuerySet
     from django.forms import Form
 
@@ -986,12 +997,20 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     def _perms(self, request: HttpRequest, object_id: UUID) -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
-    def changeform_view(self, request: HttpRequest, object_id: Optional[str] = None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
+    def changeform_view(
+        self,
+        request: HttpRequest,
+        object_id: Optional[str] = None,
+        form_url: str = "",
+        extra_context: Optional[Dict] = None,
+    ) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request: HttpRequest, form: Form, formsets: Any, add: bool = False) -> List[Dict]:
+    def construct_change_message(
+        self, request: HttpRequest, form: Form, formsets: Any, add: bool = False
+    ) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
@@ -1108,12 +1127,20 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         context["data"] = users
         return render(request, "admin/account/group/members.html", context)
 
-    def changeform_view(self, request: HttpRequest, object_id: Optional[str] = None, form_url: str = "", extra_context: Optional[Dict] = None) -> HttpResponse:
+    def changeform_view(
+        self,
+        request: HttpRequest,
+        object_id: Optional[str] = None,
+        form_url: str = "",
+        extra_context: Optional[Dict] = None,
+    ) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request: HttpRequest, form: Form, formsets: Any, add: bool = False) -> List[Dict]:
+    def construct_change_message(
+        self, request: HttpRequest, form: Form, formsets: Any, add: bool = False
+    ) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)

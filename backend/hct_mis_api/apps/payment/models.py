@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
@@ -21,7 +21,6 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.cash_assist_datahub.models import CashPlan
@@ -349,7 +348,9 @@ def update_verification_status_in_cash_plan(sender: Any, instance: CashPlanPayme
     sender=CashPlanPaymentVerification,
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
-def update_verification_status_in_cash_plan_on_delete(sender: Any, instance: CashPlanPaymentVerification, **kwargs: Any) -> None:
+def update_verification_status_in_cash_plan_on_delete(
+    sender: Any, instance: CashPlanPaymentVerification, **kwargs: Any
+) -> None:
     build_summary(instance.cash_plan)
 
 

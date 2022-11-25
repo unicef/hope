@@ -5,7 +5,7 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from typing import Any, Dict, List, Type, Callable
+from typing import Any, Callable, Dict, List, Type
 from uuid import UUID
 
 from django.core.exceptions import ValidationError

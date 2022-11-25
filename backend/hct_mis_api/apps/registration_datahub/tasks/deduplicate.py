@@ -162,7 +162,9 @@ class DeduplicateTask:
         return documents_queries
 
     @staticmethod
-    def _prepare_fields(individual: List[Individual], fields_names: List[str], dict_fields: List[Any]) -> Dict[str, Any]:
+    def _prepare_fields(
+        individual: List[Individual], fields_names: List[str], dict_fields: List[Any]
+    ) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
@@ -171,8 +173,20 @@ class DeduplicateTask:
         return fields
 
     @classmethod
-    def _prepare_households_and_roles_queries(cls, households_and_roles: List[Dict]) -> list[dict[str, dict[str, Union[
-        list[Union[dict[str, dict[str, dict[str, Optional[Any]]]], dict[str, dict[str, dict[str, str]]]]], int]]]]:
+    def _prepare_households_and_roles_queries(
+        cls, households_and_roles: List[Dict]
+    ) -> list[
+        dict[
+            str,
+            dict[
+                str,
+                Union[
+                    list[Union[dict[str, dict[str, dict[str, Optional[Any]]]], dict[str, dict[str, dict[str, str]]]]],
+                    int,
+                ],
+            ],
+        ]
+    ]:
         """
         Not needed
         Not working
@@ -387,7 +401,9 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_single_imported_individual(cls, individual: Individual) -> Tuple[List, List, List, List, Dict[str, Any]]:
+    def deduplicate_single_imported_individual(
+        cls, individual: Individual
+    ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         fields_names = (
             "given_name",
             "full_name",
@@ -822,7 +838,9 @@ class DeduplicateTask:
 
     @classmethod
     @transaction.atomic
-    def hard_deduplicate_documents(cls, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None) -> None:
+    def hard_deduplicate_documents(
+        cls, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
+    ) -> None:
         documents_to_dedup = evaluate_qs(
             new_documents.exclude(status=Document.STATUS_VALID)
             .select_related("individual")
