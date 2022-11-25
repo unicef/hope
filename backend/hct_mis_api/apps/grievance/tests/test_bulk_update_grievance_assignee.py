@@ -2,6 +2,9 @@ import random
 from typing import Any, List
 from unittest.mock import patch
 
+from django.conf import settings
+from django.test import override_settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -90,6 +93,28 @@ class TestUpdateGrievanceTickets(APITestCase):
         self, _: Any, permissions: List[Permissions], bulk_update_assigned_to_mock: Any
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        input_data = {
+            "businessAreaSlug": self.business_area.slug,
+            "grievanceTicketUnicefIds": [
+                self.grievance_ticket1.unicef_id,
+                self.grievance_ticket2.unicef_id,
+                self.grievance_ticket3.unicef_id,
+                self.grievance_ticket4.unicef_id,
+                "GRV-000030",
+            ],
+            "assignedTo": self.assignedTo,
+        }
+
+        self.snapshot_graphql_request(
+            request_string=self.BULK_UPDATE_GRIEVANCE_TICKETS_ASSIGNEES_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
+        )
+
+    @patch("hct_mis_api.apps.grievance.mutations.bulk_update_assigned_to")
+    @override_settings(ELASTICSEARCH_DSL_AUTOSYNC=False)
+    def test_bulk_update_grievance_assignee_es_autosync_off(self, bulk_update_assigned_to_mock):
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
         input_data = {
             "businessAreaSlug": self.business_area.slug,
             "grievanceTicketUnicefIds": [
