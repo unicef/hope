@@ -86,7 +86,7 @@ class HouseholdAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def members_sent_to_the_hub(self, button: button) -> Union[str, None]:
+    def members_sent_to_the_hub(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
@@ -116,7 +116,7 @@ class IndividualAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def household(self, button: button) -> Union[str, None]:
+    def household(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")

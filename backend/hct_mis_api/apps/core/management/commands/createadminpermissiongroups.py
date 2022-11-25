@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         else:
             print(f"Not found Permission with codename {codename}")
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> Any:
         print("Starting create/update Groups...")
         actions = ("view", "add", "change", "delete")
         app_model_map = {

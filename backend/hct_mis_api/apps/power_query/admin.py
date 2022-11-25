@@ -47,7 +47,7 @@ class QueryResource(resources.ModelResource):
     def dehydrate_target(self, obj: Any) -> str:
         return f"{obj.target.app_label}.{obj.target.model}"
 
-    def before_import_row(self, row: Dict, row_number: Optional[int] = None, **kwargs: Any) -> None:
+    def before_import_row(self, row: Dict, row_number: Optional[int] = None, **kwargs: Any) -> Dict:
         ct = row.get("target")
         app_label, model_name = ct.split(".")
         try:
@@ -70,7 +70,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_form_template = None
     resource_class = QueryResource
 
-    def formfield_for_dbfield(self, db_field, request: H, **kwargs: Any) -> Optional[forms.fields.Field]:
+    def formfield_for_dbfield(self, db_field, request: HttpRequest, **kwargs: Any) -> Optional[forms.fields.Field]:
         if db_field.name == "code":
             kwargs = {"widget": PythonEditor}
         elif db_field.name == "description":
@@ -80,7 +80,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
         return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
     @button()
@@ -94,7 +94,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return None
 
     @button(visible=settings.DEBUG)
-    def run(self, request, pk) -> HttpResponse:
+    def run(self, request: HttpRequest, pk: UUID) -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
         if not (query := self.get_object(request, pk)):
             raise Exception("Query not found")
@@ -104,7 +104,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return render(request, "admin/power_query/query/run_result.html", ctx)
 
     @button()
-    def queue(self, request, pk) -> None:
+    def queue(self, request: HttpRequest, pk: UUID) -> None:
         try:
             run_background_query.delay(pk)
             self.message_user(request, "Query scheduled")
@@ -112,7 +112,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button()
-    def preview(self, request, pk) -> Optional[HttpResponse]:
+    def preview(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if not (obj := self.get_object(request, pk)):
             raise Exception("Query not found")
         try:
@@ -140,7 +140,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
         return None
 
-    def get_changeform_initial_data(self, request) -> Dict[str, Any]:
+    def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Any]:
         ct = ContentType.objects.filter(id=request.GET.get("ct", 0)).first()
         return {"code": "result=conn.all()", "name": ct, "target": ct, "owner": request.user}
 
@@ -251,7 +251,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_list_template = None
     search_fields = ("name",)
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> Optional[Any]:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Any]:

@@ -2,7 +2,7 @@ import copy
 import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -32,12 +32,17 @@ from hct_mis_api.apps.program.models import (
 )
 from hct_mis_api.apps.reporting.models import Report
 
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
+
 logger = logging.getLogger(__name__)
 
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def get_individuals(report: Report):
+    def get_individuals(report: Report) -> QuerySet[Individual]:
         filter_vars = {
             "household__business_area": report.business_area,
             "withdrawn": False,
@@ -403,7 +408,7 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
-        def get_full_name(user) -> str:
+        def get_full_name(user: User) -> str:
             if not user:
                 return ""
             return " ".join(filter(None, [user.first_name, user.last_name]))

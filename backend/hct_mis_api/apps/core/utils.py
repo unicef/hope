@@ -519,8 +519,8 @@ def chart_map_choices(choices: List) -> Dict:
 
 
 def chart_get_filtered_qs(
-    obj,
-    year,
+    obj: Any,
+    year: int,
     business_area_slug_filter: Optional[Dict] = None,
     additional_filters: Optional[Dict] = None,
     year_filter_path: Optional[str] = None,
@@ -588,7 +588,7 @@ def chart_create_filter_query(filters: Dict, program_id_path: str = "id", admini
 
 
 class CaIdIterator:
-    def __init__(self, name) -> None:
+    def __init__(self, name: str) -> None:
         self.name = name
         self.last_id = 0
 
@@ -634,7 +634,7 @@ class SheetImageLoader:
 
     _images = {}
 
-    def __init__(self, sheet) -> None:
+    def __init__(self, sheet: Worksheet) -> None:
         # Holds an array of A-ZZ
         col_holder = list(
             itertools.chain(

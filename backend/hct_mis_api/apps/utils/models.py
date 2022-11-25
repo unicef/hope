@@ -1,9 +1,10 @@
 # Create your models here.
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Dict
 
 from django.db import models
+from django.http import HttpRequest
 from django.utils import timezone
 
 from concurrency.fields import IntegerVersionField
@@ -80,7 +81,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -143,7 +144,7 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
-    def process_exception(self, exc, request=None):
+    def process_exception(self, exc: BaseException, request: Optional[HttpRequest] = None):
         try:
             from sentry_sdk import capture_exception
 

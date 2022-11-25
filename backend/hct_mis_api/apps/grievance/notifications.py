@@ -34,7 +34,7 @@ class GrievanceNotification:
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
 
-    def __init__(self, grievance_ticket: GrievanceTicket, action, **kwargs):
+    def __init__(self, grievance_ticket: GrievanceTicket, action: str, **kwargs: Any) -> None:
         self.grievance_ticket = grievance_ticket
         self.action = action
         self.extra_data = kwargs
@@ -106,7 +106,7 @@ class GrievanceNotification:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
 
-    def _prepare_for_approval_recipients(self):
+    def _prepare_for_approval_recipients(self) -> QuerySet["User"]:
         user_roles = UserRole.objects.filter(
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
@@ -216,6 +216,6 @@ class GrievanceNotification:
         return notifications
 
     @classmethod
-    def send_all_notifications(cls, notifications) -> None:
+    def send_all_notifications(cls, notifications: List) -> None:
         for notification in notifications:
             notification.send_email_notification()

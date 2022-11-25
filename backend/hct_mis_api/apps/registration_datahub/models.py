@@ -253,7 +253,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
-    def __init__(self: _Self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(args, kwargs)
         self.bank_name = None
 
@@ -297,7 +297,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, ImportedIndividual)
         super().save(*args, **kwargs)
 
@@ -356,7 +356,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         return self.name
 
     @property
-    def business_area(self):
+    def business_area(self) -> str:
         return self.business_area_slug
 
     @property
@@ -541,7 +541,7 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:
@@ -653,7 +653,7 @@ class DiiaIndividual(models.Model):
     def full_name(self) -> str:
         return f"{self.last_name} {self.first_name} {self.second_name}"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.iban:
             self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)
