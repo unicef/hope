@@ -1033,7 +1033,7 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
     def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
-    def _get_data(self, record) -> str:
+    def _get_data(self, record: Any) -> str:
         roles = Role.objects.all()
         collector = ForeignKeysCollector(None)
         objs = []
@@ -1052,7 +1052,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request: HttpRequest, model_admin: Optional[str]) -> List:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> List:
         types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 

@@ -179,7 +179,7 @@ class HouseholdAdmin(
     actions = ["mass_withdraw", "mass_unwithdraw", "count_queryset"]
     cursor_ordering_field = "unicef_id"
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
             "head_of_household", "country", "country_origin", "admin_area"
         )
@@ -302,7 +302,7 @@ class HouseholdAdmin(
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.can_withdrawn")
-    def withdraw(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def withdraw(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         context = self.get_common_context(request, pk)
@@ -526,7 +526,7 @@ class IndividualAdmin(
     ]
     actions = ["count_queryset"]
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -536,7 +536,7 @@ class IndividualAdmin(
             )
         )
 
-    def formfield_for_dbfield(self, db_field: JSONField, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -697,7 +697,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
     def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> Any:
         return self.xlsx_update(request)
 
-    def xlsx_update(self, request) -> Any:
+    def xlsx_update(self, request: HttpRequest) -> Any:
         form: forms.Form
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()

@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    def __contains__(self, key: str, *args: Any, **kwargs: Any) -> bool:
+    # TODO Signature of "__contains__" incompatible with supertype tuple
+    def __contains__(self, key: str, *args: Any, **kwargs: Any) -> bool:  # type: ignore
         return key.casefold() in (element.casefold() for element in self)
 
 
@@ -237,7 +238,7 @@ def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Uni
 raise_attribute_error = object()
 
 
-def nested_getattr(obj: Any, attr: Any, default: Optional[Callable] = raise_attribute_error) -> Any:
+def nested_getattr(obj: Any, attr: Any, default: Optional[Callable[..., Any]] = raise_attribute_error) -> Any:
     import functools
 
     try:
@@ -413,7 +414,7 @@ def decode_and_get_object_required(encoded_id: str, model: Model) -> Any:
     return decode_and_get_object(encoded_id, model, required=True)
 
 
-def dict_to_camel_case(dictionary) -> Dict:
+def dict_to_camel_case(dictionary: Dict) -> Dict:
     from graphene.utils.str_converters import to_camel_case
 
     if isinstance(dictionary, dict):

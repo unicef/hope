@@ -220,7 +220,7 @@ class Formatter(NaturalKeyModel, models.Model):
     def __str__(self) -> str:  # TODO: name is a nullable charfield?
         return self.name or ""
 
-    def render(self, context) -> str:
+    def render(self, context: Dict) -> str:
         if self.content_type == "xls":
             dt = to_dataset(context["dataset"].data)
             return dt.export("xls")
@@ -251,12 +251,12 @@ class Report(NaturalKeyModel, models.Model):
 
     last_run = models.DateTimeField(null=True, blank=True)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[Any] = None, update_fields: Optional[Any] = None) -> None:
         if not self.document_title:
             self.document_title = self.name
         super().save(force_insert, force_update, using, update_fields)
 
-    def execute(self, run_query=False) -> List:
+    def execute(self, run_query: bool = False) -> List:
         # TODO: refactor that
         query: Query = self.query
         result: List = []

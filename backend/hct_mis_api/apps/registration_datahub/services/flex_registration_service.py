@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.db.models import Model
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
@@ -265,7 +266,7 @@ class FlexRegistrationService:
             else:
                 raise ValidationError("There should be only two collectors!")
 
-    def _create_object_and_validate(self, data, model_class) -> Type:
+    def _create_object_and_validate(self, data: Dict, model_class: Model) -> Type:
         ModelClassForm = modelform_factory(model_class, fields=data.keys())
         form = ModelClassForm(data)
         if not form.is_valid():

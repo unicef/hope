@@ -11,7 +11,7 @@ class GeoCountryDescriptor:
     def __init__(self, field: Any) -> None:
         self.field = field
 
-    def __get__(self, instance: Optional[Any] = None, owner: Optional[Any] = None) -> Union[List[Country], Country]:
+    def __get__(self, instance: Optional[Any] = None, owner: Optional[Any] = None) -> Union["GeoCountryDescriptor", list[Country], Country]:
         if instance is None:
             return self
         # Check in case this field was deferred.

@@ -1,6 +1,6 @@
 import random
 import time
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Optional
 
 from django.contrib.gis.geos import Point
 
@@ -125,7 +125,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
 
 
 def create_imported_household(
-    household_args=None, individual_args=None
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
 ) -> Tuple[ImportedHousehold, ImportedIndividual]:
     if household_args is None:
         household_args = {}

@@ -279,7 +279,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[I
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
+def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status: List[Dict]) -> Dict[Optional[Any], Dict[str, Any]]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -459,7 +459,7 @@ def mark_as_duplicate_individual_and_reassign_roles(
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
-def get_data_from_role_data(role_data: Dict) -> Tuple[str, Individual, Individual, Household]:
+def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -477,7 +477,7 @@ def get_data_from_role_data(role_data: Dict) -> Tuple[str, Individual, Individua
     return role_name, old_individual, new_individual, household
 
 
-def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[str, Individual, Individual, Household]:
+def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string

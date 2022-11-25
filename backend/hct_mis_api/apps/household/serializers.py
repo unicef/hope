@@ -46,9 +46,9 @@ def get_household_info(
     return {"info": output}
 
 
-def serialize_by_individual(individual, tax_id) -> Dict:
+def serialize_by_individual(individual: Individual, tax_id: str) -> Dict:
     return get_household_info(individual.household, individual, tax_id)
 
 
-def serialize_by_household(household) -> Dict:
+def serialize_by_household(household: Household) -> Dict:
     return get_household_info(household)

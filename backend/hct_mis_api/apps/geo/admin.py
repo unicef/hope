@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, List, Optional, Generator, Any, Tuple
+from typing import TYPE_CHECKING, List, Optional, Generator, Any, Tuple, Callable, Union
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter, ModelAdmin
@@ -97,7 +97,7 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request: HttpRequest) -> List:
+    def get_list_display(self, request: HttpRequest) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
         ret = super().get_list_display(request)
         return ret
 
@@ -172,7 +172,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     )
 
     @button()
-    def import_areas(self, request: HttpRequest) -> HttpResponsePermanentRedirect:
+    def import_areas(self, request: HttpRequest) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)
