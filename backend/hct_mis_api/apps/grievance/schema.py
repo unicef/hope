@@ -58,11 +58,7 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet, _QuerySet
-
-    from hct_mis_api.apps.geo.models import Area
-    from hct_mis_api.apps.household.models import Household, Individual
-    from hct_mis_api.apps.payment.models import PaymentRecord
+    from django.db.models.query import QuerySet
 
 
 logger = logging.getLogger(__name__)

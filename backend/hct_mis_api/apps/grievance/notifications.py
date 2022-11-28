@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hct_mis_api.apps.account.models import User
-
 
 class GrievanceNotification:
     ACTION_ASSIGNMENT_CHANGED = auto()

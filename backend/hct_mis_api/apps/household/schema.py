@@ -32,7 +32,6 @@ from hct_mis_api.apps.core.utils import (
     sum_lists_with_values,
     to_choice_object,
 )
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter

@@ -1,5 +1,5 @@
 from collections.abc import dict_values
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from django.db.models import DecimalField, F, Sum
 

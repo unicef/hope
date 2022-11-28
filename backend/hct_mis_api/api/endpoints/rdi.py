@@ -25,8 +25,6 @@ from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
 
 if TYPE_CHECKING:
-    from rest_framework.views import View
-
     from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -53,7 +51,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
 
     @atomic()
     @atomic(using="registration_datahub")
-    def perform_create(self, serializer: Serializer) -> Optional[RegistrationDataImport]:  # type: ignore
+    def perform_create(self, serializer: serializers.Serializer) -> Optional[RegistrationDataImport]:  # type: ignore
         # TODO: perform_create from CreateModelMixin returns None
         obj = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING

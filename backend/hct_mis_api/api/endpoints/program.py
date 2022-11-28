@@ -11,7 +11,7 @@ from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
-    from rest_framework.serializers import BaseSerializer, Serializer
+    from rest_framework.serializers import BaseSerializer
 
 
 class ProgramSerializer(serializers.ModelSerializer):

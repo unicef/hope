@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied

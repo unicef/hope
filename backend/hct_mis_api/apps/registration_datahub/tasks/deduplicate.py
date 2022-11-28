@@ -2,7 +2,7 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type
 
 from django.db import transaction
 from django.db.models import CharField, F, Q, QuerySet, Value

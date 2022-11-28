@@ -1,5 +1,5 @@
 import json
-from datetime import date, timedelta
+from datetime import date
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 from django.db.models import Prefetch, Q

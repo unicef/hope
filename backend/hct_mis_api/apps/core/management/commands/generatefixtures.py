@@ -3,7 +3,7 @@ import time
 from argparse import ArgumentParser
 from decimal import Decimal
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Dict
+from typing import Any, Callable, Dict
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction

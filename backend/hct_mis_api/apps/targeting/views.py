@@ -2,7 +2,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from openpyxl.writer.excel import save_virtual_workbook
@@ -14,8 +14,6 @@ from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
 
 if TYPE_CHECKING:
     from uuid import UUID
-
-    from django.http import HttpRequest, HttpResponse
 
 
 logger = logging.getLogger(__name__)

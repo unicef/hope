@@ -19,7 +19,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+    from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 logger = logging.getLogger(__name__)

@@ -9,7 +9,6 @@ from django.contrib.auth import authenticate
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.utils.safestring import mark_safe
-from django.views import View
 
 import tablib
 from concurrency.utils import get_classname

@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Tuple, Union
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
