@@ -1,6 +1,6 @@
+from uuid import UUID
 from calendar import timegm
 from hashlib import md5
-from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -31,8 +31,8 @@ def report(request: HttpRequest, pk: UUID) -> HttpResponse:
 
 
 @login_required()
-def document(request: HttpRequest, report_id: UUID, pk: UUID) -> HttpResponse:
-    doc: ReportDocument = get_object_or_404(ReportDocument, pk=pk, report_id=report_id)
+def document(request: HttpRequest, report: ReportDocument, pk: UUID) -> HttpResponse:
+    doc: ReportDocument = get_object_or_404(ReportDocument, pk=pk, report_id=report)
     res_etag = md5(doc.data.encode()).hexdigest()
     res_last_modified = timegm(doc.timestamp.utctimetuple())
 
