@@ -374,7 +374,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return obj_to_create
 
-    def _create_objects(self, sheet: Sheet, registration_data_import: RegistrationDataImport) -> None:
+    def _create_objects(self, sheet: "Sheet", registration_data_import: RegistrationDataImport) -> None:
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "tax_id_no_i_c": self._handle_document_fields,
@@ -570,7 +570,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: UUID, import_data_id: UUID, business_area_id: UUID) -> None:
+    def execute(self, registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID") -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
