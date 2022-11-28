@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib import messages

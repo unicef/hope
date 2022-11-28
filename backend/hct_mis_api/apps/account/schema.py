@@ -39,8 +39,6 @@ if TYPE_CHECKING:
 
     from graphene import Node
 
-    from hct_mis_api.apps.account.models import User, UserRole
-
 
 def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
     all_user_roles = user_roles

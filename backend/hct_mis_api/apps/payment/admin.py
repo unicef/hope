@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from uuid import UUID
 
 from django.contrib import admin, messages

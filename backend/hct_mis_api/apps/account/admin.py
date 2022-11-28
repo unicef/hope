@@ -72,7 +72,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.db.models.query import QuerySet, _QuerySet
+    from django.db.models.query import _QuerySet
     from django.forms import Form
 
 

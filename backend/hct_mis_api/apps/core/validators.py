@@ -1,14 +1,5 @@
 import logging
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterable,
-    List,
-    MutableSequence,
-    Optional,
-)
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
 

@@ -1,12 +1,11 @@
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 
 from elasticsearch_dsl.connections import create_connection

@@ -1,7 +1,7 @@
 # Create your models here.
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 from django.db import models
 from django.http import HttpRequest

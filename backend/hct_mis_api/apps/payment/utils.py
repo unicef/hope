@@ -1,7 +1,7 @@
 import typing
 from decimal import Decimal
 from math import ceil
-from typing import Dict, Literal, Union
+from typing import Dict, Union
 
 from django.db.models import Q, QuerySet
 

@@ -28,7 +28,7 @@ from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet, _QuerySet
+    from django.db.models.query import QuerySet
 
 log = logging.getLogger(__name__)
 

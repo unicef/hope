@@ -1,12 +1,9 @@
 import sys
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
 
 from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.views.debug import ExceptionReporter
-
-if TYPE_CHECKING:
-    from django.http import HttpRequest
 
 
 def process_exception(exception: Optional[BaseException], request: Optional[HttpRequest] = None) -> Optional[str]:
