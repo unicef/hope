@@ -72,6 +72,15 @@ export const GrievanceTicket = gql`
           unicefId
         }
       }
+      existingTickets {
+        id
+        unicefId
+        status
+        household {
+          id
+          unicefId
+        }
+      }
       addIndividualTicketDetails {
         id
         individualData
