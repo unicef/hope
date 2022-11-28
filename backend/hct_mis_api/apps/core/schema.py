@@ -76,7 +76,7 @@ class FlexibleAttributeNode(DjangoObjectType):
     choices = graphene.List(FlexibleAttributeChoiceNode)
     associated_with = graphene.Int()
 
-    def resolve_choices(self, info: Any) -> QuerySet:
+    def resolve_choices(self, info: Any) -> "QuerySet":
         return self.choices.all()
 
     def resolve_associated_with(self, info: Any) -> str:
@@ -207,7 +207,7 @@ class GroupAttributeNode(DjangoObjectType):
     def resolve_label_en(self, info: Any) -> Any:
         return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]  # type: ignore
 
-    def resolve_flex_attributes(self, info: Any) -> QuerySet:
+    def resolve_flex_attributes(self, info: Any) -> "QuerySet":
         return self.flex_attributes.all()
 
 
@@ -302,7 +302,7 @@ class Query(graphene.ObjectType):
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
 
-    def resolve_all_business_areas(parent, info: Any) -> QuerySet[BusinessArea]:
+    def resolve_all_business_areas(parent, info: Any) -> "QuerySet[BusinessArea]":
         return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
@@ -344,7 +344,7 @@ class Query(graphene.ObjectType):
             "label.English(EN)",
         )
 
-    def resolve_kobo_project(self, info: Any, uid: UUID, business_area_slug: str, **kwargs: Any) -> Tuple:
+    def resolve_kobo_project(self, info: Any, uid: "UUID", business_area_slug: str, **kwargs: Any) -> Tuple:
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
     def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> Tuple:
@@ -353,5 +353,5 @@ class Query(graphene.ObjectType):
             only_deployed=kwargs.get("only_deployed", False),
         )
 
-    def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> QuerySet[FlexibleAttributeGroup]:
+    def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)

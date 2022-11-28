@@ -55,26 +55,26 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
     )
 
     @button()
-    def selection(self, request: HttpRequest, pk: UUID) -> HttpResponse:
+    def selection(self, request: "HttpRequest", pk: "UUID") -> "HttpResponse":
         obj = self.get_object(request, pk)
         url = reverse("admin:targeting_householdselection_changelist")
         return HttpResponseRedirect(f"{url}?target_population={obj.id}")
 
     @button()
-    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def inspect(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="Inspect")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/inspect.html", context)
 
     @button()
-    def payments(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def payments(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
     @button(enabled=lambda b: b.context["original"].steficon_rule)
-    def rerun_steficon(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        def _rerun(request: HttpRequest) -> TemplateResponse:
+    def rerun_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
+        def _rerun(request: "HttpRequest") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
@@ -113,10 +113,10 @@ class HouseholdSelectionAdmin(HOPEModelAdminBase):
     )
     actions = ["reset_sync_date", "reset_vulnerability_score"]
 
-    def reset_sync_date(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def reset_sync_date(self, request: "HttpRequest", queryset: "QuerySet") -> None:
         from hct_mis_api.apps.household.models import Household
 
         Household.objects.filter(selections__in=queryset).update(last_sync_at=None)
 
-    def reset_vulnerability_score(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def reset_vulnerability_score(self, request: "HttpRequest", queryset: "QuerySet") -> None:
         queryset.update(vulnerability_score=None)

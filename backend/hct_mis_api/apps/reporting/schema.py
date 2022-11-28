@@ -51,7 +51,7 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_file_url(self, info: Any, **kwargs: Any) -> str:
         return self.file.url if self.file else ""
 
-    def resolve_admin_area(self, info: Any, **kwargs: Any) -> QuerySet:
+    def resolve_admin_area(self, info: Any, **kwargs: Any) -> "QuerySet":
         return self.admin_area.all()
 
 

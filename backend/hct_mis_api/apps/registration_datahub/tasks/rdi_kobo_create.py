@@ -202,7 +202,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict[ImportedIndividual]) -> None:
+    def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict) -> None:
         collectors_to_bulk_create = []
         for hash_key, collectors_list in collectors_dict.items():
             for collector in collectors_list:

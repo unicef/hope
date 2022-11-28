@@ -113,7 +113,7 @@ class UserRoleAdminForm(ModelForm):
 class UserRoleInlineFormSet(BaseInlineFormSet):
     model = account_models.UserRole
 
-    def add_fields(self, form: Form, index: Optional[int]) -> None:
+    def add_fields(self, form: "Form", index: Optional[int]) -> None:
         super().add_fields(form, index)
         form.fields["business_area"].choices = [
             (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
@@ -289,7 +289,7 @@ class DjAdminManager:
         except Exception:
             raise ValueError("Unable to get CSRF token from Kobo")
 
-    def delete_user(self, username: str, pk: UUID) -> None:
+    def delete_user(self, username: str, pk: "UUID") -> None:
         self.login()
         for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
             self._get(url)
@@ -308,7 +308,7 @@ class HasKoboAccount(SimpleListFilter):
     parameter_name = "kobo_account"
     title = "Has Kobo Access"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Tuple:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Tuple:
         return (1, "Yes"), (0, "No")
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -324,7 +324,7 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Any:  # TODO: typing
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Any:  # TODO: typing
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -456,7 +456,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     def kobo_user(self, obj: Any) -> str:
         return obj.custom_fields.get("kobo_username")
 
-    def get_deleted_objects(self, objs: Union[Sequence[Any], _QuerySet[Any, Any]], request: HttpRequest) -> Any:
+    def get_deleted_objects(self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -503,7 +503,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             raise
 
     @button()
-    def privileges(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk)
         user: account_models.User = context["original"]
         all_perms = user.get_all_permissions()
@@ -631,7 +631,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         permission="account.can_create_kobo_user",
         enabled=lambda b: not b.original.custom_fields.get("kobo_username"),
     )
-    def create_kobo_user(self, request: HttpRequest, pk: UUID) -> None:
+    def create_kobo_user(self, request: HttpRequest, pk: "UUID") -> None:
         try:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
             self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
@@ -643,7 +643,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
         permission="account.can_create_kobo_user",
         enabled=lambda b: not b.custom_fields.get("kobo_username"),
     )
-    def remove_kobo_access(self, request: HttpRequest, pk: UUID) -> None:
+    def remove_kobo_access(self, request: HttpRequest, pk: "UUID") -> None:
         try:
             obj = self.get_object(request, pk)
             api = DjAdminManager()
@@ -839,7 +839,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             self.message_user(request, str(e), messages.ERROR)
 
     @button(label="Sync", permission="account.can_sync_with_ad")
-    def sync_single(self, request: HttpRequest, pk: UUID) -> None:
+    def sync_single(self, request: HttpRequest, pk: "UUID") -> None:
         try:
             self._sync_ad_data(self.get_object(request, pk))
             self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
@@ -933,7 +933,7 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Optional[Iterable[Tuple[Any, str]]]:
         return Permissions.choices()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -959,7 +959,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     change_list_template = "admin/account/role/change_list.html"
 
     @button()
-    def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def members(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
 
@@ -994,7 +994,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         ctx["matrix2"] = matrix2
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
-    def _perms(self, request: HttpRequest, object_id: UUID) -> set:
+    def _perms(self, request: HttpRequest, object_id: "UUID") -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
     def changeform_view(
@@ -1009,7 +1009,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(
-        self, request: HttpRequest, form: Form, formsets: Any, add: bool = False
+        self, request: HttpRequest, form: "Form", formsets: Any, add: bool = False
     ) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
@@ -1071,7 +1071,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> List:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> List:
         types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
@@ -1113,11 +1113,11 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
         return _import_fixture(self, request)
 
-    def _perms(self, request: HttpRequest, object_id: UUID) -> set:
+    def _perms(self, request: HttpRequest, object_id: "UUID") -> set:
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
 
     @button()
-    def users(self, request: HttpRequest, pk: UUID) -> HttpResponse:
+    def users(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         User = get_user_model()
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
@@ -1139,7 +1139,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(
-        self, request: HttpRequest, form: Form, formsets: Any, add: bool = False
+        self, request: HttpRequest, form: "Form", formsets: Any, add: bool = False
     ) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:

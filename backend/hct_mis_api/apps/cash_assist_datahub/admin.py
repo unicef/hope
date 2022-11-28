@@ -66,14 +66,14 @@ class SessionAdmin(HOPEModelAdminBase):
     exclude = ("traceback",)
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
 
-    def run_time(self, obj: AbstractSession) -> Optional[timedelta]:  # type: ignore
+    def run_time(self, obj: "AbstractSession") -> Optional["timedelta"]:  # type: ignore
         if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
             elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
                 return elapsed
 
     @button(permission="account.can_debug")
-    def pull(self, request: HttpRequest) -> None:
+    def pull(self, request: "HttpRequest") -> None:
         from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
             PullFromDatahubTask,
         )
@@ -89,7 +89,7 @@ class SessionAdmin(HOPEModelAdminBase):
             self.message_user(request, msg, messages.ERROR)
 
     @button()
-    def simulate_import(self, request: HttpRequest, pk: UUID) -> Optional[TemplateResponse]:  # type: ignore
+    def simulate_import(self, request: "HttpRequest", pk: "UUID") -> Optional[TemplateResponse]:  # type: ignore
         context = self.get_common_context(request, pk, title="Test Import")
         session: Session = context["original"]
         if request.method == "POST":
@@ -137,12 +137,12 @@ class SessionAdmin(HOPEModelAdminBase):
         button.visible = False
 
     @button(visible=lambda btn: btn.original.traceback, permission="account.can_debug")
-    def view_error(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def view_error(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/cash_assist_datahub/session/debug.html", context)
 
     @button(permission="account.can_inspect")
-    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def inspect(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context: Dict[str, Any] = self.get_common_context(request, pk)
         obj: Session = context["original"]
         context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
@@ -261,7 +261,7 @@ class PaymentRecordAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
 
     @button(permission="account.can_inspect")
-    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def inspect(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         opts = self.model._meta
         payment_record: PaymentRecord = PaymentRecord.objects.get(pk=pk)
         ctx = {

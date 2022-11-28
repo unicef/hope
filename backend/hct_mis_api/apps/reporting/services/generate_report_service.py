@@ -407,12 +407,12 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
-        def get_full_name(user: User) -> str:
+        def get_full_name(user: "User") -> str:
             if not user:
                 return ""
             return " ".join(filter(None, [user.first_name, user.last_name]))
 
-        def get_username(user: User) -> str:
+        def get_username(user: "User") -> str:
             if not user:
                 return ""
             return user.username

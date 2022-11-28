@@ -106,7 +106,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_individuals(parent, info: Any) -> List[Set[UUID]]:
+    def resolve_individuals(parent, info: Any) -> List[Set["UUID"]]:
         imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(
             parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
@@ -294,7 +294,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
     country = graphene.String(description="Country")
 
     @staticmethod
-    def resolve_country(parent: ImportedIndividualIdentity, info: Any) -> Country:
+    def resolve_country(parent: ImportedIndividualIdentity, info: Any) -> "Country":
         return getattr(parent.country, "name", parent.country)
 
     class Meta:

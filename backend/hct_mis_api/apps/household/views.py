@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Dict
+from typing import Dict
 from uuid import UUID
 
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -21,9 +22,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
 )
 from hct_mis_api.apps.utils.profiling import profiling
-
-if TYPE_CHECKING:
-    from rest_framework.request import Request
 
 
 def get_individual(tax_id: str, business_area_code: str) -> Document:

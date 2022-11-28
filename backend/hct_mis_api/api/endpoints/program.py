@@ -35,11 +35,11 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
     model = Program
     permission = Grant.API_PROGRAM_CREATE
 
-    def perform_create(self, serializer: BaseSerializer) -> None:
+    def perform_create(self, serializer: "BaseSerializer") -> None:
         serializer.save(business_area=self.selected_business_area)
 
     @swagger_auto_schema(request_body=ProgramSerializer)
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         self.selected_business_area  # TODO does it work? It should be called
         serializer = ProgramSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

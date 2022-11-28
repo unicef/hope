@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @staff_member_required
-def download_xlsx_households(request: HttpRequest, target_population_id: UUID) -> HttpResponse:
+def download_xlsx_households(request: HttpRequest, target_population_id: "UUID") -> HttpResponse:
     target_population = get_object_or_404(TargetPopulation, id=target_population_id)
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     filename = f"{target_population.name}.xlsx"

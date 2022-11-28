@@ -24,8 +24,6 @@ from hct_mis_api.apps.reporting.models import DashboardReport
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.forms import Form
-
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +53,7 @@ def trigger_error(request: HttpRequest) -> None:
 
 
 @login_required
-def download_dashboard_report(request: HttpRequest, report_id: UUID) -> Any:
+def download_dashboard_report(request: HttpRequest, report_id: "UUID") -> Any:
     report = get_object_or_404(DashboardReport, id=report_id)
     if not request.user.has_permission(Permissions.DASHBOARD_EXPORT.name, report.business_area):
         logger.error("Permission Denied: You need dashboard export permission to access this file")
@@ -100,5 +98,5 @@ class UploadFile(UploadFilePermissionMixin, View):
         return "core/upload_file.html"
 
     @staticmethod
-    def format_form_error(form: Form) -> Any:
+    def format_form_error(form: forms.Form) -> Any:
         return form.errors.get_json_data()["__all__"][0]["message"]

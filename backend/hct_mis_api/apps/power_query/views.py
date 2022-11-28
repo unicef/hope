@@ -1,6 +1,6 @@
 from calendar import timegm
 from hashlib import md5
-from typing import TYPE_CHECKING
+from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -11,9 +11,6 @@ from django.utils.http import http_date
 
 from .models import Report, ReportDocument
 from .utils import basicauth
-
-if TYPE_CHECKING:
-    from uuid import UUID
 
 
 @login_required()

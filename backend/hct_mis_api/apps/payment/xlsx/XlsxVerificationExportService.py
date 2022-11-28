@@ -130,7 +130,7 @@ class XlsxVerificationExportService:
         self.generate_workbook()
         self.wb.save(filename=filename)
 
-    def save_xlsx_file(self, user: User) -> None:
+    def save_xlsx_file(self, user: "User") -> None:
         filename = f"payment_verification_{self.cashplan_payment_verification.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
@@ -164,7 +164,7 @@ class XlsxVerificationExportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def send_email(user: User, cash_plan_payment_verification_id: str) -> None:
+    def send_email(user: "User", cash_plan_payment_verification_id: str) -> None:
         protocol = "http" if settings.IS_DEV else "https"
         payment_verification_id = encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")
         api = reverse("download-cash-plan-payment-verification", args=[payment_verification_id])

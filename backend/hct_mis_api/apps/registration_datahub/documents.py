@@ -101,13 +101,13 @@ class ImportedIndividualDocument(Document):
         }
     )
 
-    def prepare_admin1(self, instance: ImportedIndividual) -> Optional[Area]:
+    def prepare_admin1(self, instance: ImportedIndividual) -> Optional["Area"]:
         household = instance.household
         if household:
             return instance.household.admin1
         return None
 
-    def prepare_admin2(self, instance: ImportedIndividual) -> Optional[Area]:
+    def prepare_admin2(self, instance: ImportedIndividual) -> Optional["Area"]:
         household = instance.household
         if household:
             return instance.household.admin2

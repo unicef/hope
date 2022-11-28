@@ -896,13 +896,13 @@ class GenerateDashboardReportService:
         )
         self.ws_meta.append(info_row)
 
-    def _add_headers(self, active_sheet: Worksheet, report_type: str) -> int:
+    def _add_headers(self, active_sheet: "Worksheet", report_type: str) -> int:
         headers_row = self.HEADERS[report_type][self.hq_or_country] + self.HEADERS[report_type][self.SHARED]
         headers_row = self._stringify_all_values(headers_row)
         active_sheet.append(headers_row)
         return len(headers_row)
 
-    def _add_rows(self, active_sheet: Worksheet, report_type: str) -> int:
+    def _add_rows(self, active_sheet: "Worksheet", report_type: str) -> int:
         is_hq_report = self.hq_or_country == self.HQ
         get_row_methods: Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]] = self.ROW_CONTENT_METHODS[
             report_type
@@ -984,7 +984,7 @@ class GenerateDashboardReportService:
         msg.send()
 
     @staticmethod
-    def _adjust_column_width_from_col(ws: Worksheet, min_col: int, max_col: int, min_row: int) -> None:
+    def _adjust_column_width_from_col(ws: "Worksheet", min_col: int, max_col: int, min_row: int) -> None:
         column_widths = []
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
             for cell in col:
@@ -1012,7 +1012,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def _add_font_style_to_sheet(ws: Worksheet, totals_row: Optional[int] = None) -> None:
+    def _add_font_style_to_sheet(ws: "Worksheet", totals_row: Optional[int] = None) -> None:
         bold_font = Font(bold=True)
         for cell in ws["1:1"]:
             cell.font = bold_font
@@ -1049,7 +1049,7 @@ class GenerateDashboardReportService:
         )
 
     @staticmethod
-    def _remove_empty_columns(ws: Worksheet, totals_row: int, min_col: int = 1, max_col: int = 2) -> int:
+    def _remove_empty_columns(ws: "Worksheet", totals_row: int, min_col: int = 1, max_col: int = 2) -> int:
         to_remove_columns = []
         for col_idx in range(min_col, max_col):
             col_letter = get_column_letter(col_idx)

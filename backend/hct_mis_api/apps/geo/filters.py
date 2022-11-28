@@ -21,5 +21,5 @@ class AreaFilter(FilterSet):
             "name": ["exact", "istartswith"],
         }
 
-    def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet":
         return qs.filter(area_type__country__name__iexact=value)

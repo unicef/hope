@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(
-    registration_data_import_data: RegistrationDataImport, user: User, data_source: Dict
+    registration_data_import_data: RegistrationDataImport, user: "User", data_source: Dict
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -356,7 +356,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, uid: UUID, business_area_slug: str, only_active_submissions: bool
+        cls, root: Any, info: Any, uid: "UUID", business_area_slug: str, only_active_submissions: bool
     ) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 

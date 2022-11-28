@@ -217,7 +217,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             return parent.admin_area.name
         return ""
 
-    def resolve_programs_with_delivered_quantity(parent, info: Any) -> List:
+    def resolve_programs_with_delivered_quantity(parent, info: Any) -> Dict[Any, Dict[str, Any]]:
         return programs_with_delivered_quantity(parent)
 
     def resolve_country(parent, info: Any) -> str:

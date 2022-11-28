@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @register.simple_tag()
-def get_related(user: User, field: Any) -> Dict[str, Any]:
+def get_related(user: "User", field: Any) -> Dict[str, Any]:
     related = []
     info = {
         "to": field.model._meta.model_name,
@@ -43,5 +43,5 @@ def get_admin_link(record: Any) -> str:
 
 
 @register.filter(name="is_root")
-def _is_root(request: HttpRequest) -> bool:
+def _is_root(request: "HttpRequest") -> bool:
     return is_root(request)

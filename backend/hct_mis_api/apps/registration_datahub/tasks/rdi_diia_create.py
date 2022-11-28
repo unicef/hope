@@ -113,8 +113,8 @@ class RdiDiiaCreateTask:
     @transaction.atomic(using="registration_datahub")
     def execute(
         self,
-        registration_data_import_id: UUID,
-        diia_hh_ids: Optional[List[UUID]] = None,
+        registration_data_import_id: "UUID",
+        diia_hh_ids: Optional[List["UUID"]] = None,
         diia_hh_count: Optional[int] = None,
     ) -> None:
         if diia_hh_ids and diia_hh_count:
@@ -336,7 +336,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_tax_id_document(self, tax_id: UUID, individual_obj: ImportedIndividual) -> None:
+    def _add_tax_id_document(self, tax_id: "UUID", individual_obj: ImportedIndividual) -> None:
         self.documents.append(
             ImportedDocument(
                 country=Country("UA"),
@@ -363,7 +363,7 @@ class RdiDiiaCreateTask:
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 
-    def tax_id_exists(self, tax_id: UUID) -> bool:
+    def tax_id_exists(self, tax_id: "UUID") -> bool:
         return (
             ImportedDocument.objects.filter(document_number=tax_id, type=self.imported_doc_type_for_tax_id).exists()
             or Document.objects.filter(document_number=tax_id, type=self.doc_type_for_tax_id).exists()
