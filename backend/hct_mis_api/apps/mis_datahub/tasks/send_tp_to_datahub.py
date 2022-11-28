@@ -83,12 +83,12 @@ class SendTPToDatahubTask:
         "type": "type.type",
     }
 
-    def execute(self, target_population: TargetPopulation) -> Dict:
+    def execute(self, target_population: "TargetPopulation") -> Dict:
         return self.send_target_population(target_population)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_mis")
-    def send_target_population(self, target_population: TargetPopulation) -> Dict:
+    def send_target_population(self, target_population: "TargetPopulation") -> Dict:
         households_to_bulk_create = []
         individuals_to_bulk_create = []
         documents_to_bulk_create = []
@@ -172,7 +172,7 @@ class SendTPToDatahubTask:
             logger.exception(e)
             raise
 
-    def _prepare_data_to_send(self, program: Program, target_population: TargetPopulation) -> Tuple:
+    def _prepare_data_to_send(self, program: "Program", target_population: "TargetPopulation") -> Tuple:
         (
             all_targeted_households_ids,
             households_to_sync,
@@ -201,7 +201,7 @@ class SendTPToDatahubTask:
         ).distinct()
         self.unhcr_id_dict = {identity.individual_id: identity.number for identity in individual_identities}
 
-    def _get_individuals_and_hauseholds(self, program: Program, target_population: TargetPopulation) -> Any:
+    def _get_individuals_and_hauseholds(self, program: "Program", target_population: "TargetPopulation") -> Any:
         all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
         if program.individual_data_needed:
             # all targeted individuals + collectors (primary_collector,alternate_collector)
@@ -229,7 +229,7 @@ class SendTPToDatahubTask:
     def _get_documents(self, individuals: List[Individual]) -> QuerySet[Document]:
         return Document.objects.filter(individual__in=individuals).distinct()
 
-    def _send_program(self, program: Program) -> Optional[dh_mis_models.Program]:
+    def _send_program(self, program: "Program") -> Optional[dh_mis_models.Program]:
         if not (program.last_sync_at is None or program.last_sync_at < program.updated_at):
             return None
         dh_program_args = build_arg_dict(program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT)
@@ -245,7 +245,7 @@ class SendTPToDatahubTask:
         program.save(update_fields=["last_sync_at"])
         return dh_program
 
-    def _send_target_population_object(self, target_population: TargetPopulation) -> dh_mis_models.TargetPopulation:
+    def _send_target_population_object(self, target_population: "TargetPopulation") -> dh_mis_models.TargetPopulation:
         dh_tp_args = build_arg_dict(target_population, SendTPToDatahubTask.MAPPING_TP_DICT)
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
         dh_target.session = self.dh_session

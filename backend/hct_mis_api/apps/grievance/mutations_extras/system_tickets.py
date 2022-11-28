@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
-def close_system_flagging_ticket(grievance_ticket: GrievanceTicket, info: Any, should_log: bool = True) -> None:
+def close_system_flagging_ticket(grievance_ticket: "GrievanceTicket", info: Any, should_log: bool = True) -> None:
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:
@@ -87,7 +87,7 @@ def close_needs_adjudication_new_ticket(ticket_details: Any, info: Any) -> None:
         _clear_deduplication_individuals_fields(unique_individuals)
 
 
-def close_needs_adjudication_ticket(grievance_ticket: GrievanceTicket, info: Any) -> None:
+def close_needs_adjudication_ticket(grievance_ticket: "GrievanceTicket", info: Any) -> None:
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details:
         return

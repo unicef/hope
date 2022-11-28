@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import CashPlan
 
 
-def get_payment_records(cash_plan: CashPlan, verification_channel: str) -> QuerySet:
+def get_payment_records(cash_plan: "CashPlan", verification_channel: str) -> QuerySet:
     if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
         return cash_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return cash_plan.available_payment_records()
@@ -29,7 +29,7 @@ def get_payment_records(cash_plan: CashPlan, verification_channel: str) -> Query
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, cash_plan: CashPlan, input_data: Dict) -> CashPlanPaymentVerification:
+    def create(cls, cash_plan: "CashPlan", input_data: Dict) -> CashPlanPaymentVerification:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")

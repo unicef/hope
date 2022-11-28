@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import List
 
 from django.db import models
 from django.db.models import Q, QuerySet
@@ -21,9 +21,6 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-
-if TYPE_CHECKING:
-    pass
 
 
 class GrievanceTicketFilter(FilterSet):

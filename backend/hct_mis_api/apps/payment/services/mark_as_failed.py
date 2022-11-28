@@ -15,7 +15,7 @@ def mark_as_failed(payment_record: PaymentRecord) -> None:
     recalculate_cash_received(payment_record.household)
 
 
-def recalculate_cash_received(household: Household) -> None:
+def recalculate_cash_received(household: "Household") -> None:
     aggregated_delivered_quantity = household.payment_records.exclude(
         status=PaymentRecord.STATUS_FORCE_FAILED
     ).aggregate(

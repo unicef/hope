@@ -54,10 +54,10 @@ def encode_id_base64(id_string: str, model_name: str) -> Optional[str]:
 
 
 def unique_slugify(
-    instance: Model,
+    instance: "Model",
     value: Any,
     slug_field_name: str = "slug",
-    queryset: Optional[QuerySet] = None,
+    queryset: Optional["QuerySet"] = None,
     slug_separator: str = "-",
 ) -> None:
     """
@@ -280,7 +280,7 @@ def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
     return results
 
 
-def to_dict(instance: Model, fields: Optional[List] = None, dict_fields: Optional[Dict] = None) -> Dict[str, Any]:
+def to_dict(instance: "Model", fields: Optional[List] = None, dict_fields: Optional[Dict] = None) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -326,7 +326,7 @@ def to_dict(instance: Model, fields: Optional[List] = None, dict_fields: Optiona
     return data
 
 
-def build_arg_dict(model_object: Model, mapping_dict: Dict) -> Dict:
+def build_arg_dict(model_object: "Model", mapping_dict: Dict) -> Dict:
     return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
@@ -335,7 +335,7 @@ def build_arg_dict_from_dict(data_dict: Dict, mapping_dict: Dict) -> Dict:
 
 
 class CustomOrderingFilter(OrderingFilter):
-    def filter(self, qs: QuerySet, value: Any) -> QuerySet:
+    def filter(self, qs: "QuerySet", value: Any) -> "QuerySet":
         from django.db.models.functions import Lower
 
         from django_filters.constants import EMPTY_VALUES
@@ -405,7 +405,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-def decode_and_get_object(encoded_id: str, model: Model, required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id: str, model: "Model", required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -415,7 +415,7 @@ def decode_and_get_object(encoded_id: str, model: Model, required: bool) -> Opti
     return None
 
 
-def decode_and_get_object_required(encoded_id: str, model: Model) -> Any:
+def decode_and_get_object_required(encoded_id: str, model: "Model") -> Any:
     return decode_and_get_object(encoded_id, model, required=True)
 
 
@@ -508,7 +508,7 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
         print(new_content, file=f, end="")
 
 
-def xlrd_rows_iterator(sheet: Worksheet) -> Generator:
+def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
     import xlrd
 
     for row_number in range(1, sheet.nrows):
@@ -530,7 +530,7 @@ def chart_get_filtered_qs(
     business_area_slug_filter: Optional[Dict] = None,
     additional_filters: Optional[Dict] = None,
     year_filter_path: Optional[str] = None,
-) -> QuerySet:
+) -> "QuerySet":
     if additional_filters is None:
         additional_filters = {}
     if year_filter_path is None:
@@ -628,7 +628,7 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
     return flex_fields_with_str_choices
 
 
-def get_model_choices_fields(model: Model, excluded: Optional[List] = None) -> List[str]:
+def get_model_choices_fields(model: "Model", excluded: Optional[List] = None) -> List[str]:
     if excluded is None:
         excluded = []
 
@@ -644,7 +644,7 @@ class SheetImageLoader:
 
     _images = {}
 
-    def __init__(self, sheet: Worksheet) -> None:
+    def __init__(self, sheet: "Worksheet") -> None:
         # Holds an array of A-ZZ
         col_holder = list(
             itertools.chain(
@@ -659,11 +659,11 @@ class SheetImageLoader:
             col = col_holder[image.anchor._from.col]
             self._images[f"{col}{row}"] = image._data
 
-    def image_in(self, cell: Cell) -> bool:
+    def image_in(self, cell: "Cell") -> bool:
         """Checks if there's an image in specified cell"""
         return cell in self._images
 
-    def get(self, cell: Cell) -> Any:
+    def get(self, cell: "Cell") -> Any:
         """Retrieves image data from a cell"""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")

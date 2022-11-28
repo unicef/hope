@@ -19,8 +19,8 @@ class SensitiveGrievanceTicketExtras(graphene.InputObjectType):
 
 
 def save_sensitive_grievance_extras(
-    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
-) -> List[GrievanceTicket]:
+    root: Any, info: Any, input: Dict, grievance_ticket: "GrievanceTicket", extras: Dict, **kwargs: Any
+) -> List["GrievanceTicket"]:
     sensitive_grievance_extras = extras.get("category", {})
     sensitive_grievance_complaint_category_extras = sensitive_grievance_extras.get(
         "sensitive_grievance_ticket_extras", {}

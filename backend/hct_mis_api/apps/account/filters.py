@@ -39,7 +39,7 @@ class UsersFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[User]":
+    def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -51,7 +51,7 @@ class UsersFilter(FilterSet):
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         return qs.filter(user_roles__business_area__slug=value)
 
-    def partners_filter(self, qs: "QuerySet", name: str, values: List[UUID]) -> "QuerySet[User]":
+    def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":
         q_obj = Q()
         for value in values:
             q_obj |= Q(partner__id=value)

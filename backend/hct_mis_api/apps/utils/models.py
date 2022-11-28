@@ -60,7 +60,7 @@ class SoftDeletableModelWithDate(models.Model):
 
 
 class SoftDeletionTreeManager(TreeManager):
-    def get_queryset(self, *args: Any, **kwargs: Any) -> QuerySet:
+    def get_queryset(self, *args: Any, **kwargs: Any) -> "QuerySet":
         """
         Return queryset limited to not removed entries.
         """

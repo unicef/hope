@@ -24,8 +24,10 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def download_cash_plan_payment_verification(  # type: ignore
-    request: HttpRequest, verification_id: str
-) -> Union[HttpResponseRedirect, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponsePermanentRedirect]:
+    request: "HttpRequest", verification_id: str
+) -> Union[
+    "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
+]:
     cash_plan_payment_verification_id = decode_id_string(verification_id)
     cash_plan_payment_verification = get_object_or_404(
         CashPlanPaymentVerification, id=cash_plan_payment_verification_id

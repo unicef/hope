@@ -90,7 +90,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
         )
 
     @atomic(using="registration_datahub")
-    def post(self, request: Request, business_area: BusinessArea, rdi: RegistrationDataImport) -> Response:
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         serializer = HouseholdSerializer(data=request.data, many=True)
 
         if serializer.is_valid():
@@ -110,7 +110,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
 
-    def post(self, request: Request, business_area: BusinessArea, rdi: RegistrationDataImport) -> Response:
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         # The initial serializer
         total_households = 0
         total_errors = 0

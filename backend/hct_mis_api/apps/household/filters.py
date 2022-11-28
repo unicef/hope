@@ -278,7 +278,7 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
 
-def get_elasticsearch_query_for_individuals(value: str, business_area: BusinessArea) -> Dict:
+def get_elasticsearch_query_for_individuals(value: str, business_area: "BusinessArea") -> Dict:
     match_fields = [
         "phone_no_text",
         "phone_no_alternative",
@@ -400,7 +400,7 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: BusinessA
     return query
 
 
-def get_elasticsearch_query_for_households(value: Any, business_area: BusinessArea) -> Dict:
+def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessArea") -> Dict:
     match_fields = [
         "admin1",
         "admin2",

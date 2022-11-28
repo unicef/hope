@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class CheckAgainstSanctionListTask:
-    def execute(self, uploaded_file_id: UUID, original_file_name: str) -> None:
+    def execute(self, uploaded_file_id: "UUID", original_file_name: str) -> None:
         today = timezone.now()
         uploaded_file = UploadedXLSXFile.objects.get(id=uploaded_file_id)
         wb = load_workbook(uploaded_file.file, data_only=True)

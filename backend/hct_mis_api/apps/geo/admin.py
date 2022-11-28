@@ -32,7 +32,7 @@ class ActiveRecordFilter(ListFilter):
     title = "Active"
     parameter_name = "active"
 
-    def __init__(self, request: HttpRequest, params: List[str], model: Model, model_admin: ModelAdmin) -> None:
+    def __init__(self, request: "HttpRequest", params: List[str], model: Model, model_admin: ModelAdmin) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
             if p in params:
@@ -56,7 +56,7 @@ class ActiveRecordFilter(ListFilter):
                 "display": title,
             }
 
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+    def queryset(self, request: "HttpRequest", queryset: QuerySet) -> QuerySet:
         if self.value() == "1":
             queryset = queryset.filter(valid_until__isnull=True)
         elif self.value() == "0":
@@ -65,7 +65,7 @@ class ActiveRecordFilter(ListFilter):
 
 
 class ValidityManagerMixin:
-    def get_list_filter(self, request: HttpRequest) -> List:
+    def get_list_filter(self, request: "HttpRequest") -> List:
         return list(self.list_filter) + [ActiveRecordFilter]
 
 
@@ -91,14 +91,14 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> None:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def get_list_display(
-        self, request: HttpRequest
+        self, request: "HttpRequest"
     ) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
         ret = super().get_list_display(request)
         return ret
@@ -134,7 +134,7 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field: Any, request: HttpRequest, model_admin: ModelAdmin) -> List[Tuple[str, str]]:
+    def field_choices(self, field: Any, request: "HttpRequest", model_admin: ModelAdmin) -> List[Tuple[str, str]]:
         if "area_type__country__exact" not in request.GET:
             return []
         return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
@@ -174,7 +174,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     )
 
     @button()
-    def import_areas(self, request: HttpRequest) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+    def import_areas(self, request: "HttpRequest") -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)
