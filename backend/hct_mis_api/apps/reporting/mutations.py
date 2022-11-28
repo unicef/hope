@@ -73,6 +73,8 @@ class CreateReport(ReportValidator, PermissionMutation):
             )
             admin_area_ids = Area.objects.filter(parent=parent).values_list("id", flat=True)
         if admin_area_2_ids:
+            # remove duplications
+            admin_area_2_ids = list(set(admin_area_2_ids))
             admin_area_ids = [decode_id_string(admin_area_id) for admin_area_id in admin_area_2_ids]
 
         if admin_area_ids:

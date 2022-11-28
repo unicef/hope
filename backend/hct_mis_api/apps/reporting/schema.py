@@ -48,7 +48,7 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.file.url if self.file else ""
 
     def resolve_admin_area_1(self, info, **kwargs) -> QuerySet:
-        parent_ids = self.admin_area.all().values_list("parent_id")
+        parent_ids = self.admin_area.filter(parent__isnull=False).values_list("parent_id")
         return Area.objects.filter(id__in=parent_ids).distinct()
 
     def resolve_admin_area_2(self, info, **kwargs) -> QuerySet:

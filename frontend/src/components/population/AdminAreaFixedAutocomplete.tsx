@@ -111,11 +111,6 @@ export const AdminAreaFixedAutocomplete = ({
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
-            // startAdornment: (
-            //   <InputAdornment position='start'>
-            //     <RoomRoundedIcon style={{ color: '#5f6368' }} />
-            //   </InputAdornment>
-            // ),
             endAdornment: (
               <>
                 {loading ? (
