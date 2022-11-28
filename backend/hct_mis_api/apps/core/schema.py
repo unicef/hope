@@ -179,14 +179,14 @@ class FieldAttributeNode(graphene.ObjectType):
     def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
-    def resolve_label_en(parent, info: Any) -> Callable:
-        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+    def resolve_label_en(parent, info: Any) -> Any:
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore
 
     def resolve_associated_with(self, info: Any) -> Union:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
-        if resolved == 0:
+        if resolved == 0:  # type: ignore
             return "Household"
-        elif resolved == 1:
+        elif resolved == 1:  # type: ignore
             return "Individual"
         else:
             return resolved
@@ -204,8 +204,8 @@ class GroupAttributeNode(DjangoObjectType):
         model = FlexibleAttributeGroup
         fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
-    def resolve_label_en(self, info: Any) -> str:
-        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
+    def resolve_label_en(self, info: Any) -> Any:
+        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]  # type: ignore
 
     def resolve_flex_attributes(self, info: Any) -> QuerySet:
         return self.flex_attributes.all()

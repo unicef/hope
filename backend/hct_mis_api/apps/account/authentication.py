@@ -59,7 +59,7 @@ def require_email(
 
 
 def create_user(
-    strategy: Any, details: Dict, backend: Any, user: Optional[User] = None, *args: Any, **kwargs: Any
+    strategy: Any, details: Dict, backend: Any, user: Union[bool, User], *args: Any, **kwargs: Any
 ) -> Optional[Dict[str, Union[bool, User]]]:
     if user:
         return {"is_new": False}

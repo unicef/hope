@@ -6,6 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
 
 from django.utils import timezone
@@ -244,7 +245,7 @@ def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Uni
 raise_attribute_error = object()
 
 
-def nested_getattr(obj: Any, attr: Any, default: Optional[Callable[..., Any]] = raise_attribute_error) -> Any:
+def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
     import functools
 
     try:
@@ -256,11 +257,11 @@ def nested_getattr(obj: Any, attr: Any, default: Optional[Callable[..., Any]] = 
         raise
 
 
-def nested_dict_get(dictionary: str, path: str) -> Any:
+def nested_dict_get(dictionary: str, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore
         path.split("."),
         dictionary,
     )
@@ -445,7 +446,7 @@ def check_concurrency_version_in_mutation(version: int, target: Any) -> None:
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file: str) -> None:
+def update_labels_mapping(csv_file: io.BytesIO) -> None:
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
 
@@ -461,7 +462,7 @@ def update_labels_mapping(csv_file: str) -> None:
 
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
-    with open(csv_file, newline="") as csv_file:
+    with open(csv_file, newline="") as csv_file:  # type: ignore
         reader = csv.reader(csv_file)
         next(reader, None)
         fields_mapping = dict(reader)

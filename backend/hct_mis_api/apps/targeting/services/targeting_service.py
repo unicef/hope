@@ -109,7 +109,7 @@ class TargetingCriteriaRuleQueryingBase:
 
 
 class TargetingIndividualRuleFilterBlockBase:
-    def __init__(self, individual_block_filters: Optional[Any] = None, target_only_hoh: List[Household] = None) -> None:
+    def __init__(self, individual_block_filters: Optional[Any] = None, target_only_hoh: List[Household] = None) -> None:  # type: ignore
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
         if target_only_hoh is not None:

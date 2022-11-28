@@ -17,7 +17,7 @@ def field(obj: Any, field_name: str) -> str:
 
 
 @register.filter()
-def link_to_sentry(event_id: Any, href: bool = False):
+def link_to_sentry(event_id: Any, href: bool = False) -> str:
     return get_sentry_url(event_id, href)
 
 

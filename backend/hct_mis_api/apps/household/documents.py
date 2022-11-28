@@ -107,13 +107,13 @@ class IndividualDocument(Document):
     def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_admin1(self, instance: Individual) -> Optional[str]:
+    def prepare_admin1(self, instance: Individual) -> Optional[str]:  # type: ignore
         household = instance.household
         if household:
             if household.admin1:
                 return household.admin1.name
 
-    def prepare_admin2(self, instance: Individual) -> Optional[str]:
+    def prepare_admin2(self, instance: Individual) -> Optional[str]:  # type: ignore
         household = instance.household
         if household:
             if household.admin2:
@@ -200,12 +200,12 @@ class HouseholdDocument(Document):
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
 
-    def prepare_admin1(self, household: Household) -> str:
+    def prepare_admin1(self, household: Household) -> Optional[str]:  # type: ignore
         if household:
             if household.admin1:
                 return household.admin1.name
 
-    def prepare_admin2(self, household: Household) -> str:
+    def prepare_admin2(self, household: Household) -> Optional[str]:  # type: ignore
         if household:
             if household.admin2:
                 return household.admin2.name

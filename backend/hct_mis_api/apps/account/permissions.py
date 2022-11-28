@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     # TODO: signature differs from superclass
-    def _generate_next_value_(name, *args: Any) -> "Permissions":
+    def _generate_next_value_(name, *args: Any) -> "Permissions":  # type: ignore
         return name
 
     # RDI
@@ -289,7 +289,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,
         filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[BasePermission] = (AllowAny,),
+        permission_classes: Tuple[BasePermission] = (AllowAny,),  # type: ignore
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -329,14 +329,14 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     @classmethod
     def resolve_queryset(
         cls,
-        connection,
-        iterable,
-        info,
-        args,
-        filtering_args,
-        filterset_class,
-        permission_classes,
-    ):
+        connection: Any,
+        iterable: Iterable,
+        info: Any,
+        args: Any,
+        filtering_args: List,
+        filterset_class: Any,
+        permission_classes: List,
+    ) -> Any:
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             log_and_raise("Permission Denied")
@@ -388,14 +388,14 @@ class BaseMutationPermissionMixin:
     @classmethod
     def has_creator_or_owner_permission(
         cls,
-        info,
-        business_area_arg,
-        general_permission,
-        is_creator,
-        creator_permission,
-        is_owner,
-        owner_permission,
-        raise_error=True,
+        info: Any,
+        business_area_arg: str,
+        general_permission: Permissions,
+        is_creator: bool,
+        creator_permission: Permissions,
+        is_owner: bool,
+        owner_permission: Any,
+        raise_error: bool = True,
     ) -> bool:
         cls.is_authenticated(info)
         if not (

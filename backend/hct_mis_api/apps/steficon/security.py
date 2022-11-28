@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # SAFETY_HIGH = 3  # only accept json values
 
 
-def clean_context(context: Dict) -> Optional[Dict]:
+def clean_context(context: Dict) -> Optional[Dict]:  # type: ignore
     try:
         if config.SAFETY_LEVEL == SAFETY_NONE:
             return context

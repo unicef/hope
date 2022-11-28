@@ -494,7 +494,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request: HttpRequest) -> Optional[HttpResponsePermanentRedirect]:
+    def download_last_valid_file(self, request: HttpRequest) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:  # type: ignore
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)

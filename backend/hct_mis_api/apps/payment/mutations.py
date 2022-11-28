@@ -456,7 +456,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
+        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore
 
 
 # TODO: what about typing [0] on XlsxErrorNode

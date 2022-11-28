@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -91,7 +91,7 @@ class CashPlanPaymentVerificationAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return HttpResponseRedirect(url)
 
     @button()
-    def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:  # type: ignore
         if request.method == "POST":
             from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
                 CheckRapidProVerificationTask,

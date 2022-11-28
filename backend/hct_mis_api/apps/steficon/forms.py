@@ -147,7 +147,7 @@ class RuleTestForm(forms.Form):
             media = media + field.widget.media
         return media
 
-    def clean_raw_data(self) -> Optional[Dict]:
+    def clean_raw_data(self) -> Optional[Dict]:  # type: ignore
         original = self.cleaned_data["raw_data"]
         if original:
             try:
@@ -155,7 +155,7 @@ class RuleTestForm(forms.Form):
             except Exception as e:
                 raise ValidationError(e)
 
-    def clean_file(self) -> Optional[Dict]:
+    def clean_file(self) -> Optional[Dict]:  # type: ignore
         original = self.cleaned_data["file"]
         if original:
             try:

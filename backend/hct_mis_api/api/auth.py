@@ -37,7 +37,7 @@ class HOPEAuthentication(TokenAuthentication):
 
 
 class HOPEPermission(IsAuthenticated):
-    def has_permission(self, request: Request, view: Any) -> bool:
+    def has_permission(self, request: Request, view: Any) -> bool:  # type: ignore
         if bool(request.auth):
             if view.permission == "any":
                 return True

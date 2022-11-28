@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -129,7 +129,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
 
 class ChoiceArrayField(ArrayField):
-    def formfield(self, **kwargs: Any) -> Any:
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
         defaults = {
             "form_class": forms.MultipleChoiceField,
             "choices": self.base_field.choices,
