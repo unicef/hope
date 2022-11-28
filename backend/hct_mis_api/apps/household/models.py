@@ -865,7 +865,7 @@ class Individual(
         self.withdrawn_date = None
         self.save()
 
-    def mark_as_duplicate(self, original_individual: Optional[Individual] = None) -> None:
+    def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
         self.documents.update(status=Document.STATUS_INVALID)

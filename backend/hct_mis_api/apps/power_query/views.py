@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.cache import get_conditional_response
 from django.utils.http import http_date
@@ -14,8 +14,6 @@ from .utils import basicauth
 
 if TYPE_CHECKING:
     from uuid import UUID
-
-    from django.http import HttpRequest, HttpResponse
 
 
 @login_required()

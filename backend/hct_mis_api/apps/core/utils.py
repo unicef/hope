@@ -6,7 +6,6 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
 
 from django.utils import timezone
@@ -18,7 +17,6 @@ from PIL import Image
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
-    from django.core.files import File
     from django.db.models import Model, QuerySet
 
     from openpyxl.cell import Cell

@@ -1,6 +1,5 @@
 import csv
 import logging
-from dataclasses import Field
 from io import StringIO
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
@@ -74,7 +73,6 @@ if TYPE_CHECKING:
 
     from django.contrib.admin import ModelAdmin
     from django.db.models.query import QuerySet
-    from django.http import HttpRequest
 
 
 logger = logging.getLogger(__name__)

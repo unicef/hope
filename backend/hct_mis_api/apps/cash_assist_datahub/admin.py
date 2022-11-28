@@ -34,7 +34,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 
 if TYPE_CHECKING:
-    from datetime import datetime, timedelta
+    from datetime import timedelta
 
     from django.http import HttpRequest
 

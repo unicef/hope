@@ -9,7 +9,7 @@ from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db.transaction import atomic
-from django.forms import Form, ModelForm
+from django.forms import ModelForm
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils import timezone

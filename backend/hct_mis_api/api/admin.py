@@ -24,9 +24,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.forms import Form
-    from django.template import Template
-
 
 TOKEN_INFO_EMAIL = """
 Dear {friendly_name},
