@@ -28,8 +28,7 @@ from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
+    from django.db.models.query import QuerySet, _QuerySet
 
 log = logging.getLogger(__name__)
 
@@ -82,7 +81,7 @@ class CheckAgainstSanctionListPreMergeTask:
     @transaction.atomic
     def execute(
         cls,
-        individuals: QuerySet[SanctionListIndividual] = None,
+        individuals: QuerySet[SanctionListIndividual] = None,  # type: ignore
         registration_data_import: Optional[RegistrationDataImport] = None,
     ) -> None:
         if individuals is None:

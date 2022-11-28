@@ -151,7 +151,7 @@ def pygmentize(code: Any) -> str:
 
 
 @register.filter
-def diff(commit: Any, panels: str = "before,after"):
+def diff(commit: Any, panels: str = "before,after") -> str:
     rule = commit.rule
     left_panel, right_panel = [], []
     right_label = "No data"

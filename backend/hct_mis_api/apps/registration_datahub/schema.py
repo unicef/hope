@@ -66,7 +66,7 @@ class DeduplicationResultNode(graphene.ObjectType):
     location = graphene.String()
     age = graphene.Int()
 
-    def resolve_age(self, info: Any) -> int:
+    def resolve_age(self, info: Any) -> int:  # type: ignore
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()

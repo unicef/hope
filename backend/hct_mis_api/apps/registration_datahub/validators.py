@@ -107,7 +107,7 @@ class ImportDataValidator(BaseValidator):
     }
 
     @classmethod
-    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore
         try:
             validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -423,7 +423,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
+    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:  # type: ignore
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -433,7 +433,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def integer_validator(self, value: int, header: str, *args: Any, **kwargs: Any) -> bool:
+    def integer_validator(self, value: int, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -722,7 +722,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
-                            f"Sheet: {sheet.title}, Unexpected value: "
+                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore
                             f"{value} for type "
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
@@ -1019,7 +1019,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:
+    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:  # type: ignore
         try:
             value_type_name = type(value).__name__
 

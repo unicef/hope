@@ -72,7 +72,7 @@ class FinalizeTargetPopulationValidator:
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def validate(rule_filter) -> None:
+    def validate(rule_filter: Any) -> None:
         is_flex_field = rule_filter.is_flex_field
         if not is_flex_field:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")

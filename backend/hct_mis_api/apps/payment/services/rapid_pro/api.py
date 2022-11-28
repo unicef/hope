@@ -177,7 +177,9 @@ class RapidProAPI:
             logger.exception(e)
             return str(e), None
 
-    def test_connection_flow_run(self, flow_uuid: UUID, phone_number: str, timestamp: Optional[Any] = None):
+    def test_connection_flow_run(
+        self, flow_uuid: UUID, phone_number: str, timestamp: Optional[Any] = None
+    ) -> Union[Tuple[None, Dict[str, Union[object, Any]]], Tuple[str, None]]:
         try:
             # getting start flow that was initiated during test, should be the most recent one with matching flow uuid
             flow_starts = self._handle_get_request(f"{RapidProAPI.FLOW_STARTS_ENDPOINT}")

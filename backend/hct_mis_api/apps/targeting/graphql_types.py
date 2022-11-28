@@ -30,7 +30,7 @@ def get_field_by_name(field_name: str) -> Optional[Any]:
     field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name").get(field_name)
     choices = field.get("choices")
     if choices and callable(choices):
-        field["choices"] = choices()
+        field["choices"] = choices()  # type: ignore
     return field
 
 

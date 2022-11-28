@@ -1,5 +1,14 @@
 import logging
-from typing import IO, TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    MutableSequence,
+    Optional,
+)
 
 from django.core.exceptions import ValidationError
 
@@ -242,7 +251,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field: Any, core_field_from_file: IO, field_choices: Dict) -> Optional[List]:
+    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: Dict) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 

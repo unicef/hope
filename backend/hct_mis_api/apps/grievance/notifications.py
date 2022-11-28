@@ -34,7 +34,7 @@ class GrievanceNotification:
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
 
-    def __init__(self, grievance_ticket: GrievanceTicket, action: str, **kwargs: Any) -> None:
+    def __init__(self, grievance_ticket: GrievanceTicket, action: auto, **kwargs: Any) -> None:
         self.grievance_ticket = grievance_ticket
         self.action = action
         self.extra_data = kwargs
@@ -60,7 +60,7 @@ class GrievanceNotification:
         return [self._prepare_email(user) for user in self.user_recipients]
 
     def _prepare_email(self, user_recipient: "User") -> EmailMultiAlternatives:
-        prepare_bodies_method: Callable = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
+        prepare_bodies_method = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
         text_body, html_body, subject = prepare_bodies_method(self, user_recipient)
         email = EmailMultiAlternatives(
             subject=subject,

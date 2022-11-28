@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import Any, Optional
 
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
@@ -280,7 +280,9 @@ class CashPlan(TimeStampedUUIDModel):
         return self.available_payment_records().count() > 0
 
     def available_payment_records(
-        self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None, extra_validation=None
+        self,
+        payment_verification_plan: Optional[CashPlanPaymentVerification] = None,
+        extra_validation: Optional[Any] = None,
     ) -> QuerySet[PaymentRecord]:
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 

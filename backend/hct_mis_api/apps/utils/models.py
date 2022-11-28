@@ -81,9 +81,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = models.Manager()
 
-    def delete(
-        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Optional[Tuple[int, dict[str, int]]]:
+    def delete(self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Optional[Tuple[int, dict[str, int]]]:  # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
