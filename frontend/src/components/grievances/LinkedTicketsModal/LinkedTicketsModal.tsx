@@ -67,7 +67,7 @@ export const LinkedTicketsModal = ({
   const history = useHistory();
   const { t } = useTranslation();
   const [
-    loadExistingTickets,
+    loadRelatedTickets,
     { data, loading },
   ] = useRelatedGrievanceTicketsLazyQuery({
     variables: {
@@ -76,9 +76,9 @@ export const LinkedTicketsModal = ({
   });
   useEffect(() => {
     if (dialogOpen) {
-      loadExistingTickets();
+      loadRelatedTickets();
     }
-  }, [dialogOpen, loadExistingTickets]);
+  }, [dialogOpen, loadRelatedTickets]);
 
   const renderIssueTypeName = (row): string => {
     if (!row.issueType) {
@@ -128,8 +128,7 @@ export const LinkedTicketsModal = ({
   };
 
   const renderLink = (): React.ReactElement => {
-    const ticketsCount =
-      ticket.relatedTickets.length + ticket.existingTickets.length;
+    const ticketsCount = ticket.relatedTickets.length;
     if (ticketsCount === 0) {
       return <span>-</span>;
     }
@@ -150,13 +149,9 @@ export const LinkedTicketsModal = ({
     if (loading) return <LoadingComponent />;
     if (!data) return null;
 
-    const { existingTickets, relatedTickets } = data?.grievanceTicket;
+    const { relatedTickets } = data?.grievanceTicket;
     return (
-      <>
-        {relatedTickets
-          .concat(existingTickets)
-          .map((relatedTicket) => renderRow(relatedTicket))}
-      </>
+      <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
     );
   };
 
@@ -172,14 +167,14 @@ export const LinkedTicketsModal = ({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            {t('Linked Tickets')}
+            {t('Related Tickets')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mt={2} mb={6}>
             <Typography>
               <Bold>Ticket ID {ticket.unicefId} </Bold>
-              is linked to following related tickets.
+              is related to the following tickets.
             </Typography>
           </Box>
           <StyledTable>

@@ -85,7 +85,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
           <Box mt={3}>
             <OtherRelatedTickets
               ticket={ticket}
-              linkedTickets={ticket.relatedTickets}
+              linkedTickets={ticket.linkedTickets}
             />
           </Box>
         </Box>
@@ -121,7 +121,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
         <Box display='flex' flexDirection='column'>
           <OtherRelatedTickets
             ticket={ticket}
-            linkedTickets={ticket.relatedTickets}
+            linkedTickets={ticket.linkedTickets}
           />
         </Box>
       </Box>

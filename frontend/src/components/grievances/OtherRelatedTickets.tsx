@@ -22,7 +22,7 @@ export const OtherRelatedTickets = ({
   linkedTickets,
   ticket,
 }: {
-  linkedTickets: GrievanceTicketQuery['grievanceTicket']['relatedTickets'];
+  linkedTickets: GrievanceTicketQuery['grievanceTicket']['linkedTickets'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement => {
   const { t } = useTranslation();
