@@ -76,7 +76,7 @@ class CommonValidator(BaseValidator):
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
-def prepare_choices_for_validation(choices_sheet: Worksheet) -> Dict[str, List[str]]:
+def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List[str]]:
     from collections import defaultdict
 
     import xlrd
@@ -175,7 +175,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_file(
-        cls, survey_sheet: Worksheet, choices_mapping: Dict, columns_names_and_numbers_mapping: Dict
+        cls, survey_sheet: "Worksheet", choices_mapping: Dict, columns_names_and_numbers_mapping: Dict
     ) -> Dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):
@@ -273,7 +273,7 @@ class KoboTemplateValidator:
         return errors
 
     @classmethod
-    def validate_kobo_template(cls, survey_sheet: Worksheet, choices_sheet: Worksheet) -> List[Dict[str, str]]:
+    def validate_kobo_template(cls, survey_sheet: "Worksheet", choices_sheet: "Worksheet") -> List[Dict[str, str]]:
         choices_mapping = prepare_choices_for_validation(choices_sheet)
 
         first_row = survey_sheet.row(0)

@@ -89,7 +89,7 @@ class FlexRegistrationService:
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by: User, rdi_name: str = "rdi_name") -> RegistrationDataImport:
+    def create_rdi(self, imported_by: "User", rdi_name: str = "rdi_name") -> RegistrationDataImport:
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
@@ -125,8 +125,8 @@ class FlexRegistrationService:
 
     def process_records(
         self,
-        rdi_id: UUID,
-        records_ids: List[UUID],
+        rdi_id: "UUID",
+        records_ids: List["UUID"],
     ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
@@ -250,13 +250,13 @@ class FlexRegistrationService:
 
         ImportedDocument.objects.bulk_create(documents)
 
-    def _set_default_head_of_household(self, individuals_array: QuerySet) -> None:
+    def _set_default_head_of_household(self, individuals_array: "QuerySet") -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role: Role, individual: ImportedIndividual, household: ImportedHousehold) -> None:
+    def _create_role(self, role: "Role", individual: ImportedIndividual, household: ImportedHousehold) -> None:
         if role == "y":
             defaults = dict(individual=individual, household=household)
             if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:

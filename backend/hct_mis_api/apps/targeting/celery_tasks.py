@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from uuid import UUID
 
 from django.core.cache import cache
 from django.db import transaction
@@ -14,10 +14,6 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 
 from ..targeting.models import HouseholdSelection, TargetPopulation
 from .services.targeting_stats_refresher import full_rebuild, refresh_stats
-
-if TYPE_CHECKING:
-    from uuid import UUID
-
 
 logger = logging.getLogger(__name__)
 

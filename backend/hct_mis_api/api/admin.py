@@ -145,7 +145,7 @@ class APITokenAdmin(SmartModelAdmin):
             self.message_user(request, f"Unable to send notification email to {obj.user.email}", messages.ERROR)
 
     @button()
-    def resend_email(self, request: HttpRequest, pk: UUID) -> None:
+    def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, pk)
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
 

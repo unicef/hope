@@ -318,7 +318,7 @@ class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
-def build_summary(cash_plan: CashPlan) -> None:
+def build_summary(cash_plan: "CashPlan") -> None:
     statuses_count = cash_plan.verifications.aggregate(
         active=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_PENDING)),

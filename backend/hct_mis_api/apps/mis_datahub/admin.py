@@ -257,8 +257,8 @@ class TargetPopulationAdmin(HUBAdminMixin):
     search_fields = ("name",)
 
     def get_search_results(
-        self, request: HttpRequest, queryset: QuerySet, search_term: str
-    ) -> Tuple[_QuerySet[Any, Any], bool]:
+        self, request: HttpRequest, queryset: "QuerySet", search_term: str
+    ) -> Tuple["_QuerySet[Any, Any]", bool]:
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         return queryset, use_distinct
 

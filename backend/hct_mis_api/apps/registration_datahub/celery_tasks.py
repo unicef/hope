@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
-from django.db.models.query import _QuerySet
 from django.utils import timezone
 
 from redis.exceptions import LockError
@@ -23,7 +22,7 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from django.db.models import QuerySet
+    from django.db.models import QuerySet, _QuerySet
 
     from hct_mis_api.apps.core.models import BusinessArea
 
@@ -31,7 +30,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id: UUID, e: BaseException) -> None:
+def handle_rdi_exception(datahub_rdi_id: "UUID", e: BaseException) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -319,7 +318,7 @@ def extract_records_task(max_records: int = 500) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def fresh_extract_records_task(records_ids: Optional[_QuerySet[Any, Any]] = None) -> None:
+def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = None) -> None:
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)

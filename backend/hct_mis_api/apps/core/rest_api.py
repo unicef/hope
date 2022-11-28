@@ -94,7 +94,7 @@ class FieldAttributeSerializer(serializers.Serializer):
 
 
 @api_view()
-def all_fields_attributes(request: Request) -> Response:
+def all_fields_attributes(request: "Request") -> "Response":
     business_area_slug = request.data.get("business_area_slug")
 
     records = cache.get(business_area_slug)

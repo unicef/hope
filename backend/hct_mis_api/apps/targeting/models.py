@@ -238,7 +238,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
 
     @property
-    def household_list(self) -> QuerySet:
+    def household_list(self) -> "QuerySet":
         queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
             return queryset
@@ -324,10 +324,10 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     list).
     """
 
-    def get_rules(self) -> QuerySet:
+    def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self) -> List[UUID]:
+    def get_excluded_household_ids(self) -> List["UUID"]:
         return self.target_population.excluded_household_ids
 
     def get_query(self) -> Q:
@@ -353,10 +353,10 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
         on_delete=models.CASCADE,
     )
 
-    def get_filters(self) -> QuerySet:
+    def get_filters(self) -> "QuerySet":
         return self.filters.all()
 
-    def get_individuals_filters_blocks(self) -> QuerySet:
+    def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
 
 
@@ -371,7 +371,7 @@ class TargetingIndividualRuleFilterBlock(
     )
     target_only_hoh = models.BooleanField(default=False)
 
-    def get_individual_block_filters(self) -> QuerySet:
+    def get_individual_block_filters(self) -> "QuerySet":
         return self.individual_block_filters.all()
 
 

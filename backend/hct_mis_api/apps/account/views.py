@@ -1,14 +1,10 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.export_users_xlsx import ExportUsersXlsx
-
-if TYPE_CHECKING:
-    from django.http import HttpRequest
 
 
 def download_exported_users(request: HttpRequest, business_area_slug: str) -> HttpResponse:

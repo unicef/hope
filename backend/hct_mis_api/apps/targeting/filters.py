@@ -63,7 +63,7 @@ class TargetPopulationFilter(FilterSet):
     program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
 
     @staticmethod
-    def filter_created_by_name(queryset: QuerySet, model_field: str, value: Any) -> QuerySet:
+    def filter_created_by_name(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         """Gets full name of the associated user from query."""
         fname_query_key = f"{model_field}__given_name__icontains"
         lname_query_key = f"{model_field}__family_name__icontains"

@@ -129,7 +129,7 @@ class TargetingCriteriaRuleFilterInputValidator:
 
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
-    def validate(rule: Rule) -> None:
+    def validate(rule: "Rule") -> None:
         total_len = 0
         filters = rule.get("filters")
         individuals_filters_blocks = rule.get("individuals_filters_blocks")

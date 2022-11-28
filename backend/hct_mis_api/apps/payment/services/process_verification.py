@@ -1,4 +1,4 @@
-from plistlib import Dict
+from typing import Dict
 
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 

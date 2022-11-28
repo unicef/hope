@@ -240,7 +240,7 @@ class UploadRDIView(HOPEAPIBusinessAreaView):
     @swagger_auto_schema(request_body=RDINestedSerializer)
     @atomic()
     @atomic(using="registration_datahub")
-    def post(self, request: Request, business_area: BusinessArea) -> Response:
+    def post(self, request: "Request", business_area: "BusinessArea") -> Response:
         serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
         if serializer.is_valid():
             info = serializer.save(user=request.user)

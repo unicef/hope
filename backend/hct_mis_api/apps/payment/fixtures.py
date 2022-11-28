@@ -365,10 +365,10 @@ def generate_real_cash_plans_for_households(households: List[Household]) -> None
 
 def create_payment_verification_plan_with_status(
     cash_plan: CashPlan,
-    user: User,
+    user: "User",
     business_area: BusinessArea,
     program: Program,
-    target_population: TargetPopulation,
+    target_population: "TargetPopulation",
     status: str,
 ) -> CashPlanPaymentVerification:
     cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)

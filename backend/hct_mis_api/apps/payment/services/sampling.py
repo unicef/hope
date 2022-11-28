@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class Sampling:
-    def __init__(self, input_data: Dict, cash_plan: CashPlan, payment_records: QuerySet) -> None:
+    def __init__(self, input_data: Dict, cash_plan: "CashPlan", payment_records: QuerySet) -> None:
         self.input_data = input_data
         self.cash_plan = cash_plan
         self.payment_records: Optional[QuerySet] = payment_records

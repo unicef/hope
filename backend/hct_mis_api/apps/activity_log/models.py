@@ -66,7 +66,7 @@ class LogEntry(models.Model):
 def log_create(
     mapping: Dict,
     business_area_field: Any,
-    user: Optional[User] = None,
+    user: Optional["User"] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:

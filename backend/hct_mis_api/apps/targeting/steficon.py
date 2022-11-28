@@ -40,7 +40,7 @@ try:
 
     class SteficonExecutorMixin:
         @button(visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR)
-        def re_run_steficon(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+        def re_run_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             tp = context["original"]
             if request.method == "POST":
@@ -57,7 +57,7 @@ try:
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_rerun.html", context)
 
         @button()
-        def test_steficon(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+        def test_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             if request.method == "GET":
                 context["title"] = "Test Steficon rule"

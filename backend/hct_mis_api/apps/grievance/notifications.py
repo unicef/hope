@@ -88,7 +88,7 @@ class GrievanceNotification:
             f"A Grievance & Feedback ticket for {self.grievance_ticket.get_category_display()}",
         )
 
-    def _prepare_universal_category_created_recipients(self) -> QuerySet:
+    def _prepare_universal_category_created_recipients(self) -> "QuerySet":
         action_roles_dict = {
             GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED: "Adjudicator",
             GrievanceNotification.ACTION_DEDUPLICATION_CREATED: "Adjudicator",
@@ -104,7 +104,7 @@ class GrievanceNotification:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
 
-    def _prepare_for_approval_recipients(self) -> QuerySet["User"]:
+    def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
         user_roles = UserRole.objects.filter(
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,

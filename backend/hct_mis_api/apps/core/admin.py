@@ -109,13 +109,13 @@ class BusinessofficeFilter(SimpleListFilter):
     title = "Business Ofiice"
     parameter_name = "bo"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> List[Tuple[int, str]]:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> List[Tuple[int, str]]:
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
     def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: "QuerySet") -> "QuerySet":
         if self.value() == "2":
             return queryset.filter(parent_id__isnull=True)
         elif self.value() == "1":
@@ -165,7 +165,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
-    def split_business_area(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
+    def split_business_area(self, request: HttpRequest, pk: "UUID") -> Union[HttpResponseRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk)
         opts = self.object._meta
         if request.POST:
@@ -248,7 +248,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         return matrix
 
     @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
-    def force_sync_doap(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def force_sync_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         matrix = self._get_doap_matrix(obj)
@@ -257,7 +257,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
     @view(label="Send DOAP", group="doap")
-    def send_doap(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def send_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         try:
@@ -296,7 +296,7 @@ UNICEF HOPE""",
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
     @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
-    def export_doap(self, request: HttpRequest, pk: UUID) -> HttpResponse:
+    def export_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
         environment = Site.objects.first().name
@@ -310,7 +310,7 @@ UNICEF HOPE""",
         return response
 
     @view(permission="core.can_send_doap")
-    def view_ca_doap(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def view_ca_doap(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, title="DOAP matrix")
         context["aeu_groups"] = ["doap"]
         obj = context["original"]
@@ -321,7 +321,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/admin/ca_doap.html", context)
 
     @button(permission="account.view_user")
-    def members(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def members(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
@@ -337,7 +337,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/admin/ba_members.html", context)
 
     @button(label="Test RapidPro Connection")
-    def _test_rapidpro_connection(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def _test_rapidpro_connection(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
@@ -373,7 +373,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
     @button(permission=is_root)
-    def mark_submissions(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
@@ -506,7 +506,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         label="Rerun KOBO Import",
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
     )
-    def rerun_kobo_import(self, request: HttpRequest, pk: UUID) -> HttpResponsePermanentRedirect:
+    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
             xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
@@ -616,7 +616,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return request.user.can_download_storage_files()
 
     @button(label="Create eDopomoga TP")
-    def create_tp(self, request: HttpRequest, pk: UUID) -> Union[TemplateResponse, HttpResponsePermanentRedirect]:
+    def create_tp(self, request: HttpRequest, pk: "UUID") -> Union[TemplateResponse, HttpResponsePermanentRedirect]:
         storage_obj = StorageFile.objects.get(pk=pk)
         context = self.get_common_context(
             request,

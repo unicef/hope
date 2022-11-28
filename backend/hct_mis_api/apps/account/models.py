@@ -101,7 +101,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
-    def has_permission(self, permission: BasePermission, business_area: BusinessArea, write: bool = False) -> bool:
+    def has_permission(self, permission: BasePermission, business_area: "BusinessArea", write: bool = False) -> bool:
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
@@ -207,7 +207,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user: User, business_area: BusinessArea, role: UserRole) -> None:
+    def validate_user_role(self, user: User, business_area: "BusinessArea", role: UserRole) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))

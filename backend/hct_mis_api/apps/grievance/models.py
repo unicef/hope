@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketManager(models.Manager):
-    def belong_household(self, household: Household) -> Iterable:
+    def belong_household(self, household: "Household") -> Iterable:
         individuals = household.individuals.values_list("id", flat=True)
         return chain(
             (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
@@ -506,7 +506,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> Household:
+    def household(self) -> "Household":
         return self.individual.household
 
 
@@ -542,7 +542,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
 
     @property
-    def household(self) -> Household:
+    def household(self) -> "Household":
         return self.individual.household
 
 
@@ -584,11 +584,11 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self) -> Household:
+    def household(self) -> "Household":
         return self.golden_records_individual.household
 
     @property
-    def individual(self) -> Individual:
+    def individual(self) -> "Individual":
         return self.golden_records_individual
 
 
@@ -635,11 +635,11 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             return False
 
     @property
-    def household(self) -> Household:
+    def household(self) -> "Household":
         return self.golden_records_individual.household
 
     @property
-    def individual(self) -> Individual:
+    def individual(self) -> "Individual":
         return self.golden_records_individual
 
 
@@ -672,15 +672,15 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         return bool(self.payment_verifications.count())
 
     @property
-    def household(self) -> Optional[Household]:
+    def household(self) -> Optional["Household"]:
         return getattr(self.payment_record, "household", None)
 
     @property
-    def individual(self) -> Optional[Individual]:
+    def individual(self) -> Optional["Individual"]:
         return getattr(self.payment_record, "head_of_household", None)
 
     @property
-    def payment_record(self) -> Optional[PaymentRecord]:
+    def payment_record(self) -> Optional["PaymentRecord"]:
         return getattr(self.payment_verification, "payment_record", None)
 
 

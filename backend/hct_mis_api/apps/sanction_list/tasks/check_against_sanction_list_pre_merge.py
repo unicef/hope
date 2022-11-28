@@ -81,7 +81,7 @@ class CheckAgainstSanctionListPreMergeTask:
     @transaction.atomic
     def execute(
         cls,
-        individuals: QuerySet[SanctionListIndividual] = None,  # type: ignore
+        individuals: "QuerySet[SanctionListIndividual]" = None,  # type: ignore
         registration_data_import: Optional[RegistrationDataImport] = None,
     ) -> None:
         if individuals is None:

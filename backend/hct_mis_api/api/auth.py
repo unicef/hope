@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Tuple
+from typing import Any, Tuple
 
 from django.db.models import Q
 from django.utils import timezone
@@ -7,13 +7,11 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 
 from hct_mis_api.apps.account.models import User
 
 from .models import APIToken
-
-if TYPE_CHECKING:
-    from requests import Request
 
 
 class HOPEAuthentication(TokenAuthentication):
@@ -37,7 +35,7 @@ class HOPEAuthentication(TokenAuthentication):
 
 
 class HOPEPermission(IsAuthenticated):
-    def has_permission(self, request: Request, view: Any) -> bool:  # type: ignore
+    def has_permission(self, request: Request, view: Any) -> bool:
         if bool(request.auth):
             if view.permission == "any":
                 return True

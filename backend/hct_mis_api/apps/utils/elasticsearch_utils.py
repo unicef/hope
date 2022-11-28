@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from django_elasticsearch_dsl import Document
 
 
-def populate_index(queryset: QuerySet, doc: Any, parallel: bool = False) -> None:
+def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> None:
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
 
@@ -61,14 +61,14 @@ def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
 
 
-def remove_document_by_matching_ids(id_list: List[UUID]) -> None:
+def remove_document_by_matching_ids(id_list: List["UUID"]) -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index="individuals")
     search.update_from_dict(query_dict)
     search.delete()
 
 
-def remove_elasticsearch_documents_by_matching_ids(id_list: List[UUID], document: Document) -> None:
+def remove_elasticsearch_documents_by_matching_ids(id_list: List["UUID"], document: "Document") -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index=document.Index.name)
     search.update_from_dict(query_dict)

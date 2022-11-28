@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def handle_role(role: IndividualRoleInHousehold, household: Household, individual: Individual) -> None:
+def handle_role(role: "IndividualRoleInHousehold", household: Household, individual: Individual) -> None:
     from hct_mis_api.apps.household.models import (
         ROLE_ALTERNATE,
         ROLE_PRIMARY,
@@ -438,7 +438,7 @@ def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -
 
 
 def withdraw_individual_and_reassign_roles(
-    ticket_details: List[GrievanceTicket], individual_to_remove: Individual, info: Any
+    ticket_details: List["GrievanceTicket"], individual_to_remove: Individual, info: Any
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
 

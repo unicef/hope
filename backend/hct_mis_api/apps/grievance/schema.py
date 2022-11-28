@@ -110,7 +110,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
     @staticmethod
-    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
+    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet":
         return grievance_ticket.related_tickets
 
     @staticmethod
@@ -134,7 +134,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return grievance_ticket.admin2
 
     @staticmethod
-    def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
+    def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet":
         return (
             GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
             .filter(household_unicef_id=grievance_ticket.household_unicef_id)
@@ -319,10 +319,10 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
         possible_duplicate = parent.extra_data.get("possible_duplicate")
         return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
 
-    def resolve_possible_duplicates(self, info: Any) -> QuerySet:
+    def resolve_possible_duplicates(self, info: Any) -> "QuerySet":
         return self.possible_duplicates.all()
 
-    def resolve_selected_individuals(self, info: Any) -> QuerySet:
+    def resolve_selected_individuals(self, info: Any) -> "QuerySet":
         return self.selected_individuals.all()
 
 
@@ -434,7 +434,7 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
-    def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
+    def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> "QuerySet":
         return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:

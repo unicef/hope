@@ -309,7 +309,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
     def get_form(
         self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
-    ) -> Type[ModelForm[Any]]:
+    ) -> Type["ModelForm[Any]"]:
         return super().get_form(request, obj, change, **kwargs)
 
     def stable(self, obj: Any) -> Optional[str]:

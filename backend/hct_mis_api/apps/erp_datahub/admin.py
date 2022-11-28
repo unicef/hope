@@ -82,7 +82,7 @@ class FundsCommitmentAssignBusinessOffice(forms.ModelForm):
         return self.cleaned_data["business_office_code"].code
 
 
-def should_show_assign_business_office(request: HttpRequest, obj: Any) -> bool:
+def should_show_assign_business_office(request: "HttpRequest", obj: Any) -> bool:
     business_area = BusinessArea.objects.get(code=obj.business_area)
     return business_area.is_split and obj.business_office_code is None
 
@@ -92,10 +92,10 @@ class SplitBusinessAreaFilter(SimpleListFilter):
     title = "Split Business Area"
     parameter_name = "split"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> List[Tuple[int, str]]:
+    def lookups(self, request: "HttpRequest", model_admin: ModelAdmin) -> List[Tuple[int, str]]:
         return [(1, "Yes"), (2, "No")]
 
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> Optional[QuerySet]:
+    def queryset(self, request: "HttpRequest", queryset: "QuerySet") -> Optional["QuerySet"]:
         if not self.value():
             return queryset
         from hct_mis_api.apps.core.models import BusinessArea
@@ -126,8 +126,8 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
     def assign_business_office(
-        self, request: HttpRequest, pk: UUID
-    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+        self, request: "HttpRequest", pk: "UUID"
+    ) -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
@@ -156,7 +156,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
 
     @button()
-    def execute_exchange_rate_sync(self, request: HttpRequest) -> None:
+    def execute_exchange_rate_sync(self, request: "HttpRequest") -> None:
         if request.method == "POST":
             from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
                 PullFromErpDatahubTask,
@@ -179,7 +179,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
                 template="admin_extra_buttons/confirm.html",
             )
 
-    def get_changeform_initial_data(self, request: HttpRequest) -> Dict:
+    def get_changeform_initial_data(self, request: "HttpRequest") -> Dict:
         initial: Dict[str, Any] = super().get_changeform_initial_data(request)
         initial["created_by"] = request.user.email
         initial["updated_by"] = request.user.email
@@ -188,8 +188,8 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         return initial
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
-    ) -> Type[ModelForm[Any]]:
+        self, request: "HttpRequest", obj: Optional[Any] = None, change: bool = False, **kwargs: Any
+    ) -> Type["ModelForm[Any]"]:
         if not change:
             return FundsCommitmentAddForm
         return super().get_form(request, obj, change, **kwargs)
@@ -222,8 +222,8 @@ class DownPaymentAdmin(HOPEModelAdminBase):
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
     def assign_business_office(
-        self, request: HttpRequest, pk: UUID
-    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+        self, request: "HttpRequest", pk: "UUID"
+    ) -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: DownPayment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
