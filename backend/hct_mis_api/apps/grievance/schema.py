@@ -81,16 +81,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     related_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
-    def get_queryset(cls, queryset, info):
-        queryset = super().get_queryset(queryset, info)
-        ticket_details_related_names = []
-        for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
-            if "household" in value:
-                ticket_details_related_names.append(key)
-                ticket_details_related_names.append(f"{key}__{value['household']}")
-        return queryset.select_related("admin2", "assigned_to").prefetch_related(*ticket_details_related_names)
-
-    @classmethod
     def check_node_permission(cls, info, object_instance) -> None:
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
@@ -444,7 +434,13 @@ class Query(graphene.ObjectType):
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
+        queryset = GrievanceTicket.objects.filter(ignored=False).select_related("admin2", "assigned_to", "created_by")
+        ticket_details_related_names = []
+        for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if "household" in value:
+                ticket_details_related_names.append(key)
+                ticket_details_related_names.append(f"{key}__{value['household']}")
+        return queryset.prefetch_related(*ticket_details_related_names)
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
