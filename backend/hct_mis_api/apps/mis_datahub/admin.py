@@ -92,6 +92,7 @@ class HouseholdAdmin(HUBAdminMixin):
             return f"{url}?session={obj.pk}&household_mis_id={obj.mis_id}"
         else:
             button.visible = False
+            return None
 
     @button()
     def see_hope_record(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
@@ -114,7 +115,7 @@ class IndividualAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def household(self, button: button) -> Union[str, NoReturn]:
+    def household(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
@@ -122,6 +123,7 @@ class IndividualAdmin(HUBAdminMixin):
             return f"{url}?session={obj.pk}&household_mis_id={obj.mis_id}"
         else:
             button.visible = False
+            return None
 
 
 @admin.register(FundsCommitment)
@@ -157,31 +159,34 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     search_fields = ("id",)
 
     @link()
-    def target_population(self, button: button) -> Union[str, None]:
+    def target_population(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_targetpopulation_changelist")
             return f"{url}?session={obj.pk}"
         else:
             button.visible = False
+            return None
 
     @link()
-    def individuals(self, button: button) -> Union[str, None]:
+    def individuals(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
             return f"{url}?session={obj.pk}"
         else:
             button.visible = False
+            return None
 
     @link()
-    def households(self, button: button) -> Union[str, None]:
+    def households(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
             return f"{url}?session={obj.pk}"
         else:
             button.visible = False
+            return None
 
     @button(permission="account.can_inspect")
     def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
@@ -203,7 +208,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
-    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> TemplateResponse:  # type: ignore
         if request.method == "POST":
             try:
                 with atomic():
@@ -258,22 +263,24 @@ class TargetPopulationAdmin(HUBAdminMixin):
         return queryset, use_distinct
 
     @link()
-    def individuals(self, button: button) -> Union[str, None]:
+    def individuals(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
             return f"{url}?session={obj.session.pk}"
         else:
             button.visible = False
+            return None
 
     @link()
-    def households(self, button: button) -> Union[str, None]:
+    def households(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
             return f"{url}?session={obj.session.pk}"
         else:
             button.visible = False
+            return None
 
 
 @admin.register(Program)

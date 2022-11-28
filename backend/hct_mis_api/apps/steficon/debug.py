@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from django.http import HttpRequest
 
 
-def process_exception(exception: None, request: Optional[HttpRequest] = None) -> Optional[str]:
+def process_exception(exception: Optional[BaseException], request: Optional[HttpRequest] = None) -> Optional[str]:
     if not exception:
         exc_type, exception, traceback = sys.exc_info()
 
@@ -19,7 +19,7 @@ def process_exception(exception: None, request: Optional[HttpRequest] = None) ->
     return tb_text
 
 
-def render_exception(request: HttpRequest, exception: None, extra_context: Dict) -> TemplateResponse:
+def render_exception(request: HttpRequest, exception: Optional[BaseException], extra_context: Dict) -> TemplateResponse:
     exc_type, exception, traceback = sys.exc_info()
     reporter = ExceptionReporter(request, exc_type, exception, traceback)
 
@@ -30,7 +30,7 @@ def render_exception(request: HttpRequest, exception: None, extra_context: Dict)
     return TemplateResponse(request, "steficon/debug.html", context)
 
 
-def get_error_info(exception: None) -> Dict:
+def get_error_info(exception: Optional[BaseException]) -> Dict:
     exc_type, exception, traceback = sys.exc_info()
     reporter = ExceptionReporter(None, exc_type, exception, traceback)
     context = reporter.get_traceback_data()

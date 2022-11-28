@@ -1,4 +1,5 @@
-from typing import List
+from collections.abc import dict_values
+from typing import Any, Dict, List
 
 from django.db.models import DecimalField, F, Sum
 
@@ -6,7 +7,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def programs_with_delivered_quantity(household: Household) -> List:
+def programs_with_delivered_quantity(household: Household) -> dict_values[Any, Dict[str, Any]]:
     programs = (
         household.payment_records.exclude(status=PaymentRecord.STATUS_FORCE_FAILED)
         .annotate(program=F("cash_plan__program"))

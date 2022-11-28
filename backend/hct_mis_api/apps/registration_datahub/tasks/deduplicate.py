@@ -2,7 +2,7 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type, Union
 
 from django.db import transaction
 from django.db.models import CharField, F, Q, QuerySet, Value
@@ -19,7 +19,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.documents import get_individual_doc
+from hct_mis_api.apps.household.documents import IndividualDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -175,18 +175,7 @@ class DeduplicateTask:
     @classmethod
     def _prepare_households_and_roles_queries(
         cls, households_and_roles: List[Dict]
-    ) -> list[
-        dict[
-            str,
-            dict[
-                str,
-                Union[
-                    list[Union[dict[str, dict[str, dict[str, Optional[Any]]]], dict[str, dict[str, dict[str, str]]]]],
-                    int,
-                ],
-            ],
-        ]
-    ]:
+    ) -> List[Dict[str, Dict[str, object]]]:
         """
         Not needed
         Not working
@@ -351,7 +340,7 @@ class DeduplicateTask:
 
     @classmethod
     def _get_duplicates_tuple(
-        cls, query_dict: Dict, duplicate_score: int, document: Document, individual: Individual
+        cls, query_dict: Dict, duplicate_score: int, document: Type[IndividualDocument], individual: Individual
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         duplicates = []
         possible_duplicates = []

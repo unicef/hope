@@ -2,7 +2,7 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Collection, Dict, List, Optional, Tuple, Type, Union
 from uuid import UUID
 
 from django import forms
@@ -13,7 +13,7 @@ from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Model, QuerySet
 from django.db.transaction import atomic
-from django.forms import Form
+from django.forms import Form, ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -55,7 +55,7 @@ class AutocompleteWidget(forms.Widget):
         self,
         model: Model,
         admin_site: str,
-        attrs: Optional[List] = None,
+        attrs: Optional[Collection[Any]] = None,
         choices: Tuple = (),
         using: Optional[Any] = None,
         pk_field: str = "id",
@@ -92,7 +92,7 @@ class AutocompleteWidget(forms.Widget):
         }
 
     @property
-    def media(self) -> forms.Media:
+    def media(self) -> forms.Media:  # type: ignore
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
         i18n_file: List = (
@@ -307,15 +307,17 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     def get_ignored_linked_objects(self, request: HttpRequest) -> List[str]:
         return ["history"]
 
-    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> None:
+    def get_form(
+        self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
+    ) -> Type[ModelForm[Any]]:
         return super().get_form(request, obj, change, **kwargs)
 
-    def stable(self, obj: Any) -> str:
+    def stable(self, obj: Any) -> Optional[str]:
         try:
             url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
             return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
         except (RuleCommit.DoesNotExist, AttributeError):
-            pass
+            return None
 
     def delete_view(
         self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None
@@ -482,7 +484,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         return super().change_view(request, object_id, form_url, extra_context)
 
     def _changeform_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None
+        self, request: HttpRequest, object_id: Optional[str], form_url: str = "", extra_context: Optional[Any] = None
     ) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None

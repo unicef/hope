@@ -6,8 +6,8 @@ from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
-    def delete(self) -> None:
-        return super().update(active=False)
+    def delete(self) -> Tuple[int, Dict[str, int]]:
+        return super().update(active=False)  # type: ignore
 
     def hard_delete(self) -> Tuple[int, Dict[str, int]]:
         return super().delete()

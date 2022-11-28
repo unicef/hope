@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Dict, Optional, Tuple, Type, Union
+from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -21,7 +21,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
-def _clean_data_for_range_field(value: Any, field: Any) -> Optional[Dict]:
+def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
     if value:
         clean_data = {}
         values = json.loads(value)

@@ -1,5 +1,6 @@
 import datetime as dt
 import random
+import typing
 from typing import Any, AnyStr, Iterable, List, Optional, Union
 
 import factory
@@ -18,7 +19,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-def comparison_method_resolver(obj: Any) -> str:
+def comparison_method_resolver(obj: Any) -> Union[List[str], str]:  # type: ignore
     core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
@@ -31,7 +32,8 @@ def comparison_method_resolver(obj: Any) -> str:
         return "CONTAINS"
 
 
-def arguments_resolver(obj: Any) -> Union[Optional[int], Optional[List[int]]]:
+@typing.no_type_check
+def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
     min = None
     max = None
     if obj.field_name == "age":

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -77,7 +77,7 @@ class Rule(models.Model):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:
+    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:  # type: ignore
         self.enabled = False
         self.save()
 
@@ -139,18 +139,18 @@ class Rule(models.Model):
         return commit
 
     @property
-    def latest(self) -> Optional[QuerySet]:
+    def latest(self) -> Union[QuerySet, None]:
         try:
             return self.history.filter(is_release=True).order_by("-version").first()
         except RuleCommit.DoesNotExist:
-            pass
+            return None
 
     @property
     def latest_commit(self) -> Optional[QuerySet]:
         try:
             return self.history.order_by("version").last()
         except RuleCommit.DoesNotExist:
-            pass
+            return None
 
     @property
     def last_changes(self) -> Optional[Dict]:
@@ -161,7 +161,7 @@ class Rule(models.Model):
                 "after": self.latest_commit.after,
             }
         except RuleCommit.DoesNotExist:
-            pass
+            return None
 
     @cached_property
     def interpreter(self) -> Any:

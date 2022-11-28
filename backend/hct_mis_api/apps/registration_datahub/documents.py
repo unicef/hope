@@ -111,7 +111,7 @@ class ImportedIndividualDocument(Document):
         household = instance.household
         if household:
             return instance.household.admin2
-        return
+        return None
 
     def prepare_hash_key(self, instance: ImportedIndividual) -> str:
         return instance.get_hash_key

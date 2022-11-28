@@ -1,3 +1,4 @@
+import typing
 from decimal import Decimal
 from math import ceil
 from typing import Dict, Literal, Union
@@ -45,6 +46,7 @@ def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
     return received_amount
 
 
+@typing.no_type_check
 def from_received_yes_no_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
     received_bool = None
     if received == "YES":

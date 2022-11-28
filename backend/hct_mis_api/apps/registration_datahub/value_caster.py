@@ -99,7 +99,7 @@ class SelectOneValueCaster(BaseValueCaster):
     def can_process(self, field: Any) -> bool:
         return field["type"] == TYPE_SELECT_ONE
 
-    def process(self, field: Any, value: Any) -> Union[int, str]:
+    def process(self, field: Any, value: Any) -> Union[int, str]:  # type: ignore
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 

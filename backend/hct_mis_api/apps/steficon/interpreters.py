@@ -5,7 +5,7 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from typing import Any, Callable, Dict, List, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
@@ -45,8 +45,8 @@ class PythonFunction(Interpreter):
     def code(self) -> str:
         return import_string(self.init_string)
 
-    def execute(self, **context: Dict) -> Any:
-        return self.code(**context)
+    def execute(self, **context: Dict) -> Callable:
+        return self.code(**context)  # type: ignore
 
 
 def call_rule(rule_id: UUID, context: Dict) -> Any:
@@ -127,7 +127,7 @@ class PythonExec(Interpreter):
         else:
             return pts
 
-    def validate(self) -> None:
+    def validate(self) -> bool:
         errors = []
         for forbidden in [
             "__import__",
