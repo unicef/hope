@@ -1,5 +1,4 @@
 from django.core.management import BaseCommand, call_command
-from django.db import connections
 
 
 class Command(BaseCommand):
@@ -30,15 +29,3 @@ class Command(BaseCommand):
         )
 
         call_command("search_index", "--rebuild", "-f")
-
-    def _drop_databases(self):
-        for connection_name in connections:
-            if connection_name == "read_only":
-                continue
-            connection = connections[connection_name]
-            with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection)
-                if not sql:
-                    continue
-                print(sql)
-                cursor.execute(sql)
