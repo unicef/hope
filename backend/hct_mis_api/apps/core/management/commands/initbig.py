@@ -42,6 +42,7 @@ def print_stats():
     print("Target Populations:", TargetPopulation.objects.count())
     print("Grievance Tickets:", GrievanceTicket.objects.count())
     print("Programs:", Program.objects.count())
+    print("Payment Records:", PaymentRecord.objects.count())
     print("-" * 30)
 
 
@@ -115,7 +116,6 @@ def create_payment_records(business_area_names):
                     business_area=household.business_area,
                     status=PaymentRecord.STATUS_SUCCESS,
                 )
-    # TODO: visible in paym verif
 
 
 def create_user_roles_in_business_areas(user, business_areas):
@@ -125,24 +125,39 @@ def create_user_roles_in_business_areas(user, business_areas):
 
 
 def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale):
-    size = int(2 * pow(10, 6) * scale)
+    size = math.ceil(2 * pow(10, 6) * scale)
     elapsed_print(f"Creating {size} grievance tickets for {business_area.name}")
     individuals = Individual.objects.filter(business_area=business_area)
     for _ in range(size):
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=GrievanceTicketFactory(
-                business_area=business_area,
+        value = faker.random_int(min=1, max=2)
+        if value == 1:
+            TicketIndividualDataUpdateDetailsFactory(
+                ticket=GrievanceTicketFactory(
+                    business_area=business_area,
+                    category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+                    issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+                    admin2=admin_area,
+                ),
+                individual=individuals.order_by("?").first(),
+                individual_data={
+                    "given_name": {
+                        "value": faker.first_name(),
+                        "approve_status": False,
+                    },
+                    "family_name": {
+                        "value": faker.last_name(),
+                        "approve_status": False,
+                    },
+                    "flex_fields": {},
+                },
+            )
+        elif value == 2:
+            GrievanceTicketFactory(
                 category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-                issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+                issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
                 admin2=admin_area,
-            ),
-            individual=individuals.order_by("?").first(),
-            individual_data={
-                "given_name": faker.first_name(),
-                "family_name": faker.last_name(),
-                "flex_fields": {},
-            },
-        )
+                business_area=business_area,
+            )
 
 
 def create_grievance_tickets(scale, business_areas):
@@ -205,7 +220,7 @@ class Command(BaseCommand):
             AreaWithLocale("Venezuela", "es_CA"),
         ]
 
-        expected_small_ba_size = int(pow(10, 5) * scale)
+        expected_small_ba_size = math.ceil(pow(10, 5) * scale)
         for area_with_locale in small_business_areas_with_locales:
             create_households(
                 individuals_amount=expected_small_ba_size,
@@ -213,7 +228,7 @@ class Command(BaseCommand):
             )
         ukraine = AreaWithLocale("Ukraine", "uk_UA")
         create_households(
-            individuals_amount=int(4 * pow(10, 6) * scale),
+            individuals_amount=math.ceil(4 * pow(10, 6) * scale),
             area_with_locale=ukraine,
         )
 
@@ -251,6 +266,3 @@ class Command(BaseCommand):
 
         elapsed_print("Done generating data")
         print_stats()
-
-
-# TODO: country dashboard shows money
