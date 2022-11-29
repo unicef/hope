@@ -1,6 +1,6 @@
-from uuid import UUID
 from calendar import timegm
 from hashlib import md5
+from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
