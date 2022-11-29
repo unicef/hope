@@ -84,9 +84,6 @@ class FlexRegistrationService:
         IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def __init__(self) -> None:
-        pass
-
     @atomic("default")
     @atomic("registration_datahub")
     def create_rdi(self, imported_by: "User", rdi_name: str = "rdi_name") -> RegistrationDataImport:
