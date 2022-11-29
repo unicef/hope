@@ -2,10 +2,9 @@ import { gql } from 'apollo-boost';
 
 export const CreateCommunicationMessage = gql`
   mutation CreateAccountabilityCommunicationMessage(
-    $businessAreaSlug: String!
-    $inputs: CreateAccountabilityCommunicationMessageInput!
+    $input: CreateAccountabilityCommunicationMessageInput!
   ) {
-    createAccountabilityCommunicationMessage(businessAreaSlug: $businessAreaSlug, inputs: $inputs) {
+    createAccountabilityCommunicationMessage(input: $input) {
       message {
         id
       }

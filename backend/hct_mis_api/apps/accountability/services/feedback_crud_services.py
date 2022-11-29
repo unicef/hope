@@ -17,12 +17,12 @@ class FeedbackCrudServices:
                 raise Exception("Household lookup does not match individual lookup")
 
     @classmethod
-    def create(cls, user: AbstractUser, input_data: dict) -> Feedback:
+    def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Feedback:
         def check(key) -> bool:
             return key in input_data and input_data[key] is not None
 
         obj = Feedback(
-            business_area=BusinessArea.objects.get(slug=input_data["business_area_slug"]),
+            business_area=business_area,
             issue_type=input_data["issue_type"],
             description=input_data["description"],
         )

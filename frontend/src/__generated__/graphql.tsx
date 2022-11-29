@@ -71,8 +71,8 @@ export type AccountabilitySampleSizeInput = {
   randomSamplingArguments?: Maybe<AccountabilityRandomSamplingArguments>,
 };
 
-export type AccountabilitySampleSizeObject = {
-   __typename?: 'AccountabilitySampleSizeObject',
+export type AccountabilitySampleSizeNode = {
+   __typename?: 'AccountabilitySampleSizeNode',
   numberOfRecipients?: Maybe<Scalars['Int']>,
   sampleSize?: Maybe<Scalars['Int']>,
 };
@@ -918,7 +918,6 @@ export type CreateDashboardReportInput = {
 };
 
 export type CreateFeedbackInput = {
-  businessAreaSlug: Scalars['String'],
   issueType: Scalars['String'],
   householdLookup?: Maybe<Scalars['ID']>,
   individualLookup?: Maybe<Scalars['ID']>,
@@ -1385,8 +1384,8 @@ export type GetCashplanVerificationSampleSizeObject = {
   sampleSize?: Maybe<Scalars['Int']>,
 };
 
-export type GetCommunicationMessageSampleSizeObject = {
-   __typename?: 'GetCommunicationMessageSampleSizeObject',
+export type GetCommunicationMessageSampleSizeNode = {
+   __typename?: 'GetCommunicationMessageSampleSizeNode',
   numberOfRecipients?: Maybe<Scalars['Int']>,
   sampleSize?: Maybe<Scalars['Int']>,
 };
@@ -2389,7 +2388,9 @@ export type ImportedIndividualNode = Node & {
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
   maritalStatus: ImportedIndividualMaritalStatus,
   phoneNo: Scalars['String'],
+  phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternative: Scalars['String'],
+  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: ImportedIndividualDisability,
@@ -2421,8 +2422,6 @@ export type ImportedIndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   importId?: Maybe<Scalars['String']>,
-  phoneNoValid?: Maybe<Scalars['Boolean']>,
-  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -2574,7 +2573,9 @@ export type IndividualNode = Node & {
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
   maritalStatus: IndividualMaritalStatus,
   phoneNo: Scalars['String'],
+  phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternative: Scalars['String'],
+  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   relationship?: Maybe<IndividualRelationship>,
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -2631,8 +2632,6 @@ export type IndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
-  phoneNoValid?: Maybe<Scalars['Boolean']>,
-  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
@@ -3061,8 +3060,7 @@ export type Mutations = {
 
 
 export type MutationsCreateAccountabilityCommunicationMessageArgs = {
-  businessAreaSlug: Scalars['String'],
-  inputs: CreateAccountabilityCommunicationMessageInput
+  input: CreateAccountabilityCommunicationMessageInput
 };
 
 
@@ -3831,14 +3829,14 @@ export type Query = {
   allAccountabilityCommunicationMessages?: Maybe<CommunicationMessageNodeConnection>,
   accountabilityCommunicationMessageRecipient?: Maybe<CommunicationMessageRecipientMapNode>,
   allAccountabilityCommunicationMessageRecipients?: Maybe<CommunicationMessageRecipientMapNodeConnection>,
-  accountabilityCommunicationMessageSampleSize?: Maybe<GetCommunicationMessageSampleSizeObject>,
+  accountabilityCommunicationMessageSampleSize?: Maybe<GetCommunicationMessageSampleSizeNode>,
   feedback?: Maybe<FeedbackNode>,
   allFeedbacks?: Maybe<FeedbackNodeConnection>,
   feedbackIssueTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   survey?: Maybe<SurveyNode>,
   allSurveys?: Maybe<SurveyNodeConnection>,
   recipients?: Maybe<RecipientNodeConnection>,
-  accountabilitySampleSize?: Maybe<AccountabilitySampleSizeObject>,
+  accountabilitySampleSize?: Maybe<AccountabilitySampleSizeNode>,
   surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
@@ -3980,7 +3978,6 @@ export type QueryAllAccountabilityCommunicationMessagesArgs = {
   numberOfRecipients_Lte?: Maybe<Scalars['Int']>,
   targetPopulation?: Maybe<Scalars['ID']>,
   createdBy?: Maybe<Scalars['ID']>,
-  businessArea: Scalars['String'],
   program?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   title?: Maybe<Scalars['String']>,
@@ -4026,7 +4023,6 @@ export type QueryAllFeedbacksArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  businessAreaSlug: Scalars['String'],
   issueType?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
@@ -7318,8 +7314,7 @@ export type UpdateFeedbackTicketMutation = (
 );
 
 export type CreateAccountabilityCommunicationMessageMutationVariables = {
-  businessAreaSlug: Scalars['String'],
-  inputs: CreateAccountabilityCommunicationMessageInput
+  input: CreateAccountabilityCommunicationMessageInput
 };
 
 
@@ -8345,8 +8340,8 @@ export type AccountabilityCommunicationMessageSampleSizeQueryVariables = {
 export type AccountabilityCommunicationMessageSampleSizeQuery = (
   { __typename?: 'Query' }
   & { accountabilityCommunicationMessageSampleSize: Maybe<(
-    { __typename?: 'GetCommunicationMessageSampleSizeObject' }
-    & Pick<GetCommunicationMessageSampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
+    { __typename?: 'GetCommunicationMessageSampleSizeNode' }
+    & Pick<GetCommunicationMessageSampleSizeNode, 'numberOfRecipients' | 'sampleSize'>
   )> }
 );
 
@@ -8358,8 +8353,8 @@ export type AccountabilitySampleSizeQueryVariables = {
 export type AccountabilitySampleSizeQuery = (
   { __typename?: 'Query' }
   & { accountabilitySampleSize: Maybe<(
-    { __typename?: 'AccountabilitySampleSizeObject' }
-    & Pick<AccountabilitySampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
+    { __typename?: 'AccountabilitySampleSizeNode' }
+    & Pick<AccountabilitySampleSizeNode, 'numberOfRecipients' | 'sampleSize'>
   )> }
 );
 
@@ -8420,7 +8415,6 @@ export type AllAccountabilityCommunicationMessagesQueryVariables = {
   numberOfRecipients_Lte?: Maybe<Scalars['Int']>,
   targetPopulation?: Maybe<Scalars['ID']>,
   createdBy?: Maybe<Scalars['ID']>,
-  businessArea: Scalars['String'],
   program?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   title?: Maybe<Scalars['String']>,
@@ -8883,7 +8877,6 @@ export type AllFeedbacksQueryVariables = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  businessAreaSlug: Scalars['String'],
   issueType?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
@@ -12266,8 +12259,8 @@ export type UpdateFeedbackTicketMutationHookResult = ReturnType<typeof useUpdate
 export type UpdateFeedbackTicketMutationResult = ApolloReactCommon.MutationResult<UpdateFeedbackTicketMutation>;
 export type UpdateFeedbackTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>;
 export const CreateAccountabilityCommunicationMessageDocument = gql`
-    mutation CreateAccountabilityCommunicationMessage($businessAreaSlug: String!, $inputs: CreateAccountabilityCommunicationMessageInput!) {
-  createAccountabilityCommunicationMessage(businessAreaSlug: $businessAreaSlug, inputs: $inputs) {
+    mutation CreateAccountabilityCommunicationMessage($input: CreateAccountabilityCommunicationMessageInput!) {
+  createAccountabilityCommunicationMessage(input: $input) {
     message {
       id
     }
@@ -12306,8 +12299,7 @@ export function withCreateAccountabilityCommunicationMessage<TProps, TChildProps
  * @example
  * const [createAccountabilityCommunicationMessageMutation, { data, loading, error }] = useCreateAccountabilityCommunicationMessageMutation({
  *   variables: {
- *      businessAreaSlug: // value for 'businessAreaSlug'
- *      inputs: // value for 'inputs'
+ *      input: // value for 'input'
  *   },
  * });
  */
@@ -15417,8 +15409,8 @@ export type AllAccountabilityCommunicationMessageRecipientsQueryHookResult = Ret
 export type AllAccountabilityCommunicationMessageRecipientsLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsLazyQuery>;
 export type AllAccountabilityCommunicationMessageRecipientsQueryResult = ApolloReactCommon.QueryResult<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>;
 export const AllAccountabilityCommunicationMessagesDocument = gql`
-    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $businessArea: String!, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
-  allAccountabilityCommunicationMessages(offset: $offset, before: $before, after: $after, first: $first, last: $last, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, targetPopulation: $targetPopulation, createdBy: $createdBy, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, title: $title, body: $body, samplingType: $samplingType, orderBy: $orderBy) {
+    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
+  allAccountabilityCommunicationMessages(offset: $offset, before: $before, after: $after, first: $first, last: $last, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, targetPopulation: $targetPopulation, createdBy: $createdBy, program: $program, createdAtRange: $createdAtRange, title: $title, body: $body, samplingType: $samplingType, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -15442,7 +15434,7 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
   }
 }
     `;
-export type AllAccountabilityCommunicationMessagesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>, 'query'> & ({ variables: AllAccountabilityCommunicationMessagesQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllAccountabilityCommunicationMessagesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>, 'query'>;
 
     export const AllAccountabilityCommunicationMessagesComponent = (props: AllAccountabilityCommunicationMessagesComponentProps) => (
       <ApolloReactComponents.Query<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables> query={AllAccountabilityCommunicationMessagesDocument} {...props} />
@@ -15482,7 +15474,6 @@ export function withAllAccountabilityCommunicationMessages<TProps, TChildProps =
  *      numberOfRecipients_Lte: // value for 'numberOfRecipients_Lte'
  *      targetPopulation: // value for 'targetPopulation'
  *      createdBy: // value for 'createdBy'
- *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
  *      title: // value for 'title'
@@ -16657,8 +16648,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllFeedbacksDocument = gql`
-    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $businessAreaSlug: String!, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String) {
-  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, businessAreaSlug: $businessAreaSlug, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId, orderBy: $orderBy) {
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String) {
+  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -16690,7 +16681,7 @@ export const AllFeedbacksDocument = gql`
   }
 }
     `;
-export type AllFeedbacksComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>, 'query'> & ({ variables: AllFeedbacksQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllFeedbacksComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>, 'query'>;
 
     export const AllFeedbacksComponent = (props: AllFeedbacksComponentProps) => (
       <ApolloReactComponents.Query<AllFeedbacksQuery, AllFeedbacksQueryVariables> query={AllFeedbacksDocument} {...props} />
@@ -16725,7 +16716,6 @@ export function withAllFeedbacks<TProps, TChildProps = {}>(operationOptions?: Ap
  *      after: // value for 'after'
  *      first: // value for 'first'
  *      last: // value for 'last'
- *      businessAreaSlug: // value for 'businessAreaSlug'
  *      issueType: // value for 'issueType'
  *      createdAtRange: // value for 'createdAtRange'
  *      createdBy: // value for 'createdBy'
@@ -22583,13 +22573,13 @@ export type ResolversTypes = {
   AccountabilityFullListArguments: AccountabilityFullListArguments,
   AccountabilityRandomSamplingArguments: AccountabilityRandomSamplingArguments,
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
-  GetCommunicationMessageSampleSizeObject: ResolverTypeWrapper<GetCommunicationMessageSampleSizeObject>,
+  GetCommunicationMessageSampleSizeNode: ResolverTypeWrapper<GetCommunicationMessageSampleSizeNode>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   RecipientNodeConnection: ResolverTypeWrapper<RecipientNodeConnection>,
   RecipientNodeEdge: ResolverTypeWrapper<RecipientNodeEdge>,
   RecipientNode: ResolverTypeWrapper<RecipientNode>,
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
-  AccountabilitySampleSizeObject: ResolverTypeWrapper<AccountabilitySampleSizeObject>,
+  AccountabilitySampleSizeNode: ResolverTypeWrapper<AccountabilitySampleSizeNode>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -23007,13 +22997,13 @@ export type ResolversParentTypes = {
   AccountabilityFullListArguments: AccountabilityFullListArguments,
   AccountabilityRandomSamplingArguments: AccountabilityRandomSamplingArguments,
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
-  GetCommunicationMessageSampleSizeObject: GetCommunicationMessageSampleSizeObject,
+  GetCommunicationMessageSampleSizeNode: GetCommunicationMessageSampleSizeNode,
   ChoiceObject: ChoiceObject,
   RecipientNodeConnection: RecipientNodeConnection,
   RecipientNodeEdge: RecipientNodeEdge,
   RecipientNode: RecipientNode,
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
-  AccountabilitySampleSizeObject: AccountabilitySampleSizeObject,
+  AccountabilitySampleSizeNode: AccountabilitySampleSizeNode,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -23217,7 +23207,7 @@ export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, Paren
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
-export type AccountabilitySampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AccountabilitySampleSizeObject'] = ResolversParentTypes['AccountabilitySampleSizeObject']> = {
+export type AccountabilitySampleSizeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AccountabilitySampleSizeNode'] = ResolversParentTypes['AccountabilitySampleSizeNode']> = {
   numberOfRecipients?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
@@ -23864,7 +23854,7 @@ export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, 
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
-export type GetCommunicationMessageSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCommunicationMessageSampleSizeObject'] = ResolversParentTypes['GetCommunicationMessageSampleSizeObject']> = {
+export type GetCommunicationMessageSampleSizeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCommunicationMessageSampleSizeNode'] = ResolversParentTypes['GetCommunicationMessageSampleSizeNode']> = {
   numberOfRecipients?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
@@ -24267,7 +24257,9 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   maritalStatus?: Resolver<ResolversTypes['ImportedIndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
@@ -24299,8 +24291,6 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
@@ -24369,7 +24359,9 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>,
   phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
@@ -24426,8 +24418,6 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
@@ -24556,7 +24546,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  createAccountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateAccountabilityCommunicationMessageArgs, 'businessAreaSlug' | 'inputs'>>,
+  createAccountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateAccountabilityCommunicationMessageArgs, 'input'>>,
   createFeedback?: Resolver<Maybe<ResolversTypes['CreateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackArgs, 'input'>>,
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>,
   createFeedbackMessage?: Resolver<Maybe<ResolversTypes['CreateFeedbackMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackMessageArgs, 'input'>>,
@@ -24800,17 +24790,17 @@ export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, Parent
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   accountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageArgs, 'id'>>,
-  allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessagesArgs, 'businessArea'>>,
+  allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, QueryAllAccountabilityCommunicationMessagesArgs>,
   accountabilityCommunicationMessageRecipient?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageRecipientArgs, 'id'>>,
   allAccountabilityCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessageRecipientsArgs, 'messageId'>>,
-  accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeObject']>, ParentType, ContextType, QueryAccountabilityCommunicationMessageSampleSizeArgs>,
+  accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeNode']>, ParentType, ContextType, QueryAccountabilityCommunicationMessageSampleSizeArgs>,
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>,
-  allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllFeedbacksArgs, 'businessAreaSlug'>>,
+  allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, QueryAllFeedbacksArgs>,
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   survey?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType, RequireFields<QuerySurveyArgs, 'id'>>,
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, QueryAllSurveysArgs>,
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
-  accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeObject']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
+  accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeNode']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
   surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
@@ -25994,7 +25984,7 @@ export type Resolvers<ContextType = any> = {
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
-  AccountabilitySampleSizeObject?: AccountabilitySampleSizeObjectResolvers<ContextType>,
+  AccountabilitySampleSizeNode?: AccountabilitySampleSizeNodeResolvers<ContextType>,
   ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   AgencyNode?: AgencyNodeResolvers<ContextType>,
@@ -26077,7 +26067,7 @@ export type Resolvers<ContextType = any> = {
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
-  GetCommunicationMessageSampleSizeObject?: GetCommunicationMessageSampleSizeObjectResolvers<ContextType>,
+  GetCommunicationMessageSampleSizeNode?: GetCommunicationMessageSampleSizeNodeResolvers<ContextType>,
   GrievanceDocumentNode?: GrievanceDocumentNodeResolvers<ContextType>,
   GrievanceDocumentNodeConnection?: GrievanceDocumentNodeConnectionResolvers<ContextType>,
   GrievanceDocumentNodeEdge?: GrievanceDocumentNodeEdgeResolvers<ContextType>,

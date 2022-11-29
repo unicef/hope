@@ -111,7 +111,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
             passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
             tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
 
-            first_registration_date = datetime.now()
+            first_registration_date = timezone.now()
             last_registration_date = first_registration_date
 
             family_ids = set()

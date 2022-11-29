@@ -21,14 +21,14 @@ logger = logging.getLogger(__name__)
 
 class MessageCrudServices:
     @classmethod
-    def create(cls, user: AbstractUser, business_area_slug: str, input_data: dict) -> Message:
+    def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Message:
         verifier = MessageArgumentVerifier(input_data)
         verifier.verify()
 
         households = cls._get_households(input_data)
         message = Message(
             created_by=user,
-            business_area=BusinessArea.objects.get(slug=business_area_slug),
+            business_area=business_area,
             title=input_data["title"],
             body=input_data["body"],
             sampling_type=input_data["sampling_type"],

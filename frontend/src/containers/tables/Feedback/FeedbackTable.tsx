@@ -12,13 +12,11 @@ import { FeedbackTableRow } from './FeedbackTableRow';
 
 interface FeedbackTableProps {
   filter;
-  businessArea: string;
   canViewDetails: boolean;
 }
 
 export const FeedbackTable = ({
   filter,
-  businessArea,
   canViewDetails,
 }: FeedbackTableProps): ReactElement => {
   const initialVariables: AllFeedbacksQueryVariables = {
@@ -28,7 +26,6 @@ export const FeedbackTable = ({
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
       : '',
-    businessAreaSlug: businessArea,
   };
   return (
     <TableWrapper>

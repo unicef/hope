@@ -13,7 +13,6 @@ from .models import Feedback, FeedbackMessage, Message, Survey
 
 
 class MessagesFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug", required=True)
     program = CharFilter(method="filter_program")
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     title = CharFilter(field_name="title", lookup_expr="icontains")
@@ -69,7 +68,6 @@ class MessageRecipientsMapFilter(FilterSet):
 
 
 class FeedbackFilter(FilterSet):
-    business_area_slug = CharFilter(field_name="business_area__slug", required=True)
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")

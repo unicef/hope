@@ -18,8 +18,8 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 class TestListQueryMessage(APITestCase):
     QUERY = """
-    query AllAccountabilityCommunicationMessages($businessArea: String! $title: String, $body: String, $samplingType: String, $createdBy: ID, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $orderBy: String,) {
-      allAccountabilityCommunicationMessages (businessArea: $businessArea, title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
+    query AllAccountabilityCommunicationMessages($title: String, $body: String, $samplingType: String, $createdBy: ID, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $orderBy: String,) {
+      allAccountabilityCommunicationMessages (title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
         edges {
           node {
             title
@@ -138,9 +138,8 @@ class TestListQueryMessage(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "businessArea": self.business_area.slug,
                 **(extra_filters(self.user) if callable(extra_filters) else extra_filters),
             },
         )
@@ -173,7 +172,7 @@ class TestListQueryMessage(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_RECIPIENTS,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
                 **variables,
