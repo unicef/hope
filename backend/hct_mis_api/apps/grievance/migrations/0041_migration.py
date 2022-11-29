@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from hct_mis_api.apps.grievance.common import _get_min_max_score
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import _get_min_max_score
 
 
 def update_min_max_score(apps, schema_editor):

@@ -50,7 +50,7 @@ def raise_as_func(exception) -> Callable:
 
 
 class TestKoboTemplateUpload(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):

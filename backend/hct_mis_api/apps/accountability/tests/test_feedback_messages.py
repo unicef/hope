@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -14,7 +16,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 
 
 class TestFeedbackMessages(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     CREATE_FEEDBACK_MESSAGE_MUTATION = """
     mutation CreateFeedbackMessage($input: CreateFeedbackMessageInput!) {

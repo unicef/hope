@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestGrievanceUpdateNegativeFeedbackTicketQuery::test_update_negative_feedback_ticket_not_supported_0_with_permission 1'] = {
+snapshots['TestUpdateGrievanceTickets::test_update_feedback_ticket_0_with_permission 1'] = {
     'data': {
         'updateGrievanceTicket': None
     },
@@ -15,7 +15,7 @@ snapshots['TestGrievanceUpdateNegativeFeedbackTicketQuery::test_update_negative_
         {
             'locations': [
                 {
-                    'column': 11,
+                    'column': 7,
                     'line': 5
                 }
             ],
@@ -27,7 +27,7 @@ snapshots['TestGrievanceUpdateNegativeFeedbackTicketQuery::test_update_negative_
     ]
 }
 
-snapshots['TestGrievanceUpdateNegativeFeedbackTicketQuery::test_update_negative_feedback_ticket_not_supported_1_without_permission 1'] = {
+snapshots['TestUpdateGrievanceTickets::test_update_feedback_ticket_1_without_permission 1'] = {
     'data': {
         'updateGrievanceTicket': None
     },
@@ -35,7 +35,7 @@ snapshots['TestGrievanceUpdateNegativeFeedbackTicketQuery::test_update_negative_
         {
             'locations': [
                 {
-                    'column': 11,
+                    'column': 7,
                     'line': 5
                 }
             ],
