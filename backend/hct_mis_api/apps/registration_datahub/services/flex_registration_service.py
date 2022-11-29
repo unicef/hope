@@ -179,7 +179,6 @@ class FlexRegistrationService:
                 rdi.status = RegistrationDataImport.IN_REVIEW
                 rdi.save()
         except Exception as e:
-            logger.exception(e)
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
             rdi.save(
