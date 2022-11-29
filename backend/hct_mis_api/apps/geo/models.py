@@ -16,7 +16,7 @@ from mptt.querysets import TreeQuerySet
 
 
 class ValidityQuerySet(TreeQuerySet):
-    def active(self, *args, **kwargs):
+    def active(self, *args: Any, **kwargs: Any) -> "ValidityQuerySet":
         return super().filter(valid_until__isnull=True).filter(*args, **kwargs)
 
 
@@ -56,7 +56,7 @@ class Country(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Countries"
         ordering = ("name",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod
@@ -93,7 +93,7 @@ class AreaType(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Area Types"
         unique_together = ("country", "area_level", "name")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -123,7 +123,7 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Areas"
         unique_together = ("name", "p_code")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod

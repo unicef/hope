@@ -8,7 +8,7 @@ from .models import Report, ReportDocument
 
 
 class PowerQueryBackend(ModelBackend):
-    def get_office_permissions(self, user_obj, office_slug) -> Any:
+    def get_office_permissions(self, user_obj: User, office_slug: str) -> Any:
         key = f"_perm_{office_slug}"
         if not hasattr(user_obj, key):
             permsissions = Permission.objects.filter(

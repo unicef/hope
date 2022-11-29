@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 from django.db import transaction
 
@@ -12,7 +14,7 @@ class Command(BaseCommand):
     help = "Fix background TP"
 
     @transaction.atomic
-    def handle(self, *args, **options) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Fixing locked, sent TPs")
         locked_and_finished_tps = TargetPopulation.objects.filter(
             status__in=[

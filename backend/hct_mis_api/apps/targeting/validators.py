@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
 
@@ -12,6 +13,10 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.steficon.models import Rule
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +24,7 @@ class TargetValidator(BaseValidator):
     """Validator for Target Population."""
 
     @staticmethod
-    def validate_is_finalized(target_status) -> None:
+    def validate_is_finalized(target_status: str) -> None:
         if target_status == "FINALIZED":
             logger.error("Target Population has been finalized. Cannot change.")
             raise ValidationError("Target Population has been finalized. Cannot change.")
@@ -67,7 +72,7 @@ class FinalizeTargetPopulationValidator:
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def validate(rule_filter) -> None:
+    def validate(rule_filter: Any) -> None:
         is_flex_field = rule_filter.is_flex_field
         if not is_flex_field:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
@@ -124,7 +129,7 @@ class TargetingCriteriaRuleFilterInputValidator:
 
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
-    def validate(rule) -> None:
+    def validate(rule: "Rule") -> None:
         total_len = 0
         filters = rule.get("filters")
         individuals_filters_blocks = rule.get("individuals_filters_blocks")
@@ -142,7 +147,7 @@ class TargetingCriteriaRuleInputValidator:
 
 class TargetingCriteriaInputValidator:
     @staticmethod
-    def validate(targeting_criteria) -> None:
+    def validate(targeting_criteria: Any) -> None:
         rules = targeting_criteria.get("rules")
         if len(rules) < 1:
             logger.error("There should be at least 1 rule in target criteria")

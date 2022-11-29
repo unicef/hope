@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Dict, Optional
 
 from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD, config
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 # SAFETY_HIGH = 3  # only accept json values
 
 
-def clean_context(context):
+def clean_context(context: Dict) -> Optional[Dict]:  # type: ignore
     try:
         if config.SAFETY_LEVEL == SAFETY_NONE:
             return context

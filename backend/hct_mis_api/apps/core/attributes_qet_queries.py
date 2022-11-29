@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -18,12 +19,13 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
+    DocumentType,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def age_to_birth_date_range_query(field_name, age_min, age_max) -> Q:
+def age_to_birth_date_range_query(field_name: str, age_min: int, age_max: int) -> Q:
     query_dict = {}
     current_date = dt.date.today()
     if age_min is not None:
@@ -33,7 +35,7 @@ def age_to_birth_date_range_query(field_name, age_min, age_max) -> Q:
     return Q(**query_dict)
 
 
-def age_to_birth_date_query(comparison_method, args):
+def age_to_birth_date_query(comparison_method: str, args: Any) -> Q:
     field_name = "birth_date"
     comparison_method_args_count = {
         "RANGE": 2,
@@ -66,108 +68,108 @@ def age_to_birth_date_query(comparison_method, args):
     raise ValidationError(f"Age filter query don't supports {comparison_method} type")
 
 
-def get_birth_certificate_document_number_query(_, args):
+def get_birth_certificate_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0])
 
 
-def get_tax_id_document_number_query(_, args):
+def get_tax_id_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_TAX_ID, args[0])
 
 
-def get_drivers_license_document_number_query(_, args):
+def get_drivers_license_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0])
 
 
-def get_national_id_document_number_query(_, args):
+def get_national_id_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_NATIONAL_ID, args[0])
 
 
-def get_national_passport_document_number_query(_, args):
+def get_national_passport_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_NATIONAL_PASSPORT, args[0])
 
 
-def get_electoral_card_document_number_query(_, args):
+def get_electoral_card_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_ELECTORAL_CARD, args[0])
 
 
-def get_other_document_number_query(_, args):
+def get_other_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_number_query(document_type, number) -> Q:
+def get_documents_number_query(document_type: DocumentType, number: str) -> Q:
     return Q(documents__type__type=document_type, documents__document_number=number)
 
 
-def get_birth_certificate_issuer_query(_, args):
+def get_birth_certificate_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0])
 
 
-def get_tax_id_issuer_query(_, args):
+def get_tax_id_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_TAX_ID, args[0])
 
 
-def get_drivers_licensee_issuer_query(_, args):
+def get_drivers_licensee_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0])
 
 
-def get_national_id_issuer_query(_, args):
+def get_national_id_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_NATIONAL_ID, args[0])
 
 
-def get_national_passport_issuer_query(_, args):
+def get_national_passport_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_NATIONAL_PASSPORT, args[0])
 
 
-def get_electoral_card_issuer_query(_, args):
+def get_electoral_card_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_ELECTORAL_CARD, args[0])
 
 
-def get_other_issuer_query(_, args):
+def get_other_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_issuer_query(document_type, country_alpha3) -> Q:
+def get_documents_issuer_query(document_type: DocumentType, country_alpha3: str) -> Q:
     return Q(documents__type__type=document_type, documents__type__country__iso_code3=country_alpha3)
 
 
-def get_role_query(_, args) -> Q:
+def get_role_query(_: Any, args: Any) -> Q:
     return Q(households_and_roles__role=args[0])
 
 
-def get_scope_id_number_query(_, args):
+def get_scope_id_number_query(_: Any, args: Any) -> Q:
     return Q(identities__partner__name=WFP, identities__number=args[0])
 
 
-def get_scope_id_issuer_query(_, args):
+def get_scope_id_issuer_query(_: Any, args: Any) -> Q:
     return Q(identities__partner__name=WFP, identities__country__iso_code3=args[0])
 
 
-def get_unhcr_id_number_query(_, args):
+def get_unhcr_id_number_query(_: Any, args: Any) -> Q:
     return Q(identities__partner__name=UNHCR, identities__number=args[0])
 
 
-def get_unhcr_id_issuer_query(_, args):
+def get_unhcr_id_issuer_query(_: Any, args: Any) -> Q:
     return Q(identities__partner__name=UNHCR, identities__country__iso_code3=args[0])
 
 
-def get_has_phone_number_query(_, args):
+def get_has_phone_number_query(_: Any, args: Any) -> Q:
     has_phone_no = args[0] in [True, "True"]
     return ~Q(phone_no="") if has_phone_no else Q(phone_no="")
 
 
-def get_has_bank_account_number_query(_, args):
+def get_has_bank_account_number_query(_: Any, args: Any) -> Q:
     has_bank_account_number = args[0] in [True, "True"]
     if has_bank_account_number:  # Individual can have related object bank_account, but empty number
         return Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")
     return Q(bank_account_info__isnull=True) | Q(bank_account_info__bank_account_number="")
 
 
-def get_has_tax_id_query(_, args):
+def get_has_tax_id_query(_: Any, args: Any) -> Q:
     has_tax_id = args[0] in [True, "True"]
     return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
 
 
-def country_generic_query(comparison_method, args, lookup) -> Q:
+def country_generic_query(comparison_method: str, args: Any, lookup: Any) -> Q:
     query = Q(**{lookup: Countries.get_country_value(args[0])})
     if comparison_method == "EQUALS":
         return query
@@ -177,15 +179,15 @@ def country_generic_query(comparison_method, args, lookup) -> Q:
     raise ValidationError(f"Country filter query does not support {comparison_method} type")
 
 
-def country_query(comparison_method, args):
+def country_query(comparison_method: str, args: Any) -> Q:
     return country_generic_query(comparison_method, args, "country")
 
 
-def country_origin_query(comparison_method, args):
+def country_origin_query(comparison_method: str, args: Any) -> Q:
     return country_generic_query(comparison_method, args, "country_origin")
 
 
-def admin_area1_query(comparison_method, args):
+def admin_area1_query(comparison_method: str, args: Any) -> Q:
     from django.db.models import Q
 
     return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__area_type__area_level=1)) | Q(
@@ -193,7 +195,7 @@ def admin_area1_query(comparison_method, args):
     )
 
 
-def registration_data_import_query(comparison_method, args):
+def registration_data_import_query(comparison_method: str, args: Any) -> Q:
     from django.db.models import Q
 
     return Q(registration_data_import__pk__in=args)

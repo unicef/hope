@@ -1,6 +1,10 @@
 import enum
 import logging
 from time import sleep
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from uuid import UUID
+
+from django.db.models import Model
 
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search, connections
@@ -10,38 +14,44 @@ logger = logging.getLogger(__name__)
 DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
 
 
-def populate_index(queryset, doc, parallel=False) -> None:
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
+    from django_elasticsearch_dsl import Document
+
+
+def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> None:
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
 
 
-def _create(models, options) -> None:
+def _create(models: List[Model]) -> None:
     for index in registry.get_indices(models):
         index.create()
 
 
-def _populate(models, options) -> None:
+def _populate(models: List[Model], options: Dict) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
 
 
-def _delete(models, options) -> bool:
+def _delete(models: List[Model]) -> bool:
     for index in registry.get_indices(models):
         index.delete(ignore=404)
     return True
 
 
-def _rebuild(models, options) -> None:
-    if not _delete(models, options):
+def _rebuild(models: List[Model], options: Dict) -> None:
+    if not _delete(models):
         return
 
-    _create(models, options)
+    _create(models)
     _populate(models, options)
 
 
-def rebuild_search_index(models=None, options=None) -> None:
+def rebuild_search_index(models: Optional[List[Model]] = None, options: Optional[Dict] = None) -> None:
     if options is None:
         options = {"parallel": False, "quiet": True}
     _rebuild(models=models, options=options)
@@ -51,14 +61,14 @@ def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
 
 
-def remove_document_by_matching_ids(id_list, document) -> None:
+def remove_document_by_matching_ids(id_list: List["UUID"]) -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index="individuals")
     search.update_from_dict(query_dict)
     search.delete()
 
 
-def remove_elasticsearch_documents_by_matching_ids(id_list, document) -> None:
+def remove_elasticsearch_documents_by_matching_ids(id_list: List["UUID"], document: "Document") -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index=document.Index.name)
     search.update_from_dict(query_dict)
