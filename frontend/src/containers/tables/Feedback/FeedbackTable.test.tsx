@@ -17,8 +17,7 @@ describe('containers/tables//Feedback/FeedbackTable', () => {
             createdBy: '',
             createdAtRange: '',
           }}
-          businessArea='afghanistan'
-          canViewDetails={true}
+          canViewDetails
         />
       </MockedProvider>,
     );
@@ -41,8 +40,7 @@ describe('containers/tables//Feedback/FeedbackTable', () => {
             createdBy: '',
             createdAtRange: '',
           }}
-          businessArea={'afghanistan'}
-          canViewDetails={true}
+          canViewDetails
         />
       </MockedProvider>,
     );

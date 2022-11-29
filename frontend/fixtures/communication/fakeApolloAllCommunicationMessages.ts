@@ -8,7 +8,6 @@ export const fakeApolloAllCommunicationMessages = [
         createdAtRange: '',
         targetPopulation: '',
         createdBy: '',
-        businessArea: 'afghanistan',
         first: 10,
         orderBy: '-created_at',
       },

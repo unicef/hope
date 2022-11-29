@@ -17,11 +17,10 @@ describe('containers/tables//Communication/CommunicationTable', () => {
           filter={{
             targetPopulation: '',
             createdBy: '',
-            businessArea: 'afghanistan',
             first: 10,
             orderBy: '-created_at',
           }}
-          businessArea={'afghanistan'}
+          canViewDetails={false}
         />
       </MockedProvider>,
     );
@@ -41,11 +40,10 @@ describe('containers/tables//Communication/CommunicationTable', () => {
           filter={{
             targetPopulation: '',
             createdBy: '',
-            businessArea: 'afghanistan',
             first: 10,
             orderBy: '-created_at',
           }}
-          businessArea={'afghanistan'}
+          canViewDetails={false}
         />
       </MockedProvider>,
     );

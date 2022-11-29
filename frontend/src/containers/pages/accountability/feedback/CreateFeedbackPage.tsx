@@ -220,7 +220,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   };
 
   const prepareVariables = (values): CreateFeedbackInput => ({
-    businessAreaSlug: businessArea,
     issueType: values.issueType,
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
