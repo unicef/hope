@@ -230,8 +230,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     values,
   ): CreateAccountabilityCommunicationMessageMutationVariables => {
     return {
-      businessAreaSlug: businessArea,
-      inputs: {
+      input: {
         households: values.households,
         targetPopulation: values.targetPopulation,
         registrationDataImport: values.registrationDataImport,

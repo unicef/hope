@@ -55,11 +55,7 @@ export const FeedbackPage = (): React.ReactElement => {
         </Button>
       </PageHeader>
       <FeedbackFilters filter={filter} onFilterChange={setFilter} />
-      <FeedbackTable
-        filter={debouncedFilter}
-        businessArea={businessArea}
-        canViewDetails={canViewDetails}
-      />
+      <FeedbackTable filter={debouncedFilter} canViewDetails={canViewDetails} />
     </>
   );
 };

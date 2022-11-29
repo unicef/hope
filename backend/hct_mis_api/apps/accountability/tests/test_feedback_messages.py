@@ -75,7 +75,7 @@ class TestFeedbackMessages(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_FEEDBACK_MESSAGE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "input": {
                     "feedback": self.id_to_base64(self.feedback.id, "FeedbackNode"),
@@ -105,6 +105,6 @@ class TestFeedbackMessages(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FEEDBACK_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={"id": self.id_to_base64(self.feedback.id, "FeedbackNode")},
         )

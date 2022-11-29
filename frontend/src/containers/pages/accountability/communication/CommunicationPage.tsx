@@ -60,7 +60,6 @@ export function CommunicationPage(): React.ReactElement {
       <CommunicationFilters filter={filter} onFilterChange={setFilter} />
       <CommunicationTable
         filter={debouncedFilter}
-        businessArea={businessArea}
         canViewDetails={hasPermissionInModule(
           PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
           permissions,

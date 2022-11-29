@@ -29,7 +29,6 @@ class TestSurveyQueries(APITestCase):
         create_household()
         cls.households = [create_household()[0] for _ in range(4)]
         cls.target_population.households.set(cls.households)
-        cls.maxDiff = None
 
     @parameterized.expand(
         [

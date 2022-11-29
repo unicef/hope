@@ -7,7 +7,6 @@ export const AllFeedbacks = gql`
     $after: String
     $first: Int
     $last: Int
-    $businessAreaSlug: String!
     $issueType: String
     $createdAtRange: String
     $createdBy: String
@@ -20,7 +19,6 @@ export const AllFeedbacks = gql`
       after: $after
       first: $first
       last: $last
-      businessAreaSlug: $businessAreaSlug
       issueType: $issueType
       createdAtRange: $createdAtRange
       createdBy: $createdBy

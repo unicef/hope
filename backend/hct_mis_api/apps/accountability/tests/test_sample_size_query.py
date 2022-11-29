@@ -84,7 +84,7 @@ class TestSampleSizeQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables=data,
         )
 
@@ -118,7 +118,7 @@ class TestSampleSizeQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables=data,
         )
 
@@ -151,6 +151,6 @@ class TestSampleSizeQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables=data,
         )
