@@ -1,5 +1,4 @@
 from django.core.management import BaseCommand, call_command
-from django.db import connections
 
 from hct_mis_api.apps.payment.fixtures import generate_real_cash_plans
 from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
@@ -44,15 +43,3 @@ class Command(BaseCommand):
         call_command("search_index", "--rebuild", "-f")
         generate_real_cash_plans()
         update_mis_unicef_id_individual_and_household()
-
-    def _drop_databases(self):
-        for connection_name in connections:
-            if connection_name == "read_only":
-                continue
-            connection = connections[connection_name]
-            with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection)
-                if not sql:
-                    continue
-                print(sql)
-                cursor.execute(sql)
