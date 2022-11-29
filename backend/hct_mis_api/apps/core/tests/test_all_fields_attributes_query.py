@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -10,7 +11,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestMetaDataFilterType(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     QUERY = """
     query AllFieldsAttributes {

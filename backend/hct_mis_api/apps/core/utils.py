@@ -396,7 +396,7 @@ def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-def decode_and_get_object(encoded_id, model: Any, required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id, model: Any, required: bool = False) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:

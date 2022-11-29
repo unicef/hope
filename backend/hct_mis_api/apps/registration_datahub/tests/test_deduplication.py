@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -29,7 +31,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 class TestBatchDeduplication(BaseElasticSearchTestCase):
     multi_db = True
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):
@@ -284,7 +286,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     multi_db = True
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):

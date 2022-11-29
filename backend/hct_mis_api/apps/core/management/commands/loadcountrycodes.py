@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+from django.conf import settings
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.core.models import CountryCodeMap
@@ -18,7 +19,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default="./data/country_code_mapping.txt",
+            default=f"{settings.PROJECT_ROOT}/../data/country_code_mapping.txt",
             type=str,
             help="file",
         )

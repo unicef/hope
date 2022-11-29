@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase
 
 from rest_framework.test import APIClient
@@ -36,7 +37,7 @@ def _time(some_time) -> str:
 
 class TestDetails(TestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):

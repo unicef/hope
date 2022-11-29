@@ -9,9 +9,10 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.program.models import CashPlan
 
 
-def create_query_variables(cash_plan, verification_channel) -> Dict:
+def create_query_variables(cash_plan: CashPlan, verification_channel) -> Dict:
     return {
         "input": {
             "cashPlanId": encode_id_base64(cash_plan.pk, "CashPlan"),

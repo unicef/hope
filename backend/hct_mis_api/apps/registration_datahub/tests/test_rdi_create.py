@@ -398,7 +398,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     multi_db = True
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @staticmethod
     def _return_test_image(*args, **kwargs):

@@ -27,7 +27,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import IndividualFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     PaymentVerificationFactory,
@@ -263,6 +263,7 @@ class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
             issue_type=None,
         ),
     )
+    golden_records_individual = factory.SubFactory(IndividualFactory)
 
 
 class PositiveFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
