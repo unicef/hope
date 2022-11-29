@@ -117,7 +117,7 @@ class FlexRegistrationService:
             business_area_slug=business_area.slug,
         )
         rdi.datahub_id = rdi_datahub.id
-        rdi.save()
+        rdi.save(update_fields=("datahub_id",))
         return rdi
 
     def process_records(
