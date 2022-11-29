@@ -33,7 +33,7 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, file_path=None) -> None:
+    def __init__(self, file_path: Optional[str] = None) -> None:
         self.file_path = file_path
 
         self.VALUES_PATHS = {
@@ -69,7 +69,7 @@ class LoadSanctionListXMLTask:
         return None
 
     @staticmethod
-    def _get_designation(individual_tag: ET.Element, *args, **kwargs) -> Union[str, None]:
+    def _get_designation(individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Union[str, None]:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, ET.Element):
@@ -81,8 +81,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualDateOfBirth]:
         date_of_birth_tags = individual_tag.findall("INDIVIDUAL_DATE_OF_BIRTH")
         dates_of_birth = set()
@@ -132,8 +132,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualAliasName]:
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
@@ -156,7 +156,7 @@ class LoadSanctionListXMLTask:
         return aliases
 
     @staticmethod
-    def _get_country_field(individual_tag: ET.Element, path: str, *args, **kwargs) -> Union[str, None, set]:
+    def _get_country_field(individual_tag: ET.Element, path: str, *args: Any, **kwargs: Any) -> Union[str, None, set]:
         tags = individual_tag.findall(path)
 
         countries = set()
@@ -174,8 +174,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualCountries]:
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
@@ -189,7 +189,7 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: ET.Element, *args, **kwargs) -> Optional[str]:
+    def _get_country_of_birth(self, individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Optional[str]:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
@@ -201,8 +201,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualNationalities]:
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
@@ -220,8 +220,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualDocument]:
         document_tags = individual_tag.findall("INDIVIDUAL_DOCUMENT")
         documents = set()
@@ -367,7 +367,7 @@ class LoadSanctionListXMLTask:
         return {i.reference_number for i in individuals_from_file}
 
     @staticmethod
-    def _cast_field_value_to_correct_type(model, field_name: str, value: Any):
+    def _cast_field_value_to_correct_type(model: Any, field_name: str, value: Any) -> Any:
         field = model._meta.get_field(field_name)
         # silencing lxml warning
         with open(os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):
