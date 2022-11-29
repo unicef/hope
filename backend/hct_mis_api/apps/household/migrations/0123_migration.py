@@ -20,4 +20,5 @@ class Migration(migrations.Migration):
             name='deduplication_golden_record_status',
             field=models.CharField(choices=[('DUPLICATE', 'Duplicate'), ('NEEDS_ADJUDICATION', 'Needs Adjudication'), ('NOT_PROCESSED', 'Not Processed'), ('POSTPONE', 'Postpone'), ('UNIQUE', 'Unique')], db_index=True, default='UNIQUE', max_length=50),
         ),
+        migrations.RunSQL("CREATE INDEX IF NOT EXISTS household_household_default_page_index ON public.household_household USING btree (created_at, business_area_id, is_removed) WHERE NOT is_removed;")
     ]
