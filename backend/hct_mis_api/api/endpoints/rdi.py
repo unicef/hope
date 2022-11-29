@@ -151,8 +151,8 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> None:
-        self.update(request, *args, **kwargs)
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self.update(request, *args, **kwargs)
 
     @atomic()
     @atomic(using="registration_datahub")
