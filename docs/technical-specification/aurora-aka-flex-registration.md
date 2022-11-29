@@ -32,6 +32,18 @@ In the advanced option of the AjaxField we can select the following attributes:
 * datasource: name of the related OptionSet
 * data-parent: name of the parent OptionSet used to filter the queryset  (optional)
 
+#### Option set configuration
+
+The option set can be constructed with various columns
+
+The primary key (unique identfier) of the options to be displayed (Pk)
+
+The label to be displayed in multiple languages
+
+The Pk of a specific option set is used when you want to reference another option set
+
+If you use multiple columns you should specify which separator
+
 ### Visible if
 
 A field can trigger js function on changes in the Advanced Section (smart > onchange)
