@@ -7,6 +7,8 @@ from collections import namedtuple
 from django.core.management import call_command
 from django.core.management import BaseCommand
 
+from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.account.models import User
@@ -24,6 +26,8 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
 )
 from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 
 from faker import Faker
 
@@ -119,6 +123,41 @@ def create_user_roles_in_business_areas(user, business_areas):
         UserRole.objects.get_or_create(user=user, role=role, business_area=BusinessArea.objects.get(name=area))
 
 
+def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale):
+    size = int(2 * pow(10, 6) * scale)
+    elapsed_print(f"Creating {size} grievance tickets for {business_area.name}")
+    individuals = Individual.objects.filter(business_area=business_area)
+    for _ in range(size):
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=GrievanceTicketFactory(
+                business_area=business_area,
+                category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+                issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+                admin2=admin_area,
+            ),
+            individual=individuals.order_by("?").first(),
+            individual_data={
+                "given_name": faker.first_name(),
+                "family_name": faker.last_name(),
+                "flex_fields": {},
+            },
+        )
+
+
+def create_grievance_tickets(scale, business_areas):
+    for business_area_data in business_areas:
+        faker = Faker([business_area_data.locale])
+        country = geo_models.Country.objects.get_or_create(name=business_area_data.area)[0]
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        admin_area = AreaFactory(name=f"city-{country.name}", area_type=area_type, p_code=faker.postcode())
+        business_area = BusinessArea.objects.get(name=business_area_data.area)
+        create_grievance_tickets_for_ba(business_area, admin_area, faker, scale / len(business_areas))
+
+
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
@@ -142,6 +181,7 @@ class Command(BaseCommand):
         call_command(
             "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
         )
+        call_command("loadcountries")
 
         user = User.objects.get(username="root")
 
@@ -206,7 +246,10 @@ class Command(BaseCommand):
 
         create_payment_records([area.area for area in all_bas])
 
-        # TODO: grievance
+        create_grievance_tickets(scale, all_bas)
 
         elapsed_print("Done generating data")
         print_stats()
+
+
+# TODO: country dashboard shows money
