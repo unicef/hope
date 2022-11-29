@@ -166,11 +166,11 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
-            name=input.get("name"),
+            name=input.get("name", "").strip(),
             created_by=user,
             business_area=business_area,
-            excluded_ids=input.get("excluded_ids"),
-            exclusion_reason=input.get("exclusion_reason", ""),
+            excluded_ids=input.get("excluded_ids", "").strip(),
+            exclusion_reason=input.get("exclusion_reason", "").strip(),
         )
         target_population.targeting_criteria = targeting_criteria
         target_population.program = program
