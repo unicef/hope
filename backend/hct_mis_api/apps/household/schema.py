@@ -1,4 +1,4 @@
-from django.db.models import Prefetch, Sum, Value
+from django.db.models import Prefetch, Sum, Value, Count, Q, Subquery, OuterRef, Func, F
 
 import graphene
 from graphene import relay
@@ -214,6 +214,16 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     active_individuals_count = graphene.Int()
     admin_area = graphene.Field(AreaNode)
 
+    def resolve_sanction_list_possible_match(parent: Household, info):
+        if hasattr(parent, "sanction_list_possible_match_annotated"):
+            return parent.sanction_list_possible_match_annotated
+        return parent.sanction_list_possible_match
+
+    def resolve_sanction_list_confirmed_match(parent: Household, info):
+        if hasattr(parent, "sanction_list_confirmed_match_annotated"):
+            return parent.sanction_list_confirmed_match_annotated
+        return parent.sanction_list_confirmed_match
+
     def resolve_admin1(parent, info):
         return parent.admin1
 
@@ -257,6 +267,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_has_duplicates(parent, info):
+        if hasattr(parent, "has_duplicates_annotated"):
+            return parent.has_duplicates_annotated
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
     def resolve_flex_fields(parent, info):
@@ -535,7 +547,41 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.order_by("created_at")
+        queryset = Household.objects.order_by("created_at")
+        if does_path_exist_in_query("edges.node.admin2", info):
+            queryset = queryset.select_related("admin_area")
+            queryset = queryset.select_related("admin_area__area_type")
+
+        if does_path_exist_in_query("edges.node.headOfHousehold", info):
+            queryset = queryset.select_related("head_of_household")
+        if does_path_exist_in_query("edges.node.hasDuplicates", info):
+            subquery = Subquery(
+                Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+            queryset = queryset.annotate(has_duplicates_annotated=subquery)
+
+        if does_path_exist_in_query("edges.node.sanctionListPossibleMatch", info):
+            subquery = Subquery(
+                Individual.objects.filter(household_id=OuterRef("pk"), sanction_list_possible_match=True)
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+            queryset = queryset.annotate(
+                sanction_list_possible_match_annotated=subquery
+            )
+        if does_path_exist_in_query("edges.node.sanctionListConfirmedMatch", info):
+            subquery = Subquery(
+                Individual.objects.filter(household_id=OuterRef("pk"), sanction_list_confirmed_match=True)
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+            queryset = queryset.annotate(
+                sanction_list_confirmed_match_annotated=subquery
+            )
+        return queryset
+
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
