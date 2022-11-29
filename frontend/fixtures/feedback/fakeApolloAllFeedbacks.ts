@@ -9,7 +9,6 @@ export const fakeApolloAllFeedbacks = [
         issueType: '',
         createdBy: '',
         createdAtRange: '',
-        businessAreaSlug: 'afghanistan',
         first: 10,
         orderBy: '-created_at',
       },

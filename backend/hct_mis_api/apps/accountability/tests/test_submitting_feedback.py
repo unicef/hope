@@ -28,14 +28,12 @@ mutation createFeedback($input: CreateFeedbackInput!) {
 
     ALL_FEEDBACKS_QUERY = """
 query allFeedbacks(
-    $businessAreaSlug: String!,
     $issueType: String,
     $feedbackId: String,
     $createdBy: String,
     $orderBy: String,
 ) {
     allFeedbacks(
-        businessAreaSlug: $businessAreaSlug,
         issueType: $issueType,
         feedbackId: $feedbackId,
         createdBy: $createdBy,
@@ -123,7 +121,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
     def create_dummy_correct_input(self) -> Dict:
         return {
-            "businessAreaSlug": self.business_area.slug,
             "issueType": Feedback.POSITIVE_FEEDBACK,
             "description": "Test description",
         }
@@ -132,7 +129,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={"input": data},
         )
         assert "errors" not in response, response
@@ -149,10 +146,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.create_new_feedback()
         response = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
-            context={"user": self.user},
-            variables={
-                "businessAreaSlug": self.business_area.slug,
-            },
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={},
         )
         assert "errors" not in response, response["errors"]
         self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
@@ -168,17 +163,13 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
 
         def filter_it(variables) -> List:
-            vars = {"businessAreaSlug": self.business_area.slug} | variables
             response = self.graphql_request(
                 request_string=self.ALL_FEEDBACKS_QUERY,
-                context={"user": self.user},
-                variables=vars,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={} | variables,
             )
             assert "errors" not in response, response["errors"]
             return response["data"]["allFeedbacks"]["edges"]
-
-        assert len(filter_it({"businessAreaSlug": "non-existent"})) == 0
-        assert len(filter_it({"businessAreaSlug": self.business_area.slug})) == 1
 
         assert len(filter_it({"issueType": Feedback.NEGATIVE_FEEDBACK})) == 0
         assert len(filter_it({"issueType": Feedback.POSITIVE_FEEDBACK})) == 1
@@ -194,24 +185,15 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             current_amount = Feedback.objects.count()
             response = self.graphql_request(
                 request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
-                context={"user": self.user},
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
                 variables={"input": data},
             )
             assert "errors" in response, response
             self.assertEqual(Feedback.objects.count(), current_amount)
 
-        # missing business area slug
-        expect_failure(
-            {
-                "issueType": Feedback.POSITIVE_FEEDBACK,
-                "description": "Test description",
-            }
-        )
-
         # missing issue type
         expect_failure(
             {
-                "businessAreaSlug": self.business_area.slug,
                 "description": "Test description",
             }
         )
@@ -219,7 +201,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         # missing description
         expect_failure(
             {
-                "businessAreaSlug": self.business_area.slug,
                 "issueType": Feedback.POSITIVE_FEEDBACK,
             }
         )
@@ -290,7 +271,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.assertEqual(feedback.issue_type, Feedback.POSITIVE_FEEDBACK)
         response = self.graphql_request(
             request_string=self.UPDATE_FEEDBACK_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "input": {
                     "feedbackId": encode_id_base64(feedback.pk, "Feedback"),
@@ -306,7 +287,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback_id = self.create_new_feedback()
         response = self.graphql_request(
             request_string=self.SINGLE_FEEDBACK_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={"id": encode_id_base64(feedback_id, "Feedback")},
         )
         assert "errors" not in response, response["errors"]
@@ -315,7 +296,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
     def create_linked_grievance_ticket(self, feedback_id) -> Dict:
         create_grievance_response = self.graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "input": {
                     "description": "Test Feedback",
@@ -358,7 +339,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "input": self.create_dummy_correct_input()
                 | {
@@ -386,8 +367,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
         response_1 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
-            context={"user": self.user},
-            variables={"businessAreaSlug": self.business_area.slug, "orderBy": "-issue_type"},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={"orderBy": "-issue_type"},
         )
         assert "errors" not in response_1, response_1["errors"]
         feedbacks_1 = response_1["data"]["allFeedbacks"]["edges"]
@@ -397,8 +378,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
         response_2 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
-            context={"user": self.user},
-            variables={"businessAreaSlug": self.business_area.slug, "orderBy": "issue_type"},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={"orderBy": "issue_type"},
         )
         assert "errors" not in response_2, response_2["errors"]
         feedbacks_2 = response_2["data"]["allFeedbacks"]["edges"]
@@ -415,8 +396,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
         response_1 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
-            context={"user": self.user},
-            variables={"businessAreaSlug": self.business_area.slug, "orderBy": "linked_grievance"},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={"orderBy": "linked_grievance"},
         )
         assert "errors" not in response_1, response_1["errors"]
         feedbacks_1 = response_1["data"]["allFeedbacks"]["edges"]
@@ -427,8 +408,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
         response_2 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
-            context={"user": self.user},
-            variables={"businessAreaSlug": self.business_area.slug, "orderBy": "-linked_grievance"},
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={"orderBy": "-linked_grievance"},
         )
         assert "errors" not in response_2, response_2["errors"]
         feedbacks_2 = response_2["data"]["allFeedbacks"]["edges"]

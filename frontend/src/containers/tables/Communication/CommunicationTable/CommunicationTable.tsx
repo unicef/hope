@@ -11,13 +11,11 @@ import { CommunicationTableRow } from './CommunicationTableRow';
 
 interface CommunicationTableProps {
   filter;
-  businessArea: string;
   canViewDetails: boolean;
 }
 
 export const CommunicationTable = ({
   filter,
-  businessArea,
   canViewDetails,
 }: CommunicationTableProps): ReactElement => {
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
@@ -27,7 +25,6 @@ export const CommunicationTable = ({
     program: filter.program,
     targetPopulation: filter.targetPopulation,
     createdBy: filter.createdBy || '',
-    businessArea,
   };
   return (
     <TableWrapper>
