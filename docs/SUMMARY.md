@@ -15,7 +15,7 @@
 
 ## Product Specification
 
-* [Country Office](product-specification/country-office/README.md)
+* [HOPE Modules](product-specification/country-office/README.md)
   * [Login](product-specification/country-office/login.md)
   * [Registration Data Import](product-specification/country-office/registration-data-import/README.md)
     * [RDI and Deduplication task](product-specification/country-office/registration-data-import/rdi-and-deduplication-task.md)
