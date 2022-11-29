@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -13,7 +15,7 @@ from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 
 class TestHouseholdWithProgramsQuantityQuery(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     QUERY = """
         query Household($id: ID!) {

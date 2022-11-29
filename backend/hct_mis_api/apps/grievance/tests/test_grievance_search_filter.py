@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+from django.conf import settings
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -14,7 +16,7 @@ from hct_mis_api.apps.household.models import Household
 
 @patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceQuerySearchFilter(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     FILTER_BY_SEARCH = """
     query AllGrievanceTicket($search: String)

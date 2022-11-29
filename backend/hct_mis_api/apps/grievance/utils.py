@@ -47,7 +47,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
 
 
-def create_grievance_documents(info, grievance_ticket, documents) -> None:
+def create_grievance_documents(user, grievance_ticket, documents) -> None:
     grievance_documents = []
     for document in documents:
         file = document["file"]
@@ -56,7 +56,7 @@ def create_grievance_documents(info, grievance_ticket, documents) -> None:
         grievance_document = GrievanceDocument(
             name=document["name"],
             file=file,
-            created_by=info.context.user,
+            created_by=user,
             grievance_ticket=grievance_ticket,
             file_size=file.size,
             content_type=file.content_type,

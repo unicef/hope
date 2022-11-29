@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.forms import model_to_dict
 
 from freezegun import freeze_time
@@ -24,8 +25,8 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
-        "hct_mis_api/apps/geo/fixtures/data.json",
-        "hct_mis_api/apps/core/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
+        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
     ]
 
     @classmethod

@@ -1,6 +1,8 @@
 from datetime import date
 from unittest import mock
 
+from django.conf import settings
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -32,7 +34,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """
     mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {

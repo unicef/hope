@@ -1,12 +1,80 @@
 import logging
 from typing import List, Optional, Tuple
 
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import TicketPriority
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_disable_individual_service,
+)
+from hct_mis_api.apps.grievance.utils import traverse_sibling_tickets
+from hct_mis_api.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Individual
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+
+
+def _clear_deduplication_individuals_fields(individuals) -> None:
+    for individual in individuals:
+        individual.deduplication_golden_record_status = UNIQUE
+        individual.deduplication_batch_status = UNIQUE_IN_BATCH
+        individual.deduplication_golden_record_results = {}
+        individual.deduplication_batch_results = {}
+        DeduplicateTask.hard_deduplicate_documents(individual.documents.all())
+    Individual.objects.bulk_update(
+        individuals,
+        [
+            "deduplication_golden_record_status",
+            "deduplication_batch_status",
+            "deduplication_golden_record_results",
+            "deduplication_batch_results",
+        ],
+    )
+
+
+def close_needs_adjudication_old_ticket(ticket_details, user) -> None:
+    both_individuals = (ticket_details.golden_records_individual, ticket_details.possible_duplicate)
+
+    if ticket_details.selected_individual is None:
+        _clear_deduplication_individuals_fields(both_individuals)
+    else:
+        individual_to_remove = ticket_details.selected_individual
+        unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
+        mark_as_duplicate_individual_and_reassign_roles(
+            ticket_details, individual_to_remove, user, unique_individuals[0]
+        )
+        _clear_deduplication_individuals_fields(unique_individuals)
+
+
+def close_needs_adjudication_new_ticket(ticket_details, user) -> None:
+    individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
+
+    if selected_individuals := ticket_details.selected_individuals.all():
+        unique_individuals = [individual for individual in individuals if individual not in selected_individuals]
+        for individual_to_remove in selected_individuals:
+            mark_as_duplicate_individual_and_reassign_roles(
+                ticket_details, individual_to_remove, user, unique_individuals[0]
+            )
+        _clear_deduplication_individuals_fields(unique_individuals)
+    else:
+        _clear_deduplication_individuals_fields(individuals)
+
+
+def close_needs_adjudication_ticket_service(grievance_ticket, user) -> None:
+    ticket_details = grievance_ticket.ticket_details
+    if not ticket_details:
+        return
+
+    if ticket_details.is_multiple_duplicates_version:
+        for individual in ticket_details.selected_individuals.all():
+            traverse_sibling_tickets(grievance_ticket, individual)
+
+        close_needs_adjudication_new_ticket(ticket_details, user)
+    else:
+        close_needs_adjudication_old_ticket(ticket_details, user)
+
 
 logger = logging.getLogger(__name__)
 
@@ -125,3 +193,31 @@ def create_needs_adjudication_tickets(
             ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
 
     return ticket_details_to_create
+
+
+def mark_as_duplicate_individual_and_reassign_roles(
+    ticket_details, individual_to_remove, user, unique_individual
+) -> None:
+    if ticket_details.is_multiple_duplicates_version:
+        household = reassign_roles_on_disable_individual_service(
+            individual_to_remove,
+            ticket_details.role_reassign_data,
+            user,
+            "new_individual",
+        )
+    else:
+        household = reassign_roles_on_disable_individual_service(
+            individual_to_remove, ticket_details.role_reassign_data, user
+        )
+    mark_as_duplicate_individual(individual_to_remove, unique_individual, household, user)
+
+
+def mark_as_duplicate_individual(individual_to_remove, unique_individual, household, user) -> None:
+    old_individual = Individual.objects.get(id=individual_to_remove.id)
+
+    individual_to_remove.mark_as_duplicate(unique_individual)
+
+    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual, individual_to_remove)
+    household.refresh_from_db()
+    if household.active_individuals.count() == 0:
+        household.withdraw()

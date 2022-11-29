@@ -436,6 +436,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def grievance_type_to_string(self):
         return "user" if self.category in range(2, 8) else "system"
 
+    def can_change_status(self, status) -> bool:
+        return status in self.ticket_details.STATUS_FLOW[self.status]
+
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
     main_ticket = models.ForeignKey(
@@ -470,7 +473,47 @@ class TicketNote(TimeStampedUUIDModel):
     )
 
 
+GENERAL_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_CLOSED: (),
+}
+FEEDBACK_STATUS_FLOW = {
+    GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
+    GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
+    GrievanceTicket.STATUS_CLOSED: (),
+}
+
+
 class TicketComplaintDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="complaint_ticket_details",
@@ -497,6 +540,8 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
 
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="sensitive_ticket_details",
@@ -523,6 +568,8 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
 
 
 class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="household_data_update_ticket_details",
@@ -538,6 +585,8 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="individual_data_update_ticket_details",
@@ -558,6 +607,8 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="add_individual_ticket_details",
@@ -574,6 +625,8 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
 
 
 class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="delete_individual_ticket_details",
@@ -594,6 +647,8 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
 
 
 class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket", related_name="delete_household_ticket_details", on_delete=models.CASCADE
     )
@@ -608,6 +663,8 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
 
 
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="system_flagging_ticket_details",
@@ -632,6 +689,8 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
 
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="needs_adjudication_ticket_details",
@@ -683,6 +742,8 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = GENERAL_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="payment_verification_ticket_details",
@@ -724,6 +785,8 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = FEEDBACK_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="positive_feedback_ticket_details",
@@ -744,6 +807,8 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
 
 
 class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = FEEDBACK_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="negative_feedback_ticket_details",
@@ -764,6 +829,8 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
 
 
 class TicketReferralDetails(TimeStampedUUIDModel):
+    STATUS_FLOW = FEEDBACK_STATUS_FLOW
+
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="referral_ticket_details",

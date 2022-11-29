@@ -220,8 +220,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
 
     def resolve_individual_data(self, info):
         individual_data: Dict = self.individual_data  # type: ignore
-        flex_fields = individual_data.get("flex_fields")
-        if flex_fields:
+        if flex_fields := individual_data.get("flex_fields"):
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
             for name, value in flex_fields.items():
                 if value and name in images_flex_fields_names:
@@ -239,8 +238,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                         pass
             individual_data["flex_fields"] = flex_fields
 
-        documents_to_edit = individual_data.get("documents_to_edit")
-        if documents_to_edit:
+        if documents_to_edit := individual_data.get("documents_to_edit"):
             for index, document in enumerate(documents_to_edit):
                 previous_value = document.get("previous_value", {})
                 if previous_value and previous_value.get("photo"):
@@ -255,8 +253,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                     documents_to_edit[index]["value"] = current_value
             individual_data["documents_to_edit"] = documents_to_edit
 
-        documents = individual_data.get("documents")
-        if documents:
+        if documents := individual_data.get("documents"):
             for index, document in enumerate(documents):
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
@@ -279,8 +276,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
 
     def resolve_individual_data(self, info):
         individual_data: Dict = self.individual_data  # type: ignore
-        flex_fields = individual_data.get("flex_fields")
-        if flex_fields:
+        if flex_fields := individual_data.get("flex_fields"):
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
             for name, value in flex_fields.items():
                 if value and name in images_flex_fields_names:
@@ -293,8 +289,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
                         pass
             individual_data["flex_fields"] = flex_fields
 
-        documents = individual_data.get("documents")
-        if documents:
+        if documents := individual_data.get("documents"):
             for index, document in enumerate(documents):
                 if document and document["photo"]:
                     document["photoraw"] = document["photo"]

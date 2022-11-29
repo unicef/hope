@@ -1,6 +1,7 @@
 import logging
 import xml.etree.ElementTree as ET
 
+from django.conf import settings
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -18,7 +19,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default="./data/GetBusinessAreaList_XML.xml",
+            default=f"{settings.PROJECT_ROOT}/../data/GetBusinessAreaList_XML.xml",
             type=str,
             help="file",
         )
