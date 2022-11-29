@@ -1,9 +1,11 @@
-from typing import Any, Tuple
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
+from uuid import UUID
 
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.admin import SimpleListFilter
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.db.models import JSONField, QuerySet
+from django.http import HttpRequest, HttpResponse
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
@@ -17,19 +19,19 @@ from hct_mis_api.apps.utils.security import is_root
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset()
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_filter(self, request) -> Tuple:
+    def get_list_filter(self, request: HttpRequest) -> Tuple:
         return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class JSONWidgetMixin:
-    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Any:
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request) or settings.DEBUG:
                 kwargs = {"widget": JSONEditor}
@@ -41,7 +43,7 @@ class JSONWidgetMixin:
 
 class LastSyncDateResetMixin:
     @button()
-    def reset_sync_date(self, request):
+    def reset_sync_date(self, request: HttpRequest) -> HttpResponse:  # type: ignore
         if request.method == "POST":
             self.get_queryset(request).update(last_sync_at=None)
         else:
@@ -55,7 +57,7 @@ class LastSyncDateResetMixin:
             )
 
     @button(label="reset sync date")
-    def reset_sync_date_single(self, request, pk):
+    def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> HttpResponse:  # type: ignore
         if request.method == "POST":
             self.get_queryset(request).filter(id=pk).update(last_sync_at=None)
         else:
@@ -75,16 +77,16 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
 class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
-    def get_fields(self, request, obj=None):
+    def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> Sequence[Union[str, Sequence[str]]]:
         return super().get_fields(request, obj)
 
-    def get_actions(self, request):
+    def get_actions(self, request: HttpRequest) -> Dict:
         actions = super().get_actions(request)
         if "delete_selected" in actions and not is_root(request):
             del actions["delete_selected"]
         return actions
 
-    def count_queryset(self, request, queryset):
+    def count_queryset(self, request: HttpRequest, queryset: QuerySet) -> None:
         count = queryset.count()
         self.message_user(request, f"Selection contains {count} records")
 
@@ -94,12 +96,12 @@ class HUBBusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
         from hct_mis_api.apps.core.models import BusinessArea
 
         return BusinessArea.objects.values_list("code", "name").distinct()
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
             return queryset.filter(business_area=self.value()).distinct()
         return queryset

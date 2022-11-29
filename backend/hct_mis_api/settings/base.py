@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
@@ -313,7 +314,7 @@ NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
 # helper function to extend all the common lists
-def extend_list_avoid_repeats(list_to_extend, extend_with):
+def extend_list_avoid_repeats(list_to_extend: List, extend_with: List) -> None:
     """Extends the first list with the elements in the second one, making sure its elements are not already there in the
     original list."""
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
@@ -706,11 +707,11 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 AA_PERMISSION_HANDLER = 3
 
 
-def filter_environment(key, config, request):
+def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
     return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
 
 
-def masker(key, value, config, request):
+def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
     from ..apps.utils.security import is_root
@@ -790,7 +791,7 @@ if DEBUG:
     MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
     # DEBUG TOOLBAR
-    def show_ddt(request):  # pragma: no-cover
+    def show_ddt(request: HttpRequest) -> None:  # pragma: no-cover
         from flags.state import flag_enabled
 
         return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)

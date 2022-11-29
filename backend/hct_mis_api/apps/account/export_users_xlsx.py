@@ -43,7 +43,7 @@ class ExportUsersXlsx:
         }
     )
 
-    def __init__(self, business_area_slug) -> None:
+    def __init__(self, business_area_slug: str) -> None:
         self.business_area_slug = business_area_slug
         self.wb = Workbook()
         self.ws = self.wb.active
