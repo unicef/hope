@@ -34,17 +34,13 @@ In the advanced option of the AjaxField we can select the following attributes:
 
 #### Option set configuration
 
-The option set can be constructed with various columns
-
-The primary key (unique identfier) of the options to be displayed (Pk)
+The primary key (PK) is the unique identfier of the options to be displayed
 
 The label to be displayed in multiple languages
 
-The Pk of a specific option set is used when you want to reference another option set
+The PK of a specific option set is used when you want to reference another option set
 
-If you use multiple columns you should specify which separator
-
-### Visible if
+The Separator is the char used to split the row in columns
 
 A field can trigger js function on changes in the Advanced Section (smart > onchange)
 
