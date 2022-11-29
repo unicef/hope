@@ -107,13 +107,14 @@ def create_payment_records(business_area_names):
         for household in hhs_to_have_pr:
             cash_plan = CashPlan.objects.filter(business_area=household.business_area).order_by("?").first()
             tp = TargetPopulation.objects.filter(business_area=household.business_area).order_by("?").first()
-            PaymentRecordFactory(
-                household=household,
-                cash_plan=cash_plan,
-                target_population=tp,
-                business_area=household.business_area,
-                status=PaymentRecord.STATUS_SUCCESS,
-            )
+            for _ in range(random.randint(1, 3)):
+                PaymentRecordFactory(
+                    household=household,
+                    cash_plan=cash_plan,
+                    target_population=tp,
+                    business_area=household.business_area,
+                    status=PaymentRecord.STATUS_SUCCESS,
+                )
     # TODO: visible in paym verif
 
 
