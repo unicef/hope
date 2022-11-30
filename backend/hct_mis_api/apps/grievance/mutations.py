@@ -708,7 +708,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
-            log_and_raise("New status is incorrect")
+            raise GraphQLError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             ticket_details = grievance_ticket.ticket_details
             if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
