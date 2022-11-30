@@ -153,7 +153,7 @@ export const LookUpHouseholdIndividualModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
+            <DialogTitle>
               <StyledTabs
                 value={selectedTab}
                 onChange={(event: React.ChangeEvent<{}>, newValue: number) => {

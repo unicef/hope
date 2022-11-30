@@ -87,9 +87,7 @@ export function ReactivateProgram({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Reactivate Programme')}</Typography>
-          </DialogTitle>
+          <DialogTitle>{t('Reactivate Programme')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>

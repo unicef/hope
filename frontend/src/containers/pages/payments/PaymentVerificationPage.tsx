@@ -26,7 +26,7 @@ export function PaymentVerificationPage(): React.ReactElement {
     verificationStatus: [],
     program: '',
     serviceProvider: '',
-    deliveryType: null,
+    deliveryType: '',
     startDate: null,
     endDate: null,
   });

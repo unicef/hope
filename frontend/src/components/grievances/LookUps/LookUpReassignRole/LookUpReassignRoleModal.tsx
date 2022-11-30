@@ -146,9 +146,7 @@ export const LookUpReassignRoleModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              {t('Reassign Role')}
-            </DialogTitle>
+            <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpIndividualFilters

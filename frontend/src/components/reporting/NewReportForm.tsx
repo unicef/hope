@@ -256,7 +256,7 @@ export const NewReportForm = (): React.ReactElement => {
             return (
               <>
                 <DialogTitleWrapper>
-                  <DialogTitle id='scroll-dialog-title' disableTypography>
+                  <DialogTitle disableTypography>
                     <Typography variant='h6'>
                       {t('Generate New Report')}
                     </Typography>

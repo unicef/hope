@@ -58,11 +58,7 @@ export const DeleteTargetPopulation = ({
         {({ submitForm }) => (
           <>
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>
-                  {t('Delete Target Population')}
-                </Typography>
-              </DialogTitle>
+              <DialogTitle>{t('Delete Target Population')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>

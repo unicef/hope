@@ -27,7 +27,6 @@ export const FormikSelectFieldConfirm = ({
 
   const isInvalid = form.errors[field.name] && form.touched[field.name];
 
-  //eslint-disable-next-line
   const handleOnChange = (value, clear) => {
     form.setFieldValue(field.name, value);
     if (clear) {
@@ -89,15 +88,13 @@ export const FormikSelectFieldConfirm = ({
       <Dialog
         fullWidth
         minWidth='md'
-        open={selectedProgram}
+        open={Boolean(selectedProgram)}
         onClose={() => setSelectedProgram(null)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            <span>{t('Programme Change')}</span>
-          </DialogTitle>
+          <DialogTitle>{t('Programme Change')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           {' '}

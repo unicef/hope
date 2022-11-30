@@ -94,9 +94,7 @@ export function FinishProgram({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'> {t('Finish Programme')}</Typography>
-          </DialogTitle>
+          <DialogTitle>{t('Finish Programme')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
