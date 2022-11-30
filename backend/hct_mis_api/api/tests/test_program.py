@@ -14,7 +14,7 @@ class CreateProgramTests(HOPEApiTestCase):
         super().setUpTestData()
         cls.url = reverse("api:program-create", args=[cls.business_area.slug])
 
-    def test_create_program(self):
+    def test_create_program(self) -> None:
         data = {
             "name": "Program #1",
             "start_date": "2022-09-27",

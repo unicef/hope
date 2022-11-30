@@ -35,7 +35,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
         cls.url = reverse("api:rdi-push-lax", args=[cls.business_area.slug, str(cls.rdi.id)])
 
-    def test_push(self):
+    def test_push(self) -> None:
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
         input_data = [

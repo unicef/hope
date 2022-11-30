@@ -53,7 +53,7 @@ show_error_codes = true
 exclude = [
   "migrations",
   "venv",
-  "tests"
+#  "tests"
 ]
 
 strict = true
@@ -68,7 +68,6 @@ disable_error_code = [
   "misc", # cannot subclass DjangoObjectType
   "union-attr",
   "type-arg", # this misses type parameters for graphene.ObjectType
-#  "no-untyped-def",
   "no-any-return", # this enforces adding return None for function that returns None
 ]
 

@@ -30,7 +30,7 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         cls.to_create = [
             {"name": "Lorem Ipsum", "hct_id": "42191234-5a31-11ea-82b4-0242ac130003"},
@@ -40,13 +40,13 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
 
         cls.data = [RegistrationDataImportDatahubFactory(**item) for item in cls.to_create]
 
-    def test_registration_data_import_datahub_query_all(self):
+    def test_registration_data_import_datahub_query_all(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},
         )
 
-    def test_registration_data_import_datahub_query_single(self):
+    def test_registration_data_import_datahub_query_single(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},

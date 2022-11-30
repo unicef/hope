@@ -26,7 +26,7 @@ class TestUkrainianRegistrationService(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUp(self):
+    def setUp(self) -> None:
         ImportedDocumentType.objects.create(
             type=IDENTIFICATION_TYPE_TAX_ID,
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -158,7 +158,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.bad_records = Record.objects.bulk_create(bad_records)
         self.user = UserFactory.create()
 
-    def test_import_data_to_datahub(self):
+    def test_import_data_to_datahub(self) -> None:
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
@@ -171,7 +171,7 @@ class TestUkrainianRegistrationService(TestCase):
             1,
         )
 
-    def test_import_data_to_datahub_retry(self):
+    def test_import_data_to_datahub_retry(self) -> None:
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids_all = [x.id for x in self.records]
@@ -186,7 +186,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
-    def test_import_document_validation(self):
+    def test_import_document_validation(self) -> None:
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 

@@ -20,7 +20,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestBuildSummary(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         cls.business_area = create_afghanistan()
 
@@ -37,14 +37,14 @@ class TestBuildSummary(TestCase):
             business_area=cls.business_area,
         )
 
-    def test_status_pending_when_zero_verifications(self):
+    def test_status_pending_when_zero_verifications(self) -> None:
         build_summary(self.cash_plan)
 
         summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
 
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_PENDING)
 
-    def test_status_active_when_at_least_one_active_verification(self):
+    def test_status_active_when_at_least_one_active_verification(self) -> None:
         self._create_verification_with_status(CashPlanPaymentVerification.STATUS_ACTIVE)
 
         build_summary(self.cash_plan)
@@ -52,7 +52,7 @@ class TestBuildSummary(TestCase):
         summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_ACTIVE)
 
-    def test_status_finished_when_all_verifications_finished(self):
+    def test_status_finished_when_all_verifications_finished(self) -> None:
         self._create_verification_with_status(CashPlanPaymentVerification.STATUS_FINISHED)
 
         build_summary(self.cash_plan)
@@ -60,7 +60,7 @@ class TestBuildSummary(TestCase):
         summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_FINISHED)
 
-    def test_status_pending_when_add_and_removed_verification(self):
+    def test_status_pending_when_add_and_removed_verification(self) -> None:
         payment_verification_plan = self._create_verification_with_status(CashPlanPaymentVerification.STATUS_PENDING)
         payment_verification_plan.delete()
 
@@ -69,11 +69,11 @@ class TestBuildSummary(TestCase):
         summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_PENDING)
 
-    def test_query_number(self):
+    def test_query_number(self) -> None:
         with self.assertNumQueries(3):
             build_summary(self.cash_plan)
 
-    def _create_verification_with_status(self, status) -> CashPlanPaymentVerification:
+    def _create_verification_with_status(self, status: str) -> CashPlanPaymentVerification:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
