@@ -33,7 +33,7 @@ class TestApproveDeleteHousehold(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
 
@@ -57,7 +57,7 @@ class TestApproveDeleteHousehold(APITestCase):
         cls.household_test_1, _ = create_household(household_args={"size": 1})
         cls.household_test_2, _ = create_household(household_args={"size": 1})
 
-    def test_approve_delete_household(self):
+    def test_approve_delete_household(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.business_area
         )

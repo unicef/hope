@@ -8,5 +8,5 @@ class TestDocumentTypeModel(TestCase):
     databases = "__all__"
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
-    def test_create_document_type(self):
+    def test_create_document_type(self) -> None:
         assert DocumentTypeFactory(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)

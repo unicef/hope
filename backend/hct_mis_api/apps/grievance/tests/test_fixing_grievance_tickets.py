@@ -1,3 +1,5 @@
+from typing import Any
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
@@ -57,7 +59,7 @@ class TestFixingGrievanceTickets(APITestCase):
             (False, NOT_DISABLED),
         ]
     )
-    def test_wrong_value_in_disability_field(self, previous_value, new_value):
+    def test_wrong_value_in_disability_field(self, previous_value: Any, new_value: Any) -> None:
         self.user = UserFactory.create()
         self.business_area = BusinessAreaFactory(
             code="0060",
@@ -121,7 +123,7 @@ class TestFixingGrievanceTickets(APITestCase):
             new_value,
         )
 
-    def test_skipping_when_ind_data_update_ticket_details_does_not_exist(self):
+    def test_skipping_when_ind_data_update_ticket_details_does_not_exist(self) -> None:
         self.user = UserFactory.create()
         self.business_area = BusinessAreaFactory(
             code="0060",

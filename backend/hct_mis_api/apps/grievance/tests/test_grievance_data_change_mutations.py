@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any, List
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -71,7 +72,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -208,7 +209,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_grievance_create_individual_data_change(self, _, permissions):
+    def test_grievance_create_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -278,7 +279,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_grievance_update_individual_data_change(self, _, permissions):
+    def test_grievance_update_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.maxDiff = None
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -356,7 +357,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_payment_channel_for_individual(self, _, permissions):
+    def test_create_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -401,7 +402,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_edit_payment_channel_for_individual(self, _, permissions):
+    def test_edit_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         bank_account = BankAccountInfoFactory(
@@ -454,7 +455,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_delete_individual_data_change(self, _, permissions):
+    def test_grievance_delete_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -490,7 +491,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_update_household_data_change(self, _, permissions):
+    def test_grievance_update_household_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.household_one.female_age_group_6_11_count = 2
         self.household_one.save()
@@ -533,7 +534,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_delete_household_data_change(self, _, permissions):
+    def test_grievance_delete_household_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {

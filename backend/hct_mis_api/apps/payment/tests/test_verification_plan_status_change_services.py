@@ -33,7 +33,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestPhoneNumberVerification(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.payment_record_amount = 110
         user = UserFactory()
@@ -149,7 +149,7 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_cash_plan = other_cash_plan
         cls.other_verification = other_cash_plan.verifications.first()
 
-    def test_failing_rapid_pro_during_cash_plan_payment_verification(self):
+    def test_failing_rapid_pro_during_cash_plan_payment_verification(self) -> None:
         self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
         self.assertIsNone(self.verification.error)
         self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)

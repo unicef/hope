@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -19,12 +21,12 @@ class TestDeleteProgram(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
 
-    def test_delete_program_not_authenticated(self):
+    def test_delete_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.DELETE_PROGRAM_MUTATION,
             variables={"programId": self.id_to_base64(self.program.id, "ProgramNode")},
@@ -37,7 +39,7 @@ class TestDeleteProgram(APITestCase):
             ("with_permission_in_active", [Permissions.PROGRAMME_REMOVE], Program.ACTIVE),
         ]
     )
-    def test_delete_program_authenticated(self, _, permissions, status):
+    def test_delete_program_authenticated(self, _: Any, permissions: List[Permissions], status: str) -> None:
         user = UserFactory.create()
 
         self.create_user_role_with_permissions(user, permissions, self.business_area)
