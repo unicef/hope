@@ -84,9 +84,6 @@ class FlexRegistrationService:
         IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def __init__(self) -> None:
-        pass
-
     @atomic("default")
     @atomic("registration_datahub")
     def create_rdi(self, imported_by: "User", rdi_name: str = "rdi_name") -> RegistrationDataImport:
@@ -120,7 +117,7 @@ class FlexRegistrationService:
             business_area_slug=business_area.slug,
         )
         rdi.datahub_id = rdi_datahub.id
-        rdi.save()
+        rdi.save(update_fields=("datahub_id",))
         return rdi
 
     def process_records(
@@ -182,7 +179,6 @@ class FlexRegistrationService:
                 rdi.status = RegistrationDataImport.IN_REVIEW
                 rdi.save()
         except Exception as e:
-            logger.exception(e)
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
             rdi.save(
