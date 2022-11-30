@@ -17,7 +17,7 @@ export const FlagTooltip = ({
 }: FlagTooltipProps): React.ReactElement => {
   return (
     <Tooltip title={message}>
-      <StyledFlag confirmed={confirmed} />
+      <StyledFlag confirmed={confirmed ? 1 : 0} />
     </Tooltip>
   );
 };
