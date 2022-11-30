@@ -1,1 +1,1 @@
-import { AssigneeAutocomplete } from './AssigneeAutocomplete';
+export { AssigneeAutocomplete } from './AssigneeAutocomplete';

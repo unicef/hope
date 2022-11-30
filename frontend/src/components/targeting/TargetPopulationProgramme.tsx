@@ -54,7 +54,6 @@ export function TargetPopulationProgramme({
             variant='outlined'
             required
             choices={mappedPrograms}
-            allProgramsEdges={allProgramsEdges}
             component={program ? FormikSelectFieldConfirm : FormikSelectField}
           />
         </Box>

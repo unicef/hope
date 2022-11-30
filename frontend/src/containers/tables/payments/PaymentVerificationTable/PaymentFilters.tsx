@@ -47,7 +47,7 @@ export function PaymentFilters({
             onChange={(e) => handleFilterChange(e, 'verificationStatus')}
             label='Status'
             multiple
-            value={filter.verificationStatus || []}
+            value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
               return (

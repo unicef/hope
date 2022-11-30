@@ -59,9 +59,7 @@ export const LookUpRelatedTicketsModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              {t('Look up Related Tickets')}
-            </DialogTitle>
+            <DialogTitle>{t('Look up Related Tickets')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpRelatedTicketsFilters

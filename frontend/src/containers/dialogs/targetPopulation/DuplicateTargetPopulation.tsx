@@ -87,11 +87,7 @@ export const DuplicateTargetPopulation = ({
         {({ submitForm }) => (
           <>
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>
-                  Duplicate Target Population?
-                </Typography>
-              </DialogTitle>
+              <DialogTitle>Duplicate Target Population?</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>

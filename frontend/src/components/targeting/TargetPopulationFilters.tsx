@@ -40,6 +40,7 @@ export function TargetPopulationFilters({
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
+            value={filter.status}
             label={t('Status')}
             icon={<Person />}
           >
@@ -47,7 +48,7 @@ export function TargetPopulationFilters({
             {Object.values(TargetPopulationStatus)
               .sort()
               .map((key) => (
-                <MenuItem value={key}>
+                <MenuItem key={key} value={key}>
                   {targetPopulationStatusMapping(key)}
                 </MenuItem>
               ))}

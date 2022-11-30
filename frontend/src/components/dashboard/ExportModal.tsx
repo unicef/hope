@@ -132,7 +132,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>{t('Export Data')}</DialogTitle>
+          <DialogTitle>{t('Export Data')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

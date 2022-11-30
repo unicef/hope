@@ -8,7 +8,7 @@ import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { SelectFilter } from '../core/SelectFilter';
-import { UsersAutocomplete } from '../core/UsersAutocomplete';
+import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
 
 const StyledTextField = styled(TextField)`
   flex: 1;
@@ -54,20 +54,11 @@ export function RegistrationFilters({
         onChange={(date) => onFilterChange({ ...filter, importDate: date })}
         value={filter.importDate}
       />
-      <UsersAutocomplete
-        onInputTextChange={(value) =>
-          onFilterChange({ ...filter, userInputValue: value })
-        }
-        inputValue={filter.userInputValue}
-        onChange={(e, option) => {
-          if (!option) {
-            return;
-          }
-          onFilterChange({ ...filter, importedBy: option.node.id });
-        }}
-        value={filter.importedBy}
+      <AssigneeAutocomplete
+        onFilterChange={onFilterChange}
+        name='importedBy'
+        label={t('Imported By')}
       />
-
       <SelectFilter
         value={filter.status}
         label={t('Status')}
