@@ -1,6 +1,5 @@
-from django.db.models import Prefetch, Sum, Value, Count, Q, Subquery, OuterRef, Func, F
-
 import graphene
+from django.db.models import Prefetch, Sum, Value, Subquery, OuterRef, Func, F
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -568,20 +567,15 @@ class Query(graphene.ObjectType):
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )
-            queryset = queryset.annotate(
-                sanction_list_possible_match_annotated=subquery
-            )
+            queryset = queryset.annotate(sanction_list_possible_match_annotated=subquery)
         if does_path_exist_in_query("edges.node.sanctionListConfirmedMatch", info):
             subquery = Subquery(
                 Individual.objects.filter(household_id=OuterRef("pk"), sanction_list_confirmed_match=True)
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )
-            queryset = queryset.annotate(
-                sanction_list_confirmed_match_annotated=subquery
-            )
+            queryset = queryset.annotate(sanction_list_confirmed_match_annotated=subquery)
         return queryset
-
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
