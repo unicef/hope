@@ -86,3 +86,41 @@ class TestCreateTargetPopulationMutation(APITestCase):
             context={"user": self.user},
             variables=variables,
         )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_CREATE]),
+            ("without_permission", []),
+        ]
+    )
+    def test_create_mutation_with_comparison_method_contains(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.program.business_area)
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5 ",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "CONTAINS",
+                                    "arguments": [],
+                                    "fieldName": "registration_data_import",
+                                    "isFlexField": False,
+                                }
+                            ],
+                            "individualsFiltersBlocks": [],
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
