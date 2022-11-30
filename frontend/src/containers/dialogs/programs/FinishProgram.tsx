@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';

@@ -1,9 +1,4 @@
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
