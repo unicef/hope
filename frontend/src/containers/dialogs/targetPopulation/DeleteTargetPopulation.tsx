@@ -4,7 +4,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
 } from '@material-ui/core';
 import { Formik } from 'formik';
 import React from 'react';
