@@ -304,7 +304,10 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
         FlexRegistrationService,
     )
 
-    FlexRegistrationService().process_records(rdi_id, records_ids)
+    try:
+        FlexRegistrationService().process_records(rdi_id, records_ids)
+    except Exception as e:
+        logger.exception(e)
 
 
 @app.task
@@ -324,7 +327,7 @@ def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = No
     extract(records_ids)
 
 
-@app.task
+@app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 3, "countdown": 30})
 @log_start_and_end
 @sentry_tags
 def automate_rdi_creation_task(
@@ -334,55 +337,51 @@ def automate_rdi_creation_task(
     auto_merge: bool = False,
     fix_tax_id: bool = False,
     **filters: Any,
-) -> Optional[List]:
+) -> List:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
-            try:
-                service = FlexRegistrationService()
+            output = []
+            service = FlexRegistrationService()
 
-                qs = Record.objects.filter(registration=registration_id, **filters).exclude(
-                    status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
+            qs = Record.objects.filter(registration=registration_id, **filters).exclude(
+                status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
+            )
+            if fix_tax_id:
+                check_and_set_taxid(qs)
+            all_records_ids = qs.values_list("id", flat=True)
+            if len(all_records_ids) == 0:
+                return ["No Records found", 0]
+
+            splitted_record_ids = [
+                all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
+            ]
+            for page, records_ids in enumerate(splitted_record_ids, 1):
+                rdi_name = template.format(
+                    page=page,
+                    date=timezone.now(),
+                    registration_id=registration_id,
+                    page_size=page_size,
+                    records=len(records_ids),
                 )
-                if fix_tax_id:
-                    check_and_set_taxid(qs)
-                all_records_ids = qs.values_list("id", flat=True)
-                if len(all_records_ids) == 0:
-                    return ["No Records found", 0]
+                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                output.append([rdi_name, len(records_ids)])
+                if auto_merge:
+                    merge_registration_data_import_task.delay(rdi.id)
 
-                splitted_record_ids = [
-                    all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
-                ]
-                output = []
-                for page, records_ids in enumerate(splitted_record_ids, 1):
-                    rdi_name = template.format(
-                        page=page,
-                        date=timezone.now(),
-                        registration_id=registration_id,
-                        page_size=page_size,
-                        records=len(records_ids),
-                    )
-                    rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
-                    service.process_records(rdi_id=rdi.id, records_ids=records_ids)
-                    output.append([rdi_name, len(records_ids)])
-                    if auto_merge:
-                        merge_registration_data_import_task.delay(rdi.id)
-
-                return output
-            except Exception as e:
-                logger.exception(e)
-                raise
-    except LockError as e:
+            return output
+    except Exception as e:
         logger.exception(e)
-    return None
+        raise
 
 
 def check_and_set_taxid(queryset: "QuerySet") -> Dict:
     qs = queryset.filter(unique_field__isnull=True)
-    results = {"updated": [], "processed": []}
+    results = {"updated": [], "processed": [], "errors": []}
     for record in qs.all():
         try:
             for individual in record.fields["individuals"]:
@@ -394,8 +393,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
             results["processed"].append(record.pk)
 
         except Exception as e:
-            # TODO: the keys are: updated, processed and any pk?
-            results[record.pk] = f"{e.__class__.__name__}: {str(e)}"  # type: ignore
+            results["errors"].append(f"Record: {record.pk} - {e.__class__.__name__}: {str(e)}")
     return results
 
 
