@@ -7702,12 +7702,9 @@ export type AllGrievanceTicketQuery = (
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
-        )>, existingTickets: Maybe<Array<Maybe<(
+        )>, relatedTickets: Maybe<Array<Maybe<(
           { __typename?: 'GrievanceTicketNode' }
           & Pick<GrievanceTicketNode, 'id'>
-        )>>>, relatedTickets: Maybe<Array<Maybe<(
-          { __typename?: 'GrievanceTicketNode' }
-          & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'unicefId'>
         )>>> }
       )> }
     )>> }
@@ -14328,15 +14325,8 @@ export const AllGrievanceTicketDocument = gql`
           id
         }
         unicefId
-        existingTickets {
-          id
-        }
         relatedTickets {
           id
-          status
-          category
-          issueType
-          unicefId
         }
       }
     }

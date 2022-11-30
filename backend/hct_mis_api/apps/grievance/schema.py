@@ -435,12 +435,17 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         queryset = GrievanceTicket.objects.filter(ignored=False).select_related("admin2", "assigned_to", "created_by")
-        ticket_details_related_names = []
+        to_prefetch = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            to_prefetch.append(key)
             if "household" in value:
-                ticket_details_related_names.append(key)
-                ticket_details_related_names.append(f"{key}__{value['household']}")
-        return queryset.prefetch_related(*ticket_details_related_names)
+                to_prefetch.append(f"{key}__{value['household']}")
+            if "golden_records_individual" in value:
+                to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
+
+        queryset = queryset.prefetch_related(*to_prefetch)
+
+        return queryset
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

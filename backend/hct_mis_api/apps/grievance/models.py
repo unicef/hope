@@ -324,8 +324,10 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     @cached_property
     def _existing_tickets(self) -> QuerySet["GrievanceTicket"]:
         """All tickets for assigned Household"""
+        if not self.household_unicef_id:
+            return GrievanceTicket.objects.none()
+
         return GrievanceTicket.objects.filter(
-            household_unicef_id__isnull=False,
             household_unicef_id=self.household_unicef_id,
         ).exclude(pk=self.pk)
 
