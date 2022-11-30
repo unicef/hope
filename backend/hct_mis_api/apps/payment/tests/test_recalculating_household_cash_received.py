@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict
+from typing import Any, Dict
 from unittest.mock import MagicMock
 
 import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
@@ -88,7 +88,7 @@ class TestRecalculatingCash(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -143,7 +143,7 @@ class TestRecalculatingCash(APITestCase):
             }
         }
 
-    def send_successful_graphql_request(self, **kwargs) -> Dict:
+    def send_successful_graphql_request(self, **kwargs: Any) -> Dict:
         response = self.graphql_request(**kwargs)
         self.assertTrue("data" in response)  # ensures successful response
         return response
@@ -155,35 +155,35 @@ class TestRecalculatingCash(APITestCase):
             variables=self.create_program_mutation_variables,
         )
 
-    def activate_program(self, program_id) -> Dict:
+    def activate_program(self, program_id: str) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables=self.update_program_mutation_variables(program_id),
         )
 
-    def create_target_population(self, program_id) -> Dict:
+    def create_target_population(self, program_id: str) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables=self.create_target_population_mutation_variables(program_id),
         )
 
-    def lock_target_population(self, target_population_id) -> Dict:
+    def lock_target_population(self, target_population_id: str) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.LOCK_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )
 
-    def finalize_target_population(self, target_population_id) -> Dict:
+    def finalize_target_population(self, target_population_id: str) -> Dict:
         return self.send_successful_graphql_request(
             request_string=self.FINALIZE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )
 
-    def test_household_cash_received_update(self):
+    def test_household_cash_received_update(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [

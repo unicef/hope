@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, List
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -78,7 +79,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -201,7 +202,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_system_flagging(self, _, permissions):
+    def test_approve_system_flagging(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -222,7 +223,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_needs_adjudication(self, _, permissions):
+    def test_approve_needs_adjudication(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -245,7 +246,9 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(self, _, permissions):
+    def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -268,7 +271,9 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_needs_adjudication_allows_multiple_selected_individuals(self, _, permissions):
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

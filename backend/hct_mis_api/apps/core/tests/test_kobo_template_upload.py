@@ -1,6 +1,6 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
-from typing import Callable, Dict
+from typing import Any, Callable, Dict
 from unittest.mock import patch
 
 from django.conf import settings
@@ -29,12 +29,12 @@ class MockSuperUser:
     is_superuser = True
     is_staff = True
 
-    def has_perm(self, perm):
+    def has_perm(self, perm: Any) -> bool:
         return True
 
 
 class MockResponse:
-    def __init__(self, status_code, data: Dict) -> None:
+    def __init__(self, status_code: str, data: Dict) -> None:
         self.status_code = status_code
         self.data: Dict = data
 
@@ -42,8 +42,8 @@ class MockResponse:
         return self.data
 
 
-def raise_as_func(exception) -> Callable:
-    def _raise(*args, **kwargs) -> None:
+def raise_as_func(exception: BaseException) -> Callable:
+    def _raise(*args: Any, **kwargs: Any) -> None:
         raise exception
 
     return _raise
@@ -53,14 +53,14 @@ class TestKoboTemplateUpload(APITestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.maxDiff = None
         cls.client = Client()  # type: ignore # TODO: expression has type "django.test.client.Client", variable has type "graphene.test.Client"
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
 
-    def prepare_request(self, name) -> WSGIRequest:
+    def prepare_request(self, name: str) -> WSGIRequest:
         with open(
             f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}",
             "rb",
@@ -74,7 +74,7 @@ class TestKoboTemplateUpload(APITestCase):
 
             return request
 
-    def test_upload_invalid_template(self):
+    def test_upload_invalid_template(self) -> None:
         request = self.prepare_request("kobo-template-invalid.xlsx")
         response = self.admin.add_view(request, form_url="", extra_context=None)
         form = response.context_data["form"]
@@ -118,7 +118,7 @@ class TestKoboTemplateUpload(APITestCase):
         "hct_mis_api.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.delay",
         new=lambda *args, **kwargs: None,
     )
-    def test_upload_valid_template(self):
+    def test_upload_valid_template(self) -> None:
         request = self.prepare_request("kobo-template-valid.xlsx")
         request.session = "session"  # type: ignore # TODO: expression has type "str", variable has type "SessionBase"
         messages = FallbackStorage(request)
@@ -144,7 +144,7 @@ class TestKoboErrorHandling(APITestCase):
             return template
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    def test_connection_retry_when_500(self, mock_parent_init):
+    def test_connection_retry_when_500(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         error_500_response = MockResponse(500, "test_error")
         mock_create_template_from_file = raise_as_func(requests.exceptions.HTTPError(response=error_500_response))
@@ -162,7 +162,7 @@ class TestKoboErrorHandling(APITestCase):
             self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    def test_unsuccessful_when_400(self, mock_parent_init):
+    def test_unsuccessful_when_400(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         error_400_response = MockResponse(400, "test_error")
         mock_create_template_from_file = raise_as_func(requests.exceptions.HTTPError(response=error_400_response))
@@ -174,7 +174,7 @@ class TestKoboErrorHandling(APITestCase):
             self.assertEqual(empty_template.first_connection_failed_time, None)
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    def test_connection_retry_when_connection_problem(self, mock_parent_init):
+    def test_connection_retry_when_connection_problem(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         mock_create_template_from_file = raise_as_func(requests.exceptions.ConnectionError())
         empty_template = self.generate_empty_template()
@@ -191,7 +191,7 @@ class TestKoboErrorHandling(APITestCase):
             self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    def test_unsuccessful_when_exception(self, mock_parent_init):
+    def test_unsuccessful_when_exception(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         mock_create_template_from_file = raise_as_func(Exception())
         empty_template = self.generate_empty_template()
@@ -206,7 +206,7 @@ class TestKoboErrorHandling(APITestCase):
             self.assertEqual(empty_template.first_connection_failed_time, None)
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    def test_unsuccessful_when_error_in_response(self, mock_parent_init):
+    def test_unsuccessful_when_error_in_response(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         mock_create_template_from_file = lambda *args, **kwargs: ({"status": "error"}, 123)
         empty_template = self.generate_empty_template()

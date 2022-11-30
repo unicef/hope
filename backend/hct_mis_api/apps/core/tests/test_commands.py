@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 class TestCommands(BaseElasticSearchTestCase):
     databases = "__all__"
 
-    def test_initdemo(self):
+    def test_initdemo(self) -> None:
         try:
             call_command("initdemo", "--skip-drop")
         except Exception as e:

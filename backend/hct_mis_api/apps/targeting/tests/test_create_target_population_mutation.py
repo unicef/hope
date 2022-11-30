@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -35,7 +37,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         create_household(
@@ -56,7 +58,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_mutation(self, _, permissions):
+    def test_create_mutation(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.program.business_area)
 
         variables = {

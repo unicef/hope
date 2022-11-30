@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class TestMetaDataFilterType(APITestCase):
@@ -45,7 +46,7 @@ class TestMetaDataFilterType(APITestCase):
         # graph query to be called.
         cls.user = UserFactory.create()
 
-    def test_core_meta_type_query(self):
+    def test_core_meta_type_query(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user},
@@ -57,7 +58,7 @@ class TestMetaDataFilterType(APITestCase):
             ("ukraine",),
         ]
     )
-    def test_rest_endpoint_all_fields_attributes(self, business_area):
+    def test_rest_endpoint_all_fields_attributes(self, business_area: BusinessArea) -> None:
         client = APIClient()
         response = client.get(reverse("fields_attributes"), data={"business_area_slug": business_area})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

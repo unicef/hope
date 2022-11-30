@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -37,7 +39,7 @@ class TestImportedHouseholdQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
@@ -66,7 +68,7 @@ class TestImportedHouseholdQuery(APITestCase):
             ),
         ]
     )
-    def test_imported_household_query_all(self, _, permissions):
+    def test_imported_household_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -86,7 +88,7 @@ class TestImportedHouseholdQuery(APITestCase):
             ),
         ]
     )
-    def test_imported_household_query_single(self, _, permissions):
+    def test_imported_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
