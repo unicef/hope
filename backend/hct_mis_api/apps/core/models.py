@@ -1,18 +1,17 @@
+import mptt
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
-
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from mptt.fields import TreeForeignKey
 
-import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
-from mptt.fields import TreeForeignKey
 
 
 class BusinessArea(TimeStampedUUIDModel):
