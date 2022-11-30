@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
+import { Box, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,11 +8,11 @@ import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
-import { FieldLabel } from '../../core/FieldLabel';
+import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from './AssigneeAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -154,27 +154,19 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Similarity Score')}</FieldLabel>
-            <TextField
-              value={filter.scoreMin}
-              variant='outlined'
-              margin='dense'
-              placeholder='From'
-              onChange={(e) => handleFilterChange(e, 'scoreMin')}
-              type='number'
-            />
-          </Box>
+          <NumberTextField
+            topLabel={t('Similarity Score')}
+            value={filter.scoreMin}
+            placeholder={t('From')}
+            onChange={(e) => handleFilterChange(e, 'scoreMin')}
+          />
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <TextField
+            <NumberTextField
               value={filter.scoreMax}
-              variant='outlined'
-              margin='dense'
               placeholder='To'
               onChange={(e) => handleFilterChange(e, 'scoreMax')}
-              type='number'
             />
           </Box>
         </Grid>
