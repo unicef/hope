@@ -28,8 +28,8 @@ export function TargetPopulationsPage(): React.ReactElement {
     status: '',
     program: '',
     numIndividuals: {
-      min: '',
-      max: '',
+      min: undefined,
+      max: undefined,
     },
   });
   const [isInfoOpen, setToggleInfo] = useState(false);

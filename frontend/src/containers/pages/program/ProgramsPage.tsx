@@ -14,6 +14,7 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
+    search: '',
     startDate: undefined,
     endDate: undefined,
     status: [],

@@ -38,9 +38,7 @@ export const LookUpPaymentRecordModal = ({
             aria-labelledby='form-dialog-title'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Look up Payment Record')}
-              </DialogTitle>
+              <DialogTitle>{t('Look up Payment Record')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <LookUpPaymentRecordTable

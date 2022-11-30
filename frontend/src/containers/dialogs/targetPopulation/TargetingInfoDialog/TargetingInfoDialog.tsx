@@ -83,7 +83,7 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
       scroll='paper'
       aria-labelledby='form-dialog-title'
     >
-      <DialogTitleWrapper id='scroll-dialog-title'>
+      <DialogTitleWrapper>
         {HeaderTabs}
         <IconButton
           onClick={() => setOpen(false)}
