@@ -176,7 +176,14 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>{t('CANCEL')}</Button>
+            <Button
+              onClick={() => {
+                setDialogOpen(false);
+                setSelected([]);
+              }}
+            >
+              {t('CANCEL')}
+            </Button>
             <Button
               type='submit'
               color='primary'
