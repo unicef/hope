@@ -44,7 +44,7 @@ export const IndividualsFilter = ({
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
-            value={filter.sex || ''}
+            value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
             SelectDisplayProps={{
@@ -70,7 +70,7 @@ export const IndividualsFilter = ({
               if (e.target.value < 0 || e.target.value > 120) return;
               onFilterChange({
                 ...filter,
-                age: { ...filter.age, min: e.target.value || undefined },
+                age: { ...filter.age, min: e.target.value },
               });
             }}
             icon={<CakeIcon />}
@@ -84,7 +84,7 @@ export const IndividualsFilter = ({
               if (e.target.value < 0 || e.target.value > 120) return;
               onFilterChange({
                 ...filter,
-                age: { ...filter.age, max: e.target.value || undefined },
+                age: { ...filter.age, max: e.target.value },
               });
             }}
             icon={<CakeIcon />}
