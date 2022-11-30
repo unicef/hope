@@ -124,7 +124,7 @@ export function LookUpIndividualFilters({
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
-            value={filter.sex || ''}
+            value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
             SelectDisplayProps={{
@@ -151,8 +151,6 @@ export function LookUpIndividualFilters({
                   onChange={(e) => {
                     if (e.target.checked) {
                       onFilterChange({ ...filter, household: household.id });
-                    } else {
-                      onFilterChange({ ...filter, household: null });
                     }
                   }}
                 />

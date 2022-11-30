@@ -58,9 +58,9 @@ export const LookUpHouseholdIndividualModal = ({
   const householdFilterInitial = {
     search: '',
     programs: [],
-    lastRegistrationDate: { min: undefined, max: undefined },
+    lastRegistrationDate: { min: '', max: '' },
     residenceStatus: '',
-    size: { min: undefined, max: undefined },
+    size: { min: '', max: '' },
     admin2: null,
   };
   const [filterHouseholdApplied, setFilterHouseholdApplied] = useState(
@@ -73,10 +73,11 @@ export const LookUpHouseholdIndividualModal = ({
   const individualFilterInitial = {
     search: '',
     programs: '',
-    lastRegistrationDate: { min: undefined, max: undefined },
+    lastRegistrationDate: { min: '', max: '' },
     status: '',
     admin2: null,
     sex: '',
+    household: null,
   };
   const [filterIndividualApplied, setFilterIndividualApplied] = useState(
     individualFilterInitial,
