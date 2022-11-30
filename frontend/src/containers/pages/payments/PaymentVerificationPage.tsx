@@ -23,7 +23,7 @@ export function PaymentVerificationPage(): React.ReactElement {
 
   const [filter, setFilter] = useState({
     search: '',
-    verificationStatus: null,
+    verificationStatus: [],
     program: '',
     serviceProvider: '',
     deliveryType: null,

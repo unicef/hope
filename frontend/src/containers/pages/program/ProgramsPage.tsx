@@ -19,12 +19,12 @@ export function ProgramsPage(): React.ReactElement {
     status: [],
     sector: [],
     numberOfHouseholds: {
-      min: undefined,
-      max: undefined,
+      min: '',
+      max: '',
     },
     budget: {
-      min: undefined,
-      max: undefined,
+      min: '',
+      max: '',
     },
   });
   const debouncedFilter = useDebounce(filter, 500);

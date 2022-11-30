@@ -38,7 +38,7 @@ export function GrievancesFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            value={filter.search || ''}
+            value={filter.search}
             label='Search'
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
@@ -48,7 +48,7 @@ export function GrievancesFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
-            value={filter.status || ''}
+            value={filter.status}
           >
             <MenuItem value=''>
               <em>None</em>
@@ -64,7 +64,7 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <SearchTextField
-            value={filter.fsp || ''}
+            value={filter.fsp}
             label='FSP'
             onChange={(e) => handleFilterChange(e, 'fsp')}
           />
@@ -108,7 +108,7 @@ export function GrievancesFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'category')}
             label={t('Category')}
-            value={filter.category || ''}
+            value={filter.category}
           >
             <MenuItem value=''>
               <em>None</em>
@@ -128,7 +128,7 @@ export function GrievancesFilters({
             <SelectFilter
               onChange={(e) => handleFilterChange(e, 'issueType')}
               label='Issue Type'
-              value={filter.issueType || ''}
+              value={filter.issueType}
             >
               <MenuItem value=''>
                 <em>None</em>
@@ -157,7 +157,7 @@ export function GrievancesFilters({
           <Box display='flex' flexDirection='column'>
             <FieldLabel>{t('Similarity Score')}</FieldLabel>
             <TextField
-              value={filter.scoreMin || null}
+              value={filter.scoreMin}
               variant='outlined'
               margin='dense'
               placeholder='From'
@@ -169,7 +169,7 @@ export function GrievancesFilters({
         <Grid item>
           <Box display='flex' flexDirection='column'>
             <TextField
-              value={filter.scoreMax || null}
+              value={filter.scoreMax}
               variant='outlined'
               margin='dense'
               placeholder='To'

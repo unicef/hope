@@ -61,7 +61,6 @@ export function RegistrationFilters({
         inputValue={filter.userInputValue}
         onChange={(e, option) => {
           if (!option) {
-            onFilterChange({ ...filter, importedBy: undefined });
             return;
           }
           onFilterChange({ ...filter, importedBy: option.node.id });
@@ -70,7 +69,7 @@ export function RegistrationFilters({
       />
 
       <SelectFilter
-        value={filter.status || ''}
+        value={filter.status}
         label={t('Status')}
         onChange={(e) => handleFilterChange(e, 'status')}
       >
