@@ -24,6 +24,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_UNKNOWN,
     HEAD,
     IDENTIFICATION_TYPE_DICT,
+    IDENTIFICATION_TYPE_OTHER,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -324,7 +325,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(type=document_data["type"])
+            doc_type = ImportedDocumentType.objects.get(type=document_data.get("type", IDENTIFICATION_TYPE_OTHER))
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
