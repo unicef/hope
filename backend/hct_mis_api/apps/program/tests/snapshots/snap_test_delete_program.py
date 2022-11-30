@@ -4,27 +4,8 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-snapshots = Snapshot()
 
-snapshots['TestDeleteProgram::test_delete_program_not_authenticated 1'] = {
-    'data': {
-        'deleteProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "'AnonymousUser' object has no attribute 'email'",
-            'path': [
-                'deleteProgram'
-            ]
-        }
-    ]
-}
+snapshots = Snapshot()
 
 snapshots['TestDeleteProgram::test_delete_program_authenticated_0_with_permission_in_draft 1'] = {
     'data': {
@@ -67,6 +48,26 @@ snapshots['TestDeleteProgram::test_delete_program_authenticated_2_with_permissio
                 }
             ],
             'message': 'Only Draft Program can be deleted.',
+            'path': [
+                'deleteProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestDeleteProgram::test_delete_program_not_authenticated 1'] = {
+    'data': {
+        'deleteProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User is not authenticated.',
             'path': [
                 'deleteProgram'
             ]
