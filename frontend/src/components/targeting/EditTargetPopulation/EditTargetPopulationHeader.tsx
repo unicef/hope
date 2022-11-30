@@ -74,11 +74,7 @@ export const EditTargetPopulationHeader = ({
             onClick={handleSubmit}
             loading={loading}
             disabled={
-              values.criterias?.length +
-                values.candidateListCriterias?.length ===
-                0 ||
-              !values.name ||
-              loading
+              values.targetingCriteria?.length === 0 || !values.name || loading
             }
           >
             {t('Save')}
