@@ -101,29 +101,16 @@ class TargetingCriteriaRuleFilterInputValidator:
         select_many = get_attr_value("type", attribute) == "SELECT_MANY"
         if select_many:
             if given_args_count < 1:
-                logger.error(
-                    f"SELECT_MANY expect at least 1 argument" f"expect {args_count} arguments, {given_args_count} given"
-                )
-                raise ValidationError(
-                    f"SELECT_MANY expect at least 1 argument" f"expect {args_count} arguments, {given_args_count} given"
-                )
+                raise ValidationError("SELECT_MANY expects at least 1 argument")
         elif given_args_count != args_count:
-            logger.error(
-                f"Comparison method - {rule_filter.comparison_method} "
-                f"expect {args_count} arguments, {given_args_count} given"
-            )
             raise ValidationError(
-                f"Comparison method - {rule_filter.comparison_method} "
-                f"expect {args_count} arguments, {given_args_count} given"
+                f"Comparison method '{rule_filter.comparison_method}' "
+                f"expected {args_count} arguments, {given_args_count} given"
             )
         if get_attr_value("type", attribute) not in comparison_attribute.get("supported_types"):
-            logger.error(
-                f"{rule_filter.field_name} is {get_attr_value('type', attribute)} type filter "
-                f"and does not accept - {rule_filter.comparison_method} comparison method"
-            )
             raise ValidationError(
-                f"{rule_filter.field_name} is {get_attr_value( 'type', attribute)} type filter "
-                f"and does not accept - {rule_filter.comparison_method} comparison method"
+                f"{rule_filter.field_name} is '{get_attr_value('type', attribute)}' type filter "
+                f"and does not accept '{rule_filter.comparison_method}' comparison method"
             )
 
 
