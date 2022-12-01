@@ -95,7 +95,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_mutation_with_comparison_method_contains(self, _, permissions) -> None:
+    def test_create_mutation_with_comparison_method_contains(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.program.business_area)
 
         variables = {
