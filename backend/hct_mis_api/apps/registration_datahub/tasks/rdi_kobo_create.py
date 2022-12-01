@@ -1,7 +1,8 @@
 import json
 import numbers
 from collections import defaultdict
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -90,7 +91,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     business_area = None
     attachments = None
 
-    def _handle_image_field(self, value, is_flex_field) -> Optional[Union[str, File]]:
+    def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
         if not self.registration_data_import_mis.pull_pictures:
             return None
         download_url = ""
@@ -110,20 +111,22 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return default_storage.save(value, file)
         return file
 
-    def _handle_geopoint_field(self, value, is_flex_field):
+    def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> Point:
         geopoint = value.split(" ")
         x = float(geopoint[0])
         y = float(geopoint[1])
         return Point(x=x, y=y, srid=4326)
 
-    def _handle_decimal_field(self, value, is_flex_field):
+    def _handle_decimal_field(self, value: Any, is_flex_field: bool) -> Any:
         if not is_flex_field:
             return value
         if isinstance(value, numbers.Number):
             return float(value)
         return value
 
-    def _cast_and_assign(self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]):
+    def _cast_and_assign(
+        self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]
+    ) -> None:
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,
@@ -149,7 +152,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities) -> None:
+    def _handle_documents_and_identities(self, documents_and_identities: List[Dict]) -> None:
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -199,7 +202,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict, individuals_dict) -> None:
+    def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict) -> None:
         collectors_to_bulk_create = []
         for hash_key, collectors_list in collectors_dict.items():
             for collector in collectors_list:
@@ -209,7 +212,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id, import_data_id, business_area_id) -> None:
+    def execute(self, registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID") -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
@@ -364,6 +367,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if not self.business_area.postpone_deduplication:
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
-    def _handle_exception(self, assigned_to, field_name, e) -> None:
+    def _handle_exception(self, assigned_to: ImportedIndividual, field_name: str, e: BaseException) -> None:
         logger.exception(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e

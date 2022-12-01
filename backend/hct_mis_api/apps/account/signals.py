@@ -1,33 +1,34 @@
 from datetime import timezone
+from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 
 @receiver(post_save, sender=UserRole)
-def post_save_userrole(sender, instance, *args, **kwargs):
+def post_save_userrole(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     instance.user.last_modify_date = timezone.now()
     instance.user.save()
 
 
 @receiver(pre_delete, sender=UserRole)
-def pre_delete_userrole(sender, instance, *args, **kwargs):
+def pre_delete_userrole(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     instance.user.last_modify_date = timezone.now()
     instance.user.save()
 
 
 @receiver(pre_save, sender=get_user_model())
-def pre_save_user(sender, instance, *args, **kwargs):
+def pre_save_user(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     instance.available_for_export = True
     instance.last_modify_date = timezone.now()
 
 
 @receiver(post_save, sender=get_user_model())
-def post_save_user(sender, instance, created, *args, **kwargs):
+def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwargs: Any) -> None:
     if created is False:
         return
 

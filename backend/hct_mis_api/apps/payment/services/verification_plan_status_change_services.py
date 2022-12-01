@@ -126,7 +126,9 @@ class VerificationPlanStatusChangeServices:
         ).delete()
         return self.cash_plan_verification
 
-    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status) -> None:
+    def _create_grievance_ticket_for_status(
+        self, cashplan_payment_verification: CashPlanPaymentVerification, status: str
+    ) -> None:
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return
@@ -154,7 +156,7 @@ class VerificationPlanStatusChangeServices:
 
         TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
 
-    def _create_grievance_tickets(self, cashplan_payment_verification) -> None:
+    def _create_grievance_tickets(self, cashplan_payment_verification: CashPlanPaymentVerification) -> None:
         self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
         self._create_grievance_ticket_for_status(
             cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES

@@ -32,7 +32,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         import_data = ImportData.objects.create(
             file="test_file/x.xlsx",
             number_of_households=10,
@@ -213,7 +213,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
         super().setUpTestData()
 
-    def test_batch_deduplication(self):
+    def test_batch_deduplication(self) -> None:
         task = DeduplicateTask()
         task.business_area = self.business_area.slug
         task.deduplicate_imported_individuals(self.registration_data_import_datahub)
@@ -287,7 +287,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -389,7 +389,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         super().setUpTestData()
 
-    def test_golden_record_deduplication(self):
+    def test_golden_record_deduplication(self) -> None:
         task = DeduplicateTask()
         task.business_area = self.business_area.slug
         task.deduplicate_individuals(self.registration_data_import)

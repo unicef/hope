@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -47,7 +49,7 @@ class TestTicketNotes(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -64,7 +66,7 @@ class TestTicketNotes(APITestCase):
         cls.ticket_1 = GrievanceTicketFactory(id="5d64ef51-5ed5-4891-b1a3-44a24acb7720")
         cls.ticket_2 = GrievanceTicketFactory(id="1dd2dc43-d418-45bd-b9f7-7545dd4c13a5")
 
-    def test_ticket_notes_query_all(self):
+    def test_ticket_notes_query_all(self) -> None:
         TicketNoteFactory(
             description="This is a test note message",
             created_by=self.user,
@@ -86,7 +88,7 @@ class TestTicketNotes(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_ticket_note(self, _, permissions):
+    def test_create_ticket_note(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {

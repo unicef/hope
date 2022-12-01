@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = None):
+def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = None) -> None:
     try:
         from hct_mis_api.apps.household.models import Household, Individual
 
@@ -83,7 +83,7 @@ def calculate_children_fields_for_not_collected_individual_data() -> int:
 
 @app.task()
 @sentry_tags
-def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID):
+def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID) -> None:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.household.models import XlsxUpdateFile
     from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import (
