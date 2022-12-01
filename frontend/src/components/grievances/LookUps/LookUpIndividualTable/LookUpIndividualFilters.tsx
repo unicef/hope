@@ -151,6 +151,8 @@ export function LookUpIndividualFilters({
                   onChange={(e) => {
                     if (e.target.checked) {
                       onFilterChange({ ...filter, household: household.id });
+                    } else {
+                      onFilterChange({ ...filter, household: null });
                     }
                   }}
                 />
