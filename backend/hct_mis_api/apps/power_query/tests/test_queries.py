@@ -22,18 +22,18 @@ class TestPowerQuery(TestCase):
         cls.formatter: Formatter = FormatterFactory(name="Queryset To HTML")
         cls.report: Report = ReportFactory(formatter=cls.formatter, query=cls.query1)
 
-    def test_query_execution(self):
+    def test_query_execution(self) -> None:
         result = self.query1.execute_matrix()
         self.assertTrue(self.query1.datasets.exists())
         self.assertEqual(result["{}"], self.query1.datasets.first().pk)
 
-    def test_report_execution(self):
+    def test_report_execution(self) -> None:
         self.query1.execute_matrix()
         dataset = self.query1.datasets.first()
         self.report.execute()
         self.assertTrue(self.report.documents.filter(dataset=dataset).exists())
 
-    def test_nested_query(self):
+    def test_nested_query(self) -> None:
         result = self.query2.execute_matrix()
         self.assertTrue(self.query2.datasets.exists())
         self.assertEqual(result["{}"], self.query2.datasets.first().pk)

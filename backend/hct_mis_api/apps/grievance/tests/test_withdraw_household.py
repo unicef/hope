@@ -32,7 +32,7 @@ class TestWithdrawHousehold(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
 
@@ -52,7 +52,7 @@ class TestWithdrawHousehold(APITestCase):
             business_area=cls.business_area,
         )
 
-    def test_withdraw_household_when_withdraw_last_individual_empty(self):
+    def test_withdraw_household_when_withdraw_last_individual_empty(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )

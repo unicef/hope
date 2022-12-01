@@ -14,14 +14,14 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 class TestDOAP(WebTest):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory(is_superuser=True, is_staff=True)
         cls.user_role = UserRoleFactory(role__name="Approver", role__subsystem="CA", business_area=cls.business_area)
         cls.officer = cls.user_role.user
 
-    def test_get_matrix(self):
+    def test_get_matrix(self) -> None:
         adm = admin.site._registry[BusinessArea]
         matrix = adm._get_doap_matrix(self.business_area)
         self.assertEqual(len(matrix), 2)
@@ -40,18 +40,18 @@ class TestDOAP(WebTest):
             ],
         )
 
-    def test_show_doap(self):
+    def test_show_doap(self) -> None:
         url = reverse("admin:core_businessarea_view_ca_doap", args=[self.business_area.pk])
         res = self.app.get(url, user=self.user)
         assert self.user_role.user.email in str(res.content)
 
-    def test_send_doap(self):
+    def test_send_doap(self) -> None:
         url = reverse("admin:core_businessarea_send_doap", args=[self.business_area.pk])
         self.app.get(url, user=self.user)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "CashAssist - UNICEF - Afghanistan user updates")
 
-    def test_export_doap(self):
+    def test_export_doap(self) -> None:
         url = reverse("admin:core_businessarea_export_doap", args=[self.business_area.pk])
         res = self.app.get(url, user=self.user)
         self.assertEqual(res.content_type, "text/csv")

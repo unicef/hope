@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, List
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -29,7 +30,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         cls.user = UserFactory.create()
         (household, _) = create_household(household_args={"size": 1})
@@ -65,7 +66,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_resolving_chart(self, _, permissions):
+    def test_resolving_chart(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, BusinessArea.objects.get(slug="global"))
 
         self.snapshot_graphql_request(
