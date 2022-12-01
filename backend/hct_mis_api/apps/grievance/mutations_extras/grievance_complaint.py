@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List
 
 import graphene
 
@@ -15,7 +15,9 @@ class GrievanceComplaintTicketExtras(graphene.InputObjectType):
     payment_record = graphene.List(graphene.ID)
 
 
-def save_grievance_complaint_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
+def save_grievance_complaint_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> List[GrievanceTicket]:
     grievance_complaint_extras = extras.get("category", {})
     grievance_complaint_category_extras = grievance_complaint_extras.get("grievance_complaint_ticket_extras", {})
 

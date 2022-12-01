@@ -4,6 +4,8 @@ import os
 import tempfile
 from datetime import datetime
 from functools import wraps
+from typing import Any, Callable
+from uuid import UUID
 
 from django.db import transaction
 from django.utils import timezone
@@ -34,13 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 class transaction_celery_task:  # used as decorator
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.task_args = args
         self.task_kwargs = kwargs
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Any:
         @wraps(func)
-        def wrapper_func(*args, **kwargs):
+        def wrapper_func(*args: Any, **kwargs: Any) -> None:
             try:
                 with transaction.atomic():
                     return func(*args, **kwargs)
@@ -54,7 +56,7 @@ class transaction_celery_task:  # used as decorator
 @app.task(bind=True, default_retry_delay=60)
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -80,7 +82,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
 @app.task
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -96,7 +98,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id, program_id, tp_name):
+def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
     program = Program.objects.get(id=program_id)
 
@@ -112,7 +114,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
             passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
             tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
 
-            first_registration_date = datetime.now()
+            first_registration_date = timezone.now()
             last_registration_date = first_registration_date
 
             family_ids = set()

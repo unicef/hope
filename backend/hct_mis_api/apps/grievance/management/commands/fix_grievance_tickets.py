@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Optional
 
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -12,8 +13,8 @@ from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
 # there's this business_area filter
 # additional kwargs go to GrievanceTicket filter
 @transaction.atomic
-def fix_disability_fields(business_area=None, **kwargs) -> None:
-    def _logic(ba) -> None:
+def fix_disability_fields(business_area: Optional[BusinessArea] = None, **kwargs: Any) -> None:
+    def _logic(ba: BusinessArea) -> None:
         logging.info(f"Fixing disability fields for {ba}")
         tickets = GrievanceTicket.objects.filter(
             business_area=ba,
@@ -64,7 +65,7 @@ def fix_disability_fields(business_area=None, **kwargs) -> None:
 class Command(BaseCommand):
     help = "Go through all grievance tickets, look for wrongly formatted data and fix it"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Fixing grievance tickets")
 
         fix_disability_fields()  # PR #1608

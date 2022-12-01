@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
@@ -16,7 +18,7 @@ class Command(BaseCommand):
 
         print(f"Fixed {qs} object(s).")
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Starting Fix Population Disability")
 
         self.update_individual_disability()

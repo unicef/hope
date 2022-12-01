@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, List, Optional
 
 from django.core.management import call_command
 
@@ -39,7 +39,7 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -67,7 +67,7 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_negative_feedback_ticket_without_extras(self, _, permissions):
+    def test_create_negative_feedback_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._prepare_input()
@@ -87,7 +87,9 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_negative_feedback_ticket_with_household_extras(self, _, permissions):
+    def test_create_negative_feedback_ticket_with_household_extras(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         extras = {
@@ -110,7 +112,9 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_negative_feedback_ticket_with_individual_extras(self, _, permissions):
+    def test_create_negative_feedback_ticket_with_individual_extras(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         extras = {
@@ -133,7 +137,9 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_negative_feedback_ticket_with_household_and_individual_extras(self, _, permissions):
+    def test_create_negative_feedback_ticket_with_household_and_individual_extras(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         extras = {
@@ -148,7 +154,7 @@ class TestGrievanceCreateNegativeFeedbackTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def _prepare_input(self, extras=None) -> Dict:
+    def _prepare_input(self, extras: Optional[Any] = None) -> Dict:
         input_data = {
             "input": {
                 "description": "Test Feedback",

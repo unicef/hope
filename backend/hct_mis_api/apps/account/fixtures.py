@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 from django.contrib.auth import get_user_model
 
@@ -37,7 +38,7 @@ class UserFactory(factory.DjangoModelFactory):
     username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}")
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs) -> User:
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> User:
         manager = cls._get_manager(model_class)
         keyword_arguments = kwargs.copy()
         if "password" not in keyword_arguments:

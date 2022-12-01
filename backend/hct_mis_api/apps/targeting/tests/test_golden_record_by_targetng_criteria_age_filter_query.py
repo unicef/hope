@@ -1,4 +1,5 @@
 import datetime
+from typing import Any, List
 
 from dateutil.relativedelta import relativedelta
 from parameterized import parameterized
@@ -23,7 +24,7 @@ class GoldenRecordTargetingCriteriaAgeFilterQueryTestCase(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
 
         cls.business_area = BusinessArea.objects.first()
@@ -63,7 +64,7 @@ class GoldenRecordTargetingCriteriaAgeFilterQueryTestCase(APITestCase):
             ),
         ]
     )
-    def test_filter_records_by_age(self, arguments, method):
+    def test_filter_records_by_age(self, arguments: List[Any], method: Any) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_VIEW_DETAILS], self.business_area)
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),

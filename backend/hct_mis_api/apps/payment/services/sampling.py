@@ -1,5 +1,5 @@
 import abc
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from django.db.models import Q, QuerySet
 
@@ -10,9 +10,12 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import CashPlan
+
 
 class Sampling:
-    def __init__(self, input_data, cash_plan, payment_records: QuerySet):
+    def __init__(self, input_data: Dict, cash_plan: "CashPlan", payment_records: QuerySet) -> None:
         self.input_data = input_data
         self.cash_plan = cash_plan
         self.payment_records: Optional[QuerySet] = payment_records
@@ -59,7 +62,7 @@ class Sampling:
 
 
 class BaseSampling(abc.ABC):
-    def __init__(self, arguments, sampling_type: str):
+    def __init__(self, arguments: Dict, sampling_type: str) -> None:
         self.sampling_type = sampling_type
         self.arguments = arguments
         self.confidence_interval = self.arguments.get("confidence_interval")
@@ -78,12 +81,12 @@ class BaseSampling(abc.ABC):
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
     @abc.abstractmethod
-    def sampling(self, payment_records: QuerySet):
+    def sampling(self, payment_records: QuerySet) -> None:
         pass
 
 
 class RandomSampling(BaseSampling):
-    def sampling(self, payment_records: QuerySet):
+    def sampling(self, payment_records: QuerySet) -> None:
         if self.sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=self.sex)
 
@@ -102,7 +105,7 @@ class RandomSampling(BaseSampling):
 
 
 class FullListSampling(BaseSampling):
-    def sampling(self, payment_records: QuerySet):
+    def sampling(self, payment_records: QuerySet) -> None:
         self.payment_records = payment_records.filter(
             ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
         )
