@@ -1,5 +1,6 @@
 import logging
 from typing import Dict
+from uuid import UUID
 
 from sentry_sdk import configure_scope
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 @app.task
 @log_start_and_end
 @sentry_tags
-def send_target_population_task(target_population_id) -> Dict:
+def send_target_population_task(target_population_id: UUID) -> Dict:
     try:
         from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import (
             SendTPToDatahubTask,

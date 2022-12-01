@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Any, List, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -18,7 +19,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
     TargetingCriteriaQueryingBase,
@@ -30,6 +31,12 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -227,11 +234,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
-    def excluded_household_ids(self):
+    def excluded_household_ids(self) -> List:
         return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
 
     @property
-    def household_list(self):
+    def household_list(self) -> "QuerySet":
         queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
             return queryset
@@ -248,11 +255,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return ""
 
     @property
-    def targeting_criteria_string(self):
+    def targeting_criteria_string(self) -> str:
         return Truncator(self.get_criteria_string()).chars(390, "...")
 
     @property
-    def allowed_steficon_rule(self):
+    def allowed_steficon_rule(self) -> Union[Rule, None]:
         if not self.program:
             return None
         tp = (
@@ -317,10 +324,10 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     list).
     """
 
-    def get_rules(self):
+    def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self):
+    def get_excluded_household_ids(self) -> List["UUID"]:
         return self.target_population.excluded_household_ids
 
     def get_query(self) -> Q:
@@ -346,10 +353,10 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
         on_delete=models.CASCADE,
     )
 
-    def get_filters(self):
+    def get_filters(self) -> "QuerySet":
         return self.filters.all()
 
-    def get_individuals_filters_blocks(self):
+    def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
 
 
@@ -364,7 +371,7 @@ class TargetingIndividualRuleFilterBlock(
     )
     target_only_hoh = models.BooleanField(default=False)
 
-    def get_individual_block_filters(self):
+    def get_individual_block_filters(self) -> "QuerySet":
         return self.individual_block_filters.all()
 
 
@@ -376,7 +383,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         :Residential Status != Refugee
     """
 
-    def get_core_fields(self):
+    def get_core_fields(self) -> List:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
     comparison_method = models.CharField(
@@ -405,7 +412,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         :Residential Status != Refugee
     """
 
-    def get_core_fields(self):
+    def get_core_fields(self) -> List:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     comparison_method = models.CharField(
@@ -425,5 +432,5 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
             """
     )
 
-    def get_lookup_prefix(self, associated_with):
+    def get_lookup_prefix(self, associated_with: Any) -> str:
         return ""

@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -56,7 +58,7 @@ class TestTargetPopulationQuery(APITestCase):
                 """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         _ = create_household(
@@ -114,7 +116,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_size_1_approved.save()
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter) -> TargetingCriteria:
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
@@ -138,7 +140,7 @@ class TestTargetPopulationQuery(APITestCase):
             ),
         ]
     )
-    def test_simple_all_targets_query(self, _, permissions, variables):
+    def test_simple_all_targets_query(self, _: Any, permissions: List[Permissions], variables: Dict) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -159,7 +161,7 @@ class TestTargetPopulationQuery(APITestCase):
             ),
         ]
     )
-    def test_simple_target_query(self, _, permissions):
+    def test_simple_target_query(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -185,7 +187,7 @@ class TestTargetPopulationQuery(APITestCase):
             ),
         ]
     )
-    def test_simple_target_query_2(self, _, permissions):
+    def test_simple_target_query_2(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

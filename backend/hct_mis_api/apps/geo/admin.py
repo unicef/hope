@@ -1,11 +1,11 @@
 import csv
 import logging
-from typing import List
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Tuple, Union
 
 from django.contrib import admin, messages
-from django.contrib.admin import ListFilter, RelatedFieldListFilter
+from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
-from django.db.models import QuerySet
+from django.db.models import Model, QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -18,6 +18,9 @@ from smart_admin.mixins import FieldsetMixin
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
+if TYPE_CHECKING:
+    from django.http import HttpRequest, HttpResponsePermanentRedirect
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +32,7 @@ class ActiveRecordFilter(ListFilter):
     title = "Active"
     parameter_name = "active"
 
-    def __init__(self, request, params, model, model_admin) -> None:
+    def __init__(self, request: "HttpRequest", params: List[str], model: Model, model_admin: ModelAdmin) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
             if p in params:
@@ -45,7 +48,7 @@ class ActiveRecordFilter(ListFilter):
     def expected_parameters(self) -> List:
         return [self.parameter_name]
 
-    def choices(self, changelist):
+    def choices(self, changelist: List) -> Generator:
         for lookup, title in ((None, "All"), ("1", "Yes"), ("0", "No")):
             yield {
                 "selected": self.value() == lookup,
@@ -53,7 +56,7 @@ class ActiveRecordFilter(ListFilter):
                 "display": title,
             }
 
-    def queryset(self, request, queryset: QuerySet) -> QuerySet:
+    def queryset(self, request: "HttpRequest", queryset: QuerySet) -> QuerySet:
         if self.value() == "1":
             queryset = queryset.filter(valid_until__isnull=True)
         elif self.value() == "0":
@@ -62,7 +65,7 @@ class ActiveRecordFilter(ListFilter):
 
 
 class ValidityManagerMixin:
-    def get_list_filter(self, request):
+    def get_list_filter(self, request: "HttpRequest") -> List:
         return list(self.list_filter) + [ActiveRecordFilter]
 
 
@@ -88,13 +91,15 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> None:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request):
+    def get_list_display(
+        self, request: "HttpRequest"
+    ) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
         ret = super().get_list_display(request)
         return ret
 
@@ -129,7 +134,7 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field, request, model_admin):
+    def field_choices(self, field: Any, request: "HttpRequest", model_admin: ModelAdmin) -> List[Tuple[str, str]]:
         if "area_type__country__exact" not in request.GET:
             return []
         return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
@@ -169,7 +174,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     )
 
     @button()
-    def import_areas(self, request):
+    def import_areas(self, request: "HttpRequest") -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)

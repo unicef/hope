@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from django.utils import timezone
 
@@ -65,7 +66,7 @@ query AllCashPlans {
 
 class TestCashPlanQueries(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -146,7 +147,7 @@ class TestCashPlanQueries(APITestCase):
             ("single_without_permission", [], QUERY_SINGLE_CASH_PLAN),
         ]
     )
-    def test_cash_plans(self, name, permissions, query):
+    def test_cash_plans(self, name: str, permissions: List[Permissions], query: str) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         variables = {}
         if "single" in name:

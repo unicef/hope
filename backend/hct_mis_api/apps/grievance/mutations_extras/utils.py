@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -27,10 +27,15 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    from hct_mis_api.apps.household.models import IndividualRoleInHousehold
+
+
 logger = logging.getLogger(__name__)
 
 
-def handle_role(role, household, individual) -> None:
+def handle_role(role: "IndividualRoleInHousehold", household: Household, individual: Individual) -> None:
     from hct_mis_api.apps.household.models import (
         ROLE_ALTERNATE,
         ROLE_PRIMARY,
@@ -46,7 +51,7 @@ def handle_role(role, household, individual) -> None:
             IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
-def handle_add_document(document, individual) -> Document:
+def handle_add_document(document: Document, individual: Individual) -> Document:
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Document, DocumentType
@@ -111,7 +116,7 @@ def handle_edit_document(document_data: Dict) -> Document:
     return document
 
 
-def handle_add_payment_channel(payment_channel, individual) -> Optional[BankAccountInfo]:
+def handle_add_payment_channel(payment_channel: Dict, individual: Individual) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
     if payment_channel_type == "BANK_TRANSFER":
         bank_name = payment_channel.get("bank_name")
@@ -124,7 +129,7 @@ def handle_add_payment_channel(payment_channel, individual) -> Optional[BankAcco
     return None
 
 
-def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
+def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
     payment_channel_id = decode_id_string(payment_channel.get("id"))
 
@@ -137,7 +142,7 @@ def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
     return None
 
 
-def handle_add_identity(identity, individual) -> IndividualIdentity:
+def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
     from hct_mis_api.apps.household.models import IndividualIdentity
 
     partner_name = identity.get("partner")
@@ -181,7 +186,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[str, Dict]:
+def prepare_previous_documents(documents_to_remove_with_approve_status: List[Document]) -> Dict[str, Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import (
@@ -206,7 +211,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[
     return previous_documents
 
 
-def prepare_edit_documents(documents_to_edit) -> List[Dict]:
+def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -252,7 +257,7 @@ def prepare_edit_documents(documents_to_edit) -> List[Dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dict[int, Any]:
+def prepare_previous_identities(identities_to_remove_with_approve_status: List[IndividualIdentity]) -> Dict[int, Any]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -273,7 +278,9 @@ def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dic
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status) -> Dict[str, Any]:
+def prepare_previous_payment_channels(
+    payment_channels_to_remove_with_approve_status: List[Dict],
+) -> Dict[Optional[Any], Dict[str, Any]]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -294,7 +301,7 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
     return previous_payment_channels
 
 
-def prepare_edit_identities(identities) -> List[Dict]:
+def prepare_edit_identities(identities: List[IndividualIdentity]) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -332,7 +339,7 @@ def prepare_edit_identities(identities) -> List[Dict]:
     return edited_identities
 
 
-def prepare_edit_payment_channel(payment_channels) -> List[Dict]:
+def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     items = []
 
     handlers = {
@@ -345,7 +352,7 @@ def prepare_edit_payment_channel(payment_channels) -> List[Dict]:
     return items
 
 
-def handle_bank_transfer_payment_method(pc) -> Dict:
+def handle_bank_transfer_payment_method(pc: Any) -> Dict:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -375,7 +382,7 @@ def handle_bank_transfer_payment_method(pc) -> Dict:
     }
 
 
-def verify_required_arguments(input_data, field_name, options) -> None:
+def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) -> None:
     from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
@@ -389,12 +396,12 @@ def verify_required_arguments(input_data, field_name, options) -> None:
                 log_and_raise(f"You can't provide {not_allowed} in {key}")
 
 
-def remove_parsed_data_fields(data_dict, fields_list) -> None:
+def remove_parsed_data_fields(data_dict: Dict, fields_list: List[str]) -> None:
     for field in fields_list:
         data_dict.pop(field, None)
 
 
-def verify_flex_fields(flex_fields_to_verify, associated_with) -> None:
+def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,
@@ -430,7 +437,9 @@ def verify_flex_fields(flex_fields_to_verify, associated_with) -> None:
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info) -> None:
+def withdraw_individual_and_reassign_roles(
+    ticket_details: List["GrievanceTicket"], individual_to_remove: Individual, info: Any
+) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
@@ -439,7 +448,7 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
 
 
 def mark_as_duplicate_individual_and_reassign_roles(
-    ticket_details, individual_to_remove, info, unique_individual
+    ticket_details: Any, individual_to_remove: Individual, info: Any, unique_individual: Individual
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
 
@@ -453,7 +462,7 @@ def mark_as_duplicate_individual_and_reassign_roles(
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
-def get_data_from_role_data(role_data) -> Tuple[str, Individual, Individual, Household]:
+def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -471,7 +480,7 @@ def get_data_from_role_data(role_data) -> Tuple[str, Individual, Individual, Hou
     return role_name, old_individual, new_individual, household
 
 
-def get_data_from_role_data_new_ticket(role_data) -> Tuple[str, Individual, Individual, Household]:
+def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -485,7 +494,7 @@ def get_data_from_role_data_new_ticket(role_data) -> Tuple[str, Individual, Indi
 
 
 def reassign_roles_on_disable_individual(
-    individual_to_remove, role_reassign_data, info=None, is_new_ticket=False
+    individual_to_remove: Individual, role_reassign_data: Dict, info: Optional[Any] = None, is_new_ticket: bool = False
 ) -> Household:
     from django.shortcuts import get_object_or_404
 
@@ -568,7 +577,7 @@ def reassign_roles_on_disable_individual(
     return household_to_remove
 
 
-def reassign_roles_on_update(individual, role_reassign_data, info=None) -> None:
+def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, info: Optional[Any] = None) -> None:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.household.models import (
@@ -619,7 +628,12 @@ def reassign_roles_on_update(individual, role_reassign_data, info=None) -> None:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
 
-def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household) -> None:
+def withdraw_individual(
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
+) -> None:
     from hct_mis_api.apps.household.models import Document
 
     individual_to_remove.withdraw()
@@ -636,11 +650,11 @@ def withdraw_individual(individual_to_remove, info, old_individual_to_remove, re
 
 
 def mark_as_duplicate_individual(
-    individual_to_remove,
-    info,
-    old_individual_to_remove,
-    removed_individual_household,
-    unique_individual,
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
+    unique_individual: Individual,
 ) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
@@ -652,7 +666,10 @@ def mark_as_duplicate_individual(
 
 
 def log_and_withdraw_household_if_needed(
-    individual_to_remove, info, old_individual_to_remove, removed_individual_household
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
 
@@ -668,7 +685,7 @@ def log_and_withdraw_household_if_needed(
         removed_individual_household.withdraw()
 
 
-def save_images(flex_fields, associated_with) -> None:
+def save_images(flex_fields: Dict, associated_with: str) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
@@ -707,7 +724,7 @@ def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Opti
     return None
 
 
-def handle_document(document) -> Dict:
+def handle_document(document: Document) -> Dict:
     photo = document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
@@ -715,5 +732,5 @@ def handle_document(document) -> Dict:
     return document
 
 
-def handle_documents(documents) -> List[Dict]:
+def handle_documents(documents: List[Document]) -> List[Dict]:
     return [handle_document(document) for document in documents]

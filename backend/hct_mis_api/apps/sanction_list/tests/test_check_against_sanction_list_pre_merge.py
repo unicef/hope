@@ -29,7 +29,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)
         task.execute()
@@ -117,7 +117,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country)
         super().setUpTestData()
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
 
         expected = [

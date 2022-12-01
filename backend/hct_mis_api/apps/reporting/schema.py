@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar
 
-from django.db.models import QuerySet
 from django.db.models.functions import ExtractYear
 
 import graphene
@@ -26,6 +25,13 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.reporting.filters import ReportFilter
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
+
+TReportNode = TypeVar("TReportNode", bound="ReportNode")
+TQuery = TypeVar("TQuery", bound="Query")
+
 
 class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
@@ -44,14 +50,14 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
     admin_area_1 = DjangoFilterConnectionField(AreaNode)
     admin_area_2 = DjangoFilterConnectionField(AreaNode)
 
-    def resolve_file_url(self, info, **kwargs) -> str:
+    def resolve_file_url(self, info: Any, **kwargs: Any) -> str:
         return self.file.url if self.file else ""
 
-    def resolve_admin_area_1(self, info, **kwargs) -> QuerySet:
+    def resolve_admin_area_1(self, info: Any, **kwargs: Any) -> "QuerySet":
         parent_ids = self.admin_area.filter(parent__isnull=False).values_list("parent_id")
         return Area.objects.filter(id__in=parent_ids).distinct()
 
-    def resolve_admin_area_2(self, info, **kwargs) -> QuerySet:
+    def resolve_admin_area_2(self, info: Any, **kwargs: Any) -> "QuerySet":
         return self.admin_area.all()
 
 
@@ -72,13 +78,15 @@ class Query(graphene.ObjectType):
     dashboard_report_types_choices = graphene.List(ChoiceObject, business_area_slug=graphene.String(required=True))
     dashboard_years_choices = graphene.List(graphene.String, business_area_slug=graphene.String(required=True))
 
-    def resolve_report_types_choices(self, info, **kwargs):
+    def resolve_report_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Report.REPORT_TYPES)
 
-    def resolve_report_status_choices(self, info, **kwargs):
+    def resolve_report_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Report.STATUSES)
 
-    def resolve_dashboard_report_types_choices(self, info, business_area_slug, **kwargs):
+    def resolve_dashboard_report_types_choices(
+        self, info: Any, business_area_slug: str, **kwargs: Any
+    ) -> List[Dict[str, Any]]:
         if business_area_slug == "global":
             return to_choice_object(
                 [
@@ -96,7 +104,7 @@ class Query(graphene.ObjectType):
                 ]
             )
 
-    def resolve_dashboard_years_choices(self, info, business_area_slug, **kwargs):
+    def resolve_dashboard_years_choices(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[int]:
         current_year = datetime.today().year
         years_list = [*range(current_year, current_year - 5, -1)]
         models = [

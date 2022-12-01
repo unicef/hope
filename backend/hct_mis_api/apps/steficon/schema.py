@@ -1,3 +1,7 @@
+from typing import Any
+
+from django.db.models import QuerySet
+
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -30,5 +34,5 @@ class Query(graphene.ObjectType):
         filterset_class=SteficonRuleFilter,
     )
 
-    def resolve_all_steficon_rules(self, info, **kwargs):
+    def resolve_all_steficon_rules(self, info: Any, **kwargs: Any) -> QuerySet:
         return Rule.objects.filter(deprecated=False, enabled=True, history__is_release=True).distinct()
