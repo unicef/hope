@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -39,7 +41,7 @@ class TestRegistrationDataImportQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
@@ -84,7 +86,7 @@ class TestRegistrationDataImportQuery(APITestCase):
             ),
         ]
     )
-    def test_registration_data_import_datahub_query_all(self, _, permissions):
+    def test_registration_data_import_datahub_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
@@ -103,7 +105,9 @@ class TestRegistrationDataImportQuery(APITestCase):
             ),
         ]
     )
-    def test_registration_data_import_datahub_query_single_with_permission(self, _, permissions):
+    def test_registration_data_import_datahub_query_single_with_permission(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,

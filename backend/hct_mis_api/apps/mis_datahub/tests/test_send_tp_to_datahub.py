@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import call_command
 from django.db.utils import IntegrityError
 from django.test import TestCase
@@ -50,7 +52,7 @@ class TestSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs) -> TargetPopulation:
+    def _create_target_population(**kwargs: Any) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,
@@ -67,7 +69,7 @@ class TestSendTpToDatahub(TestCase):
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
@@ -218,7 +220,7 @@ class TestSendTpToDatahub(TestCase):
         cls.target_population_third = refresh_stats(cls.target_population_third)
         cls.target_population_third.save()
 
-    def test_individual_data_needed_true(self):
+    def test_individual_data_needed_true(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_first)
 
@@ -232,7 +234,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_documents.count(), 1)
         self.assertEqual(dh_roles.count(), 2)
 
-    def test_individual_data_needed_false(self):
+    def test_individual_data_needed_false(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_second)
 
@@ -246,7 +248,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_documents.count(), 1)
         self.assertEqual(dh_roles.count(), 2)
 
-    def test_individual_sharing_is_true_and_unhcr_id(self):
+    def test_individual_sharing_is_true_and_unhcr_id(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_third)
 
@@ -260,7 +262,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_documents.count(), 0)
         self.assertEqual(dh_roles.count(), 1)
 
-    def test_send_two_times_household_with_different(self):
+    def test_send_two_times_household_with_different(self) -> None:
         business_area_with_data_sharing = BusinessArea.objects.first()
 
         program_individual_data_needed_true = ProgramFactory(
@@ -311,7 +313,7 @@ class TestSendTpToDatahub(TestCase):
             ("custom_code", "AU", "AUL"),
         ]
     )
-    def test_send_household_country(self, _, iso_code2, expected_ca_code):
+    def test_send_household_country(self, _: Any, iso_code2: str, expected_ca_code: str) -> None:
         (household, individuals) = create_household(household_args={"size": 1})
         household.country = geo_models.Country.objects.filter(iso_code2=iso_code2).first()
         household.save()
@@ -320,7 +322,7 @@ class TestSendTpToDatahub(TestCase):
         dh_household = task._prepare_datahub_object_household(household)
         self.assertEqual(dh_household.country, expected_ca_code)
 
-    def test_trim_targeting_criteria(self):
+    def test_trim_targeting_criteria(self) -> None:
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
@@ -345,7 +347,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(len(dh_target_population.targeting_criteria), 390)
         self.assertTrue("..." in dh_target_population.targeting_criteria)
 
-    def test_should_not_trim_targeting_criteria(self):
+    def test_should_not_trim_targeting_criteria(self) -> None:
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
@@ -370,7 +372,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(len(dh_target_population.targeting_criteria), 194)
         self.assertFalse("..." in dh_target_population.targeting_criteria)
 
-    def test_not_creating_duplicate_households(self):
+    def test_not_creating_duplicate_households(self) -> None:
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(

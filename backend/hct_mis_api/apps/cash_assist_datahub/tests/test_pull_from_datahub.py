@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import timedelta
+from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -184,7 +185,7 @@ class TestPullDataFromDatahub(TestCase):
         cls._setup_datahub_data()
 
     @requests_mock.Mocker()
-    def test_pull_data(self, mocker):
+    def test_pull_data(self, mocker: Any) -> None:
         mocker.register_uri(
             "GET",
             "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
@@ -283,11 +284,11 @@ class TestSessionsPullDataFromDatahub(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         call_command("loadcountrycodes")
 
-    def test_multiple_sessions_same_ba_working(self):
+    def test_multiple_sessions_same_ba_working(self) -> None:
         session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
         session1.save()
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
@@ -303,7 +304,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session1.delete()
         session2.delete()
 
-    def test_multiple_sessions_same_ba_fail(self):
+    def test_multiple_sessions_same_ba_fail(self) -> None:
         session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
         session1.save()
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
@@ -320,7 +321,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session1.delete()
         session2.delete()
 
-    def test_multiple_sessions_different_ba_run1(self):
+    def test_multiple_sessions_different_ba_run1(self) -> None:
         session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
         session1.save()
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
@@ -354,7 +355,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
             ),
         ]
     )
-    def test_country_mapping(self, _, ca_code, expected):
+    def test_country_mapping(self, _: Any, ca_code: str, expected: str) -> None:
         session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
         session.save()
         dh_service_provider = DHServiceProvider()
