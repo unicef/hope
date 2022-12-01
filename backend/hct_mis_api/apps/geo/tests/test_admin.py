@@ -21,30 +21,30 @@ class TestGeoApp(WebTest):
     databases = ["default"]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.factory = RequestFactory()
         cls.area_types = AreaTypeFactory.create_batch(2)
         cls.areas = AreaFactory.create_batch(5, area_type=fuzzy.FuzzyChoice(AreaType.objects.all()))
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.site = AdminSite()
         self.admin = AreaAdmin(Area, self.site)
         self.client.force_login(User.objects.get_or_create(username="testuser")[0])
         self.file = BytesIO(b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n")
 
-    def test_modeladmin_str(self):
+    def test_modeladmin_str(self) -> None:
         ma = ModelAdmin(Area, self.site)
         self.assertEqual(str(ma), "geo.ModelAdmin")
 
-    def test_login(self):
+    def test_login(self) -> None:
         url = reverse("admin:geo_area_changelist")
         resp = self.app.get(url)
         assert resp.status_int == 302, "You need to be logged in"
         resp = self.app.get(url, user=self.superuser)
         assert resp.status_int == 200, "You need to be logged in and superuser"
 
-    def test_upload(self):
+    def test_upload(self) -> None:
         self.assertEqual(AreaType.objects.count(), 2, "Two area types created")
         self.assertEqual(Area.objects.count(), 5, "Five area created")
         resp = self.app.get(reverse("admin:geo_area_changelist"), user=self.superuser).click("Import Areas")

@@ -1,6 +1,6 @@
 import uuid
 from decimal import Decimal
-from typing import Dict, List
+from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
@@ -79,7 +79,7 @@ class TestRapidProVerificationTask(TestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         payment_record_amount = 10
 
@@ -138,7 +138,7 @@ class TestRapidProVerificationTask(TestCase):
         cls.verification = cash_plan.verifications.first()
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_filtering_by_start_id(self, mock_parent_init):
+    def test_filtering_by_start_id(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
         payment_record_verification = payment_record_verification_obj.prefetch_related(
@@ -157,7 +157,7 @@ class TestRapidProVerificationTask(TestCase):
             )
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_mapping(self, mock_parent_init):
+    def test_mapping(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
         payment_record_verification = payment_record_verification_obj.prefetch_related(
@@ -169,7 +169,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
+            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])  # type: ignore
             self.assertEqual(
                 mapped_dict,
                 [
@@ -182,7 +182,7 @@ class TestRapidProVerificationTask(TestCase):
             )
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_not_received(self, mock_parent_init):
+    def test_not_received(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
@@ -217,7 +217,7 @@ class TestRapidProVerificationTask(TestCase):
             )
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_received_with_issues(self, mock_parent_init):
+    def test_received_with_issues(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
@@ -256,7 +256,7 @@ class TestRapidProVerificationTask(TestCase):
             )
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_received(self, mock_parent_init):
+    def test_received(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
@@ -295,7 +295,7 @@ class TestRapidProVerificationTask(TestCase):
             )
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
-    def test_wrong_phone_number(self, mock_parent_init):
+    def test_wrong_phone_number(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
@@ -328,7 +328,7 @@ class TestRapidProVerificationTask(TestCase):
                 PaymentVerification.STATUS_PENDING,
             )
 
-    def test_recalculating_validity_on_number_change(self):
+    def test_recalculating_validity_on_number_change(self) -> None:
         ind = self.individuals[0]
 
         first_phone = "+380 637 541 345"
@@ -345,7 +345,7 @@ class TestRapidProVerificationTask(TestCase):
 
 
 class TestPhoneNumberVerification(TestCase):
-    def test_phone_numbers(self):
+    def test_phone_numbers(self) -> None:
         self.assertFalse(is_valid_phone_number("+40 032 215 789"))
         self.assertTrue(is_valid_phone_number("+48 632 215 789"))
 

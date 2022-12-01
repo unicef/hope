@@ -22,7 +22,7 @@ class TestAllPaymentRecords(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         (cls.household1, _) = create_household(household_args={"size": 1})
@@ -60,7 +60,7 @@ class TestAllPaymentRecords(APITestCase):
             cls.user, [Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")
         )
 
-    def test_fetch_payment_records_filter_by_household(self):
+    def test_fetch_payment_records_filter_by_household(self) -> None:
         for household in [self.household1, self.household2, self.household3]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_RECORDS_QUERY,
@@ -71,7 +71,7 @@ class TestAllPaymentRecords(APITestCase):
                 },
             )
 
-    def test_fetch_payment_records_filter_by_cash_plan(self):
+    def test_fetch_payment_records_filter_by_cash_plan(self) -> None:
         for cash_plan in [self.cash_plan1, self.cash_plan2, self.cash_plan3]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_RECORDS_QUERY,
@@ -82,7 +82,7 @@ class TestAllPaymentRecords(APITestCase):
                 },
             )
 
-    def test_fetch_payment_records_filter_by_cash_plan_and_household(self):
+    def test_fetch_payment_records_filter_by_cash_plan_and_household(self) -> None:
         households = [self.household1, self.household2, self.household3]
         cash_plans = [self.cash_plan1, self.cash_plan2, self.cash_plan3]
         for household, cash_plan in itertools.product(households, cash_plans):
