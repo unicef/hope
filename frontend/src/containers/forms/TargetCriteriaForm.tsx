@@ -147,7 +147,7 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
-    const filterNull = (filter): boolean => filter.value === null;
+    const filterNull = (filter): boolean => filter.value === null || (filter?.fieldAttribute?.type === "SELECT_MANY" && filter.value && filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
       filter.value?.hasOwnProperty('from') &&
