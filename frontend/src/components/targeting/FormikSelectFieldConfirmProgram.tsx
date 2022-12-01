@@ -27,7 +27,6 @@ export const FormikSelectFieldConfirmProgram = ({
   const handleOnChange = (value, clear): void => {
     setFieldValue(field.name, value);
     if (clear) {
-      // setFieldValue('criterias', []);
       setFieldValue('targetingCriteria', []);
     }
   };
