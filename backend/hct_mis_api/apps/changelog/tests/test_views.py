@@ -16,8 +16,8 @@ class APITestCase(TestCase):
         self.user = UserFactory()
 
     def tests_changelog_list_view(self) -> None:
-        instance1 = ChangelogFactory()
-        instance2 = ChangelogFactory()
+        instance1 = ChangelogFactory(active=True)
+        instance2 = ChangelogFactory(active=True)
         url = reverse("changelog_changelog_list")
         # Log out
         self.client.logout()
