@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, List, Optional
 
 from django.core.management import call_command
 
@@ -57,7 +57,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -139,7 +139,9 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_payment_verification_ticket_with_new_received_amount_extras(self, _, permissions):
+    def test_update_payment_verification_ticket_with_new_received_amount_extras(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         extras = {"newReceivedAmount": 1234.99, "newStatus": PaymentVerification.STATUS_RECEIVED}
@@ -160,7 +162,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_payment_verification_ticket_approve_payment_details(self, _, permissions):
+    def test_payment_verification_ticket_approve_payment_details(self, _: Any, permissions: List[Permissions]) -> None:
         # update status for approval
         self.ticket.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.ticket.ticket.save()
@@ -177,7 +179,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def _prepare_input(self, extras=None) -> Dict:
+    def _prepare_input(self, extras: Optional[Any] = None) -> Dict:
         input_data: Dict = {
             "input": {
                 "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),

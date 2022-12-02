@@ -48,7 +48,7 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
@@ -141,7 +141,7 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         )
 
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_add_individual_close_ticket_for_postponed_deduplication(self):
+    def test_add_individual_close_ticket_for_postponed_deduplication(self) -> None:
         permissions = [
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
         ]

@@ -1,3 +1,4 @@
+from typing import Any, List
 from unittest.mock import patch
 
 from django.core.management import call_command
@@ -46,7 +47,7 @@ class TestGrievanceQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
 
         call_command("loadcountries")
@@ -98,7 +99,7 @@ class TestGrievanceQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_sort_by_linked_tickets_ascending(self, _, permissions):
+    def test_grievance_query_sort_by_linked_tickets_ascending(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_ASC,
@@ -114,7 +115,7 @@ class TestGrievanceQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_sort_by_linked_tickets_descending(self, _, permissions):
+    def test_grievance_query_sort_by_linked_tickets_descending(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_DESC, context={"user": self.user}

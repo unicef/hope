@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Optional
 
 from django.conf import settings
+from django.core.files import File
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -234,7 +235,7 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
         ordering = ("created_at",)
         verbose_name = _("Survey")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
     def sample_file_path(self) -> Optional[str]:
@@ -249,7 +250,7 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
             days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS
         )
 
-    def store_sample_file(self, filename, file) -> None:
+    def store_sample_file(self, filename: str, file: File) -> None:
         self.sample_file.save(filename, file)
         self.sample_file_generated_at = timezone.now()
         self.save()

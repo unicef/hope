@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -21,7 +23,7 @@ class TestSurveyQueries(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
@@ -36,7 +38,7 @@ class TestSurveyQueries(APITestCase):
             ("with_permissions", [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS]),
         ]
     )
-    def test_query_list(self, _, permissions):
+    def test_query_list(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         survey = SurveyFactory(target_population=self.target_population, created_by=self.user)

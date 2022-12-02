@@ -53,6 +53,73 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
     ]
 }
 
+snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_with_two_payment_records_0_with_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'admin': 'City Test',
+                    'category': 3,
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'issueType': 12,
+                    'language': 'Polish, English',
+                    'sensitiveTicketDetails': {
+                        'household': {
+                            'size': 1
+                        },
+                        'individual': {
+                            'fullName': 'John Doe'
+                        },
+                        'paymentRecord': {
+                            'fullName': 'John Doe second Individual'
+                        }
+                    }
+                },
+                {
+                    'admin': 'City Test',
+                    'category': 3,
+                    'consent': True,
+                    'description': 'Test Feedback',
+                    'issueType': 12,
+                    'language': 'Polish, English',
+                    'sensitiveTicketDetails': {
+                        'household': {
+                            'size': 1
+                        },
+                        'individual': {
+                            'fullName': 'John Doe'
+                        },
+                        'paymentRecord': {
+                            'fullName': 'John Doe second Individual'
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_with_two_payment_records_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
+        }
+    ]
+}
+
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_without_extras_0_with_permission 1'] = {
     'data': {
         'createGrievanceTicket': {

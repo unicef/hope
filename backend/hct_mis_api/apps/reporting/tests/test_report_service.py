@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.test import TestCase
 
@@ -23,7 +25,7 @@ class TestGenerateReportService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(self) -> None:
         create_afghanistan()
         from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
@@ -117,7 +119,9 @@ class TestGenerateReportService(TestCase):
             ("individuals_payments_admin_area_and_program", Report.INDIVIDUALS_AND_PAYMENT, True, True, 2),
         ]
     )
-    def test_report_types(self, _, report_type, should_set_admin_area, should_set_program, number_of_records):
+    def test_report_types(
+        self, _: Any, report_type: str, should_set_admin_area: bool, should_set_program: bool, number_of_records: int
+    ) -> None:
 
         report = ReportFactory.create(
             created_by=self.user,

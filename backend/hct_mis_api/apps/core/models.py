@@ -102,7 +102,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:
             self.parent.is_split = True
@@ -128,7 +128,7 @@ class BusinessArea(TimeStampedUUIDModel):
         return self.code_to_cash_assist_mapping.get(self.code, self.code)
 
     @cash_assist_code.setter
-    def cash_assist_code(self, value) -> None:
+    def cash_assist_code(self, value: Any) -> None:
         self.code = self.cash_assist_to_code_mapping.get(value, value)
 
     @property
@@ -145,7 +145,7 @@ class BusinessArea(TimeStampedUUIDModel):
     def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
 
-    def get_sys_option(self, key, default=None) -> Any:
+    def get_sys_option(self, key: str, default: None = None) -> Any:
         if "hope" in self.custom_fields:
             return self.custom_fields["hope"].get(key, default)
         return default
@@ -199,7 +199,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
 
 class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
-    def get_by_natural_key(self, name) -> "FlexibleAttributeGroup":
+    def get_by_natural_key(self, name: str) -> "FlexibleAttributeGroup":
         return self.get(name=name)
 
 
@@ -294,18 +294,18 @@ class CountryCodeMapManager(models.Manager):
         self._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         super().__init__()
 
-    def get_code(self, iso_code) -> Optional[str]:
+    def get_code(self, iso_code: str) -> Optional[str]:
         iso_code = iso_code.upper()
         self.build_cache()
         return self._cache[len(iso_code)].get(iso_code, iso_code)
 
-    def get_iso3_code(self, ca_code) -> Optional[str]:
+    def get_iso3_code(self, ca_code: str) -> str:
         ca_code = ca_code.upper()
         self.build_cache()
 
         return self._cache["ca3"].get(ca_code, ca_code)
 
-    def get_iso2_code(self, ca_code) -> Optional[str]:
+    def get_iso2_code(self, ca_code: str) -> str:
         ca_code = ca_code.upper()
         self.build_cache()
 
@@ -336,7 +336,7 @@ class CustomModelEntry(ModelEntry):
     """
 
     @classmethod
-    def from_entry(cls, name, app=None, **entry) -> "CustomModelEntry":
+    def from_entry(cls, name: str, app: Optional[str] = None, **entry: Any) -> "CustomModelEntry":
         obj, _ = PeriodicTask._default_manager.get_or_create(
             name=name,
             defaults=cls._unpack_fields(**entry),
@@ -417,7 +417,7 @@ class TicketPriority(models.Model):
 
     @classmethod
     @lru_cache()
-    def priority_by_business_area_and_ticket_type(cls, business_area_id, ticket_type) -> int:
+    def priority_by_business_area_and_ticket_type(cls, business_area_id: str, ticket_type: int) -> int:
         try:
             return cls.objects.get(business_area__pk=business_area_id, ticket_type=ticket_type).priority
         except ObjectDoesNotExist:
@@ -425,14 +425,14 @@ class TicketPriority(models.Model):
 
     @classmethod
     @lru_cache()
-    def urgency_by_business_area_and_ticket_type(cls, business_area_id, ticket_type) -> int:
+    def urgency_by_business_area_and_ticket_type(cls, business_area_id: str, ticket_type: int) -> int:
         try:
             return cls.objects.get(business_area__pk=business_area_id, ticket_type=ticket_type).urgency
         except ObjectDoesNotExist:
             return cls._get_default_urgency_by_ticket_type(ticket_type)
 
     @classmethod
-    def _get_default_priority_by_ticket_type(cls, ticket_type) -> int:
+    def _get_default_priority_by_ticket_type(cls, ticket_type: int) -> int:
         return {
             cls.NEEDS_ADJUDICATION: config.NEEDS_ADJUDICATION_PRIORITY,
             cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_PRIORITY,
@@ -440,7 +440,7 @@ class TicketPriority(models.Model):
         }[ticket_type]
 
     @classmethod
-    def _get_default_urgency_by_ticket_type(cls, ticket_type) -> int:
+    def _get_default_urgency_by_ticket_type(cls, ticket_type: int) -> int:
         return {
             cls.NEEDS_ADJUDICATION: config.NEEDS_ADJUDICATION_URGENCY,
             cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_URGENCY,

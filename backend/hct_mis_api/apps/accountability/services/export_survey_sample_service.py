@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from django.core.mail import EmailMultiAlternatives
@@ -12,6 +13,7 @@ from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.models import Household
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class ExportSurveySampleService:
         "registration_date",
     )
 
-    def __init__(self, survey: Survey, user):
+    def __init__(self, survey: Survey, user: AbstractUser):
         self.survey = survey
         self.user = user
 
@@ -89,7 +91,7 @@ class ExportSurveySampleService:
         for recipient in self.survey.recipients.all():
             self._get_record(recipient)
 
-    def _get_record(self, recipient) -> None:
+    def _get_record(self, recipient: Household) -> None:
         row = (
             str(recipient.unicef_id),
             str(recipient.head_of_household.full_name),

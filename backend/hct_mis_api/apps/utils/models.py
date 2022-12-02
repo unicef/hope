@@ -1,8 +1,10 @@
 # Create your models here.
 import logging
 import sys
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 from django.db import models
+from django.http import HttpRequest
 from django.utils import timezone
 
 from concurrency.fields import IntegerVersionField
@@ -11,6 +13,10 @@ from model_utils.models import UUIDModel
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +46,7 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:  # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -54,7 +60,7 @@ class SoftDeletableModelWithDate(models.Model):
 
 
 class SoftDeletionTreeManager(TreeManager):
-    def get_queryset(self, *args, **kwargs):
+    def get_queryset(self, *args: Any, **kwargs: Any) -> "QuerySet":
         """
         Return queryset limited to not removed entries.
         """
@@ -75,7 +81,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Optional[Tuple[int, dict[str, int]]]:  # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -138,7 +144,7 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
-    def process_exception(self, exc, request=None):
+    def process_exception(self, exc: BaseException, request: Optional[HttpRequest] = None) -> Optional[int]:
         try:
             from sentry_sdk import capture_exception
 
@@ -160,7 +166,7 @@ class AbstractSession(models.Model):
 
         return self.sentry_id
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"#{self.id} on {self.timestamp}"
 
 
@@ -187,7 +193,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:  # type: ignore
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -212,7 +218,7 @@ class UnicefIdentifiedModel(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
         if self._state.adding or self.unicef_id is None:
             # due to existence of "CREATE TRIGGER" in migrations

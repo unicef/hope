@@ -43,6 +43,7 @@ class ReferralTicketExtras(graphene.InputObjectType):
 class SensitiveGrievanceTicketExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
+    payment_record = graphene.List(graphene.ID)
 
 
 class TicketPaymentVerificationDetailsExtras(graphene.InputObjectType):
@@ -116,14 +117,14 @@ class EditIndividualDocumentObjectType(graphene.InputObjectType):
 
 class IndividualIdentityObjectType(graphene.InputObjectType):
     country = graphene.String(required=True)
-    agency = graphene.String(required=True)
+    partner = graphene.String(required=True)
     number = graphene.String(required=True)
 
 
 class EditIndividualIdentityObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
     country = graphene.String(required=True)
-    agency = graphene.String(required=True)
+    partner = graphene.String(required=True)
     number = graphene.String(required=True)
 
 
@@ -276,10 +277,6 @@ class UpdateGrievanceTicketExtrasInput(graphene.InputObjectType):
     add_individual_issue_type_extras = UpdateAddIndividualIssueTypeExtras()
     category = CategoryExtrasInput()
     ticket_payment_verification_details_extras = TicketPaymentVerificationDetailsExtras()
-
-
-def _no_operation_close_method(*args, **kwargs):
-    pass
 
 
 class GrievanceDocumentInput(graphene.InputObjectType):

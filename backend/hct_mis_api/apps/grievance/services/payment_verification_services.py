@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List
 
 from django.utils import timezone
 
@@ -7,7 +7,9 @@ from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
-def update_payment_verification_service(grievance_ticket, *args, **kwargs) -> List[GrievanceTicket]:
+def update_payment_verification_service(
+    grievance_ticket: GrievanceTicket, *args: Any, **kwargs: Any
+) -> List[GrievanceTicket]:
     payment_verification_details = grievance_ticket.payment_verification_ticket_details
     payment_verification = payment_verification_details.payment_verification
     if not (
@@ -37,7 +39,9 @@ def update_payment_verification_service(grievance_ticket, *args, **kwargs) -> Li
     return [grievance_ticket]
 
 
-def update_ticket_payment_verification_service(grievance_ticket, extras, input_data) -> GrievanceTicket:
+def update_ticket_payment_verification_service(
+    grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict
+) -> GrievanceTicket:
     if grievance_ticket.status != GrievanceTicket.STATUS_IN_PROGRESS:
         log_and_raise("Payment Details is editable only for Grievance Ticket on status In Progress")
 

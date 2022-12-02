@@ -1,5 +1,7 @@
 from collections import Counter
+from typing import Dict
 
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
@@ -18,7 +20,7 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
 def reassign_roles_on_disable_individual_service(
-    individual_to_remove, role_reassign_data, user, individual_key="individual"
+    individual_to_remove: Individual, role_reassign_data: Dict, user: AbstractUser, individual_key: str = "individual"
 ) -> Household:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -78,7 +80,7 @@ def reassign_roles_on_disable_individual_service(
     return household_to_remove
 
 
-def reassign_roles_on_update_service(individual, role_reassign_data, user) -> None:
+def reassign_roles_on_update_service(individual: Individual, role_reassign_data: Dict, user: AbstractUser) -> None:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
         role_name = role_data.get("role")

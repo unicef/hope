@@ -29,7 +29,7 @@ export function AgencyField({
     <>
       <Grid item xs={4}>
         <Field
-          name={`${baseName}[${index}].agency`}
+          name={`${baseName}[${index}].partner`}
           fullWidth
           variant='outlined'
           label={t('Agency')}

@@ -84,7 +84,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
@@ -125,7 +125,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             "description": "Test description",
         }
 
-    def submit_feedback(self, data) -> Optional[str]:
+    def submit_feedback(self, data: Dict) -> Optional[str]:
         amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
@@ -136,13 +136,13 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.assertEqual(Feedback.objects.count(), amount + 1)
         return decode_id_string(response["data"]["createFeedback"]["feedback"]["id"])
 
-    def create_new_feedback(self, data=None) -> Optional[str]:
+    def create_new_feedback(self, data: Optional[Dict] = None) -> Optional[str]:
         return self.submit_feedback(data or self.create_dummy_correct_input())
 
-    def test_creating_new_feedback(self):
+    def test_creating_new_feedback(self) -> None:
         self.create_new_feedback()
 
-    def test_getting_all_feedbacks(self):
+    def test_getting_all_feedbacks(self) -> None:
         self.create_new_feedback()
         response = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
@@ -152,7 +152,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in response, response["errors"]
         self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
 
-    def test_filtering_feedbacks(self):
+    def test_filtering_feedbacks(self) -> None:
         self.create_new_feedback(
             data=self.create_dummy_correct_input()
             | {
@@ -162,7 +162,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             }
         )
 
-        def filter_it(variables) -> List:
+        def filter_it(variables: Dict) -> List:
             response = self.graphql_request(
                 request_string=self.ALL_FEEDBACKS_QUERY,
                 context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
@@ -180,8 +180,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert len(filter_it({"createdBy": str(self.user.pk)})) == 1
         assert len(filter_it({"createdBy": str(self.program.pk)})) == 0
 
-    def test_failing_to_create_new_feedback(self):
-        def expect_failure(data) -> None:
+    def test_failing_to_create_new_feedback(self) -> None:
+        def expect_failure(data: Dict) -> None:
             current_amount = Feedback.objects.count()
             response = self.graphql_request(
                 request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
@@ -205,7 +205,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             }
         )
 
-    def test_optional_household_lookup(self):
+    def test_optional_household_lookup(self) -> None:
         data = self.create_dummy_correct_input() | {
             "householdLookup": encode_id_base64(self.household.pk, "Household"),
         }
@@ -213,7 +213,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.household_lookup, self.household)
 
-    def test_optional_individual_lookup(self):
+    def test_optional_individual_lookup(self) -> None:
         data = self.create_dummy_correct_input() | {
             "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
         }
@@ -222,7 +222,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.individual_lookup, self.individuals[0])
 
-    def test_optional_comments(self):
+    def test_optional_comments(self) -> None:
         data = self.create_dummy_correct_input() | {
             "comments": "Test comments",
         }
@@ -230,7 +230,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.comments, "Test comments")
 
-    def test_optional_program(self):
+    def test_optional_program(self) -> None:
         data = self.create_dummy_correct_input() | {
             "program": encode_id_base64(self.program.pk, "Program"),
         }
@@ -238,7 +238,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.program, self.program)
 
-    def test_optional_language(self):
+    def test_optional_language(self) -> None:
         data = self.create_dummy_correct_input() | {
             "language": "en",
         }
@@ -246,7 +246,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.language, "en")
 
-    def test_optional_area(self):
+    def test_optional_area(self) -> None:
         data = self.create_dummy_correct_input() | {
             "area": "Test area",
         }
@@ -254,7 +254,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.area, "Test area")
 
-    def test_optional_admin2(self):
+    def test_optional_admin2(self) -> None:
         country = CountryFactory()
         area_type = geo_models.AreaType.objects.create(name="X", area_level=1, country=country)
         admin2 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=area_type)
@@ -265,7 +265,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.admin2, admin2)
 
-    def test_updating_feedback(self):
+    def test_updating_feedback(self) -> None:
         feedback_id = self.create_new_feedback()
         feedback = Feedback.objects.get(id=feedback_id)
         self.assertEqual(feedback.issue_type, Feedback.POSITIVE_FEEDBACK)
@@ -283,7 +283,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         feedback.refresh_from_db()
         self.assertEqual(feedback.issue_type, Feedback.NEGATIVE_FEEDBACK)
 
-    def test_getting_single_feedback(self):
+    def test_getting_single_feedback(self) -> None:
         feedback_id = self.create_new_feedback()
         response = self.graphql_request(
             request_string=self.SINGLE_FEEDBACK_QUERY,
@@ -293,7 +293,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in response, response["errors"]
         self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
 
-    def create_linked_grievance_ticket(self, feedback_id) -> Dict:
+    def create_linked_grievance_ticket(self, feedback_id: str) -> Dict:
         create_grievance_response = self.graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
@@ -313,7 +313,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in create_grievance_response, create_grievance_response["errors"]
         return create_grievance_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]
 
-    def test_linking_feedback_to_grievance_ticket(self):
+    def test_linking_feedback_to_grievance_ticket(self) -> None:
         feedback_id = self.create_new_feedback()
         grievance_data = self.create_linked_grievance_ticket(feedback_id)
         received_grievance_id = decode_id_string(grievance_data["id"])
@@ -327,7 +327,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         self.assertEqual(str(feedback.id), received_feedback_id)
 
-    def test_individuals_lookup_household_matching_household_lookup(self):
+    def test_individuals_lookup_household_matching_household_lookup(self) -> None:
         self.other_household, self.other_individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.registration_data_import,
@@ -351,7 +351,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" in response, response
         self.assertEqual(Feedback.objects.count(), amount)
 
-    def test_ordering_by_issue_type(self):
+    def test_ordering_by_issue_type(self) -> None:
         self.create_new_feedback(
             data=self.create_dummy_correct_input()
             | {
@@ -387,7 +387,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.assertEqual(feedbacks_2[0]["node"]["issueType"], Feedback.NEGATIVE_FEEDBACK)
         self.assertEqual(feedbacks_2[1]["node"]["issueType"], Feedback.POSITIVE_FEEDBACK)
 
-    def test_ordering_by_linked_grievance(self):
+    def test_ordering_by_linked_grievance(self) -> None:
         feedback_id_1 = self.create_new_feedback()
         grievance_data_1 = self.create_linked_grievance_ticket(feedback_id_1)
         feedback_id_2 = self.create_new_feedback()

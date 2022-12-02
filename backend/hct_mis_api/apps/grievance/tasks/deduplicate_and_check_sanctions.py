@@ -21,7 +21,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
     @transaction.atomic(using="default")
-    def execute(self, should_populate_index: bool, individuals_ids: List[str]):
+    def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
 

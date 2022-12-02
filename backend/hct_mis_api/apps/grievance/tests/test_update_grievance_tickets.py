@@ -1,13 +1,15 @@
 from datetime import date
-from typing import Dict
+from typing import Any, Dict, List, Optional
 from unittest import mock
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from factory import Factory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -40,7 +42,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SINGLE,
     UNHCR,
-    Agency,
     DocumentType,
     IndividualIdentity,
 )
@@ -81,7 +82,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
@@ -235,17 +236,19 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.positive_feedback_grievance_ticket)
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
+        unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
         cls.identity_to_update = IndividualIdentity.objects.create(
-            agency=unhcr_agency,
+            partner=unhcr,
             individual=cls.individuals[0],
             number="1111",
+            country=country_pl,
         )
 
         cls.identity_to_remove = IndividualIdentity.objects.create(
-            agency=unhcr_agency,
+            partner=unhcr,
             individual=cls.individuals[0],
             number="3456",
+            country=country_pl,
         )
 
     @parameterized.expand(
@@ -262,7 +265,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_update_add_individual(self, name, permissions):
+    def test_update_add_individual(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.add_individual_grievance_ticket.save()
@@ -296,7 +299,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             ],
                             "identities": [
                                 {
-                                    "agency": UNHCR,
+                                    "partner": UNHCR,
                                     "country": "POL",
                                     "number": "2222",
                                 }
@@ -341,7 +344,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "bank_account_number": "2356789789789789",
                     },
                 ],
-                "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
+                "identities": [{"partner": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
                 "birth_date": "1981-02-02",
                 "given_name": "John",
@@ -388,7 +391,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_update_change_individual(self, name, permissions):
+    def test_update_change_individual(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.individual_data_change_grievance_ticket.save()
@@ -423,7 +426,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "documentsToRemove": [],
                             "identities": [
                                 {
-                                    "agency": UNHCR,
+                                    "partner": UNHCR,
                                     "country": "POL",
                                     "number": "2222",
                                 }
@@ -431,7 +434,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "identitiesToEdit": [
                                 {
                                     "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                                    "agency": UNHCR,
+                                    "partner": UNHCR,
                                     "country": "POL",
                                     "number": "3333",
                                 }
@@ -467,7 +470,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 ],
                 "identities": [
                     {
-                        "value": {"agency": "UNHCR", "number": "2222", "country": "POL"},
+                        "value": {"partner": "UNHCR", "number": "2222", "country": "POL"},
                         "approve_status": False,
                     },
                 ],
@@ -475,14 +478,14 @@ class TestUpdateGrievanceTickets(APITestCase):
                     {
                         "value": {
                             "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                            "agency": "UNHCR",
+                            "partner": "UNHCR",
                             "number": "3333",
                             "country": "POL",
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         },
                         "previous_value": {
                             "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                            "agency": "UNHCR",
+                            "partner": "UNHCR",
                             "number": "1111",
                             "country": "POL",
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
@@ -548,7 +551,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_change_household(self, name, permissions):
+    def test_update_change_household(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -615,7 +618,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_feedback_ticket(self, _, permissions):
+    def test_update_feedback_ticket(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -646,7 +649,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_set_household_if_not_set(self, _, factory):
+    def test_set_household_if_not_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         ticket = factory()
@@ -677,7 +680,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_set_individual_if_not_set(self, _, factory):
+    def test_set_individual_if_not_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         ticket = factory()
@@ -708,7 +711,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_raise_exception_if_household_already_set(self, _, factory):
+    def test_raise_exception_if_household_already_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         household, _ = create_household()
@@ -739,7 +742,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_raise_exception_if_individual_already_set(self, _, factory):
+    def test_raise_exception_if_individual_already_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         household, individuals = create_household()
@@ -758,7 +761,9 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.assertTrue("Cannot change individual" in response["errors"][0]["message"])
 
-    def _prepare_input_data(self, ticket_id, household_id=None, individual_id=None) -> Dict:
+    def _prepare_input_data(
+        self, ticket_id: str, household_id: Optional[str] = None, individual_id: Optional[str] = None
+    ) -> Dict:
         return {
             "input": {
                 "description": "New Description",

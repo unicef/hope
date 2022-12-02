@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -57,7 +58,7 @@ class TestCloseDataChangeTickets(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -281,7 +282,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_add_individual(cls, _, permissions, should_close):
+    def test_close_add_individual(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
         cls.graphql_request(
             request_string=cls.STATUS_CHANGE_MUTATION,
@@ -324,7 +325,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_update_individual(cls, _, permissions, should_close):
+    def test_close_update_individual(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
 
         cls.graphql_request(
@@ -363,7 +364,7 @@ class TestCloseDataChangeTickets(APITestCase):
             cls.assertEqual(individual.full_name, "Benjamin Butler")
             cls.assertEqual(individual.family_name, "Butler")
 
-    def test_close_update_individual_document_photo(cls):
+    def test_close_update_individual_document_photo(cls) -> None:
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
@@ -435,7 +436,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_update_household(cls, _, permissions, should_close):
+    def test_close_update_household(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
         cls.graphql_request(
             request_string=cls.STATUS_CHANGE_MUTATION,
@@ -451,7 +452,7 @@ class TestCloseDataChangeTickets(APITestCase):
         if should_close:
             cls.assertEqual(cls.household_one.village, "Test Village")
 
-    def test_close_individual_delete_with_correct_permissions(cls):
+    def test_close_individual_delete_with_correct_permissions(cls) -> None:
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
@@ -472,7 +473,7 @@ class TestCloseDataChangeTickets(APITestCase):
         ).exists()
         cls.assertTrue(changed_role_exists)
 
-    def test_close_individual_delete_without_permissions(cls):
+    def test_close_individual_delete_without_permissions(cls) -> None:
         cls.create_user_role_with_permissions(cls.user, [], cls.business_area)
 
         cls.graphql_request(
@@ -485,7 +486,7 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         cls.assertTrue(Individual.objects.filter(id=cls.individuals_household_two[0].id).exists())
 
-    def test_close_household_delete(cls):
+    def test_close_household_delete(cls) -> None:
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
@@ -521,7 +522,7 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.assertTrue(cls.individuals[0].withdrawn)
         cls.assertTrue(cls.individuals[1].withdrawn)
 
-    def test_close_add_individual_create_bank_account(self):
+    def test_close_add_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
@@ -549,7 +550,7 @@ class TestCloseDataChangeTickets(APITestCase):
         self.assertEqual(bank_account_info.bank_name, "privatbank")
         self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
 
-    def test_close_update_individual_create_bank_account(self):
+    def test_close_update_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
@@ -594,7 +595,7 @@ class TestCloseDataChangeTickets(APITestCase):
         self.assertEqual(bank_account_info.bank_name, "privatbank")
         self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
 
-    def test_close_update_individual_update_bank_account(self):
+    def test_close_update_individual_update_bank_account(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )

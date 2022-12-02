@@ -87,20 +87,6 @@ input AgeInput {
   max: Int
 }
 
-type AgencyNode {
-  id: ID!
-  type: AgencyType!
-  label: String!
-  country: String
-  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
-  countryIso3: String
-}
-
-enum AgencyType {
-  UNHCR
-  WFP
-}
-
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -846,7 +832,7 @@ input EditIndividualDocumentObjectType {
 input EditIndividualIdentityObjectType {
   id: ID!
   country: String!
-  agency: String!
+  partner: String!
   number: String!
 }
 
@@ -1698,8 +1684,8 @@ type ImportedIndividualIdentityNode implements Node {
   id: ID!
   individual: ImportedIndividualNode!
   documentNumber: String!
-  type: String
   country: String
+  partner: String
 }
 
 type ImportedIndividualIdentityNodeConnection {
@@ -1835,11 +1821,11 @@ input IndividualDocumentObjectType {
 
 type IndividualIdentityNode implements Node {
   id: ID!
-  agency: AgencyNode!
   individual: IndividualNode!
   number: String!
-  type: String
+  partner: String
   country: String
+  countryIso3: String
 }
 
 type IndividualIdentityNodeConnection {
@@ -1856,7 +1842,7 @@ type IndividualIdentityNodeEdge {
 
 input IndividualIdentityObjectType {
   country: String!
-  agency: String!
+  partner: String!
   number: String!
 }
 
@@ -2184,10 +2170,10 @@ type Mutations {
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
-  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
+  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
+  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
+  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
@@ -2252,6 +2238,7 @@ type PartnerType {
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
 type PaymentDetailsApproveMutation {
@@ -3079,6 +3066,7 @@ type SectionTotalNode {
 input SensitiveGrievanceTicketExtras {
   household: ID
   individual: ID
+  paymentRecord: [ID]
 }
 
 type ServiceProviderNode implements Node {
@@ -3425,6 +3413,7 @@ type TicketDeleteHouseholdDetailsNode implements Node {
   household: HouseholdNode
   roleReassignData: JSONString!
   approveStatus: Boolean!
+  reasonHousehold: HouseholdNode
   householdData: Arg
 }
 

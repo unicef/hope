@@ -1,3 +1,5 @@
+from typing import Any
+
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -23,7 +25,7 @@ class SanctionListIndividualNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_country_of_birth(parent, info):
+    def resolve_country_of_birth(parent, info: Any) -> str:
         return parent.country_of_birth.name
 
 
@@ -36,7 +38,7 @@ class SanctionListIndividualDocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_issuing_country(parent, info):
+    def resolve_issuing_country(parent, info: Any) -> str:
         return parent.issuing_country.name
 
 
@@ -49,7 +51,7 @@ class SanctionListIndividualNationalitiesNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_nationality(parent, info):
+    def resolve_nationality(parent, info: Any) -> str:
         return parent.nationality.name
 
 
@@ -62,7 +64,7 @@ class SanctionListIndividualCountriesNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_country(parent, info):
+    def resolve_country(parent, info: Any) -> str:
         return parent.country.name
 
 

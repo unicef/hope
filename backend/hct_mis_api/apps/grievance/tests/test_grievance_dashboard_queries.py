@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -64,7 +65,7 @@ class TestGrievanceDashboardQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadcountries")
         create_afghanistan()
         cls.user = UserFactory.create()
@@ -148,7 +149,7 @@ class TestGrievanceDashboardQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_by_type(self, _, permissions):
+    def test_grievance_query_by_type(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -166,7 +167,7 @@ class TestGrievanceDashboardQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_by_category(self, _, permissions):
+    def test_grievance_query_by_category(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -184,7 +185,7 @@ class TestGrievanceDashboardQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_by_status(self, _, permissions):
+    def test_grievance_query_by_status(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -202,7 +203,7 @@ class TestGrievanceDashboardQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_by_location(self, _, permissions):
+    def test_grievance_query_by_location(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

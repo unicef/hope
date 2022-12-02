@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 
@@ -11,14 +13,14 @@ from hct_mis_api.apps.program.models import Program
 
 class FeedbackCrudServices:
     @classmethod
-    def validate_lookup(cls, feedback) -> None:
+    def validate_lookup(cls, feedback: Feedback) -> None:
         if feedback.household_lookup is not None and feedback.individual_lookup is not None:
             if feedback.household_lookup != feedback.individual_lookup.household:
                 raise Exception("Household lookup does not match individual lookup")
 
     @classmethod
     def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Feedback:
-        def check(key) -> bool:
+        def check(key: Any) -> bool:
             return key in input_data and input_data[key] is not None
 
         obj = Feedback(
@@ -49,7 +51,7 @@ class FeedbackCrudServices:
 
     @classmethod
     def update(cls, feedback: Feedback, input_data: dict) -> Feedback:
-        def check(key) -> bool:
+        def check(key: Any) -> bool:
             return key in input_data and input_data[key] is not None
 
         if check("issue_type"):

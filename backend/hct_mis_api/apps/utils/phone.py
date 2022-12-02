@@ -1,9 +1,11 @@
 from typing import Any
 
+from django.db.models import Model
+
 import phonenumbers
 
 
-def is_valid_phone_number(phone_number) -> bool:
+def is_valid_phone_number(phone_number: Any) -> bool:
     if not isinstance(phone_number, str):
         phone_number = str(phone_number)
 
@@ -15,13 +17,13 @@ def is_valid_phone_number(phone_number) -> bool:
         return phonenumbers.is_valid_number(parsed_number)
 
 
-def calculate_phone_numbers_validity(obj) -> Any:
+def calculate_phone_numbers_validity(obj: Any) -> Any:
     obj.phone_no_valid = is_valid_phone_number(str(obj.phone_no))
     obj.phone_no_alternative_valid = is_valid_phone_number(str(obj.phone_no_alternative))
     return obj
 
 
-def recalculate_phone_numbers_validity(obj, model) -> Any:
+def recalculate_phone_numbers_validity(obj: Any, model: Model) -> Any:
     # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
     if current := model.objects.filter(pk=obj.pk).first():
         # update

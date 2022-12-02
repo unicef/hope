@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from graphql import GraphQLError
 
@@ -22,7 +23,7 @@ class MessageArgumentVerifier:
         "only_one_of_these": ["households", "target_population", "registration_data_import"],
     }
 
-    def __init__(self, input_data) -> None:
+    def __init__(self, input_data: Dict) -> None:
         self.input_data = input_data
 
     def verify(self) -> None:

@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.conf import settings
 from django.core.management import call_command
 
@@ -103,7 +105,7 @@ class TestHouseholdQuery(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cached_business_areas_slug_id_dict.cache_clear()
         call_command("loadbusinessareas")
         cls.user = UserFactory.create()
@@ -146,7 +148,7 @@ class TestHouseholdQuery(APITestCase):
             ("all_max_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MAX),
         ]
     )
-    def test_household_query_all(self, _, permissions, query_string):
+    def test_household_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -160,7 +162,7 @@ class TestHouseholdQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_household_filter_by_programme(self, _, permissions):
+    def test_household_filter_by_programme(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -175,7 +177,7 @@ class TestHouseholdQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_household_query_single(self, _, permissions):
+    def test_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

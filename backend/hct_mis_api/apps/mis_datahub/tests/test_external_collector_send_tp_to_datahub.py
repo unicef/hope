@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -16,6 +18,7 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class TestExternalCollectorSendTpToDatahub(TestCase):
@@ -33,7 +36,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs) -> TargetPopulation:
+    def _create_target_population(**kwargs: Any) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,
@@ -50,7 +53,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
@@ -88,7 +91,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_with_individuals.households.set([cls.household, cls.household_second])
-        cls.target_population_with_individuals.refresh_stats()
+        cls.target_population_with_individuals = refresh_stats(cls.target_population_with_individuals)
         cls.target_population_with_individuals.save()
 
         cls.target_population_without_individuals = cls._create_target_population(
@@ -99,11 +102,11 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_without_individuals.households.set([cls.household, cls.household_second])
-        cls.target_population_without_individuals.refresh_stats()
+        cls.target_population_without_individuals = refresh_stats(cls.target_population_without_individuals)
         cls.target_population_without_individuals.save()
 
     @classmethod
-    def create_first_household(cls, admin_area, rdi) -> None:
+    def create_first_household(cls, admin_area: Any, rdi: RegistrationDataImportFactory) -> None:
         cls.household = HouseholdFactory.build(
             size=4,
             registration_data_import=rdi,
@@ -140,7 +143,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.household.save()
 
     @classmethod
-    def create_second_household(cls, admin_area, rdi_second) -> None:
+    def create_second_household(cls, admin_area: Any, rdi_second: RegistrationDataImportFactory) -> None:
         cls.household_second = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
@@ -180,7 +183,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.household_second.save()
 
     @classmethod
-    def create_third_household(cls, admin_area, rdi_second) -> None:
+    def create_third_household(cls, admin_area: Any, rdi_second: RegistrationDataImportFactory) -> None:
         """this is generated only to have additional informaation in DB"""
         household_third = HouseholdFactory.build(
             size=1,
@@ -220,7 +223,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         household_third.head_of_household = household_third_head
         household_third.save()
 
-    def test_send_targeting_with_external_collectors_with_individuals(self):
+    def test_send_targeting_with_external_collectors_with_individuals(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_with_individuals)
 
@@ -334,7 +337,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             "Only 4 Roles should be copied",
         )
 
-    def test_send_targeting_with_external_collectors_without_individuals(self):
+    def test_send_targeting_with_external_collectors_without_individuals(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_without_individuals)
 

@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.test import TestCase
 
@@ -31,7 +33,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 
 
 # used for ease of assertions, so it imitates serializer's behaviour
-def _time(some_time) -> str:
+def _time(some_time: datetime.date) -> str:
     return str(some_time).replace(" ", "T").replace("+00:00", "Z")
 
 
@@ -40,7 +42,7 @@ class TestDetails(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)
@@ -54,7 +56,7 @@ class TestDetails(TestCase):
             has_data_sharing_agreement=True,
         )
 
-    def test_filtering_business_area_code_with_tax_id(self):
+    def test_filtering_business_area_code_with_tax_id(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
@@ -69,7 +71,7 @@ class TestDetails(TestCase):
         response_nok = self.api_client.get(f"/api/hh-status?tax_id={tax_id}&business_area_code=non-existent")
         self.assertEqual(response_nok.status_code, 404)
 
-    def test_filtering_business_area_code_with_registration_id(self):
+    def test_filtering_business_area_code_with_registration_id(self) -> None:
         rdi_datahub = RegistrationDataImportDatahubFactory(business_area_slug=self.business_area.slug)
         imported_household = ImportedHouseholdFactory(registration_data_import=rdi_datahub)
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
@@ -92,12 +94,12 @@ class TestDetails(TestCase):
         )
         self.assertEqual(response_nok.status_code, 404)
 
-    def test_getting_non_existent_individual(self):
+    def test_getting_non_existent_individual(self) -> None:
         response = self.api_client.get("/api/hh-status?tax_id=non-existent")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["status"], "not found")
 
-    def test_getting_individual_with_status_imported(self):
+    def test_getting_individual_with_status_imported(self) -> None:
         imported_household = ImportedHouseholdFactory()
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual
@@ -123,7 +125,7 @@ class TestDetails(TestCase):
         self.assertEqual(individual["role"], ROLE_NO_ROLE)
         self.assertEqual(individual["tax_id"], tax_id)
 
-    def test_getting_individual_with_status_merged_to_population(self):
+    def test_getting_individual_with_status_merged_to_population(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
@@ -137,7 +139,7 @@ class TestDetails(TestCase):
         self.assertEqual(info["status"], "merged to population")
         self.assertEqual(info["date"], _time(household.created_at))
 
-    def test_getting_individual_with_status_targeted(self):
+    def test_getting_individual_with_status_targeted(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
@@ -157,7 +159,7 @@ class TestDetails(TestCase):
         self.assertEqual(info["status"], "targeted")
         self.assertEqual(info["date"], _time(HouseholdSelection.objects.first().updated_at))
 
-    def test_getting_individual_with_status_sent_to_cash_assist(self):
+    def test_getting_individual_with_status_sent_to_cash_assist(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
@@ -179,7 +181,7 @@ class TestDetails(TestCase):
         info = data["info"]
         self.assertEqual(info["status"], "sent to cash assist")
 
-    def test_getting_individual_with_status_paid(self):
+    def test_getting_individual_with_status_paid(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
@@ -195,12 +197,12 @@ class TestDetails(TestCase):
         self.assertEqual(info["status"], "paid")
         self.assertEqual(info["date"], _time(payment_record.updated_at))
 
-    def test_getting_non_existent_household(self):
+    def test_getting_non_existent_household(self) -> None:
         response = self.api_client.get("/api/hh-status?registration_id=non-existent")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["status"], "not found")
 
-    def test_getting_household_with_status_imported(self):
+    def test_getting_household_with_status_imported(self) -> None:
         imported_household = ImportedHouseholdFactory()
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual

@@ -45,7 +45,7 @@ class TestRoleReassignMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -107,7 +107,7 @@ class TestRoleReassignMutation(APITestCase):
             approve_status=True,
         )
 
-    def test_role_reassignment(self):
+    def test_role_reassignment(self) -> None:
         variables = {
             "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
             "householdId": self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -163,7 +163,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -254,7 +254,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             selected_individual=None,
         )
 
-    def test_role_reassignment_new_ticket(self):
+    def test_role_reassignment_new_ticket(self) -> None:
         variables = {
             "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
             "householdId": self.id_to_base64(self.household.id, "HouseholdNode"),

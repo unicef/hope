@@ -1,4 +1,6 @@
-from django.contrib.admin import site
+from typing import Any, Dict, Tuple
+
+from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse
 
@@ -16,7 +18,7 @@ factories_registry = {}
 
 
 class AutoRegisterFactoryMetaClass(FactoryMetaClass):
-    def __new__(mcs, class_name, bases, attrs):
+    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:
         new_class = super().__new__(mcs, class_name, bases, attrs)
         factories_registry[new_class._meta.model] = new_class
         return new_class
@@ -26,7 +28,7 @@ class ModelFactory(factory.django.DjangoModelFactory, metaclass=AutoRegisterFact
     pass
 
 
-def get_factory_for_model(_model):
+def get_factory_for_model(_model: Any) -> object:
     class Meta:
         model = _model
 
@@ -35,7 +37,7 @@ def get_factory_for_model(_model):
     return type("AAA", (ModelFactory,), {"Meta": Meta})
 
 
-def model_admins():
+def model_admins() -> Tuple:
     m = []
     for model, admin in site._registry.items():
         if model.__name__ not in EXCLUDED_MODELS:
@@ -52,11 +54,11 @@ class TestAdminSite(WebTest):
         "registration_datahub",
     ]
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
     @parameterized.expand(model_admins)
-    def test_changelist(self, name, model_admin):
+    def test_changelist(self, name: str, model_admin: ModelAdmin) -> None:
         url = reverse(admin_urlname(model_admin.model._meta, "changelist"))
         res = self.app.get(url, user=self.superuser)
         self.assertEqual(res.status_code, 200)

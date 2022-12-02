@@ -73,7 +73,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   if (permissions === null) return null;
 
   const cashAssistIndex = menuItems.findIndex(
-    (item) => item.name === 'Payment Management',
+    (item) => item.name === 'Cash Assist',
   );
 
   menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;

@@ -1,6 +1,6 @@
 import re
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
@@ -19,7 +19,7 @@ class MessagesFilter(FilterSet):
     body = CharFilter(field_name="body", lookup_expr="icontains")
     sampling_type = ChoiceFilter(field_name="sampling_type", choices=Message.SamplingChoices.choices)
 
-    def filter_program(self, queryset, name, value):
+    def filter_program(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Message]:
         return queryset.filter(target_population__program=decode_id_string(value))
 
     class Meta:
@@ -42,10 +42,10 @@ class MessageRecipientsMapFilter(FilterSet):
     phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
     sex = CharFilter(field_name="head_of_household__sex")
 
-    def filter_message_id(self, queryset, name, value):
+    def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
         return queryset.filter(messages__id=decode_id_string(value))
 
-    def filter_recipient_id(self, queryset, name, value):
+    def filter_recipient_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
         return queryset.filter(head_of_household_id=decode_id_string(value))
 
     class Meta:
@@ -73,10 +73,10 @@ class FeedbackFilter(FilterSet):
     created_by = CharFilter(method="filter_created_by")
     feedback_id = CharFilter(method="filter_feedback_id")
 
-    def filter_created_by(self, queryset, name, value):
+    def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(created_by__pk=value)
 
-    def filter_feedback_id(self, queryset, name, value):
+    def filter_feedback_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(unicef_id=value)
 
     class Meta:
@@ -107,7 +107,7 @@ class SurveyFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
 
-    def filter_search(self, queryset, name, value):
+    def filter_search(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Survey]:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -161,5 +161,5 @@ class RecipientFilter(FilterSet):
         )
     )
 
-    def filter_survey(self, queryset, name, value):
+    def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
         return queryset.filter(surveys__id=decode_id_string(value))

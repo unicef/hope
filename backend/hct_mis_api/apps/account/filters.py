@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, List
+
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
@@ -6,6 +8,13 @@ from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models.query import QuerySet
+
+    from hct_mis_api.apps.account.models import User
 
 
 class UsersFilter(FilterSet):
@@ -30,7 +39,7 @@ class UsersFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -39,16 +48,16 @@ class UsersFilter(FilterSet):
             q_obj |= Q(email__startswith=value)
         return qs.filter(q_obj)
 
-    def business_area_filter(self, qs, name, value):
+    def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         return qs.filter(user_roles__business_area__slug=value)
 
-    def partners_filter(self, qs, name, values):
+    def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":
         q_obj = Q()
         for value in values:
             q_obj |= Q(partner__id=value)
         return qs.filter(q_obj)
 
-    def roles_filter(self, qs, name, values):
+    def roles_filter(self, qs: "QuerySet", name: str, values: List) -> "QuerySet[User]":
         business_area_slug = self.data.get("business_area")
         q_obj = Q()
         for value in values:
