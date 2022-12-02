@@ -67,7 +67,7 @@ export function GrievancesFilters({
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid container item xs={5} spacing={0}>
-          <Grid xs={8}>
+          <Grid item xs={8}>
             <SearchTextField
               value={filter.search || ''}
               label='Search'
@@ -77,7 +77,7 @@ export function GrievancesFilters({
               borderRadius='4px 0px 0px 4px'
             />
           </Grid>
-          <Grid container xs={4}>
+          <Grid container item xs={4}>
             <SelectFilter
               onChange={(e) => handleFilterChange(e, 'searchType')}
               label={undefined}
