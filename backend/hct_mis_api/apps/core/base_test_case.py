@@ -23,11 +23,23 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
 
 
-class APITestCase(SnapshotTestTestCase):
+class TimeMeasuringTestCase:
     def setUp(self) -> None:
+        super().setUp()
+        self._start_time = time.time()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
+            f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
+
+
+class APITestCase(SnapshotTestTestCase, TimeMeasuringTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+
         from hct_mis_api.schema import schema
 
-        super().setUp()
         self.client = Client(schema)
 
         seed_in_env = os.getenv("RANDOM_SEED", None)
@@ -36,12 +48,8 @@ class APITestCase(SnapshotTestTestCase):
         if seed_in_env is not None:
             print(f"Random seed: {self.seed}")
 
-        self.start_time = time.time()
-
     def tearDown(self) -> None:
-        with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
-            f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
-
+        super().tearDown()
         # https://stackoverflow.com/a/39606065
         if hasattr(self._outcome, "errors"):
             # Python 3.4 - 3.10  (These two methods have no side effects)
@@ -120,7 +128,7 @@ class APITestCase(SnapshotTestTestCase):
         return user_role
 
 
-class BaseElasticSearchTestCase(TestCase):
+class BaseElasticSearchTestCase(TestCase, TimeMeasuringTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         connections.create_connection(hosts=["elasticsearch:9200"], timeout=20)

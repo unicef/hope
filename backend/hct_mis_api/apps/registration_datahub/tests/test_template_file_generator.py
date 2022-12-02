@@ -1,11 +1,12 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.registration_datahub.template_generator import (
     TemplateFileGenerator,
 )
 
 
-class TestTemplateFileGenerator(TestCase):
+class TestTemplateFileGenerator(TestCase, TimeMeasuringTestCase):
     def test_create_workbook(self) -> None:
         wb = TemplateFileGenerator._create_workbook()
 

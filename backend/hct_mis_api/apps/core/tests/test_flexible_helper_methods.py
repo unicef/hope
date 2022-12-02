@@ -7,10 +7,11 @@ from django.test import TestCase
 import xlrd
 from xlrd.sheet import Cell
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 
 
-class TestFlexibleHelperMethods(TestCase):
+class TestFlexibleHelperMethods(TestCase, TimeMeasuringTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.importer = FlexibleAttributeImporter()

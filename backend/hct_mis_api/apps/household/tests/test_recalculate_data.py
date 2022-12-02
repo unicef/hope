@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from freezegun import freeze_time
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -25,7 +26,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
-class TestRecalculateData(TestCase):
+class TestRecalculateData(TestCase, TimeMeasuringTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()

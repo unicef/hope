@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -9,7 +10,7 @@ from hct_mis_api.apps.household.models import Document, Household, Individual
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 
 
-class TestHouseholdWithdraw(TestCase):
+class TestHouseholdWithdraw(TestCase, TimeMeasuringTestCase):
     databases = {"registration_datahub", "default"}
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
