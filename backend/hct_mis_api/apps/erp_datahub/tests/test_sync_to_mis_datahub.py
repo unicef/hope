@@ -2,7 +2,6 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.erp_datahub.fixtures import FundsCommitmentFactory
 from hct_mis_api.apps.erp_datahub.models import DownPayment
@@ -10,7 +9,7 @@ from hct_mis_api.apps.erp_datahub.tasks.sync_to_mis_datahub import SyncToMisData
 from hct_mis_api.apps.mis_datahub import models as mis_models
 
 
-class TestSyncToMisDatahubTask(TestCase, TimeMeasuringTestCase):
+class TestSyncToMisDatahubTask(TestCase):
     databases = "__all__"
     bosnia_and_herzegovina = None
     bosnia = None
