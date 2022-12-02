@@ -154,10 +154,16 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if document_data:
             document_data["photo"] = file
         else:
+            doc_type = (
+                "OTHER"
+                if header.startswith("other_id")
+                else header.replace("_no", "").replace("_i_c", "").upper().strip()
+            )
             suffix = "other" if header.startswith("other_id") else header
             self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
                 "photo": file,
+                "type": doc_type,
             }
 
     def _handle_document_issuing_country_fields(
@@ -174,10 +180,16 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if document_data:
             document_data["issuing_country"] = Country(value)
         else:
+            doc_type = (
+                "OTHER"
+                if header.startswith("other_id")
+                else header.replace("_no", "").replace("_i_c", "").upper().strip()
+            )
             suffix = "other" if header.startswith("other_id") else header
             self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
                 "issuing_country": Country(value),
+                "type": doc_type,
             }
 
     def _handle_image_field(
@@ -324,7 +336,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(type=document_data["type"])
+            doc_type = ImportedDocumentType.objects.get(type=document_data["type"].strip().upper())
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
