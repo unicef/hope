@@ -999,8 +999,9 @@ export type CreateReportInput = {
   businessAreaSlug: Scalars['String'],
   dateFrom: Scalars['Date'],
   dateTo: Scalars['Date'],
-  adminArea?: Maybe<Array<Maybe<Scalars['ID']>>>,
   program?: Maybe<Scalars['ID']>,
+  adminArea1?: Maybe<Scalars['ID']>,
+  adminArea2?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
 export type CreateSurveyInput = {
@@ -4071,7 +4072,8 @@ export type QueryAllAdminAreasArgs = {
   name?: Maybe<Scalars['String']>,
   name_Istartswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
-  level?: Maybe<Scalars['Int']>
+  level?: Maybe<Scalars['Int']>,
+  parentId?: Maybe<Scalars['String']>
 };
 
 
@@ -5062,12 +5064,34 @@ export type ReportNode = Node & {
   dateTo: Scalars['Date'],
   numberOfRecords?: Maybe<Scalars['Int']>,
   program?: Maybe<ProgramNode>,
-  adminArea?: Maybe<AreaNodeConnection>,
+  adminArea: AreaNodeConnection,
   fileUrl?: Maybe<Scalars['String']>,
+  adminArea1?: Maybe<AreaNodeConnection>,
+  adminArea2?: Maybe<AreaNodeConnection>,
 };
 
 
 export type ReportNodeAdminAreaArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type ReportNodeAdminArea1Args = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type ReportNodeAdminArea2Args = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -8081,7 +8105,7 @@ export type CreateReportMutation = (
       & { createdBy: (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: Maybe<(
+      ), adminArea: (
         { __typename?: 'AreaNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'AreaNodeEdge' }
@@ -8090,7 +8114,7 @@ export type CreateReportMutation = (
             & Pick<AreaNode, 'name'>
           )> }
         )>> }
-      )>, program: Maybe<(
+      ), program: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'name'>
       )> }
@@ -8113,7 +8137,7 @@ export type RestartCreateReportMutation = (
       & { createdBy: (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: Maybe<(
+      ), adminArea: (
         { __typename?: 'AreaNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'AreaNodeEdge' }
@@ -8122,7 +8146,7 @@ export type RestartCreateReportMutation = (
             & Pick<AreaNode, 'name'>
           )> }
         )>> }
-      )>, program: Maybe<(
+      ), program: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'name'>
       )> }
@@ -8416,7 +8440,8 @@ export type AllAdminAreasQueryVariables = {
   name?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   level?: Maybe<Scalars['Int']>,
-  first?: Maybe<Scalars['Int']>
+  first?: Maybe<Scalars['Int']>,
+  parentId?: Maybe<Scalars['String']>
 };
 
 
@@ -10685,7 +10710,16 @@ export type ReportQuery = (
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
-    ), adminArea: Maybe<(
+    ), adminArea2: Maybe<(
+      { __typename?: 'AreaNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'AreaNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'name'>
+        )> }
+      )>> }
+    )>, adminArea1: Maybe<(
       { __typename?: 'AreaNodeConnection' }
       & { edges: Array<Maybe<(
         { __typename?: 'AreaNodeEdge' }
@@ -15418,8 +15452,8 @@ export type AllAccountabilityCommunicationMessagesQueryHookResult = ReturnType<t
 export type AllAccountabilityCommunicationMessagesLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesLazyQuery>;
 export type AllAccountabilityCommunicationMessagesQueryResult = ApolloReactCommon.QueryResult<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>;
 export const AllAdminAreasDocument = gql`
-    query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int) {
-  allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level) {
+    query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int, $parentId: String) {
+  allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level, parentId: $parentId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -15470,6 +15504,7 @@ export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: A
  *      businessArea: // value for 'businessArea'
  *      level: // value for 'level'
  *      first: // value for 'first'
+ *      parentId: // value for 'parentId'
  *   },
  * });
  */
@@ -20875,7 +20910,14 @@ export const ReportDocument = gql`
       firstName
       lastName
     }
-    adminArea {
+    adminArea2 {
+      edges {
+        node {
+          name
+        }
+      }
+    }
+    adminArea1 {
       edges {
         node {
           name
@@ -24993,8 +25035,10 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminAreaArgs>,
+  adminArea?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
   fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  adminArea1?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminArea1Args>,
+  adminArea2?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminArea2Args>,
 };
 
 export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']> = {

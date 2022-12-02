@@ -17,7 +17,6 @@ from graphene_django.filter.utils import (
 )
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -221,44 +220,38 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def hopePermissionClass(permission: BasePermission) -> Type[BasePermission]:
+def check_permissions(user: Any, permissions: List[Permissions], **kwargs: Any) -> bool:
+    if not user.is_authenticated:
+        return False
+    business_area_arg = kwargs.get("business_area")
+    if business_area_arg is None:
+        return False
+    if isinstance(business_area_arg, BusinessArea):
+        business_area = business_area_arg
+    else:
+        business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+    if business_area is None:
+        return False
+    return any(user.has_permission(permission.name, business_area) for permission in permissions)
+
+
+def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
-            business_area_arg = kwargs.get("business_area")
-            if isinstance(business_area_arg, BusinessArea):
-                business_area = business_area_arg
-            else:
-                if business_area_arg is None:
-                    return False
-                business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
-                if business_area is None:
-                    return False
-            return info.context.user.is_authenticated and info.context.user.has_permission(
-                permission.name, business_area
-            )
+            user = info.context.user
+            permissions = [permission]
+            return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
 
 
-def hopeOneOfPermissionClass(*permissions: BasePermission) -> Type[BasePermission]:
+def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
-            if info.context.user.is_authenticated:
-                business_area_arg = kwargs.get("business_area")
-                if isinstance(business_area_arg, BusinessArea):
-                    business_area = business_area_arg
-                else:
-                    if business_area_arg is None:
-                        return False
-                    business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
-                    if business_area is None:
-                        return False
-                for permission in permissions:
-                    if info.context.user.has_permission(permission.name, business_area):
-                        return True
-            return False
+            user = info.context.user
+            return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
 
@@ -270,7 +263,7 @@ class BaseNodePermissionMixin:
     def check_node_permission(cls, info: Any, object_instance: Any) -> None:
         business_area = object_instance.business_area
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
-            log_and_raise("Permission Denied")
+            raise PermissionDenied("Permission Denied")
 
     @classmethod
     def get_node(cls, info: Any, object_id: str) -> Optional[Model]:
@@ -294,12 +287,12 @@ class BaseNodePermissionMixin:
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
-        if not info.context.user.is_authenticated or not (
+        if not user.is_authenticated or not (
             user.has_permission(general_permission, business_area)
             or (is_creator and user.has_permission(creator_permission, business_area))
             or (is_owner and user.has_permission(owner_permission, business_area))
         ):
-            log_and_raise("Permission Denied")
+            raise PermissionDenied("Permission Denied")
 
 
 class DjangoPermissionFilterConnectionField(DjangoConnectionField):
@@ -362,7 +355,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         if business_area := info.context.headers.get("Business-Area"):
             filter_kwargs["business_area"] = business_area
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
-            log_and_raise("Permission Denied")
+            raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
                 filter_kwargs.get("business_area")
@@ -383,7 +376,7 @@ class BaseMutationPermissionMixin:
     @classmethod
     def is_authenticated(cls, info: Any) -> Optional[bool]:
         if not info.context.user.is_authenticated:
-            cls.raise_permission_denied_error(True)
+            cls.raise_not_authenticated_error()
         return True
 
     @classmethod
@@ -432,15 +425,14 @@ class BaseMutationPermissionMixin:
         return True
 
     @staticmethod
-    def raise_permission_denied_error(not_authenticated: bool = False, raise_error: bool = True) -> bool:
+    def raise_permission_denied_error(raise_error: bool = True) -> bool:
         if not raise_error:
             return False
-        if not_authenticated:
-            logger.error("Permission Denied: User is not authenticated.")
-            raise PermissionDenied("Permission Denied: User is not authenticated.")
-        else:
-            logger.error("Permission Denied: User does not have correct permission.")
-            raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    @staticmethod
+    def raise_not_authenticated_error() -> None:
+        raise PermissionDenied("Permission Denied: User is not authenticated.")
 
 
 class PermissionMutation(BaseMutationPermissionMixin, Mutation):

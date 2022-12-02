@@ -27,7 +27,7 @@ import { reduceChoices, reportStatusToColor } from '../../../utils/utils';
 import {
   useReportChoiceDataQuery,
   useReportQuery,
-  useRestartCreateReportMutation
+  useRestartCreateReportMutation,
 } from '../../../__generated__/graphql';
 
 const IconContainer = styled.div`
@@ -55,7 +55,10 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [mutate, { loading: restartReportLoading }] = useRestartCreateReportMutation();
+  const [
+    mutate,
+    { loading: restartReportLoading },
+  ] = useRestartCreateReportMutation();
 
   const { data, loading } = useReportQuery({
     variables: { id },
@@ -93,61 +96,71 @@ export const ReportingDetailsPage = (): React.ReactElement => {
     value: React.ReactElement | string;
     size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
   }[] = [
-      {
-        label: t('STATUS'),
-        value: (
-          <StatusBox
-            status={statusChoices[report.status]}
-            statusToColor={reportStatusToColor}
-          />
-        ),
-        size: 3,
-      },
-      {
-        label: t('Report Type'),
-        value: typeChoices[report.reportType],
-        size: 3,
-      },
-      {
-        label: t('Timeframe'),
-        value: (
-          <span>
-            <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
-            <UniversalMoment>{report.dateTo}</UniversalMoment>
-          </span>
-        ),
-        size: 3,
-      },
-      {
-        label: t('Creation Date'),
-        value: <UniversalMoment>{report.createdAt}</UniversalMoment>,
-        size: 3,
-      },
-      {
-        label: t('Created By'),
-        value: (
-          <span>
-            {report.createdBy.firstName} {report.createdBy.lastName}
-          </span>
-        ),
-        size: 3,
-      },
-      {
-        label: t('Programme'),
-        value: report.program?.name,
-        size: 3,
-      },
-      {
-        label: t('Administrative Level 2'),
-        value: (
-          <span>
-            {report.adminArea?.edges.map((edge) => edge.node.name).join(', ') ||
-              '-'}
-          </span>
-        ),
-        size: 3,
-      },
-    ];
+    {
+      label: t('STATUS'),
+      value: (
+        <StatusBox
+          status={statusChoices[report.status]}
+          statusToColor={reportStatusToColor}
+        />
+      ),
+      size: 3,
+    },
+    {
+      label: t('Report Type'),
+      value: typeChoices[report.reportType],
+      size: 3,
+    },
+    {
+      label: t('Timeframe'),
+      value: (
+        <span>
+          <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
+          <UniversalMoment>{report.dateTo}</UniversalMoment>
+        </span>
+      ),
+      size: 3,
+    },
+    {
+      label: t('Creation Date'),
+      value: <UniversalMoment>{report.createdAt}</UniversalMoment>,
+      size: 3,
+    },
+    {
+      label: t('Created By'),
+      value: (
+        <span>
+          {report.createdBy.firstName} {report.createdBy.lastName}
+        </span>
+      ),
+      size: 3,
+    },
+    {
+      label: t('Programme'),
+      value: report.program?.name,
+      size: 3,
+    },
+    {
+      label: t('Administrative Level 1'),
+      value: (
+        <span>
+          {report.adminArea1?.edges.map((edge) => edge.node.name).join(', ') ||
+            '-'}
+        </span>
+      ),
+      size: 3,
+    },
+    {
+      label: t('Administrative Level 2'),
+      value: (
+        <span>
+          {report.adminArea2?.edges.map((edge) => edge.node.name).join(', ') ||
+            '-'}
+        </span>
+      ),
+      size: 3,
+    },
+  ];
 
   const currentDate: Date = new Date();
   const lastUpdatedDate: Date = new Date(report.updatedAt);
@@ -158,7 +171,9 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   const reGenerateReport = async (): Promise<void> => {
     try {
       const response = await mutate({
-        variables: { reportData: { reportId: report.id, businessAreaSlug: businessArea } },
+        variables: {
+          reportData: { reportId: report.id, businessAreaSlug: businessArea },
+        },
         refetchQueries: () => [
           { query: ALL_REPORTS_QUERY, variables: { businessArea } },
         ],
@@ -185,29 +200,36 @@ export const ReportingDetailsPage = (): React.ReactElement => {
         breadCrumbs={breadCrumbsItems}
       >
         <>
-          {report.fileUrl && <Button
-            color='primary'
-            variant='contained'
-            startIcon={<GetApp />}
-            href={report.fileUrl}
-          >
-            {t('DOWNLOAD REPORT')}
-          </Button>
-          }
-          {report.status === REPORTING_STATES.PROCESSING && minutes > 30 &&
+          {report.fileUrl && (
+            <Button
+              color='primary'
+              variant='contained'
+              startIcon={<GetApp />}
+              href={report.fileUrl}
+            >
+              {t('DOWNLOAD REPORT')}
+            </Button>
+          )}
+          {report.status === REPORTING_STATES.PROCESSING && minutes > 30 && (
             <>
-              <span>{t("Report is in processing status for over 30 min.")}<br />{t("Please wait or re-generate report.")}</span>
+              <span>
+                {t('Report is in processing status for over 30 min.')}
+                <br />
+                {t('Please wait or re-generate report.')}
+              </span>
               &emsp;
               <LoadingButton
                 color='primary'
                 variant='contained'
                 loading={restartReportLoading}
-                onClick={() => { reGenerateReport() }}
+                onClick={() => {
+                  reGenerateReport();
+                }}
               >
                 {t('Re-Generate Report')}
               </LoadingButton>
             </>
-          }
+          )}
         </>
       </PageHeader>
       <ContainerColumnWithBorder>
