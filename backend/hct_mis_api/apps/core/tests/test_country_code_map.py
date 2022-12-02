@@ -5,10 +5,11 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.models import CountryCodeMap
 
 
-class TestCountryCodeMap(TestCase):
+class TestCountryCodeMap(TestCase, TimeMeasuringTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod

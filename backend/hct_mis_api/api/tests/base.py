@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.api.models import APIToken, Grant
 from hct_mis_api.api.tests.factories import APITokenFactory
 from hct_mis_api.apps.account.fixtures import (
@@ -9,7 +10,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 
 
-class HOPEApiTestCase(APITestCase):
+class HOPEApiTestCase(APITestCase, TimeMeasuringTestCase):
     databases = {"default", "registration_datahub"}
     user_permissions = [
         Grant.API_RDI_CREATE,

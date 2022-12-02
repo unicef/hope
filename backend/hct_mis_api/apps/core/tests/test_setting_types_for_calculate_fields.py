@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_DATE,
     TYPE_DECIMAL,
@@ -21,7 +22,7 @@ class MockSuperUser:
         return True
 
 
-class TestSettingTypesForCalculateFields(TestCase):
+class TestSettingTypesForCalculateFields(TestCase, TimeMeasuringTestCase):
     @staticmethod
     def load_xls_file(name: str) -> None:
         task = FlexibleAttributeImporter()

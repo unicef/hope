@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 from django.http import JsonResponse
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.api.endpoints.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
 
@@ -25,7 +26,7 @@ HOUSEHOLD = {
 }
 
 
-class ValidatorTest(TestCase):
+class ValidatorTest(TestCase, TimeMeasuringTestCase):
     maxDiff = None
 
     @classmethod

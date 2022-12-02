@@ -1,5 +1,7 @@
 from django.test import TestCase, override_settings
 
+
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from ...account.fixtures import BusinessAreaFactory, UserFactory
 from ..celery_tasks import run_background_query
 from ..defaults import create_defaults
@@ -8,7 +10,7 @@ from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, Repor
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQueryCelery(TestCase):
+class TestPowerQueryCelery(TestCase, TimeMeasuringTestCase):
     databases = {"default"}
 
     @classmethod

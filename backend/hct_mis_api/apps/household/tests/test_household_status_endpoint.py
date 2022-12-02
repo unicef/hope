@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from rest_framework.test import APIClient
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
@@ -36,7 +37,7 @@ def _time(some_time: datetime.date) -> str:
     return str(some_time).replace(" ", "T").replace("+00:00", "Z")
 
 
-class TestDetails(TestCase):
+class TestDetails(TestCase, TimeMeasuringTestCase):
     databases = "__all__"
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
