@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -58,7 +59,7 @@ def invalid_file() -> File:
     return File(BytesIO(content), name="iban_update_invalid_file.xlsx")
 
 
-class TestIndividualXlsxUpdate(TestCase):
+class TestIndividualXlsxUpdate(TestCase, TimeMeasuringTestCase):
     databases = "__all__"
 
     @classmethod

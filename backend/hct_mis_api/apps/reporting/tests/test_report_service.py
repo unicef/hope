@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -20,7 +21,7 @@ from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 
 
-class TestGenerateReportService(TestCase):
+class TestGenerateReportService(TestCase, TimeMeasuringTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod

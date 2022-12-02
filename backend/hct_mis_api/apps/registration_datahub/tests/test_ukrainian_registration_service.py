@@ -4,6 +4,7 @@ import json
 from django.test import TestCase
 from django.utils import timezone
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
@@ -18,7 +19,7 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 )
 
 
-class TestUkrainianRegistrationService(TestCase):
+class TestUkrainianRegistrationService(TestCase, TimeMeasuringTestCase):
     databases = {
         "default",
         "registration_datahub",

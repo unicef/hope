@@ -6,10 +6,11 @@ from django.utils import timezone
 import pytz
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.utils import timezone_datetime
 
 
-class TestTimezoneDatetime(TestCase):
+class TestTimezoneDatetime(TestCase, TimeMeasuringTestCase):
     @parameterized.expand(
         [
             ("2022-09-24",),

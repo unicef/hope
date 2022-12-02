@@ -1,6 +1,8 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from ...account.fixtures import BusinessAreaFactory, UserFactory
 from ...household.fixtures import create_household
 from ..defaults import create_defaults
@@ -15,7 +17,7 @@ from .fixtures import (
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQuery(TestCase):
+class TestPowerQuery(TestCase, TimeMeasuringTestCase):
     databases = {"default"}
 
     @classmethod

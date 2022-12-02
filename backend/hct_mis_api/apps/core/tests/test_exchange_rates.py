@@ -11,6 +11,7 @@ from django.utils import timezone
 import requests_mock
 from parameterized import parameterized
 
+from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.exchange_rates import ExchangeRateAPI, ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import (
@@ -101,7 +102,7 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 }
 
 
-class TestExchangeRatesAPI(TestCase):
+class TestExchangeRatesAPI(TestCase, TimeMeasuringTestCase):
     @mock.patch.dict(os.environ, clear=True)
     def test_test_api_class_initialization_key_not_in_env(self) -> None:
         self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateAPI)
@@ -212,7 +213,7 @@ class TestExchangeRates(TestCase):
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
-class TestFixExchangeRatesCommand(TestCase):
+class TestFixExchangeRatesCommand(TestCase, TimeMeasuringTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = BusinessArea.objects.create(
