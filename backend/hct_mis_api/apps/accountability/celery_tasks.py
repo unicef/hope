@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @app.task
 @log_start_and_end
 @sentry_tags
-def export_survey_sample_task(survey_id, user_id):
+def export_survey_sample_task(survey_id: str, user_id: str) -> None:
     try:
         survey = Survey.objects.get(id=survey_id)
         user = get_user_model().objects.get(pk=user_id)

@@ -38,7 +38,7 @@ class BaseSampling(abc.ABC):
 
 
 class FullListSampling(BaseSampling):
-    def sampling(self, households: QuerySet[Household]):
+    def sampling(self, households: QuerySet[Household]) -> None:
         self.households = households.exclude(
             head_of_household__phone_no__isnull=False, admin_area__id__in=self.excluded_admin_areas_decoded
         )
@@ -54,7 +54,7 @@ class FullListSampling(BaseSampling):
 
 
 class RandomSampling(BaseSampling):
-    def sampling(self, households: QuerySet[Household]):
+    def sampling(self, households: QuerySet[Household]) -> None:
         if self.sex and isinstance(self.sex, str):
             households = households.filter(head_of_household__sex=self.sex)
 
@@ -95,7 +95,7 @@ class ResultSampling:
 
 
 class Sampling:
-    def __init__(self, input_data, households: QuerySet[Household]):
+    def __init__(self, input_data: Dict, households: QuerySet[Household]) -> None:
         self.input_data = input_data
         self.households = households
 

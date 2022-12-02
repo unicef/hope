@@ -1,4 +1,7 @@
+from typing import Any, Dict, List
+
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -84,21 +87,21 @@ class Query(graphene.ObjectType):
     )
     survey_category_choices = graphene.List(ChoiceObject)
 
-    def resolve_all_accountability_communication_messages(self, info, **kwargs):
+    def resolve_all_accountability_communication_messages(self, info: Any, **kwargs: Any) -> QuerySet[Message]:
         business_area_slug = info.context.headers.get("Business-Area")
         return Message.objects.filter(business_area__slug=business_area_slug)
 
-    def resolve_all_feedback(self, info, **kwargs):
+    def resolve_all_feedback(self, info: Any, **kwargs: Any) -> QuerySet[Feedback]:
         business_area_slug = info.context.headers.get("Business-Area")
         return Feedback.objects.filter(business_area__slug=business_area_slug)
 
-    def resolve_survey_category_choices(self, info):
+    def resolve_survey_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Survey.CATEGORY_CHOICES)
 
-    def resolve_feedback_issue_type_choices(self, info, **kwargs):
+    def resolve_feedback_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
 
-    def resolve_accountability_communication_message_sample_size(self, info, input: dict, **kwargs):
+    def resolve_accountability_communication_message_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
         verifier = MessageArgumentVerifier(input)
         verifier.verify()
 
@@ -112,7 +115,7 @@ class Query(graphene.ObjectType):
             "sample_size": sample_size,
         }
 
-    def resolve_accountability_sample_size(self, info, input: dict, **kwargs):
+    def resolve_accountability_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
         if target_population := input.get("target_population"):
             obj = get_object_or_404(TargetPopulation, id=decode_id_string(target_population))
             households = Household.objects.filter(target_populations=obj)

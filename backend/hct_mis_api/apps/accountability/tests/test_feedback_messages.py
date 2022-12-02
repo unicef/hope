@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.conf import settings
 
 from parameterized import parameterized
@@ -50,7 +52,7 @@ class TestFeedbackMessages(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
 
         country = geo_models.Country.objects.get(name="Afghanistan")
@@ -73,7 +75,7 @@ class TestFeedbackMessages(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_feedback_message(self, _, permissions):
+    def test_create_feedback_message(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_FEEDBACK_MESSAGE_MUTATION,
@@ -95,7 +97,7 @@ class TestFeedbackMessages(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_feedback_query_shows_feedback_messages(self, _, permissions):
+    def test_feedback_query_shows_feedback_messages(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         FeedbackMessageFactory(

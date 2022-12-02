@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -43,7 +45,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -75,6 +77,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             business_area=cls.business_area,
             cash_plan=cash_plan,
         )
+        cls.maxDiff = None
 
     @parameterized.expand(
         [
@@ -85,7 +88,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket(self, _, permissions):
+    def test_create_sensitive_ticket(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -124,8 +127,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket_wrong_extras(self, _, permissions):
-        self.maxDiff = None
+    def test_create_sensitive_ticket_wrong_extras(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -164,7 +166,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket_without_issue_type(self, _, permissions):
+    def test_create_sensitive_ticket_without_issue_type(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -181,6 +183,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
                         }
                     }
                 },
@@ -202,7 +205,50 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket_without_payment_record(self, _, permissions):
+    def test_create_sensitive_ticket_with_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        input_data = {
+            "input": {
+                "description": "Test Feedback",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+                "issueType": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+                "admin": self.admin_area.p_code,
+                "language": "Polish, English",
+                "consent": True,
+                "businessArea": "afghanistan",
+                "extras": {
+                    "category": {
+                        "sensitiveGrievanceTicketExtras": {
+                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "paymentRecord": [
+                                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+                            ],
+                        }
+                    }
+                },
+            }
+        }
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_create_sensitive_ticket_without_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -241,7 +287,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket_without_household(self, _, permissions):
+    def test_create_sensitive_ticket_without_household(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -279,7 +325,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket_without_individual(self, _, permissions):
+    def test_create_sensitive_ticket_without_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -317,7 +363,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_sensitive_ticket_without_extras(self, _, permissions):
+    def test_create_sensitive_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {

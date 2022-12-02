@@ -133,30 +133,6 @@ export type AgeInput = {
   max?: Maybe<Scalars['Int']>,
 };
 
-export type AgencyNode = {
-   __typename?: 'AgencyNode',
-  id: Scalars['ID'],
-  type: AgencyType,
-  label: Scalars['String'],
-  country?: Maybe<Scalars['String']>,
-  individualIdentities: IndividualIdentityNodeConnection,
-  countryIso3?: Maybe<Scalars['String']>,
-};
-
-
-export type AgencyNodeIndividualIdentitiesArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
-}
-
 export type AreaNode = Node & {
    __typename?: 'AreaNode',
   id: Scalars['ID'],
@@ -1236,7 +1212,7 @@ export type EditIndividualDocumentObjectType = {
 export type EditIndividualIdentityObjectType = {
   id: Scalars['ID'],
   country: Scalars['String'],
-  agency: Scalars['String'],
+  partner: Scalars['String'],
   number: Scalars['String'],
 };
 
@@ -2344,8 +2320,8 @@ export type ImportedIndividualIdentityNode = Node & {
   id: Scalars['ID'],
   individual: ImportedIndividualNode,
   documentNumber: Scalars['String'],
-  type?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
+  partner?: Maybe<Scalars['String']>,
 };
 
 export type ImportedIndividualIdentityNodeConnection = {
@@ -2512,11 +2488,11 @@ export type IndividualDocumentObjectType = {
 export type IndividualIdentityNode = Node & {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
-  agency: AgencyNode,
   individual: IndividualNode,
   number: Scalars['String'],
-  type?: Maybe<Scalars['String']>,
+  partner?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 export type IndividualIdentityNodeConnection = {
@@ -2535,7 +2511,7 @@ export type IndividualIdentityNodeEdge = {
 
 export type IndividualIdentityObjectType = {
   country: Scalars['String'],
-  agency: Scalars['String'],
+  partner: Scalars['String'],
   number: Scalars['String'],
 };
 
@@ -3163,6 +3139,7 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 export type MutationsApproveAddIndividualArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -3170,6 +3147,7 @@ export type MutationsApproveAddIndividualArgs = {
 export type MutationsApproveDeleteIndividualArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -3177,6 +3155,7 @@ export type MutationsApproveDeleteIndividualArgs = {
 export type MutationsApproveDeleteHouseholdArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -3184,6 +3163,7 @@ export type MutationsApproveDeleteHouseholdArgs = {
 export type MutationsApproveSystemFlaggingArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
+  reasonHhId?: Maybe<Scalars['String']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -3432,6 +3412,7 @@ export type PartnerType = {
   isUn: Scalars['Boolean'],
   userSet: UserNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
+  individualIdentities: IndividualIdentityNodeConnection,
 };
 
 
@@ -3445,6 +3426,15 @@ export type PartnerTypeUserSetArgs = {
 
 
 export type PartnerTypeGrievanceticketSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PartnerTypeIndividualIdentitiesArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5418,6 +5408,7 @@ export type SectionTotalNode = {
 export type SensitiveGrievanceTicketExtras = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
 export type ServiceProviderNode = Node & {
@@ -5873,6 +5864,7 @@ export type TicketDeleteHouseholdDetailsNode = Node & {
   household?: Maybe<HouseholdNode>,
   roleReassignData: Scalars['JSONString'],
   approveStatus: Scalars['Boolean'],
+  reasonHousehold?: Maybe<HouseholdNode>,
   householdData?: Maybe<Scalars['Arg']>,
 };
 
@@ -6824,17 +6816,6 @@ export type HouseholdDetailedFragment = (
       { __typename?: 'IndividualNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'birthDate' | 'relationship'>
-        & { identities: (
-          { __typename?: 'IndividualIdentityNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'IndividualIdentityNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'IndividualIdentityNode' }
-              & Pick<IndividualIdentityNode, 'id' | 'number' | 'type'>
-            )> }
-          )>> }
-        ) }
         & IndividualMinimalFragment
       )> }
     )>> }
@@ -6904,11 +6885,7 @@ export type IndividualMinimalFragment = (
       { __typename?: 'IndividualIdentityNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'IndividualIdentityNode' }
-        & Pick<IndividualIdentityNode, 'id' | 'number'>
-        & { agency: (
-          { __typename?: 'AgencyNode' }
-          & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
-        ) }
+        & Pick<IndividualIdentityNode, 'id' | 'partner' | 'country' | 'number'>
       )> }
     )>> }
   ), household: Maybe<(
@@ -6935,7 +6912,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6946,19 +6923,6 @@ export type IndividualDetailedFragment = (
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'label'>
-        ) }
-      )> }
-    )>> }
-  ), identities: (
-    { __typename?: 'IndividualIdentityNodeConnection' }
-    & { edges: Array<Maybe<(
-      { __typename?: 'IndividualIdentityNodeEdge' }
-      & { node: Maybe<(
-        { __typename?: 'IndividualIdentityNode' }
-        & Pick<IndividualIdentityNode, 'id' | 'number' | 'type' | 'country'>
-        & { agency: (
-          { __typename?: 'AgencyNode' }
-          & Pick<AgencyNode, 'country' | 'label'>
         ) }
       )> }
     )>> }
@@ -7127,7 +7091,7 @@ export type ImportedIndividualDetailedFragment = (
       { __typename?: 'ImportedIndividualIdentityNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ImportedIndividualIdentityNode' }
-        & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
+        & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'partner' | 'country'>
       )> }
     )>> }
   ), household: Maybe<(
@@ -7364,7 +7328,8 @@ export type ApproveAddIndividualDataChangeMutation = (
 
 export type ApproveDeleteHouseholdDataChangeMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  approveStatus: Scalars['Boolean']
+  approveStatus: Scalars['Boolean'],
+  reasonHhId?: Maybe<Scalars['String']>
 };
 
 
@@ -9195,6 +9160,10 @@ export type GrievanceTicketQuery = (
     )>, deleteHouseholdTicketDetails: Maybe<(
       { __typename?: 'TicketDeleteHouseholdDetailsNode' }
       & Pick<TicketDeleteHouseholdDetailsNode, 'id' | 'approveStatus'>
+      & { reasonHousehold: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )> }
     )>, systemFlaggingTicketDetails: Maybe<(
       { __typename?: 'TicketSystemFlaggingDetailsNode' }
       & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
@@ -10142,11 +10111,7 @@ export type AllIndividualsQuery = (
             { __typename?: 'IndividualIdentityNodeEdge' }
             & { node: Maybe<(
               { __typename?: 'IndividualIdentityNode' }
-              & Pick<IndividualIdentityNode, 'id' | 'number'>
-              & { agency: (
-                { __typename?: 'AgencyNode' }
-                & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
-              ) }
+              & Pick<IndividualIdentityNode, 'id' | 'partner' | 'country' | 'countryIso3' | 'number'>
             )> }
           )>> }
         ), paymentChannels: Maybe<Array<Maybe<(
@@ -11342,11 +11307,8 @@ export const IndividualMinimalFragmentDoc = gql`
     edges {
       node {
         id
-        agency {
-          country
-          label
-          countryIso3
-        }
+        partner
+        country
         number
       }
     }
@@ -11424,17 +11386,6 @@ export const HouseholdDetailedFragmentDoc = gql`
     edges {
       node {
         ...individualMinimal
-        birthDate
-        relationship
-        identities {
-          edges {
-            node {
-              id
-              number
-              type
-            }
-          }
-        }
       }
     }
   }
@@ -11494,7 +11445,6 @@ export const IndividualDetailedFragmentDoc = gql`
   familyName
   estimatedBirthDate
   pregnant
-  status
   lastSyncAt
   deduplicationBatchStatus
   disability
@@ -11529,32 +11479,8 @@ export const IndividualDetailedFragmentDoc = gql`
       }
     }
   }
-  identities {
-    edges {
-      node {
-        id
-        agency {
-          country
-          label
-        }
-        number
-        type
-        country
-      }
-    }
-  }
   enrolledInNutritionProgramme
   administrationOfRutf
-  identities {
-    edges {
-      node {
-        id
-        number
-        type
-        country
-      }
-    }
-  }
   household {
     status
     id
@@ -11566,8 +11492,6 @@ export const IndividualDetailedFragmentDoc = gql`
       level
     }
   }
-  role
-  relationship
   headingHousehold {
     id
     headOfHousehold {
@@ -11828,7 +11752,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
       node {
         id
         documentNumber
-        type
+        partner
         country
       }
     }
@@ -12416,8 +12340,8 @@ export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof
 export type ApproveAddIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
 export const ApproveDeleteHouseholdDataChangeDocument = gql`
-    mutation ApproveDeleteHouseholdDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
-  approveDeleteHousehold(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    mutation ApproveDeleteHouseholdDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!, $reasonHhId: String) {
+  approveDeleteHousehold(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus, reasonHhId: $reasonHhId) {
     grievanceTicket {
       id
       status
@@ -12459,6 +12383,7 @@ export function withApproveDeleteHouseholdDataChange<TProps, TChildProps = {}>(o
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      approveStatus: // value for 'approveStatus'
+ *      reasonHhId: // value for 'reasonHhId'
  *   },
  * });
  */
@@ -17274,6 +17199,10 @@ export const GrievanceTicketDocument = gql`
     deleteHouseholdTicketDetails {
       id
       approveStatus
+      reasonHousehold {
+        id
+        unicefId
+      }
     }
     systemFlaggingTicketDetails {
       id
@@ -19318,11 +19247,9 @@ export const AllIndividualsDocument = gql`
           edges {
             node {
               id
-              agency {
-                country
-                label
-                countryIso3
-              }
+              partner
+              country
+              countryIso3
               number
             }
           }
@@ -22537,8 +22464,6 @@ export type ResolversTypes = {
   IndividualIdentityNodeConnection: ResolverTypeWrapper<IndividualIdentityNodeConnection>,
   IndividualIdentityNodeEdge: ResolverTypeWrapper<IndividualIdentityNodeEdge>,
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
-  AgencyNode: ResolverTypeWrapper<AgencyNode>,
-  AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
@@ -22961,8 +22886,6 @@ export type ResolversParentTypes = {
   IndividualIdentityNodeConnection: IndividualIdentityNodeConnection,
   IndividualIdentityNodeEdge: IndividualIdentityNodeEdge,
   IndividualIdentityNode: IndividualIdentityNode,
-  AgencyNode: AgencyNode,
-  AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: BankAccountInfoNode,
@@ -23220,15 +23143,6 @@ export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, Par
 export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
   min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgencyNode'] = ResolversParentTypes['AgencyNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, AgencyNodeIndividualIdentitiesArgs>,
-  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type AreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNode'] = ResolversParentTypes['AreaNode']> = {
@@ -24225,8 +24139,8 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualIdentityNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeConnection'] = ResolversParentTypes['ImportedIndividualIdentityNodeConnection']> = {
@@ -24316,11 +24230,11 @@ export type IndividualDataChangeApproveMutationResolvers<ContextType = any, Pare
 
 export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  agency?: Resolver<ResolversTypes['AgencyNode'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualIdentityNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNodeConnection'] = ResolversParentTypes['IndividualIdentityNodeConnection']> = {
@@ -24626,6 +24540,7 @@ export type PartnerTypeResolvers<ContextType = any, ParentType extends Resolvers
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerTypeGrievanceticketSetArgs>,
+  individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerTypeIndividualIdentitiesArgs>,
 };
 
 export type PaymentDetailsApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentDetailsApproveMutation'] = ResolversParentTypes['PaymentDetailsApproveMutation']> = {
@@ -25551,6 +25466,7 @@ export type TicketDeleteHouseholdDetailsNodeResolvers<ContextType = any, ParentT
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  reasonHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
 };
 
@@ -25987,7 +25903,6 @@ export type Resolvers<ContextType = any> = {
   AccountabilitySampleSizeNode?: AccountabilitySampleSizeNodeResolvers<ContextType>,
   ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
-  AgencyNode?: AgencyNodeResolvers<ContextType>,
   AreaNode?: AreaNodeResolvers<ContextType>,
   AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>,
   AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>,

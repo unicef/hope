@@ -314,7 +314,7 @@ class IndividualDataUpdateService(DataChangeService):
         Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo"])
         Document.objects.filter(id__in=documents_to_remove).delete()
         IndividualIdentity.objects.bulk_create(identities_to_create)
-        IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "agency"])
+        IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
         IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
         BankAccountInfo.objects.bulk_create(payment_channels_to_create)
         BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])

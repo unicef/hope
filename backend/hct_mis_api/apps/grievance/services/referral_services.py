@@ -1,11 +1,11 @@
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from hct_mis_api.apps.core.utils import decode_and_get_object
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
 
 
-def save_referral_service(grievance_ticket, extras) -> List[GrievanceTicket]:
+def save_referral_service(grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
 
     TicketReferralDetails.objects.create(
@@ -17,7 +17,7 @@ def save_referral_service(grievance_ticket, extras) -> List[GrievanceTicket]:
     return [grievance_ticket]
 
 
-def update_referral_service(grievance_ticket, extras, input_data) -> GrievanceTicket:
+def update_referral_service(grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras)
 
     ticket_details = grievance_ticket.referral_ticket_details
@@ -30,7 +30,7 @@ def update_referral_service(grievance_ticket, extras, input_data) -> GrievanceTi
     return grievance_ticket
 
 
-def fetch_household_and_individual(extras) -> Tuple[Optional[Household], Optional[Individual]]:
+def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], Optional[Individual]]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
     individual_encoded_id = feedback_ticket_extras.get("individual")

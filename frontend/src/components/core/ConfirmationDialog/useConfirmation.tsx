@@ -11,6 +11,14 @@ const ConfirmationDialogContext = createContext<
   (options: ConfirmationDialogOptions) => Promise<void>
 >(Promise.reject.bind(Promise));
 
+export interface ConfirmationDialogOptions {
+  catchOnCancel?: boolean;
+  title?: string;
+  content?: string | React.ReactElement;
+  continueText?: string;
+  extraContent?: string;
+  disabled?: boolean;
+}
 export const useConfirmation = (): ((
   options: ConfirmationDialogOptions,
 ) => Promise<void>) => useContext(ConfirmationDialogContext);

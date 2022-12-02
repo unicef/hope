@@ -200,7 +200,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'given_name': 'Test',
                             'identities': [
                                 {
-                                    'agency': 'UNHCR',
+                                    'partner': 'UNHCR',
                                     'country': 'POL',
                                     'number': '2222'
                                 }
@@ -462,7 +462,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 {
                                     'approve_status': False,
                                     'value': {
-                                        'agency': 'UNHCR',
+                                        'partner': 'UNHCR',
                                         'country': 'POL',
                                         'number': '2222'
                                     }
@@ -472,14 +472,14 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 {
                                     'approve_status': False,
                                     'previous_value': {
-                                        'agency': 'UNHCR',
+                                        'partner': 'UNHCR',
                                         'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
                                         'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
                                         'number': '1111'
                                     },
                                     'value': {
-                                        'agency': 'UNHCR',
+                                        'partner': 'UNHCR',
                                         'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
                                         'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',

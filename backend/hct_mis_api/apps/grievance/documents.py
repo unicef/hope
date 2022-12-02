@@ -1,7 +1,8 @@
 import logging
-from typing import Callable
+from typing import Any, Callable, List, Optional
 
 from django.conf import settings
+from django.db.models import Model, QuerySet
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
@@ -21,13 +22,14 @@ logger = logging.getLogger(__name__)
 INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
-def es_autosync(is_autosync_enabled: bool):
+def es_autosync(is_autosync_enabled: bool) -> Callable:
     """This decorator checks if auto-synchronization with Elasticsearch is turned on"""
 
-    def wrapper(func: Callable):
-        def inner(*args, **kwargs):
+    def wrapper(func: Callable) -> Callable:
+        def inner(*args: Any, **kwargs: Any) -> Optional[Callable]:
             if is_autosync_enabled:
                 return func(*args, **kwargs)
+            return None
 
         return inner
 
@@ -35,7 +37,7 @@ def es_autosync(is_autosync_enabled: bool):
 
 
 @es_autosync(settings.ELASTICSEARCH_DSL_AUTOSYNC)
-def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id) -> None:
+def bulk_update_assigned_to(grievance_tickets_ids: List[str], assigned_to_id: str) -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
     documents_to_update = []
@@ -84,6 +86,7 @@ class GrievanceTicketDocument(Document):
         name = INDEX
         settings = settings.ELASTICSEARCH_BASE_SETTINGS
 
-    def get_instances_from_related(self, related_instance):
+    def get_instances_from_related(self, related_instance: Model) -> QuerySet:
         if isinstance(related_instance, BusinessArea):
             return related_instance.tickets.all()
+        return Model.objects.none()

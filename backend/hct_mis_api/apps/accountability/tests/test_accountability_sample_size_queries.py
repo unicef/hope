@@ -22,7 +22,7 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
@@ -58,10 +58,9 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
             (Survey.SAMPLING_RANDOM,),
         ]
     )
-    def test_sample_size_by_target_population(self, sampling_type):
+    def test_sample_size_by_target_population(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},

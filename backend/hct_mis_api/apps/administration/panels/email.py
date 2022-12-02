@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Dict, Optional, Union
 
 from django.http import HttpRequest, HttpResponse
 
@@ -20,7 +20,7 @@ def masker(value: Any, request: HttpRequest) -> Union[Any, str]:
     return "****"
 
 
-def email(self, request, extra_context=None) -> HttpResponse:
+def email(self: Any, request: HttpRequest, extra_context: Optional[Dict] = None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = "Test Email"
     context["smtp"] = {

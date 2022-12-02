@@ -1,4 +1,6 @@
-from django.db.models import Count, Q
+from typing import Any
+
+from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -42,7 +44,7 @@ class ProgramFilter(FilterSet):
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(
             total_hh_count=Count(
                 "cash_plans__payment_records__household",
@@ -52,7 +54,7 @@ class ProgramFilter(FilterSet):
         )
         return super().filter_queryset(queryset)
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -104,11 +106,11 @@ class CashPlanFilter(FilterSet):
         )
     )
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
         return super().filter_queryset(queryset)
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -123,7 +125,7 @@ class ChartProgramFilter(FilterSet):
         fields = ("business_area",)
         model = Program
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:

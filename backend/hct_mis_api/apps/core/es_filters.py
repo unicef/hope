@@ -1,6 +1,7 @@
-from typing import List
+from typing import Dict, List
 
 from django.conf import settings
+from django.db.models import QuerySet
 
 from django_filters import FilterSet
 
@@ -12,10 +13,10 @@ class ElasticSearchFilterSet(FilterSet):
     def elasticsearch_filter_queryset(self) -> List[str]:
         raise NotImplementedError()
 
-    def prepare_filters(self, allowed_fields):
+    def prepare_filters(self, allowed_fields: List[str]) -> Dict:
         raise NotImplementedError()
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         if not self.USE_ALL_FIELDS_AS_POSTGRES_DB and self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH:
             grievance_ids = self.elasticsearch_filter_queryset()
             queryset = queryset.filter(id__in=grievance_ids)

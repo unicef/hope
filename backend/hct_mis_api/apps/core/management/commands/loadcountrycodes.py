@@ -1,5 +1,7 @@
 import logging
+from argparse import ArgumentParser
 from pathlib import Path
+from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "load_business_areas"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--file",
             dest="file",
@@ -24,7 +26,7 @@ class Command(BaseCommand):
             help="file",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         with Path(options["file"]).open() as f:
             for line in f.readlines():
                 iso_code, ca_code = line.split()

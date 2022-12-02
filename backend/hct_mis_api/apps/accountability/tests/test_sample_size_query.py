@@ -24,7 +24,7 @@ class TestSampleSizeQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.business_area = create_afghanistan()
 

@@ -1,5 +1,7 @@
 import datetime as dt
 import random
+import typing
+from typing import Any, Iterable, List, Optional, Union
 
 import factory
 from pytz import utc
@@ -17,7 +19,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-def comparison_method_resolver(obj):
+def comparison_method_resolver(obj: Any) -> Union[List[str], str]:  # type: ignore
     core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
@@ -30,7 +32,8 @@ def comparison_method_resolver(obj):
         return "CONTAINS"
 
 
-def arguments_resolver(obj):
+@typing.no_type_check
+def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
     min = None
     max = None
     if obj.field_name == "age":
@@ -84,7 +87,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     business_area = None
 
     @factory.post_generation
-    def households(self, create, extracted, **kwargs):
+    def households(self, create: bool, extracted: Iterable, **kwargs: Any) -> None:
         if not create:
             households = HouseholdFactory.create_batch(5)
             self.households.add(*households)

@@ -16,7 +16,7 @@ from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactor
 
 class TestSystemTickets(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         _, individuals = create_household({"size": 1})
@@ -29,7 +29,7 @@ class TestSystemTickets(APITestCase):
         )
         cls.sanction_list_individual = SanctionListIndividualFactory.create()
 
-    def test_close_system_flagging_ticket_with_approve_status(self):
+    def test_close_system_flagging_ticket_with_approve_status(self) -> None:
         ticket_details = TicketSystemFlaggingDetailsFactory(
             ticket=self.grievance_ticket,
             golden_records_individual=self.individual,
@@ -41,7 +41,7 @@ class TestSystemTickets(APITestCase):
         individual = Individual.objects.get(pk=self.individual.pk)
         self.assertTrue(individual.sanction_list_confirmed_match)
 
-    def test_close_system_flagging_ticket_without_approve_status(self):
+    def test_close_system_flagging_ticket_without_approve_status(self) -> None:
         ticket_details = TicketSystemFlaggingDetailsFactory(
             ticket=self.grievance_ticket,
             golden_records_individual=self.individual,

@@ -1,12 +1,15 @@
+from django.contrib.auth.models import AbstractUser
+
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
 from hct_mis_api.apps.household.models import Individual
 
 
-def close_system_flagging_ticket_service(grievance_ticket, user) -> None:
+def close_system_flagging_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:

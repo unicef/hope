@@ -24,12 +24,12 @@ class TestCreateSurvey(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Doe")
         cls.tp = TargetPopulationFactory(business_area=cls.business_area)
 
-    def test_create_survey_without_permission(self):
+    def test_create_survey_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
@@ -44,7 +44,7 @@ class TestCreateSurvey(APITestCase):
             },
         )
 
-    def test_create_survey_without_target_population_and_program(self):
+    def test_create_survey_without_target_population_and_program(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
         )
@@ -61,7 +61,7 @@ class TestCreateSurvey(APITestCase):
             },
         )
 
-    def test_create_survey(self):
+    def test_create_survey(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
         )
@@ -86,7 +86,7 @@ class TestCreateSurvey(APITestCase):
             },
         )
 
-    def test_create_survey_without_recipients(self):
+    def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
         )
