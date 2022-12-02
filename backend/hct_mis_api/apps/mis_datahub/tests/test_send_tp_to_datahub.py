@@ -6,7 +6,6 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -39,7 +38,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
-class TestSendTpToDatahub(TestCase, TimeMeasuringTestCase):
+class TestSendTpToDatahub(TestCase):
     databases = "__all__"
 
     @staticmethod

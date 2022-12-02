@@ -1,7 +1,6 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -18,7 +17,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-class TestIndividualBlockFilter(TestCase, TimeMeasuringTestCase):
+class TestIndividualBlockFilter(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")

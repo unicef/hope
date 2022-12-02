@@ -4,7 +4,6 @@ from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
 from django.test import TestCase
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineFormSet
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
@@ -12,7 +11,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 
 
-class UserRolesTest(TestCase, TimeMeasuringTestCase):
+class UserRolesTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.role_1 = Role.objects.create(name="Role_1")

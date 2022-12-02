@@ -5,8 +5,6 @@ from django.urls import reverse
 
 from parameterized import parameterized
 
-
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from ...account.fixtures import BusinessAreaFactory, UserFactory
 from ..defaults import create_defaults
 from ..models import Query, Report
@@ -14,7 +12,7 @@ from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, Repor
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQueryViews(TestCase, TimeMeasuringTestCase):
+class TestPowerQueryViews(TestCase):
     databases = {"default"}
 
     @classmethod
@@ -75,7 +73,7 @@ class TestPowerQueryViews(TestCase, TimeMeasuringTestCase):
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQueryBasicAuth(TestCase, TimeMeasuringTestCase):
+class TestPowerQueryBasicAuth(TestCase):
     databases = {"default"}
 
     @classmethod
@@ -111,7 +109,7 @@ CONTENT_TYPES = [
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQueryResponses(TestCase, TimeMeasuringTestCase):
+class TestPowerQueryResponses(TestCase):
     databases = {"default"}
 
     @classmethod

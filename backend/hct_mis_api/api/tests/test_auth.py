@@ -6,7 +6,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
 from hct_mis_api.api.models import APIToken, Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
@@ -18,7 +17,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 
 
-class HOPEPermissionTest(TestCase, TimeMeasuringTestCase):
+class HOPEPermissionTest(TestCase):
     def setUp(self) -> None:
         super().setUpTestData()
         user = UserFactory()
