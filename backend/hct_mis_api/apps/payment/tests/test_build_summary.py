@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
@@ -19,7 +18,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 
 
-class TestBuildSummary(TestCase, TimeMeasuringTestCase):
+class TestBuildSummary(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()

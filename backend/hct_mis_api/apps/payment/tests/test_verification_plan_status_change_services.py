@@ -6,7 +6,6 @@ from django.test import TestCase
 
 import requests
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -32,7 +31,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 
 
-class TestPhoneNumberVerification(TestCase, TimeMeasuringTestCase):
+class TestPhoneNumberVerification(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()

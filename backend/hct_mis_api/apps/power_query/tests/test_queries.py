@@ -1,7 +1,5 @@
 from django.test import TestCase, override_settings
 
-
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from ...account.fixtures import BusinessAreaFactory, UserFactory
 from ..defaults import create_defaults
 from ..models import Formatter, Query, Report
@@ -9,7 +7,7 @@ from .fixtures import FormatterFactory, QueryFactory, ReportFactory
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
-class TestPowerQuery(TestCase, TimeMeasuringTestCase):
+class TestPowerQuery(TestCase):
     databases = {"default"}
 
     @classmethod

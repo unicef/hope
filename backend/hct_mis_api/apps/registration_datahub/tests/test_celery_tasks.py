@@ -9,7 +9,6 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.core.base_test_case import TimeMeasuringTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -117,7 +116,7 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
         return automate_rdi_creation_task(*args, **kwargs)
 
 
-class TestAutomatingRDICreationTask(TestCase, TimeMeasuringTestCase):
+class TestAutomatingRDICreationTask(TestCase):
     databases = {
         "default",
         "cash_assist_datahub_ca",
