@@ -54,7 +54,7 @@ export function CommunicationFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
-            value={filter.program || ''}
+            value={filter.program}
             fullWidth
           >
             <MenuItem value=''>
@@ -71,7 +71,7 @@ export function CommunicationFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'targetPopulation')}
             label={t('Target Population')}
-            value={filter.targetPopulation || ''}
+            value={filter.targetPopulation}
             fullWidth
           >
             <MenuItem value=''>

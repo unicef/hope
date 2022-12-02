@@ -32,9 +32,9 @@ export const FeedbackFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='center' spacing={3}>
-        <Grid xs={4}>
+        <Grid item xs={4}>
           <SearchTextField
-            value={filter.feedbackId || ''}
+            value={filter.feedbackId}
             label='Search'
             onChange={(e) => handleFilterChange(e, 'feedbackId')}
             data-cy='filters-search'
@@ -45,7 +45,7 @@ export const FeedbackFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'issueType')}
             label={t('Issue Type')}
-            value={filter.issueType || ''}
+            value={filter.issueType}
             fullWidth
           >
             <MenuItem value=''>
