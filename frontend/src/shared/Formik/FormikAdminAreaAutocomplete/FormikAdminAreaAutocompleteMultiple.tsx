@@ -5,6 +5,7 @@ export const FormikAdminAreaAutocompleteMultiple = ({
   field,
   form,
   disabled,
+  ...props
 }): React.ReactElement => {
   const handleChange = (e, option): void => {
     if (!option) {
@@ -19,6 +20,7 @@ export const FormikAdminAreaAutocompleteMultiple = ({
         disabled={disabled}
         value={field.value}
         onChange={handleChange}
+        {...props}
       />
     </>
   );
