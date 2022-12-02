@@ -18,6 +18,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -46,12 +47,17 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
 
     file_url = graphene.String()
-    admin_area = DjangoFilterConnectionField(AreaNode)
+    admin_area_1 = DjangoFilterConnectionField(AreaNode)
+    admin_area_2 = DjangoFilterConnectionField(AreaNode)
 
     def resolve_file_url(self, info: Any, **kwargs: Any) -> str:
         return self.file.url if self.file else ""
 
-    def resolve_admin_area(self, info: Any, **kwargs: Any) -> "QuerySet":
+    def resolve_admin_area_1(self, info: Any, **kwargs: Any) -> "QuerySet":
+        parent_ids = self.admin_area.filter(parent__isnull=False).values_list("parent_id")
+        return Area.objects.filter(id__in=parent_ids).distinct()
+
+    def resolve_admin_area_2(self, info: Any, **kwargs: Any) -> "QuerySet":
         return self.admin_area.all()
 
 
