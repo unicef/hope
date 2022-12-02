@@ -25,22 +25,22 @@ export function GrievancesTablePage(): React.ReactElement {
   const { id, cashPlanId } = useParams();
   const [filter, setFilter] = useState({
     search: '',
+    searchType: GrievanceSearchTypes.TicketID,
     status: '',
     fsp: '',
     createdAtRange: '',
     category: '',
     issueType: '',
     assignedTo: '',
-    admin: null,
+    admin: '',
     registrationDataImport: id,
     cashPlan: cashPlanId,
-    scoreMin: null,
-    scoreMax: null,
+    scoreMin: '',
+    scoreMax: '',
     grievanceType: GrievanceTypes[0],
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
-    searchType: GrievanceSearchTypes.TicketID,
   });
   const [selectedTab, setSelectedTab] = useState(
     GRIEVANCE_TICKETS_TYPES.userGenerated,
