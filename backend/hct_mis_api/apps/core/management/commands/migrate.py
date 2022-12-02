@@ -1,4 +1,5 @@
 import time
+from argparse import ArgumentParser
 from collections import OrderedDict
 from importlib import import_module
 from typing import Any, List, Optional, Tuple
@@ -20,7 +21,7 @@ from django.utils.text import Truncator
 class Command(BaseCommand):
     help = "Updates database schema. Manages both apps with migrations and those without."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "app_label",
             nargs="?",
@@ -67,14 +68,13 @@ class Command(BaseCommand):
             help="Creates tables for apps without migrations.",
         )
 
-    def _run_checks(self, **kwargs):
+    def _run_checks(self, **kwargs: Any) -> List:
         issues = run_checks(tags=[Tags.database])
         issues.extend(super()._run_checks(**kwargs))
         return issues
 
     @no_translations
-    def handle(self, *args, **options):
-
+    def handle(self, *args: Any, **options: Any) -> None:
         self.verbosity = options["verbosity"]
         self.interactive = options["interactive"]
         # Import the 'management' module within each installed app, to register
@@ -279,7 +279,9 @@ class Command(BaseCommand):
             plan=plan,
         )
 
-    def migration_progress_callback(self, action, migration=None, fake=False):
+    def migration_progress_callback(
+        self, action: str, migration: Optional[str] = None, fake: Optional[bool] = False
+    ) -> None:
         if self.verbosity >= 1:
             compute_time = self.verbosity > 1
             if action == "apply_start":
@@ -313,7 +315,7 @@ class Command(BaseCommand):
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
                 self.stdout.write(self.style.SUCCESS(" DONE" + elapsed))
 
-    def sync_apps(self, connection, app_labels) -> None:
+    def sync_apps(self, connection: Any, app_labels: str) -> None:  # TODO connection
         """Run the old syncdb-style operation on a list of app_labels."""
         with connection.cursor() as cursor:
             tables = connection.introspection.table_names(cursor)
@@ -328,7 +330,7 @@ class Command(BaseCommand):
             if app_config.models_module is not None and app_config.label in app_labels
         ]
 
-        def model_installed(model):
+        def model_installed(model: Any) -> bool:
             opts = model._meta
             converter = connection.introspection.identifier_converter
             return not (
@@ -360,7 +362,7 @@ class Command(BaseCommand):
                 self.stdout.write("    Running deferred SQL...\n")
 
     @staticmethod
-    def describe_operation(operation, backwards) -> Tuple[str, bool]:
+    def describe_operation(operation: Any, backwards: Any) -> Tuple[str, bool]:
         """Return a string that describes a migration operation for --plan."""
         prefix = ""
         is_error = False

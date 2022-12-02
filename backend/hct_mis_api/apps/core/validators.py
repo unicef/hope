@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
 
@@ -19,6 +19,10 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
 
+if TYPE_CHECKING:
+    from openpyxl.worksheet.worksheet import Worksheet
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +41,7 @@ class BaseValidator:
     """
 
     @classmethod
-    def validate(cls, excluded_validators=None, *args, **kwargs) -> None:
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> None:
         if not excluded_validators:
             excluded_validators = []
 
@@ -59,7 +63,7 @@ class BaseValidator:
 
 class CommonValidator(BaseValidator):
     @classmethod
-    def validate_start_end_date(cls, *args, **kwargs):
+    def validate_start_end_date(cls, *args: Any, **kwargs: Any) -> None:
         start_date = kwargs.get("start_date")
         end_date = kwargs.get("end_date")
         if start_date and end_date:
@@ -72,7 +76,7 @@ class CommonValidator(BaseValidator):
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
-def prepare_choices_for_validation(choices_sheet) -> Dict[str, List[str]]:
+def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List[str]]:
     from collections import defaultdict
 
     import xlrd
@@ -151,7 +155,7 @@ class KoboTemplateValidator:
     )
 
     @classmethod
-    def _map_columns_numbers(cls, first_row) -> Dict[str, int]:
+    def _map_columns_numbers(cls, first_row: Iterable) -> Dict[str, int]:
         columns_names_and_numbers_mapping: Dict[str, Any] = {
             "type": None,
             "name": None,
@@ -170,7 +174,9 @@ class KoboTemplateValidator:
         return columns_names_and_numbers_mapping
 
     @classmethod
-    def _get_core_fields_from_file(cls, survey_sheet, choices_mapping, columns_names_and_numbers_mapping) -> Dict:
+    def _get_core_fields_from_file(
+        cls, survey_sheet: "Worksheet", choices_mapping: Dict, columns_names_and_numbers_mapping: Dict
+    ) -> Dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):
             field_name = row[columns_names_and_numbers_mapping["name"]].value
@@ -216,7 +222,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_field_type(cls, core_field, core_field_from_file, field_type) -> Optional[Dict]:
+    def _check_field_type(cls, core_field: Any, core_field_from_file: Dict, field_type: str) -> Optional[Dict]:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -225,7 +231,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_is_field_required(cls, core_field, core_field_from_file) -> Optional[Dict]:
+    def _check_is_field_required(cls, core_field: Any, core_field_from_file: Dict) -> Optional[Dict]:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":
@@ -236,7 +242,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field, core_field_from_file, field_choices) -> Optional[List]:
+    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: Dict) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 
@@ -267,7 +273,7 @@ class KoboTemplateValidator:
         return errors
 
     @classmethod
-    def validate_kobo_template(cls, survey_sheet, choices_sheet) -> List[Dict[str, str]]:
+    def validate_kobo_template(cls, survey_sheet: "Worksheet", choices_sheet: "Worksheet") -> List[Dict[str, str]]:
         choices_mapping = prepare_choices_for_validation(choices_sheet)
 
         first_row = survey_sheet.row(0)

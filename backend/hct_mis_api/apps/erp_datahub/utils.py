@@ -1,11 +1,14 @@
 from decimal import Decimal
+from typing import Optional
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
 
 
-def get_exchange_rate_for_cash_plan(cash_plan: CashPlan, exchange_rates_client=None):
+def get_exchange_rate_for_cash_plan(
+    cash_plan: CashPlan, exchange_rates_client: Optional[ExchangeRates] = None
+) -> Optional[float]:
     if exchange_rates_client is None:
         exchange_rates_client = ExchangeRates()
 
@@ -16,7 +19,9 @@ def get_exchange_rate_for_cash_plan(cash_plan: CashPlan, exchange_rates_client=N
     return exchange_rate
 
 
-def get_payment_record_delivered_quantity_in_usd(payment_record: PaymentRecord, exchange_rates_client=None):
+def get_payment_record_delivered_quantity_in_usd(
+    payment_record: PaymentRecord, exchange_rates_client: Optional[ExchangeRates] = None
+) -> Optional[Decimal]:
     if (
         not payment_record.delivered_quantity
         or not payment_record.cash_plan

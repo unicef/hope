@@ -14,7 +14,7 @@ import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapp
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
   title?: string;
-  content?: string;
+  content?: string | React.ReactElement;
   continueText?: string;
   extraContent?: string;
   warningContent?: string | null;

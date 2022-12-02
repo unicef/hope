@@ -21,7 +21,7 @@ class TicketStatusChangerService:
         self.ticket = ticket
         self.user = user
 
-    def change_status(self, status) -> None:
+    def change_status(self, status: int) -> None:
         self._can_change_status(status)
 
         if status == GrievanceTicket.STATUS_ASSIGNED:
@@ -36,7 +36,7 @@ class TicketStatusChangerService:
             self._change_status_closed()
         self.ticket.save()
 
-    def _can_change_status(self, status) -> None:
+    def _can_change_status(self, status: int) -> None:
         if not self.ticket.can_change_status(status):
             log_and_raise("New status is incorrect")
 

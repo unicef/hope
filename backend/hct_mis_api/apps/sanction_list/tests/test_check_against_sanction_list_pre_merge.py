@@ -36,7 +36,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)
         task.execute()
@@ -128,7 +128,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         TicketPriority.priority_by_business_area_and_ticket_type.cache_clear()
         TicketPriority.urgency_by_business_area_and_ticket_type.cache_clear()
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
 
         expected = [
@@ -146,17 +146,17 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
 
         self.assertEqual(result, expected)
 
-    def test_create_system_flag_tickets(self):
+    def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
         self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 3)
 
-    def test_create_system_flag_ticket_with_default_priority_and_urgency(self):
+    def test_create_system_flag_ticket_with_default_priority_and_urgency(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
 
         self.assertEqual(GrievanceTicket.objects.last().priority, PRIORITY_HIGH)
         self.assertEqual(GrievanceTicket.objects.last().urgency, URGENCY_URGENT)
 
-    def test_create_system_flag_ticket_with_priority_and_urgency_by_business_area(self):
+    def test_create_system_flag_ticket_with_priority_and_urgency_by_business_area(self) -> None:
         TicketPriority.objects.create(
             business_area=self.business_area,
             priority=PRIORITY_MEDIUM,

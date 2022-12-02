@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import graphene
 from graphene_django import DjangoObjectType
 
@@ -106,14 +108,14 @@ class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
 
     @staticmethod
-    def resolve_sample_file_path(survey: Survey, info):
+    def resolve_sample_file_path(survey: Survey, info: Any) -> Optional[str]:
         try:
             return survey.sample_file_path()
         except SampleFileExpiredException:
             return None
 
     @staticmethod
-    def resolve_has_valid_sample_file(survey: Survey, info):
+    def resolve_has_valid_sample_file(survey: Survey, info: Any) -> bool:
         return survey.has_valid_sample_file()
 
 

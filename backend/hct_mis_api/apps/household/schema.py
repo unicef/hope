@@ -1,9 +1,9 @@
-from typing import Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from django.db.models import Case, Prefetch, Sum, Value, When
+from django.db.models import Case, Prefetch, QuerySet, Sum, Value, When
 
 import graphene
-from graphene import relay
+from graphene import Boolean, DateTime, Enum, Field, Int, String, relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -52,7 +52,6 @@ from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
-    Agency,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -93,29 +92,22 @@ class DocumentTypeNode(DjangoObjectType):
         model = DocumentType
 
 
-class AgencyNode(DjangoObjectType):
-    country = graphene.String(description="Country name")
-    country_iso3 = graphene.String(description="Country ISO3")
+class IndividualIdentityNode(DjangoObjectType):
+    partner = graphene.String(description="Partner")
+    country = graphene.String(description="Individual Identity country")
+    country_iso3 = graphene.String(description="Individual Identity country iso3")
 
-    def resolve_country(parent: Agency, info):
+    @staticmethod
+    def resolve_partner(parent: IndividualIdentity, info: Any) -> str:
+        return parent.partner.name
+
+    @staticmethod
+    def resolve_country(parent: IndividualIdentity, info: Any) -> str:
         return parent.country.name
 
-    def resolve_country_iso3(parent: Agency, info):
+    @staticmethod
+    def resolve_country_iso3(parent: IndividualIdentity, info: Any) -> str:
         return parent.country.iso_code3
-
-    class Meta:
-        model = Agency
-
-
-class IndividualIdentityNode(DjangoObjectType):
-    type = graphene.String(description="Agency type")
-    country = graphene.String(description="Agency country")
-
-    def resolve_type(parent, info):
-        return parent.agency.type
-
-    def resolve_country(parent, info):
-        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = IndividualIdentity
@@ -129,16 +121,16 @@ class DocumentNode(DjangoObjectType):
     country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
-    def resolve_country(parent: Document, info):
+    def resolve_country(parent: Document, info: Any) -> str:
         return getattr(parent.country, "name", parent.country)
 
-    def resolve_country_iso3(parent: Document, info):
+    def resolve_country_iso3(parent: Document, info: Any) -> str:
         return parent.country.iso_code3
 
-    def resolve_photo(parent: Document, info):
+    def resolve_photo(parent: Document, info: Any) -> Optional[String]:
         if parent.photo:
             return parent.photo.url
-        return
+        return None
 
     class Meta:
         model = Document
@@ -155,13 +147,13 @@ class ExtendedHouseHoldConnection(graphene.Connection):
     individuals_count = graphene.Int()
     edge_count = graphene.Int()
 
-    def resolve_total_count(root, info, **kwargs):
+    def resolve_total_count(root, info: Any, **kwargs: Any) -> int:
         return root.length
 
-    def resolve_edge_count(root, info, **kwargs):
+    def resolve_edge_count(root, info: Any, **kwargs: Any) -> int:
         return len(root.edges)
 
-    def resolve_individuals_count(root, info, **kwargs):
+    def resolve_individuals_count(root, info: Any, **kwargs: Any) -> int:
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
@@ -212,35 +204,35 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin_area = graphene.Field(AreaNode)
 
     @staticmethod
-    def resolve_country_origin(parent: Household, info):
+    def resolve_country_origin(parent: Household, info: Any) -> str:
         return getattr(parent.country_origin, "name", "")
 
     @staticmethod
-    def resolve_country(parent: Household, info):
+    def resolve_country(parent: Household, info: Any) -> str:
         return getattr(parent.country, "name", "")
 
-    def resolve_admin1(parent, info):
+    def resolve_admin1(parent, info: Any) -> Field:
         return parent.admin1
 
-    def resolve_admin2(parent, info):
+    def resolve_admin2(parent, info: Any) -> Field:
         return parent.admin2
 
-    def resolve_admin_area(parent, info):
+    def resolve_admin_area(parent, info: Any) -> Field:
         return parent.admin_area
 
-    def resolve_admin_area_title(parent, info):
+    def resolve_admin_area_title(parent, info: Any) -> str:
         if parent.admin_area:
             return parent.admin_area.name
         return ""
 
-    def resolve_programs_with_delivered_quantity(parent, info):
+    def resolve_programs_with_delivered_quantity(parent, info: Any) -> Dict[Any, Dict[str, Any]]:
         return programs_with_delivered_quantity(parent)
 
-    def resolve_selection(parent, info):
+    def resolve_selection(parent, info: Any) -> Any:
         selection = parent.selections.first()
         return selection
 
-    def resolve_individuals(parent, info):
+    def resolve_individuals(parent, info: Any) -> QuerySet:
         individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(parent.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
@@ -251,17 +243,17 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             )
         )
 
-    def resolve_has_duplicates(parent, info):
+    def resolve_has_duplicates(parent, info: Any) -> QuerySet:
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
-    def resolve_flex_fields(parent, info):
+    def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_active_individuals_count(parent, info):
+    def resolve_active_individuals_count(parent, info: Any) -> int:
         return parent.active_individuals.count()
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info: Any, object_instance: Household) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
 
@@ -281,7 +273,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             )
 
     @classmethod
-    def get_queryset(cls, queryset, info):
+    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
         queryset = queryset.annotate(
             status_label=Case(
                 When(withdrawn=True, then=Value(STATUS_INACTIVE)),
@@ -339,59 +331,59 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_channels = graphene.List(BankAccountInfoNode)
 
     @staticmethod
-    def resolve_payment_channels(parent: Individual, info):
+    def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
         return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
-    def resolve_bank_account_info(parent, info):
+    def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
         bank_account_info = parent.bank_account_info.first()
         if bank_account_info:
             return bank_account_info
         return None
 
-    def resolve_role(parent, info):
+    def resolve_role(parent, info: Any) -> str:
         role = parent.households_and_roles.first()
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
 
-    def resolve_deduplication_golden_record_results(parent, info):
+    def resolve_deduplication_golden_record_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
-    def resolve_deduplication_batch_results(parent, info):
+    def resolve_deduplication_batch_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
-    def resolve_relationship(parent, info):
+    def resolve_relationship(parent, info: Any) -> Optional[Enum]:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
         if not parent.relationship:
             return None
         return parent.relationship
 
-    def resolve_photo(parent, info):
+    def resolve_photo(parent, info: Any) -> Optional[str]:
         if parent.photo:
             return parent.photo.url
-        return
+        return None
 
-    def resolve_flex_fields(parent, info):
+    def resolve_flex_fields(parent, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_age(parent, info):
+    def resolve_age(parent, info: Any) -> Int:
         return parent.age
 
-    def resolve_sanction_list_last_check(parent, info):
+    def resolve_sanction_list_last_check(parent, info: Any) -> DateTime:
         return parent.sanction_list_last_check
 
-    def resolve_phone_no_valid(parent, info):
+    def resolve_phone_no_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_valid
 
-    def resolve_phone_no_alternative_valid(parent, info):
+    def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
         # if user can't simply view all individuals, we check if they can do it because of grievance
@@ -501,64 +493,68 @@ class Query(graphene.ObjectType):
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
 
-    def resolve_all_households_flex_fields_attributes(self, info, **kwargs):
+    def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
         ).order_by("created_at")
 
-    def resolve_all_individuals_flex_fields_attributes(self, info, **kwargs):
+    def resolve_all_individuals_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
         ).order_by("created_at")
 
-    def resolve_all_households(self, info, **kwargs):
+    def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
         return Household.objects.order_by("created_at")
 
-    def resolve_residence_status_choices(self, info, **kwargs):
+    def resolve_residence_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
 
-    def resolve_sex_choices(self, info, **kwargs):
+    def resolve_sex_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(SEX_CHOICE)
 
-    def resolve_marital_status_choices(self, info, **kwargs):
+    def resolve_marital_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(MARITAL_STATUS_CHOICE)
 
-    def resolve_relationship_choices(self, info, **kwargs):
+    def resolve_relationship_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(RELATIONSHIP_CHOICE)
 
-    def resolve_role_choices(self, info, **kwargs):
+    def resolve_role_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(ROLE_CHOICE)
 
-    def resolve_document_type_choices(self, info, **kwargs):
+    def resolve_document_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
 
-    def resolve_identity_type_choices(self, info, **kwargs):
+    def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)
 
-    def resolve_countries_choices(self, info, **kwargs):
+    def resolve_countries_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
 
-    def resolve_severity_of_disability_choices(self, info, **kwargs):
+    def resolve_severity_of_disability_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
 
-    def resolve_observed_disability_choices(self, info, **kwargs):
+    def resolve_observed_disability_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(OBSERVED_DISABILITY_CHOICE)
 
-    def resolve_flag_choices(self, info, **kwargs):
+    def resolve_flag_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
-    def resolve_work_status_choices(self, info, **kwargs):
+    def resolve_work_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
+    def resolve_section_households_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
         payment_records_qs = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
+    def resolve_section_individuals_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
         households_individuals_params = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
@@ -582,7 +578,9 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
+    def resolve_section_child_reached(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, int]:
         households_child_params = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
@@ -603,7 +601,9 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_individuals_reached_by_age_and_gender(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
         households_params = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
@@ -630,7 +630,9 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_individuals_with_disability_reached_by_age(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
         households_params_with_disability = [
             "household__female_age_group_0_5_disabled_count",
             "household__female_age_group_6_11_disabled_count",

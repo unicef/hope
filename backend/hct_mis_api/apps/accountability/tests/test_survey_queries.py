@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -38,7 +40,7 @@ class TestSurveyQueries(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
@@ -52,7 +54,7 @@ class TestSurveyQueries(APITestCase):
             3, target_population=TargetPopulationFactory(business_area=cls.business_area), created_by=UserFactory()
         )
 
-    def test_query_list_without_permissions(self):
+    def test_query_list_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
@@ -61,7 +63,7 @@ class TestSurveyQueries(APITestCase):
             variables={},
         )
 
-    def test_query_list_filter_by_search(self):
+    def test_query_list_filter_by_search(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
         )
@@ -72,7 +74,7 @@ class TestSurveyQueries(APITestCase):
             variables={"search": "Test survey"},
         )
 
-    def test_query_list_filter_by_target_population(self):
+    def test_query_list_filter_by_target_population(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
         )
@@ -85,7 +87,7 @@ class TestSurveyQueries(APITestCase):
             },
         )
 
-    def test_query_list_filter_by_created_by(self):
+    def test_query_list_filter_by_created_by(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
         )
@@ -107,7 +109,7 @@ class TestSurveyQueries(APITestCase):
             ("with_permission", [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS]),
         ]
     )
-    def test_single_survey(self, _, permissions):
+    def test_single_survey(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         survey = SurveyFactory(
             title="Test survey single", target_population=self.target_population, created_by=self.user

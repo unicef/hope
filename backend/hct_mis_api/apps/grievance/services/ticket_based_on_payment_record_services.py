@@ -1,6 +1,7 @@
-from typing import List
+from typing import Dict, List
 
 from django.core.exceptions import ValidationError
+from django.db.models import Model
 
 from hct_mis_api.apps.core.utils import (
     decode_and_get_object,
@@ -11,7 +12,9 @@ from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def create_tickets_based_on_payment_records_service(grievance_ticket, details, model) -> List[GrievanceTicket]:
+def create_tickets_based_on_payment_records_service(
+    grievance_ticket: GrievanceTicket, details: Dict, model: Model
+) -> List[GrievanceTicket]:
     individual_encoded_id = details.get("individual")
     individual = decode_and_get_object(individual_encoded_id, Individual)
 
@@ -57,7 +60,9 @@ def create_tickets_based_on_payment_records_service(grievance_ticket, details, m
     return grievance_tickets_to_return
 
 
-def update_ticket_based_on_payment_record_service(grievance_ticket, extras, input_data) -> GrievanceTicket:
+def update_ticket_based_on_payment_record_service(
+    grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict
+) -> GrievanceTicket:
     ticket_details = grievance_ticket.ticket_details
 
     if household_id := input_data.get("household"):

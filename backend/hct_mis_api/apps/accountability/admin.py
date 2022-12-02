@@ -1,6 +1,7 @@
-from typing import Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 
 from django.contrib import admin
+from django.http import HttpRequest
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
@@ -17,10 +18,10 @@ class MessageRecipientMapInline(admin.TabularInline):
     fields: Optional[Sequence[str]] = ("get_hoh_name",)
     readonly_fields: Sequence[str] = ("get_hoh_name",)
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request: HttpRequest, obj: Any = None) -> bool:
         return False
 
-    def get_hoh_name(self, obj):
+    def get_hoh_name(self, obj: Any) -> str:
         return obj.household.head_of_household.full_name
 
     get_hoh_name.short_description = "HoH Full Name"

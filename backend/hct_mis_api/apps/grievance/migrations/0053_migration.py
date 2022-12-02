@@ -13,6 +13,20 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
+            model_name="grievanceticket",
+            name="priority",
+            field=models.IntegerField(
+                choices=[(1, "High"), (2, "Medium"), (3, "Low")], default=3, verbose_name="Priority"
+            ),
+        ),
+        migrations.AddField(
+            model_name="grievanceticket",
+            name="urgency",
+            field=models.IntegerField(
+                choices=[(1, "Very urgent"), (2, "Urgent"), (3, "Not urgent")], default=3, verbose_name="Urgency"
+            ),
+        ),
+        migrations.AddField(
             model_name='grievanceticket',
             name='partner',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='account.partner'),

@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class DataChangeValidator:
     @classmethod
-    def verify_approve_data(cls, approve_data) -> None:
+    def verify_approve_data(cls, approve_data: Dict) -> None:
         if not isinstance(approve_data, dict):
             log_and_raise("Fields must be a dictionary with field name as key and boolean as a value")
 
@@ -22,7 +23,7 @@ class DataChangeValidator:
             log_and_raise("Values must be booleans")
 
     @classmethod
-    def verify_approve_data_against_object_data(cls, object_data, approve_data) -> None:
+    def verify_approve_data_against_object_data(cls, object_data: Dict, approve_data: Dict) -> None:
         error = "Provided fields are not the same as provided in the object approve data"
         if approve_data and not isinstance(object_data, dict):
             log_and_raise(error)
@@ -33,7 +34,7 @@ class DataChangeValidator:
             log_and_raise(error)
 
 
-def validate_file(file) -> None:
+def validate_file(file: Any) -> None:
     if file.content_type in settings.GRIEVANCE_UPLOAD_CONTENT_TYPES:
         if file.size > settings.GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE:
             raise GraphQLError(_(f"File {file.name} of size {file.size} is above max size limit"))
@@ -41,12 +42,12 @@ def validate_file(file) -> None:
         raise GraphQLError(_("File type not supported"))
 
 
-def validate_files_size(files) -> None:
+def validate_files_size(files: List[Any]) -> None:
     if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
         raise GraphQLError("Total size of files can not be larger than 25mb.")
 
 
-def validate_grievance_documents_size(ticket_id, new_documents, is_updated=False) -> None:
+def validate_grievance_documents_size(ticket_id: str, new_documents: List[Dict], is_updated: bool = False) -> None:
     grievance_documents = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id)
 
     if is_updated:

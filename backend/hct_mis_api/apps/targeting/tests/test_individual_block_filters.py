@@ -19,7 +19,7 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestIndividualBlockFilter(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         business_area = BusinessArea.objects.first()
@@ -38,7 +38,7 @@ class TestIndividualBlockFilter(TestCase):
         )
         cls.household_2_indiv = household
 
-    def test_all_individuals_are_female(self):
+    def test_all_individuals_are_female(self) -> None:
         queryset = Household.objects.all()
         tp = TargetPopulation()
         tc = TargetingCriteria()
@@ -69,7 +69,7 @@ class TestIndividualBlockFilter(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first().id, self.household_1_indiv.id)
 
-    def test_all_individuals_are_female_on_mixins(self):
+    def test_all_individuals_are_female_on_mixins(self) -> None:
         query = Household.objects.all()
         married_rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="EQUALS",
@@ -90,7 +90,7 @@ class TestIndividualBlockFilter(TestCase):
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
 
-    def test_two_separate_blocks_on_mixins(self):
+    def test_two_separate_blocks_on_mixins(self) -> None:
         query = Household.objects.all()
         married_rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="EQUALS",

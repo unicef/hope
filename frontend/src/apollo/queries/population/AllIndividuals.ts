@@ -99,11 +99,9 @@ export const AllIndividuals = gql`
             edges {
               node {
                 id
-                agency {
-                  country
-                  label
-                  countryIso3
-                }
+                partner
+                country
+                countryIso3
                 number
               }
             }

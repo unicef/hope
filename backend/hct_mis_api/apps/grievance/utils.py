@@ -1,7 +1,8 @@
 import logging
 import os
-from typing import List
+from typing import Dict, List
 
+from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -27,7 +28,7 @@ def select_individual(
     selected_individual: Individual,
     ticket_duplicates: List[Individual],
     ticket_individuals: List[Individual],
-):
+) -> None:
     if selected_individual in ticket_duplicates and selected_individual not in ticket_individuals:
         ticket_details.selected_individuals.add(selected_individual)
 
@@ -47,7 +48,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
 
 
-def create_grievance_documents(user, grievance_ticket, documents) -> None:
+def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTicket, documents: List[Dict]) -> None:
     grievance_documents = []
     for document in documents:
         file = document["file"]
@@ -65,7 +66,7 @@ def create_grievance_documents(user, grievance_ticket, documents) -> None:
     GrievanceDocument.objects.bulk_create(grievance_documents)
 
 
-def update_grievance_documents(documents) -> None:
+def update_grievance_documents(documents: List[Dict]) -> None:
     for document in documents:
         current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
         if current_document:
@@ -81,7 +82,7 @@ def update_grievance_documents(documents) -> None:
             current_document.save()
 
 
-def delete_grievance_documents(ticket_id, ids_to_delete) -> None:
+def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None:
     documents_to_delete = GrievanceDocument.objects.filter(
         grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
     )

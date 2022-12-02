@@ -34,7 +34,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
@@ -106,7 +106,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         cls.grievance_ticket_2 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7224")
         cls.grievance_ticket_3 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7225")
 
-    def test_grievance_list_filtered_by_ticket_id(self):
+    def test_grievance_list_filtered_by_ticket_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -119,7 +119,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             variables={"search": f"ticket_id {self.grievance_ticket_1.unicef_id}"},
         )
 
-    def test_grievance_list_filtered_by_ticket_household_unicef_id(self):
+    def test_grievance_list_filtered_by_ticket_household_unicef_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -132,7 +132,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             variables={"search": f"ticket_hh_id {self.grievance_ticket_2.household_unicef_id}"},
         )
 
-    def test_grievance_list_filtered_by_household_head_family_name(self):
+    def test_grievance_list_filtered_by_household_head_family_name(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],

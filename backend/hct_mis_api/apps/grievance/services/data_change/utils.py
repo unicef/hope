@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.core_fields_attributes import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_IMAGE,
@@ -28,10 +29,11 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Agency,
     BankAccountInfo,
     Document,
     DocumentType,
+    Household,
+    Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
@@ -40,17 +42,17 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 logger = logging.getLogger(__name__)
 
 
-def to_date_string(data, field_name) -> None:
+def to_date_string(data: Dict, field_name: str) -> None:
     if raw_date := data.get(field_name):
         data[field_name] = raw_date.isoformat()
 
 
-def to_phone_number_str(data, field_name) -> None:
+def to_phone_number_str(data: Dict, field_name: str) -> None:
     if phone_number := data.get(field_name):
         data[field_name] = str(phone_number)
 
 
-def is_approved(item) -> bool:
+def is_approved(item: Dict) -> bool:
     return item.get("approve_status") is True
 
 
@@ -58,7 +60,7 @@ def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
     return value or ""
 
 
-def cast_flex_fields(flex_fields) -> None:
+def cast_flex_fields(flex_fields: Dict) -> None:
     decimals_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
     integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
     for key, value in flex_fields.items():
@@ -68,7 +70,7 @@ def cast_flex_fields(flex_fields) -> None:
             flex_fields[key] = int(value)
 
 
-def verify_flex_fields(flex_fields_to_verify, associated_with) -> None:
+def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
         logger.error("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
@@ -97,7 +99,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with) -> None:
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def handle_role(role, household, individual) -> None:
+def handle_role(role: str, household: Household, individual: Individual) -> None:
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
         if already_existing_role:
@@ -107,7 +109,7 @@ def handle_role(role, household, individual) -> None:
             IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
-def handle_add_document(document, individual) -> Document:
+def handle_add_document(document: Dict, individual: Individual) -> Document:
     type_name = document.get("type")
     country_code = document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
@@ -160,7 +162,7 @@ def handle_edit_document(document_data: Dict) -> Document:
     return document
 
 
-def handle_add_payment_channel(payment_channel, individual) -> Optional[BankAccountInfo]:
+def handle_add_payment_channel(payment_channel: Dict, individual: Individual) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
     if payment_channel_type == "BANK_TRANSFER":
         bank_name = payment_channel.get("bank_name")
@@ -173,7 +175,7 @@ def handle_add_payment_channel(payment_channel, individual) -> Optional[BankAcco
     return None
 
 
-def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
+def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
     payment_channel_id = decode_id_string(payment_channel.get("id"))
 
@@ -186,61 +188,44 @@ def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
     return None
 
 
-def handle_add_identity(identity, individual) -> IndividualIdentity:
-    agency_name = identity.get("agency")
+def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
+    partner_name = identity.get("partner")
     country_code = identity.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
-    agency_type, _ = Agency.objects.get_or_create(
-        country=country,
-        type=agency_name,
-        defaults={
-            "country": country,
-            "type": agency_name,
-            "label": f"{country.name} - {agency_name}",
-        },
-    )
+    partner, _ = Partner.objects.get_or_create(name=partner_name)
 
-    identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
+    identity_already_exists = IndividualIdentity.objects.filter(number=number, partner=partner).exists()
     if identity_already_exists:
-        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
+        log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
 
-    return IndividualIdentity(number=number, individual=individual, agency=agency_type)
+    return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
 
 
 def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     updated_identity = identity_data.get("value", {})
-    agency_name = updated_identity.get("agency")
-    country_code = updated_identity.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    partner_name = updated_identity.get("partner")
     number = updated_identity.get("number")
     identity_id = updated_identity.get("id")
+    country_code = updated_identity.get("country")
 
-    identity_id = decode_id_string(identity_id)
-    identity = get_object_or_404(IndividualIdentity, id=identity_id)
-
-    agency_type, _ = Agency.objects.get_or_create(
-        country=country,
-        type=agency_name,
-        defaults={
-            "country": country,
-            "type": agency_name,
-            "label": f"{country.name} - {agency_name}",
-        },
-    )
+    country = geo_models.Country.objects.get(iso_code3=country_code)
+    identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
+    partner, _ = Partner.objects.get_or_create(name=partner_name)
 
     identity_already_exists = (
-        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
+        IndividualIdentity.objects.exclude(pk=identity.id).filter(number=number, partner=partner).exists()
     )
     if identity_already_exists:
-        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
+        log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
 
     identity.number = number
-    identity.agency = agency_type
+    identity.partner = partner
+    identity.country = country
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[str, Dict]:
+def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
     previous_documents: Dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = decode_id_string(document_data.get("value"))
@@ -256,7 +241,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status) -> Dict[
     return previous_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dict[str, Any]:
+def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[int, Any]:
     previous_identities = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
@@ -265,17 +250,17 @@ def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dic
             "id": identity.id,
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
-            "agency": identity.agency.type,
-            "country": identity.agency.country.iso_code3,
+            "partner": identity.partner.name,
+            "country": identity.country.iso_code3,
         }
 
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status) -> Dict[str, Any]:
+def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
     previous_payment_channels = {}
     for payment_channel_data in payment_channels_to_remove_with_approve_status:
-        payment_channel_id = payment_channel_data.get("value")
+        payment_channel_id: str = payment_channel_data.get("value", "")
         bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(payment_channel_id))
         previous_payment_channels[payment_channel_id] = {
             "id": payment_channel_id,
@@ -288,12 +273,12 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
     return previous_payment_channels
 
 
-def prepare_edit_identities(identities) -> List[Dict]:
+def prepare_edit_identities(identities: List[Dict]) -> List[Dict]:
     edited_identities = []
     for identity_data in identities:
         encoded_id = identity_data.get("id")
         number = identity_data.get("number")
-        agency = identity_data.get("agency")
+        partner = identity_data.get("partner")
         country = identity_data.get("country")
 
         identity_id = decode_id_string(encoded_id)
@@ -305,14 +290,14 @@ def prepare_edit_identities(identities) -> List[Dict]:
                 "value": {
                     "id": encoded_id,
                     "country": country,
-                    "agency": agency,
+                    "partner": partner,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": number,
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": identity.agency.country.iso_code3,
-                    "agency": identity.agency.type,
+                    "country": identity.country.iso_code3,
+                    "partner": identity.partner.name,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
                 },
@@ -321,7 +306,7 @@ def prepare_edit_identities(identities) -> List[Dict]:
     return edited_identities
 
 
-def prepare_edit_payment_channel(payment_channels) -> List[Dict]:
+def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     items = []
 
     handlers = {
@@ -334,7 +319,7 @@ def prepare_edit_payment_channel(payment_channels) -> List[Dict]:
     return items
 
 
-def handle_bank_transfer_payment_method(pc) -> Dict:
+def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
     bank_account_number = pc.get("bank_account_number")
     bank_name = pc.get("bank_name")
     encoded_id = pc.get("id")
@@ -372,7 +357,7 @@ def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Opti
     return None
 
 
-def handle_document(document) -> Dict:
+def handle_document(document: Dict) -> Dict:
     photo = document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
@@ -380,11 +365,11 @@ def handle_document(document) -> Dict:
     return document
 
 
-def handle_documents(documents) -> List[Dict]:
+def handle_documents(documents: List[Dict]) -> List[Dict]:
     return [handle_document(document) for document in documents]
 
 
-def save_images(flex_fields, associated_with) -> None:
+def save_images(flex_fields: Dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
         logger.error("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
@@ -407,7 +392,7 @@ def save_images(flex_fields, associated_with) -> None:
                 flex_fields[name] = unquoted_value
 
 
-def prepare_edit_documents(documents_to_edit) -> List[Dict]:
+def prepare_edit_documents(documents_to_edit: List[Dict]) -> List[Dict]:
     edited_documents = []
 
     for document_to_edit in documents_to_edit:

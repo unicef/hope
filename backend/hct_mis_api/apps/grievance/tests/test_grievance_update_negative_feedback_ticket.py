@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -36,7 +38,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -66,7 +68,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_negative_feedback_ticket_not_supported(self, _, permissions):
+    def test_update_negative_feedback_ticket_not_supported(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

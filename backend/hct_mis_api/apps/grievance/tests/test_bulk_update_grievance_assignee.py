@@ -1,4 +1,5 @@
 import random
+from typing import Any, List
 from unittest.mock import patch
 
 from parameterized import parameterized
@@ -28,7 +29,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory(first_name="user")
         cls.user_two = UserFactory.create(first_name="user_two")
@@ -85,7 +86,9 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
     )
     @patch("hct_mis_api.apps.grievance.mutations.bulk_update_assigned_to")
-    def test_bulk_update_grievance_assignee(self, _, permissions, bulk_update_assigned_to_mock):
+    def test_bulk_update_grievance_assignee(
+        self, _: Any, permissions: List[Permissions], bulk_update_assigned_to_mock: Any
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         input_data = {
             "businessAreaSlug": self.business_area.slug,

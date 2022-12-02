@@ -31,5 +31,5 @@ class HOPEApiTestCase(APITestCase):
         )
         cls.token.valid_for.set([cls.business_area])
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)

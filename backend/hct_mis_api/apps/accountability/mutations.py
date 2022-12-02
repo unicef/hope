@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 
@@ -48,7 +50,7 @@ class CreateCommunicationMessageMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input):
+    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateCommunicationMessageMutation":
         user = info.context.user
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
@@ -68,7 +70,7 @@ class CreateFeedbackMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input):
+    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMutation":
         user = info.context.user
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
@@ -88,7 +90,7 @@ class UpdateFeedbackMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input):
+    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "UpdateFeedbackMutation":
         user = info.context.user
         old_feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
@@ -114,7 +116,7 @@ class CreateFeedbackMessageMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input):
+    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMessageMutation":
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback"]))
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE, feedback.business_area.slug)
 
@@ -133,7 +135,7 @@ class CreateSurveyMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input):
+    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateSurveyMutation":
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
@@ -157,7 +159,7 @@ class ExportSurveySampleMutationMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, survey_id):
+    def mutate(cls, root: Any, info: Any, survey_id: str) -> "ExportSurveySampleMutationMutation":
         survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, survey.business_area)
 

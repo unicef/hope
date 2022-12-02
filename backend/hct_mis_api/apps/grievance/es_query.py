@@ -26,7 +26,7 @@ OBJECT_FIELDS = (
 TERMS_FIELDS = ("status", "admin2")
 
 
-def execute_es_query(query_dict) -> List[str]:
+def execute_es_query(query_dict: Dict) -> List[str]:
     es_response = (
         GrievanceTicketDocument.search()
         .params(search_type="dfs_query_then_fetch", preserve_order=True)
@@ -37,7 +37,7 @@ def execute_es_query(query_dict) -> List[str]:
     return es_ids
 
 
-def create_es_query(options) -> Dict:
+def create_es_query(options: Dict) -> Dict:
     all_queries: List[Dict[str, Any]] = []
     query_search: List[Dict[str, Any]] = []
     query_term_fields: List[Dict[str, Any]] = []

@@ -15,10 +15,10 @@ class TestHouseholdWithdraw(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
 
-    def test_withdraw(self):
+    def test_withdraw(self) -> None:
         _, individuals = create_household_for_fixtures({"size": 5})
         for individual in individuals:
             DocumentFactory.create_batch(2, individual=individual, status=Document.STATUS_VALID)

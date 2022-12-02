@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, List
 from unittest.mock import patch
 
 from django.core.management import call_command
@@ -167,7 +168,7 @@ class TestGrievanceQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -258,7 +259,7 @@ class TestGrievanceQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_all(self, _, permissions):
+    def test_grievance_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -272,7 +273,7 @@ class TestGrievanceQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_query_single(self, _, permissions):
+    def test_grievance_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS).id
@@ -282,7 +283,7 @@ class TestGrievanceQuery(APITestCase):
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
 
-    def test_grievance_list_filtered_by_admin2(self):
+    def test_grievance_list_filtered_by_admin2(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -295,7 +296,7 @@ class TestGrievanceQuery(APITestCase):
             variables={"admin": self.admin_area_1.id},
         )
 
-    def test_grievance_list_filtered_by_created_at(self):
+    def test_grievance_list_filtered_by_created_at(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -308,7 +309,7 @@ class TestGrievanceQuery(APITestCase):
             variables={"createdAtRange": '{"min": "2020-07-12", "max": "2020-09-12"}'},
         )
 
-    def test_grievance_list_filtered_by_status(self):
+    def test_grievance_list_filtered_by_status(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -333,7 +334,7 @@ class TestGrievanceQuery(APITestCase):
             ),
         ]
     )
-    def test_grievance_list_filtered_by_category(self, _, category):
+    def test_grievance_list_filtered_by_category(self, _: Any, category: str) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -346,7 +347,7 @@ class TestGrievanceQuery(APITestCase):
             variables={"category": str(category)},
         )
 
-    def test_grievance_list_filtered_by_assigned_to_correct_user(self):
+    def test_grievance_list_filtered_by_assigned_to_correct_user(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -359,7 +360,7 @@ class TestGrievanceQuery(APITestCase):
             variables={"assignedTo": self.id_to_base64(self.user.id, "UserNode")},
         )
 
-    def test_grievance_list_filtered_by_assigned_to_incorrect_user(self):
+    def test_grievance_list_filtered_by_assigned_to_incorrect_user(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
@@ -372,7 +373,7 @@ class TestGrievanceQuery(APITestCase):
             variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
         )
 
-    def test_grievance_list_filtered_by_score(self):
+    def test_grievance_list_filtered_by_score(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],

@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -18,7 +18,6 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
-from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.geo.models import Area, ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
@@ -32,14 +31,14 @@ class IsNull(Func):
 
 
 class GrievanceOrderingFilter(OrderingFilter):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.extra["choices"] += [
             ("linked_tickets", "Linked tickets"),
             ("-linked_tickets", "Linked tickets (descending)"),
         ]
 
-    def filter(self, qs, value):
+    def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
         if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
             qs = super().filter(qs, value)
             qs = (
@@ -83,7 +82,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
         return execute_es_query(grievance_es_query_dict)
 
-    def prepare_filters(self, allowed_fields) -> Dict:
+    def prepare_filters(self, allowed_fields: List[str]) -> Dict:
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):
@@ -213,7 +212,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         label, value = tuple(value.split(" ", 1))
         if label == "ticket_id":
             q = Q(unicef_id=value)
@@ -228,7 +227,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             q = Q(household_unicef_id__in=ids)
         return qs.filter(q)
 
-    def fsp_filter(self, qs, name, value):
+    def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
             q_obj = Q()
             for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
@@ -237,12 +236,12 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(q_obj)
         return qs
 
-    def admin_filter(self, qs, name, value):
+    def admin_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-    def permissions_filter(self, qs, name, value) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name: str, value: List[Permissions]) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
@@ -291,19 +290,17 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             else:
                 return GrievanceTicket.objects.none()
 
-    def filter_grievance_type(self, qs, name, val):
-        choices = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
-        user_generated = []
-        for value in choices:
-            if value in GrievanceTicket.MANUAL_CATEGORIES:
-                user_generated.append(value)
-        if val == "user":
-            return qs.filter(category__in=user_generated)
-        elif val == "system":
+    def filter_grievance_type(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
+        choices = dict(GrievanceTicket.CATEGORY_CHOICES)
+        user_generated = [value for value in choices if value in dict(GrievanceTicket.MANUAL_CATEGORIES)]
+
+        if val == "system":
             return qs.filter(~Q(category__in=user_generated))
+        elif val == "user":
+            return qs.filter(category__in=user_generated)
         return qs
 
-    def filter_grievance_status(self, qs, name, val):
+    def filter_grievance_status(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
         if val == "active":
             return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs
@@ -324,7 +321,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(fields=("id",))
 
-    def prepare_ticket_filters(self, lookup, obj) -> Q:
+    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
 
         q_obj = Q()
@@ -334,7 +331,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
                 q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
         return q_obj
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         cleaned_data = self.form.cleaned_data
 
         payment_record_objects = cleaned_data.pop("payment_record", None)
@@ -374,7 +371,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
         return queryset
 
-    def permissions_filter(self, qs, name, value):
+    def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
 
 

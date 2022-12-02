@@ -1,8 +1,11 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
+
+from django.contrib.auth.models import AbstractUser
+from django.db.models import QuerySet
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import TicketPriority
+from hct_mis_api.apps.core.models import BusinessArea, TicketPriority
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -12,11 +15,17 @@ from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
 from hct_mis_api.apps.grievance.utils import traverse_sibling_tickets
-from hct_mis_api.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Individual
+from hct_mis_api.apps.household.models import (
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+    Household,
+    Individual,
+)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
-def _clear_deduplication_individuals_fields(individuals) -> None:
+def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -> None:
     for individual in individuals:
         individual.deduplication_golden_record_status = UNIQUE
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
@@ -34,7 +43,7 @@ def _clear_deduplication_individuals_fields(individuals) -> None:
     )
 
 
-def close_needs_adjudication_old_ticket(ticket_details, user) -> None:
+def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
     both_individuals = (ticket_details.golden_records_individual, ticket_details.possible_duplicate)
 
     if ticket_details.selected_individual is None:
@@ -48,7 +57,7 @@ def close_needs_adjudication_old_ticket(ticket_details, user) -> None:
         _clear_deduplication_individuals_fields(unique_individuals)
 
 
-def close_needs_adjudication_new_ticket(ticket_details, user) -> None:
+def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
     individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
 
     if selected_individuals := ticket_details.selected_individuals.all():
@@ -62,7 +71,7 @@ def close_needs_adjudication_new_ticket(ticket_details, user) -> None:
         _clear_deduplication_individuals_fields(individuals)
 
 
-def close_needs_adjudication_ticket_service(grievance_ticket, user) -> None:
+def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details:
         return
@@ -79,19 +88,19 @@ def close_needs_adjudication_ticket_service(grievance_ticket, user) -> None:
 logger = logging.getLogger(__name__)
 
 
-def _get_min_max_score(golden_records) -> Tuple[float, float]:
+def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)
 
 
 def create_grievance_ticket_with_details(
-    main_individual,
-    possible_duplicate,
-    business_area,
-    possible_duplicates=None,
-    registration_data_import=None,
-    is_multiple_duplicates_version=False,
+    main_individual: Individual,
+    possible_duplicate: Individual,
+    business_area: BusinessArea,
+    possible_duplicates: Optional[List[Individual]] = None,
+    registration_data_import: Optional[RegistrationDataImport] = None,
+    is_multiple_duplicates_version: bool = False,
 ) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
@@ -157,7 +166,10 @@ def create_grievance_ticket_with_details(
 
 
 def create_needs_adjudication_tickets(
-    individuals_queryset, results_key, business_area, registration_data_import=None
+    individuals_queryset: QuerySet[Individual],
+    results_key: str,
+    business_area: BusinessArea,
+    registration_data_import: Optional[RegistrationDataImport] = None,
 ) -> Optional[List[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.household.models import Individual
 
@@ -196,7 +208,10 @@ def create_needs_adjudication_tickets(
 
 
 def mark_as_duplicate_individual_and_reassign_roles(
-    ticket_details, individual_to_remove, user, unique_individual
+    ticket_details: TicketNeedsAdjudicationDetails,
+    individual_to_remove: Individual,
+    user: AbstractUser,
+    unique_individual: Individual,
 ) -> None:
     if ticket_details.is_multiple_duplicates_version:
         household = reassign_roles_on_disable_individual_service(
@@ -212,7 +227,9 @@ def mark_as_duplicate_individual_and_reassign_roles(
     mark_as_duplicate_individual(individual_to_remove, unique_individual, household, user)
 
 
-def mark_as_duplicate_individual(individual_to_remove, unique_individual, household, user) -> None:
+def mark_as_duplicate_individual(
+    individual_to_remove: Individual, unique_individual: Individual, household: Household, user: AbstractUser
+) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
 
     individual_to_remove.mark_as_duplicate(unique_individual)

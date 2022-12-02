@@ -1,7 +1,7 @@
 import itertools
 from typing import Any, Dict, Tuple
 
-from django.db.models import Avg, Case, CharField, Count, F, Q, Value, When
+from django.db.models import Avg, Case, CharField, Count, F, Q, QuerySet, Value, When
 from django.utils.encoding import force_str
 
 import graphene
@@ -34,7 +34,7 @@ TICKET_ORDERING = {
 }
 
 
-def transform_to_chart_dataset(qs) -> Dict[str, Any]:
+def transform_to_chart_dataset(qs: QuerySet) -> Dict[str, Any]:
     labels, data = [], []
     for q in qs:
         label, value = q
@@ -44,7 +44,7 @@ def transform_to_chart_dataset(qs) -> Dict[str, Any]:
     return {"labels": labels, "datasets": [{"data": data}]}
 
 
-def display_value(choices, field, default_field=None) -> Case:
+def display_value(choices: Tuple, field: str, default_field: Any = None) -> Case:
     options = [When(**{field: k, "then": Value(force_str(v))}) for k, v in choices]
     return Case(*options, default=default_field, output_field=CharField())
 
@@ -53,7 +53,7 @@ def create_type_generated_queries() -> Tuple[Q, Q]:
     user_generated, system_generated = Q(), Q()
     for category in GrievanceTicket.CATEGORY_CHOICES:
         category_num, category_str = category
-        if category_num in GrievanceTicket.MANUAL_CATEGORIES:
+        if category_num in dict(GrievanceTicket.MANUAL_CATEGORIES):
             user_generated |= Q(category_name=force_str(category_str))
         else:
             system_generated |= Q(category_name=force_str(category_str))
@@ -88,7 +88,7 @@ class TicketByLocationAndCategory(graphene.ObjectType):
     count = graphene.Int()
     categories = graphene.List(TicketByCategory)
 
-    def resolve_count(self, info):
+    def resolve_count(self, info: Any) -> int:
         return sum([category["count"] for category in self.get("categories")])
 
 
@@ -100,7 +100,7 @@ class Query(graphene.ObjectType):
         ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True)
     )
 
-    def resolve_tickets_by_type(self, info, **kwargs):
+    def resolve_tickets_by_type(self, info: Any, **kwargs: Any) -> Dict:
         user_generated, system_generated = create_type_generated_queries()
 
         qs = (
@@ -125,7 +125,7 @@ class Query(graphene.ObjectType):
         qs["system_generated_avg_resolution"] = round(qs["system_generated_avg_resolution"], 2)
         return qs
 
-    def resolve_tickets_by_category(self, info, **kwargs):
+    def resolve_tickets_by_category(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
             GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
@@ -137,7 +137,7 @@ class Query(graphene.ObjectType):
 
         return transform_to_chart_dataset(qs)
 
-    def resolve_tickets_by_status(self, info, **kwargs):
+    def resolve_tickets_by_status(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
             GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
@@ -149,7 +149,7 @@ class Query(graphene.ObjectType):
 
         return transform_to_chart_dataset(qs)
 
-    def resolve_tickets_by_location_and_category(self, info, **kwargs):
+    def resolve_tickets_by_location_and_category(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
             GrievanceTicket.objects.select_related("admin2")
             .filter(business_area__slug=kwargs.get("business_area_slug"))

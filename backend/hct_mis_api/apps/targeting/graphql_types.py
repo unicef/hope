@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import graphene
 from graphene import relay
@@ -18,16 +18,23 @@ from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
-def get_field_by_name(field_name: str):
+    from graphene.types.structures import List as GrapheneList
+
+    from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
+
+
+def get_field_by_name(field_name: str) -> Optional[Any]:
     field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name").get(field_name)
     choices = field.get("choices")
     if choices and callable(choices):
-        field["choices"] = choices()
+        field["choices"] = choices()  # type: ignore
     return field
 
 
-def filter_choices(field, args) -> List:
+def filter_choices(field: Dict, args: List) -> Dict:
     choices = field.get("choices")
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))
@@ -38,10 +45,10 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
 
-    def resolve_arguments(self, info):
+    def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info):
+    def resolve_field_attribute(parent, info: Any) -> Dict:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
@@ -56,10 +63,10 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
 
-    def resolve_arguments(self, info):
+    def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info):
+    def resolve_field_attribute(parent, info: Any) -> Union[Dict, FlexibleAttribute]:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
@@ -73,7 +80,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
 class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
     individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
 
-    def resolve_individual_block_filters(self, info):
+    def resolve_individual_block_filters(self, info: Any) -> "QuerySet":
         return self.individual_block_filters.all()
 
     class Meta:
@@ -84,10 +91,10 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
     filters = graphene.List(TargetingCriteriaRuleFilterNode)
     individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
 
-    def resolve_individuals_filters_blocks(self, info):
+    def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualBlockRuleFilter]":
         return self.individuals_filters_blocks.all()
 
-    def resolve_filters(self, info):
+    def resolve_filters(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
         return self.filters.all()
 
     class Meta:
@@ -97,20 +104,11 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
 class TargetingCriteriaNode(DjangoObjectType):
     rules = graphene.List(TargetingCriteriaRuleNode)
 
-    def resolve_rules(self, info):
+    def resolve_rules(self, info: Any) -> "QuerySet":
         return self.rules.all()
 
     class Meta:
         model = target_models.TargetingCriteria
-
-
-class StatsObjectType(graphene.ObjectType):
-    child_male = graphene.Int()
-    child_female = graphene.Int()
-    adult_male = graphene.Int()
-    adult_female = graphene.Int()
-    all_households = graphene.Int()
-    all_individuals = graphene.Int()
 
 
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):

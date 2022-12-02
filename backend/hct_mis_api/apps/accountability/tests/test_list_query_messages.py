@@ -58,7 +58,7 @@ class TestListQueryMessage(APITestCase):
 """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
