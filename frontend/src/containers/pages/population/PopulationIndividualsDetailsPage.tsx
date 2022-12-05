@@ -59,14 +59,26 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
 
   const {
     data: grievancesChoices,
+    loading: grievancesChoicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
+  if (
+    loading ||
+    choicesLoading ||
+    flexFieldsDataLoading ||
+    grievancesChoicesLoading
+  )
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
+  if (
+    !data ||
+    !choicesData ||
+    !flexFieldsData ||
+    !grievancesChoices ||
+    permissions === null
+  )
     return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -129,7 +141,9 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         <IndividualBioData
           businessArea={businessArea}
           individual={individual as IndividualNode}
-          choicesData={choicesData} grievancesChoices={grievancesChoices} />
+          choicesData={choicesData}
+          grievancesChoices={grievancesChoices}
+        />
         <IndividualVulnerabilities
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
