@@ -276,7 +276,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         households_ids = self.household_list.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+        targeted_individuals = Individual.objects.filter(
+            household__id__in=households_ids, duplicate=False, withdrawn=False
+        ).aggregate(
             child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
             child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
             adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),

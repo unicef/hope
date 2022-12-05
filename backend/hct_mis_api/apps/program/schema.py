@@ -1,5 +1,6 @@
 from typing import Tuple, Type
 
+import graphene
 from django.db.models import (
     Case,
     Count,
@@ -10,9 +11,6 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce
-
-import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -25,6 +23,8 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
+from hct_mis_api.apps.core.cache_keys import PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_permission_decorator,
     to_choice_object,
+    save_data_in_cache,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
@@ -66,7 +67,8 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.history.all()
 
     def resolve_total_number_of_households(self, info, **kwargs):
-        return self.total_number_of_households
+        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
+        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -145,20 +147,16 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_programs(self, info, **kwargs):
-        return (
-            Program.objects.annotate(
-                custom_order=Case(
-                    When(status=Program.DRAFT, then=Value(1)),
-                    When(status=Program.ACTIVE, then=Value(2)),
-                    When(status=Program.FINISHED, then=Value(3)),
-                    output_field=IntegerField(),
-                )
+        queryset = Program.objects.annotate(
+            custom_order=Case(
+                When(status=Program.DRAFT, then=Value(1)),
+                When(status=Program.ACTIVE, then=Value(2)),
+                When(status=Program.FINISHED, then=Value(3)),
+                output_field=IntegerField(),
             )
-            .annotate(
-                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
-            )
-            .order_by("custom_order", "start_date")
         )
+
+        return queryset.order_by("custom_order", "start_date")
 
     def resolve_program_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)
@@ -195,6 +193,7 @@ class Query(graphene.ObjectType):
         ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
@@ -226,6 +225,7 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True

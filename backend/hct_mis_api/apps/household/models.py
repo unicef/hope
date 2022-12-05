@@ -791,11 +791,13 @@ class Individual(
         max_length=50,
         default=UNIQUE,
         choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
     )
     deduplication_batch_status = models.CharField(
         max_length=50,
         default=UNIQUE_IN_BATCH,
         choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
     )
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
