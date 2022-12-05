@@ -46,7 +46,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [filters, setFilters] = useState({ search: null, module: '' });
+  const [filters, setFilters] = useState({ search: '', module: '' });
   const debouncedFilters = useDebounce(filters, 700);
 
   const { data, refetch, loading } = useAllLogEntriesQuery({

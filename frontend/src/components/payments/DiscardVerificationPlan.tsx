@@ -58,9 +58,7 @@ export function DiscardVerificationPlan({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Discard Verification Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Discard Verification Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
