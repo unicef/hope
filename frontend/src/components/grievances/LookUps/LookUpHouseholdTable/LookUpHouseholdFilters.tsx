@@ -71,7 +71,7 @@ export function LookUpHouseholdFilters({
                 ...filter,
                 lastRegistrationDate: {
                   ...filter.lastRegistrationDate,
-                  min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  min: date ? moment(date).format('YYYY-MM-DD') : undefined,
                 },
               })
             }
@@ -86,7 +86,7 @@ export function LookUpHouseholdFilters({
                 ...filter,
                 lastRegistrationDate: {
                   ...filter.lastRegistrationDate,
-                  max: date ? moment(date).format('YYYY-MM-DD') : null,
+                  max: date ? moment(date).format('YYYY-MM-DD') : undefined,
                 },
               })
             }
