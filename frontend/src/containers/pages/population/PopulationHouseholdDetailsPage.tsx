@@ -143,10 +143,12 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       />
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
-        <HouseholdIndividualsTable
-          choicesData={choicesData}
-          household={household as HouseholdNode}
-        />
+        {household?.individuals?.edges?.length ? (
+          <HouseholdIndividualsTable
+            choicesData={choicesData}
+            household={household as HouseholdNode}
+          />
+        ) : null}
         {hasPermissions(
           PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
