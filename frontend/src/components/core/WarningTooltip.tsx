@@ -13,12 +13,12 @@ interface WarningTooltipProps {
   message?: string;
 }
 export const WarningTooltip = ({
-  confirmed,
+  confirmed = false,
   message = '',
 }: WarningTooltipProps): React.ReactElement => {
   return (
     <Tooltip title={message}>
-      <StyledWarning confirmed={confirmed} />
+      <StyledWarning confirmed={confirmed ? 1 : 0} />
     </Tooltip>
   );
 };
