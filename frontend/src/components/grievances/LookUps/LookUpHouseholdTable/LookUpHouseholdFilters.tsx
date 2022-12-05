@@ -99,7 +99,7 @@ export function LookUpHouseholdFilters({
             label={t('Status')}
             value={filter.residenceStatus}
           >
-            {choicesData.residenceStatusChoices.map((item) => {
+            {choicesData.residenceStatusChoices?.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
