@@ -114,7 +114,7 @@ export function DedupeResults({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>{t('Duplicates')}</DialogTitle>
+          <DialogTitle>{t('Duplicates')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>

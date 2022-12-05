@@ -64,7 +64,7 @@ export const LookUpReassignRoleModal = ({
   } = {
     search: '',
     programs: '',
-    lastRegistrationDate: { min: undefined, max: undefined },
+    lastRegistrationDate: { min: '', max: '' },
     status: '',
     admin2: null,
     sex: '',
@@ -146,9 +146,7 @@ export const LookUpReassignRoleModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              {t('Reassign Role')}
-            </DialogTitle>
+            <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpIndividualFilters
