@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from redis.exceptions import LockError
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
@@ -44,20 +43,18 @@ def handle_rdi_exception(datahub_rdi_id: "UUID", e: BaseException) -> None:
 
 
 @contextmanager
-def locked_cache(key: Union[int, str]) -> Any:
-    try:
-        # ``blocking_timeout`` indicates the maximum amount of time in seconds to
-        # spend trying to acquire the lock.
-        # ``timeout`` indicates a maximum life for the lock.
-        # some procedures here can take a few seconds
-        # 30s to try acquiring the lock should be enough
-        with cache.lock(key, blocking_timeout=30, timeout=60 * 60 * 24) as lock:
-            yield
-    except LockError as e:
-        logger.exception(f"Couldn't lock cache for key '{key}'. Failed with: {e}")
+def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
+    if cache.get(key):
+        logger.info(f"Task with key {key} is already running")
+        yield False
     else:
-        if lock.locked():
-            lock.release()
+        try:
+            logger.info(f"Task with key {key} running")
+            cache.set(key, True, timeout=timeout)
+            yield True
+        finally:
+            cache.delete(key)
+            logger.info(f"Task with key {key} finished")
 
 
 @app.task
@@ -198,11 +195,13 @@ def registration_xlsx_import_hourly_task() -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def merge_registration_data_import_task(registration_data_import_id: "UUID") -> None:
+def merge_registration_data_import_task(registration_data_import_id: "UUID") -> bool:
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
-    with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}"):
+    with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
+        if not locked:
+            return True
         try:
             from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
                 RdiMergeTask,
@@ -221,6 +220,7 @@ def merge_registration_data_import_task(registration_data_import_id: "UUID") -> 
     logger.info(
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
     )
+    return True
 
 
 @app.task(queue="priority")
@@ -343,7 +343,9 @@ def automate_rdi_creation_task(
     )
 
     try:
-        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as locked:
+            if not locked:
+                return []
             output = []
             service = FlexRegistrationService()
 
@@ -408,7 +410,9 @@ def automate_registration_diia_import_task(
         RdiDiiaCreateTask,
     )
 
-    with locked_cache(key="automate_rdi_diia_creation_task"):
+    with locked_cache(key="automate_rdi_diia_creation_task") as locked:
+        if not locked:
+            return []
         try:
             with configure_scope() as scope:
                 scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
@@ -435,7 +439,9 @@ def registration_diia_import_task(
         RdiDiiaCreateTask,
     )
 
-    with locked_cache(key="registration_diia_import_task"):
+    with locked_cache(key="registration_diia_import_task") as locked:
+        if not locked:
+            return []
         try:
             with configure_scope() as scope:
                 scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
@@ -454,8 +460,10 @@ def registration_diia_import_task(
 @app.task
 @log_start_and_end
 @sentry_tags
-def deduplicate_documents() -> None:
-    with locked_cache(key="deduplicate_documents"):
+def deduplicate_documents() -> bool:
+    with locked_cache(key="deduplicate_documents") as locked:
+        if not locked:
+            return True
         grouped_rdi = (
             Document.objects.filter(status=Document.STATUS_PENDING)
             .values("individual__registration_data_import")
@@ -479,3 +487,4 @@ def deduplicate_documents() -> None:
             DeduplicateTask.hard_deduplicate_documents(
                 documents_query,
             )
+    return True
