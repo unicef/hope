@@ -1,4 +1,3 @@
-import logging
 from decimal import Decimal
 from math import ceil
 from typing import Union
@@ -28,7 +27,6 @@ def is_right_phone_number_format(phone_number) -> bool:
     try:
         return phonenumbers.is_possible_number(phonenumbers.parse(phone_number))
     except phonenumbers.NumberParseException:
-        logging.warning(f"'{phone_number}' is not a valid phone number")
         return False
 
 

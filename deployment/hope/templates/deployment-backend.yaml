@@ -43,6 +43,7 @@ spec:
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
           readinessProbe:
+            timeoutSeconds: 30
             httpGet:
               path: /api/_health
               port: {{ .Values.backend.service.port }}

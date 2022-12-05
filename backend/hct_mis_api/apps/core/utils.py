@@ -8,6 +8,7 @@ from collections.abc import MutableMapping
 from datetime import date, datetime
 from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 
+from django.core.cache import cache
 from django.db.models import QuerySet
 from django.utils import timezone
 
@@ -705,3 +706,13 @@ def timezone_datetime(value) -> datetime:
     if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
+
+
+def save_data_in_cache(cache_key, data_lambda, timeout=60 * 60 * 24, cache_condition=None):
+    cache_data = cache.get(cache_key, "NOT_CACHED")
+    if cache_data == "NOT_CACHED":
+        cache_data = data_lambda()
+        if cache_condition and not cache_condition(cache_data):
+            return cache_data
+        cache.set(cache_key, cache_data, timeout=timeout)
+    return cache_data
