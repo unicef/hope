@@ -16,7 +16,10 @@ import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import {
+  isPermissionDeniedError,
+  renderSomethingOrDash,
+} from '../../../utils/utils';
 import {
   HouseholdNode,
   useAllHouseholdsFlexFieldsAttributesQuery,
@@ -73,9 +76,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  const {
-    data: grievancesChoices,
-  } = useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices } = useGrievancesChoiceDataQuery();
 
   if (loading || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
@@ -97,7 +98,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <>
       <PageHeader
-        title={`${t('Household ID')}: ${household.unicefId}`}
+        title={`${t('Household ID')}: ${renderSomethingOrDash(
+          household?.unicefId,
+        )}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -135,7 +138,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
-        businessArea={businessArea} grievancesChoices={grievancesChoices} />
+        businessArea={businessArea}
+        grievancesChoices={grievancesChoices}
+      />
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable
@@ -146,16 +151,16 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
-            <PaymentRecordHouseholdTable
-              openInNewTab
-              household={household as HouseholdNode}
-              businessArea={businessArea}
-              canViewPaymentRecordDetails={hasPermissions(
-                PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
-                permissions,
-              )}
-            />
-          )}
+          <PaymentRecordHouseholdTable
+            openInNewTab
+            household={household as HouseholdNode}
+            businessArea={businessArea}
+            canViewPaymentRecordDetails={hasPermissions(
+              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+              permissions,
+            )}
+          />
+        )}
         <HouseholdVulnerabilities
           household={household as HouseholdNode}
           flexFieldsData={flexFieldsData}
