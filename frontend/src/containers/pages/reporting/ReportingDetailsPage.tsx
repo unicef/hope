@@ -23,7 +23,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { REPORTING_STATES } from '../../../utils/constants';
-import { reduceChoices, reportStatusToColor } from '../../../utils/utils';
+import { choicesToDict, reportStatusToColor } from '../../../utils/utils';
 import {
   useReportChoiceDataQuery,
   useReportQuery,
@@ -85,11 +85,11 @@ export const ReportingDetailsPage = (): React.ReactElement => {
 
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.reportStatusChoices);
+  } = choicesToDict(choicesData.reportStatusChoices);
 
   const typeChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.reportTypesChoices);
+  } = choicesToDict(choicesData.reportTypesChoices);
 
   const FieldsArray: {
     label: string;
