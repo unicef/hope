@@ -94,10 +94,12 @@ def find_duplicated_households():
     tax_ids_of_inds_loaded_via_sf = Document.objects.filter(
         individual__household__in=households_loaded_via_sf, type__type="TAX_ID"
     ).values_list("document_number", flat=True)
-    documents = set(Document.objects.filter(
-        document_number__in=tax_ids_of_inds_loaded_via_sf,
-        individual__household__storage_obj__isnull=True,
-    ).values_list("document_number", flat=True))
+    documents = set(
+        Document.objects.filter(
+            document_number__in=tax_ids_of_inds_loaded_via_sf,
+            individual__household__storage_obj__isnull=True,
+        ).values_list("document_number", flat=True)
+    )
     hh_ids_not_loaded_via_sf = Household.objects.filter(
         Q(
             individuals__documents__document_number__in=tax_ids_of_inds_loaded_via_sf,
@@ -111,12 +113,16 @@ def find_duplicated_households():
             PaymentRecord.STATUS_DISTRIBUTION_SUCCESS,
         ),
     ).values_list("household__id", flat=True)
-    paid_documents = set(Document.objects.filter(
-        individual__household_id__in=paid_household_ids,
-        individual__household__storage_obj__isnull=True,
-    ).values_list("document_number", flat=True))
-    not_paid_documents = documents-paid_documents
-    edopomoga_duplicates = households_loaded_via_sf.filter(individuals__documents__document_number__in=not_paid_documents)
+    paid_documents = set(
+        Document.objects.filter(
+            individual__household_id__in=paid_household_ids,
+            individual__household__storage_obj__isnull=True,
+        ).values_list("document_number", flat=True)
+    )
+    not_paid_documents = documents - paid_documents
+    edopomoga_duplicates = households_loaded_via_sf.filter(
+        individuals__documents__document_number__in=not_paid_documents
+    )
     return edopomoga_duplicates
 
 
@@ -203,7 +209,7 @@ class TestTpsCreation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.storage_file = StorageFileFactory(id=3)
-        UserFactory(email='jan.romaniak@tivix.com')
+        UserFactory(email="jan.romaniak@tivix.com")
         cls.business_area = BusinessArea.objects.create(
             slug="ukraine",
             code="1234",
@@ -329,8 +335,12 @@ class TestTpsCreation(APITestCase):
     def test_create_tps(self):
         create_tps()
         empty_tax_id_or_iban_tp = TargetPopulation.objects.get(name="eDopomoga 1.12.2022 without tax id or iban")
-        already_received_assistance_tp = TargetPopulation.objects.get(name="eDopomoga 1.12.2022 already received assistance")
-        duplicates_tp = TargetPopulation.objects.get(name="eDopomoga 1.12.2022 duplicated in unicef but never received assistance")
+        already_received_assistance_tp = TargetPopulation.objects.get(
+            name="eDopomoga 1.12.2022 already received assistance"
+        )
+        duplicates_tp = TargetPopulation.objects.get(
+            name="eDopomoga 1.12.2022 duplicated in unicef but never received assistance"
+        )
         all_others_tp = TargetPopulation.objects.get(name="eDopomoga 1.12.2022 not meeting any of the criteria")
 
         all_edopomoga_households = find_edopomoga_households().count()
