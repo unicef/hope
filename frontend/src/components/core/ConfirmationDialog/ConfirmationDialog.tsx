@@ -41,9 +41,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   return (
     <Dialog fullWidth scroll='paper' open={open}>
       <DialogTitleWrapper>
-        <DialogTitle id='scroll-dialog-title'>
-          {title || t('Confirmation')}
-        </DialogTitle>
+        <DialogTitle>{title || t('Confirmation')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
         {extraContent ? (

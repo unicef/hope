@@ -145,9 +145,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {matchDialogTitle()}
-              </DialogTitle>
+              <DialogTitle>{matchDialogTitle()}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>

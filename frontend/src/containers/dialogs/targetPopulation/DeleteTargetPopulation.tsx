@@ -4,7 +4,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
 } from '@material-ui/core';
 import { Formik } from 'formik';
 import React from 'react';
@@ -58,11 +57,7 @@ export const DeleteTargetPopulation = ({
         {({ submitForm }) => (
           <>
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>
-                  {t('Delete Target Population')}
-                </Typography>
-              </DialogTitle>
+              <DialogTitle>{t('Delete Target Population')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>

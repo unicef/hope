@@ -49,7 +49,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Linked Tickets',
-    id: 'id',
+    id: '',
     numeric: false,
     dataCy: 'linkedTickets',
   },
