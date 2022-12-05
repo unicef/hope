@@ -146,7 +146,7 @@ export function LookUpIndividualFilters({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={filter.household}
+                  checked={Boolean(filter.household)}
                   color='primary'
                   onChange={(e) => {
                     if (e.target.checked) {
