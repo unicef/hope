@@ -1,12 +1,13 @@
 from django.core.management.base import BaseCommand
+
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk, scan
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 BATCH_SIZE = 5_000
 
@@ -20,14 +21,14 @@ ES_MAPPING_INDEX_MODEL = {
 class Command(BaseCommand):
     help = "Re-index elasticsearch documents for given index and business_area"
 
-    ELASTICSEARCH_HOST = "http://elasticsearch:9200"
-
     def add_arguments(self, parser):
         parser.add_argument("index", type=str)
         parser.add_argument("business_area", type=str)
 
     def handle(self, *args, **options):
-        es = Elasticsearch(self.ELASTICSEARCH_HOST)
+        from django.conf import settings
+
+        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
         index = options["index"]
         es_mapping = ES_MAPPING_INDEX_MODEL.get(index)
@@ -40,24 +41,12 @@ class Command(BaseCommand):
             self.stdout.write(f"{business_area} does not exist.")
             return
 
-        query_body = {
-            "query": {
-                "bool": {
-                    "filter": {
-                        "term": {
-                            "business_area": business_area
-                        }
-                    }
-                }
-            }
-        }
+        query_body = {"query": {"bool": {"filter": {"term": {"business_area": business_area}}}}}
 
         bulk_deletes = []
         total = 0
 
-        for result in scan(
-            client=es, query=query_body, index=index, _source=False, track_scores=False, scroll="1m"
-        ):
+        for result in scan(client=es, query=query_body, index=index, _source=False, track_scores=False, scroll="1m"):
             result["_op_type"] = "delete"
             bulk_deletes.append(result)
 
@@ -76,18 +65,16 @@ class Command(BaseCommand):
         else:
             qs = model.objects.filter(registration_data_import__business_area__slug=business_area)
 
-        i, count = 0, qs.count() // BATCH_SIZE + 1
-        document_list = []
+        i, count = 1, qs.count() // BATCH_SIZE + 1
 
         while i <= count:
+            document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * (i - 1) : BATCH_SIZE * i].iterator()
             for item in batch:
                 document = {**es_document().prepare(item), "_id": item.id}
                 document_list.append(document)
-                bulk(es, document_list, index=index)
+            bulk(es, document_list, index=index)
             i += 1
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Documents for index: {index}, business_area: {business_area} created")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Documents for index: {index}, business_area: {business_area} created"))

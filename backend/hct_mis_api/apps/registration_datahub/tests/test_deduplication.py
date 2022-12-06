@@ -33,7 +33,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
         import_data = ImportData.objects.create(
             file="test_file/x.xlsx",
             number_of_households=10,
@@ -212,7 +211,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             ],
         )
 
-        cls.rebuild_search_index()
+        super().setUpTestData()
 
     def test_batch_deduplication(self):
         task = DeduplicateTask()
@@ -289,7 +288,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -389,7 +387,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
             ],
         )
-        cls.rebuild_search_index()
+        super().setUpTestData()
 
     def test_golden_record_deduplication(self):
         task = DeduplicateTask()

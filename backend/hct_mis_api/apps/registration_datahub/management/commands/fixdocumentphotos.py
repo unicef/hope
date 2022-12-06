@@ -5,7 +5,7 @@ from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_datahub.models import ImportedDocument
 
 
-def fix_document_photos():
+def fix_document_photos() -> None:
     imported_documents = (
         ImportedDocument.objects.exclude(photo="")
         .annotate(hct_id=F("individual__registration_data_import__hct_id"))

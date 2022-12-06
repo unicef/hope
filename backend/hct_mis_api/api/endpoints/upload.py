@@ -1,6 +1,7 @@
 import logging
 from dataclasses import asdict
 from datetime import datetime
+from typing import Any, Dict
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -171,7 +172,7 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
         return ret
 
     def validate(self, attrs):
-        def get_related():
+        def get_related() -> int:
             return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 
         ctype = attrs.get("collect_individual_data", "")
@@ -194,17 +195,17 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         model = RegistrationDataImportDatahub
         exclude = ("business_area_slug", "import_data", "hct_id")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
 
-    def validate_households(self, value):
+    def validate_households(self, value) -> Any:
         if not value:
             raise ValidationError("This field is required.")
         return value
 
     @atomic()
-    def create(self, validated_data):
+    def create(self, validated_data) -> Dict:
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
 

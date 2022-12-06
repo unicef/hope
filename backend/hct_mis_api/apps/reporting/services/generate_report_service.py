@@ -53,7 +53,7 @@ class GenerateReportContentHelpers:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
-            individual.household.admin_area.title if individual.household.admin_area else "",
+            individual.household.admin_area.name if individual.household.admin_area else "",
             individual.birth_date,
             individual.estimated_birth_date,
             individual.sex,
@@ -100,7 +100,7 @@ class GenerateReportContentHelpers:
         row = [
             household.id,
             household.country_origin.name if household.country_origin else "",
-            household.admin_area.title if household.admin_area else "",
+            household.admin_area.name if household.admin_area else "",
             household.size,
             household.geopoint[0] if household.geopoint else "",
             household.geopoint[1] if household.geopoint else "",
@@ -355,7 +355,7 @@ class GenerateReportContentHelpers:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
-            individual.household.admin_area.title if individual.household.admin_area else "",
+            individual.household.admin_area.name if individual.household.admin_area else "",
             self._format_date(individual.first_delivery_date),
             self._format_date(individual.last_delivery_date),
             individual.payments_made,
@@ -401,12 +401,12 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
-        def get_full_name(user):
+        def get_full_name(user) -> str:
             if not user:
                 return ""
             return " ".join(filter(None, [user.first_name, user.last_name]))
 
-        def get_username(user):
+        def get_username(user) -> str:
             if not user:
                 return ""
             return user.username
@@ -695,7 +695,7 @@ class GenerateReportService:
         self.ws_filters = wb.create_sheet(GenerateReportService.FILTERS_SHEET)
         return wb
 
-    def _add_filters_info(self):
+    def _add_filters_info(self) -> None:
         filter_rows = [
             ("Report type", str(self._report_type_to_str())),
             ("Business area", self.business_area.name),
@@ -716,7 +716,7 @@ class GenerateReportService:
         for filter_row in filter_rows:
             self.ws_filters.append(filter_row)
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         headers_row = GenerateReportService.HEADERS[self.report_type]
         self.ws_report.append(headers_row)
 
@@ -751,7 +751,7 @@ class GenerateReportService:
         self._adjust_column_width_from_col(self.ws_report, 1, number_of_columns, 0)
         return self.wb
 
-    def generate_report(self):
+    def generate_report(self) -> None:
         try:
             self.generate_workbook()
             with NamedTemporaryFile() as tmp:
@@ -771,7 +771,7 @@ class GenerateReportService:
         if self.report.file:
             self._send_email()
 
-    def _send_email(self):
+    def _send_email(self) -> None:
         context = {
             "report_type": self._report_type_to_str(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
@@ -788,12 +788,12 @@ class GenerateReportService:
         msg.attach_alternative(html_body, "text/html")
         msg.send()
 
-    def _add_missing_headers(self, ws, column_to_start, column_to_finish, label):
+    def _add_missing_headers(self, ws, column_to_start, column_to_finish, label) -> None:
         for x in range(column_to_start, column_to_finish + 1):
             col_letter = get_column_letter(x)
             ws[f"{col_letter}1"] = label
 
-    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
+    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
@@ -814,7 +814,7 @@ class GenerateReportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value

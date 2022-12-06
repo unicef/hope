@@ -269,7 +269,7 @@ class ImportedDocumentNode(DjangoObjectType):
     photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info):
-        return getattr(parent.type.country, "name", parent.type.country)
+        return getattr(parent.country, "name", parent.country)
 
     def resolve_photo(parent, info):
         if parent.photo:

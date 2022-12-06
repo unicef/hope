@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -23,7 +24,7 @@ def does_payment_record_have_right_hoh_phone_number(record):
 
 
 class CheckRapidProVerificationTask:
-    def execute(self):
+    def execute(self) -> None:
         active_rapidpro_verifications = CashPlanPaymentVerification.objects.filter(
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
@@ -34,7 +35,7 @@ class CheckRapidProVerificationTask:
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, cashplan_payment_verification):
+    def _verify_cashplan_payment_verification(self, cashplan_payment_verification) -> None:
         payment_record_verifications = cashplan_payment_verification.payment_record_verifications.prefetch_related(
             "payment_record__head_of_household"
         )
@@ -53,7 +54,7 @@ class CheckRapidProVerificationTask:
         calculate_counts(cashplan_payment_verification)
         cashplan_payment_verification.save()
 
-    def _get_payment_record_verification_to_update(self, results, phone_numbers):
+    def _get_payment_record_verification_to_update(self, results, phone_numbers) -> List:
         output = []
         for rapid_pro_result in results:
             payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
@@ -65,7 +66,7 @@ class CheckRapidProVerificationTask:
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict, rapid_pro_result
-    ):
+    ) -> Optional[PaymentVerification]:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")
