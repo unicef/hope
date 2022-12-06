@@ -1,5 +1,6 @@
 import random
 import time
+from typing import List, Tuple
 
 from django.contrib.gis.geos import Point
 
@@ -13,8 +14,8 @@ from hct_mis_api.apps.household.models import (
     MARITAL_STATUS_CHOICE,
     ORG_ENUMERATOR_CHOICES,
     RESIDENCE_STATUS_CHOICE,
-    UNICEF,
     SEX_CHOICE,
+    UNICEF,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
@@ -123,7 +124,9 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
 
-def create_imported_household(household_args=None, individual_args=None):
+def create_imported_household(
+    household_args=None, individual_args=None
+) -> Tuple[ImportedHousehold, ImportedIndividual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -137,13 +140,15 @@ def create_imported_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_imported_household_and_individuals(household_data=None, individuals_data=None):
+def create_imported_household_and_individuals(
+    household_data=None, individuals_data=None
+) -> Tuple[ImportedHousehold, List[ImportedIndividual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
         individuals_data = {}
-    household = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
-    individuals = [
+    household: ImportedHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
+    individuals: List[ImportedIndividual] = [
         ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]

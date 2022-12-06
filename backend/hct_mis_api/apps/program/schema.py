@@ -1,3 +1,5 @@
+from typing import Tuple, Type
+
 import graphene
 from django.db.models import (
     Case,
@@ -15,6 +17,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -69,7 +72,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
         hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     )
@@ -252,7 +255,7 @@ class Query(graphene.ObjectType):
         voucher_transfers = [0] * 12
 
         for data_dict in months_and_amounts:
-            month_index = data_dict.get("delivery_date__month") - 1
+            month_index = data_dict[("delivery_date__month")] - 1
             cash_transfers[month_index] = data_dict.get("total_delivered_cash") or 0
             voucher_transfers[month_index] = data_dict.get("total_delivered_voucher") or 0
 

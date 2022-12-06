@@ -8,7 +8,6 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -64,14 +63,14 @@ class RdiDiiaCreateTask:
     }
     DIIA_SEX_MAP = {"M": MALE, "F": FEMALE}
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.bank_accounts = []
         self.documents = []
         self.business_area = BusinessArea.objects.get(slug="ukraine")
 
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name"):
+    def create_rdi(self, imported_by, rdi_name="rdi_name") -> RegistrationDataImport:
 
         number_of_individuals = 0
         number_of_households = 0
@@ -107,7 +106,7 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id, diia_hh_ids=None, diia_hh_count=None):
+    def execute(self, registration_data_import_id, diia_hh_ids=None, diia_hh_count=None) -> None:
         if diia_hh_ids and diia_hh_count:
             raise ValueError("You can't set two args diia_hh_ids and diia_hh_count")
 
@@ -281,7 +280,7 @@ class RdiDiiaCreateTask:
                 registration_data_import_datahub=registration_data_import_data_hub
             )
 
-    def _add_bank_account(self, individual, individual_obj):
+    def _add_bank_account(self, individual, individual_obj) -> None:
         self.bank_accounts.append(
             ImportedBankAccountInfo(
                 individual=individual_obj,
@@ -290,11 +289,12 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_vpo_document(self, head_of_household, household):
+    def _add_vpo_document(self, head_of_household, household) -> None:
         vpo_doc_date = dateutil.parser.parse(household.vpo_doc_date)
 
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=household.vpo_doc_id,
                 individual=head_of_household,
                 type=self.other_document_type,
@@ -303,20 +303,22 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_birth_document(self, individual, individual_obj):
+    def _add_birth_document(self, individual, individual_obj) -> None:
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=individual.birth_doc,
                 individual=individual_obj,
                 type=self.birth_document_type,
             )
         )
 
-    def _add_hh_doc(self, data):
+    def _add_hh_doc(self, data) -> None:
         doc_type = self.national_passport_document_type if data.get("type") == "passport" else self.other_document_type
 
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=data.get("document_number"),
                 individual=data.get("individual"),
                 doc_date=data.get("doc_date"),
@@ -324,38 +326,34 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_tax_id_document(self, tax_id, individual_obj):
+    def _add_tax_id_document(self, tax_id, individual_obj) -> None:
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=tax_id,
                 individual=individual_obj,
                 type=self.imported_doc_type_for_tax_id,
             )
         )
 
-    def _get_document_types(self):
+    def _get_document_types(self) -> None:
         self.national_passport_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         )
         self.birth_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
         self.other_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_OTHER,
         )
         self.imported_doc_type_for_tax_id, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
         self.doc_type_for_tax_id, _ = DocumentType.objects.get_or_create(
-            country=GeoCountry.objects.get(iso_code2="UA"),
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 
-    def tax_id_exists(self, tax_id):
+    def tax_id_exists(self, tax_id) -> bool:
         return (
             ImportedDocument.objects.filter(document_number=tax_id, type=self.imported_doc_type_for_tax_id).exists()
             or Document.objects.filter(document_number=tax_id, type=self.doc_type_for_tax_id).exists()

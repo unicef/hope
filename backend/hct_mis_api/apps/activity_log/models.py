@@ -9,35 +9,6 @@ from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 
-def log_create(mapping, business_area_field, user=None, old_object=None, new_object=None):
-    if new_object:
-        instance = new_object
-    else:
-        instance = old_object
-    action = LogEntry.UPDATE
-    if old_object is None:
-        action = LogEntry.CREATE
-    elif new_object is None:
-        action = LogEntry.DELETE
-    else:
-        is_removed = getattr(new_object, "is_removed", None)
-        is_removed_old = getattr(old_object, "is_removed", None)
-        if is_removed and is_removed_old != is_removed:
-            action = LogEntry.SOFT_DELETE
-    business_area = nested_getattr(instance, business_area_field)
-    log = LogEntry.objects.create(
-        action=action,
-        content_object=instance,
-        user=user,
-        business_area=business_area,
-        object_repr=str(instance),
-        changes=create_diff(old_object, new_object, mapping)
-        if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
-        else None,
-    )
-    return log
-
-
 class LogEntry(models.Model):
     CREATE = "CREATE"
     UPDATE = "UPDATE"
@@ -85,3 +56,31 @@ class LogEntry(models.Model):
         ordering = ["-timestamp"]
         verbose_name = _("log entry")
         verbose_name_plural = _("log entries")
+
+
+def log_create(mapping, business_area_field, user=None, old_object=None, new_object=None) -> LogEntry:
+    if new_object:
+        instance = new_object
+    else:
+        instance = old_object
+    action = LogEntry.UPDATE
+    if old_object is None:
+        action = LogEntry.CREATE
+    elif new_object is None:
+        action = LogEntry.DELETE
+    else:
+        is_removed = getattr(new_object, "is_removed", None)
+        is_removed_old = getattr(old_object, "is_removed", None)
+        if is_removed and is_removed_old != is_removed:
+            action = LogEntry.SOFT_DELETE
+    business_area = nested_getattr(instance, business_area_field)
+    return LogEntry.objects.create(
+        action=action,
+        content_object=instance,
+        user=user,
+        business_area=business_area,
+        object_repr=str(instance),
+        changes=create_diff(old_object, new_object, mapping)
+        if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
+        else None,
+    )

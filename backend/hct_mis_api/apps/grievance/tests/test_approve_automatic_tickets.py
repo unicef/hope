@@ -41,8 +41,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
-      grievanceTicketId: $grievanceTicketId, 
-      selectedIndividualId: $selectedIndividualId, 
+      grievanceTicketId: $grievanceTicketId,
+      selectedIndividualId: $selectedIndividualId,
       selectedIndividualIds: $selectedIndividualIds
       ) {
         grievanceTicket {
@@ -61,8 +61,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
-      grievanceTicketId: $grievanceTicketId, 
-      selectedIndividualId: $selectedIndividualId, 
+      grievanceTicketId: $grievanceTicketId,
+      selectedIndividualId: $selectedIndividualId,
       selectedIndividualIds: $selectedIndividualIds
       ) {
         grievanceTicket {

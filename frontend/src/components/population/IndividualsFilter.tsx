@@ -57,8 +57,8 @@ export const IndividualsFilter = ({
             <MenuItem value=''>
               <em>{t('None')}</em>
             </MenuItem>
-            <MenuItem value='MALE'>{t('Male')}</MenuItem>
             <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
+            <MenuItem value='MALE'>{t('Male')}</MenuItem>
           </SelectFilter>
         </Grid>
         <Grid item>

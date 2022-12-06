@@ -19,7 +19,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Status',
-    id: 'status',
+    id: 'status_label',
     numeric: false,
     dataCy: 'status',
   },

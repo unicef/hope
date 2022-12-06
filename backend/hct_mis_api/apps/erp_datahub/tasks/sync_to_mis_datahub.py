@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django.db.models import Q
 from django.db.transaction import atomic
 from django.utils import timezone
@@ -9,7 +11,7 @@ from hct_mis_api.apps.mis_datahub import models as mis_models
 
 class SyncToMisDatahubTask:
     @staticmethod
-    def get_model_dict(model):
+    def get_model_dict(model) -> Dict:
         model_dict = {}
         model_dict.update(model.__dict__)
         if "_prefetched_objects_cache" in model_dict:
@@ -20,7 +22,7 @@ class SyncToMisDatahubTask:
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
-    def execute(self):
+    def execute(self) -> None:
         # have to be list because it used in another database
 
         parent_business_area_codes = list(BusinessArea.objects.filter(is_split=True).values_list("code", flat=True))

@@ -137,12 +137,6 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
                   status
                   households {
                     totalCount
-                    edges {
-                      node {
-                        size
-                        residenceStatus
-                      }
-                    }
                   }
                 }
               }

@@ -1,0 +1,13 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load power_query %}
+{% block action-content %}
+    <table>
+        {% for entry in original.get_matrix %}
+            <tr>
+            <td>{{ forloop.counter }}</td>
+                <td><code>
+                    execute({% for k,v in entry.items %}{{ k }}={{ v }}{% if not forloop.last %}, {% endif %}{% endfor %})
+                </code>
+                </td>
+            </tr>
+        {% endfor %}</table>
+{% endblock %}
