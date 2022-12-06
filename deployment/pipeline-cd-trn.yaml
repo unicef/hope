@@ -65,4 +65,4 @@ stages:
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
-                celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),\
+                celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
