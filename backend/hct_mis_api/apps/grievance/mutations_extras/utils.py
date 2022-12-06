@@ -12,8 +12,6 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from graphql import GraphQLError
-
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -149,7 +147,7 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
 
     identity_already_exists = IndividualIdentity.objects.filter(number=number, partner=partner).exists()
     if identity_already_exists:
-        raise GraphQLError(f"Identity with number {number}, partner: {partner_name} already exists")
+        raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
     return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
 
@@ -174,7 +172,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
         IndividualIdentity.objects.exclude(pk=identity.id).filter(number=number, partner=partner).exists()
     )
     if identity_already_exists:
-        raise GraphQLError(f"Identity with number {number}, partner: {partner_name} already exists")
+        raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
     identity.number = number
     identity.partner = partner
@@ -386,10 +384,10 @@ def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) 
             continue
         for required in value.get("required"):
             if nested_dict_get(input_data, required) is None:
-                raise GraphQLError(f"You have to provide {required} in {key}")
+                raise ValidationError(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
             if nested_dict_get(input_data, not_allowed) is not None:
-                raise GraphQLError(f"You can't provide {not_allowed} in {key}")
+                raise ValidationError(f"You can't provide {not_allowed} in {key}")
 
 
 def remove_parsed_data_fields(data_dict: Dict, fields_list: List[str]) -> None:
@@ -494,8 +492,6 @@ def reassign_roles_on_disable_individual(
 ) -> Household:
     from django.shortcuts import get_object_or_404
 
-    from graphql import GraphQLError
-
     from hct_mis_api.apps.household.models import (
         HEAD,
         ROLE_ALTERNATE,
@@ -540,7 +536,7 @@ def reassign_roles_on_disable_individual(
                 )
 
         if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
-            raise GraphQLError("Cannot reassign the role. Selected individual has primary collector role.")
+            raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
@@ -558,14 +554,14 @@ def reassign_roles_on_disable_individual(
     is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
 
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
-        raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
+        raise ValidationError("Ticket cannot be closed, not all roles have been reassigned")
 
     if (
         all(HEAD not in key for key in role_reassign_data.keys())
         and individual_to_remove.is_head()
         and not is_one_individual
     ):
-        raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
+        raise ValidationError("Ticket cannot be closed head of household has not been reassigned")
 
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
@@ -608,7 +604,7 @@ def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, i
                 )
 
         if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
-            raise GraphQLError("Cannot reassign the role. Selected individual has primary collector role.")
+            raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
