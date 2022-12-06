@@ -607,7 +607,7 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["document_number", "type"],
+                fields=["document_number", "type", "country"],
                 condition=Q(Q(is_removed=False) & Q(status="VALID")),
                 name="unique_if_not_removed_and_valid",
             )
