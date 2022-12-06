@@ -1,0 +1,50 @@
+global:
+  env: staging
+  storageClass: default
+
+backend:
+  image: #from-pipeline
+  replicaCount: 1
+  secret:
+    AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
+    AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
+    AZURE_TENANT_KEY: #secret-variables: AZURE_TENANT_KEY
+    STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
+    STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
+    SECRET_KEY: #secret-variables: SECRET_KEY
+    SENTRY_DSN: #secret-variables: SENTRY_DSN
+    EMAIL_HOST: extmail01.unicef.org
+    EMAIL_USE_TLS: "false"
+    EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY
+    ROOT_ACCESS_TOKEN: #secret-variables: ROOT_ACCESS_TOKEN
+
+frontend:
+  image: #from-pipeline
+
+celery:
+  image: #from-pipeline
+  replicaCount: 1
+
+celeryflower:
+  secret:
+    FLOWER_BASIC_AUTH: #secret-variables: FLOWER_BASIC_AUTH
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: cert-ictd-hope-dev-aks-unitst-tls
+  host: dev-hope.unitst.org
+
+
+postgresql:
+  postgresqlPassword: #secret-variables: POSTGRES_PASSWORD
+registrationdatahubpostgresql:
+  postgresqlPassword: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
+cashassistdatahubpostgresql:
+  enabled: false
+  externalDatabase:
+    host: pgsql-10-reserved-hctmis-tstuat.postgres.database.azure.com 
+    user: devcahubusr@pgsql-10-reserved-hctmis-tstuat
+    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+    db: dev_cashassist_datahubdb
