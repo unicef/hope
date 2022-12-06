@@ -62,6 +62,7 @@ stages:
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
+                backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
