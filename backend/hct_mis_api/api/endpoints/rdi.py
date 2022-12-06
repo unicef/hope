@@ -1,6 +1,8 @@
 from dataclasses import asdict
+from typing import Optional
 
 from django.db.transaction import atomic
+from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
 from rest_framework import serializers, status
@@ -38,16 +40,17 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     def get_queryset(self):
         return RegistrationDataImportDatahub.objects.filter(business_area=self.selected_business_area)
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs) -> HttpResponseBase:
         return super().dispatch(request, *args, **kwargs)
 
     @atomic()
     @atomic(using="registration_datahub")
-    def perform_create(self, serializer):
+    def perform_create(self, serializer) -> Optional[RegistrationDataImport]:  # type: ignore
+        # TODO: perform_create from CreateModelMixin returns None
         obj = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )
-        r2 = RegistrationDataImport.objects.create(
+        return RegistrationDataImport.objects.create(
             **serializer.validated_data,
             imported_by=self.request.user,
             data_source=RegistrationDataImport.API,
@@ -56,7 +59,6 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             datahub_id=str(obj.pk),
             business_area=self.selected_business_area,
         )
-        return r2
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -108,7 +110,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         total_errors = 0
         total_accepted = 0
         out = []
-        for i, household_data in enumerate(request.data):
+        for household_data in request.data:
             total_households += 1
             serializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
@@ -148,7 +150,7 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
 
     @atomic()
     @atomic(using="registration_datahub")
-    def update(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs) -> Response:
         self.selected_rdi.import_done = RegistrationDataImportDatahub.DONE
         self.selected_rdi.save()
 

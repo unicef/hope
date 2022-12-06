@@ -3,6 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple
 from urllib.parse import unquote
 
 from django import forms
@@ -20,12 +21,12 @@ from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import router, transaction
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -33,19 +34,18 @@ from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 import requests
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_sync.mixin import GetManyFromRemoteMixin
+from admin_extra_buttons.api import button
+from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
 from adminactions.export import ForeignKeysCollector
-from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
-from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from requests.models import Response
 from smart_admin.decorators import smart_register
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -56,7 +56,7 @@ from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, Role, Us
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class UserRoleAdminForm(ModelForm):
         model = account_models.UserRole
         fields = "__all__"
 
-    def clean(self):
+    def clean(self) -> None:
         super().clean()
         if not self.is_valid():
             return
@@ -95,13 +95,13 @@ class UserRoleAdminForm(ModelForm):
 class UserRoleInlineFormSet(BaseInlineFormSet):
     model = account_models.UserRole
 
-    def add_fields(self, form, index):
+    def add_fields(self, form, index) -> None:
         super().add_fields(form, index)
         form.fields["business_area"].choices = [
             (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
         ]
 
-    def clean(self):
+    def clean(self) -> None:
         super().clean()
         if not self.is_valid():
             return
@@ -149,7 +149,7 @@ The HOPE team.
 """
 
 
-def get_valid_kobo_username(user: User):
+def get_valid_kobo_username(user: User) -> str:
     return user.username.replace("@", "_at_").replace(".", "_").replace("+", "_").lower()
 
 
@@ -159,7 +159,7 @@ class DjAdminManager:
     class ResponseException(Exception):
         pass
 
-    def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL):
+    def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL) -> None:
         self.admin_path = "/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
@@ -167,17 +167,17 @@ class DjAdminManager:
         self.admin_url_kc = f"{kc_host}{self.admin_path}"
         self.login_url_kc = f"{self.admin_url_kc}login/"
         self._logged = False
-        self._last_error = None
-        self._last_response = False
+        self._last_error: Optional[Response] = None
+        self._last_response: Optional[Response] = None
         self._username = None
         self._password = None
         self.form_errors = []
 
-    def extract_errors(self, res):
+    def extract_errors(self, res) -> List:
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: [int], location: str = None, custom_error=""):
+    def assert_response(self, status: List[int], location: Optional[str] = None, custom_error="") -> None:
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
@@ -191,7 +191,7 @@ class DjAdminManager:
             raise self.ResponseException(msg)
 
     @cached_property
-    def client(self):
+    def client(self) -> requests.Session:
         client = requests.Session()
         client.headers["Referer"] = self.admin_url
         client.headers["User-Agent"] = (
@@ -201,11 +201,11 @@ class DjAdminManager:
         )
         return client
 
-    def logout(self, request):
+    def logout(self, request) -> None:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
-    def login(self, request=None, twin=None):
+    def login(self, request=None, twin=None) -> None:
         try:
             username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         except ValueError:
@@ -235,16 +235,16 @@ class DjAdminManager:
             logger.exception(e)
             raise
 
-    def _get(self, url):
+    def _get(self, url) -> Any:
         self._last_response = self.client.get(url, allow_redirects=False)
         self.client.headers["Referer"] = url
         return self._last_response
 
-    def _post(self, url, data):
+    def _post(self, url, data) -> Any:
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
-    def list_users(self, q=""):
+    def list_users(self, q="") -> Generator:
         regex = re.compile(
             r'action-checkbox.*value="(?P<id>\d+)".*</td>.*field-username.*<a.*?>(?P<username>.*)</a></t.>.*field-email">(?P<mail>.*?)<',
             re.MULTILINE + re.IGNORECASE,
@@ -263,7 +263,7 @@ class DjAdminManager:
 
             page += 1
 
-    def get_csrfmiddlewaretoken(self):
+    def get_csrfmiddlewaretoken(self) -> Any:
         regex = re.compile("""csrfmiddlewaretoken["'] +value=["'](.*)["']""")
         try:
             m = regex.search(self._last_response.content.decode("utf8"))
@@ -271,7 +271,7 @@ class DjAdminManager:
         except Exception:
             raise ValueError("Unable to get CSRF token from Kobo")
 
-    def delete_user(self, username, pk):
+    def delete_user(self, username, pk) -> None:
         self.login()
         for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
             self._get(url)
@@ -290,10 +290,10 @@ class HasKoboAccount(SimpleListFilter):
     parameter_name = "kobo_account"
     title = "Has Kobo Access"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request, model_admin) -> Tuple:
         return (1, "Yes"), (0, "No")
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset) -> QuerySet:
         if self.value() == "0":
             return queryset.filter(Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None))
         elif self.value() == "1":
@@ -306,15 +306,15 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request, model_admin) -> Any:  # TODO: typing
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset) -> QuerySet:
         return queryset.filter(user_roles__business_area=self.value()).distinct() if self.value() else queryset
 
 
 @admin.register(account_models.Partner)
-class PartnerAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
     search_fields = ("name",)
 
@@ -327,8 +327,8 @@ class HopeUserCreationForm(UserCreationForm):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminActionPermMixin, BaseUserAdmin):
-    Results = namedtuple("Result", "created,missing,updated,errors")
+class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmin):
+    Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
@@ -409,10 +409,19 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
     }
 
     @property
-    def media(self):
+    def media(self) -> Any:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
-    def get_fields(self, request, obj=None):
+    def get_queryset(self, request) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "partner",
+            )
+        )
+
+    def get_fields(self, request, obj=None) -> List[str]:
         return [
             "last_name",
             "first_name",
@@ -421,15 +430,15 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
             "job_title",
         ]
 
-    def get_fieldsets(self, request, obj=None):
+    def get_fieldsets(self, request, obj=None) -> Any:
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)
         return [(None, {"fields": self.get_fields(request, obj)})]
 
-    def kobo_user(self, obj):
+    def kobo_user(self, obj) -> str:
         return obj.custom_fields.get("kobo_username")
 
-    def get_deleted_objects(self, objs, request):
+    def get_deleted_objects(self, objs, request) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -438,12 +447,13 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
             to_delete.append(f"Kobo: {kobo_username}")
         return to_delete, model_count, perms_needed, protected
 
-    def delete_view(self, request, object_id, extra_context=None):
+    def delete_view(self, request, object_id, extra_context=None) -> HttpResponse:
         if request.POST:  # The user has confirmed the deletion.
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)
         else:
-            obj: account_models.User = self.get_object(request, unquote(object_id))
+            if not (obj := self.get_object(request, unquote(object_id))):
+                raise Exception("Object not found")
             kobo_pk = obj.custom_fields.get("kobo_pk", None)
             extra_context = extra_context or {}
             try:
@@ -462,7 +472,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
 
         return res
 
-    def delete_model(self, request, obj):
+    def delete_model(self, request, obj) -> None:
         try:
             if "kobo_username" in obj.custom_fields:
                 api = DjAdminManager()
@@ -475,7 +485,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
             raise
 
     @button()
-    def privileges(self, request, pk):
+    def privileges(self, request, pk) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         user: account_models.User = context["original"]
         all_perms = user.get_all_permissions()
@@ -492,7 +502,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         context["business_ares_roles"] = dict(ba_roles)
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    def get_actions(self, request):
+    def get_actions(self, request) -> Dict:
         actions = super().get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
             if "create_kobo_user_qs" in actions:
@@ -502,7 +512,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
                 del actions["add_business_area_role"]
         return actions
 
-    def add_business_area_role(self, request, queryset):
+    def add_business_area_role(self, request, queryset) -> HttpResponse:
         if "apply" in request.POST:
             form = AddRoleForm(request.POST)
             if form.is_valid():
@@ -548,7 +558,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
-    def _grant_kobo_accesss_to_user(self, user, notify=True, sync=True):
+    def _grant_kobo_accesss_to_user(self, user, notify=True, sync=True) -> None:
         password = get_random_string(length=12)
         url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
         username = get_valid_kobo_username(user)
@@ -586,7 +596,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         user.custom_fields["kobo_username"] = user.username
         user.save()
 
-    def create_kobo_user_qs(self, request, queryset):
+    def create_kobo_user_qs(self, request, queryset) -> None:
         for user in queryset.all():
             try:
                 self._grant_kobo_accesss_to_user(request, user)
@@ -603,7 +613,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         permission="account.can_create_kobo_user",
         enabled=lambda b: not b.original.custom_fields.get("kobo_username"),
     )
-    def create_kobo_user(self, request, pk):
+    def create_kobo_user(self, request, pk) -> None:
         try:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
             self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
@@ -615,7 +625,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         permission="account.can_create_kobo_user",
         enabled=lambda b: not b.custom_fields.get("kobo_username"),
     )
-    def remove_kobo_access(self, request, pk):
+    def remove_kobo_access(self, request, pk) -> None:
         try:
             obj = self.get_object(request, pk)
             api = DjAdminManager()
@@ -633,7 +643,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
-    def import_csv(self, request):
+    def import_csv(self, request) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
 
         context = self.get_common_context(request, processed=False)
@@ -722,7 +732,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
     @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
-    def kobo_users_sync(self, request):
+    def kobo_users_sync(self, request) -> TemplateResponse:
         ctx = self.get_common_context(request)
         users = []
         if request.method == "POST":
@@ -762,10 +772,10 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)
 
-    def __init__(self, model, admin_site):
+    def __init__(self, model, admin_site) -> None:
         super().__init__(model, admin_site)
 
-    def _sync_ad_data(self, user):
+    def _sync_ad_data(self, user) -> None:
         ms_graph = MicrosoftGraphAPI()
         if user.ad_uuid:
             filters = [{"uuid": user.ad_uuid}, {"email": user.email}]
@@ -785,8 +795,8 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         else:
             raise Http404
 
-    @button(label="Sync", permission="account.can_sync_with_ad")
-    def sync_multi(self, request):
+    @button(label="AD Sync", permission="account.can_sync_with_ad")
+    def sync_multi(self, request) -> None:
         not_found = []
         try:
             for user in account_models.User.objects.all():
@@ -811,7 +821,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
             self.message_user(request, str(e), messages.ERROR)
 
     @button(label="Sync", permission="account.can_sync_with_ad")
-    def sync_single(self, request, pk):
+    def sync_single(self, request, pk) -> None:
         try:
             self._sync_ad_data(self.get_object(request, pk))
             self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
@@ -820,7 +830,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission="account.can_load_from_ad")
-    def load_ad_users(self, request):
+    def load_ad_users(self, request) -> TemplateResponse:
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
         ctx = self.get_common_context(
@@ -905,10 +915,10 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request, model_admin) -> Optional[Iterable[Tuple[Any, str]]]:
         return Permissions.choices()
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset) -> QuerySet:
         if not self.value():
             return queryset
         return queryset.filter(permissions__contains=[self.value()])
@@ -922,20 +932,21 @@ class RoleResource(resources.ModelResource):
 
 
 @admin.register(account_models.Role)
-class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
     list_filter = (PermissionFilter, "subsystem")
     resource_class = RoleResource
+    change_list_template = "admin/account/role/change_list.html"
 
     @button()
-    def members(self, request, pk):
+    def members(self, request, pk) -> HttpResponseRedirect:
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
 
     @button()
-    def matrix(self, request):
+    def matrix(self, request) -> TemplateResponse:
         ctx = self.get_common_context(request, action="Matrix")
         matrix1 = {}
         matrix2 = {}
@@ -968,16 +979,17 @@ class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def _perms(self, request, object_id) -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request, form, formsets, add=False):
+    def construct_change_message(self, request, form, formsets, add=False) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            change_message[0]["changed"]["permissions"] = {
+            changed: Dict[str, Any] = change_message[0]["changed"]
+            changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),
             }
@@ -997,10 +1009,21 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         ("role__subsystem", AllValuesComboFilter),
     )
 
-    def check_sync_permission(self, request, obj=None):
+    def get_queryset(self, request) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "business_area",
+                "user",
+                "role",
+            )
+        )
+
+    def check_sync_permission(self, request, obj=None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request, obj=None):
+    def check_publish_permission(self, request, obj=None) -> bool:
         return False
 
     def _get_data(self, record) -> str:
@@ -1013,7 +1036,8 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+        )
 
 
 class IncompatibleRoleFilter(SimpleListFilter):
@@ -1021,11 +1045,11 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request, model_admin) -> List:
         types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset) -> QuerySet:
         if not self.value():
             return queryset
         try:
@@ -1053,12 +1077,12 @@ class GroupResource(resources.ModelResource):
 
 
 @smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
+class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 
     @button(permission=lambda request, group: request.user.is_superuser)
-    def import_fixture(self, request):
+    def import_fixture(self, request) -> TemplateResponse:
         from adminactions.helpers import import_fixture as _import_fixture
 
         return _import_fixture(self, request)
@@ -1067,7 +1091,7 @@ class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
 
     @button()
-    def users(self, request, pk):
+    def users(self, request, pk) -> HttpResponse:
         User = get_user_model()
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
@@ -1077,17 +1101,60 @@ class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
         context["data"] = users
         return render(request, "admin/account/group/members.html", context)
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request, form, formsets, add=False):
+    def construct_change_message(self, request, form, formsets, add=False) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            change_message[0]["changed"]["permissions"] = {
+            changed: Dict[str, Any] = change_message[0]["changed"]
+            changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),
             }
         return change_message
+
+
+@admin.register(account_models.UserGroup)
+class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
+    list_display = ("user", "group", "business_area")
+    autocomplete_fields = ("group",)
+    raw_id_fields = ("user", "business_area", "group")
+    search_fields = ("user__username__istartswith",)
+    list_filter = (
+        ("business_area", AutoCompleteFilter),
+        ("group", AutoCompleteFilter),
+    )
+
+    def get_queryset(self, request) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "business_area",
+                "user",
+                "group",
+            )
+        )
+
+    def check_sync_permission(self, request, obj=None) -> bool:
+        return request.user.is_staff
+
+    def check_publish_permission(self, request, obj=None) -> bool:
+        return False
+
+    def _get_data(self, record) -> str:
+        groups = Group.objects.all()
+        collector = ForeignKeysCollector(None)
+        objs = []
+        for qs in [groups]:
+            objs.extend(qs)
+        objs.extend(account_models.UserGroup.objects.filter(pk=record.pk))
+        collector.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+        )

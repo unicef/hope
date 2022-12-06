@@ -1,14 +1,13 @@
 from django.test import TestCase
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
+from hct_mis_api.apps.household.fixtures import DocumentTypeFactory, DocumentAllowDuplicatesFactory
 from hct_mis_api.apps.core.models import BusinessArea
 
 from hct_mis_api.apps.core.fixtures import StorageFileFactory
 from hct_mis_api.apps.household.management.commands.detect_paid_households import find_paid_households
 
 from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory,
     create_household,
 )
 
@@ -41,7 +40,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
         cls.household_1.storage_obj = cls.storage_file
         cls.household_1.save()
         cls.individuals_1[0].documents.add(
-            DocumentFactory(individual=cls.individuals_1[0], type=cls.document_type, document_number="1")
+            DocumentAllowDuplicatesFactory(individual=cls.individuals_1[0], type=cls.document_type, document_number="1")
         )
 
         cls.household_2, cls.individuals_2 = create_household(
@@ -56,7 +55,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             cash_plan=cls.cash_plan,
         )
         cls.individuals_2[0].documents.add(
-            DocumentFactory(individual=cls.individuals_2[0], type=cls.document_type, document_number="1")
+            DocumentAllowDuplicatesFactory(individual=cls.individuals_2[0], type=cls.document_type, document_number="1")
         )
 
         cls.household_3, cls.individuals_3 = create_household(
@@ -65,7 +64,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
         cls.household_3.storage_obj = cls.storage_file
         cls.household_3.save()
         cls.individuals_3[0].documents.add(
-            DocumentFactory(individual=cls.individuals_3[0], type=cls.document_type, document_number="1")
+            DocumentAllowDuplicatesFactory(individual=cls.individuals_3[0], type=cls.document_type, document_number="1")
         )
 
         ##
@@ -76,7 +75,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
         cls.household_4.storage_obj = None
         cls.household_4.save()
         cls.individuals_4[0].documents.add(
-            DocumentFactory(individual=cls.individuals_4[0], type=cls.document_type, document_number="2")
+            DocumentAllowDuplicatesFactory(individual=cls.individuals_4[0], type=cls.document_type, document_number="2")
         )
 
         cls.household_5, cls.individuals_5 = create_household(
@@ -85,7 +84,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
         cls.household_5.storage_obj = cls.storage_file
         cls.household_5.save()
         cls.individuals_5[0].documents.add(
-            DocumentFactory(individual=cls.individuals_5[0], type=cls.document_type, document_number="2")
+            DocumentAllowDuplicatesFactory(individual=cls.individuals_5[0], type=cls.document_type, document_number="2")
         )
 
     def test_detecting_paid_hhs_loaded_via_sf(self):

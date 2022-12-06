@@ -30,16 +30,15 @@ export function TargetPopulationCore({
 }: TargetPopulationCoreProps): React.ReactElement {
   const { t } = useTranslation();
   if (!targetPopulation) return null;
-  // const { rules } = targetPopulation.targetingCriteria;
 
   return (
     <>
       {targetPopulation.targetingCriteria ? (
-      <TargetingCriteria
-        candidateListRules={targetPopulation.targetingCriteria?.rules || []}
-        targetPopulation={targetPopulation}
-      />) : null
-      }
+        <TargetingCriteria
+          rules={targetPopulation.targetingCriteria?.rules || []}
+          targetPopulation={targetPopulation}
+        />
+      ) : null}
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
           <Typography variant='h6'>

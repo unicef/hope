@@ -44,8 +44,32 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
 
-  - stage: build_and_push
+  - stage: check_format
     dependsOn: []
+    displayName: Check BE format
+    jobs:
+      - job: check_format
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CHECK FORMAT]"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.9"
+            displayName: "Use Python 3.9"
+          - script: pip install black==22.8.0 isort==5.10.1
+          # remember to update this if you change the version of black/isort in pyproject.toml
+            displayName: "Install tools"
+          - script: black --check .
+            workingDirectory: 'backend'
+            displayName: "Check format"
+          - script: isort --check-only .
+            workingDirectory: 'backend'
+            displayName: "Check imports order"
+
+
+  - stage: build_and_push
+    dependsOn: check_format
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
@@ -136,8 +160,56 @@ stages:
               failTaskOnFailedTests: true
               testRunTitle: 'Lint results'
 
+  - stage: mypy_backend
+    dependsOn: build_and_push
+    displayName: Mypy-Backend
+    jobs:
+      - job: django_mypy
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO MYPY]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-django-test'
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
+               mv $(Agent.TempDirectory)/.env-django-test .env
+
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend ./docker-mypy-entrypoint.sh'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+
+          - task: PublishTestResults@2
+            displayName: "Publish mypy result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/mypy-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'Mypy results'
+
   - stage: test_backend
-    dependsOn: lint_backend
+    dependsOn: [lint_backend, mypy_backend]
     displayName: Test-Backend
     jobs:
       - job: django_tests

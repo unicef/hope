@@ -1,3 +1,5 @@
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
@@ -10,7 +12,7 @@ from django.utils.functional import cached_property
 from concurrency.fields import AutoIncVersionField
 
 from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
-from .interpreters import interpreters, mapping
+from .interpreters import Interpreter, interpreters, mapping
 from .result import Result
 from .validators import DoubleSpaceValidator, StartEndSpaceValidator
 
@@ -65,7 +67,7 @@ class Rule(models.Model):
     def get_flag(self, name, default=None):
         return self.flags.get(name, default)
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         return model_to_dict(self, MONITORED_FIELDS)
 
     def clean(self):
@@ -79,7 +81,7 @@ class Rule(models.Model):
         self.enabled = False
         self.save()
 
-    def get_changes(self):
+    def get_changes(self) -> Tuple[Dict, List]:
         prev = self.latest_commit
         if prev:
             data1 = prev.after
@@ -91,14 +93,14 @@ class Rule(models.Model):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
         if "individual_data_needed" not in self.flags:
             self.flags["individual_data_needed"] = False
         with atomic():
             super().save(force_insert, force_update, using, update_fields)
             self.commit()
 
-    def commit(self, is_release=False, force=False):
+    def commit(self, is_release=False, force=False) -> Optional["RuleCommit"]:
         stored, changes = self.get_changes()
         release = None
         values = {
@@ -157,7 +159,8 @@ class Rule(models.Model):
 
     @cached_property
     def interpreter(self):
-        return mapping[self.language](self.definition)
+        func: Type[Interpreter] = mapping[self.language]
+        return func(self.definition)
 
     def execute(self, context=None, only_release=True, only_enabled=True) -> Result:
         if self.pk:
@@ -229,9 +232,10 @@ class RuleCommit(models.Model):
 
     @cached_property
     def interpreter(self):
-        return mapping[self.language](self.definition)
+        func: Callable = mapping[self.language]
+        return func(self.definition)
 
-    def execute(self, context):
+    def execute(self, context) -> Any:
         return self.interpreter.execute(context)
 
     def release(self):

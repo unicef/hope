@@ -1,4 +1,7 @@
+from typing import Tuple, Type
+
 import graphene
+from django.db.models import Case, When
 from django.db.models import Prefetch, Sum, Value, Subquery, OuterRef, Func, F
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -6,6 +9,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -46,6 +50,8 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
     Agency,
     BankAccountInfo,
@@ -85,15 +91,6 @@ INDIVIDUALS_CHART_LABELS = [
 
 
 class DocumentTypeNode(DjangoObjectType):
-    country = graphene.String(description="Country name")
-    country_iso3 = graphene.String(description="Country ISO3")
-
-    def resolve_country(parent: DocumentType, info):
-        return parent.country.name
-
-    def resolve_country_iso3(parent: DocumentType, info):
-        return parent.country.iso_code3
-
     class Meta:
         model = DocumentType
 
@@ -131,12 +128,16 @@ class IndividualIdentityNode(DjangoObjectType):
 
 class DocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
+    country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
-    def resolve_country(parent, info):
-        return getattr(parent.type.country, "name", parent.type.country)
+    def resolve_country(parent: Document, info):
+        return getattr(parent.country, "name", parent.country)
 
-    def resolve_photo(parent, info):
+    def resolve_country_iso3(parent: Document, info):
+        return parent.country.iso_code3
+
+    def resolve_photo(parent: Document, info):
         if parent.photo:
             return parent.photo.url
         return
@@ -166,8 +167,7 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
-# FIXME: This need to be changed to HouseholdSelectionNode
-class HouseholdSelection(DjangoObjectType):
+class HouseholdSelectionNode(DjangoObjectType):
     class Meta:
         model = HouseholdSelection
 
@@ -201,7 +201,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     country = graphene.String(description="Country name")
     currency = graphene.String()
     flex_fields = FlexFieldsScalar()
-    selection = graphene.Field(HouseholdSelection)
+    selection = graphene.Field(HouseholdSelectionNode)
     sanction_list_possible_match = graphene.Boolean()
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
@@ -296,15 +296,15 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
 
-    # I don't think this is needed because it would skip check_node_permission call
-    # @classmethod
-    # def get_node(cls, info, id):
-    #     # This will skip permission check from BaseNodePermissionMixin, check if okay
-    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
-    #     try:
-    #         return queryset.get(pk=id)
-    #     except cls._meta.model.DoesNotExist:
-    #         return None
+    @classmethod
+    def get_queryset(cls, queryset, info):
+        queryset = queryset.annotate(
+            status_label=Case(
+                When(withdrawn=True, then=Value(STATUS_INACTIVE)),
+                default=Value(STATUS_ACTIVE),
+            )
+        )
+        return super().get_queryset(queryset, info)
 
     class Meta:
         model = Household
@@ -329,7 +329,7 @@ class BankAccountInfoNode(DjangoObjectType):
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
@@ -426,15 +426,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value,
             )
-
-    # I don't think this is needed because it would skip check_node_permission call
-    # @classmethod
-    # def get_node(cls, info, id):
-    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
-    #     try:
-    #         return queryset.get(pk=id)
-    #     except cls._meta.model.DoesNotExist:
-    #         return None
 
     class Meta:
         model = Individual

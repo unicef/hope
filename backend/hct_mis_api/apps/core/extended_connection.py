@@ -1,5 +1,6 @@
 import hashlib
 import json
+from typing import Any
 
 import graphene
 from django.db.models import QuerySet
@@ -82,8 +83,8 @@ class ExtendedConnection(graphene.Connection):
     total_count = graphene.Int()
     edge_count = graphene.Int()
 
-    def resolve_total_count(root, info, **kwargs):
+    def resolve_total_count(root, info: Any, **kwargs: Any) -> int:
         return root.length
 
-    def resolve_edge_count(root, info, **kwargs):
+    def resolve_edge_count(root, info: Any, **kwargs: Any) -> int:
         return len(root.edges)

@@ -5,10 +5,10 @@ from freezegun import freeze_time
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
-    COUSIN,
-    HEAD,
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
+    COUSIN,
+    HEAD,
     Household,
     Individual,
 )
@@ -30,7 +30,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.maxDiff = None
         cls.rdi = RegistrationDataImportFactory()
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
@@ -39,6 +38,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         cls.rdi.datahub_id = cls.rdi_hub.id
         cls.rdi.save()
+        super().setUpTestData()
 
     @classmethod
     def set_imported_individuals(cls, imported_household):

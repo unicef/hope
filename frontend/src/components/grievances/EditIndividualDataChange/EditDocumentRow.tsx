@@ -42,7 +42,7 @@ export function EditDocumentRow({
     <>
       <DocumentField
         index={index}
-        key={`${index}-${document.node.type.country}-${document.node.type.label}`}
+        key={`${index}-${document.node.country}-${document.node.type.label}`}
         onDelete={() => arrayHelpers.remove(index)}
         countryChoices={addIndividualFieldsData.countriesChoices}
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
@@ -61,7 +61,7 @@ export function EditDocumentRow({
           onClick={() => {
             arrayHelpers.remove({
               id: document.node.id,
-              country: document.node.type.countryIso3,
+              country: document.node.countryIso3,
               type: document.node.type.type,
               number: document.node.documentNumber,
               photo: document.node.photo,
@@ -87,7 +87,7 @@ export function EditDocumentRow({
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Country')}
-            value={document.node.type.country}
+            value={document.node.country}
           />
         </DisabledDiv>
       </Grid>
@@ -109,7 +109,7 @@ export function EditDocumentRow({
               onClick={() => {
                 arrayHelpers.push({
                   id: document.node.id,
-                  country: document.node.type.countryIso3,
+                  country: document.node.countryIso3,
                   type: document.node.type.type,
                   number: document.node.documentNumber,
                   photo: document.node.photo,

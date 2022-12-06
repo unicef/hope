@@ -42,6 +42,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
 )
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -85,7 +86,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root, info, input, **kwargs) -> "EditPaymentVerificationMutation":
         cash_plan_verification_id = decode_id_string(input.get("cash_plan_payment_verification_id"))
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -120,7 +121,9 @@ class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMu
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def processed_mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def processed_mutate(
+        cls, root, info, cash_plan_verification_id, **kwargs
+    ) -> "ActivateCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -151,7 +154,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "FinishCashPlanVerificationMutation":
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
         check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
@@ -159,8 +162,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
-            logger.error("You can finish only ACTIVE verification")
-            raise GraphQLError("You can finish only ACTIVE verification")
+            log_and_raise("You can finish only ACTIVE verification")
         VerificationPlanStatusChangeServices(cashplan_payment_verification).finish()
         cashplan_payment_verification.refresh_from_db()
         log_create(
@@ -183,7 +185,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "DiscardCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -215,7 +217,7 @@ class InvalidCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "InvalidCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
@@ -247,7 +249,7 @@ class DeleteCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs) -> "DeleteCashPlanVerificationMutation":
         cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
         cash_plan = cash_plan_verification.cash_plan
@@ -305,8 +307,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
             payment_verification.cash_plan_payment_verification.verification_channel
             != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
-            logger.error("You can only update status of payment verification for MANUAL verification method")
-            raise GraphQLError("You can only update status of payment verification for MANUAL verification method")
+            log_and_raise("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.cash_plan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             logger.error(
                 f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
@@ -406,8 +407,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             payment_verification.cash_plan_payment_verification.verification_channel
             != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
-            logger.error("You can only update status of payment verification for MANUAL verification method")
-            raise GraphQLError("You can only update status of payment verification for MANUAL verification method")
+            log_and_raise("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.cash_plan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             logger.error(
                 f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
@@ -416,16 +416,13 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
                 f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
             )
         if not payment_verification.is_manually_editable:
-            logger.error("You can only edit payment verification in first 10 minutes")
-            raise GraphQLError("You can only edit payment verification in first 10 minutes")
+            log_and_raise("You can only edit payment verification in first 10 minutes")
         delivered_amount = payment_verification.payment_record.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
-            logger.error(f"You can't set received_amount {received_amount} and not set received to NO")
-            raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to NO")
+            log_and_raise("You can't set received_amount {received_amount} and not set received to NO")
         if received is None and received_amount is not None:
-            logger.error(f"You can't set received_amount {received_amount} and not set received to YES")
-            raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to YES")
+            log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
             logger.error(
                 "If received_amount is 0, you should set received to NO",
@@ -434,8 +431,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
                 "If received_amount is 0, you should set received to NO",
             )
         elif received_amount is not None and received_amount != 0 and not received:
-            logger.error(f"If received_amount({received_amount}) is not 0, you should set received to YES")
-            raise GraphQLError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
+            log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()
@@ -454,19 +450,20 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
+# TODO: what about typing [0] on XlsxErrorNode
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent, info):
-        return parent[0]
+    def resolve_sheet(parent: "XlsxErrorNode", info) -> str:
+        return parent[0]  # type: ignore
 
-    def resolve_coordinates(parent, info):
-        return parent[1]
+    def resolve_coordinates(parent: "XlsxErrorNode", info) -> str:
+        return parent[1]  # type: ignore
 
-    def resolve_message(parent, info):
-        return parent[2]
+    def resolve_message(parent: "XlsxErrorNode", info) -> str:
+        return parent[2]  # type: ignore
 
 
 class ExportXlsxCashPlanVerification(PermissionMutation):
@@ -477,24 +474,20 @@ class ExportXlsxCashPlanVerification(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, cash_plan_verification_id):
+    def mutate(cls, root, info, cash_plan_verification_id) -> "ExportXlsxCashPlanVerification":
         pk = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=pk)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
-            logger.error("You can only export verification for active CashPlan verification")
-            raise GraphQLError("You can export verification for active CashPlan verification")
+            log_and_raise("You can only export verification for active CashPlan verification")
         if cashplan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
-            logger.error("You can only export verification when XLSX channel is selected")
-            raise GraphQLError("You can export verification when XLSX channel is selected")
+            log_and_raise("You can only export verification when XLSX channel is selected")
         if cashplan_payment_verification.xlsx_file_exporting:
-            logger.error("Exporting xlsx file is already started. Please wait")
-            raise GraphQLError("Exporting xlsx file is already started. Please wait")
+            log_and_raise("Exporting xlsx file is already started. Please wait")
         if cashplan_payment_verification.has_xlsx_cash_plan_payment_verification_file:
-            logger.error("Xlsx file is already created")
-            raise GraphQLError("Xlsx file is already created")
+            log_and_raise("Xlsx file is already created")
 
         cashplan_payment_verification.xlsx_file_exporting = True
         cashplan_payment_verification.save()
@@ -512,18 +505,16 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, file, cash_plan_verification_id):
+    def mutate(cls, root, info, file, cash_plan_verification_id) -> "ImportXlsxCashPlanVerification":
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
-            logger.error("You can only import verification for active CashPlan verification")
-            raise GraphQLError("You can only import verification for active CashPlan verification")
+            log_and_raise("You can only import verification for active CashPlan verification")
         if cashplan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
-            logger.error("You can only import verification when XLSX channel is selected")
-            raise GraphQLError("You can only import verification when XLSX channel is selected")
+            log_and_raise("You can only import verification when XLSX channel is selected")
         import_service = XlsxVerificationImportService(cashplan_payment_verification, file)
         import_service.open_workbook()
         import_service.validate()
@@ -559,8 +550,7 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
         try:
             mark_as_failed(payment_record)
         except ValidationError as e:
-            logger.error(e.message)
-            raise GraphQLError(e.message) from e
+            log_and_raise(e.message, e)
 
         return MarkPaymentRecordAsFailedMutation(payment_record)
 

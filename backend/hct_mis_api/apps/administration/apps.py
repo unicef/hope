@@ -11,22 +11,22 @@ class TemplateConfig(AppConfig):
 
 class Config(SmartConfig):
     default_site = "hct_mis_api.apps.administration.site.HopeAdminSite"
-    # verbose_name = _("Smart Admin")
-    # name = 'django.contrib.admin'
 
-    def ready(self):
+    def ready(self) -> None:
         super().ready()
         django.contrib.admin.autodiscover()
         self.module.autodiscover()
         from django.contrib.admin.models import LogEntry
+        from django.contrib.auth.models import Permission
         from django.contrib.contenttypes.models import ContentType
 
-        from smart_admin.smart_auth.admin import ContentTypeAdmin
+        from smart_admin.smart_auth.admin import ContentTypeAdmin, PermissionAdmin
 
         from .admin import LogEntryAdmin
 
         smart_register(ContentType)(ContentTypeAdmin)
         smart_register(LogEntry)(LogEntryAdmin)
+        smart_register(Permission)(PermissionAdmin)
 
         from django.contrib.admin import site
 

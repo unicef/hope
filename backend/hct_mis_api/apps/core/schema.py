@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Iterable
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -50,19 +51,22 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
     class Meta:
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-        exclude_fields = []
+        connection_class: Type = ExtendedConnection
+        exclude_fields: List = []
 
 
 class FlexibleAttributeNode(DjangoObjectType):
     choices = graphene.List(FlexibleAttributeChoiceNode)
-    associated_with = graphene.String()
+    associated_with = graphene.Int()
 
     def resolve_choices(self, info):
         return self.choices.all()
 
     def resolve_associated_with(self, info):
-        return str(FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1])
+        # TODO: need some stubs for graphene-django?
+        associated_number: int = int(self.associated_with)  # type: ignore
+        choice: Tuple[int, str] = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[associated_number]
+        return str(choice[1])
 
     class Meta:
         model = FlexibleAttribute
@@ -81,7 +85,7 @@ class LabelNode(graphene.ObjectType):
     label = graphene.String()
 
 
-def resolve_label(parent):
+def resolve_label(parent) -> List[Dict[str, Any]]:
     labels = []
     for k, v in parent.items():
         labels.append({"language": k, "label": v})
@@ -107,14 +111,14 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
+def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args) -> Any:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options, attrs: str) -> list:
+def sort_by_attr(options, attrs: str) -> List:
     def key_extractor(el):
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
@@ -212,7 +216,7 @@ class KoboAssetObjectConnection(Connection):
         node = KoboAssetObject
 
 
-def get_fields_attr_generators(flex_field, business_area_slug=None):
+def get_fields_attr_generators(flex_field, business_area_slug=None) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
@@ -221,13 +225,20 @@ def get_fields_attr_generators(flex_field, business_area_slug=None):
         )
 
 
-def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
-    if uid is not None:
-        method = KoboAPI(business_area_slug).get_single_project_data(uid)
-        return_method = reduce_asset
-    else:
-        method = KoboAPI(business_area_slug).get_all_projects_data()
-        return_method = reduce_assets_list
+def resolve_assets(business_area_slug, uid: Optional[str] = None, *args: Any, **kwargs: Any):
+    method: Iterable
+    return_method: Callable
+    method, return_method = (
+        (  # type: ignore # TODO: refactor that
+            KoboAPI(business_area_slug).get_single_project_data(uid),
+            reduce_asset,
+        )
+        if uid is not None
+        else (
+            KoboAPI(business_area_slug).get_all_projects_data(),
+            reduce_assets_list,
+        )
+    )
     try:
         assets = method
     except ObjectDoesNotExist:
@@ -237,7 +248,7 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
         logger.exception(error)
         raise GraphQLError(str(error))
 
-    return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
+    return return_method(assets, **{"only_deployed": kwargs.get("only_deployed", False)})
 
 
 class Query(graphene.ObjectType):
@@ -281,7 +292,38 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
-        return sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")
+        def is_a_killer_filter(field) -> bool:
+            if isinstance(field, FlexibleAttribute):
+                name = field.name
+                associated_with = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[field.associated_with][1]
+            else:
+                name = field["name"]
+                associated_with = field["associated_with"]
+
+            return name in {
+                "Household": ["address", "deviceid"],
+                "Individual": [
+                    "full_name",
+                    "family_name",
+                    "given_name",
+                    "middle_name",
+                    "phone_no",
+                    "phone_no_alternative",
+                    "electoral_card_no",
+                    "drivers_license_no",
+                    "national_passport",
+                    "national_id_no",
+                ],
+            }.get(associated_with, [])
+
+        return sort_by_attr(
+            (
+                attr
+                for attr in get_fields_attr_generators(flex_field, business_area_slug)
+                if not is_a_killer_filter(attr)
+            ),
+            "label.English(EN)",
+        )
 
     def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
