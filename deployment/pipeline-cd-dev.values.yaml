@@ -5,16 +5,17 @@ global:
 backend:
   image: #from-pipeline
   replicaCount: 1
+  config:
+    STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
+    EMAIL_HOST: extmail01.unicef.org
+    EMAIL_USE_TLS: "false"
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
     AZURE_TENANT_KEY: #secret-variables: AZURE_TENANT_KEY
-    STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
     STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
     SECRET_KEY: #secret-variables: SECRET_KEY
     SENTRY_DSN: #secret-variables: SENTRY_DSN
-    EMAIL_HOST: extmail01.unicef.org
-    EMAIL_USE_TLS: "false"
     EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY
     ROOT_ACCESS_TOKEN: #secret-variables: ROOT_ACCESS_TOKEN
 
