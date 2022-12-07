@@ -1,3 +1,5 @@
+from django.db.models import QuerySet
+
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
@@ -5,11 +7,11 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 
-def find_edopomoga_households():
+def find_edopomoga_households() -> QuerySet[Household]:
     storage_file = StorageFile.objects.get(pk=3)
     return Household.objects.filter(storage_obj=storage_file, business_area__slug="ukraine").distinct()
 
-def create_collector_for_household(household):
+def create_collector_for_household(household: Household) -> None:
     if household.representatives.count() > 0:
         return
     individual = household.head_of_household
@@ -19,7 +21,7 @@ def create_collector_for_household(household):
     role = IndividualRoleInHousehold(role=ROLE_PRIMARY, individual=individual, household=household)
     role.save()
 
-def create_collectors_for_households():
+def create_collectors_for_households() -> None:
     households = find_edopomoga_households()
     for household in households:
         create_collector_for_household(household)

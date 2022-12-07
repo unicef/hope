@@ -1,6 +1,7 @@
 from collections import defaultdict
+from typing import List
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.db.transaction import atomic
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -22,12 +23,12 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-def find_edopomoga_households():
+def find_edopomoga_households() -> QuerySet[Household]:
     storage_file = StorageFile.objects.get(pk=3)
     return Household.objects.filter(storage_obj=storage_file, business_area__slug="ukraine").distinct()
 
 
-def find_households_without_documents_or_iban():
+def find_households_without_documents_or_iban() -> QuerySet[Household]:
     households_loaded_via_sf = (
         find_edopomoga_households()
         .filter(
@@ -41,7 +42,7 @@ def find_households_without_documents_or_iban():
     return households_loaded_via_sf
 
 
-def find_paid_households():  # noqa
+def find_paid_households() -> QuerySet[Household]:
     storage_file = StorageFile.objects.get(pk=3)
     households_loaded_via_sf = find_edopomoga_households()
     tax_ids_of_inds_loaded_via_sf = Document.objects.filter(
@@ -84,7 +85,7 @@ def find_paid_households():  # noqa
     return Household.objects.filter(unicef_id__in=households_already_paid, storage_obj=storage_file)
 
 
-def find_duplicated_households():
+def find_duplicated_households() -> QuerySet[Household]:
     storage_file = StorageFile.objects.get(pk=3)
     households_loaded_via_sf = find_edopomoga_households()
     tax_ids_of_inds_loaded_via_sf = Document.objects.filter(
@@ -122,7 +123,7 @@ def find_duplicated_households():
     return edopomoga_duplicates
 
 
-def create_tp_with_hhs_ids(name, households):
+def create_tp_with_hhs_ids(name: str, households: List[str]) -> None:
     tp = TargetPopulation()
     tp.name = name
     tp.created_by = User.objects.get(email="jan.romaniak@tivix.com")
@@ -136,7 +137,7 @@ def create_tp_with_hhs_ids(name, households):
 
 
 @atomic
-def create_tps():
+def create_tps() -> None:
     households_without_documents_or_iban = (find_households_without_documents_or_iban().distinct()).values_list(
         "id", flat=True
     )
@@ -203,7 +204,7 @@ def create_tps():
 
 class TestTpsCreation(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.storage_file = StorageFileFactory(id=3)
         UserFactory(email="jan.romaniak@tivix.com")
         cls.business_area = BusinessArea.objects.create(
@@ -225,7 +226,7 @@ class TestTpsCreation(APITestCase):
         cls.setup_duplicated()
 
     @classmethod
-    def setup_test_data_for_empty_tax_id_or_iban(cls):
+    def setup_test_data_for_empty_tax_id_or_iban(cls) -> None:
         cls.household_edopomoga_empty_tax_id, (cls.individual_edopomoga_empty_tax_id,) = create_household(
             household_args={"size": 1, "business_area": cls.business_area}
         )
@@ -250,7 +251,7 @@ class TestTpsCreation(APITestCase):
         BankAccountInfoFactory(individual=cls.individual_edopomoga_empty_iban, bank_account_number="")
 
     @classmethod
-    def setup_already_paid(cls):
+    def setup_already_paid(cls) -> None:
         DOCUMENT_NUMBER_ONE = "1234567890"
         ##
         cls.household_edopomoga_already_paid, (cls.individual_edopomoga_already_paid,) = create_household(
@@ -285,7 +286,7 @@ class TestTpsCreation(APITestCase):
         )
 
     @classmethod
-    def setup_duplicated(cls):
+    def setup_duplicated(cls) -> None:
         DOCUMENT_NUMBER_TWO = "213821382138"
         ##
         cls.household_edopomoga_duplicated, (cls.individual_edopomoga_duplicated,) = create_household(
@@ -312,23 +313,23 @@ class TestTpsCreation(APITestCase):
             )
         )
 
-    def test_households_without_documents_or_iban(self):
+    def test_households_without_documents_or_iban(self) -> None:
         found_empty_tax_id_or_iban = list(find_households_without_documents_or_iban().values_list("id", flat=True))
         self.assertIn(self.household_edopomoga_empty_tax_id.id, found_empty_tax_id_or_iban)
         self.assertIn(self.household_edopomoga_empty_iban.id, found_empty_tax_id_or_iban)
         self.assertEqual(len(found_empty_tax_id_or_iban), 2)
 
-    def test_households_already_received_support(self):
+    def test_households_already_received_support(self) -> None:
         found_paid_household = list(find_paid_households().values_list("id", flat=True))
         self.assertIn(self.household_edopomoga_already_paid.id, found_paid_household)
         self.assertEqual(len(found_paid_household), 1)
 
-    def test_household_duplicated_not_paid(self):
+    def test_household_duplicated_not_paid(self) -> None:
         found_duplicated_household = list(find_duplicated_households().values_list("id", flat=True))
         self.assertIn(self.household_edopomoga_duplicated.id, found_duplicated_household)
         self.assertEqual(len(found_duplicated_household), 1)
 
-    def test_create_tps(self):
+    def test_create_tps(self) -> None:
         create_tps()
         empty_tax_id_or_iban_tp = TargetPopulation.objects.get(name="eDopomoga 1.12.2022 without tax id or iban")
         already_received_assistance_tp = TargetPopulation.objects.get(
