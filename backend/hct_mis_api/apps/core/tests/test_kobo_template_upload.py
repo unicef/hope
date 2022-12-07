@@ -54,7 +54,6 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.maxDiff = None
         cls.client = Client()  # type: ignore # TODO: expression has type "django.test.client.Client", variable has type "graphene.test.Client"
         cls.factory = RequestFactory()
         cls.site = AdminSite()

@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def set_household_unicef_id(apps, schema_editor):
-    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    GrievanceTicket = apps.get_model("grievance", "GrievanceTicket")
     start = 10_000
     grievance_tickets = []
     i, count = 0, GrievanceTicket.objects.all().count() // start + 1

@@ -1,6 +1,17 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from django.db.models import Case, Prefetch, QuerySet, Sum, Value, When
+from django.db.models import (
+    Case,
+    F,
+    Func,
+    OuterRef,
+    Prefetch,
+    QuerySet,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Field, Int, String, relay
@@ -16,6 +27,7 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
@@ -66,6 +78,7 @@ from hct_mis_api.apps.household.services.household_programs_with_delivered_quant
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -203,6 +216,18 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     active_individuals_count = graphene.Int()
     admin_area = graphene.Field(AreaNode)
 
+    @staticmethod
+    def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
+        if hasattr(parent, "sanction_list_possible_match_annotated"):
+            return parent.sanction_list_possible_match_annotated
+        return parent.sanction_list_possible_match
+
+    @staticmethod
+    def resolve_sanction_list_confirmed_match(parent: Household, info: Any) -> bool:
+        if hasattr(parent, "sanction_list_confirmed_match_annotated"):
+            return parent.sanction_list_confirmed_match_annotated
+        return parent.sanction_list_confirmed_match
+
     def resolve_admin1(parent, info: Any) -> Field:
         return parent.admin1
 
@@ -246,6 +271,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_has_duplicates(parent, info: Any) -> QuerySet:
+        if hasattr(parent, "has_duplicates_annotated"):
+            return parent.has_duplicates_annotated
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
     def resolve_flex_fields(parent, info: Any) -> Dict:
@@ -495,6 +522,15 @@ class Query(graphene.ObjectType):
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
 
+    def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
+        queryset = Individual.objects
+        if does_path_exist_in_query("edges.node.household", info):
+            queryset = queryset.select_related("household")
+        if does_path_exist_in_query("edges.node.household.admin2", info):
+            queryset = queryset.select_related("household__admin_area")
+            queryset = queryset.select_related("household__admin_area__area_type")
+        return queryset
+
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
@@ -506,7 +542,36 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
-        return Household.objects.order_by("created_at")
+        queryset = Household.objects.order_by("created_at")
+        if does_path_exist_in_query("edges.node.admin2", info):
+            queryset = queryset.select_related("admin_area")
+            queryset = queryset.select_related("admin_area__area_type")
+
+        if does_path_exist_in_query("edges.node.headOfHousehold", info):
+            queryset = queryset.select_related("head_of_household")
+        if does_path_exist_in_query("edges.node.hasDuplicates", info):
+            subquery = Subquery(
+                Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+            queryset = queryset.annotate(has_duplicates_annotated=subquery)
+
+        if does_path_exist_in_query("edges.node.sanctionListPossibleMatch", info):
+            subquery = Subquery(
+                Individual.objects.filter(household_id=OuterRef("pk"), sanction_list_possible_match=True)
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+            queryset = queryset.annotate(sanction_list_possible_match_annotated=subquery)
+        if does_path_exist_in_query("edges.node.sanctionListConfirmedMatch", info):
+            subquery = Subquery(
+                Individual.objects.filter(household_id=OuterRef("pk"), sanction_list_confirmed_match=True)
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+            queryset = queryset.annotate(sanction_list_confirmed_match_annotated=subquery)
+        return queryset
 
     def resolve_residence_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
@@ -545,6 +610,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
@@ -554,6 +620,7 @@ class Query(graphene.ObjectType):
         return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
@@ -580,6 +647,7 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_child_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
@@ -603,6 +671,7 @@ class Query(graphene.ObjectType):
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
@@ -632,6 +701,7 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_individuals_with_disability_reached_by_age(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:

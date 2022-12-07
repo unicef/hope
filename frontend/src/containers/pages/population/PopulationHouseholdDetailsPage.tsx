@@ -55,7 +55,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export function PopulationHouseholdDetailsPage(): React.ReactElement {
+export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
@@ -73,9 +73,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  const {
-    data: grievancesChoices,
-  } = useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices } = useGrievancesChoiceDataQuery();
 
   if (loading || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
@@ -97,7 +95,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <>
       <PageHeader
-        title={`${t('Household ID')}: ${household.unicefId}`}
+        title={`${t('Household ID')}: ${household?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -109,7 +107,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         flags={
           <>
             <Box mr={2}>
-              {household.hasDuplicates && (
+              {household?.hasDuplicates && (
                 <WarningTooltip
                   confirmed
                   message={t('Houesehold has Duplicates')}
@@ -117,12 +115,12 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
               )}
             </Box>
             <Box mr={2}>
-              {household.sanctionListPossibleMatch && (
+              {household?.sanctionListPossibleMatch && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
             <Box mr={2}>
-              {household.sanctionListConfirmedMatch && (
+              {household?.sanctionListConfirmedMatch && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}
                   confirmed
@@ -135,7 +133,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
-        businessArea={businessArea} grievancesChoices={grievancesChoices} />
+        businessArea={businessArea}
+        grievancesChoices={grievancesChoices}
+      />
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable
@@ -146,16 +146,16 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
-            <PaymentRecordHouseholdTable
-              openInNewTab
-              household={household as HouseholdNode}
-              businessArea={businessArea}
-              canViewPaymentRecordDetails={hasPermissions(
-                PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
-                permissions,
-              )}
-            />
-          )}
+          <PaymentRecordHouseholdTable
+            openInNewTab
+            household={household as HouseholdNode}
+            businessArea={businessArea}
+            canViewPaymentRecordDetails={hasPermissions(
+              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+              permissions,
+            )}
+          />
+        )}
         <HouseholdVulnerabilities
           household={household as HouseholdNode}
           flexFieldsData={flexFieldsData}
@@ -167,49 +167,49 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           <Grid container spacing={6}>
             <Grid item xs={3}>
               <LabelizedField label={t('Source')}>
-                <div>{household.registrationDataImport.dataSource}</div>
+                <div>{household?.registrationDataImport?.dataSource}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Import name')}>
-                <div>{household.registrationDataImport.name}</div>
+                <div>{household?.registrationDataImport?.name}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
-                    {household.lastRegistrationDate}
+                    {household?.lastRegistrationDate}
                   </UniversalMoment>
                 </div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('User name')}>
-                {household.registrationDataImport.importedBy?.email}
+                {household?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </Grid>
           </Grid>
-          {household.registrationDataImport.dataSource === 'XLS' ? null : (
+          {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>
               <hr />
               <SubTitle variant='h6'>{t('Data Collection')}</SubTitle>
               <Grid container spacing={6}>
                 <Grid item xs={3}>
                   <LabelizedField label={t('Start time')}>
-                    <UniversalMoment>{household.start}</UniversalMoment>
+                    <UniversalMoment>{household?.start}</UniversalMoment>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={3}>
                   <LabelizedField label={t('End time')}>
                     <UniversalMoment>
-                      {household.firstRegistrationDate}
+                      {household?.firstRegistrationDate}
                     </UniversalMoment>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={3}>
                   <LabelizedField label={t('Device ID')}>
-                    {household.deviceid}
+                    {household?.deviceid}
                   </LabelizedField>
                 </Grid>
               </Grid>
@@ -218,8 +218,8 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         </Overview>
       </Container>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={data.household.id} />
+        <UniversalActivityLogTable objectId={data.household?.id} />
       )}
     </>
   );
-}
+};
