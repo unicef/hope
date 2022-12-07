@@ -86,6 +86,7 @@ class TestPullDataFromDatahub(TestCase):
     @classmethod
     def _setup_datahub_data(cls) -> None:
         session = Session()
+        session.business_area = BusinessArea.objects.first().code
         session.status = Session.STATUS_READY
         session.save()
         cls.session = session
