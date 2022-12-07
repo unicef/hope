@@ -48,7 +48,7 @@ class FundsCommitment(models.Model):
     ca_sync_date = models.DateTimeField(blank=True, null=True)
     business_office_code = models.CharField(max_length=4, blank=True, null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.funds_commitment_number
 
 

@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
@@ -95,9 +89,7 @@ export function ActivateProgram({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Activate Programme')}</Typography>
-          </DialogTitle>
+          <DialogTitle>{t('Activate Programme')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>

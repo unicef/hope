@@ -37,16 +37,16 @@ class TestProgramChoices(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
 
-    def test_status_choices_query(self):
+    def test_status_choices_query(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_REPORT_STATUS_CHOICES,
             context={"user": self.user},
         )
 
-    def test_report_types_choices(self):
+    def test_report_types_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_REPORT_TYPES_CHOICES,
             context={"user": self.user},

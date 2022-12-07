@@ -1,4 +1,5 @@
 import uuid
+from typing import Dict
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
@@ -30,7 +31,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestPhoneNumberVerification(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.payment_record_amount = 110
         user = UserFactory()
@@ -57,7 +58,7 @@ class TestPhoneNumberVerification(TestCase):
             generic_fk_obj=cash_plan,
         )
         cls.individuals = []
-        for _ in range(cls.payment_record_amount):
+        for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=BusinessArea.objects.first()
             )
@@ -66,7 +67,10 @@ class TestPhoneNumberVerification(TestCase):
                     "registration_data_import": registration_data_import,
                     "admin_area": Area.objects.order_by("?").first(),
                 },
-                {"registration_data_import": registration_data_import},
+                {
+                    "registration_data_import": registration_data_import,
+                    "phone_no": f"+48 609 999 {i:03d}",
+                },
             )
             cls.individuals.append(individuals[0])
 
@@ -143,12 +147,12 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_cash_plan = other_cash_plan
         cls.other_verification = other_cash_plan.get_payment_verification_plans.first()
 
-    def test_failing_rapid_pro_during_cash_plan_payment_verification(self):
+    def test_failing_rapid_pro_during_cash_plan_payment_verification(self) -> None:
         self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
         self.assertIsNone(self.verification.error)
         self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
 
-        def create_flow_response():
+        def create_flow_response() -> Dict:
             return {
                 "uuid": str(uuid.uuid4()),
             }

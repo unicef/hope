@@ -1,11 +1,17 @@
+from typing import List
+
 from django.db import DEFAULT_DB_ALIAS, connections
+from django.db.models import QuerySet
 from django.test.utils import CaptureQueriesContext
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import (
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
@@ -15,7 +21,6 @@ from hct_mis_api.apps.household.models import (
     SON_DAUGHTER,
     WIFE_HUSBAND,
     Document,
-    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -26,8 +31,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def setUpTestData(cls) -> None:
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -106,29 +110,41 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentType(country=country, label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        dt_tax_id = DocumentType.objects.create(
-            country=country, label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID
-        )
+        dt = DocumentTypeFactory(label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        dt_tax_id = DocumentTypeFactory(label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID)
         dt.save()
         cls.document1 = Document(
-            type=dt, document_number="ASD123", individual=cls.individuals[0], status=Document.STATUS_VALID
+            country=country,
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[0],
+            status=Document.STATUS_VALID,
         )
-        cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1])
-        cls.document3 = Document(type=dt, document_number="BBC999", individual=cls.individuals[2])
-        cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3])
+        cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1], country=country)
+        cls.document3 = Document(type=dt, document_number="BBC999", individual=cls.individuals[2], country=country)
+        cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3], country=country)
         cls.document5 = Document(
-            type=dt, document_number="TOTALY UNIQ", individual=cls.individuals[4], status=Document.STATUS_VALID
+            country=country,
+            type=dt,
+            document_number="TOTALY UNIQ",
+            individual=cls.individuals[4],
+            status=Document.STATUS_VALID,
         )
         cls.document6 = Document.objects.create(
-            type=dt_tax_id, document_number="ASD123", individual=cls.individuals[2], status=Document.STATUS_VALID
+            country=country,
+            type=dt_tax_id,
+            document_number="ASD123",
+            individual=cls.individuals[2],
+            status=Document.STATUS_VALID,
         )
         cls.document7 = Document.objects.create(
+            country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[1],
         )
         cls.document8 = Document.objects.create(
+            country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[4],
@@ -148,13 +164,19 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             cls.document6,
             cls.document7,
         ]
+        super().setUpTestData()
 
-    def refresh_all_documents(self):
+    def get_documents_query(self, documents: List[Document]) -> QuerySet[Document]:
+        return Document.objects.filter(id__in=[document.id for document in documents])
+
+    def refresh_all_documents(self) -> None:
         for document in self.all_documents:
             document.refresh_from_db()
 
-    def test_hard_documents_deduplication(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+    def test_hard_documents_deduplication(self) -> None:
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4])
+        )
         self.refresh_all_documents()
         self.assertEqual(self.document1.status, Document.STATUS_VALID)
         self.assertEqual(self.document2.status, Document.STATUS_NEED_INVESTIGATION)
@@ -165,39 +187,67 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(ticket_details.possible_duplicates.count(), 2)
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
 
-    def test_hard_documents_deduplication_for_initially_valid(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document5,))
+    def test_hard_documents_deduplication_for_initially_valid(self) -> None:
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query(
+                [
+                    self.document5,
+                ]
+            )
+        )
         self.refresh_all_documents()
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
-    def test_should_create_one_ticket(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+    def test_should_create_one_ticket(self) -> None:
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4])
+        )
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4])
+        )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
 
-    def test_hard_documents_deduplication_number_of_queries(self):
+    def test_hard_documents_deduplication_number_of_queries(self) -> None:
+        documents1 = self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
+        documents2 = self.get_documents_query(
+            [self.document2, self.document3, self.document4, self.document5, self.document7, self.document8]
+        )
         context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
         with context:
-            DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
+            DeduplicateTask.hard_deduplicate_documents(documents1)
             first_dedup_query_count = len(context.captured_queries)
-            DeduplicateTask.hard_deduplicate_documents(
-                (self.document2, self.document3, self.document4, self.document5, self.document7, self.document8),
-                self.registration_data_import,
-            )
+            DeduplicateTask.hard_deduplicate_documents(documents2, self.registration_data_import)
             second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
             self.assertEqual(
                 first_dedup_query_count, second_dedup_query_count, "Both queries should use same amount of queries"
             )
-            self.assertEqual(first_dedup_query_count, 6, "Should only use 6 queries")
 
-    def test_ticket_created_correctly(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
+            # Queries:
+            # 1. Transaction savepoint
+            # 2. Select for update: Documents, Individuals
+            # 3. Filter all_matching_number_documents
+            # 4. Update Documents.status
+            # 5. Filter PossibleDuplicateThrough
+            # 6. Bulk Create GrievanceTicket
+            # 7. Bulk Create TicketNeedsAdjudicationDetails
+            # 8. Bulk Create PossibleDuplicateThrough
+            # 9. Transaction savepoint release
+            self.assertEqual(first_dedup_query_count, 9, "Should only use 9 queries")
+
+    def test_ticket_created_correctly(self) -> None:
+        DeduplicateTask.hard_deduplicate_documents(
+            self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
+        )
         self.refresh_all_documents()
 
         self.assertEqual(GrievanceTicket.objects.count(), 1)
         DeduplicateTask.hard_deduplicate_documents(
-            (self.document7,),
+            self.get_documents_query(
+                [
+                    self.document7,
+                ]
+            ),
             self.registration_data_import,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)

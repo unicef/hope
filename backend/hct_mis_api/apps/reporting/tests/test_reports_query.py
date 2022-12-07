@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -58,7 +60,7 @@ REPORT_QUERY = """
 
 class TestReportsQuery(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -81,7 +83,7 @@ class TestReportsQuery(APITestCase):
             ("filter_by_type_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_FILTER_TYPE_QUERY),
         ]
     )
-    def test_reports_query_all(self, _, permissions, query_string):
+    def test_reports_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -95,7 +97,7 @@ class TestReportsQuery(APITestCase):
             ("without_permissions", []),
         ]
     )
-    def test_report_query_single(self, _, permissions):
+    def test_report_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

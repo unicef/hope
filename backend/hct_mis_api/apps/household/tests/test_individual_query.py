@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -63,7 +65,7 @@ class TestIndividualQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.maxDiff = None
         cached_business_areas_slug_id_dict.cache_clear()
         create_afghanistan()
@@ -145,7 +147,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_all(self, _, permissions):
+    def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -159,7 +161,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_single(self, _, permissions):
+    def test_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -174,7 +176,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_programme_filter(self, _, permissions):
+    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -189,7 +191,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_filter(self, _, permissions):
+    def test_query_individuals_by_search_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,

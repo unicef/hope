@@ -33,7 +33,7 @@ export function ActivityLogPageFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            value={filter.search || ''}
+            value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
           />
@@ -42,7 +42,7 @@ export function ActivityLogPageFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'module')}
             label={t('Module')}
-            value={filter.module || ''}
+            value={filter.module}
             icon={<ViewModuleRoundedIcon />}
             SelectDisplayProps={{
               'data-cy': 'filters-residence-status',
@@ -54,11 +54,13 @@ export function ActivityLogPageFilters({
             <MenuItem value=''>
               <em>{t('None')}</em>
             </MenuItem>
-            {Object.entries(modules).map(([key, value]) => (
-              <MenuItem key={key} value={key}>
-                {value}
-              </MenuItem>
-            ))}
+            {Object.entries(modules)
+              .sort()
+              .map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
           </SelectFilter>
         </Grid>
       </Grid>

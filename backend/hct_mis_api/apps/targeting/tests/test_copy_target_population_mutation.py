@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -49,7 +51,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                 """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -71,7 +73,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         cls.empty_target_population_1.save()
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter: TargetingCriteriaRuleFilter) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
@@ -86,7 +88,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_copy_target(self, _, permissions):
+    def test_copy_target(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -108,7 +110,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             ("without_permission", [], False),
         ]
     )
-    def test_copy_target_ids(self, _, permissions, should_have_copy):
+    def test_copy_target_ids(self, _: Any, permissions: List[Permissions], should_have_copy: bool) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         graphql_request = self.client.execute(
@@ -151,7 +153,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_copy_empty_target_1(self, _, permissions):
+    def test_copy_empty_target_1(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

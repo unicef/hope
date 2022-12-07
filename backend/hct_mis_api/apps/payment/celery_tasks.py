@@ -1,5 +1,6 @@
 import datetime
 import logging
+from uuid import UUID
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 @app.task
 @log_start_and_end
 @sentry_tags
-def get_sync_run_rapid_pro_task():
+def get_sync_run_rapid_pro_task() -> None:
     try:
         from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
             CheckRapidProVerificationTask,
@@ -62,7 +63,7 @@ def fsp_generate_xlsx_report_task(fsp_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id):
+def create_payment_verification_plan_xlsx(payment_verification_plan_id: UUID, user_id: UUID) -> None:
     try:
         user = get_user_model().objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
@@ -86,7 +87,7 @@ def create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id)
 @app.task
 @log_start_and_end
 @sentry_tags
-def remove_old_cash_plan_payment_verification_xls(past_days=30):
+def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
     """Remove old Payment Verification report XLSX files"""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)

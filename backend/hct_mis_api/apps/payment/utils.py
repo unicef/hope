@@ -1,11 +1,13 @@
 import datetime
+import typing
 from decimal import Decimal
 from math import ceil
-
-from django.db.models import Q
+from typing import Dict, Union
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
+from django.db.models import Q, QuerySet
+
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import (
     CashPlan,
@@ -13,10 +15,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentVerificationPlan,
 )
 
-
-def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):
+def get_number_of_samples(payment_records_sample_count: int, confidence_interval: int, margin_of_error: int) -> int:
     from statistics import NormalDist
 
     variable = 0.5
@@ -28,7 +30,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(received, received_amount, delivered_amount):
+def from_received_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
     received_amount_dec = float_to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
@@ -43,13 +45,14 @@ def from_received_to_status(received, received_amount, delivered_amount):
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def float_to_decimal(received_amount):
+def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
     if isinstance(received_amount, float):
         return Decimal(f"{round(received_amount, 2):.2f}")
     return received_amount
 
 
-def from_received_yes_no_to_status(received, received_amount, delivered_amount):
+@typing.no_type_check
+def from_received_yes_no_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
     received_bool = None
     if received == "YES":
         received_bool = True
@@ -58,7 +61,7 @@ def from_received_yes_no_to_status(received, received_amount, delivered_amount):
     return from_received_to_status(received_bool, received_amount, delivered_amount)
 
 
-def calculate_counts(cash_plan_verification):
+def calculate_counts(cash_plan_verification: PaymentVerificationPlan) -> None:
     cash_plan_verification.responded_count = cash_plan_verification.payment_record_verifications.filter(
         ~Q(status=PaymentVerification.STATUS_PENDING)
     ).count()
@@ -73,7 +76,9 @@ def calculate_counts(cash_plan_verification):
     ).count()
 
 
-def get_payment_items_for_dashboard(year, business_area_slug, filters, only_with_delivered_quantity=False):
+def get_payment_items_for_dashboard(
+    year: int, business_area_slug: str, filters: Dict, only_with_delivered_quantity: bool = False
+) -> QuerySet:
     additional_filters = {}
     if only_with_delivered_quantity:
         additional_filters["delivered_quantity_usd__gt"] = 0

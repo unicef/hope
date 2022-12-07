@@ -1,4 +1,6 @@
-from django.db.models import Count, F, Q
+from typing import Any
+
+from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
@@ -35,7 +37,7 @@ class ProgramFilter(FilterSet):
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(
             total_payment_plans_hh_count=Count(
                 "cashplan__payment_items__household",
@@ -50,7 +52,7 @@ class ProgramFilter(FilterSet):
         ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
         return super().filter_queryset(queryset)
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -65,7 +67,7 @@ class ChartProgramFilter(FilterSet):
         fields = ("business_area",)
         model = Program
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:

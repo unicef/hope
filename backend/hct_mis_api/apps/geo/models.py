@@ -1,6 +1,8 @@
 # - Country
 # - AreaType
 # - Area
+from typing import Any, Dict, List, Optional
+
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import CICharField
 from django.db.models import JSONField
@@ -14,7 +16,7 @@ from mptt.querysets import TreeQuerySet
 
 
 class ValidityQuerySet(TreeQuerySet):
-    def active(self, *args, **kwargs):
+    def active(self, *args: Any, **kwargs: Any) -> "ValidityQuerySet":
         return super().filter(valid_until__isnull=True).filter(*args, **kwargs)
 
 
@@ -54,11 +56,11 @@ class Country(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Countries"
         ordering = ("name",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod
-    def get_choices(cls):
+    def get_choices(cls) -> List[Dict[str, Any]]:
         queryset = cls.objects.all().order_by("name")
         return [
             {
@@ -91,7 +93,7 @@ class AreaType(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Area Types"
         unique_together = ("country", "area_level", "name")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -121,12 +123,14 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Areas"
         unique_together = ("name", "p_code")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod
-    def get_admin_areas_as_choices(cls, admin_level: int = None, business_area_slug: str = None):
-        params = {}
+    def get_admin_areas_as_choices(
+        cls, admin_level: Optional[int] = None, business_area_slug: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        params: Dict[str, Any] = {}
         if admin_level:
             params["area_type__area_level"] = admin_level
 
@@ -137,7 +141,7 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             # also, short_name does not contain dashes
             # so it won't fail for e.g. Timor-Leste
             # because short_name for it is just `Timor Leste`
-            unslugged_business_area_slug = business_area_slug.replace("-", " ")
+            unslugged_business_area_slug: str = business_area_slug.replace("-", " ")
             params["area_type__country__short_name__iexact"] = unslugged_business_area_slug
             # still, this approach smells fishy because we're matching business area slug with country name
             # it's a good approximation for now but it should be improved somehow

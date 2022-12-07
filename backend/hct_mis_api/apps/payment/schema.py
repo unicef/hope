@@ -1,7 +1,7 @@
 import json
 from base64 import b64decode
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Union
 
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import (
@@ -19,6 +19,9 @@ from django.db.models import (
     When,
 )
 from django.db.models.functions import Coalesce
+from typing import Any, Dict, List, Optional
+
+from django.db.models import Case, CharField, Count, Q, QuerySet, Sum, Value, When
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -128,8 +131,8 @@ class RapidProFlow(graphene.ObjectType):
     created_on = graphene.DateTime()
     modified_on = graphene.DateTime()
 
-    def resolve_id(parent, info):
-        return parent["uuid"]
+    def resolve_id(parent, info: Any) -> str:
+        return parent["uuid"]  # type: ignore
 
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -513,10 +516,10 @@ class PaymentVerificationPlanNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_xlsx_file_was_downloaded(self, info):
+    def resolve_xlsx_file_was_downloaded(self, info: Any) -> bool:
         return self.xlsx_payment_verification_plan_file_was_downloaded
 
-    def resolve_has_xlsx_file(self, info):
+    def resolve_has_xlsx_file(self, info: Any) -> bool:
         return self.has_xlsx_payment_verification_plan_file
 
 
@@ -859,7 +862,7 @@ class Query(graphene.ObjectType):
             for mechanism in delivery_mechanisms
         ]
 
-    def resolve_all_payment_verifications(self, info, **kwargs):
+    def resolve_all_payment_verifications(self, info: Any, **kwargs: Any) -> QuerySet:
         payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
         payment_record_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
 
@@ -879,11 +882,11 @@ class Query(graphene.ObjectType):
             .distinct()
         )
 
-    def resolve_sample_size(self, info, input, **kwargs):
+    def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
         node_name, obj_id = b64decode(input.get("cash_or_payment_plan_id")).decode().split(":")
         payment_plan_object = get_object_or_404(CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id)
 
-        def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
+        def get_payment_records(cash_plan: Union[PaymentPlan, CashPlan], payment_verification_plan: Optional[PaymentVerificationPlan], verification_channel: str) -> QuerySet:
             kwargs = {}
             if payment_verification_plan:
                 kwargs["payment_verification_plan"] = payment_verification_plan
@@ -913,36 +916,38 @@ class Query(graphene.ObjectType):
             "sample_size": payment_records_sample_count,
         }
 
-    def resolve_all_rapid_pro_flows(self, info, business_area_slug, **kwargs):
+    def resolve_all_rapid_pro_flows(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[RapidProFlow]:
         api = RapidProAPI(business_area_slug)
         return api.get_flows()
 
-    def resolve_payment_record_status_choices(self, info, **kwargs):
+    def resolve_payment_record_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentRecord.STATUS_CHOICE)
 
-    def resolve_payment_record_entitlement_card_status_choices(self, info, **kwargs):
+    def resolve_payment_record_entitlement_card_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE)
 
-    def resolve_payment_record_delivery_type_choices(self, info, **kwargs):
+    def resolve_payment_record_delivery_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentRecord.DELIVERY_TYPE_CHOICE)
 
-    def resolve_cash_plan_verification_status_choices(self, info, **kwargs):
+    def resolve_cash_plan_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.STATUS_CHOICES)
 
-    def resolve_cash_plan_verification_sampling_choices(self, info, **kwargs):
+    def resolve_cash_plan_verification_sampling_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.SAMPLING_CHOICES)
 
-    def resolve_cash_plan_verification_verification_channel_choices(self, info, **kwargs):
+    def resolve_cash_plan_verification_verification_channel_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES)
 
-    def resolve_payment_verification_status_choices(self, info, **kwargs):
+    def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
     def resolve_all_delivery_mechanisms(self, info, **kwargs):
         return to_choice_object(GenericPayment.DELIVERY_TYPE_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_payment_verification(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
         additional_filters = chart_create_filter_query_for_payment_verification_gfk(
@@ -964,7 +969,7 @@ class Query(graphene.ObjectType):
 
         verifications_by_status = payment_verifications.values("status").annotate(count=Count("status"))
         verifications_by_status_dict = {x.get("status"): x.get("count") for x in verifications_by_status}
-        dataset = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
+        dataset: List[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
         try:
             all_verifications = sum(dataset)
             dataset_percentage = [data / all_verifications for data in dataset]
@@ -985,10 +990,11 @@ class Query(graphene.ObjectType):
             .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
             .count()
         )
-        if samples_count == 0 or all_payment_records_for_created_verifications == 0:
-            average_sample_size = 0
-        else:
-            average_sample_size = samples_count / all_payment_records_for_created_verifications
+        average_sample_size: float = (
+            0.0
+            if all_payment_records_for_created_verifications == 0
+            else samples_count / all_payment_records_for_created_verifications
+        )
         return {
             "labels": ["Payment Verification"],
             "datasets": dataset_percentage_done,
@@ -997,7 +1003,9 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_volume_by_delivery_mechanism(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
@@ -1022,7 +1030,7 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": [{"data": data}]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_payment(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
@@ -1043,14 +1051,18 @@ class Query(graphene.ObjectType):
         return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
+    def resolve_section_total_transferred(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict[str, Any]:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
         return {"total": payment_items_qs.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
+    def resolve_table_total_cash_transferred_by_administrative_area(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Optional[Dict[str, Any]]:
         if business_area_slug == "global":
             return None
         order = kwargs.pop("order", None)
@@ -1099,7 +1111,7 @@ class Query(graphene.ObjectType):
         return {"data": data}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_total_transferred_cash_by_country(self, info, year, **kwargs):
+    def resolve_chart_total_transferred_cash_by_country(self, info: Any, year: int, **kwargs: Any) -> Dict[str, Any]:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, "global", {}, True)
 
         countries_and_amounts: dict = (

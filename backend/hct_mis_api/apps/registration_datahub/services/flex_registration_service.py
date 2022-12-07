@@ -2,11 +2,12 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.db.models import Model
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
@@ -43,6 +44,13 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models.query import QuerySet
+
+    from hct_mis_api.apps.account.models import Role, User
+
 logger = logging.getLogger(__name__)
 
 
@@ -76,12 +84,9 @@ class FlexRegistrationService:
         IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def __init__(self):
-        pass
-
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name"):
+    def create_rdi(self, imported_by: "User", rdi_name: str = "rdi_name") -> RegistrationDataImport:
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
@@ -112,14 +117,14 @@ class FlexRegistrationService:
             business_area_slug=business_area.slug,
         )
         rdi.datahub_id = rdi_datahub.id
-        rdi.save()
+        rdi.save(update_fields=("datahub_id",))
         return rdi
 
     def process_records(
         self,
-        rdi_id,
-        records_ids,
-    ):
+        rdi_id: "UUID",
+        records_ids: List["UUID"],
+    ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
@@ -134,11 +139,10 @@ class FlexRegistrationService:
         try:
             for record_id in records_ids_to_import:
                 try:
-                    with atomic("default"):
-                        with atomic("registration_datahub"):
-                            record = Record.objects.defer("data").get(id=record_id)
-                            self.create_household_for_rdi_household(record, rdi_datahub)
-                            imported_records_ids.append(record_id)
+                    with atomic("default"), atomic("registration_datahub"):
+                        record = Record.objects.defer("data").get(id=record_id)
+                        self.create_household_for_rdi_household(record, rdi_datahub)
+                        imported_records_ids.append(record_id)
                 except ValidationError as e:
                     logger.exception(e)
                     record.mark_as_invalid(str(e))
@@ -175,7 +179,6 @@ class FlexRegistrationService:
                 rdi.status = RegistrationDataImport.IN_REVIEW
                 rdi.save()
         except Exception as e:
-            logger.exception(e)
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
             rdi.save(
@@ -188,7 +191,7 @@ class FlexRegistrationService:
 
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
-    ):
+    ) -> None:
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
         record_data_dict = record.get_data()
@@ -243,13 +246,13 @@ class FlexRegistrationService:
 
         ImportedDocument.objects.bulk_create(documents)
 
-    def _set_default_head_of_household(self, individuals_array):
+    def _set_default_head_of_household(self, individuals_array: "QuerySet") -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role, individual, household):
+    def _create_role(self, role: "Role", individual: ImportedIndividual, household: ImportedHousehold) -> None:
         if role == "y":
             defaults = dict(individual=individual, household=household)
             if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
@@ -261,14 +264,16 @@ class FlexRegistrationService:
             else:
                 raise ValidationError("There should be only two collectors!")
 
-    def _create_object_and_validate(self, data, model_class):
+    def _create_object_and_validate(self, data: Dict, model_class: Model) -> Type:
         ModelClassForm = modelform_factory(model_class, fields=data.keys())
         form = ModelClassForm(data)
         if not form.is_valid():
             raise ValidationError(form.errors)
         return form.save()
 
-    def _prepare_household_data(self, household_dict, record, registration_data_import) -> dict:
+    def _prepare_household_data(
+        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
+    ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
@@ -288,10 +293,10 @@ class FlexRegistrationService:
 
     def _prepare_individual_data(
         self,
-        individual_dict: dict,
+        individual_dict: Dict,
         household: ImportedHousehold,
         registration_data_import: RegistrationDataImportDatahub,
-    ) -> dict:
+    ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, FlexRegistrationService.INDIVIDUAL_MAPPING_DICT),
             household=household,
@@ -334,7 +339,7 @@ class FlexRegistrationService:
 
         return individual_data
 
-    def _prepare_documents(self, individual_dict: dict, individual: ImportedIndividual) -> List[ImportedDocument]:
+    def _prepare_documents(self, individual_dict: Dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
 
         for document_type_string, (
@@ -351,8 +356,9 @@ class FlexRegistrationService:
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
-            document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
+            document_type = ImportedDocumentType.objects.get(type=document_type_string)
             document_kwargs = {
+                "country": "UA",
                 "type": document_type,
                 "document_number": document_number,
                 "individual": individual,
@@ -366,18 +372,20 @@ class FlexRegistrationService:
 
         return documents
 
-    def _prepare_picture_from_base64(self, certificate_picture, document_number):
+    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> Union[ContentFile, Any]:
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.md5(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
-    def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
+    def _prepare_bank_account_info(
+        self, individual_dict: Dict, individual: ImportedIndividual
+    ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
-            return
+            return None
         if not individual_dict.get("bank_account_number"):
-            return
+            return None
         bank_name = individual_dict.get("bank_name_h_f", "")
         other_bank_name = individual_dict.get("other_bank_name", "")
         if not bank_name:
@@ -390,7 +398,7 @@ class FlexRegistrationService:
         }
         return bank_account_info_data
 
-    def validate_household(self, individuals_array):
+    def validate_household(self, individuals_array: List[ImportedIndividual]) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -398,5 +406,5 @@ class FlexRegistrationService:
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def _has_head(self, individuals_array):
+    def _has_head(self, individuals_array: List[ImportedIndividual]) -> bool:
         return any(individual_data.get("relationship_i_c") == "head" for individual_data in individuals_array)

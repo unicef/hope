@@ -1,32 +1,27 @@
 import logging
+from typing import TYPE_CHECKING, Any, List, Union
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField
-from django.contrib.postgres.validators import (
-    RangeMaxValueValidator,
-    RangeMinValueValidator,
-)
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, JSONField, Q
-from django.utils import timezone
+from django.db.models import JSONField, Q
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
-from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
-from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
-from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
     TargetingCriteriaQueryingBase,
@@ -39,29 +34,13 @@ from hct_mis_api.apps.utils.validators import (
     StartEndSpaceValidator,
 )
 
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.db.models.query import QuerySet
+
+
 logger = logging.getLogger(__name__)
-
-_MAX_LEN = 256
-_MIN_RANGE = 1
-_MAX_RANGE = 200
-
-
-def get_serialized_range(min_range=None, max_range=None):
-    return NumericRange(min_range or _MIN_RANGE, max_range or _MAX_RANGE)
-
-
-def get_integer_range(min_range=None, max_range=None):
-    """Numeric Range support for saving as InterRangeField."""
-    min_range = min_range or _MIN_RANGE
-    max_range = max_range or _MAX_RANGE
-    return IntegerRangeField(
-        default=get_serialized_range,
-        blank=True,
-        validators=[
-            RangeMinValueValidator(min_range),
-            RangeMaxValueValidator(max_range),
-        ],
-    )
 
 
 class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
@@ -175,9 +154,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
+    status = models.CharField(max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
     build_status = models.CharField(
-        max_length=_MAX_LEN, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
     households = models.ManyToManyField(
@@ -257,13 +236,15 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
-    @property
-    def excluded_household_ids(self):
-        excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
-        return excluded_household_ids_array
+    # todo move to StorageFile
+    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
-    def household_list(self):
+    def excluded_household_ids(self) -> List:
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+
+    @property
+    def household_list(self) -> "QuerySet":
         queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
             return queryset
@@ -273,7 +254,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
         return queryset.distinct()
 
-    def refresh_stats(self):
+    def refresh_stats(self) -> None:
         households = self.household_list.only("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
@@ -297,7 +278,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
-    def full_rebuild(self):
+    def full_rebuild(self) -> None:
         household_queryset = Household.objects.filter(business_area=self.business_area)
         household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
         self.households.set(household_queryset)
@@ -305,18 +286,18 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         try:
             return self.targeting_criteria.get_criteria_string()
         except Exception:
             return ""
 
     @property
-    def targeting_criteria_string(self):
+    def targeting_criteria_string(self) -> str:
         return Truncator(self.get_criteria_string()).chars(390, "...")
 
     @property
-    def allowed_steficon_rule(self):
+    def allowed_steficon_rule(self) -> Union[Rule, None]:
         if not self.program:
             return None
         tp = (
@@ -333,20 +314,20 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         return tp.steficon_rule.rule
 
-    def set_to_ready_for_cash_assist(self):
+    def set_to_ready_for_cash_assist(self) -> None:
         self.status = self.STATUS_READY_FOR_CASH_ASSIST
         self.sent_to_datahub = True
 
-    def is_finalized(self):
+    def is_finalized(self) -> bool:
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
-    def is_locked(self):
+    def is_locked(self) -> bool:
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
-    def is_open(self):
+    def is_open(self) -> bool:
         return self.status in (self.STATUS_OPEN,)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -381,13 +362,13 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     list).
     """
 
-    def get_rules(self):
+    def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self):
+    def get_excluded_household_ids(self) -> List["UUID"]:
         return self.target_population.excluded_household_ids
 
-    def get_query(self):
+    def get_query(self) -> Q:
         query = super().get_query()
         if (
             self.target_population
@@ -410,10 +391,10 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
         on_delete=models.CASCADE,
     )
 
-    def get_filters(self):
+    def get_filters(self) -> "QuerySet":
         return self.filters.all()
 
-    def get_individuals_filters_blocks(self):
+    def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
 
 
@@ -428,7 +409,7 @@ class TargetingIndividualRuleFilterBlock(
     )
     target_only_hoh = models.BooleanField(default=False)
 
-    def get_individual_block_filters(self):
+    def get_individual_block_filters(self) -> "QuerySet":
         return self.individual_block_filters.all()
 
 
@@ -440,7 +421,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         :Residential Status != Refugee
     """
 
-    def get_core_fields(self):
+    def get_core_fields(self) -> List:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
     comparison_method = models.CharField(
@@ -469,7 +450,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         :Residential Status != Refugee
     """
 
-    def get_core_fields(self):
+    def get_core_fields(self) -> List:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     comparison_method = models.CharField(
@@ -489,5 +470,5 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
             """
     )
 
-    def get_lookup_prefix(self, associated_with):
+    def get_lookup_prefix(self, associated_with: Any) -> str:
         return ""

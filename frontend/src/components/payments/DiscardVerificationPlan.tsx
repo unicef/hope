@@ -29,6 +29,7 @@ export function DiscardVerificationPlan({
   const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
   const discard = async (): Promise<void> => {
+<<<<<<< HEAD
     const { errors } = await mutate({
       variables: { paymentVerificationPlanId },
       refetchQueries,
@@ -36,8 +37,17 @@ export function DiscardVerificationPlan({
     if (errors) {
       showMessage(t('Error while submitting'));
       return;
+=======
+    try {
+      await mutate({
+        variables: { cashPlanVerificationId },
+        refetchQueries,
+      });
+      showMessage(t('Verification plan has been discarded.'));
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+>>>>>>> develop
     }
-    showMessage(t('Verification plan has been discarded.'));
   };
   return (
     <>
@@ -58,9 +68,7 @@ export function DiscardVerificationPlan({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Discard Verification Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Discard Verification Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

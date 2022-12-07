@@ -1,5 +1,7 @@
 import os
 import random
+from argparse import ArgumentParser
+from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -165,7 +167,7 @@ individual_header_mapping = {
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "amount",
             default=1,
@@ -182,7 +184,7 @@ class Command(BaseCommand):
             type=int,
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         amount = options["amount"]
         seed = options["seed"]
         print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")

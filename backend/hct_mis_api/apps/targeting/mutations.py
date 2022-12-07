@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -6,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     PermissionMutation,
@@ -68,14 +68,14 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
 class ValidatedMutation(PermissionMutation):
     arguments_validators = []
-    object_validators = []
-    permissions = None
+    object_validators: List = []
+    permissions: Optional[Any] = None
 
-    model_class = None
+    model_class: Optional[Type] = None
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, **kwargs):
+    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "ValidatedMutation":
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
@@ -86,7 +86,7 @@ class ValidatedMutation(PermissionMutation):
         return cls.validated_mutate(root, info, model_object=model_object, old_model_object=old_model_object, **kwargs)
 
     @classmethod
-    def get_object(cls, root, info, **kwargs):
+    def get_object(cls, root: Any, info: Any, **kwargs: Any) -> Any:
         id = kwargs.get("id")
         if id is None:
             return None
@@ -117,7 +117,7 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     exclusion_reason = graphene.String()
 
 
-def from_input_to_targeting_criteria(targeting_criteria_input, program: Program):
+def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
     targeting_criteria = TargetingCriteria()
     targeting_criteria.save()
     for rule_input in targeting_criteria_input.get("rules"):
@@ -148,7 +148,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def processed_mutate(cls, root, info, **kwargs):
+    def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "CreateTargetPopulationMutation":
         user = info.context.user
         input = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
@@ -156,7 +156,6 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
         if program.status != Program.ACTIVE:
-            logger.error("Only Active program can be assigned to Targeting")
             raise ValidationError("Only Active program can be assigned to Targeting")
 
         targeting_criteria_input = input.get("targeting_criteria")
@@ -165,11 +164,11 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
-            name=input.get("name"),
+            name=input.get("name", "").strip(),
             created_by=user,
             business_area=business_area,
-            excluded_ids=input.get("excluded_ids"),
-            exclusion_reason=input.get("exclusion_reason", ""),
+            excluded_ids=input.get("excluded_ids", "").strip(),
+            exclusion_reason=input.get("exclusion_reason", "").strip(),
         )
         target_population.targeting_criteria = targeting_criteria
         target_population.program = program
@@ -190,7 +189,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def processed_mutate(cls, root, info, **kwargs):
+    def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
@@ -261,7 +260,9 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         return cls(target_population=target_population)
 
     @classmethod
-    def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population):
+    def rebuild_tp(
+        cls, should_rebuild_list: List, should_rebuild_stats: bool, target_population: TargetPopulation
+    ) -> None:
         rebuild_list = target_population.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
         if rebuild_list or rebuild_stats:
@@ -274,32 +275,31 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     def validate_statuses(
-        cls, name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
-    ):
+        cls,
+        name: str,
+        target_population: TargetPopulation,
+        targeting_criteria_input: Dict,
+        vulnerability_score_max: int,
+        vulnerability_score_min: int,
+    ) -> None:
         if not target_population.is_locked() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
-            logger.error(
-                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
-            )
             raise ValidationError(
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
             )
         if target_population.is_locked() and name:
-            logger.error("Name can't be changed when Target Population is in Locked status")
             raise ValidationError("Name can't be changed when Target Population is in Locked status")
         if target_population.is_finalized():
-            logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
         if targeting_criteria_input and not target_population.is_open():
             raise ValidationError("Locked Target Population can't be changed")
 
     @classmethod
-    def get_object(cls, id):
+    def get_object(cls, id: str) -> Optional[TargetPopulation]:
         if id is None:
             return None
-        object = get_object_or_404(TargetPopulation, id=decode_id_string(id))
-        return object
+        return get_object_or_404(TargetPopulation, id=decode_id_string(id))
 
 
 class LockTargetPopulationMutation(ValidatedMutation):
@@ -314,11 +314,10 @@ class LockTargetPopulationMutation(ValidatedMutation):
 
     @classmethod
     @transaction.atomic
-    def validated_mutate(cls, root, info, **kwargs):
+    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "LockTargetPopulationMutation":
         user = info.context.user
         target_population = kwargs.get("model_object")
         if target_population.status != TargetPopulation.STATUS_OPEN:
-            logger.error("You can only lock open target population")
             raise ValidationError("You can only lock open target population")
         old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_LOCKED
@@ -348,7 +347,7 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def validated_mutate(cls, root, info, **kwargs):
+    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UnlockTargetPopulationMutation":
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_OPEN
@@ -380,7 +379,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def validated_mutate(cls, root, info, **kwargs):
+    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "FinalizeTargetPopulationMutation":
         user = info.context.user
         old_target_population = kwargs.get("old_model_object")
         target_population: TargetPopulation = kwargs.get("model_object")
@@ -396,7 +395,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population.finalized_by = user
                 target_population.finalized_at = timezone.now()
                 target_population.save()
-            send_target_population_task.delay(target_population.id)
+                transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
+                transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -418,7 +418,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate_and_get_payload(cls, _root, info, **kwargs):
+    def mutate_and_get_payload(cls, _root: Any, info: Any, **kwargs: Any) -> "CopyTargetPopulationMutation":
         try:
             user = info.context.user
             target_population_data = kwargs["target_population_data"]
@@ -461,7 +461,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             return cls(validation_errors=e.message_dict)
 
     @classmethod
-    def copy_target_criteria(cls, targeting_criteria):
+    def copy_target_criteria(cls, targeting_criteria: TargetingCriteria) -> TargetingCriteria:
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
@@ -492,7 +492,7 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     @is_authenticated
-    def mutate_and_get_payload(cls, _root, _info, **kwargs):
+    def mutate_and_get_payload(cls, _root: Any, _info: Any, **kwargs: Any) -> "DeleteTargetPopulationMutation":
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
         old_target_population = TargetPopulation.objects.get(id=target_id)
@@ -527,7 +527,9 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
 
     @classmethod
     @is_authenticated
-    def mutate_and_get_payload(cls, _root, _info, **kwargs):
+    def mutate_and_get_payload(
+        cls, _root: Any, _info: Any, **kwargs: Any
+    ) -> "SetSteficonRuleOnTargetPopulationMutation":
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
@@ -540,8 +542,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
-                logger.error("This steficon rule is not enabled or is deprecated.")
-                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+                raise ValidationError("This steficon rule is not enabled or is deprecated.")
             target_population.steficon_rule = steficon_rule_commit
             target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()
@@ -575,7 +576,7 @@ class RebuildTargetPopulationMutation(ValidatedMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    def validated_mutate(cls, root, info, **kwargs):
+    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "RebuildTargetPopulationMutation":
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
         target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING

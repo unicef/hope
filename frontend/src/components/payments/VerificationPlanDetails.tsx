@@ -236,7 +236,8 @@ export const VerificationPlanDetails = ({
                     />
                   )}
                 {canDiscard &&
-                  (verificationPlan.xlsxFileWasDownloaded &&
+                  ((verificationPlan.xlsxFileWasDownloaded ||
+                    verificationPlan.xlsxFileImported) &&
                   verificationPlan.status ===
                     PaymentVerificationPlanStatus.Active ? (
                     <Box p={2}>

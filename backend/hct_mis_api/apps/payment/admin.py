@@ -1,14 +1,18 @@
 from django import forms
+from typing import Any, Optional
+from uuid import UUID
+
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
-from django.db.models import Q, QuerySet
-from django.http import HttpResponseRedirect
+from django.db.models import Q
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
@@ -68,15 +72,15 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "service_provider",
     )
 
-    def cash_plan_name(self, obj):
+    def cash_plan_name(self, obj: Any) -> str:
         return obj.parent.name
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
 
 
 @admin.register(PaymentVerificationPlan)
-class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     # TODO: fix filtering
     list_display = ("payment_plan_obj", "status", "verification_channel")
     list_filter = (
@@ -90,13 +94,13 @@ class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEMo
     raw_id_fields = ("payment_plan",)
 
     @button()
-    def verifications(self, request, pk):
+    def verifications(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         list_url = reverse("admin:payment_paymentverification_changelist")
         url = f"{list_url}?payment_verification_plan__exact={pk}"
         return HttpResponseRedirect(url)
 
     @button()
-    def execute_sync_rapid_pro(self, request):
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:  # type: ignore
         if request.method == "POST":
             from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
                 CheckRapidProVerificationTask,
@@ -119,7 +123,7 @@ class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEMo
                 template="admin_extra_buttons/confirm.html",
             )
 
-    def activate(self, request, pk):
+    def activate(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         return confirm_action(
             self,
             request,
@@ -145,15 +149,15 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_verification_plan",)
 
-    def payment_plan_name(self, obj):
+    def payment_plan_name(self, obj: Any) -> str:
         payment_plan = obj.payment_verification_plan.payment_plan_obj
         return getattr(payment_plan, "name", "~no name~")
 
-    def household(self, obj):
+    def household(self, obj: Any) -> str:
         payment = obj.payment_obj
         return payment.household.unicef_id if payment else ""
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -171,10 +175,11 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+    autocomplete_fields = ("business_area",)
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class CashPlanAdmin(HOPEModelAdminBase):
     list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
     list_filter = (
         ("status", ChoicesFieldComboFilter),

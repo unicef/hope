@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Any
 from unittest import mock
 
 from django.core.management import call_command
@@ -102,7 +103,7 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 
 class TestExchangeRatesAPI(TestCase):
     @mock.patch.dict(os.environ, clear=True)
-    def test_test_api_class_initialization_key_not_in_env(self):
+    def test_test_api_class_initialization_key_not_in_env(self) -> None:
         self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateClientAPI)
 
     @parameterized.expand(
@@ -112,7 +113,7 @@ class TestExchangeRatesAPI(TestCase):
             ("api_url_provided_as_arg", None, "https://uni-apis.org"),
         ]
     )
-    def test_api_class_initialization(self, _, api_key, api_url):
+    def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
         with mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True):
             api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
@@ -132,7 +133,7 @@ class TestExchangeRatesAPI(TestCase):
             ("without_history", False),
         ]
     )
-    def test_fetch_exchange_rates(self, test_name, with_history):
+    def test_fetch_exchange_rates(self, test_name: str, with_history: bool) -> None:
         with requests_mock.Mocker() as adapter:
             if with_history is True:
                 adapter.register_uri(
@@ -158,7 +159,7 @@ class TestExchangeRatesAPI(TestCase):
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestExchangeRates(TestCase):
-    def test_convert_response_json_to_exchange_rates(self):
+    def test_convert_response_json_to_exchange_rates(self) -> None:
         converted_response = ExchangeRates._convert_response_json_to_exchange_rates(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
         xeu = converted_response.get("XEU")
         cup1 = converted_response.get("CUP1")
@@ -214,7 +215,9 @@ class TestExchangeRates(TestCase):
             ("cup1_future_date", "CUP1", timezone.now() + timedelta(weeks=200), 24),
         ]
     )
-    def test_get_exchange_rate_for_currency_code(self, _, currency_code, dispersion_date, expected_result):
+    def test_get_exchange_rate_for_currency_code(
+        self, _: Any, currency_code: str, dispersion_date: datetime, expected_result: Any
+    ) -> None:
         with requests_mock.Mocker() as adapter:
             adapter.register_uri(
                 "GET",
@@ -229,7 +232,7 @@ class TestExchangeRates(TestCase):
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestFixExchangeRatesCommand(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -265,7 +268,7 @@ class TestFixExchangeRatesCommand(TestCase):
             )
 
     @requests_mock.Mocker()
-    def test_modify_delivered_quantity_in_usd(self, mocker):
+    def test_modify_delivered_quantity_in_usd(self, mocker: Any) -> None:
         mocker.register_uri(
             "GET",
             "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",

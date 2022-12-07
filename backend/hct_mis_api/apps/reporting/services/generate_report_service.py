@@ -2,16 +2,18 @@ import copy
 import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING, List
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Count, DecimalField, Max, Min, Q, Sum
+from django.db.models import Count, DecimalField, Max, Min, Q, QuerySet, Sum
 from django.template.loader import render_to_string
 
 import openpyxl
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo.models import Area
@@ -32,12 +34,16 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
+
 logger = logging.getLogger(__name__)
 
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def get_individuals(report: Report):
+    def get_individuals(report: Report) -> QuerySet[Individual]:
         filter_vars = {
             "household__business_area": report.business_area,
             "withdrawn": False,
@@ -86,7 +92,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_households(report: Report):
+    def get_households(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
             "withdrawn": False,
@@ -140,7 +146,7 @@ class GenerateReportContentHelpers:
         return tuple(row)
 
     @staticmethod
-    def get_cash_plan_verifications(report: Report):
+    def get_cash_plan_verifications(report: Report) -> QuerySet:
         pp_business_area_ids = list(
             CashPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
         )
@@ -167,15 +173,15 @@ class GenerateReportContentHelpers:
         return ", ".join(result)
 
     @classmethod
-    def format_cash_plan_verification_row(self, verification: PaymentVerificationPlan) -> tuple:
+    def format_cash_plan_verification_row(cls, verification: PaymentVerificationPlan) -> tuple:
         return (
             verification.id,
             verification.payment_plan_obj.get_unicef_id,
             verification.payment_plan_obj.program.name,
-            self._format_date(verification.activation_date),
+            cls._format_date(verification.activation_date),
             verification.status,
             verification.verification_channel,
-            self._format_date(verification.completion_date),
+            cls._format_date(verification.completion_date),
             verification.sample_size,
             verification.responded_count,
             verification.received_count,
@@ -183,12 +189,12 @@ class GenerateReportContentHelpers:
             verification.not_received_count,
             verification.sampling,
             verification.sex_filter,
-            self._map_admin_area_names_from_ids(verification.excluded_admin_areas_filter),
+            cls._map_admin_area_names_from_ids(verification.excluded_admin_areas_filter),
             verification.age_filter,
         )
 
     @staticmethod
-    def get_payments(report: Report):
+    def get_payments(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
             "delivery_date__date__range": (report.date_from, report.date_to),
@@ -198,7 +204,7 @@ class GenerateReportContentHelpers:
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
-    def format_payment_row(self, payment: PaymentRecord) -> tuple:
+    def format_payment_row(cls, payment: PaymentRecord) -> tuple:
         cash_or_voucher = ""
         if payment.delivery_type:
             if payment.delivery_type in [
@@ -219,7 +225,7 @@ class GenerateReportContentHelpers:
             payment.currency,
             payment.delivered_quantity,
             payment.delivered_quantity_usd or payment.delivered_quantity,
-            self._format_date(payment.delivery_date),
+            cls._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
             payment.entitlement_quantity,
@@ -230,7 +236,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_payment_verifications(report: Report):
+    def get_payment_verifications(report: Report) -> QuerySet:
         pp_business_area_ids = list(
             PaymentPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
         )
@@ -245,12 +251,12 @@ class GenerateReportContentHelpers:
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
-    def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
+    def format_payment_verification_row(cls, payment_verification: PaymentVerification) -> tuple:
         return (
             payment_verification.payment_verification_plan.id,
             payment_verification.payment_obj.unicef_id,
             payment_verification.payment_verification_plan.get_payment_plan.get_unicef_id,
-            self._format_date(payment_verification.payment_verification_plan.completion_date),
+            cls._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
@@ -266,7 +272,7 @@ class GenerateReportContentHelpers:
         return PaymentPlan.objects.filter(**filter_vars)
 
     @classmethod
-    def format_payment_plan_row(self, payment_plan: PaymentPlan) -> tuple:
+    def format_payment_plan_row(cls, payment_plan: PaymentPlan) -> tuple:
         return (
             payment_plan.get_unicef_id,
             payment_plan.get_status_display(),
@@ -275,12 +281,12 @@ class GenerateReportContentHelpers:
             payment_plan.total_entitled_quantity,
             payment_plan.total_delivered_quantity,
             payment_plan.total_undelivered_quantity,
-            self._format_date(payment_plan.dispersion_start_date),
-            self._format_date(payment_plan.dispersion_end_date),
+            cls._format_date(payment_plan.dispersion_start_date),
+            cls._format_date(payment_plan.dispersion_end_date),
         )
 
     @staticmethod
-    def get_cash_plans(report: Report):
+    def get_cash_plans(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
             "end_date__gte": report.date_from,
@@ -291,18 +297,18 @@ class GenerateReportContentHelpers:
         return CashPlan.objects.filter(**filter_vars)
 
     @classmethod
-    def format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
+    def format_cash_plan_row(cls, cash_plan: CashPlan) -> tuple:
         return (
             cash_plan.ca_id,
             cash_plan.name,
-            self._format_date(cash_plan.start_date),
-            self._format_date(cash_plan.end_date),
+            cls._format_date(cash_plan.start_date),
+            cls._format_date(cash_plan.end_date),
             cash_plan.program.name,
             cash_plan.funds_commitment,
             cash_plan.assistance_measurement,
             cash_plan.assistance_through,
             cash_plan.delivery_type,
-            self._format_date(cash_plan.dispersion_date),
+            cls._format_date(cash_plan.dispersion_date),
             cash_plan.down_payment,
             cash_plan.total_delivered_quantity,
             cash_plan.total_undelivered_quantity,
@@ -311,14 +317,14 @@ class GenerateReportContentHelpers:
             cash_plan.total_persons_covered,
             cash_plan.total_persons_covered_revised,
             cash_plan.status,
-            self._format_date(cash_plan.status_date),
+            cls._format_date(cash_plan.status_date),
             cash_plan.vision_id,
             cash_plan.validation_alerts_count,
             # cash_plan.verification_status,
         )
 
     @staticmethod
-    def get_programs(report: Report):
+    def get_programs(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
             "end_date__gte": report.date_from,
@@ -327,7 +333,7 @@ class GenerateReportContentHelpers:
         return Program.objects.filter(**filter_vars)
 
     @classmethod
-    def format_program_row(self, program: Program) -> tuple:
+    def format_program_row(cls, program: Program) -> tuple:
         return (
             program.id,
             program.name,
@@ -346,7 +352,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_payments_for_individuals(report: Report):
+    def get_payments_for_individuals(report: Report) -> QuerySet:
         if isinstance(report.date_to, str):
             report.date_to = datetime.strptime(report.date_to, "%Y-%m-%d").date()
 
@@ -387,13 +393,13 @@ class GenerateReportContentHelpers:
         )
 
     @classmethod
-    def format_payments_for_individuals_row(self, individual: Individual) -> tuple:
+    def format_payments_for_individuals_row(cls, individual: Individual) -> tuple:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
             individual.household.admin_area.name if individual.household.admin_area else "",
-            self._format_date(individual.first_delivery_date),
-            self._format_date(individual.last_delivery_date),
+            cls._format_date(individual.first_delivery_date),
+            cls._format_date(individual.last_delivery_date),
             individual.payments_made,
             ", ".join(individual.payment_currency),
             individual.total_delivered_quantity_local,
@@ -412,7 +418,7 @@ class GenerateReportContentHelpers:
             individual.selfcare_disability,
             individual.pregnant,
             individual.relationship,
-            self._to_values_list(individual.households_and_roles.all(), "role"),
+            cls._to_values_list(individual.households_and_roles.all(), "role"),
             dict(WORK_STATUS_CHOICE).get(individual.work_status, ""),
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
@@ -426,7 +432,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_grievance_tickets(report: Report):
+    def get_grievance_tickets(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
             "created_at__gte": report.date_from,
@@ -437,12 +443,12 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
-        def get_full_name(user):
+        def get_full_name(user: "User") -> str:
             if not user:
                 return ""
             return " ".join(filter(None, [user.first_name, user.last_name]))
 
-        def get_username(user):
+        def get_username(user: "User") -> str:
             if not user:
                 return ""
             return user.username
@@ -463,12 +469,12 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _to_values_list(instances, field_name: str) -> str:
+    def _to_values_list(instances: List, field_name: str) -> str:
         values_list = list(instances.values_list(field_name, flat=True))
         return ", ".join([str(value) for value in values_list])
 
     @staticmethod
-    def _format_date(date) -> str:
+    def _format_date(date: datetime) -> str:
         if not date:
             return ""
         return date.strftime("%Y-%m-%d")
@@ -733,7 +739,7 @@ class GenerateReportService:
     FILTERS_SHEET = "Meta"
     MAX_COL_WIDTH = 75
 
-    def __init__(self, report: Report):
+    def __init__(self, report: Report) -> None:
         self.report = report
         self.report_type = report.report_type
         self.business_area = report.business_area
@@ -747,7 +753,7 @@ class GenerateReportService:
         self.ws_filters = wb.create_sheet(GenerateReportService.FILTERS_SHEET)
         return wb
 
-    def _add_filters_info(self):
+    def _add_filters_info(self) -> None:
         filter_rows = [
             ("Report type", str(self._report_type_to_str())),
             ("Business area", self.business_area.name),
@@ -768,7 +774,7 @@ class GenerateReportService:
         for filter_row in filter_rows:
             self.ws_filters.append(filter_row)
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         headers_row = GenerateReportService.HEADERS[self.report_type]
         self.ws_report.append(headers_row)
 
@@ -803,7 +809,7 @@ class GenerateReportService:
         self._adjust_column_width_from_col(self.ws_report, 1, number_of_columns, 0)
         return self.wb
 
-    def generate_report(self):
+    def generate_report(self) -> None:
         try:
             self.generate_workbook()
             with NamedTemporaryFile() as tmp:
@@ -823,7 +829,7 @@ class GenerateReportService:
         if self.report.file:
             self._send_email()
 
-    def _send_email(self):
+    def _send_email(self) -> None:
         context = {
             "report_type": self._report_type_to_str(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
@@ -840,12 +846,12 @@ class GenerateReportService:
         msg.attach_alternative(html_body, "text/html")
         msg.send()
 
-    def _add_missing_headers(self, ws, column_to_start, column_to_finish, label):
+    def _add_missing_headers(self, ws: Worksheet, column_to_start: int, column_to_finish: int, label: str) -> None:
         for x in range(column_to_start, column_to_finish + 1):
             col_letter = get_column_letter(x)
             ws[f"{col_letter}1"] = label
 
-    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
+    def _adjust_column_width_from_col(self, ws: Worksheet, min_col: int, max_col: int, min_row: int) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -25,7 +25,7 @@ class UpdateByXlsxStage1Form(forms.Form):
 
         return registration_data_import
 
-    def _check_rdi_has_correct_business_area(self, registration_data_import) -> None:
+    def _check_rdi_has_correct_business_area(self, registration_data_import: RegistrationDataImport) -> None:
         business_area = self.cleaned_data.get("business_area")
         if registration_data_import.business_area != business_area:
             raise ValidationError("Rdi should belong to selected business area")
@@ -41,7 +41,7 @@ class UpdateByXlsxStage1Form(forms.Form):
 class UpdateByXlsxStage2Form(forms.Form):
     xlsx_update_file = forms.ModelChoiceField(queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput())
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.xlsx_columns = kwargs.pop("xlsx_columns", [])
         super().__init__(*args, **kwargs)
         self.fields["xlsx_match_columns"] = forms.MultipleChoiceField(
@@ -49,7 +49,7 @@ class UpdateByXlsxStage2Form(forms.Form):
             choices=[(xlsx_column, xlsx_column) for xlsx_column in self.xlsx_columns],
         )
 
-    def clean_xlsx_match_columns(self):
+    def clean_xlsx_match_columns(self) -> Dict:
         data = self.cleaned_data["xlsx_match_columns"]
         required_columns = {"individual__unicef_id", "household__unicef_id"}
         all_columns = set(self.xlsx_columns)
@@ -76,6 +76,7 @@ class WithdrawForm(forms.Form):
 class RestoreForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
+    reopen_tickets = forms.BooleanField(required=False, help_text="Restore all previously closed tickets")
 
 
 class MassWithdrawForm(WithdrawForm):

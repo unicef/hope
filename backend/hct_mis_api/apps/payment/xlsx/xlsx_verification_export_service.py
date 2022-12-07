@@ -1,5 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING, Optional
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
@@ -15,6 +16,10 @@ from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +53,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
-    def __init__(self, payment_verification_plan: PaymentVerificationPlan):
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
 
@@ -61,13 +66,13 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self.ws_meta = wb.create_sheet(XlsxVerificationExportService.META_SHEET)
         return wb
 
-    def _add_version(self):
+    def _add_version(self) -> None:
         self.ws_meta[
             XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
         ] = XlsxVerificationExportService.VERSION_CELL_NAME
         self.ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES] = XlsxVerificationExportService.VERSION
 
-    def _to_received_column(self, payment_record_verification):
+    def _to_received_column(self, payment_record_verification: PaymentVerification) -> Optional[str]:
         status = payment_record_verification.status
         if payment_record_verification.status == PaymentVerification.STATUS_PENDING:
             return None
@@ -75,7 +80,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
-    def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification):
+    def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification) -> None:
         household = payment_record_verification.payment_obj.household
         head_of_household = payment_record_verification.payment_obj.head_of_household
 
@@ -95,17 +100,17 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         )
         self.ws_export_list.append(payment_record_verification_row)
 
-    def _add_payment_record_verifications(self):
+    def _add_payment_record_verifications(self) -> None:
         for payment_record_verification in self.payment_record_verifications:
             self._add_payment_record_verification_row(payment_record_verification)
 
-    def _add_data_validation(self):
+    def _add_data_validation(self) -> None:
         self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
         self.dv_received.add(f"B2:B{len(self.ws_export_list['B'])}")
         self.ws_export_list.add_data_validation(self.dv_received)
         self.ws_export_list["B2":f"B{len(self.ws_export_list['B'])}"]
 
-    def generate_workbook(self):
+    def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
         self._add_version()
         self._add_headers()
@@ -114,7 +119,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self._adjust_column_width_from_col(self.ws_export_list, 0, 1, 8)  # min_row, min_col, max_col
         return self.wb
 
-    def save_xlsx_file(self, user):
+    def save_xlsx_file(self, user: "User") -> None:
         filename = f"payment_verification_{self.payment_verification_plan.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
@@ -127,7 +132,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
-    def get_email_context(self, user) -> dict:
+    def get_email_context(self, user: "User") -> dict:
         payment_verification_id = encode_id_base64(self.payment_verification_plan.pk, "PaymentVerificationPlan")
         link = self.get_link(reverse("download-payment-verification-plan", args=[payment_verification_id]))
 
@@ -143,7 +148,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         return context
 
-    def send_email(self, user):
+    def send_email(self, user: "User") -> None:
         protocol = "http" if settings.IS_DEV else "https"
         payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
         api = reverse("download-payment-verification-plan", args=[payment_verification_id])

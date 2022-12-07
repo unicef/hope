@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.core.exceptions import ValidationError
 
@@ -13,7 +14,7 @@ class ValidationErrorMutationMixin(graphene.ObjectType):
     validation_errors = graphene.Field(Arg)
 
     @classmethod
-    def mutate(cls, root, info, **kwargs):
+    def mutate(cls, root: Any, info: Any, **kwargs: Any) -> "ValidationErrorMutationMixin":
         try:
             return cls.processed_mutate(root, info, **kwargs)
         except ValidationError as e:

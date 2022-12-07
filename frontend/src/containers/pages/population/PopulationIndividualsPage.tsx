@@ -25,8 +25,9 @@ export function PopulationIndividualsPage(): React.ReactElement {
   } = useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState({
+    text: '',
     sex: [],
-    age: { min: undefined, max: undefined },
+    age: { min: '', max: '' },
     flags: [],
   });
   const debouncedFilter = useDebounce(filter, 500);

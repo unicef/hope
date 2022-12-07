@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict
 
 from django.core.management import BaseCommand
 
@@ -11,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
-        initialise_countries()
+    def handle(self, *args: Any, **options: Any) -> None:
+        initialize_countries()
 
 
-def initialise_countries():
+def initialize_countries() -> Dict:
     results = {"errors": []}
     try:
         default_data = {

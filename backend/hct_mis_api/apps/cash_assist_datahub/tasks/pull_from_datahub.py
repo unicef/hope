@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from django.db import transaction
 from django.db.models import Count
@@ -22,6 +23,10 @@ from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.utils.models import AbstractSession
+
 
 logger = logging.getLogger(__name__)
 
@@ -85,19 +90,19 @@ class PullFromDatahubTask:
         "vision_id": "vision_id",
     }
 
-    def __init__(self, exchange_rates_client: ExchangeRates = None):
+    def __init__(self, exchange_rates_client: Optional[ExchangeRates] = None) -> None:
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
-    def execute(self):
+    def execute(self) -> Dict:
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
-        ret = {
-            "grouped_session": 0,
+        ret: Dict[str, List] = {
             "skipped_due_failure": [],
             "successes": [],
             "failures": [],
         }
+        grouped_session_count = 0
         for group in grouped_session:
-            ret["grouped_session"] += 1
+            grouped_session_count += 1
             business_area = group.get("business_area")
             session_queryset = Session.objects.filter(business_area=business_area)
             # if any session in this business area fails omit other sessions in this business area
@@ -112,23 +117,22 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
                     ret["failures"].append(session.id)
-        return ret
+        return ret | {"grouped_session": grouped_session_count}
 
-    def copy_session(self, session):
+    def copy_session(self, session: "AbstractSession") -> None:
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
             session.save(update_fields=("status",))
             try:
-                with transaction.atomic(using="default"):
-                    with transaction.atomic(using="cash_assist_datahub_ca"):
-                        self.copy_service_providers(session)
-                        self.copy_programs(session)
-                        self.copy_target_population(session)
-                        self.copy_cash_plans(session)
-                        self.copy_payment_records(session)
-                        session.status = session.STATUS_COMPLETED
-                        session.save(update_fields=("status",))
+                with transaction.atomic(using="default"), transaction.atomic(using="cash_assist_datahub_ca"):
+                    self.copy_service_providers(session)
+                    self.copy_programs(session)
+                    self.copy_target_population(session)
+                    self.copy_cash_plans(session)
+                    self.copy_payment_records(session)
+                    session.status = session.STATUS_COMPLETED
+                    session.save(update_fields=("status",))
             except Exception as e:
                 session.process_exception(e)
                 session.save(
@@ -140,12 +144,12 @@ class PullFromDatahubTask:
                 )
                 raise
 
-    def get_business_area_for_cash_assist_code(self, cash_assist_code):
+    def get_business_area_for_cash_assist_code(self, cash_assist_code: str) -> BusinessArea:
         return BusinessArea.objects.get(
             code=BusinessArea.cash_assist_to_code_mapping.get(cash_assist_code, cash_assist_code)
         )
 
-    def copy_cash_plans(self, session):
+    def copy_cash_plans(self, session: "AbstractSession") -> None:
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
@@ -178,7 +182,7 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
 
-    def set_cash_plan_service_provider(self, cash_plan_args):
+    def set_cash_plan_service_provider(self, cash_plan_args: Dict) -> None:
         assistance_through = cash_plan_args.get("assistance_through")
         if not assistance_through:
             return
@@ -187,7 +191,7 @@ class PullFromDatahubTask:
             return
         cash_plan_args["service_provider"] = service_provider
 
-    def copy_payment_records(self, session):
+    def copy_payment_records(self, session: "AbstractSession") -> None:
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
         household_ids = []
         for dh_payment_record in dh_payment_records:
@@ -227,7 +231,7 @@ class PullFromDatahubTask:
                 payment_record.household.programs.add(payment_record.parent.program)
         handle_total_cash_in_specific_households(household_ids)
 
-    def copy_service_providers(self, session):
+    def copy_service_providers(self, session: "AbstractSession") -> None:
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)
         for dh_service_provider in dh_service_providers:
             service_provider_args = build_arg_dict(
@@ -240,7 +244,7 @@ class PullFromDatahubTask:
             service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
             ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
-    def copy_programs(self, session):
+    def copy_programs(self, session: "AbstractSession") -> None:
         dh_programs = ca_models.Programme.objects.filter(session=session)
         programs = []
         for dh_program in dh_programs:
@@ -250,7 +254,7 @@ class PullFromDatahubTask:
             programs.append(program)
         Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
 
-    def copy_target_population(self, session):
+    def copy_target_population(self, session: "AbstractSession") -> None:
         dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)
         target_populations = []
         for dh_target_population in dh_target_populations:
