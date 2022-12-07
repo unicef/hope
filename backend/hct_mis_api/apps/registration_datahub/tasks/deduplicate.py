@@ -528,7 +528,7 @@ class DeduplicateTask:
         ]
 
         if isinstance(individual, ImportedIndividual):
-            document = get_individual_doc(individual.registration_data_import.business_area)
+            document = get_imported_individual_doc(individual.registration_data_import.business_area)
         else:
             document = get_individual_doc(individual.registration_data_import.business_area.slug)
 
