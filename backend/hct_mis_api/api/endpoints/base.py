@@ -1,11 +1,16 @@
+from typing import Any
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.http import Http404
+from django.http import Http404, HttpRequest
+from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
+
+from hct_mis_api.apps.core.models import BusinessArea
 
 from ..auth import HOPEAuthentication, HOPEPermission
 from ..models import APILogEntry, Grant
@@ -18,7 +23,7 @@ class RejectPolicy(models.TextChoices):
 
 class SelectedBusinessAreaMixin:
     @cached_property
-    def selected_business_area(self):
+    def selected_business_area(self) -> BusinessArea:
         try:
             return self.request.auth.valid_for.all().get(slug=self.kwargs.get("business_area", None))
         except ObjectDoesNotExist:
@@ -31,7 +36,7 @@ class HOPEAPIView(APIView):
     permission = Grant.API_READ_ONLY
     log_http_methods = ["POST", "PUT", "DELETE"]
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         ret = super().dispatch(request, *args, **kwargs)
         if request.method.upper() in self.log_http_methods and (ret.status_code < 300 or ret.status_code > 400):
             if request.auth:
@@ -45,7 +50,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc):
+    def handle_exception(self, exc: BaseException) -> Any:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))

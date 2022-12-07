@@ -18,7 +18,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestHopeRedirect(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         business_area = BusinessAreaFactory(
             code="0060",
@@ -86,13 +86,13 @@ class TestHopeRedirect(APITestCase):
 
         cls.create_user_role_with_permissions(cls.user, [], business_area)
 
-    def test_redirect_to_household_list(self):
+    def test_redirect_to_household_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_registrationgroup")
 
         expected_url = "/afghanistan/population/household"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_household_details(self):
+    def test_redirect_to_household_details(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(
             self.user,
             "progres_registrationgroup",
@@ -105,13 +105,13 @@ class TestHopeRedirect(APITestCase):
         )
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_individual_list(self):
+    def test_redirect_to_individual_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_individual")
 
         expected_url = "/afghanistan/population/individuals"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_individual_details(self):
+    def test_redirect_to_individual_details(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(
             self.user,
             "progres_individual",
@@ -124,13 +124,13 @@ class TestHopeRedirect(APITestCase):
         )
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_program_list(self):
+    def test_redirect_to_program_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_program")
 
         expected_url = "/afghanistan/programs"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_program_details(self):
+    def test_redirect_to_program_details(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(
             self.user,
             "progres_program",
@@ -141,13 +141,13 @@ class TestHopeRedirect(APITestCase):
         expected_url = "/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTY1MzdmMWUtMjdiNS00MTc5LWE0NDMtZDQyNDk4ZmIwNDc4"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_cash_plan_list(self):
+    def test_redirect_to_cash_plan_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_cashplan")
 
         expected_url = "/afghanistan/payment-verification"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_cash_plan_details(self):
+    def test_redirect_to_cash_plan_details(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(
             self.user,
             "progres_cashplan",
@@ -159,13 +159,13 @@ class TestHopeRedirect(APITestCase):
         expected_url = "/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOjAyNzJkZDJkLWM0MWUtNDM1ZC05NTg3LTZiYTI4MDY3OGM1NA=="
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_payment_list(self):
+    def test_redirect_to_payment_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_payment")
 
         expected_url = "/afghanistan/payment-verification"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_payment_details(self):
+    def test_redirect_to_payment_details(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(
             self.user,
             "progres_payment",
@@ -177,13 +177,13 @@ class TestHopeRedirect(APITestCase):
         expected_url = "/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6YTc2YmZlNmYtYzc2Ny00YjdmLTk2NzEtNmRmMTBiODA5NWNj"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_target_population_list(self):
+    def test_redirect_to_target_population_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_targetpopulation")
 
         expected_url = "/afghanistan/target-population"
         self.assertEqual(expected_url, hope_redirect.url())
 
-    def test_redirect_to_target_population_details(self):
+    def test_redirect_to_target_population_details(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(
             self.user,
             "progres_targetpopulation",

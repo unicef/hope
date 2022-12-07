@@ -26,13 +26,12 @@ export const fakeIndividual = {
           id:
             'RG9jdW1lbnROb2RlOjBlYjYwZmY5LWRhMDYtNGYwMC1iMzQwLTFhOTU5Y2NjMjQyMw==',
           country: 'Poland',
+          countryIso3: 'POL',
           documentNumber: 'WSH221365',
           photo: null,
           type: {
-            country: 'Poland',
             label: 'National ID',
             type: 'NATIONAL_ID',
-            countryIso3: 'POL',
             __typename: 'DocumentTypeNode',
           },
           __typename: 'DocumentNode',

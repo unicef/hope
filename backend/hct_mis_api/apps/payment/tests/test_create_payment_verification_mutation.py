@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -22,7 +24,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -38,7 +40,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_cash_plan_payment_verification(self, _, permissions):
+    def test_create_cash_plan_payment_verification(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         (household, _) = create_household(household_args={"size": 1})
         PaymentRecordFactory.create(
@@ -71,7 +73,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             },
         )
 
-    def test_create_cash_plan_payment_verification_when_invalid_arguments(self):
+    def test_create_cash_plan_payment_verification_when_invalid_arguments(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
 
         defaults = {
@@ -130,7 +132,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             },
         )
 
-    def test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record(self):
+    def test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
 
         self.snapshot_graphql_request(

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+<<<<<<< HEAD
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
@@ -15,6 +16,16 @@ import {
   TargetPopulationQuery,
   TargetPopulationStatus,
   useBusinessAreaDataQuery,
+=======
+import { PageHeader } from '../../../components/core/PageHeader';
+import { StatusBox } from '../../../components/core/StatusBox';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
+import {
+  TargetPopulationBuildStatus,
+  TargetPopulationQuery,
+  TargetPopulationStatus,
+>>>>>>> develop
 } from '../../../__generated__/graphql';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
@@ -35,7 +46,6 @@ const StatusWrapper = styled.div`
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  setEditState: Function;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   canEdit: boolean;
   canRemove: boolean;
@@ -47,7 +57,6 @@ export interface ProgramDetailsPageHeaderPropTypes {
 
 export const TargetPopulationPageHeader = ({
   targetPopulation,
-  setEditState,
   canEdit,
   canRemove,
   canDuplicate,
@@ -80,7 +89,6 @@ export const TargetPopulationPageHeader = ({
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
-          setEditState={setEditState}
           canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}
@@ -119,17 +127,15 @@ export const TargetPopulationPageHeader = ({
         title={
           <HeaderWrapper>
             {t(`${targetPopulation.name}`)}
-            <StatusWrapper>
-              <StatusBox
-                status={targetPopulation.status}
-                statusToColor={targetPopulationStatusToColor}
-                statusNameMapping={targetPopulationStatusMapping}
-              />
-              <StatusBox
-                status={targetPopulation.buildStatus}
-                statusToColor={targetPopulationBuildStatusToColor}
-              />
-            </StatusWrapper>
+            {targetPopulation.buildStatus !==
+              TargetPopulationBuildStatus.Ok && (
+              <StatusWrapper>
+                <StatusBox
+                  status={targetPopulation.buildStatus}
+                  statusToColor={targetPopulationBuildStatusToColor}
+                />
+              </StatusWrapper>
+            )}
           </HeaderWrapper>
         }
         breadCrumbs={breadCrumbsItems}

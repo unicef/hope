@@ -2,6 +2,7 @@ import abc
 import json
 import logging
 import os
+from typing import Dict, Optional
 
 from django.conf import settings
 from django.core.cache import cache
@@ -29,7 +30,7 @@ class ExchangeRateClientDummy(ExchangeRateClient):
 class ExchangeRateClientAPI(ExchangeRateClient):
     CACHE_KEY = "exchange_rates"
 
-    def __init__(self, api_key: str = None, api_url: str = None):
+    def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
         self.api_key = api_key or os.getenv("EXCHANGE_RATES_API_KEY")
         self.api_url = api_url or os.getenv(
             "EXCHANGE_RATES_API_URL", "https://uniapis.unicef.org/biapi/v1/exchangerates"
@@ -43,7 +44,7 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
-    def fetch_exchange_rates(self, with_history: bool = True) -> dict:
+    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
         if settings.USE_DUMMY_EXCHANGE_RATES is True:
             exchange_rates_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exchange_rates.json")
             with open(exchange_rates_file_path, "r") as exchange_rates_file:

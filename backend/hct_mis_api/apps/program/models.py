@@ -160,12 +160,12 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.get_total_number_of_households_from_payments(qs)
 
     @property
-    def admin_areas_log(self):
+    def admin_areas_log(self) -> str:
         return ", ".join(self.admin_areas.all())
 
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Programme"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name

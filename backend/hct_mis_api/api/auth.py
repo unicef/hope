@@ -1,3 +1,5 @@
+from typing import Any, Tuple
+
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -5,6 +7,9 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+
+from hct_mis_api.apps.account.models import User
 
 from .models import APIToken
 
@@ -12,7 +17,7 @@ from .models import APIToken
 class HOPEAuthentication(TokenAuthentication):
     keyword = "Token"
 
-    def authenticate_credentials(self, key):
+    def authenticate_credentials(self, key: str) -> Tuple[User, APIToken]:
         try:
             token = (
                 APIToken.objects.select_related("user")
@@ -30,7 +35,7 @@ class HOPEAuthentication(TokenAuthentication):
 
 
 class HOPEPermission(IsAuthenticated):
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view: Any) -> bool:
         if bool(request.auth):
             if view.permission == "any":
                 return True

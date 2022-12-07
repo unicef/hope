@@ -1,4 +1,6 @@
+import datetime
 from datetime import timedelta
+from typing import Any, List
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -47,7 +49,7 @@ class TestReportingMutation(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         create_afghanistan()
         call_command("loadcountries")
@@ -114,7 +116,9 @@ class TestReportingMutation(APITestCase):
             ("without_permission_individuals_report", [], Report.INDIVIDUALS, "2022-01-02"),
         ]
     )
-    def test_create_report_with_no_extra_filters(self, _, permissions, report_type, date_to):
+    def test_create_report_with_no_extra_filters(
+        self, _: Any, permissions: List[Permissions], report_type: str, date_to: datetime.date
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REPORT,
@@ -143,7 +147,9 @@ class TestReportingMutation(APITestCase):
             ("individuals_payments", Report.INDIVIDUALS_AND_PAYMENT, "program", None),
         ]
     )
-    def test_create_report_validator(self, _, report_type, should_exist_field, should_not_exist_field):
+    def test_create_report_validator(
+        self, _: Any, report_type: str, should_exist_field: str, should_not_exist_field: str
+    ) -> None:
 
         report_data = {
             "report_type": report_type,
@@ -166,7 +172,7 @@ class TestReportingMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_restart_create_report(self, _, permissions):
+    def test_restart_create_report(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.RESTART_CREATE_REPORT,
@@ -179,7 +185,7 @@ class TestReportingMutation(APITestCase):
             },
         )
 
-    def test_restart_create_report_invalid_status_update_time(self):
+    def test_restart_create_report_invalid_status_update_time(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.REPORTING_EXPORT], self.business_area)
         self.report.status = Report.COMPLETED
         self.report.save()

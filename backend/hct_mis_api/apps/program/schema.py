@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Tuple, Type
+
 from django.db.models import (
     Case,
     Count,
@@ -7,18 +9,20 @@ from django.db.models import (
     IntegerField,
     OuterRef,
     Q,
+    QuerySet,
     Sum,
     Value,
     When,
 )
 
 import graphene
-from graphene import relay
+from graphene import Boolean, Int, relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -76,15 +80,15 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_history(self, info):
+    def resolve_history(self, info: Any) -> QuerySet:
         return self.history.all()
 
-    def resolve_total_number_of_households(self, info, **kwargs):
+    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
         return self.total_number_of_households
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
         hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     )
@@ -114,12 +118,12 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_available_payment_records_count(self, info, **kwargs):
+    def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> Int:
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
 
-    def resolve_verification_plans(self, info, **kwargs):
+    def resolve_verification_plans(self, info: Any, **kwargs: Any) -> QuerySet:
         return self.get_payment_verification_plans
 
 
@@ -165,32 +169,38 @@ class Query(graphene.ObjectType):
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_all_programs(self, info, **kwargs):
-        return Program.objects.annotate(
-            custom_order=Case(
-                When(status=Program.DRAFT, then=Value(1)),
-                When(status=Program.ACTIVE, then=Value(2)),
-                When(status=Program.FINISHED, then=Value(3)),
-                output_field=IntegerField(),
+    def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        return (
+            Program.objects.annotate(
+                custom_order=Case(
+                    When(status=Program.DRAFT, then=Value(1)),
+                    When(status=Program.ACTIVE, then=Value(2)),
+                    When(status=Program.FINISHED, then=Value(3)),
+                    output_field=IntegerField(),
+                )
             )
-        ).order_by("custom_order", "start_date")
+            .annotate(
+                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+            )
+            .order_by("custom_order", "start_date")
+        )
 
-    def resolve_program_status_choices(self, info, **kwargs):
+    def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
 
-    def resolve_program_frequency_of_payments_choices(self, info, **kwargs):
+    def resolve_program_frequency_of_payments_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
 
-    def resolve_program_sector_choices(self, info, **kwargs):
+    def resolve_program_sector_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.SECTOR_CHOICE)
 
-    def resolve_program_scope_choices(self, info, **kwargs):
+    def resolve_program_scope_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.SCOPE_CHOICE)
 
-    def resolve_cash_plan_status_choices(self, info, **kwargs):
+    def resolve_cash_plan_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
 
-    def resolve_all_cash_plans(self, info, **kwargs):
+    def resolve_all_cash_plans(self, info: Any, **kwargs: Any) -> QuerySet[CashPlan]:
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
             payment_plan_object_id=OuterRef("id")
         )
@@ -215,7 +225,7 @@ class Query(graphene.ObjectType):
         ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
@@ -250,7 +260,9 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_total_transferred_by_month(
+        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+    ) -> Dict:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )

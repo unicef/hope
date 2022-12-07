@@ -9,11 +9,11 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
 )
-from hct_mis_api.apps.utils.models import AbstractSession, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class Session(AbstractSession):
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.business_area} / {self.timestamp}"
 
 
@@ -24,9 +24,10 @@ class SessionModel(models.Model):
         abstract = True
 
 
-class Household(SessionModel, UnicefIdentifiedModel):
+class Household(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
+    unicef_id = models.CharField(blank=True, max_length=255, null=True)
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     household_size = models.PositiveIntegerField()
     # registration household id
@@ -43,29 +44,30 @@ class Household(SessionModel, UnicefIdentifiedModel):
         unique_together = ("session", "mis_id")
 
 
-class Individual(SessionModel, UnicefIdentifiedModel):
+class Individual(SessionModel):
     INACTIVE = "INACTIVE"
     ACTIVE = "ACTIVE"
     STATUS_CHOICE = ((INACTIVE, "Inactive"), (ACTIVE, "Active"))
     MALE = "MALE"
     FEMALE = "FEMALE"
+    UNKNOWN = "UNKNOWN"
+
     SEX_CHOICE = (
         (MALE, _("Male")),
         (FEMALE, _("Female")),
+        (UNKNOWN, _("Unknown")),
     )
 
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
+    unicef_id = models.CharField(blank=True, max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
     middle_name = models.CharField(max_length=255, null=True)
-    sex = models.CharField(
-        max_length=255,
-        choices=SEX_CHOICE,
-    )
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE)
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
     relationship = models.CharField(
@@ -85,7 +87,7 @@ class Individual(SessionModel, UnicefIdentifiedModel):
     class Meta:
         unique_together = ("session", "mis_id")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.family_name or ""
 
 
@@ -101,7 +103,7 @@ class TargetPopulation(SessionModel):
     class Meta:
         unique_together = ("session", "mis_id")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -244,7 +246,7 @@ class FundsCommitment(models.Model):
     ca_sync_flag = models.BooleanField(blank=True, null=True, default=False)
     ca_sync_date = models.DateTimeField(blank=True, null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.funds_commitment_number
 
 

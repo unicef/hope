@@ -21,11 +21,6 @@ const FormLabelContainer = styled.div`
   }
 `;
 
-const StyledFormControl = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(6)}px;
-  margin-bottom: ${({ theme }) => theme.spacing(2)}px;
-`;
-
 export const FormikRadioGroup = ({
   field,
   form,
@@ -33,7 +28,7 @@ export const FormikRadioGroup = ({
 }): React.ReactElement => {
   return (
     <>
-      <StyledFormControl {...otherProps} component='fieldset'>
+      <Box mt={otherProps.noMargin ? 0 : 6} mb={otherProps.noMargin ? 0 : 2}>
         <FormLabelContainer>
           <Typography variant='caption'>{otherProps.label}</Typography>
         </FormLabelContainer>
@@ -55,7 +50,7 @@ export const FormikRadioGroup = ({
             </Box>
           ))}
         </RadioGroup>
-      </StyledFormControl>
+      </Box>
     </>
   );
 };

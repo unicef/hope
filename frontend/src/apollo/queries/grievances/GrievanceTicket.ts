@@ -95,6 +95,10 @@ export const GrievanceTicket = gql`
       deleteHouseholdTicketDetails {
         id
         approveStatus
+        reasonHousehold {
+          id
+          unicefId
+        }
       }
       systemFlaggingTicketDetails {
         id
@@ -189,7 +193,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo
@@ -224,7 +227,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo
@@ -261,7 +263,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo

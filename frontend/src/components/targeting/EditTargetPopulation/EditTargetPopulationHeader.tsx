@@ -1,24 +1,24 @@
 import { Box, Button } from '@material-ui/core';
 import { Field } from 'formik';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { TargetPopulationQuery } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
-  cancelEdit: () => void;
   values;
   businessArea: string;
-  targetPopulation;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   loading: boolean;
 }
 
 export const EditTargetPopulationHeader = ({
   handleSubmit,
-  cancelEdit,
   values,
   businessArea,
   targetPopulation,
@@ -57,7 +57,12 @@ export const EditTargetPopulationHeader = ({
       <>
         {values.name && (
           <Box m={2}>
-            <Button variant='outlined' color='primary' onClick={cancelEdit}>
+            <Button
+              variant='outlined'
+              color='primary'
+              component={Link}
+              to={`/${businessArea}/target-population/${targetPopulation.id}`}
+            >
               {t('Cancel')}
             </Button>
           </Box>
@@ -69,11 +74,7 @@ export const EditTargetPopulationHeader = ({
             onClick={handleSubmit}
             loading={loading}
             disabled={
-              values.criterias?.length +
-                values.candidateListCriterias?.length ===
-                0 ||
-              !values.name ||
-              loading
+              values.targetingCriteria?.length === 0 || !values.name || loading
             }
           >
             {t('Save')}

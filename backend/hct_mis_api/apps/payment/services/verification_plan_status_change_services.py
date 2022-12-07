@@ -59,7 +59,7 @@ class VerificationPlanStatusChangeServices:
         else:
             raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")
 
-    def _reset_payment_verifications(self):
+    def _reset_payment_verifications(self) -> None:
         # payment verifications to reset using for discard and mark_invalid
         payment_record_verifications = self.payment_verification_plan.payment_record_verifications.all()
         for payment_record_verification in payment_record_verifications:
@@ -81,12 +81,12 @@ class VerificationPlanStatusChangeServices:
 
         return self.payment_verification_plan
 
-    def _can_activate_via_rapidpro(self):
+    def _can_activate_via_rapidpro(self) -> bool:
         return (
             self.payment_verification_plan.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO
         )
 
-    def _activate_rapidpro(self):
+    def _activate_rapidpro(self) -> None:
         business_area_slug = self.payment_verification_plan.business_area.slug
         api = RapidProAPI(business_area_slug)
 
@@ -158,7 +158,7 @@ class VerificationPlanStatusChangeServices:
 
         TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
 
-    def _create_grievance_tickets(self, payment_verification_plan):
+    def _create_grievance_tickets(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         self._create_grievance_ticket_for_status(payment_verification_plan, PaymentVerification.STATUS_NOT_RECEIVED)
         self._create_grievance_ticket_for_status(
             payment_verification_plan, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES

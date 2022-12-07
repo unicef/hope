@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -15,13 +17,13 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 
 
 class MockSuperUser:
-    def has_perm(self, perm):
+    def has_perm(self, perm: Any) -> bool:
         return True
 
 
 class TestSettingTypesForCalculateFields(TestCase):
     @staticmethod
-    def load_xls_file(name):
+    def load_xls_file(name: str) -> None:
         task = FlexibleAttributeImporter()
         task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
 
@@ -51,7 +53,7 @@ class TestSettingTypesForCalculateFields(TestCase):
             ),
         ]
     )
-    def test_setting_calculate_field_types(self, _, file_name, validation_error):
+    def test_setting_calculate_field_types(self, _: Any, file_name: Any, validation_error: BaseException) -> None:
         if validation_error is not None:
             self.assertRaisesMessage(
                 ValidationError,

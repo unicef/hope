@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 from django.db.models import OuterRef, Subquery, Value
 from django.db.models.functions import Coalesce
@@ -5,7 +7,7 @@ from django.db.models.functions import Coalesce
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
-def update_household_unicef_id():
+def update_household_unicef_id() -> int:
     subquery = Subquery(
         GrievanceTicket.objects.annotate(
             hh_unicef_id=Coalesce(
@@ -40,7 +42,7 @@ def update_household_unicef_id():
 class Command(BaseCommand):
     help = "Update household unicef id"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Updating household unicef id")
         updated = update_household_unicef_id()
         print(f"Done - updated {updated}")
