@@ -143,7 +143,7 @@ def get_item(dictionary: Dict, key: Any) -> Any:
 
 
 @register.filter
-def pygmentize(code):
+def pygmentize(code: Any) -> str:
     formatter = HtmlFormatter(linenos=True)
     lex = lexers.get_lexer_by_name("python")
     formatted_code = highlight(code, lex, formatter)
@@ -151,7 +151,7 @@ def pygmentize(code):
 
 
 @register.filter
-def diff(commit, panels="before,after"):
+def diff(commit: Any, panels: str = "before,after") -> str:
     rule = commit.rule
     left_panel, right_panel = [], []
     right_label = "No data"

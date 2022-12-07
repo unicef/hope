@@ -1,3 +1,5 @@
+from typing import Dict
+
 from graphql import GraphQLError
 
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
@@ -31,10 +33,10 @@ class PaymentVerificationArgumentVerifier:
         },
     }
 
-    def __init__(self, input_data) -> None:
+    def __init__(self, input_data: Dict) -> None:
         self.input_data = input_data
 
-    def verify(self, field_name) -> None:
+    def verify(self, field_name: str) -> None:
         options = self.ARGUMENTS.get(field_name)
 
         for key, value in options.items():

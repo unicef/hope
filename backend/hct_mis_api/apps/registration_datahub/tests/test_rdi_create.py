@@ -3,7 +3,7 @@ import secrets
 from datetime import date
 from io import BytesIO
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 from unittest import mock
 
 from django.conf import settings
@@ -42,17 +42,17 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 
 class ImageLoaderMock:
-    def image_in(self, *args, **kwargs):
+    def image_in(self, *args: Any, **kwargs: Any) -> bool:
         return True
 
-    def get(self, *args, **kwargs):
+    def get(self, *args: Any, **kwargs: Any) -> Image:
         content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
         file = File(BytesIO(content), name="image.png")
         return Image.open(file)
 
 
 class CellMock:
-    def __init__(self, value, coordinate) -> None:
+    def __init__(self, value: Any, coordinate: Any) -> None:
         self.value = value
         self.coordinate = coordinate
 
@@ -67,7 +67,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -107,7 +107,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         )
         super().setUpTestData()
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(
             self.registration_data_import.id,
@@ -151,7 +151,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         self.assertEqual(household_obj_data, household_data)
 
-    def test_handle_document_fields(self):
+    def test_handle_document_fields(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.documents = {}
         individual = ImportedIndividualFactory()
@@ -234,7 +234,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
         lambda: "2020-06-22 12:00:00-0000",
     )
-    def test_handle_document_photo_fields(self):
+    def test_handle_document_photo_fields(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.image_loader = ImageLoaderMock()
         task.documents = {}
@@ -275,7 +275,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(birth_certificate["value"], "CD1247246Q12W")
         self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg")
 
-    def test_handle_geopoint_field(self):
+    def test_handle_geopoint_field(self) -> None:
         empty_geopoint = ""
         valid_geopoint = "51.107883, 17.038538"
         task = self.RdiXlsxCreateTask()
@@ -287,7 +287,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         result = task._handle_geopoint_field(valid_geopoint)
         self.assertEqual(result, expected)
 
-    def test_create_documents(self):
+    def test_create_documents(self) -> None:
         task = self.RdiXlsxCreateTask()
         individual = ImportedIndividualFactory()
         task.business_area = self.business_area
@@ -317,7 +317,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         photo = document.photo.name
         self.assertTrue(photo.startswith("image") and photo.endswith(".png"))
 
-    def test_cast_value(self):
+    def test_cast_value(self) -> None:
         task = self.RdiXlsxCreateTask()
 
         # None and ""
@@ -353,7 +353,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         result = task._cast_value("True", "estimated_birth_date_i_c")
         self.assertEqual(result, True)
 
-    def test_store_row_id(self):
+    def test_store_row_id(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(
             self.registration_data_import.id,
@@ -369,7 +369,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         for individual in individuals:
             self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8])
 
-    def test_create_bank_account(self):
+    def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(
             self.registration_data_import.id,
@@ -382,7 +382,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
 
-    def test_create_tax_id_document(self):
+    def test_create_tax_id_document(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(
             self.registration_data_import.id,
@@ -401,13 +401,13 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @staticmethod
-    def _return_test_image(*args, **kwargs):
+    def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
         return BytesIO(
             Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -473,7 +473,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
-    def test_execute(self):
+    def test_execute(self) -> None:
         task = self.RdiKoboCreateTask()
         task.execute(
             self.registration_data_import.id,
@@ -516,7 +516,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
-    def test_execute_multiple_collectors(self):
+    def test_execute_multiple_collectors(self) -> None:
         task = self.RdiKoboCreateTask()
         task.execute(
             self.registration_data_import.id,
@@ -557,7 +557,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
-    def test_handle_image_field(self):
+    def test_handle_image_field(self) -> None:
         task = self.RdiKoboCreateTask()
         task.registration_data_import_mis = RegistrationDataImport()
         task.business_area = self.business_area
@@ -591,7 +591,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertIsInstance(result, File)
         self.assertEqual(result.name, "signature-14_59_24.png", False)
 
-    def test_handle_geopoint_field(self):
+    def test_handle_geopoint_field(self) -> None:
         geopoint = "51.107883 17.038538"
         task = self.RdiKoboCreateTask()
 
@@ -599,14 +599,14 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         result = task._handle_geopoint_field(geopoint, False)
         self.assertEqual(result, expected)
 
-    def test_cast_and_assign(self):
+    def test_cast_and_assign(self) -> None:
         pass
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
-    def test_handle_documents_and_identities(self):
+    def test_handle_documents_and_identities(self) -> None:
         task = self.RdiKoboCreateTask()
         task.registration_data_import_mis = RegistrationDataImport()
         task.business_area = self.business_area
@@ -670,7 +670,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
         self.assertEqual(national_passport, "NATIONAL_PASSPORT")
 
-    def _generate_huge_file(self):
+    def _generate_huge_file(self) -> None:
         base_form = {
             "_notes": [],
             "household_questions/household_location/address_h_c": "Some Address 12",

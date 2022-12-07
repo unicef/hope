@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -106,9 +100,7 @@ export function DeleteProgram({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Remove Programme')}</Typography>
-          </DialogTitle>
+          <DialogTitle>{t('Remove Programme')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>

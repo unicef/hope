@@ -224,7 +224,7 @@ export function TargetCriteriaForm({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title' disableTypography>
+              <DialogTitle disableTypography>
                 <Typography variant='h6'>{t('Add Filter')}</Typography>
               </DialogTitle>
             </DialogTitleWrapper>

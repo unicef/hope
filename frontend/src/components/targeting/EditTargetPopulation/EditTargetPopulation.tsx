@@ -2,8 +2,8 @@ import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
 import styled from 'styled-components';
+import * as Yup from 'yup';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
@@ -15,7 +15,7 @@ import {
   ProgramStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
@@ -50,7 +50,7 @@ export const EditTargetPopulation = ({
   const {
     data: allProgramsData,
     loading: loadingPrograms,
-  } = useAllProgramsQuery({
+  } = useAllProgramsForChoicesQuery({
     variables: { businessArea, status: [ProgramStatus.Active] },
     fetchPolicy: 'cache-and-network',
   });
@@ -133,7 +133,7 @@ export const EditTargetPopulation = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => {
+      {({ values, submitForm, setFieldValue }) => {
         return (
           <Form>
             <EditTargetPopulationHeader
@@ -147,6 +147,8 @@ export const EditTargetPopulation = ({
               allPrograms={allProgramsData}
               loading={loadingPrograms}
               program={values.program}
+              setFieldValue={setFieldValue}
+              values={values}
             />
 
             <FieldArray

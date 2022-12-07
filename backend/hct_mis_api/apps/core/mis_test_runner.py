@@ -13,7 +13,7 @@ from snapshottest.django import TestRunner
 _worker_id = 0
 
 
-def _elastic_search_init_worker(counter):
+def _elastic_search_init_worker(counter: Any) -> None:
     global _worker_id
 
     with counter.get_lock():
@@ -82,7 +82,7 @@ class PostgresTestRunner(TestRunner):
             "output": output,
         }
 
-    def run_suite(self, suite, **kwargs) -> Any:
+    def run_suite(self, suite: Any, **kwargs: Any) -> Any:
         runner_kwargs = self.get_test_runner_kwargs()
         runner = self.test_runner(**runner_kwargs)
         results = runner.run(suite)

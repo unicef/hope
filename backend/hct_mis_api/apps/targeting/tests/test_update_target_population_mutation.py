@@ -1,5 +1,5 @@
 import copy
-from typing import Dict
+from typing import Any, Dict, List
 
 from parameterized import parameterized
 
@@ -153,7 +153,7 @@ VARIABLES_UNKNOWN_CORE_FIELD_NAME = {
 
 class TestUpdateTargetPopulationMutation(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
@@ -183,7 +183,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.target_populations = [cls.draft_target_population, cls.approved_target_population]
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter) -> TargetingCriteria:
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         # TODO: this function is copy-pasted in many places
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
@@ -201,7 +201,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             ("without_permission_approved", [], 1, False),
         ]
     )
-    def test_update_mutation_correct_variables(self, name, permissions, population_index, should_be_updated):
+    def test_update_mutation_correct_variables(
+        self, name: str, permissions: List[Permissions], population_index: int, should_be_updated: bool
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables: Dict = copy.deepcopy(VARIABLES)
@@ -230,7 +232,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             ("unknown_core_field_name", VARIABLES_UNKNOWN_CORE_FIELD_NAME),
         ]
     )
-    def test_fail_update(self, _, variables):
+    def test_fail_update(self, _: Any, variables: Dict) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
 
         variables = copy.deepcopy(variables)

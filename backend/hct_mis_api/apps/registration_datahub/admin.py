@@ -1,15 +1,18 @@
 import base64
 import logging
-from typing import Any, Dict, Generator, Iterable, Optional, Tuple
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
+from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 
 import requests
@@ -74,7 +77,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         href=None,
         label="RDI",
     )
-    def hub(self, button) -> Optional[str]:
+    def hub(self, button: button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
             if obj.hct_id:
@@ -86,7 +89,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         return None
 
     @button()
-    def inspect(self, request, pk) -> TemplateResponse:
+    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         obj: RegistrationDataImportDatahub = context["original"]
         context["title"] = f"Import {obj.name} - {obj.import_done}"
@@ -132,19 +135,19 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
     actions = ["enrich_deduplication"]
     inlines = (ImportedBankAccountInfoStackedInline,)
 
-    def score(self, obj) -> Any:
+    def score(self, obj: ImportedIndividual) -> Union[int, str]:
         try:
             return obj.deduplication_golden_record_results["score"]["max"]
         except KeyError:
             return ""
 
-    def batch_score(self, obj) -> Any:
+    def batch_score(self, obj: ImportedIndividual) -> Union[int, str]:
         try:
             return obj.deduplication_batch_results["score"]["max"]
         except KeyError:
             return ""
 
-    def dedupe_status(self, obj) -> str:
+    def dedupe_status(self, obj: ImportedIndividual) -> str:
         lbl = f"{obj.deduplication_batch_status}/{obj.deduplication_golden_record_status}"
         url = reverse("admin:registration_datahub_importedindividual_duplicates", args=[obj.pk])
         if "duplicates" in obj.deduplication_batch_results:
@@ -155,18 +158,18 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
             ret = lbl
         return mark_safe(ret)
 
-    def enrich_deduplication(self, request, queryset) -> None:
+    def enrich_deduplication(self, request: HttpRequest, queryset: QuerySet) -> None:
         for record in queryset.exclude(deduplication_batch_results__has_key="score"):
             _post_process_dedupe_results(record)
 
     @button()
-    def post_process_dedupe_results(self, request, pk) -> None:
+    def post_process_dedupe_results(self, request: HttpRequest, pk: UUID) -> None:
         record = self.get_queryset(request).get(id=pk)
         _post_process_dedupe_results(record)
         record.save()
 
     @button()
-    def duplicates(self, request, pk) -> TemplateResponse:
+    def duplicates(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         ctx = self.get_common_context(request, pk, title="Duplicates")
         return TemplateResponse(request, "registration_datahub/admin/duplicates.html", ctx)
 
@@ -249,12 +252,12 @@ class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
     remember = forms.BooleanField(label="Remember me", required=False)
 
-    def get_signed_cookie(self, request) -> Any:
+    def get_signed_cookie(self, request: HttpRequest) -> Any:
         signer = Signer(request.user.password)
         return signer.sign_object(self.cleaned_data)
 
     @classmethod
-    def get_saved_config(cls, request) -> Dict:
+    def get_saved_config(cls, request: HttpRequest) -> Dict:
         try:
             signer = Signer(request.user.password)
             obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
@@ -288,12 +291,14 @@ class AlexisFilter(SimpleListFilter):
     title = "Alexis"
     parameter_name = "alexis"
 
-    def __init__(self, request, params, model, model_admin) -> None:
+    def __init__(
+        self, request: HttpRequest, params: MultiValueDict[str, str], model: Any, model_admin: ModelAdmin
+    ) -> None:
         super().__init__(request, params, model, model_admin)
         self.lookup_kwarg = self.parameter_name
         self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
 
-    def queryset(self, request, queryset) -> QuerySet:
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if "1" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__individuals_num=F("data__household__0__size_h_c"))
         if "2" in self.lookup_val:
@@ -314,7 +319,7 @@ class AlexisFilter(SimpleListFilter):
             queryset = queryset.filter(data__w_counters__collector_bank_account=True)
         return queryset
 
-    def lookups(self, request, model_admin) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Optional[Iterable[Tuple[Any, str]]]:
         return (
             ("1", "Household size match"),
             ("2", "Only one collector"),
@@ -327,7 +332,7 @@ class AlexisFilter(SimpleListFilter):
             ("9", "Collector has BankAccount"),
         )
 
-    def choices(self, changelist) -> Generator:
+    def choices(self, changelist: List) -> Generator:
         for lookup, title in self.lookup_choices:
             qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
             qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
@@ -372,13 +377,13 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs
 
     @admin.action(description="Create RDI")
-    def create_rdi(self, request, queryset) -> None:
+    def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
         service = FlexRegistrationService()
         try:
             records_ids = queryset.values_list("id", flat=True)
@@ -393,7 +398,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             self.message_user(request, str(e), messages.ERROR)
 
     @admin.action(description="Async extract")
-    def async_extract(self, request, queryset) -> None:
+    def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
             records_ids = queryset.values_list("id", flat=True)
             fresh_extract_records_task.delay(list(records_ids))
@@ -402,7 +407,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission=is_root)
-    def fetch(self, request) -> TemplateResponse:
+    def fetch(self, request: HttpRequest) -> TemplateResponse:
         ctx = self.get_common_context(request)
         cookies = {}
         if request.method == "POST":
@@ -434,17 +439,17 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         return response
 
     @button(label="Extract")
-    def extract_single(self, request, pk) -> None:
+    def extract_single(self, request: HttpRequest, pk: UUID) -> None:
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         try:
             extract(records_ids, raise_exception=True)
         except Exception as e:
             self.message_error_to_user(request, e)
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
 

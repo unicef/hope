@@ -1,10 +1,11 @@
 from datetime import date
-from typing import Dict
+from typing import Any, Dict, List, Optional
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
+from factory import Factory
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -79,7 +80,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -263,7 +264,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_update_add_individual(self, name, permissions):
+    def test_update_add_individual(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.add_individual_grievance_ticket.save()
@@ -389,7 +390,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_update_change_individual(self, name, permissions):
+    def test_update_change_individual(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.individual_data_change_grievance_ticket.save()
@@ -549,7 +550,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_change_household(self, name, permissions):
+    def test_update_change_household(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -616,7 +617,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_feedback_ticket(self, name, permissions):
+    def test_update_feedback_ticket(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -662,7 +663,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_set_household_if_not_set(self, _, factory):
+    def test_set_household_if_not_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         ticket = factory()
@@ -693,7 +694,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_set_individual_if_not_set(self, _, factory):
+    def test_set_individual_if_not_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         ticket = factory()
@@ -724,7 +725,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_raise_exception_if_household_already_set(self, _, factory):
+    def test_raise_exception_if_household_already_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         household, _ = create_household()
@@ -755,7 +756,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ),
         ]
     )
-    def test_raise_exception_if_individual_already_set(self, _, factory):
+    def test_raise_exception_if_individual_already_set(self, _: Any, factory: Factory) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
 
         household, individuals = create_household()
@@ -774,7 +775,9 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.assertTrue("Cannot change individual" in response["errors"][0]["message"])
 
-    def _prepare_input_data(self, ticket_id, household_id=None, individual_id=None) -> Dict:
+    def _prepare_input_data(
+        self, ticket_id: str, household_id: Optional[str] = None, individual_id: Optional[str] = None
+    ) -> Dict:
         return {
             "input": {
                 "description": "New Description",

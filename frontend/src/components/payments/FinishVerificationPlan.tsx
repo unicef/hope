@@ -103,9 +103,7 @@ export function FinishVerificationPlan({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Finish Verification Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Finish Verification Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
