@@ -1,7 +1,7 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
-import { FieldLabel } from '../../../components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../../components/population/AdminAreaFixedAutocomplete';
+import { FieldLabel } from '../../../components/core/FieldLabel';
 
 export const FormikAdminAreaAutocomplete = ({
   field,

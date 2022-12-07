@@ -352,7 +352,6 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def test_finalize_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
