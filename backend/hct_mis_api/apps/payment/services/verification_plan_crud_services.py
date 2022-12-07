@@ -1,18 +1,11 @@
-from typing import Union
+from typing import TYPE_CHECKING, Dict, Union
 
 from django.contrib.admin.options import get_content_type_for_model
-
-from typing import TYPE_CHECKING, Dict
-
 from django.db.models import QuerySet
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import (
-    CashPlan,
-    PaymentPlan,
-    PaymentVerificationPlan,
-)
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
@@ -26,7 +19,8 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.program.models import CashPlan, PaymentPlan
+    from hct_mis_api.apps.payment.models import CashPlan, PaymentPlan
+
 
 def get_payment_records(payment_plan: Union["PaymentPlan", "CashPlan"], verification_channel: str) -> QuerySet:
     payment_plan_type = payment_plan.__class__.__name__

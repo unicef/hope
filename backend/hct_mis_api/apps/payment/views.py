@@ -9,7 +9,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -49,7 +49,9 @@ def download_payment_verification_plan(  # type: ignore
 
 
 @login_required
-def download_payment_plan_payment_list(request: "HttpRequest", payment_plan_id: str) -> Union[
+def download_payment_plan_payment_list(
+    request: "HttpRequest", payment_plan_id: str
+) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
 ]:
     payment_plan_id = decode_id_string(payment_plan_id)

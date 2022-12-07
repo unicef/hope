@@ -107,7 +107,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="cashplanpaymentverification",
             name="unicef_id",
-            field=models.CharField(blank=True, max_length=255, null=True),
+            field=models.CharField(blank=True, db_index=True, max_length=255, null=True),
         ),
         migrations.AlterField(
             model_name="cashplanpaymentverification",
@@ -1436,12 +1436,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="payment",
             name="unicef_id",
-            field=models.CharField(blank=True, max_length=255, null=True),
+            field=models.CharField(blank=True, db_index=True, max_length=255, null=True),
         ),
         migrations.AlterField(
             model_name="paymentplan",
             name="unicef_id",
-            field=models.CharField(blank=True, max_length=255, null=True),
+            field=models.CharField(blank=True, db_index=True, max_length=255, null=True),
         ),
         migrations.AddField(
             model_name="paymentplan",

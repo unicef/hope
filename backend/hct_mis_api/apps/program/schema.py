@@ -14,9 +14,10 @@ from django.db.models import (
     Value,
     When,
 )
+from django.db.models.functions import Coalesce
 
 import graphene
-from graphene import Boolean, Int, relay
+from graphene import Int, relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (

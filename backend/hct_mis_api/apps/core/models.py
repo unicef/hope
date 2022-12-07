@@ -11,7 +11,6 @@ from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
-from model_utils.models import SoftDeletableModel
 from natural_keys import NaturalKeyModel
 
 import mptt

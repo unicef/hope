@@ -78,7 +78,6 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.exceptions import log_and_raise
-from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -93,7 +92,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentVerificationMutation":
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
         node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
 
@@ -162,7 +161,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
     @is_authenticated
     @transaction.atomic
     def processed_mutate(
-            cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
     ) -> "ActivatePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -195,7 +194,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-            cls, root: Any, info: Any, payment_verification_plan_id: str, **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: str, **kwargs: Any
     ) -> "FinishPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -228,7 +227,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-            cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
     ) -> "DiscardPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -552,7 +551,9 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, file: IO, payment_verification_plan_id: str) -> "ImportXlsxPaymentVerificationPlanFile":
+    def mutate(
+        cls, root: Any, info: Any, file: IO, payment_verification_plan_id: str
+    ) -> "ImportXlsxPaymentVerificationPlanFile":
         id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
 
