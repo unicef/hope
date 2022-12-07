@@ -61,7 +61,7 @@ export const LookUpHouseholdIndividualModal = ({
     programs: [],
     lastRegistrationDate: { min: undefined, max: undefined },
     residenceStatus: '',
-    size: { min: undefined, max: undefined },
+    size: { min: '', max: '' },
     admin2: null,
   };
   const [filterHouseholdApplied, setFilterHouseholdApplied] = useState(
@@ -78,6 +78,7 @@ export const LookUpHouseholdIndividualModal = ({
     status: '',
     admin2: null,
     sex: '',
+    household: null,
   };
   const [filterIndividualApplied, setFilterIndividualApplied] = useState(
     individualFilterInitial,
@@ -154,7 +155,7 @@ export const LookUpHouseholdIndividualModal = ({
         >
           {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
+            <DialogTitle>
               <StyledTabs
                 value={selectedTab}
                 onChange={(event: React.ChangeEvent<{}>, newValue: number) => {

@@ -5,6 +5,8 @@ from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from random import randint
+from typing import TYPE_CHECKING, Any, List, Union
 
 import factory
 from pytz import utc
@@ -61,6 +63,10 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class PaymentGFKFactory(factory.django.DjangoModelFactory):
@@ -457,7 +463,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
 
     @factory.post_generation
-    def payment_verification_summary(self, create, extracted, **kwargs):
+    def payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
@@ -645,7 +651,14 @@ class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
 
 
-def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+def create_payment_verification_plan_with_status(
+    cash_plan: Union[CashPlan, PaymentPlan],
+    user: "User",
+    business_area: BusinessArea,
+    program: Program,
+    target_population: "TargetPopulation",
+    status: str,
+) -> PaymentVerificationPlan:
     payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
     payment_verification_plan.status = status
     payment_verification_plan.save(update_fields=("status",))
@@ -682,7 +695,7 @@ def create_payment_verification_plan_with_status(cash_plan, user, business_area,
     return payment_verification_plan
 
 
-def generate_real_cash_plans():
+def generate_real_cash_plans() -> None:
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory(status=Program.ACTIVE)
@@ -727,7 +740,7 @@ def generate_real_cash_plans():
     )
 
 
-def generate_real_cash_plans_for_households(households):
+def generate_real_cash_plans_for_households(households: List[Household]) -> None:
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
     program = RealProgramFactory(business_area=households[0].business_area)
@@ -746,7 +759,7 @@ def generate_real_cash_plans_for_households(households):
     )
 
 
-def generate_reconciled_payment_plan():
+def generate_reconciled_payment_plan() -> :
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
@@ -784,7 +797,7 @@ def generate_reconciled_payment_plan():
     pp.update_population_count_fields()
 
 
-def generate_payment_plan():
+def generate_payment_plan() -> None:
     # creates a payment plan that has all the necessary data needed to go with it for manual testing
 
     afghanistan = BusinessArea.objects.get(slug="afghanistan")

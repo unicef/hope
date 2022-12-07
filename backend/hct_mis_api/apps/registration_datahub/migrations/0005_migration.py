@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 from django.db.models import F
-from django.db.models.functions import Concat
 
 
 def remove_duplicates(apps, schema_editor):
@@ -11,15 +10,10 @@ def remove_duplicates(apps, schema_editor):
     )
 
     master_qs_types = ImportedDocumentType.objects.annotate(
-        concat_country_type=Concat(
-            F("country"), F("type"), output_field=models.CharField(),
-        ),
-    ).distinct("concat_country_type")
+        concat_country_type=F("type")).distinct("concat_country_type")
 
     for master in master_qs_types:
-        ImportedDocumentType.objects.filter(
-            country=master.country, type=master.type
-        ).exclude(pk=master.pk).delete()
+        ImportedDocumentType.objects.filter(type=master.type).exclude(pk=master.pk).delete()
 
 
 def set_document_types(apps, schema_editor):

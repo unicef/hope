@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -13,16 +15,16 @@ from hct_mis_api.apps.core.models import (
 
 
 class MockSuperUser:
-    def has_perm(self, perm):
+    def has_perm(self, perm: Any) -> bool:
         return True
 
 
 class TestFlexibles(TestCase):
-    def load_xls(self, name):
+    def load_xls(self, name: str) -> None:
         task = FlexibleAttributeImporter()
         task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
 
-    def test_flexible_init_update_delete(self):
+    def test_flexible_init_update_delete(self) -> None:
         self.load_xls("flex_init.xls")
         # Check if created correct amount of objects
         expected_attributes_count = 45
@@ -135,7 +137,7 @@ class TestFlexibles(TestCase):
         introduction = FlexibleAttribute.objects.filter(type="note", name="introduction_h_f").exists()
         self.assertFalse(introduction)
 
-    def test_flexibles_type_validation(self):
+    def test_flexibles_type_validation(self) -> None:
         # import valid file
         self.load_xls("flex_init_valid_types.xls")
 
@@ -173,14 +175,14 @@ class TestFlexibles(TestCase):
         self.assertEqual(len(group), 1)
         self.assertEqual(len(attribs), 1)
 
-    def test_flexibles_missing_name(self):
+    def test_flexibles_missing_name(self) -> None:
         self.assertRaisesMessage(ValidationError, "Name is required", self.load_xls, "flex_field_missing_name.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
-    def test_flexibles_missing_english_label(self):
+    def test_flexibles_missing_english_label(self) -> None:
         self.assertRaisesMessage(
             ValidationError, "English label cannot be empty", self.load_xls, "flex_field_missing_english_label.xls"
         )
@@ -189,10 +191,10 @@ class TestFlexibles(TestCase):
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
-    def test_load_invalid_file(self):
+    def test_load_invalid_file(self) -> None:
         self.assertRaises(XLRDError, self.load_xls, "erd arrows.jpg")
 
-    def test_reimport_soft_deleted_objects(self):
+    def test_reimport_soft_deleted_objects(self) -> None:
         self.load_xls("flex_init_valid_types.xls")
         field = FlexibleAttribute.objects.get(name="introduction_h_f")
         group = FlexibleAttributeGroup.objects.get(name="consent")

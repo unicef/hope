@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q, QuerySet
 
 import graphene
 from graphene import relay
@@ -13,9 +13,10 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
+    decode_and_get_object_required,
     decode_id_string,
     map_unicef_ids_to_households_unicef_ids,
+    to_choice_object,
 )
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
@@ -29,11 +30,10 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 
 
 def targeting_criteria_object_type_to_query(
-    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
-):
+    targeting_criteria_object_type: TargetingCriteriaObjectType, program: Union[str, Program], excluded_ids: str = ""
+) -> Q:
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
-    if not isinstance(program, Program):
-        program = decode_and_get_object(program, Program, True)
+    given_program: Program = decode_and_get_object_required(program, Program) if isinstance(program, str) else program
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
         [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
     )
@@ -45,7 +45,7 @@ def targeting_criteria_object_type_to_query(
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
         for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
             individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockBase(
-                [], not program.individual_data_needed
+                [], not given_program.individual_data_needed
             )
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
             for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
@@ -56,7 +56,7 @@ def targeting_criteria_object_type_to_query(
     return targeting_criteria_querying.get_query()
 
 
-def prefetch_selections(qs, target_population=None):
+def prefetch_selections(qs: QuerySet, target_population: Optional[target_models.TargetPopulation] = None) -> QuerySet:
     return qs.prefetch_related(
         Prefetch(
             "selections",
@@ -90,16 +90,24 @@ class Query(graphene.ObjectType):
     )
     target_population_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_target_population_status_choices(self, info, **kwargs):
-        return [{"name": name, "value": value} for value, name in target_models.TargetPopulation.STATUS_CHOICES]
+    def resolve_target_population_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(target_models.TargetPopulation.STATUS_CHOICES)
 
-    def resolve_target_population_households(parent, info, target_population, **kwargs):
+    def resolve_target_population_households(
+        parent, info: Any, target_population: target_models.TargetPopulation, **kwargs: Any
+    ) -> QuerySet:
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        queryset = prefetch_selections(target_population_model.household_list, target_population_model)
-        return queryset
+        return prefetch_selections(target_population_model.household_list, target_population_model)
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(
+        parent,
+        info: Any,
+        targeting_criteria: target_models.TargetPopulation,
+        program: Program,
+        excluded_ids: str,
+        **kwargs: Any
+    ) -> QuerySet:
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(

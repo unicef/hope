@@ -1,5 +1,6 @@
 from datetime import timedelta
 from random import randint
+from typing import Any
 
 import factory
 from factory import fuzzy
@@ -38,7 +39,6 @@ class ProgramFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    locations = factory.SubFactory(AreaFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE,
@@ -63,7 +63,7 @@ class ProgramFactory(factory.DjangoModelFactory):
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
 
     @factory.post_generation
-    def locations(self, create, extracted, **kwargs):
+    def locations(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             self.locations.add(AreaFactory())
 

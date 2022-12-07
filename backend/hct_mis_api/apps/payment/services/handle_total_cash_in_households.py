@@ -1,3 +1,6 @@
+from typing import List
+from uuid import UUID
+
 from django.db.models import F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 
@@ -5,7 +8,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan, PaymentRecord
 
 
-def handle_total_cash_in_specific_households(id_list):
+def handle_total_cash_in_specific_households(id_list: List[UUID]) -> None:
     # TODO MB ExtendedQuerySetSequence
     total_cash_received_payment_record_subquery = Subquery(
         PaymentRecord.objects.filter(household__pk=OuterRef("pk"))
@@ -43,7 +46,7 @@ def handle_total_cash_in_specific_households(id_list):
     )
 
 
-def handle_total_cash_in_households(only_new=False):
+def handle_total_cash_in_households(only_new: bool = False) -> None:
     base_queryset = Household.objects.all()
     if only_new:
         base_queryset = base_queryset.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)

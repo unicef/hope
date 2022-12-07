@@ -2,7 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from typing import Any, Iterable, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,7 +33,7 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, file_path=None):
+    def __init__(self, file_path: Optional[str] = None) -> None:
         self.file_path = file_path
 
         self.VALUES_PATHS = {
@@ -62,13 +62,14 @@ class LoadSanctionListXMLTask:
         }
 
     @staticmethod
-    def _get_text_from_path(individual_tag: ET.Element, path: str) -> str:
+    def _get_text_from_path(individual_tag: ET.Element, path: str) -> Union[str, None]:
         tag = individual_tag.find(path)
         if isinstance(tag, ET.Element):
             return tag.text
+        return None
 
     @staticmethod
-    def _get_designation(individual_tag: ET.Element, *args, **kwargs) -> Union[str, None]:
+    def _get_designation(individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Union[str, None]:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, ET.Element):
@@ -80,8 +81,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualDateOfBirth]:
         date_of_birth_tags = individual_tag.findall("INDIVIDUAL_DATE_OF_BIRTH")
         dates_of_birth = set()
@@ -131,8 +132,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualAliasName]:
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
@@ -155,7 +156,7 @@ class LoadSanctionListXMLTask:
         return aliases
 
     @staticmethod
-    def _get_country_field(individual_tag: ET.Element, path: str, *args, **kwargs) -> Union[str, None, set]:
+    def _get_country_field(individual_tag: ET.Element, path: str, *args: Any, **kwargs: Any) -> Union[str, None, set]:
         tags = individual_tag.findall(path)
 
         countries = set()
@@ -173,8 +174,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualCountries]:
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
@@ -188,7 +189,7 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: ET.Element, *args, **kwargs) -> str:
+    def _get_country_of_birth(self, individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Optional[str]:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
@@ -200,8 +201,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualNationalities]:
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
@@ -219,8 +220,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualDocument]:
         document_tags = individual_tag.findall("INDIVIDUAL_DOCUMENT")
         documents = set()
@@ -260,7 +261,7 @@ class LoadSanctionListXMLTask:
 
         return documents
 
-    def _get_individual_data(self, individual_tag: ET.Element) -> dict:
+    def _get_individual_data(self, individual_tag: ET.Element) -> Dict:
         individual_data_dict = {
             "individual": SanctionListIndividual(),
             "documents": None,
@@ -286,7 +287,7 @@ class LoadSanctionListXMLTask:
         return individual_data_dict
 
     @cached_property
-    def _get_individual_fields(self) -> list[str]:
+    def _get_individual_fields(self) -> List[str]:
         excluded_fields = {
             "id",
             "history",
@@ -297,7 +298,6 @@ class LoadSanctionListXMLTask:
             "dates_of_birth",
             "created_at",
             "updated_at",
-            # "country_of_birth",
         }
         all_fields = SanctionListIndividual._meta.get_fields(include_parents=False)
         return [field.name for field in all_fields if field.name not in excluded_fields and field.concrete is True]
@@ -352,7 +352,7 @@ class LoadSanctionListXMLTask:
 
         return individuals_to_update
 
-    def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> list[str]:
+    def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> QuerySet:
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         ids = self._get_all_individuals_from_db.difference(
             self._get_existing_individuals(individuals_reference_numbers)
@@ -367,13 +367,12 @@ class LoadSanctionListXMLTask:
         return {i.reference_number for i in individuals_from_file}
 
     @staticmethod
-    def _cast_field_value_to_correct_type(model, field_name: str, value: Any):
+    def _cast_field_value_to_correct_type(model: Any, field_name: str, value: Any) -> Any:
         field = model._meta.get_field(field_name)
         # silencing lxml warning
-        with open(os.devnull, "w") as devnull:
-            with contextlib.redirect_stderr(devnull):
-                if not value:
-                    return field.default
+        with open(os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):
+            if not value:
+                return field.default
 
         if field.get_internal_type() == "DateTimeField":
             year, month, day, *time = value.split("-")
@@ -394,7 +393,7 @@ class LoadSanctionListXMLTask:
 
         return correct_value
 
-    def execute(self):
+    def execute(self) -> None:
         if self.file_path is not None:
             tree = ET.parse(self.file_path)
         else:

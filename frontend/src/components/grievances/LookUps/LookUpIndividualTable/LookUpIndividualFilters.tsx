@@ -124,7 +124,7 @@ export function LookUpIndividualFilters({
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
-            value={filter.sex || ''}
+            value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
             SelectDisplayProps={{

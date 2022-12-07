@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -108,7 +109,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -155,23 +156,23 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
         ]
         first_individual = cls.individuals[0]
-        country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(
-            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
-        )
+        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
+        country_pol = geo_models.Country.objects.get(iso_code2="PL")
 
         cls.national_id = DocumentFactory(
             id="df1ce6e8-2864-4c3f-803d-19ec6f4c47f3",
             type=national_id_type,
             document_number="789-789-645",
             individual=first_individual,
+            country=country_pol,
         )
         cls.birth_certificate = DocumentFactory(
             id="8ad5e3b8-4c4d-4c10-8756-118d86095dd0",
             type=birth_certificate_type,
             document_number="ITY8456",
             individual=first_individual,
+            country=country_pol,
         )
         household_one.head_of_household = first_individual
         household_one.save()
@@ -286,7 +287,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_add_individual(self, _, permissions):
+    def test_approve_add_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -307,7 +308,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_update_individual(self, _, permissions):
+    def test_approve_update_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -340,7 +341,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_update_household(self, _, permissions):
+    def test_approve_update_household(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

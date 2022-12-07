@@ -2,6 +2,7 @@ import logging
 import math
 from base64 import b64decode
 from decimal import Decimal
+from typing import IO, Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -76,6 +77,8 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.utils.exceptions import log_and_raise
+from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -90,7 +93,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentVerificationMutation":
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
         node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
 
@@ -122,7 +125,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "EditPaymentVerificationMutation":
         payment_verification_id = decode_id_string(input.get("payment_verification_plan_id"))
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_id)
 
@@ -158,7 +161,9 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def processed_mutate(cls, root, info, payment_verification_plan_id, **kwargs):
+    def processed_mutate(
+            cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "ActivatePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
@@ -189,7 +194,9 @@ class FinishPaymentVerificationPlan(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
+    def mutate(
+            cls, root: Any, info: Any, payment_verification_plan_id: str, **kwargs: Any
+    ) -> "FinishPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
@@ -197,8 +204,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, payment_verification_plan.business_area)
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            logger.error("You can finish only ACTIVE verification")
-            raise GraphQLError("You can finish only ACTIVE verification")
+            log_and_raise("You can finish only ACTIVE verification")
         VerificationPlanStatusChangeServices(payment_verification_plan).finish()
         payment_verification_plan.refresh_from_db()
         log_create(
@@ -221,7 +227,9 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
+    def mutate(
+            cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "DiscardPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
@@ -253,7 +261,9 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
+    def mutate(
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "InvalidPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
@@ -285,7 +295,9 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
+    def mutate(
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "DeletePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         payment_plan = payment_verification_plan.payment_plan_obj
@@ -328,13 +340,13 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
     @transaction.atomic
     def mutate(
         cls,
-        root,
-        info,
-        payment_verification_id,
-        received_amount,
-        status,
-        **kwargs,
-    ):
+        root: Any,
+        info: Any,
+        payment_verification_id: Optional[str],
+        received_amount: Optional[int],
+        status: str,
+        **kwargs: Any,
+    ) -> "UpdatePaymentVerificationStatusAndReceivedAmount":
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
@@ -342,8 +354,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         ):
-            logger.error("You can only update status of payment verification for MANUAL verification method")
-            raise GraphQLError("You can only update status of payment verification for MANUAL verification method")
+            log_and_raise("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             logger.error(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
@@ -426,13 +437,13 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
     @transaction.atomic
     def mutate(
         cls,
-        root,
-        info,
-        payment_verification_id,
-        received_amount,
-        received,
-        **kwargs,
-    ):
+        root: Any,
+        info: Any,
+        payment_verification_id: str,
+        received_amount: Optional[int],
+        received: Optional[int],
+        **kwargs: Any,
+    ) -> "UpdatePaymentVerificationReceivedAndReceivedAmount":
         if math.isnan(received_amount):
             received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
@@ -443,8 +454,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         ):
-            logger.error("You can only update status of payment verification for MANUAL verification method")
-            raise GraphQLError("You can only update status of payment verification for MANUAL verification method")
+            log_and_raise("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             logger.error(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
@@ -453,16 +463,13 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
         if not payment_verification.is_manually_editable:
-            logger.error("You can only edit payment verification in first 10 minutes")
-            raise GraphQLError("You can only edit payment verification in first 10 minutes")
+            log_and_raise("You can only edit payment verification in first 10 minutes")
         delivered_amount = payment_verification.payment_obj.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
-            logger.error(f"You can't set received_amount {received_amount} and not set received to NO")
-            raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to NO")
+            log_and_raise("You can't set received_amount {received_amount} and not set received to NO")
         if received is None and received_amount is not None:
-            logger.error(f"You can't set received_amount {received_amount} and not set received to YES")
-            raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to YES")
+            log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
             logger.error(
                 "If received_amount is 0, you should set received to NO",
@@ -471,8 +478,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
                 "If received_amount is 0, you should set received to NO",
             )
         elif received_amount is not None and received_amount != 0 and not received:
-            logger.error(f"If received_amount({received_amount}) is not 0, you should set received to YES")
-            raise GraphQLError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
+            log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()
@@ -488,22 +494,23 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
+        return UpdatePaymentVerificationReceivedAndReceivedAmount(payment_verification)  # type: ignore
 
 
+# TODO: what about typing [0] on XlsxErrorNode
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent, info):
-        return parent[0]
+    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
+        return parent[0]  # type: ignore
 
-    def resolve_coordinates(parent, info):
-        return parent[1]
+    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
+        return parent[1]  # type: ignore
 
-    def resolve_message(parent, info):
-        return parent[2]
+    def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
+        return parent[2]  # type: ignore
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -514,24 +521,20 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, payment_verification_plan_id):
+    def mutate(cls, root: Any, info: Any, payment_verification_plan_id: str) -> "ExportXlsxPaymentVerificationPlanFile":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, payment_verification_plan.business_area)
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            logger.error("You can only export verification for active CashPlan verification")
-            raise GraphQLError("You can export verification for active CashPlan verification")
+            log_and_raise("You can only export verification for active CashPlan verification")
         if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
-            logger.error("You can only export verification when XLSX channel is selected")
-            raise GraphQLError("You can export verification when XLSX channel is selected")
+            log_and_raise("You can only export verification when XLSX channel is selected")
         if payment_verification_plan.xlsx_file_exporting:
-            logger.error("Exporting xlsx file is already started. Please wait")
-            raise GraphQLError("Exporting xlsx file is already started. Please wait")
+            log_and_raise("Exporting xlsx file is already started. Please wait")
         if payment_verification_plan.has_xlsx_payment_verification_plan_file:
-            logger.error("Xlsx file is already created")
-            raise GraphQLError("Xlsx file is already created")
+            log_and_raise("Xlsx file is already created")
 
         payment_verification_plan.xlsx_file_exporting = True
         payment_verification_plan.save()
@@ -549,18 +552,16 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, file, payment_verification_plan_id):
+    def mutate(cls, root: Any, info: Any, file: IO, payment_verification_plan_id: str) -> "ImportXlsxPaymentVerificationPlanFile":
         id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, payment_verification_plan.business_area)
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            logger.error("You can only import verification for active CashPlan verification")
-            raise GraphQLError("You can only import verification for active CashPlan verification")
+            log_and_raise("You can only import verification for active CashPlan verification")
         if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
-            logger.error("You can only import verification when XLSX channel is selected")
-            raise GraphQLError("You can only import verification when XLSX channel is selected")
+            log_and_raise("You can only import verification when XLSX channel is selected")
         import_service = XlsxVerificationImportService(payment_verification_plan, file)
         import_service.open_workbook()
         import_service.validate()
@@ -584,11 +585,11 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
     @transaction.atomic
     def mutate(
         cls,
-        root,
-        info,
-        payment_record_id,
-        **kwargs,
-    ):
+        root: Any,
+        info: Any,
+        payment_record_id: str,
+        **kwargs: Any,
+    ) -> "MarkPaymentRecordAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
@@ -596,8 +597,7 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
         try:
             mark_as_failed(payment_record)
         except ValidationError as e:
-            logger.error(e.message)
-            raise GraphQLError(e.message) from e
+            log_and_raise(e.message, e)
 
         return MarkPaymentRecordAsFailedMutation(payment_record)
 

@@ -11,11 +11,11 @@ from hct_mis_api.apps.payment.models import (
 
 
 class CreatePaymentVerifications:
-    def __init__(self, payment_verification_plan: PaymentVerificationPlan, payment_records: List[PaymentRecord]):
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan, payment_records: List[PaymentRecord]) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.payment_records = payment_records
 
-    def create(self):
+    def create(self) -> None:
         payment_record_verifications_to_create = []
         for payment_record in self.payment_records:
             payment_record_verification = PaymentVerification(

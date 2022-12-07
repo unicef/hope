@@ -96,9 +96,10 @@ export function AddIndividualGrievanceDetails({
     }) || [];
   const identityLabels =
     identities?.map((item) => {
+      const partner = item.partner || item.agency; // For backward compatibility
       return (
-        <Grid key={item.country + item.agency} item xs={6}>
-          <LabelizedField label={item.agency} value={item.number} />
+        <Grid key={item.country + partner} item xs={6}>
+          <LabelizedField label={partner} value={item.number} />
         </Grid>
       );
     }) || [];

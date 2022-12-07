@@ -143,7 +143,7 @@ export function DeleteIndividualGrievanceDetails({
     documents?.edges?.map((edge) => {
       const item = edge.node;
       return (
-        <Grid key={item.type.country + item.type.label} item xs={6}>
+        <Grid key={item.country + item.type.label} item xs={6}>
           <LabelizedField
             label={item.type.label.replace(/_/g, ' ')}
             value={item.documentNumber}

@@ -1,7 +1,8 @@
-from django.core.management import BaseCommand, call_command
-from django.db import connections
+from argparse import ArgumentParser
+from typing import Any
 
-from hct_mis_api.apps.core.management.sql import sql_drop_tables
+from django.core.management import BaseCommand, call_command
+
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import GenericPayment
 
@@ -17,7 +18,7 @@ def create_fsps():
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--skip-drop",
             action="store_true",
@@ -25,9 +26,9 @@ class Command(BaseCommand):
             help="Skip migrating - just reload the data",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if options["skip_drop"] is False:
-            self._drop_databases()
+            call_command("dropalldb")
             call_command("migratealldb")
 
         call_command("flush", "--noinput")
@@ -46,15 +47,3 @@ class Command(BaseCommand):
         create_fsps()
 
         call_command("search_index", "--rebuild", "-f")
-
-    def _drop_databases(self):
-        for connection_name in connections:
-            if connection_name == "read_only":
-                continue
-            connection = connections[connection_name]
-            with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection)
-                if not sql:
-                    continue
-                print(sql)
-                cursor.execute(sql)

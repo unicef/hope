@@ -237,9 +237,7 @@ export function EditVerificationPlan({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Edit Verification Plan')}
-              </DialogTitle>
+              <DialogTitle>{t('Edit Verification Plan')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>

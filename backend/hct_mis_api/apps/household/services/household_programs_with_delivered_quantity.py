@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+from typing import Any, Dict
+
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Coalesce
 
@@ -8,7 +10,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def programs_with_delivered_quantity(household: Household):
+def programs_with_delivered_quantity(household: Household) -> Dict[Any, Dict[str, Any]]:
     payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.all())
     programs = (
         payment_items.select_related("parent__program")
@@ -54,5 +56,4 @@ def programs_with_delivered_quantity(household: Household):
                     "currency": program["currency"],
                 }
             )
-
-    return programs_dict.values()
+    return programs_dict.values()  # type: ignore

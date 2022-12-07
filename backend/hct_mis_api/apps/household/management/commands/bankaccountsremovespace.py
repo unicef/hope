@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.household.models import BankAccountInfo
@@ -7,7 +9,7 @@ from hct_mis_api.apps.registration_datahub.models import ImportedBankAccountInfo
 class Command(BaseCommand):
     help = "Fix Bank Account info (remove space from account number and debit card number)"
 
-    def bank_acc_remove_space(self):
+    def bank_acc_remove_space(self) -> None:
         # update BankAccountInfo
         qs = BankAccountInfo.objects.all()
 
@@ -26,7 +28,7 @@ class Command(BaseCommand):
 
         ImportedBankAccountInfo.objects.bulk_update(qs, ["bank_account_number", "debit_card_number"], 1000)
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Starting fix Bank Account Info")
 
         self.bank_acc_remove_space()
