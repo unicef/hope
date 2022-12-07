@@ -1,4 +1,4 @@
-import multiprocessing
+import os
 from typing import Any
 
 bind = "0.0.0.0:8000"
@@ -6,10 +6,10 @@ backlog = 2048
 
 
 worker_class = "gthread"
-timeout = 30
+timeout = 65
 keepalive = 2
-workers = int(multiprocessing.cpu_count() / 2)
-threads = int(multiprocessing.cpu_count())
+workers = os.getenv("GUNICORN_WORKERS") or 4
+threads = os.getenv("GUNICORN_THREADS") or 10
 
 proc_name = None
 daemon = False
@@ -58,7 +58,7 @@ def worker_int(worker: Any) -> None:
             code.append('File: "{}", line {}, in {}'.format(filename, lineno, name))
             if line:
                 code.append("  {}".format(line.strip()))
-    worker.log.debug("\n".join(code))
+    worker.log.warning("\n".join(code))
 
 
 def worker_abort(worker: Any) -> None:

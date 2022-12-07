@@ -33,6 +33,7 @@ class APITestCase(SnapshotTestTestCase):
         random.seed(self.seed)
         if seed_in_env is not None:
             print(f"Random seed: {self.seed}")
+        self.maxDiff = None
 
     def tearDown(self) -> None:
         # https://stackoverflow.com/a/39606065
