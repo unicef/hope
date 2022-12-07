@@ -206,6 +206,16 @@ class DocumentFactory(factory.DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
+class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+
+
 class EntitlementCardFactory(factory.DjangoModelFactory):
     class Meta:
         model = EntitlementCard

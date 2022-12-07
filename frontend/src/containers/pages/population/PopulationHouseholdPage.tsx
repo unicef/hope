@@ -17,7 +17,7 @@ import {
 } from '../../../__generated__/graphql';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
-export function PopulationHouseholdPage(): React.ReactElement {
+export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
     text: '',
@@ -78,4 +78,4 @@ export function PopulationHouseholdPage(): React.ReactElement {
       </Box>
     </div>
   );
-}
+};
