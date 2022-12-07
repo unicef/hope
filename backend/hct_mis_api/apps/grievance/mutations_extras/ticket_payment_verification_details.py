@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict
 
 import graphene
 
@@ -13,7 +14,9 @@ class TicketPaymentVerificationDetailsExtras(graphene.InputObjectType):
     new_status = graphene.String()
 
 
-def update_ticket_payment_verification_details_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_ticket_payment_verification_details_extras(
+    root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
+) -> GrievanceTicket:
     if grievance_ticket.status != GrievanceTicket.STATUS_IN_PROGRESS:
         log_and_raise("Payment Details is editable only for Grievance Ticket on status In Progress")
 

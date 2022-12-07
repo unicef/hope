@@ -1,5 +1,7 @@
 import random
-from typing import List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
+from django.db.models import Model
 
 import factory
 from factory import enums, fuzzy
@@ -34,7 +36,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 faker = Faker()
 
 
-def flex_field_households(o):
+def flex_field_households(o: Any) -> Dict:
     return {
         "treatment_facility_h_f": random.sample(
             [
@@ -52,7 +54,7 @@ def flex_field_households(o):
     }
 
 
-def flex_field_individual(o):
+def flex_field_individual(o: Any) -> Dict:
     return {
         "wellbeing_index_i_f": random.choice(["24", "150d", "666", None]),
         "school_enrolled_before_i_f": random.choice(["0", "1", None]),
@@ -120,14 +122,14 @@ class HouseholdFactory(factory.DjangoModelFactory):
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
     @classmethod
-    def build(cls, **kwargs) -> Household:
+    def build(cls, **kwargs: Any) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
         if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs) -> Household:
+    def _create(cls, model_class: Model, *args: Any, **kwargs: Any) -> Household:
         if not (hoh := kwargs.get("head_of_household", None)):
             hoh = IndividualFactory(household=None)
             kwargs["head_of_household"] = hoh
@@ -204,6 +206,16 @@ class DocumentFactory(factory.DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
+class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+
+
 class EntitlementCardFactory(factory.DjangoModelFactory):
     class Meta:
         model = EntitlementCard
@@ -220,7 +232,9 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
 
 
-def create_household(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
+def create_household(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -262,7 +276,9 @@ def create_household(household_args=None, individual_args=None) -> Tuple[Househo
     return household, individuals
 
 
-def create_household_for_fixtures(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
+def create_household_for_fixtures(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -304,7 +320,7 @@ def create_household_for_fixtures(household_args=None, individual_args=None) -> 
 
 
 def create_household_and_individuals(
-    household_data=None, individuals_data=None, imported=False
+    household_data: Optional[Dict] = None, individuals_data: Optional[Dict] = None, imported: bool = False
 ) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
@@ -323,7 +339,7 @@ def create_household_and_individuals(
     return household, individuals
 
 
-def create_individual_document(individual, document_type=None) -> Document:
+def create_individual_document(individual: Individual, document_type: Optional[str] = None) -> Document:
     additional_fields = {}
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)

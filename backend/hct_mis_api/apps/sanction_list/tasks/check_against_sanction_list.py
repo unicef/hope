@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from itertools import permutations
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -17,9 +18,12 @@ from hct_mis_api.apps.sanction_list.models import (
     UploadedXLSXFile,
 )
 
+if TYPE_CHECKING:
+    from uuid import UUID
+
 
 class CheckAgainstSanctionListTask:
-    def execute(self, uploaded_file_id, original_file_name) -> None:
+    def execute(self, uploaded_file_id: "UUID", original_file_name: str) -> None:
         today = timezone.now()
         uploaded_file = UploadedXLSXFile.objects.get(id=uploaded_file_id)
         wb = load_workbook(uploaded_file.file, data_only=True)

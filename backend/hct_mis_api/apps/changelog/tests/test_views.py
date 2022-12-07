@@ -11,13 +11,13 @@ User = get_user_model()
 
 
 class APITestCase(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.superuser = UserFactory(is_superuser=True, is_staff=True)
         self.user = UserFactory()
 
-    def tests_changelog_list_view(self):
-        instance1 = ChangelogFactory()
-        instance2 = ChangelogFactory()
+    def tests_changelog_list_view(self) -> None:
+        instance1 = ChangelogFactory(active=True)
+        instance2 = ChangelogFactory(active=True)
         url = reverse("changelog_changelog_list")
         # Log out
         self.client.logout()
@@ -29,7 +29,7 @@ class APITestCase(TestCase):
         self.assertIn(str(instance1.version), resp.content.decode("utf-8"))
         self.assertIn(str(instance2.date), resp.content.decode("utf-8"))
 
-    def tests_changelog_detail_view(self):
+    def tests_changelog_detail_view(self) -> None:
         instance = ChangelogFactory()
         url = reverse(
             "changelog_changelog_detail",

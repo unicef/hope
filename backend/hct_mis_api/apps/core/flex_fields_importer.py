@@ -1,13 +1,16 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.db import transaction
 from django.utils.html import strip_tags
 
 import xlrd
+from openpyxl.worksheet.worksheet import Worksheet
+from xlwt import Row
 
 from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_DATE,
@@ -73,14 +76,16 @@ class FlexibleAttributeImporter:
         "deviceid",
     )
 
-    def _get_model_fields(self, object_type_to_add) -> Optional[List[str]]:
+    def _get_model_fields(self, object_type_to_add: Any) -> Optional[List[str]]:
         return {
             "attribute": self.ATTRIBUTE_MODEL_FIELDS,
             "group": self.GROUP_MODEL_FIELDS,
             "choice": self.CHOICE_MODEL_FIELDS,
         }.get(object_type_to_add)
 
-    def _assign_field_values(self, value, header_name, object_type_to_add, row, row_number) -> None:
+    def _assign_field_values(
+        self, value: Any, header_name: str, object_type_to_add: Any, row: Row, row_number: int
+    ) -> None:
         if not (model_fields := self._get_model_fields(object_type_to_add)):
             return
 
@@ -169,7 +174,7 @@ class FlexibleAttributeImporter:
             else:
                 self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
-    def _can_add_row(self, row) -> bool:
+    def _can_add_row(self, row: Row) -> bool:
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
             "_group"
         )
@@ -192,7 +197,7 @@ class FlexibleAttributeImporter:
 
         return True
 
-    def _get_list_of_field_choices(self, sheet) -> Set:
+    def _get_list_of_field_choices(self, sheet: Worksheet) -> Set:
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)
@@ -201,7 +206,7 @@ class FlexibleAttributeImporter:
 
         return {row[0].value.split(" ")[1] for row in fields_with_choices}
 
-    def _get_field_choice_name(self, row) -> Optional[str]:
+    def _get_field_choice_name(self, row: Row) -> Optional[str]:
         has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
@@ -211,7 +216,7 @@ class FlexibleAttributeImporter:
         self.json_fields_to_create = defaultdict(dict)
         self.object_fields_to_create = {}
 
-    def _handle_choices(self, sheets) -> None:
+    def _handle_choices(self, sheets: Union[Dict, Worksheet]) -> None:
         choices_assigned_to_fields = self._get_list_of_field_choices(sheets["survey"])
         choices_from_db = FlexibleAttributeChoice.objects.all()
         choices_first_row = sheets["choices"].row(0)
@@ -266,7 +271,7 @@ class FlexibleAttributeImporter:
         for choice in choices_to_delete:
             choice.delete()
 
-    def _handle_groups_and_fields(self, sheet) -> None:
+    def _handle_groups_and_fields(self, sheet: Worksheet) -> None:
         groups_from_db, attrs_from_db = (
             FlexibleAttributeGroup.objects.all(),
             FlexibleAttribute.objects.all(),
@@ -398,7 +403,7 @@ class FlexibleAttributeImporter:
     can_add_flag = True
 
     @transaction.atomic
-    def import_xls(self, xls_file) -> None:
+    def import_xls(self, xls_file: File) -> None:
         self.current_group_tree = [None]
         if isinstance(xls_file, str) and isfile(xls_file):
             wb = xlrd.open_workbook(filename=xls_file)

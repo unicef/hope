@@ -14,8 +14,8 @@ class Changelog(models.Model):
     class Meta:
         ordering = ("-date",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.version}-{self.date}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("changelog_changelog_detail", args=(self.pk,))

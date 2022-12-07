@@ -50,7 +50,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
@@ -88,7 +88,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
 
-    def test_golden_record_by_targeting_criteria_size(self):
+    def test_golden_record_by_targeting_criteria_size(self) -> None:
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -124,7 +124,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_observed_disability(self):
+    def test_golden_record_by_targeting_criteria_observed_disability(self) -> None:
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -162,7 +162,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         )
 
     # ruleFilters for observed_disability and fullname will be served with ts_vector
-    def test_golden_record_by_targeting_criteria_observed_disability_with_valid_argument(self):
+    def test_golden_record_by_targeting_criteria_observed_disability_with_valid_argument(self) -> None:
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -237,7 +237,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
@@ -245,7 +245,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
 
-    def test_golden_record_by_targeting_criteria_phone_number(self):
+    def test_golden_record_by_targeting_criteria_phone_number(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
             [{"phone_no": "+48 123456789", "full_name": "individual_with_phone"}],
@@ -284,7 +284,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_has_bank_account_info(self):
+    def test_golden_record_by_targeting_criteria_has_bank_account_info(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
             [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
@@ -326,7 +326,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self):
+    def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
             [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
@@ -368,7 +368,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_tax_id(self):
+    def test_golden_record_by_targeting_criteria_tax_id(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
             [{"full_name": "individual_without_tax_id", "phone_no": "123456789"}],

@@ -43,7 +43,7 @@ class APIToken(models.Model):
     def __str__(self) -> str:
         return f"Token #{self.pk}"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.key:
             self.key = self.generate_key()
         return super().save(*args, **kwargs)

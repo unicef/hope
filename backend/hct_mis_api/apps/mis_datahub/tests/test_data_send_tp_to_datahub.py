@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -42,7 +43,7 @@ class TestDataSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs) -> TargetPopulation:
+    def _create_target_population(**kwargs: Any) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,
@@ -60,7 +61,7 @@ class TestDataSendTpToDatahub(TestCase):
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
@@ -104,7 +105,7 @@ class TestDataSendTpToDatahub(TestCase):
         HouseholdSelection.objects.update(vulnerability_score=1.23)
 
     @classmethod
-    def create_first_household(cls, admin_area, rdi) -> None:
+    def create_first_household(cls, admin_area: Any, rdi: RegistrationDataImportFactory) -> None:
         country = Country.objects.filter(iso_code2="PL").first()
         cls.household = HouseholdFactory.build(
             size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country
@@ -121,7 +122,7 @@ class TestDataSendTpToDatahub(TestCase):
         cls.household.head_of_household = cls.individual
         cls.household.save()
 
-    def test_program_data_is_send_correctly(self):
+    def test_program_data_is_send_correctly(self) -> None:
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -143,8 +144,7 @@ class TestDataSendTpToDatahub(TestCase):
         dh_program_dict.pop("session_id")
         self.assertDictEqual(expected_program_dict, dh_program_dict)
 
-    def test_target_population_data_is_send_correctly(self):
-        self.maxDiff = None
+    def test_target_population_data_is_send_correctly(self) -> None:
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -162,8 +162,7 @@ class TestDataSendTpToDatahub(TestCase):
         dh_target_population_dict.pop("session_id")
         self.assertDictEqual(expected_target_population_dict, dh_target_population_dict)
 
-    def test_target_population_entry_data_is_send_correctly(self):
-        self.maxDiff = None
+    def test_target_population_entry_data_is_send_correctly(self) -> None:
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -181,8 +180,7 @@ class TestDataSendTpToDatahub(TestCase):
         dh_target_population_entry_dict.pop("session_id")
         self.assertDictEqual(expected_target_population_entry_dict, dh_target_population_entry_dict)
 
-    def test_individual_send_correctly(self):
-        self.maxDiff = None
+    def test_individual_send_correctly(self) -> None:
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -212,7 +210,7 @@ class TestDataSendTpToDatahub(TestCase):
         dh_expected_individual_dict.pop("session_id")
         self.assertDictEqual(expected_individual_dict, dh_expected_individual_dict)
 
-    def test_household_send_correctly(self):
+    def test_household_send_correctly(self) -> None:
         task = SendTPToDatahubTask()
         self.target_population.refresh_from_db()
         self.target_population: TargetPopulation = refresh_stats(self.target_population)

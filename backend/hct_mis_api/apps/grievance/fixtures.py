@@ -1,4 +1,5 @@
 import random
+from typing import Any
 
 import factory
 from pytz import utc
@@ -72,7 +73,7 @@ class SensitiveGrievanceTicketFactory(factory.DjangoModelFactory):
     payment_record = None
 
     @factory.post_generation
-    def create_extras(obj, create, extracted, **kwargs):
+    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
         household, individuals = create_household(
             household_args={"size": 2, "business_area": obj.ticket.business_area},
         )
@@ -92,7 +93,7 @@ class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
     payment_record = None
 
     @factory.post_generation
-    def create_extras(obj, create, extracted, **kwargs):
+    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
         household, individuals = create_household(
             household_args={"size": 2, "business_area": obj.ticket.business_area},
         )

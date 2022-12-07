@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from django import template
 from django.utils.safestring import mark_safe
@@ -11,26 +12,26 @@ register = template.Library()
 
 
 @register.filter()
-def field(obj, field_name):
+def field(obj: Any, field_name: str) -> str:
     return get_attr(obj, field_name)
 
 
 @register.filter()
-def link_to_sentry(event_id, href=False):
+def link_to_sentry(event_id: Any, href: bool = False) -> str:
     return get_sentry_url(event_id, href)
 
 
 @register.filter(name="classname")
-def get_class(value):
+def get_class(value: Any) -> Any:
     return value.__class__.__name__
 
 
 @register.filter()
-def dataset_to_json(value):
+def dataset_to_json(value: Any) -> str:
     # TODO: json.dump needs a second argument (fp)
     return json.dump(value)  # type: ignore
 
 
 @register.filter()
-def fmt_size(value):
+def fmt_size(value: Any) -> str:
     return mark_safe(sizeof(value))

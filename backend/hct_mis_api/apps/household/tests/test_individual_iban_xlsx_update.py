@@ -1,5 +1,6 @@
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 from django.conf import settings
@@ -61,7 +62,7 @@ class TestIndividualXlsxUpdate(TestCase):
     databases = "__all__"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
@@ -130,7 +131,7 @@ class TestIndividualXlsxUpdate(TestCase):
     @mock.patch(
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
-    def test_update_individuals_iban_from_xlsx_task_invalid_file_error(self, prepare_email_mock):
+    def test_update_individuals_iban_from_xlsx_task_invalid_file_error(self, prepare_email_mock: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file.id,
             uploaded_by_id=self.user.id,
@@ -148,7 +149,9 @@ class TestIndividualXlsxUpdate(TestCase):
     @mock.patch(
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
-    def test_update_individuals_iban_from_xlsx_task_invalid_file_bad_columns_fail(self, prepare_email_mock):
+    def test_update_individuals_iban_from_xlsx_task_invalid_file_bad_columns_fail(
+        self, prepare_email_mock: Any
+    ) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_bad_columns.id,
             uploaded_by_id=self.user.id,
@@ -166,7 +169,7 @@ class TestIndividualXlsxUpdate(TestCase):
     @mock.patch(
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
-    def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, prepare_email_mock):
+    def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, prepare_email_mock: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_no_match.id,
             uploaded_by_id=self.user.id,
@@ -184,7 +187,7 @@ class TestIndividualXlsxUpdate(TestCase):
     @mock.patch(
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
-    def test_update_individuals_iban_from_xlsx_task_valid_match(self, prepare_email_mock):
+    def test_update_individuals_iban_from_xlsx_task_valid_match(self, prepare_email_mock: Any) -> None:
         # creating BankAccountInfo for only one individual, second one should be populated on demand
         BankAccountInfoFactory(individual=self.individuals[0])
         self.individuals[0].save()
@@ -213,7 +216,7 @@ class TestIndividualXlsxUpdate(TestCase):
     @mock.patch(
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
-    def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, prepare_email_mock):
+    def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, prepare_email_mock: Any) -> None:
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_empty_cell.id,
             uploaded_by_id=self.user.id,

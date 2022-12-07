@@ -13,14 +13,13 @@ from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestEdopomogaCreation(APITestCase):
     databases = ("default", "registration_datahub")
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -44,19 +43,12 @@ class TestEdopomogaCreation(APITestCase):
             file=File(BytesIO(content.read_bytes()), name="edopomoga_sample.csv"),
         )
 
-    def test_edopomoga_tp_creation(self):
+    def test_edopomoga_tp_creation(self) -> None:
         create_target_population_inner = create_target_population_task.__wrapped__
-        create_target_population_inner(self.storage_file.id, self.program.id, "test_edopomoga")
+        create_target_population_inner(self.storage_file.id, self.program.id, "test_edopomoga", "test_edopomoga")
 
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
-
-        target_population = TargetPopulation.objects.first()
-
-        self.assertEqual(TargetPopulation.objects.count(), 1)
-        self.assertEqual(target_population.status, TargetPopulation.STATUS_LOCKED)
-        self.assertEqual(target_population.total_households_count, 3)
-        self.assertEqual(target_population.total_individuals_count, 5)
 
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)

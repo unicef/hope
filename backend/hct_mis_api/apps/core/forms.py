@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -8,7 +10,7 @@ from hct_mis_api.apps.program.models import Program
 
 
 class StorageFileForm(forms.Form):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
 
@@ -19,7 +21,7 @@ class StorageFileForm(forms.Form):
     def get_business_area_queryset(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(id__in=self.user.user_roles.all().values_list("business_area_id", flat=True))
 
-    def clean(self, *args, **kwargs):
+    def clean(self, *args: Any, **kwargs: Any) -> Optional[Dict[str, Any]]:
         cleaned_data = super().clean()
         limit = settings.MAX_STORAGE_FILE_SIZE * 1024 * 1024
         if self.cleaned_data["file"].size > limit:
@@ -28,9 +30,9 @@ class StorageFileForm(forms.Form):
 
 
 class ProgramForm(forms.Form):
-    name = forms.CharField(max_length=255, label="Target population name")
+    name = forms.CharField(max_length=255, label="RDI name")
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area_id = kwargs.pop("business_area_id")
         super().__init__(*args, **kwargs)
 
