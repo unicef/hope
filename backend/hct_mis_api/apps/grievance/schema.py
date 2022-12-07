@@ -17,6 +17,7 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
@@ -473,6 +474,7 @@ class Query(graphene.ObjectType):
         return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_grievances(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, object]:

@@ -11,7 +11,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   ProgramNode,
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
@@ -31,7 +31,7 @@ export function PaymentVerificationPage(): React.ReactElement {
     endDate: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
   });

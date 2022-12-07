@@ -36,7 +36,6 @@ class TestIndividualFlagQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cached_business_areas_slug_id_dict.cache_clear()
-        cls.maxDiff = None
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
