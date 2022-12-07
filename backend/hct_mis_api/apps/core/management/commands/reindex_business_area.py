@@ -1,3 +1,6 @@
+from argparse import ArgumentParser
+from typing import Any
+
 from django.core.management.base import BaseCommand
 
 from elasticsearch import Elasticsearch
@@ -21,11 +24,11 @@ ES_MAPPING_INDEX_MODEL = {
 class Command(BaseCommand):
     help = "Re-index elasticsearch documents for given index and business_area"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("index", type=str)
         parser.add_argument("business_area", type=str)
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         from django.conf import settings
 
         es = Elasticsearch(settings.ELASTICSEARCH_HOST)

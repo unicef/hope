@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -89,7 +91,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
     }
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
@@ -117,7 +119,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_golden_record_by_targeting_criteria_size(self, _, permissions):
+    def test_golden_record_by_targeting_criteria_size(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -135,7 +137,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_golden_record_by_targeting_criteria_residence_status(self, _, permissions):
+    def test_golden_record_by_targeting_criteria_residence_status(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -156,7 +158,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_golden_record_by_targeting_criteria_flex_field(self, _, permissions):
+    def test_golden_record_by_targeting_criteria_flex_field(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -174,7 +176,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_golden_record_by_targeting_criteria_select_many(self, _, permissions):
+    def test_golden_record_by_targeting_criteria_select_many(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

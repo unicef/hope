@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.core.management import call_command
 
@@ -15,6 +15,10 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.household.models import Household, Individual
+    from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class TestGrievanceCreateComplaintTicketQuery(APITestCase):
@@ -44,7 +48,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -86,7 +90,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_complaint_ticket(self, _, permissions):
+    def test_create_complaint_ticket(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._create_variables(
@@ -101,7 +105,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def test_create_a_ticket_per_payment_record(self):
+    def test_create_a_ticket_per_payment_record(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
 
         input_data = self._create_variables(
@@ -129,7 +133,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_complaint_ticket_without_payment_record(self, _, permissions):
+    def test_create_complaint_ticket_without_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._create_variables(
@@ -152,7 +156,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_complaint_ticket_with_two_payment_records(self, _, permissions):
+    def test_create_complaint_ticket_with_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._create_variables(
@@ -179,7 +183,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_complaint_ticket_without_household(self, _, permissions):
+    def test_create_complaint_ticket_without_household(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._create_variables(
@@ -202,7 +206,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_complaint_ticket_without_individual(self, _, permissions):
+    def test_create_complaint_ticket_without_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._create_variables(
@@ -225,7 +229,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_complaint_ticket_without_extras(self, _, permissions):
+    def test_create_complaint_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = self._create_variables()
@@ -236,7 +240,12 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def _create_variables(self, household=None, individual=None, payment_records=None) -> Dict:
+    def _create_variables(
+        self,
+        household: Optional["Household"] = None,
+        individual: Optional["Individual"] = None,
+        payment_records: Optional["PaymentRecord"] = None,
+    ) -> Dict:
         return {
             "input": {
                 "description": "Test Feedback",

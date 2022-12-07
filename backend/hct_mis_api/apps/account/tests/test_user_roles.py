@@ -13,19 +13,19 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 class UserRolesTest(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.role_1 = Role.objects.create(name="Role_1")
         cls.role_2 = Role.objects.create(name="Role_2")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()
 
-    def test_user_can_be_assigned_role(self):
+    def test_user_can_be_assigned_role(self) -> None:
         data = {"role": self.role_1.id, "user": self.user.id, "business_area": self.business_area.id}
         form = UserRoleAdminForm(data=data)
         self.assertTrue(form.is_valid())
 
-    def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(self):
+    def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
         userrole = UserRole.objects.create(role=self.role_1, business_area=self.business_area, user=self.user)
 
@@ -44,7 +44,7 @@ class UserRolesTest(TestCase):
         self.assertIn("role", form.errors.keys())
         self.assertIn(f"This role is incompatible with {self.role_2.name}", form.errors["role"])
 
-    def test_assign_multiple_roles_for_user_at_the_same_time(self):
+    def test_assign_multiple_roles_for_user_at_the_same_time(self) -> None:
         data = {
             "user_roles-TOTAL_FORMS": "2",
             "user_roles-INITIAL_FORMS": "0",
@@ -57,7 +57,7 @@ class UserRolesTest(TestCase):
         formset = UserRoleFormSet(instance=self.user, data=data)
         self.assertTrue(formset.is_valid())
 
-    def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(self):
+    def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
 
         data = {

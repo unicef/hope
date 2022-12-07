@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
+from typing import TYPE_CHECKING, Any, List
 
 import factory
 from factory import fuzzy
@@ -28,6 +29,10 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
@@ -258,7 +263,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def cash_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
@@ -339,7 +344,7 @@ def generate_real_cash_plans() -> None:
     )
 
 
-def generate_real_cash_plans_for_households(households):
+def generate_real_cash_plans_for_households(households: List[Household]) -> None:
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
     program = RealProgramFactory(business_area=households[0].business_area)
@@ -359,7 +364,12 @@ def generate_real_cash_plans_for_households(households):
 
 
 def create_payment_verification_plan_with_status(
-    cash_plan, user, business_area, program, target_population, status
+    cash_plan: CashPlan,
+    user: "User",
+    business_area: BusinessArea,
+    program: Program,
+    target_population: "TargetPopulation",
+    status: str,
 ) -> CashPlanPaymentVerification:
     cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
     cash_plan_payment_verification.status = status

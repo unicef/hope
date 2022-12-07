@@ -1,7 +1,7 @@
 import logging
 from dataclasses import asdict
-from datetime import datetime
-from typing import Any, Dict
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -36,17 +36,23 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 
+if TYPE_CHECKING:
+    from rest_framework.request import Request
+
+    from hct_mis_api.apps.core.models import BusinessArea
+
+
 logger = logging.getLogger(__name__)
 
 
 class BirthDateValidator:
-    def __call__(self, value):
+    def __call__(self, value: date) -> None:
         if value >= datetime.today().date():
             raise ValidationError("Birth date must be in the past")
 
 
 class HouseholdValidator:
-    def __call__(self, value):
+    def __call__(self, value: Any) -> None:
         head_of_household = None
         alternate_collector = None
         primary_collector = None
@@ -93,7 +99,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 class CollectDataMixin(serializers.Serializer):
     collect_individual_data = serializers.CharField(required=True)
 
-    def validate_collect_individual_data(self, value):
+    def validate_collect_individual_data(self, value: str) -> str:
         v = value.upper()
         if v in [COLLECT_TYPE_FULL, "FULL", "F"]:
             return COLLECT_TYPE_FULL
@@ -131,7 +137,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "mis_unicef_id",
         ]
 
-    def validate_role(self, value):
+    def validate_role(self, value: str) -> Optional[str]:
         if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
         if not value:
@@ -166,12 +172,12 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
         ]
         validators = [HouseholdValidator()]
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: ImportedHousehold) -> Dict:
         ret = super().to_representation(instance)
         ret.pop("members", None)
         return ret
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict) -> Dict:
         def get_related() -> int:
             return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 
@@ -195,17 +201,17 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         model = RegistrationDataImportDatahub
         exclude = ("business_area_slug", "import_data", "hct_id")
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
 
-    def validate_households(self, value) -> Any:
+    def validate_households(self, value: Any) -> Any:
         if not value:
             raise ValidationError("This field is required.")
         return value
 
     @atomic()
-    def create(self, validated_data) -> Dict:
+    def create(self, validated_data: Dict) -> Dict:
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
 
@@ -234,7 +240,7 @@ class UploadRDIView(HOPEAPIBusinessAreaView):
     @swagger_auto_schema(request_body=RDINestedSerializer)
     @atomic()
     @atomic(using="registration_datahub")
-    def post(self, request, business_area):
+    def post(self, request: "Request", business_area: "BusinessArea") -> Response:
         serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
         if serializer.is_valid():
             info = serializer.save(user=request.user)

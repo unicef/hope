@@ -45,7 +45,7 @@ def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
     return target_population
 
 
-def full_rebuild(target_population) -> TargetPopulation:
+def full_rebuild(target_population: TargetPopulation) -> TargetPopulation:
     households = Household.objects.filter(business_area=target_population.business_area)
     households = households.filter(target_population.targeting_criteria.get_query())
     target_population.households.set(households)

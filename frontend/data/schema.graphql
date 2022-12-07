@@ -501,8 +501,9 @@ input CreateReportInput {
   businessAreaSlug: String!
   dateFrom: Date!
   dateTo: Date!
-  adminArea: [ID]
   program: ID
+  adminArea1: ID
+  adminArea2: [ID]
 }
 
 input CreateTargetPopulationInput {
@@ -2183,7 +2184,7 @@ type ProgramsWithDeliveredQuantityNode {
 
 type Query {
   adminArea(id: ID!): AreaNode
-  allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
+  allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
@@ -2359,6 +2360,7 @@ enum RegistrationDataImportDataSource {
   DIIA
   FLEX_REGISTRATION
   API
+  EDOPOMOGA
 }
 
 enum RegistrationDataImportDatahubImportDone {
@@ -2490,8 +2492,10 @@ type ReportNode implements Node {
   dateTo: Date!
   numberOfRecords: Int
   program: ProgramNode
-  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
+  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   fileUrl: String
+  adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
+  adminArea2(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
 }
 
 type ReportNodeConnection {
