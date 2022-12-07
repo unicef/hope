@@ -1,12 +1,11 @@
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
+from typing import Any, List, Union
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from random import randint
-from typing import TYPE_CHECKING, Any, List, Union
 
 import factory
 from pytz import utc
@@ -63,10 +62,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class PaymentGFKFactory(factory.django.DjangoModelFactory):
@@ -759,7 +754,7 @@ def generate_real_cash_plans_for_households(households: List[Household]) -> None
     )
 
 
-def generate_reconciled_payment_plan() -> :
+def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()

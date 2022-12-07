@@ -402,13 +402,10 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: List[str]) -> None:
 
 
 def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -> None:
-    from hct_mis_api.apps.core.core_fields_attributes import (
+    from hct_mis_api.apps.core.field_attributes.fields_types import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,
         TYPE_SELECT_ONE,
-    )
-    from hct_mis_api.apps.core.field_attributes.fields_types import (
-        FIELD_TYPES_TO_INTERNAL_TYPE,
     )
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
@@ -689,7 +686,6 @@ def log_and_withdraw_household_if_needed(
 
 
 def save_images(flex_fields: Dict, associated_with: str) -> None:
-    from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
     from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 

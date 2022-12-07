@@ -8,7 +8,7 @@ from collections.abc import MutableMapping
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
 
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.utils import timezone
 
 import pytz

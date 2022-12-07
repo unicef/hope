@@ -100,7 +100,7 @@ class TestDeleteVerificationMutation(APITestCase):
             },
         )
 
-    def create_pending_payment_verification_plan(self) -> CashPlanPaymentVerification:
+    def create_pending_payment_verification_plan(self) -> PaymentVerificationPlan:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
@@ -110,7 +110,7 @@ class TestDeleteVerificationMutation(APITestCase):
             PaymentVerificationPlan.STATUS_PENDING,
         )
 
-    def create_active_payment_verification_plan(self) -> CashPlanPaymentVerification:
+    def create_active_payment_verification_plan(self) -> PaymentVerificationPlan:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,

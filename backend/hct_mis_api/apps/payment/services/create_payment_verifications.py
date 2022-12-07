@@ -11,7 +11,9 @@ from hct_mis_api.apps.payment.models import (
 
 
 class CreatePaymentVerifications:
-    def __init__(self, payment_verification_plan: PaymentVerificationPlan, payment_records: List[PaymentRecord]) -> None:
+    def __init__(
+        self, payment_verification_plan: PaymentVerificationPlan, payment_records: List[PaymentRecord]
+    ) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.payment_records = payment_records
 

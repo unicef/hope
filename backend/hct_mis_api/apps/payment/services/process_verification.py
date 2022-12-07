@@ -1,5 +1,6 @@
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from typing import Dict
+
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 
 
 class ProcessVerification:

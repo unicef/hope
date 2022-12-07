@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 
 
 class Sampling:
-    def __init__(self, input_data: Dict, payment_plan: Union["CashPlan", "PaymentPlan"], payment_records: QuerySet) -> None:
+    def __init__(
+        self, input_data: Dict, payment_plan: Union["CashPlan", "PaymentPlan"], payment_records: QuerySet
+    ) -> None:
         self.input_data = input_data
         self.payment_plan = payment_plan
         self.payment_records: Optional[QuerySet] = payment_records
