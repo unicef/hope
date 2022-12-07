@@ -1,20 +1,21 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
 
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 BATCH_SIZE = 5_000
 
 
 class Command(BaseCommand):
     help = "Re-index elasticsearch individuals' documents per business_area (index)"
-    es = Elasticsearch("http://elasticsearch:9200")
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
     def add_arguments(self, parser):
-        parser.add_argument("business_area", type=str, default=None)
+        parser.add_argument("business_area", type=str, default=None, nargs="?")
 
     def load_batches(self, index, business_area_slug) -> None:
         if business_area_slug in ("afghanistan", "ukraine"):
@@ -26,13 +27,9 @@ class Command(BaseCommand):
         self.stdout.write(index)
 
         while i <= count:
-            document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * (i - 1) : BATCH_SIZE * i].iterator()
-            for item in batch:
-                document = {**IndividualDocument().prepare(item), "_id": item.id}
-                document_list.append(document)
-            bulk(self.es, document_list, index=index)
+            batch = qs[BATCH_SIZE * (i - 1) : BATCH_SIZE * i]
+            populate_index(batch, get_individual_doc(business_area_slug))
             i += 1
 
     def reindex_business_area(self, business_area_slug) -> None:
