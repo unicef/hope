@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
