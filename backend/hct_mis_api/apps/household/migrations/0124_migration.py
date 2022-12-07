@@ -20,4 +20,12 @@ class Migration(migrations.Migration):
             name='documenttype',
             unique_together=set(),
         ),
+        migrations.RemoveConstraint(
+            model_name='document',
+            name='unique_if_not_removed_and_valid',
+        ),
+        migrations.AddConstraint(
+            model_name='document',
+            constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'))), fields=('document_number', 'type', 'country'), name='unique_if_not_removed_and_valid'),
+        ),
     ]
