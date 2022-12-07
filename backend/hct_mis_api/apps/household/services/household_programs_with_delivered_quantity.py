@@ -1,5 +1,4 @@
 from decimal import Decimal
-
 from typing import Any, Dict
 
 from django.db.models import DecimalField, F, Sum

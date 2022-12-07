@@ -2,8 +2,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Optional, Union
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -37,19 +36,15 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     _INDIVIDUAL,
     Scope,
 )
-from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.steficon.models import RuleCommit
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.cash_assist_datahub.models import CashPlan
 
 logger = logging.getLogger(__name__)
 
@@ -1283,9 +1278,7 @@ def build_summary(payment_plan: Union["CashPlan", "PaymentPlan"]) -> None:
     sender=PaymentVerificationPlan,
     dispatch_uid="update_verification_status_in_cash_plan",
 )
-def update_verification_status_in_cash_plan(
-        sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
-) -> None:
+def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerificationPlan, **kwargs: Any) -> None:
     build_summary(instance.payment_plan_obj)
 
 
@@ -1295,7 +1288,7 @@ def update_verification_status_in_cash_plan(
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
 def update_verification_status_in_cash_plan_on_delete(
-        sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
+    sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
 ) -> None:
     build_summary(instance.payment_plan_obj)
 

@@ -1,7 +1,7 @@
 import json
 from base64 import b64decode
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import (
@@ -14,14 +14,12 @@ from django.db.models import (
     IntegerField,
     OuterRef,
     Q,
+    QuerySet,
     Sum,
     Value,
     When,
 )
 from django.db.models.functions import Coalesce
-from typing import Any, Dict, List, Optional
-
-from django.db.models import Case, CharField, Count, Q, QuerySet, Sum, Value, When
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -886,7 +884,11 @@ class Query(graphene.ObjectType):
         node_name, obj_id = b64decode(input.get("cash_or_payment_plan_id")).decode().split(":")
         payment_plan_object = get_object_or_404(CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id)
 
-        def get_payment_records(cash_plan: Union[PaymentPlan, CashPlan], payment_verification_plan: Optional[PaymentVerificationPlan], verification_channel: str) -> QuerySet:
+        def get_payment_records(
+            cash_plan: Union[PaymentPlan, CashPlan],
+            payment_verification_plan: Optional[PaymentVerificationPlan],
+            verification_channel: str,
+        ) -> QuerySet:
             kwargs = {}
             if payment_verification_plan:
                 kwargs["payment_verification_plan"] = payment_verification_plan
@@ -935,7 +937,9 @@ class Query(graphene.ObjectType):
     def resolve_cash_plan_verification_sampling_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.SAMPLING_CHOICES)
 
-    def resolve_cash_plan_verification_verification_channel_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_cash_plan_verification_verification_channel_choices(
+        self, info: Any, **kwargs: Any
+    ) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES)
 
     def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:

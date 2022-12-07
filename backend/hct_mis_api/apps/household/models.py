@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import date
-from decimal import Decimal
 from typing import Any, List, Optional
 
 from django.conf import settings
@@ -12,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField, QuerySet
+from django.db.models import JSONField, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
