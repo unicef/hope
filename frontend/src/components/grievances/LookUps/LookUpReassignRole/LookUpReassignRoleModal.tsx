@@ -64,7 +64,7 @@ export const LookUpReassignRoleModal = ({
   } = {
     search: '',
     programs: '',
-    lastRegistrationDate: { min: '', max: '' },
+    lastRegistrationDate: { min: undefined, max: undefined },
     status: '',
     admin2: null,
     sex: '',

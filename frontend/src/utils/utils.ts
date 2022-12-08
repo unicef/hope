@@ -1,4 +1,3 @@
-
 import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
@@ -7,7 +6,8 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-  ProgramStatus, TargetPopulationBuildStatus,
+  ProgramStatus,
+  TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
@@ -202,7 +202,6 @@ export function targetPopulationBuildStatusToColor(
   return theme.palette.error.main;
 }
 
-
 export function userStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -323,6 +322,7 @@ export function columnToOrderBy(
 export function choicesToDict(
   choices: ChoiceObject[],
 ): { [key: string]: string } {
+  if (!choices) return {};
   return choices.reduce((previousValue, currentValue) => {
     const newDict = { ...previousValue };
     newDict[currentValue.value] = currentValue.name;
@@ -445,14 +445,6 @@ export function getComparator(
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-export function reduceChoices(choices): { [id: number]: string } {
-  return choices.reduce((previousValue, currentValue) => {
-    // eslint-disable-next-line no-param-reassign
-    previousValue[currentValue.value] = currentValue.name;
-    return previousValue;
-  }, {});
 }
 
 export function renderUserName(user): string {

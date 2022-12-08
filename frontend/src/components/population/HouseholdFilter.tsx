@@ -70,9 +70,9 @@ export function HouseholdFilters({
               'data-cy': 'filters-residence-status-options',
             }}
           >
-            {choicesData.residenceStatusChoices.map((program) => (
-              <MenuItem key={program.value} value={program.value}>
-                {program.name}
+            {choicesData.residenceStatusChoices?.map((status) => (
+              <MenuItem key={status.value} value={status.value}>
+                {status.name}
               </MenuItem>
             ))}
           </SelectFilter>
