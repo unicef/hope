@@ -43,7 +43,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
-    logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
@@ -546,7 +545,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             if value is not None:
                                 obj_to_create.flex_fields[header] = value
                     except Exception as e:
-                        logger.exception(e)
                         raise Exception(
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
                         ) from e
@@ -563,8 +561,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     obj_to_create = self._validate_birth_date(obj_to_create)
                     self.individuals.append(obj_to_create)
             except Exception as e:
-                logger.exception(e)
-                raise Exception(f"Error processing row {row}: {e.__class__.__name__}({e})") from e
+                raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
 
         if sheet_title == "households":
             ImportedHousehold.objects.bulk_create(self.households.values())

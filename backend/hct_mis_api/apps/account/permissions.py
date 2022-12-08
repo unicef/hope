@@ -10,12 +10,12 @@ from django.db.models import Model
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
-from graphene_django import DjangoConnectionField
 from graphene_django.filter.utils import (
     get_filtering_args_from_filterset,
     get_filterset_class,
 )
 
+from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -291,7 +291,7 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
 
-class DjangoPermissionFilterConnectionField(DjangoConnectionField):
+class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
         type: str,

@@ -1,6 +1,7 @@
+import factory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 
 faker = Faker()
 
@@ -26,3 +27,10 @@ def create_afghanistan(
             "is_payment_plan_applicable": is_payment_plan_applicable,
         },
     )
+
+
+class StorageFileFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StorageFile
+
+    business_area = factory.LazyAttribute(lambda _: BusinessArea.objects.first())

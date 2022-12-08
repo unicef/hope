@@ -13,7 +13,7 @@ from django.db import transaction
 from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -38,6 +38,8 @@ from hct_mis_api.apps.household.celery_tasks import (
     update_individuals_iban_from_xlsx_task,
 )
 from hct_mis_api.apps.household.forms import (
+    AddToTargetPopulationForm,
+    CreateTargetPopulationForm,
     MassWithdrawForm,
     RestoreForm,
     UpdateByXlsxStage1Form,
@@ -177,7 +179,13 @@ class HouseholdAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
-    actions = ["mass_withdraw", "mass_unwithdraw", "count_queryset"]
+    actions = [
+        "mass_withdraw",
+        "mass_unwithdraw",
+        "count_queryset",
+        "create_target_population",
+        "add_to_target_population",
+    ]
     cursor_ordering_field = "unicef_id"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -238,6 +246,97 @@ class HouseholdAdmin(
 
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("household.can_withdrawn")
+
+    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.targeting.models import TargetPopulation
+
+        context = self.get_common_context(request, title="Extend TargetPopulation")
+        tp: TargetPopulation
+        ba: BusinessArea
+        if "apply" in request.POST:
+            form = AddToTargetPopulationForm(request.POST, read_only=True)
+            if form.is_valid():
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
+                population = qs.filter(business_area=ba)
+                context["target_population"] = tp
+                context["population"] = population
+                context["queryset"] = qs
+                if population.count() != qs.count():
+                    context["mixed_household"] = True
+        elif "confirm" in request.POST:
+            form = AddToTargetPopulationForm(request.POST)
+            if form.is_valid():
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
+                population = qs.filter(business_area=ba)
+                with atomic():
+                    tp.households.add(*population)
+                    tp.refresh_stats()
+                    tp.save()
+                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
+                return HttpResponseRedirect(url)
+        else:
+            form = AddToTargetPopulationForm(
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "action": "add_to_target_population",
+                }
+            )
+        context["form"] = form
+        return TemplateResponse(request, "admin/household/household/add_target_population.html", context)
+
+    add_to_target_population.allowed_permissions = ["create_target_population"]
+
+    def create_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+        context = self.get_common_context(request, title="Create TargetPopulation")
+        if "apply" in request.POST:
+            form = CreateTargetPopulationForm(request.POST, read_only=True)
+            if form.is_valid():
+                program = form.cleaned_data["program"]
+                ba = program.business_area
+                population = qs.filter(business_area=ba)
+                context["program"] = program
+                context["population"] = population
+                context["queryset"] = qs
+                if population.count() != qs.count():
+                    context["mixed_household"] = True
+        elif "confirm" in request.POST:
+            form = CreateTargetPopulationForm(request.POST)
+            if form.is_valid():
+                from hct_mis_api.apps.targeting.models import TargetPopulation
+
+                program = form.cleaned_data["program"]
+                ba = program.business_area
+                population = qs.filter(business_area=ba)
+                with atomic():
+                    tp = TargetPopulation.objects.create(
+                        targeting_criteria=None,
+                        created_by=request.user,
+                        name=form.cleaned_data["name"],
+                        business_area=ba,
+                        program=program,
+                    )
+                    tp.households.set(population)
+                    tp.refresh_stats()
+                    tp.save()
+                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
+                return HttpResponseRedirect(url)
+        else:
+            form = CreateTargetPopulationForm(
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "action": "create_target_population",
+                }
+            )
+        context["form"] = form
+        return TemplateResponse(request, "admin/household/household/create_target_population.html", context)
+
+    create_target_population.allowed_permissions = ["create_target_population"]
+
+    def has_create_target_population_permission(self, request: HttpRequest) -> bool:
+        return request.user.has_perm("targeting.add_target_population")
 
     def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
@@ -320,7 +419,7 @@ class HouseholdAdmin(
             context["title"] = "Withdrawn"
             msg = "Household successfully withdrawn"
             tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
-
+        form: Union[Form, WithdrawForm]
         if request.method == "POST":
             form = WithdrawForm(request.POST)
             if form.is_valid():

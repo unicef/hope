@@ -1,6 +1,5 @@
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -91,7 +90,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             },
         }
 
-        with self.assertRaises(GraphQLError) as context:
+        with self.assertRaises(ValidationError) as context:
             reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
