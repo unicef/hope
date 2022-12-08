@@ -5,6 +5,7 @@ import urllib.parse
 from collections import Counter
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
@@ -52,8 +53,6 @@ def handle_role(role: "IndividualRoleInHousehold", household: Household, individ
 
 
 def handle_add_document(document: Document, individual: Individual) -> Document:
-    from graphql import GraphQLError
-
     from hct_mis_api.apps.household.models import Document, DocumentType
 
     type_name = document.get("type")
@@ -70,7 +69,7 @@ def handle_add_document(document: Document, individual: Individual) -> Document:
         document_number=number, type=document_type, country=country
     ).exists()
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} already exists")
+        raise ValidationError(f"Document with number {number} of type {type_name} already exists")
 
     return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
@@ -78,8 +77,6 @@ def handle_add_document(document: Document, individual: Individual) -> Document:
 @transaction.atomic
 def handle_edit_document(document_data: Dict) -> Document:
     from django.shortcuts import get_object_or_404
-
-    from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Document, DocumentType
@@ -104,7 +101,7 @@ def handle_edit_document(document_data: Dict) -> Document:
         .exists()
     )
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} already exists")
+        raise ValidationError(f"Document with number {number} of type {type_name} already exists")
 
     document = get_object_or_404(Document.objects.select_for_update(), id=document_id)
 
