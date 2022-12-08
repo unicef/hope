@@ -70,7 +70,8 @@ export function UniversalTable<T, K>({
     console.error(error);
     return <div>Unexpected error</div>;
   }
-  if (!data && loading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
 
   let correctTitle = title;
   if (getTitle) {
