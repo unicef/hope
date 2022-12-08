@@ -307,6 +307,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("title", "content_type", "arguments", "size")
     list_filter = (("report", AutoCompleteFilter),)
+    filter_horizontal = ("limit_access_to",)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
 
     def size(self, obj: ReportDocument) -> int:
@@ -314,5 +315,7 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def view(self, request, pk) -> HttpResponseRedirect:
-        url = reverse("power_query:report", args=[pk])
+        if not (obj := self.get_object(request, pk)):
+            raise Exception("Report document not found")
+        url = reverse("power_query:document", args=[obj.report.pk, pk])
         return HttpResponseRedirect(url)
