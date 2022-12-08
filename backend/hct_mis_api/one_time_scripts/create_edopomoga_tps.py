@@ -15,6 +15,9 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     create_household,
 )
+from hct_mis_api.apps.household.management.commands.detect_paid_households import (
+    find_paid_households,
+)
 from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
