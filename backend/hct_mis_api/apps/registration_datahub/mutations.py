@@ -116,12 +116,23 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
+    def validate_import_data(cls, import_data_id: Optional[str]) -> None:
+        import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
+        if import_data.status != ImportData.STATUS_FINISHED:
+            raise ValidationError("Cannot import file containing validation errors")
+
+        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+            raise ValidationError("Cannot import empty form")
+
+    @classmethod
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> "RegistrationXlsxImportMutation":
+        cls.validate_import_data(registration_data_import_data.import_data_id)
+
         (
             created_obj_datahub,
             created_obj_hct,
@@ -140,10 +151,13 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
-        registration_xlsx_import_task.delay(
-            registration_data_import_id=str(created_obj_datahub.id),
-            import_data_id=str(import_data_obj.id),
-            business_area=str(business_area.id),
+
+        transaction.on_commit(
+            lambda: registration_xlsx_import_task.delay(
+                registration_data_import_id=str(created_obj_datahub.id),
+                import_data_id=str(import_data_obj.id),
+                business_area_id=str(business_area.id),
+            )
         )
 
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
@@ -195,20 +209,13 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
-    def check_is_not_empty(cls, import_data_id: Optional[str]) -> None:
-        import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
-        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
-            logger.error("Cannot import empty KoBo form")
-            raise ValidationError("Cannot import empty KoBo form")
-
-    @classmethod
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> RegistrationXlsxImportMutation:
-        cls.check_is_not_empty(registration_data_import_data.import_data_id)
+        RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
 
         (
             created_obj_datahub,
@@ -228,10 +235,13 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
-        registration_kobo_import_task.delay(
-            registration_data_import_id=str(created_obj_datahub.id),
-            import_data_id=str(import_data_obj.id),
-            business_area=str(business_area.id),
+
+        transaction.on_commit(
+            lambda: registration_kobo_import_task.delay(
+                registration_data_import_id=str(created_obj_datahub.id),
+                import_data_id=str(import_data_obj.id),
+                business_area_id=str(business_area.id),
+            )
         )
 
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
