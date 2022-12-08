@@ -31,7 +31,7 @@ class GenerateReportService:
     FILTERS_SHEET = "Meta"
     MAX_COL_WIDTH = 75
 
-    def __init__(self, fsp: FinancialServiceProvider, business_area_slug: str = None):
+    def __init__(self, fsp: FinancialServiceProvider, business_area_slug: str = None) -> None:
         self.fsp = fsp
         self.business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug else None
 
@@ -44,10 +44,10 @@ class GenerateReportService:
         self.ws_filters = wb.create_sheet(self.FILTERS_SHEET)
         return wb
 
-    def _add_filters_info(self):
+    def _add_filters_info(self) -> None:
         self.ws_filters.append(["Business Area", self.business_area.name])
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         self.ws_report.append(self.fsp.fsp_xlsx_template.columns)
 
     def _add_rows(self) -> int:
@@ -66,7 +66,7 @@ class GenerateReportService:
         # TODO: adjust column widths
         return self.wb
 
-    def generate_report(self):
+    def generate_report(self) -> None:
         try:
             self.generate_workbook()
             with NamedTemporaryFile() as tmp:

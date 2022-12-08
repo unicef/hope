@@ -1,7 +1,7 @@
 import copy
 import logging
 from functools import reduce
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     admin_area1_query,
@@ -1694,7 +1694,7 @@ class FieldFactory(list):
     def to_dict_by(self, attr: str) -> Dict:
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
-    def to_choices(self):
+    def to_choices(self) -> List[Any]:
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
     def apply_business_area(self, business_area_slug: str) -> "FieldFactory":

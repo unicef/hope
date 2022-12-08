@@ -103,7 +103,7 @@ class TestAllFinancialServiceProviders(APITestCase):
     BUSINESS_AREA_SLUG = "afghanistan"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         permissions = [
@@ -118,19 +118,19 @@ class TestAllFinancialServiceProviders(APITestCase):
             10, fsp_xlsx_template=FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
         )
 
-    def test_fetch_count_financial_service_providers(self):
+    def test_fetch_count_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_COUNT_ALL_FSP_QUERY,
             context={"user": self.user},
         )
 
-    def test_fetch_all_financial_service_providers(self):
+    def test_fetch_all_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST_ALL_FSP_QUERY,
             context={"user": self.user},
         )
 
-    def test_create_financial_service_provider(self):
+    def test_create_financial_service_provider(self) -> None:
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
 
         self.graphql_request(
@@ -149,7 +149,7 @@ class TestAllFinancialServiceProviders(APITestCase):
             },
         )
 
-    def test_update_financial_service_provider(self):
+    def test_update_financial_service_provider(self) -> None:
         fsp = FinancialServiceProviderFactory.create()
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
 

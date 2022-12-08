@@ -159,7 +159,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
     report_url = graphene.String()
 
-    def resolve_report_url(self, info, **kwargs):
+    def resolve_report_url(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.file.url if self.file else ""
 
 
@@ -209,7 +209,7 @@ class ApprovalNode(DjangoObjectType):
         model = Approval
         fields = ("created_at", "comment", "info", "created_by")
 
-    def resolve_info(self, info):
+    def resolve_info(self, info: Any) -> graphene.String:
         return self.info
 
 
@@ -231,7 +231,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_rejected_on(self, info):
+    def resolve_rejected_on(self, info: Any) -> Optional[str]:
         if self.approvals.filter(type=Approval.REJECT).exists():
             if self.sent_for_finance_review_date:
                 return "IN_REVIEW"
@@ -241,7 +241,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
                 return "IN_APPROVAL"
         return None
 
-    def resolve_actions(self, info):
+    def resolve_actions(self, info: Any) -> "FilteredActionsListNode":
         resp = FilteredActionsListNode(
             approval=self.approvals.filter(type=Approval.APPROVAL),
             authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
@@ -260,10 +260,10 @@ class PaymentConflictDataNode(graphene.ObjectType):
     payment_id = graphene.String()
     payment_unicef_id = graphene.String()
 
-    def resolve_payment_plan_id(self, info):
+    def resolve_payment_plan_id(self, info: Any) -> Optional[str]:
         return encode_id_base64(self["payment_plan_id"], "PaymentPlan")
 
-    def resolve_payment_id(self, info):
+    def resolve_payment_id(self, info: Any) -> Optional[str]:
         return encode_id_base64(self["payment_id"], "Payment")
 
 
@@ -278,25 +278,25 @@ class GenericPaymentNode(graphene.ObjectType):
     delivered_quantity_usd = graphene.Float()
     household = graphene.Field(HouseholdNode)
 
-    def resolve_id(self, info):
+    def resolve_id(self, info: Any) -> str:
         return to_global_id(self.__class__.__name__ + "Node", self.id)
 
-    def resolve_obj_type(self, info):
+    def resolve_obj_type(self, info: Any) -> str:
         return self.__class__.__name__
 
-    def resolve_unicef_id(self, info):
+    def resolve_unicef_id(self, info: Any) -> graphene.String:
         return self.unicef_id
 
-    def resolve_currency(self, info):
+    def resolve_currency(self, info: Any) -> graphene.String:
         return self.currency
 
-    def resolve_delivered_quantity_usd(self, info):
+    def resolve_delivered_quantity_usd(self, info: Any) -> graphene.Float:
         return self.delivered_quantity_usd
 
-    def resolve_delivered_quantity(self, info):
+    def resolve_delivered_quantity(self, info: Any) -> graphene.Float:
         return self.delivered_quantity
 
-    def resolve_household(self, info):
+    def resolve_household(self, info: Any) -> graphene.Field:
         return self.household
 
 
@@ -319,46 +319,46 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment_plan_hard_conflicted_data(self, info) -> list:
+    def resolve_payment_plan_hard_conflicted_data(self, info: Any) -> List[Any]:
         if self.parent.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_hard_conflicted_data", []))
 
-    def resolve_payment_plan_soft_conflicted_data(self, info) -> list:
+    def resolve_payment_plan_soft_conflicted_data(self, info: Any) -> List[Any]:
         if self.parent.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
-    def resolve_has_payment_channel(self, info) -> bool:
+    def resolve_has_payment_channel(self, info: Any) -> bool:
         return self.collector.payment_channels.exists()
 
-    def resolve_payment_plan_hard_conflicted(self, info) -> bool:
+    def resolve_payment_plan_hard_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
 
-    def resolve_payment_plan_soft_conflicted(self, info) -> bool:
+    def resolve_payment_plan_soft_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_soft_conflicted
 
-    def resolve_target_population(self, info) -> TargetPopulation:
+    def resolve_target_population(self, info: Any) -> TargetPopulation:
         return self.parent.target_population
 
-    def resolve_full_name(self, info) -> str:
+    def resolve_full_name(self, info: Any) -> str:
         return self.head_of_household.full_name if self.head_of_household else ""
 
-    def resolve_verification(self, info) -> Optional[PaymentVerification]:
+    def resolve_verification(self, info: Any) -> graphene.Field:
         return self.verification
 
-    def resolve_distribution_modality(self, info) -> str:
+    def resolve_distribution_modality(self, info: Any) -> str:
         return self.parent.unicef_id
 
-    def resolve_total_persons_covered(self, info) -> Optional[int]:
+    def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         # TODO: in feature will get data from snap shot
         return self.household.size
 
-    def resolve_service_provider(self, info) -> Optional[FinancialServiceProvider]:
+    def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
 
     @classmethod
-    def _parse_pp_conflict_data(cls, conflicts_data):
+    def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:
         """parse list of conflicted payment plans data from Payment model json annotations"""
         return [json.loads(conflict) for conflict in conflicts_data]
 
@@ -368,13 +368,13 @@ class DeliveryMechanismNode(DjangoObjectType):
     order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
 
-    def resolve_name(self, info):
+    def resolve_name(self, info: Any) -> graphene.String:
         return self.delivery_mechanism
 
-    def resolve_order(self, info):
+    def resolve_order(self, info: Any) -> graphene.Int:
         return self.delivery_mechanism_order
 
-    def resolve_fsp(self, info):
+    def resolve_fsp(self, info: Any) -> graphene.Field:
         return self.financial_service_provider
 
     class Meta:
@@ -383,7 +383,9 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-def _calculate_volume(delivery_mechanism_per_payment_plan, field):
+def _calculate_volume(
+    delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
+) -> Optional[Decimal]:
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
     payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
@@ -398,13 +400,13 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
     volume = graphene.Float()
     volume_usd = graphene.Float()
 
-    def resolve_delivery_mechanism(self, info):
+    def resolve_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismNode":
         return self  # DeliveryMechanismNode uses the same model
 
-    def resolve_volume(self, info):  # non-usd
+    def resolve_volume(self, info: Any) -> graphene.Decimal:  # non-usd
         return _calculate_volume(self, "entitlement_quantity")
 
-    def resolve_volume_usd(self, info):
+    def resolve_volume_usd(self, info: Any) -> graphene.Decimal:
         return _calculate_volume(self, "entitlement_quantity_usd")
 
     class Meta:
@@ -418,7 +420,7 @@ class FspChoices(graphene.ObjectType):
         id = graphene.String()
         name = graphene.String()
 
-        def resolve_id(self, info):
+        def resolve_id(self, info: Any) -> Optional[str]:
             return encode_id_base64(self["id"], "FinancialServiceProvider")
 
     delivery_mechanism = graphene.String()
@@ -458,37 +460,37 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_verification_plans(self, info, **kwargs):
+    def resolve_verification_plans(self, info: Any) -> graphene.List:
         return self.get_payment_verification_plans
 
-    def resolve_approval_number_required(self, info):
+    def resolve_approval_number_required(self, info: Any) -> graphene.Int:
         return self.business_area.approval_number_required
 
-    def resolve_authorization_number_required(self, info):
+    def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
         return self.business_area.authorization_number_required
 
-    def resolve_finance_review_number_required(self, info):
+    def resolve_finance_review_number_required(self, info: Any) -> graphene.Int:
         return self.business_area.finance_review_number_required
 
-    def resolve_payments_conflicts_count(self, info):
+    def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
 
-    def resolve_currency_name(self, info):
+    def resolve_currency_name(self, info: Any) -> graphene.String:
         return self.get_currency_display()
 
-    def resolve_delivery_mechanisms(self, info):
+    def resolve_delivery_mechanisms(self, info: Any) -> graphene.List:
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
-    def resolve_has_payment_list_export_file(self, info):
+    def resolve_has_payment_list_export_file(self, info: Any) -> graphene.Boolean:
         return self.has_export_file
 
-    def resolve_imported_file_name(self, info):
+    def resolve_imported_file_name(self, info: Any) -> graphene.String:
         return self.imported_file.file.name if self.imported_file else ""
 
-    def resolve_volume_by_delivery_mechanism(self, info):
+    def resolve_volume_by_delivery_mechanism(self, info: Any) -> graphene.List:
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
-    def resolve_available_payment_records_count(self, info, **kwargs):
+    def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
 
 
@@ -502,7 +504,7 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment(self, info):
+    def resolve_payment(self, info: Any) -> graphene.Field:
         return self.get_payment
 
 
@@ -589,28 +591,29 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     dispersion_date = graphene.String()
     service_provider_full_name = graphene.String()
 
-    def resolve_id(self, info, **kwargs):
+    def resolve_id(self, info: Any, **kwargs: Any) -> str:
         return to_global_id(self.__class__.__name__ + "Node", self.id)
 
-    def resolve_obj_type(self, info, **kwargs):
+    def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
 
-    def resolve_verification_status(self, info, **kwargs):
+    def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None
 
-    def resolve_programme_name(self, info, **kwargs):
+    def resolve_programme_name(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.program.name
 
-    def resolve_verification_plans(self, info, **kwargs):
+    def resolve_verification_plans(self, info: Any, **kwargs: Any) -> graphene.List:
         return self.payment_verification_plan.all()
 
-    def resolve_assistance_measurement(self, info, **kwargs):
+    # TODO: do we need this empty fields ??
+    def resolve_assistance_measurement(self, info: Any, **kwargs: Any) -> str:
         return "HH"
 
-    def resolve_dispersion_date(self, info, **kwargs):
+    def resolve_dispersion_date(self, info: Any, **kwargs: Any) -> str:
         return ""
 
-    def resolve_service_provider_full_name(self, info, **kwargs):
+    def resolve_service_provider_full_name(self, info: Any, **kwargs: Any) -> str:
         return ""
 
 
@@ -659,39 +662,39 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     total_undelivered_quantity = graphene.Float()
     can_create_payment_verification_plan = graphene.Boolean()
 
-    def resolve_id(self, info, **kwargs):
+    def resolve_id(self, info: Any, **kwargs: Any) -> graphene.String:
         return to_global_id(self.__class__.__name__ + "Node", self.id)
 
-    def resolve_obj_type(self, info, **kwargs):
+    def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
 
-    def resolve_payment_verification_summary(self, info, **kwargs):
+    def resolve_payment_verification_summary(self, info: Any, **kwargs: Any) -> graphene.Field:
         return self.get_payment_verification_summary
 
-    def resolve_available_payment_records_count(self, info, **kwargs):
+    def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
 
-    def resolve_verification_plans(self, info, **kwargs):
+    def resolve_verification_plans(self, info: Any, **kwargs: Any) -> DjangoPermissionFilterConnectionField:
         return self.get_payment_verification_plans
 
-    def resolve_total_entitled_quantity(self, info, **kwargs):
+    def resolve_total_entitled_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
         return self.total_entitled_quantity
 
-    def resolve_total_delivered_quantity(self, info, **kwargs):
+    def resolve_total_delivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
         return self.total_delivered_quantity
 
-    def resolve_total_undelivered_quantity(self, info, **kwargs):
+    def resolve_total_undelivered_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
         return self.total_undelivered_quantity
 
-    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
+    def resolve_can_create_payment_verification_plan(self, info: Any, **kwargs: Any) -> graphene.Boolean:
         return self.can_create_payment_verification_plan
 
-    def resolve_status_date(self, info):
+    def resolve_status_date(self, info: Any, **kwargs: Any) -> graphene.DateTime:
         return self.status_date
 
-    def resolve_status(self, info):
+    def resolve_status(self, info: Any, **kwargs: Any) -> graphene.String:
         return self.status
 
 
@@ -837,7 +840,7 @@ class Query(graphene.ObjectType):
         after=graphene.String(),
     )
 
-    def resolve_available_fsps_for_delivery_mechanisms(self, info, input, **kwargs):
+    def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
@@ -845,7 +848,7 @@ class Query(graphene.ObjectType):
             .order_by("delivery_mechanism_order")
         )
 
-        def get_fsps_for_delivery_mechanism(mechanism):
+        def get_fsps_for_delivery_mechanism(mechanism: str) -> List[str, Any]:
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
             return (
                 [
@@ -889,7 +892,7 @@ class Query(graphene.ObjectType):
         payment_plan_object = get_object_or_404(CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id)
 
         def get_payment_records(
-            cash_plan: Union[PaymentPlan, CashPlan],
+            obj: Union["PaymentPlan", "CashPlan"],
             payment_verification_plan: Optional[PaymentVerificationPlan],
             verification_channel: str,
         ) -> QuerySet:
@@ -899,7 +902,7 @@ class Query(graphene.ObjectType):
             if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
                 kwargs["extra_validation"] = does_payment_record_have_right_hoh_phone_number
             kwargs["class_name"] = payment_plan_object.__class__.__name__
-            return cash_plan.available_payment_records(**kwargs)
+            return obj.available_payment_records(**kwargs)
 
         payment_verification_plan = None
         if payment_verification_plan_id := decode_id_string(input.get("payment_verification_plan_id")):
@@ -949,7 +952,7 @@ class Query(graphene.ObjectType):
     def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
-    def resolve_all_delivery_mechanisms(self, info, **kwargs):
+    def resolve_all_delivery_mechanisms(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GenericPayment.DELIVERY_TYPE_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -959,7 +962,7 @@ class Query(graphene.ObjectType):
     ) -> Dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
-        additional_filters = chart_create_filter_query_for_payment_verification_gfk(
+        additional_filters: Q = chart_create_filter_query_for_payment_verification_gfk(
             filters,
             program_id_path="payment__parent__program__id,payment_record__parent__program__id",
             administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
@@ -971,7 +974,7 @@ class Query(graphene.ObjectType):
                 "payment__business_area__slug": business_area_slug,
                 "payment_record__business_area__slug": business_area_slug,
             },
-            additional_filters=additional_filters if isinstance(additional_filters, Q) else {**additional_filters},
+            additional_filters=additional_filters,
             year_filter_path="payment__delivery_date,payment_record__delivery_date",
             payment_verification_gfk=True,
         )
@@ -1016,7 +1019,7 @@ class Query(graphene.ObjectType):
     def resolve_chart_volume_by_delivery_mechanism(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
@@ -1042,7 +1045,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_payment(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
         payment_items_dict = payment_items_qs.aggregate(
@@ -1066,7 +1069,7 @@ class Query(graphene.ObjectType):
     def resolve_section_total_transferred(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
         return {"total": payment_items_qs.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
@@ -1126,7 +1129,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_total_transferred_cash_by_country(self, info: Any, year: int, **kwargs: Any) -> Dict[str, Any]:
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, "global", {}, True)
+        payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, "global", {}, True)
 
         countries_and_amounts: dict = (
             payment_items_qs.select_related("business_area")
@@ -1163,16 +1166,16 @@ class Query(graphene.ObjectType):
 
         return {"labels": labels, "datasets": datasets}
 
-    def resolve_currency_choices(self, *args, **kwargs):
+    def resolve_currency_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""])
 
-    def resolve_payment_plan_status_choices(self, info, **kwargs):
+    def resolve_payment_plan_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentPlan.Status.choices)
 
-    def resolve_payment_plan_background_action_status_choices(self, info, **kwargs):
+    def resolve_payment_plan_background_action_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)
 
-    def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
+    def resolve_all_cash_plans_and_payment_plans(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
         service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("pk")).distinct()
         fsp_qs = FinancialServiceProvider.objects.filter(
             delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")

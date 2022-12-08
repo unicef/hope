@@ -2,11 +2,11 @@ import logging
 import math
 from base64 import b64decode
 from decimal import Decimal
-from typing import IO, Any, Dict, Optional
+from typing import IO, TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -79,6 +79,9 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -613,7 +616,9 @@ class CreateFinancialServiceProviderMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, business_area_slug, inputs):
+    def mutate(
+        cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
+    ) -> "CreateFinancialServiceProviderMutation":
         cls.has_permission(info, Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
 
         fsp = FSPService.create(inputs, info.context.user)
@@ -634,7 +639,9 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, business_area_slug, financial_service_provider_id, inputs):
+    def mutate(
+        cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
+    ) -> "EditFinancialServiceProviderMutation":
         cls.has_permission(info, Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
 
         fsp_id = decode_id_string(financial_service_provider_id)
@@ -653,7 +660,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "ActionPaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
@@ -684,7 +691,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
         cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, input.get("business_area_slug"))
 
         payment_plan = PaymentPlanService().create(input_data=input, user=info.context.user)
@@ -707,7 +714,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "UpdatePaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
@@ -736,7 +743,7 @@ class DeletePaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, payment_plan_id, **kwargs):
+    def mutate(cls, root: Any, info: Any, payment_plan_id: str, **kwargs: Any) -> "DeletePaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         old_payment_plan = copy_model_object(payment_plan)
@@ -768,7 +775,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan_id = graphene.ID(required=True)
 
     @classmethod
-    def export_action(cls, payment_plan: PaymentPlan, user) -> PaymentPlan:
+    def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
             msg = "You can only export Payment List for LOCKED Payment Plan"
             logger.error(msg)
@@ -779,7 +786,9 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, payment_plan_id, **kwargs):
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, **kwargs: Any
+    ) -> "ExportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
@@ -800,7 +809,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
-    def export_action(cls, payment_plan: PaymentPlan, user) -> PaymentPlan:
+    def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
         if payment_plan.status != PaymentPlan.Status.ACCEPTED:
             msg = "You can only export Payment List Per FSP for ACCEPTED Payment Plan"
             logger.error(msg)
@@ -814,7 +823,9 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
 
 
-def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order):
+def create_insufficient_delivery_mechanisms_message(
+    collectors_that_cant_be_paid: QuerySet[Individual], delivery_mechanisms_in_order: List[str]
+) -> str:
     needed_delivery_mechanisms = list(
         PaymentChannel.objects.select_related("delivery_mechanism")
         .filter(
@@ -841,7 +852,9 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(
+        cls, root: Any, info: Any, input: Dict, **kwargs: Any
+    ) -> "ChooseDeliveryMechanismsForPaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
         cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -914,7 +927,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "AssignFspToDeliveryMechanismMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
         cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -967,7 +980,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, file, payment_plan_id):
+    def mutate(cls, root: Any, info: Any, file: IO, payment_plan_id: str) -> "ImportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
@@ -1011,7 +1024,9 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, file, payment_plan_id):
+    def mutate(
+        cls, root: Any, info: Any, file: IO, payment_plan_id: str
+    ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
@@ -1043,7 +1058,9 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, payment_plan_id, steficon_rule_id):
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, steficon_rule_id: str
+    ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         cls.has_permission(

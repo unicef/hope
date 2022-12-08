@@ -1,6 +1,7 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
@@ -42,19 +43,19 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
 )
 
 
-def valid_file():
+def valid_file() -> File:
     content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
     return File(BytesIO(content), name="pp_payment_list_valid.xlsx")
 
 
-def invalid_file():
+def invalid_file() -> File:
     content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_invalid.xlsx").read_bytes()
     return File(BytesIO(content), name="pp_payment_list_invalid.xlsx")
 
 
 class ImportExportPaymentPlanPaymentListTest(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
@@ -100,7 +101,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             file=invalid_file(),
         ).file
 
-    def test_import_invalid_file(self):
+    def test_import_invalid_file(self) -> None:
         error_msg = [
             ("Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"),
             (
@@ -126,7 +127,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
-    def test_import_valid_file(self, mock_parent_init):
+    def test_import_valid_file(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
         not_excluded_payments = self.payment_plan.not_excluded_payments.all()
         # override imported payment id
@@ -155,7 +156,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(float_to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
         self.assertEqual("Cash", payment_2.collector.payment_channels.first().delivery_mechanism.delivery_mechanism)
 
-    def test_export_payment_plan_payment_list(self):
+    def test_export_payment_plan_payment_list(self) -> None:
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
@@ -168,7 +169,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)
         self.assertEqual(wb.active["F2"].value, "")
 
-    def test_export_payment_plan_payment_list_per_fsp(self):
+    def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
         )

@@ -1,6 +1,7 @@
 import os
 import tempfile
 from datetime import timedelta
+from typing import TYPE_CHECKING, Any, Tuple
 from unittest.mock import patch
 from zipfile import ZipFile
 
@@ -38,6 +39,9 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.household.models import Household, Individual
 
 CREATE_PROGRAMME_MUTATION = """
 mutation CreateProgram($programData: CreateProgramInput!) {
@@ -198,7 +202,7 @@ mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Uplo
 
 class TestPaymentPlanReconciliation(APITestCase):
     @classmethod
-    def create_household_and_individual(cls):
+    def create_household_and_individual(cls) -> Tuple["Household", "Individual"]:
         household, individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
@@ -210,7 +214,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         return household, individuals[0]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan(
             is_payment_plan_applicable=True,
             approval_number_required=1,
@@ -261,7 +265,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate):
+    def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
         create_programme_response = self.graphql_request(
             request_string=CREATE_PROGRAMME_MUTATION,
             context={"user": self.user},
