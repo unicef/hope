@@ -1,4 +1,4 @@
-from graphql import GraphQLError
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -91,7 +91,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             },
         }
 
-        with self.assertRaises(GraphQLError) as context:
+        with self.assertRaises(ValidationError) as context:
             reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
