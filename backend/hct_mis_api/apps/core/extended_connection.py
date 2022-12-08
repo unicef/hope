@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 from typing import Any
 
 from django.db.models import QuerySet
@@ -17,6 +18,8 @@ from graphql_relay.connection.arrayconnection import (
 
 from hct_mis_api.apps.core.utils import save_data_in_cache
 
+logger = logging.getLogger(__name__)
+
 
 class DjangoFastConnectionField(DjangoConnectionField):
     @classmethod
@@ -29,7 +32,7 @@ class DjangoFastConnectionField(DjangoConnectionField):
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
         except Exception as e:
-            print(e)
+            logger.exception(e)
             return iterable.count()
 
     @classmethod
