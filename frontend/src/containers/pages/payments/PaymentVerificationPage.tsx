@@ -11,7 +11,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   ProgramNodeEdge,
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
@@ -31,17 +31,19 @@ export function PaymentVerificationPage(): React.ReactElement {
     endDate: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
   });
   if (loading) return <LoadingComponent />;
-  if (permissions === null) return null;
+  if (!data || permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   const allPrograms = get(data, 'allPrograms.edges', []);
-  const programs: Array<ProgramNodeEdge["node"]> = allPrograms.map((edge: ProgramNodeEdge) => edge.node);
+  const programs: Array<ProgramNodeEdge['node']> = allPrograms.map(
+    (edge: ProgramNodeEdge) => edge.node,
+  );
 
   return (
     <>

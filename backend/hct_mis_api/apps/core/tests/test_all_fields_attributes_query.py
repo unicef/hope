@@ -41,7 +41,6 @@ class TestMetaDataFilterType(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.maxDiff = None
         call_command("loadflexfieldsattributes")
         # graph query to be called.
         cls.user = UserFactory.create()

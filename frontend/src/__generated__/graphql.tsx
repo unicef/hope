@@ -5389,7 +5389,8 @@ export enum RegistrationDataImportDataSource {
   Kobo = 'KOBO',
   Diia = 'DIIA',
   FlexRegistration = 'FLEX_REGISTRATION',
-  Api = 'API'
+  Api = 'API',
+  Edopomoga = 'EDOPOMOGA'
 }
 
 export type RegistrationDataImportNode = Node & {

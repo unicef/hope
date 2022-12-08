@@ -20,7 +20,7 @@ import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import {
   grievanceTicketStatusToColor,
-  reduceChoices,
+  choicesToDict,
 } from '../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
@@ -74,11 +74,11 @@ export const LinkedGrievancesModal = ({
 
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(grievancesChoices.grievanceTicketStatusChoices);
+  } = choicesToDict(grievancesChoices.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(grievancesChoices.grievanceTicketCategoryChoices);
+  } = choicesToDict(grievancesChoices.grievanceTicketCategoryChoices);
 
   const renderRow = (row): React.ReactElement => {
     return (

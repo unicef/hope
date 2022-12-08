@@ -12,7 +12,7 @@ class Changelog(models.Model):
     date = models.DateField(auto_now=True)
 
     class Meta:
-        ordering = ("-date",)
+        ordering = ("date",)
 
     def __str__(self) -> str:
         return f"{self.version}-{self.date}"

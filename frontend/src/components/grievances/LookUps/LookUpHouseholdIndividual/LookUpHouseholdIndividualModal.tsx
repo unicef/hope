@@ -23,6 +23,7 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { TabPanel } from '../../../core/TabPanel';
 import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
@@ -98,7 +99,8 @@ export const LookUpHouseholdIndividualModal = ({
   } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
   });
-  if (loading || choicesLoading) return null;
+  if (!data || !choicesData) return null;
+  if (loading || choicesLoading) return <LoadingComponent />;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);

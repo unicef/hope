@@ -36,7 +36,11 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
+<<<<<<< HEAD
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+=======
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
+>>>>>>> origin
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -949,6 +953,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(GenericPayment.DELIVERY_TYPE_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_payment_verification(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
@@ -1007,6 +1012,7 @@ class Query(graphene.ObjectType):
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_volume_by_delivery_mechanism(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
@@ -1034,6 +1040,7 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": [{"data": data}]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_payment(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
@@ -1055,6 +1062,7 @@ class Query(graphene.ObjectType):
         return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_section_total_transferred(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, Any]:
@@ -1064,6 +1072,7 @@ class Query(graphene.ObjectType):
         return {"total": payment_items_qs.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_table_total_cash_transferred_by_administrative_area(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
@@ -1115,6 +1124,7 @@ class Query(graphene.ObjectType):
         return {"data": data}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_total_transferred_cash_by_country(self, info: Any, year: int, **kwargs: Any) -> Dict[str, Any]:
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, "global", {}, True)
 
