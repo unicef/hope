@@ -1,5 +1,7 @@
 import datetime
 import random
+from argparse import ArgumentParser
+from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -30,7 +32,7 @@ class Command(BaseCommand):
 
     help = "Generate fake file for RDI"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--households",
             dest="households_count",
@@ -41,7 +43,7 @@ class Command(BaseCommand):
             help="Creates provided amount of program objects.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         wb = TemplateFileGenerator.get_template_file()
         households_ws = wb["Households"]
         individuals_ws = wb["Individuals"]

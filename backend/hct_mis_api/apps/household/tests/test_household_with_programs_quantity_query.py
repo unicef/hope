@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -30,7 +32,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -95,7 +97,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_household_query_single(self, _, permissions):
+    def test_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

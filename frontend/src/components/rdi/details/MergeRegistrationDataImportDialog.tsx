@@ -56,9 +56,7 @@ export function MergeRegistrationDataImportDialog({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Merge Import')}
-          </DialogTitle>
+          <DialogTitle>{t('Merge Import')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>

@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from typing import Dict
 
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -23,19 +24,17 @@ from .base import HOPEApiTestCase
 
 
 class CreateRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.url = reverse("api:rdi-create", args=[cls.business_area.slug])
 
-    def test_create_rdi(self):
+    def test_create_rdi(self) -> None:
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_data_policy": "FULL",
         }
         response = self.client.post(self.url, data, format="json")
@@ -50,20 +49,20 @@ class CreateRDITests(HOPEApiTestCase):
 
 
 class PushToRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
-    def test_push(self):
+    def test_push(self) -> None:
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
-        data = [
+        input_data = [
             {
                 "residence_status": "",
                 "village": "village1",
@@ -97,10 +96,10 @@ class PushToRDITests(HOPEApiTestCase):
                 "size": 1,
             }
         ]
-        response = self.client.post(self.url, data, format="json")
+        response = self.client.post(self.url, input_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
-        data = response.json()
+        data: Dict = response.json()
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
 
@@ -119,11 +118,11 @@ class PushToRDITests(HOPEApiTestCase):
 
 
 class CompleteRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.rdi = RegistrationDataImportDatahub.objects.create(
             business_area_slug=cls.business_area.slug, import_done=RegistrationDataImport.LOADING
@@ -139,7 +138,7 @@ class CompleteRDITests(HOPEApiTestCase):
 
         cls.url = reverse("api:rdi-complete", args=[cls.business_area.slug, str(cls.rdi.id)])
 
-    def test_complete(self):
+    def test_complete(self) -> None:
         data = {}
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, str(response.json()))

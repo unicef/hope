@@ -90,9 +90,7 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Select File to Import')}
-          </DialogTitle>
+          <DialogTitle>{t('Select File to Import')}</DialogTitle>
           <>
             <DropzoneField
               dontShowFilename={false}

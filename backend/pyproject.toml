@@ -53,7 +53,7 @@ show_error_codes = true
 exclude = [
   "migrations",
   "venv",
-  "tests", # TODO
+#  "tests"
 ]
 
 strict = true
@@ -68,7 +68,6 @@ disable_error_code = [
   "misc", # cannot subclass DjangoObjectType
   "union-attr",
   "type-arg", # this misses type parameters for graphene.ObjectType
-  "no-untyped-def",
   "no-any-return", # this enforces adding return None for function that returns None
 ]
 
@@ -78,7 +77,7 @@ django_settings_module = "hct_mis_api.settings.dev"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.11.1"
+version = "2022.12.1"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -163,6 +162,7 @@ xlrd = "1.2.0"
 django-admin-cursor-paginator = "^0.1.3"
 jmespath = "^1.0.1"
 update = "^0.0.1"
+django-markdownify = "^0.9.2"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.10"

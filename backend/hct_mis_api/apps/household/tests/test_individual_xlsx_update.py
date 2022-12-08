@@ -24,19 +24,19 @@ from hct_mis_api.apps.household.services.individual_xlsx_update import (
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
-def valid_file():
+def valid_file() -> File:
     content = Path(f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file.xlsx").read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file.xlsx")
 
 
-def valid_file_complex():
+def valid_file_complex() -> File:
     content = Path(
         f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file_complex.xlsx"
     ).read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file_complex.xlsx")
 
 
-def invalid_file():
+def invalid_file() -> File:
     content = Path(
         f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/invalid_updated_test_file.xlsx"
     ).read_bytes()
@@ -47,7 +47,7 @@ class TestIndividualXlsxUpdate(APITestCase):
     databases = "__all__"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -128,7 +128,7 @@ class TestIndividualXlsxUpdate(APITestCase):
             household_data=household_data, individuals_data=individuals_data
         )
 
-    def test_generate_report(self):
+    def test_generate_report(self) -> None:
         # Given
         updater = IndividualXlsxUpdate(self.xlsx_update_file)
 
@@ -140,7 +140,7 @@ class TestIndividualXlsxUpdate(APITestCase):
         self.assertEqual(len(report[IndividualXlsxUpdate.STATUS_NO_MATCH]), 1)
         self.assertEqual(len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH]), 1)
 
-    def test_update_individuals(self):
+    def test_update_individuals(self) -> None:
         # Given
         updater = IndividualXlsxUpdate(self.xlsx_update_file)
 
@@ -155,13 +155,13 @@ class TestIndividualXlsxUpdate(APITestCase):
         self.assertEqual(self.individuals[2].family_name, "Kowalska")
         self.assertEqual(self.individuals[3].family_name, "Dąbrowska")
 
-    def test_raise_error_when_invalid_columns(self):
+    def test_raise_error_when_invalid_columns(self) -> None:
         with self.assertRaises(InvalidColumnsError) as context:
             IndividualXlsxUpdate(self.xlsx_update_invalid_file)
 
         self.assertTrue("Invalid columns" in str(context.exception))
 
-    def test_complex_update_individual(self):
+    def test_complex_update_individual(self) -> None:
         # Given
         updater = IndividualXlsxUpdate(self.xlsx_update_valid_file_complex)
 

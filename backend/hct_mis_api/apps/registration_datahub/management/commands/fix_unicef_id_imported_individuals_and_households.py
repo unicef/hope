@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 from django.db.models import Q
 
@@ -20,6 +22,6 @@ def update_mis_unicef_id_individual_and_household() -> None:
 class Command(BaseCommand):
     help = "Fix unicef id for imported Households and Individuals"
 
-    def handle(self, *args, **options) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         update_mis_unicef_id_individual_and_household()
         self.stdout.write("Unicef id fixed for imported Households and Individuals")

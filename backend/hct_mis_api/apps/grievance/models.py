@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -13,7 +13,6 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -21,11 +20,16 @@ from hct_mis_api.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.household.models import Household, Individual
+    from hct_mis_api.apps.payment.models import PaymentRecord
+
+
 logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketManager(models.Manager):
-    def belong_household(self, household) -> Iterable:
+    def belong_household(self, household: "Household") -> Iterable:
         individuals = household.individuals.values_list("id", flat=True)
         return chain(
             (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
@@ -162,25 +166,20 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         (STATUS_ON_HOLD, _("On Hold")),
     )
 
-    CATEGORY_CHOICES = (
+    MANUAL_CATEGORIES = (
         (CATEGORY_DATA_CHANGE, _("Data Change")),
         (CATEGORY_GRIEVANCE_COMPLAINT, _("Grievance Complaint")),
-        (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
         (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
-        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_REFERRAL, _("Referral")),
         (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
+    )
+    SYSTEM_CATEGORIES = (
+        (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
-    MANUAL_CATEGORIES = (
-        CATEGORY_DATA_CHANGE,
-        CATEGORY_GRIEVANCE_COMPLAINT,
-        CATEGORY_NEGATIVE_FEEDBACK,
-        CATEGORY_POSITIVE_FEEDBACK,
-        CATEGORY_REFERRAL,
-        CATEGORY_SENSITIVE_GRIEVANCE,
-    )
+    CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
@@ -314,7 +313,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t) -> List:
+    def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]
 
     @property
@@ -345,15 +344,15 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return getattr(self, details_name, None)
 
     @property
-    def status_log(self) -> Dict:
-        return choices_to_dict(GrievanceTicket.STATUS_CHOICES)[self.status]
+    def status_log(self) -> str:
+        return self.get_status_display()
 
     @property
-    def category_log(self) -> Dict:
-        return choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.category]
+    def category_log(self) -> str:
+        return self.get_category_display()
 
     @property
-    def issue_type_log(self):
+    def issue_type_log(self) -> Optional[str]:
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -378,7 +377,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
@@ -507,7 +506,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self):
+    def household(self) -> "Household":
         return self.individual.household
 
 
@@ -543,7 +542,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
 
     @property
-    def household(self):
+    def household(self) -> "Household":
         return self.individual.household
 
 
@@ -559,6 +558,14 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
     )
     role_reassign_data = JSONField(default=dict)
     approve_status = models.BooleanField(default=False)
+    reason_household = models.ForeignKey(
+        "household.Household",
+        related_name="+",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
 
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
@@ -577,11 +584,11 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
     @property
-    def household(self):
+    def household(self) -> "Household":
         return self.golden_records_individual.household
 
     @property
-    def individual(self):
+    def individual(self) -> "Individual":
         return self.golden_records_individual
 
 
@@ -607,7 +614,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     score_max = models.FloatField(default=0.0)
 
     @property
-    def has_duplicated_document(self):
+    def has_duplicated_document(self) -> bool:
         if not self.is_multiple_duplicates_version:
             documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
             documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
@@ -628,11 +635,11 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             return False
 
     @property
-    def household(self):
+    def household(self) -> "Household":
         return self.golden_records_individual.household
 
     @property
-    def individual(self):
+    def individual(self) -> "Individual":
         return self.golden_records_individual
 
 
@@ -661,19 +668,19 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
 
     @property
-    def has_multiple_payment_verifications(self):
+    def has_multiple_payment_verifications(self) -> bool:
         return bool(self.payment_verifications.count())
 
     @property
-    def household(self):
+    def household(self) -> Optional["Household"]:
         return getattr(self.payment_record, "household", None)
 
     @property
-    def individual(self):
+    def individual(self) -> Optional["Individual"]:
         return getattr(self.payment_record, "head_of_household", None)
 
     @property
-    def payment_record(self):
+    def payment_record(self) -> Optional["PaymentRecord"]:
         return getattr(self.payment_verification, "payment_record", None)
 
 
@@ -750,6 +757,6 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 @receiver(post_save, sender=TicketSystemFlaggingDetails)
 @receiver(post_save, sender=TicketNeedsAdjudicationDetails)
 @receiver(post_save, sender=TicketPaymentVerificationDetails)
-def update_household_unicef_id(sender, instance, *args, **kwargs):
+def update_household_unicef_id(sender: Any, instance: GrievanceTicket, *args: Any, **kwargs: Any) -> None:
     instance.ticket.household_unicef_id = getattr(instance.household, "unicef_id", None)
     instance.ticket.save(update_fields=("household_unicef_id",))

@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -75,7 +77,7 @@ class TestImportedIndividualQuery(APITestCase):
     MIN_AGE = 37
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -148,7 +150,7 @@ class TestImportedIndividualQuery(APITestCase):
             ),
         ]
     )
-    def test_imported_individual_query(self, _, permissions, query):
+    def test_imported_individual_query(self, _: Any, permissions: List[Permissions], query: str) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -162,7 +164,7 @@ class TestImportedIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_imported_individual_query_single(self, _, permissions):
+    def test_imported_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

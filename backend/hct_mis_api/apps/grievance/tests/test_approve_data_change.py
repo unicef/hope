@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -108,7 +109,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -286,7 +287,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_add_individual(self, _, permissions):
+    def test_approve_add_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -307,7 +308,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_update_individual(self, _, permissions):
+    def test_approve_update_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -340,7 +341,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_update_household(self, _, permissions):
+    def test_approve_update_household(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

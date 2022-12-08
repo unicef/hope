@@ -1,8 +1,10 @@
+from typing import Dict
+
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 
 
 class ProcessVerification:
-    def __init__(self, input_data, cash_plan_payment_verification: CashPlanPaymentVerification) -> None:
+    def __init__(self, input_data: Dict, cash_plan_payment_verification: CashPlanPaymentVerification) -> None:
         self.input_data = input_data
         self.cash_plan_payment_verification = cash_plan_payment_verification
 

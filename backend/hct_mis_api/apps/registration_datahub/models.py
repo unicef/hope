@@ -46,9 +46,9 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -200,7 +200,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_valid = models.BooleanField(default=False)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_alternative_valid = models.BooleanField(default=False)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -287,17 +289,13 @@ class ImportedIndividual(TimeStampedUUIDModel):
         return self.registration_data_import.business_area
 
     @property
-    def phone_no_valid(self) -> bool:
-        return is_right_phone_number_format(str(self.phone_no))
-
-    @property
-    def phone_no_alternative_valid(self) -> bool:
-        return is_right_phone_number_format(str(self.phone_no_alternative))
-
-    @property
     def role(self) -> Optional[str]:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        recalculate_phone_numbers_validity(self, ImportedIndividual)
+        super().save(*args, **kwargs)
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
@@ -350,11 +348,11 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         ordering = ("name",)
         permissions = (["api_upload", "Can upload"],)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
-    def business_area(self):
+    def business_area(self) -> str:
         return self.business_area_slug
 
     @property
@@ -442,24 +440,7 @@ class ImportedDocument(TimeStampedUUIDModel):
                 raise ValidationError("Document number is not validating")
 
 
-class ImportedAgency(models.Model):
-    type = models.CharField(
-        max_length=100,
-    )
-    label = models.CharField(
-        max_length=100,
-    )
-    country = CountryField()
-
-    class Meta:
-        unique_together = ("country", "type")
-
-    def __str__(self) -> str:
-        return f"{self.label}"
-
-
 class ImportedIndividualIdentity(models.Model):
-    agency = models.ForeignKey("ImportedAgency", related_name="identities", on_delete=models.CASCADE)
     individual = models.ForeignKey(
         "ImportedIndividual",
         related_name="identities",
@@ -468,12 +449,14 @@ class ImportedIndividualIdentity(models.Model):
     document_number = models.CharField(
         max_length=255,
     )
+    country = CountryField(default="U")
+    partner = models.CharField(max_length=100, null=True)
 
     class Meta:
         verbose_name_plural = "Imported Individual Identities"
 
     def __str__(self) -> str:
-        return f"{self.agency} {self.individual} {self.document_number}"
+        return f"{self.partner} {self.individual} {self.document_number}"
 
 
 class KoboImportedSubmission(models.Model):
@@ -554,7 +537,7 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:
@@ -666,7 +649,7 @@ class DiiaIndividual(models.Model):
     def full_name(self) -> str:
         return f"{self.last_name} {self.first_name} {self.second_name}"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.iban:
             self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)
