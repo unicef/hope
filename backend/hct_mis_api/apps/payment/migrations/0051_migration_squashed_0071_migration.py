@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("steficon", "0017_migration"),
         ("household", "0109_migration"),
-        ("core", "0059_migration"),
+        ("core", "0060_migration"),
         ("household", "0119_migration"),
         ("program", "0035_migration"),
         ("payment", "0050_migration"),
