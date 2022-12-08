@@ -5,10 +5,7 @@ import openpyxl
 from graphql import GraphQLError
 from xlwt import Row
 
-from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-    PaymentVerification,
-)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import (
     float_to_decimal,
     from_received_yes_no_to_status,

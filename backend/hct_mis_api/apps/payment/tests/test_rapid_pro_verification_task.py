@@ -191,8 +191,8 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         assert is_valid_phone_number(
-            payment_record_verification.payment_record.head_of_household.phone_no
-        ), payment_record_verification.payment_record.head_of_household.phone_no
+            payment_record_verification.payment_obj.head_of_household.phone_no
+        ), payment_record_verification.payment_obj.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
@@ -215,8 +215,8 @@ class TestRapidProVerificationTask(TestCase):
             PaymentVerification.STATUS_PENDING,
         )
         assert is_valid_phone_number(
-            payment_record_verification.payment_record.head_of_household.phone_no
-        ), payment_record_verification.payment_record.head_of_household.phone_no
+            payment_record_verification.payment_obj.head_of_household.phone_no
+        ), payment_record_verification.payment_obj.head_of_household.phone_no
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment_obj.head_of_household.phone_no),
@@ -257,8 +257,8 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         assert is_valid_phone_number(
-            payment_record_verification.payment_record.head_of_household.phone_no
-        ), payment_record_verification.payment_record.head_of_household.phone_no
+            payment_record_verification.payment_obj.head_of_household.phone_no
+        ), payment_record_verification.payment_obj.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
