@@ -20,13 +20,8 @@ export const WarningTooltip = ({
   handleClick,
 }: WarningTooltipProps): React.ReactElement => {
   return (
-<<<<<<< HEAD
     <Tooltip onClick={handleClick} title={message}>
-      <StyledWarning confirmed={confirmed} />
-=======
-    <Tooltip title={message}>
       <StyledWarning confirmed={confirmed ? 1 : 0} />
->>>>>>> develop
     </Tooltip>
   );
 };

@@ -53,6 +53,7 @@ export const GrievanceTicket = gql`
       paymentRecord {
         id
         caId
+        deliveredQuantity
       }
       relatedTickets {
         id
@@ -160,10 +161,6 @@ export const GrievanceTicket = gql`
           edges {
             node {
               id
-              # paymentRecord {
-              #   id
-              #   caId
-              # }
             }
           }
         }

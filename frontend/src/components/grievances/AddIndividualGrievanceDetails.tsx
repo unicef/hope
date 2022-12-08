@@ -6,7 +6,7 @@ import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
@@ -19,7 +19,7 @@ export function AddIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();

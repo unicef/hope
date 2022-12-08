@@ -2,21 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-<<<<<<< HEAD
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  targetPopulationBuildStatusToColor,
-  targetPopulationStatusMapping,
-  targetPopulationStatusToColor,
-} from '../../../utils/utils';
-import {
-  TargetPopulationQuery,
-  TargetPopulationStatus,
-  useBusinessAreaDataQuery,
-=======
 import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -25,7 +11,7 @@ import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
->>>>>>> develop
+  useBusinessAreaDataQuery,
 } from '../../../__generated__/graphql';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
