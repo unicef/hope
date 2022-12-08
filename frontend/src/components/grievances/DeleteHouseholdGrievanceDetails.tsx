@@ -6,13 +6,7 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { choicesToDict } from '../../utils/utils';
 import {
-<<<<<<< HEAD
-  GrievanceTicketDocument,
-  GrievanceTicketNode,
-  useApproveDeleteHouseholdDataChangeMutation,
-=======
   GrievanceTicketQuery,
->>>>>>> develop
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
@@ -32,7 +26,7 @@ export const DeleteHouseholdGrievanceDetails = ({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();

@@ -218,8 +218,8 @@ export function paymentPlanStatusToColor(
 ): string {
   const colorsMap = {
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
-    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
     [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InReview]: theme.hctPalette.blue,

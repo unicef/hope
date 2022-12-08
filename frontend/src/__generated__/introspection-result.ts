@@ -24,68 +24,19 @@
             "name": "AreaTypeNode"
           },
           {
-<<<<<<< HEAD
             "name": "HouseholdNode"
-=======
-            "name": "GrievanceTicketNode"
+          },
+          {
+            "name": "IndividualNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "UserNode"
           },
           {
             "name": "IndividualIdentityNode"
-          },
-          {
-            "name": "IndividualNode"
-          },
-          {
-            "name": "HouseholdNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
-          },
-          {
-            "name": "UserBusinessAreaNode"
-          },
-          {
-            "name": "PaymentRecordNode"
-          },
-          {
-            "name": "CashPlanNode"
-          },
-          {
-            "name": "ProgramNode"
-          },
-          {
-            "name": "TargetPopulationNode"
->>>>>>> develop
-          },
-          {
-            "name": "RuleCommitNode"
-          },
-          {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationSummaryNode"
-          },
-          {
-            "name": "UserNode"
           },
           {
             "name": "UserBusinessAreaNode"
@@ -121,7 +72,6 @@
             "name": "TicketSensitiveDetailsNode"
           },
           {
-<<<<<<< HEAD
             "name": "PaymentVerificationNode"
           },
           {
@@ -173,29 +123,6 @@
             "name": "TicketHouseholdDataUpdateDetailsNode"
           },
           {
-=======
-            "name": "PaymentVerificationLogEntryNode"
-          },
-          {
-            "name": "TicketHouseholdDataUpdateDetailsNode"
-          },
-          {
-            "name": "TicketAddIndividualDetailsNode"
-          },
-          {
-            "name": "TicketDeleteHouseholdDetailsNode"
-          },
-          {
-            "name": "TicketPositiveFeedbackDetailsNode"
-          },
-          {
-            "name": "TicketNegativeFeedbackDetailsNode"
-          },
-          {
-            "name": "TicketReferralDetailsNode"
-          },
-          {
->>>>>>> develop
             "name": "TicketIndividualDataUpdateDetailsNode"
           },
           {
@@ -232,18 +159,21 @@
             "name": "TicketNeedsAdjudicationDetailsNode"
           },
           {
+            "name": "TicketPositiveFeedbackDetailsNode"
+          },
+          {
+            "name": "TicketNegativeFeedbackDetailsNode"
+          },
+          {
+            "name": "TicketReferralDetailsNode"
+          },
+          {
             "name": "DocumentNode"
           },
           {
             "name": "BankAccountInfoNode"
           },
           {
-<<<<<<< HEAD
-=======
-            "name": "TicketNoteNode"
-          },
-          {
->>>>>>> develop
             "name": "LogEntryNode"
           },
           {
