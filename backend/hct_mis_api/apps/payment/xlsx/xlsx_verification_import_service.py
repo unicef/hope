@@ -6,7 +6,7 @@ from graphql import GraphQLError
 from xlwt import Row
 
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.utils import (
@@ -22,7 +22,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
 class XlsxVerificationImportService(XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
-    def __init__(self, cashplan_payment_verification: CashPlanPaymentVerification, file: typing.IO) -> None:
+    def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: typing.IO) -> None:
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
