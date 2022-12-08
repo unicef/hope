@@ -15,9 +15,6 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     create_household,
 )
-from hct_mis_api.apps.household.management.commands.detect_paid_households import (
-    find_paid_households,
-)
 from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -126,7 +123,7 @@ def find_duplicated_households() -> QuerySet[Household]:
     return edopomoga_duplicates
 
 
-def create_tp_with_hhs_ids(name: str, households: List[str]) -> None:
+def create_tp_with_hhs_ids(name: str, households: QuerySet[Household]) -> None:
     tp = TargetPopulation()
     tp.name = name
     tp.created_by = User.objects.get(email="jan.romaniak@tivix.com")
