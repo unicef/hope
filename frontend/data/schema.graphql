@@ -3137,6 +3137,7 @@ enum RegistrationDataImportDataSource {
   DIIA
   FLEX_REGISTRATION
   API
+  EDOPOMOGA
 }
 
 enum RegistrationDataImportDatahubImportDone {

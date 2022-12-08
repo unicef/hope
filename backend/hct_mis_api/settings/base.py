@@ -819,3 +819,9 @@ if DEBUG:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
+
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
+    }
+}

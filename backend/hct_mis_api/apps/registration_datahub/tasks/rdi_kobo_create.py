@@ -368,5 +368,5 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
     def _handle_exception(self, assigned_to: ImportedIndividual, field_name: str, e: BaseException) -> None:
-        logger.exception(e)
+        logger.warning(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e

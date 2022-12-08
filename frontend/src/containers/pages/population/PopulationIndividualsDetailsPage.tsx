@@ -34,7 +34,7 @@ const Container = styled.div`
   }
 `;
 
-export function PopulationIndividualsDetailsPage(): React.ReactElement {
+export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
@@ -59,14 +59,26 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
 
   const {
     data: grievancesChoices,
+    loading: grievancesChoicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
+  if (
+    loading ||
+    choicesLoading ||
+    flexFieldsDataLoading ||
+    grievancesChoicesLoading
+  )
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
+  if (
+    !data ||
+    !choicesData ||
+    !flexFieldsData ||
+    !grievancesChoices ||
+    permissions === null
+  )
     return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -79,18 +91,18 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   const { individual } = data;
 
   let duplicateTooltip = null;
-  if (individual.status === 'DUPLICATE') {
+  if (individual?.status === 'DUPLICATE') {
     duplicateTooltip = (
       <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
     );
-  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+  } else if (individual?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
     duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
   }
 
   return (
     <div>
       <PageHeader
-        title={`${t('Individual ID')}: ${individual.unicefId}`}
+        title={`${t('Individual ID')}: ${individual?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
@@ -103,12 +115,12 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
           <>
             <Box mr={2}>{duplicateTooltip}</Box>
             <Box mr={2}>
-              {individual.sanctionListPossibleMatch && (
+              {individual?.sanctionListPossibleMatch && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
             <Box mr={2}>
-              {individual.sanctionListConfirmedMatch && (
+              {individual?.sanctionListConfirmedMatch && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}
                   confirmed
@@ -119,7 +131,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         }
       >
         <Box mr={2}>
-          {individual.photo ? (
+          {individual?.photo ? (
             <IndividualPhotoModal individual={individual as IndividualNode} />
           ) : null}
         </Box>
@@ -129,15 +141,17 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         <IndividualBioData
           businessArea={businessArea}
           individual={individual as IndividualNode}
-          choicesData={choicesData} grievancesChoices={grievancesChoices} />
+          choicesData={choicesData}
+          grievancesChoices={grievancesChoices}
+        />
         <IndividualVulnerabilities
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}
         />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={individual.id} />
+          <UniversalActivityLogTable objectId={individual?.id} />
         )}
       </Container>
     </div>
   );
-}
+};

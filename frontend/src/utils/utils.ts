@@ -375,6 +375,7 @@ export function columnToOrderBy(
 export function choicesToDict(
   choices: ChoiceObject[],
 ): { [key: string]: string } {
+  if (!choices) return {};
   return choices.reduce((previousValue, currentValue) => {
     const newDict = { ...previousValue };
     newDict[currentValue.value] = currentValue.name;
@@ -509,14 +510,6 @@ export function getComparator(
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-export function reduceChoices(choices): { [id: number]: string } {
-  return choices.reduce((previousValue, currentValue) => {
-    // eslint-disable-next-line no-param-reassign
-    previousValue[currentValue.value] = currentValue.name;
-    return previousValue;
-  }, {});
 }
 
 export function renderUserName(user): string {

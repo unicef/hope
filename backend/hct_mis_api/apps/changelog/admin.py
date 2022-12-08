@@ -20,6 +20,8 @@ class ChangelogAdmin(HOPEModelAdminBase):
         "active",
         "date",
     ]
+    list_filter = ["active"]
+    date_hierarchy = "date"
     formfield_overrides = {
         models.TextField: {"widget": HTMLEditor},
     }
