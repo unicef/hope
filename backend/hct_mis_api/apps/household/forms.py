@@ -1,10 +1,8 @@
-from typing import Any, Dict, Iterable, Mapping, Optional, Type, Union
+from typing import Any, Dict, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import HiddenInput
-from django.forms.renderers import BaseRenderer
-from django.forms.utils import ErrorList
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
@@ -95,7 +93,7 @@ class AddToTargetPopulationForm(forms.Form):
         queryset=TargetPopulation.objects.filter(status=TargetPopulation.STATUS_OPEN)
     )
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
         if read_only:
@@ -108,7 +106,7 @@ class CreateTargetPopulationForm(forms.Form):
     name = forms.CharField()
     program = forms.ModelChoiceField(queryset=Program.objects.filter(status=Program.ACTIVE))
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
         if "initial" in kwargs:
