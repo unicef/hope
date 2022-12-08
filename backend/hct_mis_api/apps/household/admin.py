@@ -13,7 +13,7 @@ from django.db import transaction
 from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -246,7 +246,7 @@ class HouseholdAdmin(
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
-    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
+    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -256,8 +256,8 @@ class HouseholdAdmin(
         if "apply" in request.POST:
             form = AddToTargetPopulationForm(request.POST, read_only=True)
             if form.is_valid():
-                tp: TargetPopulation = form.cleaned_data["target_population"]
-                ba: BusinessArea = tp.business_area
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
                 population = qs.filter(business_area=ba)
                 context["target_population"] = tp
                 context["population"] = population
@@ -267,8 +267,8 @@ class HouseholdAdmin(
         elif "confirm" in request.POST:
             form = AddToTargetPopulationForm(request.POST)
             if form.is_valid():
-                tp: TargetPopulation = form.cleaned_data["target_population"]
-                ba: BusinessArea = tp.business_area
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
                 population = qs.filter(business_area=ba)
                 with atomic():
                     tp.households.add(*population)
@@ -288,7 +288,7 @@ class HouseholdAdmin(
 
     add_to_target_population.allowed_permissions = ["create_target_population"]
 
-    def create_target_population(self, request, qs):
+    def create_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
         context = self.get_common_context(request, title="Create TargetPopulation")
         if "apply" in request.POST:
             form = CreateTargetPopulationForm(request.POST, read_only=True)
@@ -334,10 +334,10 @@ class HouseholdAdmin(
 
     create_target_population.allowed_permissions = ["create_target_population"]
 
-    def has_create_target_population_permission(self, request):
+    def has_create_target_population_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("targeting.add_target_population")
 
-    def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:
+    def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
