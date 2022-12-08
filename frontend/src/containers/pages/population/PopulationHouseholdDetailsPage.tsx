@@ -16,7 +16,10 @@ import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import {
+  isPermissionDeniedError,
+  renderSomethingOrDash,
+} from '../../../utils/utils';
 import {
   HouseholdNode,
   useAllHouseholdsFlexFieldsAttributesQuery,
@@ -95,7 +98,9 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${t('Household ID')}: ${household?.unicefId}`}
+        title={`${t('Household ID')}: ${renderSomethingOrDash(
+          household?.unicefId,
+        )}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -138,10 +143,12 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       />
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
-        <HouseholdIndividualsTable
-          choicesData={choicesData}
-          household={household as HouseholdNode}
-        />
+        {household?.individuals?.edges?.length ? (
+          <HouseholdIndividualsTable
+            choicesData={choicesData}
+            household={household as HouseholdNode}
+          />
+        ) : null}
         {hasPermissions(
           PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
