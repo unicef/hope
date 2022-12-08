@@ -1,8 +1,7 @@
-from faker import Faker
 import factory
+from faker import Faker
 
-from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 
 faker = Faker()
 

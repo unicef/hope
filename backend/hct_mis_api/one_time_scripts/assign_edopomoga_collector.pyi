@@ -1,5 +1,9 @@
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.household.models import Household, IndividualRoleInHousehold, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Household,
+    IndividualRoleInHousehold,
+)
 
 def find_edopomoga_households():
     storage_file = StorageFile.objects.get(pk=3)
