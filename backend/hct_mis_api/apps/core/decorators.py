@@ -1,12 +1,13 @@
 import hashlib
 import json
+from typing import Any, Callable
 
 from django.core.cache import cache
 
 
-def cached_in_django_cache(timeout_in_hours):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
+def cached_in_django_cache(timeout_in_hours: int) -> Callable:
+    def decorator(func: Callable) -> Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             hashed_args = hashlib.sha1(json.dumps(kwargs).encode()).hexdigest()
             key = f"{func.__name__}_{hashed_args}"
             value = cache.get(key)

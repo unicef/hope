@@ -1,5 +1,6 @@
 import operator
 from functools import reduce
+from typing import Any, List, Optional
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -69,7 +70,7 @@ class ParametrizerFactory(factory.DjangoModelFactory):
         django_get_or_create = ("code",)
 
 
-def get_group(name="Group1", permissions=None):
+def get_group(name: str = "Group1", permissions: Optional[List[Permission]] = None) -> Group:
     group = GroupFactory(name)
     permission_names = permissions or []
     for permission_name in permission_names:
@@ -87,12 +88,12 @@ def get_group(name="Group1", permissions=None):
 
 
 class user_grant_permission:
-    def __init__(self, user, permissions=None):
+    def __init__(self, user: User, permissions: Optional[List[Permission]] = None) -> None:
         self.user = user
         self.permissions = permissions
-        self.group = None
+        self.group: Optional[Group] = None
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         if hasattr(self.user, "_group_perm_cache"):
             del self.user._group_perm_cache
         if hasattr(self.user, "_officepermissionchecker"):
@@ -102,25 +103,25 @@ class user_grant_permission:
         self.group = get_group(permissions=self.permissions or [])
         self.user.groups.add(self.group)
 
-    def __exit__(self, e_typ, e_val, trcbak):
+    def __exit__(self, e_typ: Any, e_val: Any, trcbak: Any) -> None:
         if all((e_typ, e_val, trcbak)):
             raise e_typ(e_val)
         if self.group:
             self.user.groups.remove(self.group)
             self.group.delete()
 
-    def start(self):
+    def start(self) -> None:
         """Activate a patch, returning any created mock."""
-        result = self.__enter__()
+        result = self.__enter__()  # type: ignore
         return result
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop an active patch."""
         return self.__exit__(None, None, None)
 
 
 class user_grant_office_permission(object):
-    def __init__(self, user: User, office: BusinessArea, permissions):
+    def __init__(self, user: User, office: BusinessArea, permissions: Any) -> None:
         self.user = user
         self.office = office
         if isinstance(permissions, str):
@@ -128,7 +129,7 @@ class user_grant_office_permission(object):
         else:
             self.permissions = permissions
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         if hasattr(self.user, "_group_perm_cache"):
             del self.user._group_perm_cache
 
@@ -152,18 +153,18 @@ class user_grant_office_permission(object):
                 user=self.user, group=self.group, business_area=self.office
             )
 
-    def __exit__(self, e_typ, e_val, trcbak):
+    def __exit__(self, e_typ: Any, e_val: Any, trcbak: Any) -> None:
         if all((e_typ, e_val, trcbak)):
             raise e_typ(e_val) from e_val
         if self.group:
             self.user_group.delete()
             self.group.delete()
 
-    def start(self):
+    def start(self) -> None:
         """Activate a patch, returning any created mock."""
         self.__enter__()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop an active patch."""
         # TODO: __exit__ needs arguments
         return self.__exit__()  # type: ignore

@@ -35,7 +35,7 @@ export function HouseholdFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            value={filter.text || ''}
+            value={filter.text}
             onChange={(e) => handleFilterChange(e, 'text')}
             data-cy='filters-search'
           />
@@ -44,7 +44,7 @@ export function HouseholdFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
-            value={filter.program || ''}
+            value={filter.program}
             icon={<FlashOnIcon />}
           >
             <MenuItem value=''>
@@ -61,7 +61,7 @@ export function HouseholdFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Residence Status')}
-            value={filter.residenceStatus || ''}
+            value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
             SelectDisplayProps={{
               'data-cy': 'filters-residence-status',
@@ -70,9 +70,9 @@ export function HouseholdFilters({
               'data-cy': 'filters-residence-status-options',
             }}
           >
-            {choicesData.residenceStatusChoices.map((program) => (
-              <MenuItem key={program.value} value={program.value}>
-                {program.name}
+            {choicesData.residenceStatusChoices?.map((status) => (
+              <MenuItem key={status.value} value={status.value}>
+                {status.name}
               </MenuItem>
             ))}
           </SelectFilter>
@@ -85,7 +85,6 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='minFilter'
             topLabel={t('Household Size')}
             value={filter.householdSize.min}
             placeholder={t('From')}
@@ -95,7 +94,7 @@ export function HouseholdFilters({
                 ...filter,
                 householdSize: {
                   ...filter.householdSize,
-                  min: e.target.value || undefined,
+                  min: e.target.value,
                 },
               })
             }
@@ -103,7 +102,6 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='maxFilter'
             value={filter.householdSize.max}
             placeholder={t('To')}
             icon={<GroupIcon />}
@@ -112,7 +110,7 @@ export function HouseholdFilters({
                 ...filter,
                 householdSize: {
                   ...filter.householdSize,
-                  max: e.target.value || undefined,
+                  max: e.target.value,
                 },
               })
             }

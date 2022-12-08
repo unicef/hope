@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, Optional
 
 from django import forms
 from django.utils.safestring import mark_safe
@@ -10,7 +10,7 @@ class JsonWidget(forms.widgets.TextInput):
     class Media:
         css = {"screen": ("administration/pygments.css",)}
 
-    def get_context(self, name, value, attrs) -> Dict:
+    def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
         import json
 
         from pygments import highlight

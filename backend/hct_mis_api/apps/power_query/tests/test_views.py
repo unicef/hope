@@ -13,10 +13,10 @@ from .fixtures import FormatterFactory, ParametrizerFactory, QueryFactory, Repor
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryViews(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         from hct_mis_api.apps.power_query.models import Query, Report
 
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
@@ -38,7 +38,7 @@ class TestPowerQueryViews(TestCase):
         )
         cls.report2.execute()
 
-    def test_valid_report(self):
+    def test_valid_report(self) -> None:
         url = reverse("power_query:report", args=[self.report2.pk])
         self.client.login(username=self.report2.owner.username, password="password")
         response = self.client.get(url)
@@ -46,7 +46,7 @@ class TestPowerQueryViews(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, b">Report2<")
 
-    def test_valid_fetch(self):
+    def test_valid_fetch(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:data", args=[self.report2.documents.first().pk])
             username, password = self.report2.owner.username, "password"
@@ -57,14 +57,14 @@ class TestPowerQueryViews(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, b">Report2<")
 
-    def test_permission_owner(self):
+    def test_permission_owner(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:document", args=[self.report2.pk, self.report2.documents.first().pk])
             self.client.login(username=self.report1.owner.username, password="password")
             response = self.client.get(url)
             self.assertEqual(response.status_code, 403)
 
-    def test_permission_business_area(self):
+    def test_permission_business_area(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:document", args=[self.report2.pk, self.report2.documents.first().pk])
             self.client.login(username=self.report1.owner.username, password="password")
@@ -74,10 +74,10 @@ class TestPowerQueryViews(TestCase):
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryBasicAuth(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user2 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
@@ -91,7 +91,7 @@ class TestPowerQueryBasicAuth(TestCase):
         cls.report2: Report = ReportFactory(formatter=cls.formatter_json, query=cls.query, owner=cls.user2)
         cls.report2.execute()
 
-    def test_valid_fetch(self):
+    def test_valid_fetch(self) -> None:
         url = reverse("power_query:data", args=[self.report2.documents.first().pk])
         username, password = self.report2.owner.username, "password"
         headers = {
@@ -110,10 +110,10 @@ CONTENT_TYPES = [
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQueryResponses(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user2 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
@@ -126,7 +126,7 @@ class TestPowerQueryResponses(TestCase):
         cls.report2.execute(run_query=True)
 
     @parameterized.expand(CONTENT_TYPES)
-    def test_fetch_no_auth_content_types(self, accept, content_type):
+    def test_fetch_no_auth_content_types(self, accept: str, content_type: str) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:data", args=[self.report2.pk])
             response = self.client.get(url, HTTP_ACCEPT=accept)

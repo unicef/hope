@@ -171,9 +171,7 @@ export const LinkedTicketsModal = ({
         maxWidth='lg'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Linked Tickets')}
-          </DialogTitle>
+          <DialogTitle>{t('Linked Tickets')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mt={2} mb={6}>

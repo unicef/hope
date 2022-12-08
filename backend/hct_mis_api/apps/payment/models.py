@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
@@ -21,6 +21,9 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.cash_assist_datahub.models import CashPlan
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
@@ -315,7 +318,7 @@ class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
-def build_summary(cash_plan) -> None:
+def build_summary(cash_plan: "CashPlan") -> None:
     statuses_count = cash_plan.verifications.aggregate(
         active=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_PENDING)),
@@ -336,7 +339,7 @@ def build_summary(cash_plan) -> None:
     sender=CashPlanPaymentVerification,
     dispatch_uid="update_verification_status_in_cash_plan",
 )
-def update_verification_status_in_cash_plan(sender, instance, **kwargs) -> None:
+def update_verification_status_in_cash_plan(sender: Any, instance: CashPlanPaymentVerification, **kwargs: Any) -> None:
     build_summary(instance.cash_plan)
 
 
@@ -345,7 +348,9 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs) -> None:
     sender=CashPlanPaymentVerification,
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
-def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs) -> None:
+def update_verification_status_in_cash_plan_on_delete(
+    sender: Any, instance: CashPlanPaymentVerification, **kwargs: Any
+) -> None:
     build_summary(instance.cash_plan)
 
 

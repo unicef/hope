@@ -1,5 +1,5 @@
 import abc
-from typing import Optional
+from typing import Any, Optional
 
 from django.db.models import Q
 
@@ -148,7 +148,7 @@ class HopeRedirectDefault(HopeRedirect):
         return ""
 
 
-def get_hope_redirect(user: User, ent, ca_id="", source_id="", program_id="") -> HopeRedirect:
+def get_hope_redirect(user: User, ent: Any, ca_id: str = "", source_id: str = "", program_id: str = "") -> HopeRedirect:
     if ent == "progres_registrationgroup":
         return HopeRedirectHousehold(user, ent, ca_id, source_id, program_id)
     if ent == "progres_individual":

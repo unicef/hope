@@ -19,7 +19,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_0_wrong_args_cou
                     'line': 3
                 }
             ],
-            'message': "['Comparison method - EQUALS expect 1 arguments, 2 given']",
+            'message': '["Comparison method \'EQUALS\' expected 1 arguments, 2 given"]',
             'path': [
                 'updateTargetPopulation'
             ]
@@ -39,7 +39,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_1_wrong_comparis
                     'line': 3
                 }
             ],
-            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparison method']",
+            'message': '["size is \'INTEGER\' type filter and does not accept \'CONTAINS\' comparison method"]',
             'path': [
                 'updateTargetPopulation'
             ]

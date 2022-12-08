@@ -360,7 +360,7 @@
   "Enter Target Population Name": "Enter Target Population Name",
   "Select Field": "Select Field",
   "Programme Change": "Programme Change",
-  "Are you sure you want to change the programme ?": "Are you sure you want to change the programme ?",
+  "Are you sure you want to change the programme?": "Are you sure you want to change the programme?",
   "Changing the programme will result in deleting your current Targeting Criteria.": "Changing the programme will result in deleting your current Targeting Criteria.",
   "Female Children": "Female Children",
   "Female Adults": "Female Adults",
@@ -613,5 +613,10 @@
   "Mark as failed": "Mark as failed",
   "Are you sure you would like to mark payment record as failed?": "Are you sure you would like to mark payment record as failed?",
   "Save to see the list of households": "Save to see the list of households",
-  "List of households will be available after saving": "List of households will be available after saving"
+  "List of households will be available after saving": "List of households will be available after saving",
+  "Reason of withdrawal": "Reason of withdrawal",
+  "Please provide the reason of withdrawal of this household.": "Please provide the reason of withdrawal of this household.",
+  "Confirm": "Confirm",
+  "Household Id": "Household Id",
+  "This household is a duplicate of a household ID": "This household is a duplicate of a household ID"
 }

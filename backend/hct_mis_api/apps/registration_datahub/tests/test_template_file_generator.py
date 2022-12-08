@@ -6,7 +6,7 @@ from hct_mis_api.apps.registration_datahub.template_generator import (
 
 
 class TestTemplateFileGenerator(TestCase):
-    def test_create_workbook(self):
+    def test_create_workbook(self) -> None:
         wb = TemplateFileGenerator._create_workbook()
 
         expected_sheet_names = ["Households", "Individuals"].sort()
@@ -14,7 +14,7 @@ class TestTemplateFileGenerator(TestCase):
 
         self.assertEqual(expected_sheet_names, result_sheet_names)
 
-    def test_handle_name_and_label_row(self):
+    def test_handle_name_and_label_row(self) -> None:
         fields = {
             "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []},
             "test_h_f": {
@@ -32,7 +32,7 @@ class TestTemplateFileGenerator(TestCase):
         )
         self.assertEqual(expected, result)
 
-    def test_add_template_columns(self):
+    def test_add_template_columns(self) -> None:
         wb = TemplateFileGenerator._create_workbook()
         result_wb = TemplateFileGenerator._add_template_columns(wb)
 

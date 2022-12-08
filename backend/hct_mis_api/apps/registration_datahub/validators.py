@@ -7,14 +7,19 @@ from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Union
+from uuid import UUID
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
+from django.core.files import File
 
 import openpyxl
 import phonenumbers
 from dateutil import parser
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
+from openpyxl.cell import Cell
+from openpyxl.worksheet.worksheet import Worksheet
+from PIL.Image import Image
 
 from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
@@ -42,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, *args, **kwargs) -> List:  # type: ignore
+    def validate(cls, *args: Any, **kwargs: Any) -> List:  # type: ignore
         # TODO: Signature of "validate" incompatible with supertype "BaseValidator"
         try:
             validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
@@ -60,7 +65,7 @@ class XLSXValidator(BaseValidator):
             raise
 
     @classmethod
-    def validate_file_extension(cls, *args, **kwargs) -> List:
+    def validate_file_extension(cls, *args: Any, **kwargs: Any) -> List:
         try:
             xlsx_file = kwargs.get("file")
             file_suffix = Path(xlsx_file.name).suffix
@@ -102,7 +107,7 @@ class ImportDataValidator(BaseValidator):
     }
 
     @classmethod
-    def validate(cls, *args, **kwargs):
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore
         try:
             validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -119,7 +124,7 @@ class ImportDataValidator(BaseValidator):
             raise
 
     @classmethod
-    def documents_validator(cls, documents_numbers_dict, is_xlsx=True, *args, **kwargs):
+    def documents_validator(cls, documents_numbers_dict: Dict, is_xlsx: bool = True) -> List:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -188,7 +193,7 @@ class ImportDataValidator(BaseValidator):
             raise
 
     @classmethod
-    def identity_validator(cls, identities_numbers_dict, is_xlsx=True, *args, **kwargs):
+    def identity_validator(cls, identities_numbers_dict: Dict, is_xlsx: bool = True) -> List:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
@@ -204,7 +209,7 @@ class ImportDataValidator(BaseValidator):
                     elif value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": f"Issuing country is required: agency: {values['agency']} no: {value}",
+                            "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -293,7 +298,7 @@ class ImportDataInstanceValidator:
             logger.exception(e)
             raise
 
-    def documents_validator(self, documents_numbers_dict, is_xlsx=True, *args, **kwargs) -> List:
+    def documents_validator(self, documents_numbers_dict: Dict, is_xlsx: bool = True) -> List:
         try:
             invalid_rows = []
             for key, values in documents_numbers_dict.items():
@@ -361,7 +366,7 @@ class ImportDataInstanceValidator:
             logger.exception(e)
             raise
 
-    def identity_validator(self, identities_numbers_dict, is_xlsx=True, *args, **kwargs) -> List[Dict[str, Any]]:
+    def identity_validator(self, identities_numbers_dict: Dict, is_xlsx: bool = True) -> List[Dict[str, Any]]:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
@@ -377,7 +382,7 @@ class ImportDataInstanceValidator:
                     elif value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": f"Issuing country is required: agency: {values['agency']} no: {value}",
+                            "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -418,7 +423,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def string_validator(self, value, header, *args, **kwargs):
+    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:  # type: ignore
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -428,7 +433,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def integer_validator(self, value, header, *args, **kwargs) -> bool:
+    def integer_validator(self, value: int, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -446,7 +451,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def float_validator(self, value, header, *args, **kwargs):
+    def float_validator(self, value: float, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -460,7 +465,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def geolocation_validator(self, value, header, *args, **kwargs):
+    def geolocation_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -473,7 +478,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def date_validator(self, value, header, *args, **kwargs):
+    def date_validator(self, value: datetime, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
@@ -491,7 +496,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def phone_validator(self, value, header, *args, **kwargs):
+    def phone_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -507,7 +512,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def choice_validator(self, value, header, *args, **kwargs):
+    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -555,14 +560,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def not_empty_validator(self, value, *args, **kwargs) -> bool:
+    def not_empty_validator(self, value: str, *args: Any, **kwargs: Any) -> bool:
         try:
             return not (value is None or value == "")
         except Exception as e:
             logger.exception(e)
             raise
 
-    def bool_validator(self, value, header, *args, **kwargs):
+    def bool_validator(self, value: bool, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if isinstance(value, bool):
                 return True
@@ -577,7 +582,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def required_validator(self, value, header, *args, **kwargs) -> bool:
+    def required_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             is_required = self.all_fields[header]["required"]
             is_not_empty = self.not_empty_validator(value)
@@ -590,7 +595,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def image_validator(self, value, header, cell, *args, **kwargs):
+    def image_validator(self, value: Image, header: str, cell: Cell, *args: Any, **kwargs: Any) -> Any:
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True
@@ -599,7 +604,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def rows_validator(self, sheet) -> List:
+    def rows_validator(self, sheet: Worksheet) -> List:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -626,13 +631,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
-                    "agency": "UNHCR",
+                    "partner": "UNHCR",
                     "validation_data": [],
                     "numbers": [],
                     "issuing_countries": [],
                 },
                 "scope_id_no_i_c": {
-                    "agency": "WFP",
+                    "partner": "WFP",
                     "validation_data": [],
                     "numbers": [],
                     "issuing_countries": [],
@@ -717,7 +722,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
-                            f"Sheet: {sheet.title}, Unexpected value: "
+                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore
                             f"{value} for type "
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
@@ -775,7 +780,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_file_with_template(self, wb) -> List:
+    def validate_file_with_template(self, wb: Workbook) -> List:
         try:
             errors = []
             combined_fields = self.combined_fields
@@ -805,7 +810,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_file_extension(self, xlsx_file) -> List:
+    def validate_file_extension(self, xlsx_file: File) -> List:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
@@ -821,7 +826,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file, business_area_slug) -> List[Dict[str, Any]]:
+    def validate_everything(self, xlsx_file: File, business_area_slug: str) -> List[Dict[str, Any]]:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
@@ -845,7 +850,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header, data_dict, household_ids) -> List[Dict[str, Any]]:
+    def collector_column_validator(header: str, data_dict: Dict, household_ids: List[UUID]) -> List[Dict[str, Any]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []
@@ -890,7 +895,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_collectors(self, wb) -> List[Dict[str, Any]]:
+    def validate_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
         try:
             errors = []
 
@@ -928,7 +933,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_collectors_size(self, wb) -> List[Dict[str, Any]]:
+    def validate_collectors_size(self, wb: Workbook) -> List[Dict[str, Any]]:
         try:
             errors = []
 
@@ -961,7 +966,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def _count_individuals(self, individuals_sheet) -> int:
+    def _count_individuals(self, individuals_sheet: Worksheet) -> int:
         first_row = individuals_sheet[1]
         individuals_count = 0
         for cell in first_row:
@@ -971,7 +976,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         individuals_count += 1
         return individuals_count
 
-    def _count_households(self, households_sheet) -> int:
+    def _count_households(self, households_sheet: Worksheet) -> int:
         household_count = 0
         for cell in households_sheet["A"][2:]:
             if cell.value:
@@ -1014,14 +1019,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def standard_type_validator(self, value: str, field: str, field_type: str):
+    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:  # type: ignore
         try:
             value_type_name = type(value).__name__
 
             if field_type == "INTEGER":
                 try:
                     int(value)
-                    return
+                    return None
                 except Exception:
                     return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type int"
             elif field_type == "STRING":
@@ -1032,7 +1037,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         phonenumbers.parse(value, None)
                     except (phonenumbers.NumberParseException, TypeError):
                         return f"Invalid phone number {value} for field {field}"
-                return
+                return None
 
             elif field_type == "BOOL":
                 # Important! if value == 0 or 1 it's also evaluated to True
@@ -1045,7 +1050,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def image_validator(self, value: str, field: str, attachments: list[dict], *args, **kwargs) -> Union[str, None]:
+    def image_validator(
+        self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
+    ) -> Union[str, None]:
         try:
             allowed_extensions = django_core_validators.get_available_image_extensions()
             file_extension = value.split(".")[-1]
@@ -1070,7 +1077,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def geopoint_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
+    def geopoint_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> Union[str, None]:
         message = f"Invalid geopoint {value} for field {field}"
 
         if not value or not isinstance(value, str):
@@ -1084,7 +1091,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
         return None if is_valid_geopoint else message
 
-    def date_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
+    def date_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> Union[str, None]:
         try:
             message = (
                 f"Invalid datetime/date {value} for field {field}, "
@@ -1113,7 +1120,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def choice_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
+    def choice_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> Union[str, None]:
         try:
             message = f"Invalid choice {value} for field {field}"
             if not value:
@@ -1194,7 +1201,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, submissions: List, business_area: BusinessArea):
+    def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
         try:
             reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore
             docs_and_identities_to_validate = []
@@ -1203,8 +1210,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             # thx
 
             identities_numbers = {
-                "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
-                "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "unhcr_id_no_i_c": {"partner": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "scope_id_no_i_c": {"partner": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
             }
             documents_numbers: Dict[str, Dict[str, Any]] = {
                 "birth_certificate_no_i_c": {

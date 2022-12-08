@@ -1,22 +1,24 @@
 from django.test import TestCase
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.household.fixtures import DocumentTypeFactory, DocumentAllowDuplicatesFactory
-from hct_mis_api.apps.core.models import BusinessArea
 
 from hct_mis_api.apps.core.fixtures import StorageFileFactory
-from hct_mis_api.apps.household.management.commands.detect_paid_households import find_paid_households
-
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
+    DocumentAllowDuplicatesFactory,
+    DocumentTypeFactory,
     create_household,
 )
+from hct_mis_api.apps.household.management.commands.detect_paid_households import (
+    find_paid_households,
+)
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class TestDetectingAlreadyPaidHouseholds(TestCase):
     databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.storage_file = StorageFileFactory()
 
         cls.business_area = BusinessArea.objects.create(
@@ -87,7 +89,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             DocumentAllowDuplicatesFactory(individual=cls.individuals_5[0], type=cls.document_type, document_number="2")
         )
 
-    def test_detecting_paid_hhs_loaded_via_sf(self):
+    def test_detecting_paid_hhs_loaded_via_sf(self) -> None:
         hhs = find_paid_households(self.storage_file.pk)
 
         # hh1 and hh3 were loaded via SF and hh2 (e.g. from RDI) was already paid and had the same doc number for individual

@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.export_users_xlsx import ExportUsersXlsx
 
 
-def download_exported_users(request, business_area_slug) -> HttpResponse:
+def download_exported_users(request: HttpRequest, business_area_slug: str) -> HttpResponse:
     export_class = ExportUsersXlsx(business_area_slug=business_area_slug)
     wb = export_class.get_exported_users_file()
     if wb is None:

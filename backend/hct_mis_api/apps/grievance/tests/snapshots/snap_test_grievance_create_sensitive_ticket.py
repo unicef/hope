@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_0_with_permission 1'] = {
@@ -267,7 +268,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'line': 3
                 }
             ],
-            'message': 'You have to provide issue_type in 3',
+            'message': "['You have to provide issue_type in 3']",
             'path': [
                 'createGrievanceTicket'
             ]
@@ -353,7 +354,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     'line': 3
                 }
             ],
-            'message': "You can't provide extras.category.grievance_complaint_ticket_extras in 3",
+            'message': '["You can\'t provide extras.category.grievance_complaint_ticket_extras in 3"]',
             'path': [
                 'createGrievanceTicket'
             ]

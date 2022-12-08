@@ -1,5 +1,8 @@
-def does_path_exist_in_query(path, info):
-    def does_path_exist_in_selection(_path, selection_set):
+from typing import Any
+
+
+def does_path_exist_in_query(path: str, info: Any) -> bool:
+    def does_path_exist_in_selection(_path: str, selection_set: Any) -> bool:
         if "." not in _path:
             return _path in (field.name.value for field in selection_set.selections)
         left, right = _path.split(".", 1)

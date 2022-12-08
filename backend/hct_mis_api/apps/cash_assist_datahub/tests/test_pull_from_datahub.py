@@ -1,13 +1,15 @@
 import os
 import uuid
 from datetime import timedelta
+from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
-import requests_mock
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
+import requests_mock
 from parameterized import parameterized
 
 from hct_mis_api.apps.cash_assist_datahub.models import CashPlan as DHCashPlan
@@ -48,18 +50,13 @@ class TestPullDataFromDatahub(TestCase):
     household = None
 
     @staticmethod
-    def _pre_test_commands():
+    def _pre_test_commands() -> None:
         create_afghanistan()
         call_command("loadcountries")
         call_command("loadcountrycodes")
 
-        # call_command("generatedocumenttypes")
-        # business_area_with_data_sharing = BusinessArea.objects.first()
-        # business_area_with_data_sharing.has_data_sharing_agreement = True
-        # business_area_with_data_sharing.save()
-
     @classmethod
-    def _setup_in_app_data(cls):
+    def _setup_in_app_data(cls) -> None:
         target_population = TargetPopulation()
         target_population.name = "Test TP"
         target_population.status = TargetPopulation.STATUS_PROCESSING
@@ -87,7 +84,7 @@ class TestPullDataFromDatahub(TestCase):
         cls.program = program
 
     @classmethod
-    def _setup_datahub_data(cls):
+    def _setup_datahub_data(cls) -> None:
         session = Session()
         session.business_area = BusinessArea.objects.first().code
         session.status = Session.STATUS_READY
@@ -183,13 +180,13 @@ class TestPullDataFromDatahub(TestCase):
         cls.dh_payment_record = dh_payment_record
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
     @requests_mock.Mocker()
-    def test_pull_data(self, mocker):
+    def test_pull_data(self, mocker: Any) -> None:
         mocker.register_uri(
             "GET",
             "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
@@ -288,11 +285,11 @@ class TestSessionsPullDataFromDatahub(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         call_command("loadcountrycodes")
 
-    def test_multiple_sessions_same_ba_working(self):
+    def test_multiple_sessions_same_ba_working(self) -> None:
         session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
         session1.save()
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
@@ -308,7 +305,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session1.delete()
         session2.delete()
 
-    def test_multiple_sessions_same_ba_fail(self):
+    def test_multiple_sessions_same_ba_fail(self) -> None:
         session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
         session1.save()
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
@@ -325,7 +322,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session1.delete()
         session2.delete()
 
-    def test_multiple_sessions_different_ba_run1(self):
+    def test_multiple_sessions_different_ba_run1(self) -> None:
         session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
         session1.save()
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
@@ -359,7 +356,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
             ),
         ]
     )
-    def test_country_mapping(self, _, ca_code, expected):
+    def test_country_mapping(self, _: Any, ca_code: str, expected: str) -> None:
         session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
         session.save()
         dh_service_provider = DHServiceProvider()
