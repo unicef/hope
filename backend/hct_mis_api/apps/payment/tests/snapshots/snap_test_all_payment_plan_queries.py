@@ -255,16 +255,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
     'data': {
         'paymentPlanStatusChoices': [
             {
-                'name': 'Open',
-                'value': 'OPEN'
-            },
-            {
-                'name': 'Locked',
-                'value': 'LOCKED'
-            },
-            {
-                'name': 'Locked FSP',
-                'value': 'LOCKED_FSP'
+                'name': 'Accepted',
+                'value': 'ACCEPTED'
             },
             {
                 'name': 'In Approval',
@@ -279,8 +271,16 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'value': 'IN_REVIEW'
             },
             {
-                'name': 'Accepted',
-                'value': 'ACCEPTED'
+                'name': 'Locked',
+                'value': 'LOCKED'
+            },
+            {
+                'name': 'Locked FSP',
+                'value': 'LOCKED_FSP'
+            },
+            {
+                'name': 'Open',
+                'value': 'OPEN'
             },
             {
                 'name': 'Reconciled',

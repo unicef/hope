@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 
 
 class TestChartTotalTransferredCashByCountry(APITestCase):
@@ -44,7 +44,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=200.20,
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
             )
             PaymentRecordFactory.create_batch(
@@ -53,7 +53,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=100.00,
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
             )
 
