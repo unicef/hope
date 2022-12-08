@@ -11,9 +11,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 
 
 class TestChartTotalTransferredCashByCountry(APITestCase):
