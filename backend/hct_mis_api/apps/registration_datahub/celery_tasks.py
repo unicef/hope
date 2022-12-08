@@ -24,8 +24,6 @@ if TYPE_CHECKING:
 
     from django.db.models import QuerySet, _QuerySet
 
-    from hct_mis_api.apps.core.models import BusinessArea
-
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +62,7 @@ def locked_cache(key: Union[int, str]) -> Any:
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area: "BusinessArea"
+    registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -73,14 +71,14 @@ def registration_xlsx_import_task(
         )
 
         with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
             RdiXlsxCreateTask().execute(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
-                business_area_id=business_area,
+                business_area_id=business_area_id,
             )
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -91,14 +89,12 @@ def registration_xlsx_import_task(
 
         handle_rdi_exception(registration_data_import_id, e)
 
-        raise
-
 
 @app.task
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area: "BusinessArea"
+    registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -107,15 +103,15 @@ def registration_kobo_import_task(
         )
 
         with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
 
             RdiKoboCreateTask().execute(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
-                business_area_id=business_area,
+                business_area_id=business_area_id,
             )
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -125,8 +121,6 @@ def registration_kobo_import_task(
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
-
-        raise
 
 
 @app.task
@@ -157,8 +151,7 @@ def registration_kobo_import_hourly_task() -> None:
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
             )
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
         raise
 
 
@@ -190,8 +183,7 @@ def registration_xlsx_import_hourly_task() -> None:
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
             )
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
         raise
 
 
@@ -243,11 +235,7 @@ def rdi_deduplication_task(registration_data_import_id: "UUID") -> None:
 
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
-        logger.exception(e)
-
         handle_rdi_exception(registration_data_import_id, e)
-
-        raise
 
 
 @app.task
@@ -264,7 +252,6 @@ def pull_kobo_submissions_task(import_data_id: "UUID") -> Dict:
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
     except Exception as e:
-        logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         RegistrationDataImport.objects.filter(
@@ -287,10 +274,7 @@ def validate_xlsx_import_task(import_data_id: "UUID") -> Dict:
     try:
         return ValidateXlsxImport().execute(import_data)
     except Exception as e:
-        logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        RegistrationDataImport.objects.filter(
+        ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
         raise
@@ -306,8 +290,8 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
 
     try:
         FlexRegistrationService().process_records(rdi_id, records_ids)
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("Process Flex Records Task error")
 
 
 @app.task
@@ -374,8 +358,8 @@ def automate_rdi_creation_task(
                     merge_registration_data_import_task.delay(rdi.id)
 
             return output
-    except Exception as e:
-        logger.exception(e)
+
+    except Exception:
         raise
 
 
