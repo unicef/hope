@@ -7,12 +7,18 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { RegistrationFilters } from '../../../components/rdi/RegistrationFilter';
+import { RegistrationFilters } from '../../../components/rdi/RegistrationFilters';
 
 export function RegistrationDataImportPage(): React.ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const [filter, setFilter] = useState({});
+  const [filter, setFilter] = useState({
+    search: '',
+    importDate: null,
+    userInputValue: '',
+    importedBy: '',
+    status: '',
+  });
   const debounceFilter = useDebounce(filter, 500);
   if (permissions === null) return null;
 

@@ -4,8 +4,11 @@ import os
 import tempfile
 from datetime import datetime
 from functools import wraps
+from typing import Any, Callable
+from uuid import UUID
 
 from django.db import transaction
+from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
@@ -23,7 +26,10 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -31,13 +37,13 @@ logger = logging.getLogger(__name__)
 
 
 class transaction_celery_task:  # used as decorator
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.task_args = args
         self.task_kwargs = kwargs
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Any:
         @wraps(func)
-        def wrapper_func(*args, **kwargs):
+        def wrapper_func(*args: Any, **kwargs: Any) -> None:
             try:
                 with transaction.atomic():
                     return func(*args, **kwargs)
@@ -51,7 +57,7 @@ class transaction_celery_task:  # used as decorator
 @app.task(bind=True, default_retry_delay=60)
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -77,7 +83,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
 @app.task
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -93,9 +99,11 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id, rdi_name):
+def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: str, rdi_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
+    program = Program.objects.get(id=program_id)
     file_path = None
+
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
 
@@ -105,7 +113,7 @@ def create_target_population_task(storage_id, rdi_name):
             passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
             tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
 
-            first_registration_date = datetime.now()
+            first_registration_date = timezone.now()
             last_registration_date = first_registration_date
 
             family_ids = set()
@@ -212,6 +220,27 @@ def create_target_population_task(storage_id, rdi_name):
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
+            households = Household.objects.filter(family_id__in=list(family_ids)).only("id")
+            if len(family_ids) != rows_count:
+                for household in households:
+                    household.size = Individual.objects.filter(household=household).count()
+                Household.objects.bulk_update(households, ["size"])
+
+            households.update(withdrawn=True, withdrawn_date=timezone.now())
+            Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
+
+            target_population = TargetPopulation.objects.create(
+                name=tp_name,
+                created_by=storage_obj.created_by,
+                program=program,
+                status=TargetPopulation.STATUS_LOCKED,
+                build_status=TargetPopulation.BUILD_STATUS_OK,
+                business_area=business_area,
+                storage_file=storage_obj,
+            )
+            target_population.households.set(households)
+            target_population = refresh_stats(target_population)
+            target_population.save()
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
     except Exception:

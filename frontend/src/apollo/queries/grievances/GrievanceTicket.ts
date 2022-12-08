@@ -95,6 +95,10 @@ export const GrievanceTicket = gql`
       deleteHouseholdTicketDetails {
         id
         approveStatus
+        reasonHousehold {
+          id
+          unicefId
+        }
       }
       systemFlaggingTicketDetails {
         id

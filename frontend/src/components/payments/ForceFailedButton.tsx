@@ -57,9 +57,7 @@ export function ForceFailedButton({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Mark as failed')}
-          </DialogTitle>
+          <DialogTitle>{t('Mark as failed')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

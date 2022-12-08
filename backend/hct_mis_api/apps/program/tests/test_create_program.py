@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -31,7 +33,7 @@ class TestCreateProgram(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -52,7 +54,7 @@ class TestCreateProgram(APITestCase):
             }
         }
 
-    def test_create_program_not_authenticated(self):
+    def test_create_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(request_string=self.CREATE_PROGRAM_MUTATION, variables=self.program_data)
 
     @parameterized.expand(
@@ -62,7 +64,9 @@ class TestCreateProgram(APITestCase):
             ("with_permission_but_invalid_dates", [Permissions.PROGRAMME_CREATE], True),
         ]
     )
-    def test_create_program_authenticated(self, _, permissions, should_set_wrong_date):
+    def test_create_program_authenticated(
+        self, _: Any, permissions: List[Permissions], should_set_wrong_date: bool
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         if should_set_wrong_date:

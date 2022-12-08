@@ -1,6 +1,6 @@
 from typing import Dict
 
-from django.db.models import Q
+from django.db.models import Model, Q
 from django.db.transaction import atomic
 from django.utils import timezone
 
@@ -11,7 +11,7 @@ from hct_mis_api.apps.mis_datahub import models as mis_models
 
 class SyncToMisDatahubTask:
     @staticmethod
-    def get_model_dict(model) -> Dict:
+    def get_model_dict(model: Model) -> Dict:
         model_dict = {}
         model_dict.update(model.__dict__)
         if "_prefetched_objects_cache" in model_dict:

@@ -1,6 +1,5 @@
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -17,7 +16,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class TestReassignRolesOnUpdate(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
 
         business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -53,7 +52,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             role=ROLE_ALTERNATE,
         )
 
-    def test_reassign_role_to_another_individual(self):
+    def test_reassign_role_to_another_individual(self) -> None:
         individual = IndividualFactory(household=None)
 
         individual.household = self.household
@@ -82,7 +81,7 @@ class TestReassignRolesOnUpdate(APITestCase):
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_PRIMARY)
 
-    def test_reassign_alternate_role_to_primary_collector(self):
+    def test_reassign_alternate_role_to_primary_collector(self) -> None:
         role_reassign_data = {
             self.alternate_role.id: {
                 "role": "ALTERNATE",
@@ -91,12 +90,12 @@ class TestReassignRolesOnUpdate(APITestCase):
             },
         }
 
-        with self.assertRaises(GraphQLError) as context:
+        with self.assertRaises(ValidationError) as context:
             reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
-    def test_reassign_alternate_role(self):
+    def test_reassign_alternate_role(self) -> None:
         individual = IndividualFactory(household=None)
         individual.household = self.household
         individual.save()

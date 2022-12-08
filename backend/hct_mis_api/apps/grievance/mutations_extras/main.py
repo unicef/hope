@@ -1,3 +1,5 @@
+from typing import Any
+
 import graphene
 
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
@@ -55,5 +57,5 @@ class UpdateGrievanceTicketExtrasInput(graphene.InputObjectType):
     ticket_payment_verification_details_extras = TicketPaymentVerificationDetailsExtras()
 
 
-def _no_operation_close_method(*args, **kwargs):
+def _no_operation_close_method(*args: Any, **kwargs: Any) -> None:
     pass

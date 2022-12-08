@@ -37,7 +37,7 @@ export function PaymentFilters({
       <Grid container spacing={3}>
         <Grid item>
           <SearchTextField
-            value={filter.search || ''}
+            value={filter.search}
             label='Cash Plan ID'
             onChange={(e) => handleFilterChange(e, 'search')}
           />
@@ -47,7 +47,7 @@ export function PaymentFilters({
             onChange={(e) => handleFilterChange(e, 'verificationStatus')}
             label='Status'
             multiple
-            value={filter.verificationStatus || []}
+            value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
               return (
@@ -60,7 +60,7 @@ export function PaymentFilters({
         </Grid>
         <Grid item>
           <SearchTextField
-            value={filter.serviceProvider || ''}
+            value={filter.serviceProvider}
             label='FSP'
             onChange={(e) => handleFilterChange(e, 'serviceProvider')}
           />
@@ -69,7 +69,7 @@ export function PaymentFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'deliveryType')}
             label='Modality'
-            value={filter.deliveryType || ''}
+            value={filter.deliveryType}
             icon={<MonetizationOnIcon />}
           >
             <MenuItem value=''>
@@ -114,7 +114,7 @@ export function PaymentFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label='Programme'
-            value={filter.program || ''}
+            value={filter.program}
             icon={<FlashOnIcon />}
           >
             <MenuItem value=''>
