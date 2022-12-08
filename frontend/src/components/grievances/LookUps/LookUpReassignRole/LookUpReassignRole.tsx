@@ -6,7 +6,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../../utils/constants';
 import {
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
   useIndividualQuery,
 } from '../../../../__generated__/graphql';
 import { LoadingComponent } from '../../../core/LoadingComponent';
@@ -22,10 +22,10 @@ export const LookUpReassignRole = ({
   individual,
 }: {
   household?:
-    | GrievanceTicketNode['household']
-    | GrievanceTicketNode['individual']['householdsAndRoles'][number]['household'];
-  individual: GrievanceTicketNode['individual'];
-  ticket: GrievanceTicketNode;
+    | GrievanceTicketQuery['grievanceTicket']['household']
+    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+  individual: GrievanceTicketQuery['grievanceTicket']['individual'];
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
 }): React.ReactElement => {

@@ -18,13 +18,8 @@ export const FlagTooltip = ({
   handleClick,
 }: FlagTooltipProps): React.ReactElement => {
   return (
-<<<<<<< HEAD
     <Tooltip onClick={handleClick} title={message}>
-      <StyledFlag confirmed={confirmed} />
-=======
-    <Tooltip title={message}>
       <StyledFlag confirmed={confirmed ? 1 : 0} />
->>>>>>> develop
     </Tooltip>
   );
 };

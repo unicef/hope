@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
   IndividualRoleInHouseholdRole,
 } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
@@ -36,7 +36,7 @@ const WarnIcon = styled(WarningIcon)`
 export const ReassignMultipleRoleBox = ({
   ticket,
 }: {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();

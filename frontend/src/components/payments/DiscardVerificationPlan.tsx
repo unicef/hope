@@ -29,24 +29,14 @@ export function DiscardVerificationPlan({
   const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
   const discard = async (): Promise<void> => {
-<<<<<<< HEAD
-    const { errors } = await mutate({
-      variables: { paymentVerificationPlanId },
-      refetchQueries,
-    });
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
-=======
     try {
       await mutate({
-        variables: { cashPlanVerificationId },
+        variables: { paymentVerificationPlanId },
         refetchQueries,
       });
       showMessage(t('Verification plan has been discarded.'));
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
->>>>>>> develop
     }
   };
   return (
