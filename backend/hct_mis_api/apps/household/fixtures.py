@@ -128,16 +128,6 @@ class HouseholdFactory(factory.DjangoModelFactory):
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
-    @classmethod
-    def _create(cls, model_class: Model, *args: Any, **kwargs: Any) -> Household:
-        if not (hoh := kwargs.get("head_of_household", None)):
-            hoh = IndividualFactory(household=None)
-            kwargs["head_of_household"] = hoh
-        ret = super()._create(model_class, *args, **kwargs)
-        hoh.household = ret
-        hoh.save()
-        return ret
-
 
 class IndividualIdentityFactory(factory.DjangoModelFactory):
     class Meta:
