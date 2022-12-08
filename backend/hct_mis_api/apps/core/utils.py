@@ -539,7 +539,7 @@ def chart_get_filtered_qs(
     qs: Any,
     year: int,
     business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Optional[Dict] = None,
+    additional_filters: Optional[Dict, Q] = None,
     year_filter_path: Optional[str] = None,
     payment_verification_gfk: bool = False,
 ) -> "QuerySet":

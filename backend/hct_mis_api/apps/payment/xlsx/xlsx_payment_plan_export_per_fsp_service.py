@@ -1,6 +1,7 @@
 import logging
 import zipfile
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -16,6 +17,9 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +30,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             "household", "collector", "financial_service_provider", "assigned_payment_channel"
         ).order_by("unicef_id")
 
-    def export_per_fsp(self, user):
+    def export_per_fsp(self, user: "User") -> None:
         # TODO this should be refactored
         fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
         fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()

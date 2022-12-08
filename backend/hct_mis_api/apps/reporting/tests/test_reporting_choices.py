@@ -53,7 +53,7 @@ class TestProgramChoices(APITestCase):
         )
 
     @freeze_time("2023-10-10")
-    def test_dashboard_years_choices__no_objects(self):
+    def test_dashboard_years_choices__no_objects(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,
             context={"user": self.user},
@@ -61,7 +61,7 @@ class TestProgramChoices(APITestCase):
         )
 
     @freeze_time("2023-10-10")
-    def test_dashboard_years_choices(self):
+    def test_dashboard_years_choices(self) -> None:
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
 

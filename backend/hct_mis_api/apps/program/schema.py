@@ -34,7 +34,6 @@ from hct_mis_api.apps.core.cache_keys import (
 )
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -231,9 +230,7 @@ class Query(graphene.ObjectType):
     def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
-            year, business_area_slug, filters, True
-        )
+        payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
 
         programs_ids = payment_items_qs.values_list("parent__program__id", flat=True)
         programs = Program.objects.filter(id__in=programs_ids).distinct()
@@ -267,7 +264,7 @@ class Query(graphene.ObjectType):
     def resolve_chart_total_transferred_by_month(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
