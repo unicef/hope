@@ -1,5 +1,7 @@
+from typing import Any
 from unittest.mock import patch
 
+from autopep8 import List
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -74,7 +76,7 @@ class TestActionPaymentPlanMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create(first_name="Rachel", last_name="Walker")
         create_afghanistan()  # approve:2, authorize:2, finance_review:3
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -142,7 +144,9 @@ class TestActionPaymentPlanMutation(APITestCase):
         ]
     )
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_update_status_payment_plan(self, name, permissions, status, actions, get_exchange_rate_mock):
+    def test_update_status_payment_plan(
+        self, name: Any, permissions: List[Permissions], status: str, actions: List[str], get_exchange_rate_mock: Any
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         if status:
             self.payment_plan.status = status
