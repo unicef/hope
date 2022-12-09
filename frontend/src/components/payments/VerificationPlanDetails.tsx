@@ -11,10 +11,10 @@ import {
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import {
-  PaymentVerificationPlanStatus,
-  CashPlanNode,
-  PaymentPlanNode,
+  CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
+  PaymentPlanQuery,
+  PaymentVerificationPlanStatus,
   useExportXlsxPaymentVerificationPlanFileMutation,
   useInvalidPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
@@ -30,12 +30,6 @@ import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
-
-interface VerificationPlanDetailsProps {
-  verificationPlan: CashPlanNode['verificationPlans']['edges'][number]['node'] | PaymentPlanNode['verificationPlans']['edges'][number]['node'];
-  samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: CashPlanNode | PaymentPlanNode;
-}
 
 const Container = styled.div`
   display: flex;
@@ -60,6 +54,12 @@ const StyledBox = styled(Box)`
   justify-content: flex-end;
   align-items: center;
 `;
+
+interface VerificationPlanDetailsProps {
+  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
+  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
+}
 
 export const VerificationPlanDetails = ({
   verificationPlan,
