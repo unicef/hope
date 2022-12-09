@@ -2,14 +2,13 @@ import json
 import os
 import shutil
 
+from django.conf import settings
 from django.core.management import BaseCommand
 from django.db.models import Q
-from django.conf import settings
 
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.household.models import Document, Household
+from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 def find_paid_households(sf_pk, business_area_slug="ukraine"):

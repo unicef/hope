@@ -4,10 +4,11 @@ from datetime import timedelta
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
-import requests_mock
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
+import requests_mock
 from parameterized import parameterized
 
 from hct_mis_api.apps.cash_assist_datahub.models import CashPlan as DHCashPlan

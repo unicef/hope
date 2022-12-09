@@ -1,8 +1,18 @@
 from typing import Tuple, Type
 
+from django.db.models import (
+    Case,
+    F,
+    Func,
+    OuterRef,
+    Prefetch,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
+
 import graphene
-from django.db.models import Case, When
-from django.db.models import Prefetch, Sum, Value, Subquery, OuterRef, Func, F
 from graphene import relay
 from graphene_django import DjangoObjectType
 

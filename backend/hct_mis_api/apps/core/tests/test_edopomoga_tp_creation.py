@@ -13,7 +13,6 @@ from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestEdopomogaCreation(APITestCase):
@@ -50,7 +49,6 @@ class TestEdopomogaCreation(APITestCase):
 
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
-
 
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)
