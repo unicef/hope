@@ -16,11 +16,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-<<<<<<< HEAD
-=======
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
->>>>>>> origin
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope

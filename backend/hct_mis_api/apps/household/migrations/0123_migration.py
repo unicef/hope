@@ -20,18 +20,5 @@ class Migration(migrations.Migration):
             name='deduplication_golden_record_status',
             field=models.CharField(choices=[('DUPLICATE', 'Duplicate'), ('NEEDS_ADJUDICATION', 'Needs Adjudication'), ('NOT_PROCESSED', 'Not Processed'), ('POSTPONE', 'Postpone'), ('UNIQUE', 'Unique')], db_index=True, default='UNIQUE', max_length=50),
         ),
-<<<<<<< HEAD
-        migrations.RemoveConstraint(
-            model_name='document',
-            name='unique_if_not_removed_and_valid',
-        ),
-        migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'))),
-                                               fields=('document_number', 'type', 'country'),
-                                               name='unique_if_not_removed_and_valid'),
-        ),
-=======
         migrations.RunSQL("CREATE INDEX IF NOT EXISTS household_household_default_page_index ON public.household_household USING btree (created_at, business_area_id, is_removed) WHERE NOT is_removed;","DROP INDEX IF EXISTS household_household_default_page_index;")
->>>>>>> origin
     ]

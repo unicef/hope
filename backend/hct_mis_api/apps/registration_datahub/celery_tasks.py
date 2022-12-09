@@ -209,14 +209,11 @@ def merge_registration_data_import_task(registration_data_import_id: "UUID") -> 
             ).update(status=RegistrationDataImport.MERGE_ERROR)
             raise
 
-<<<<<<< HEAD
-=======
     logger.info(
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
     )
     return True
 
->>>>>>> origin
 
 @app.task(queue="priority")
 @log_start_and_end
@@ -277,14 +274,7 @@ def validate_xlsx_import_task(import_data_id: "UUID") -> Dict:
     try:
         return ValidateXlsxImport().execute(import_data)
     except Exception as e:
-<<<<<<< HEAD
-        logger.exception("ValidateXlsxImport exception")
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        RegistrationDataImport.objects.filter(
-=======
         ImportData.objects.filter(
->>>>>>> origin
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
         raise
