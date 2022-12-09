@@ -286,7 +286,7 @@ class Report(NaturalKeyModel, models.Model):
             try:
                 context = dataset.arguments
                 if dataset.extra:
-                    context.update(pickle.loads(dataset.extra))
+                    context.update(pickle.loads(dataset.extra) or {})
 
                 title = self.document_title % context
                 output = self.formatter.render({"dataset": dataset, "report": self, "title": title, "context": context})
