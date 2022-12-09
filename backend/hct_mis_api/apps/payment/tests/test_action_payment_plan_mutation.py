@@ -1,7 +1,6 @@
-from typing import Any
+from typing import Any, List
 from unittest.mock import patch
 
-from autopep8 import List
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory

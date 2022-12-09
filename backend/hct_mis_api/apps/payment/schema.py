@@ -845,7 +845,7 @@ class Query(graphene.ObjectType):
             .order_by("delivery_mechanism_order")
         )
 
-        def get_fsps_for_delivery_mechanism(mechanism: str) -> List[str, Any]:
+        def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
             return (
                 [
