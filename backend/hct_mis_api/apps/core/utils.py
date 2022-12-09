@@ -8,11 +8,8 @@ from collections.abc import MutableMapping
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
 
-<<<<<<< HEAD
-from django.db.models import Q
-=======
 from django.core.cache import cache
->>>>>>> origin
+from django.db.models import Q
 from django.utils import timezone
 
 import pytz
@@ -539,7 +536,7 @@ def chart_get_filtered_qs(
     qs: Any,
     year: int,
     business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Optional[Dict, Q] = None,
+    additional_filters: Union[Dict, Q, None] = None,
     year_filter_path: Optional[str] = None,
     payment_verification_gfk: bool = False,
 ) -> "QuerySet":
