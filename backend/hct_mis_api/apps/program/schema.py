@@ -14,7 +14,6 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Int, relay
@@ -176,15 +175,28 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
-        return Program.objects.annotate(
-            custom_order=Case(
-                When(status=Program.DRAFT, then=Value(1)),
-                When(status=Program.ACTIVE, then=Value(2)),
-                When(status=Program.FINISHED, then=Value(3)),
-                output_field=IntegerField(),
-            ),
-            households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField()),
-        ).order_by("custom_order", "start_date")
+        return (
+            Program.objects.annotate(
+                custom_order=Case(
+                    When(status=Program.DRAFT, then=Value(1)),
+                    When(status=Program.ACTIVE, then=Value(2)),
+                    When(status=Program.FINISHED, then=Value(3)),
+                    output_field=IntegerField(),
+                ),
+                total_payment_plans_hh_count=Count(
+                    "cashplan__payment_items__household",
+                    filter=Q(cashplan__payment_items__delivered_quantity__gte=0),
+                    distinct=True,
+                ),
+                total_cash_plans_hh_count=Count(
+                    "paymentplan__payment_items__household",
+                    filter=Q(paymentplan__payment_items__delivered_quantity__gte=0),
+                    distinct=True,
+                ),
+            )
+            .annotate(households_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
+            .order_by("custom_order", "start_date")
+        )
 
     def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
