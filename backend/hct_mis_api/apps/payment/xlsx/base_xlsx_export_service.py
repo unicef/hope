@@ -44,7 +44,7 @@ class XlsxExportBaseService:
         self.wb.save(filename=filename)
 
     @staticmethod
-    def _adjust_column_width_from_col(ws: "Worksheet", min_row: int = 0, min_col: int = 1, max_col: int = 1):
+    def _adjust_column_width_from_col(ws: "Worksheet", min_row: int = 0, min_col: int = 1, max_col: int = 1) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
@@ -66,7 +66,7 @@ class XlsxExportBaseService:
             value = width + 2
             ws.column_dimensions[col_name].width = value
 
-    def _add_col_bgcolor(self, col: Optional[List] = None, hex_code: str = "A0FDB0"):
+    def _add_col_bgcolor(self, col: Optional[List] = None, hex_code: str = "A0FDB0") -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
             bd = Side(style="thin", color="999999")

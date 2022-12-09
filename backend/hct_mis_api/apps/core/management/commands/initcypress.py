@@ -7,7 +7,7 @@ from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import GenericPayment
 
 
-def create_fsps():
+def create_fsps() -> None:
     for delivery_mechanism in GenericPayment.DELIVERY_TYPE_CHOICE:
         dm = delivery_mechanism[0]
         FinancialServiceProviderFactory(

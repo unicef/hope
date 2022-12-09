@@ -200,12 +200,12 @@ class PaymentPlanService:
                 PaymentPlan.Status.IN_REVIEW,
             ],
         }
-        if self.payment_plan.status not in action_to_statuses_map.get(self.action):
+        if self.payment_plan.status not in action_to_statuses_map.get(self.action, []):
             raise GraphQLError(
                 f"Not possible to create {self.action} for Payment Plan within status {self.payment_plan.status}"
             )
 
-    def validate_acceptance_process_approval_count(self, acceptance_process) -> None:
+    def validate_acceptance_process_approval_count(self, acceptance_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_business_area_required_number_by_approval_type()
         if acceptance_process.approvals.filter(type=approval_type).count() >= required_number:
@@ -213,7 +213,7 @@ class PaymentPlanService:
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
 
-    def check_payment_plan_and_update_status(self, approval_process) -> None:
+    def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_business_area_required_number_by_approval_type()
 

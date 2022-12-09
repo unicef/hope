@@ -1,5 +1,4 @@
-from typing import Any, Optional
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django import forms
 from django.contrib import admin, messages
@@ -38,6 +37,11 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.forms import Form
 
 
 @admin.register(PaymentRecord)
@@ -93,7 +97,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     raw_id_fields = ("payment_plan",)
 
     @button()
-    def verifications(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+    def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         list_url = reverse("admin:payment_paymentverification_changelist")
         url = f"{list_url}?payment_verification_plan__exact={pk}"
         return HttpResponseRedirect(url)
@@ -122,7 +126,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 template="admin_extra_buttons/confirm.html",
             )
 
-    def activate(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def activate(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         return confirm_action(
             self,
             request,
@@ -191,11 +195,11 @@ class CashPlanAdmin(HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)
 
-    def verification_status(self, obj):
+    def verification_status(self, obj: Any) -> Optional[str]:
         return obj.get_payment_verification_summary.status if obj.get_payment_verification_summary else None
 
     @button()
-    def payments(self, request, pk):
+    def payments(self, request: HttpRequest, pk: str) -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/cashplan/payments.html", context)
@@ -238,7 +242,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "financial_service_provider",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")
 
 
@@ -251,7 +255,7 @@ class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
 class PaymentChannelAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism_display_name")
 
-    def delivery_mechanism_display_name(self, obj):
+    def delivery_mechanism_display_name(self, obj: Any) -> str:
         return obj.delivery_mechanism
 
 
@@ -269,12 +273,14 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         "columns",
     )
 
-    def total_selected_columns(self, obj):
+    def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
 
     total_selected_columns.short_description = "# of columns"
 
-    def save_model(self, request, obj: FinancialServiceProviderXlsxTemplate, form, change: bool) -> None:
+    def save_model(
+        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+    ) -> None:
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
@@ -293,7 +299,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             delivery_mechanisms__financial_service_provider=obj,
         ).distinct()
 
-    def clean(self):
+    def clean(self) -> Optional[Dict[str, Any]]:
         if self.instance:
             payment_plans = self.locked_payment_plans_for_fsp(self.instance)
             if payment_plans.exists():
@@ -326,7 +332,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("data_transfer_configuration",),
     )
 
-    def save_model(self, request, obj: FinancialServiceProvider, form, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: FinancialServiceProvider, form: "Form", change: bool) -> None:
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
@@ -340,10 +346,10 @@ class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
     # search_fields = ("id",)
     readonly_fields = ("file", "status", "financial_service_provider")
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
 

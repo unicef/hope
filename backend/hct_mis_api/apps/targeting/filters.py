@@ -74,19 +74,22 @@ class TargetPopulationFilter(FilterSet):
             queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
         return queryset
 
-    def filter_number_of_households_min(self, queryset, model_field, value):
+    @staticmethod
+    def filter_number_of_households_min(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__gte=value
         )
         return queryset
 
-    def filter_number_of_households_max(self, queryset, model_field, value):
+    @staticmethod
+    def filter_number_of_households_max(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__lte=value
         )
         return queryset
 
-    def filter_payment_plan_applicable(self, queryset, model_field, value):
+    @staticmethod
+    def filter_payment_plan_applicable(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         if value is True:
             return queryset.filter(
                 Q(business_area__is_payment_plan_applicable=True)

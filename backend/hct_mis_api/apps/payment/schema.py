@@ -22,6 +22,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
+import _decimal
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -258,10 +259,10 @@ class PaymentConflictDataNode(graphene.ObjectType):
     payment_unicef_id = graphene.String()
 
     def resolve_payment_plan_id(self, info: Any) -> Optional[str]:
-        return encode_id_base64(self["payment_plan_id"], "PaymentPlan")
+        return encode_id_base64(self["payment_plan_id"], "PaymentPlan")  # type: ignore
 
     def resolve_payment_id(self, info: Any) -> Optional[str]:
-        return encode_id_base64(self["payment_id"], "Payment")
+        return encode_id_base64(self["payment_id"], "Payment")  # type: ignore
 
 
 class GenericPaymentNode(graphene.ObjectType):
@@ -400,10 +401,10 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
     def resolve_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismNode":
         return self  # DeliveryMechanismNode uses the same model
 
-    def resolve_volume(self, info: Any) -> graphene.Decimal:  # non-usd
+    def resolve_volume(self, info: Any) -> Optional[_decimal.Decimal]:  # non-usd
         return _calculate_volume(self, "entitlement_quantity")
 
-    def resolve_volume_usd(self, info: Any) -> graphene.Decimal:
+    def resolve_volume_usd(self, info: Any) -> Optional[_decimal.Decimal]:
         return _calculate_volume(self, "entitlement_quantity_usd")
 
     class Meta:
@@ -418,7 +419,7 @@ class FspChoices(graphene.ObjectType):
         name = graphene.String()
 
         def resolve_id(self, info: Any) -> Optional[str]:
-            return encode_id_base64(self["id"], "FinancialServiceProvider")
+            return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
 
     delivery_mechanism = graphene.String()
     fsps = graphene.List(FspChoice)
