@@ -13,9 +13,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 class UpdateByXlsxStage1Form(forms.Form):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    registration_data_import = forms.ModelChoiceField(
-        queryset=RegistrationDataImport.objects.all()
-    )
+    registration_data_import = forms.ModelChoiceField(queryset=RegistrationDataImport.objects.all())
     file = forms.FileField()
 
     def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
@@ -37,18 +35,14 @@ class UpdateByXlsxStage1Form(forms.Form):
 
     def _retrieve_rdi_by_name(self) -> RegistrationDataImport:
         data = self.cleaned_data.get("registration_data_import")
-        registration_data_import = RegistrationDataImport.objects.filter(
-            name=data
-        ).first()
+        registration_data_import = RegistrationDataImport.objects.filter(name=data).first()
         if not registration_data_import:
             raise ValidationError(f"Rdi with the name {data} doesn't exist")
         return registration_data_import
 
 
 class UpdateByXlsxStage2Form(forms.Form):
-    xlsx_update_file = forms.ModelChoiceField(
-        queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput()
-    )
+    xlsx_update_file = forms.ModelChoiceField(queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs) -> None:
         self.xlsx_columns = kwargs.pop("xlsx_columns", [])
@@ -87,9 +81,7 @@ class WithdrawForm(forms.Form):
 class RestoreForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
-    reopen_tickets = forms.BooleanField(
-        required=False, help_text="Restore all previously closed tickets"
-    )
+    reopen_tickets = forms.BooleanField(required=False, help_text="Restore all previously closed tickets")
 
 
 class MassWithdrawForm(WithdrawForm):
@@ -114,9 +106,7 @@ class CreateTargetPopulationForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     action = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField()
-    program = forms.ModelChoiceField(
-        queryset=Program.objects.filter(status=Program.ACTIVE)
-    )
+    program = forms.ModelChoiceField(queryset=Program.objects.filter(status=Program.ACTIVE))
 
     def __init__(self, *args, **kwargs) -> None:
         read_only = kwargs.pop("read_only", False)
