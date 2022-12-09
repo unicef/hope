@@ -18,6 +18,12 @@ Oneliner to refresh your packages (from `backend` dir):
 sh -c ". ./venv/bin/activate ; docker-compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt ; python3.9 -m pip install -r venv/requirements.txt --require-hashes"
 ```
 
+To ensure that your change will pass all the static checks, run this command:
+
+```shell
+docker-compose run --rm backend sh -c "black . && isort . && flake8 . && mypy ."
+```
+
 ## Testing
 
 To run tests, you call `./manage.py test`. Example invocation:
@@ -48,4 +54,12 @@ To run isort, you use `isort`. Example invocation:
 
 ```shell
 docker-compose run --rm backend isort .
+```
+
+## Mypy
+
+To run mypy, you use `mypy`. Example invocation:
+
+```shell
+docker-compose run --rm backend mypy .
 ```

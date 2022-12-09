@@ -1,7 +1,9 @@
+from typing import Any, Tuple
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.db.models import JSONField
+from django.db.models import JSONField, QuerySet
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
@@ -15,19 +17,19 @@ from hct_mis_api.apps.utils.security import is_root
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         qs = self.model.all_objects.get_queryset()
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_filter(self, request):
-        return super().get_list_filter(request) + ("is_removed",)
+    def get_list_filter(self, request) -> Tuple:
+        return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class JSONWidgetMixin:
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request) or settings.DEBUG:
                 kwargs = {"widget": JSONEditor}
@@ -37,7 +39,7 @@ class JSONWidgetMixin:
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-class LastSyncDateResetMixin(ExtraButtonsMixin):
+class LastSyncDateResetMixin:
     @button()
     def reset_sync_date(self, request):
         if request.method == "POST":
@@ -66,9 +68,11 @@ class LastSyncDateResetMixin(ExtraButtonsMixin):
             )
 
 
-class HOPEModelAdminBase(
-    SmartDisplayAllMixin, AdminFiltersMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin
-):
+class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPermMixin, AdminFiltersMixin):
+    pass
+
+
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):
@@ -76,9 +80,13 @@ class HOPEModelAdminBase(
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if "delete_selected" in actions:
+        if "delete_selected" in actions and not is_root(request):
             del actions["delete_selected"]
         return actions
+
+    def count_queryset(self, request, queryset):
+        count = queryset.count()
+        self.message_user(request, f"Selection contains {count} records")
 
 
 class HUBBusinessAreaFilter(SimpleListFilter):

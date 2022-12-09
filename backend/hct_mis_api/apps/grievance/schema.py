@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import Dict, Tuple, Type
 
 from django.core.files.storage import default_storage
 from django.db.models import Q
@@ -10,11 +11,13 @@ from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
+from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
@@ -60,7 +63,7 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER),
@@ -77,7 +80,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info, object_instance) -> None:
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
@@ -94,7 +97,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         check_creator = object_instance.created_by == user and user.has_permission(creator_perm, business_area)
         check_assignee = object_instance.assigned_to == user and user.has_permission(owner_perm, business_area)
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
-            return True
+            return None
 
         log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
 
@@ -171,7 +174,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info):
-        individual_data = self.individual_data
+        individual_data: Dict = self.individual_data  # type: ignore
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -230,7 +233,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info):
-        individual_data = self.individual_data
+        individual_data: Dict = self.individual_data  # type: ignore
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -475,6 +478,7 @@ class Query(graphene.ObjectType):
         return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    @cached_in_django_cache(24)
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket,

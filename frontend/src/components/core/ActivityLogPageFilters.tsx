@@ -54,11 +54,13 @@ export function ActivityLogPageFilters({
             <MenuItem value=''>
               <em>{t('None')}</em>
             </MenuItem>
-            {Object.entries(modules).map(([key, value]) => (
-              <MenuItem key={key} value={key}>
-                {value}
-              </MenuItem>
-            ))}
+            {Object.entries(modules)
+              .sort()
+              .map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
           </SelectFilter>
         </Grid>
       </Grid>

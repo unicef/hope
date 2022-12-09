@@ -1,10 +1,12 @@
 import logging
+from typing import List, Optional
 from uuid import UUID
 
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.models import COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_task(household_ids: list[UUID] = None):
+def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = None):
     try:
         from hct_mis_api.apps.household.models import Household, Individual
 
@@ -28,14 +30,14 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
         for hh in (
             Household.objects.filter(**params)
             .only("id", "collect_individual_data")
+            .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
             .prefetch_related("individuals")
             .iterator(chunk_size=10000)
         ):
             with configure_scope() as scope:
                 scope.set_tag("business_area", hh.business_area)
-                with disable_concurrency(Household):
-                    with disable_concurrency(Individual):
-                        recalculate_data(hh)
+                with disable_concurrency(Household), disable_concurrency(Individual):
+                    recalculate_data(hh)
 
     except Exception as e:
         logger.exception(e)

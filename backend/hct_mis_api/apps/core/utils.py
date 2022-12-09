@@ -6,7 +6,9 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 
+from django.core.cache import cache
 from django.db.models import QuerySet
 from django.utils import timezone
 
@@ -20,29 +22,32 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    def __contains__(self, key, *args, **kwargs):
+    def __contains__(self, key, *args, **kwargs) -> bool:
         return key.casefold() in (element.casefold() for element in self)
 
 
-def decode_id_string(id_string):
+def decode_id_string(id_string) -> Optional[str]:
     if not id_string:
-        return
+        return None
 
     from base64 import b64decode
 
     return b64decode(id_string).decode().split(":")[1]
 
 
-def encode_id_base64(id_string, model_name):
-    if not id_string:
-        return
-
+def encode_id_base64_required(id_string, model_name) -> str:
     from base64 import b64encode
 
     return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
 
 
-def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
+def encode_id_base64(id_string, model_name) -> Optional[str]:
+    if not id_string:
+        return None
+    return encode_id_base64_required(id_string, model_name)
+
+
+def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-") -> None:
     """
     Calculates and stores a unique slug of ``value`` for an instance.
 
@@ -88,7 +93,7 @@ def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_
     setattr(instance, slug_field.attname, slug)
 
 
-def _slug_strip(value, separator="-"):
+def _slug_strip(value, separator="-") -> str:
     import re
 
     """
@@ -106,7 +111,8 @@ def _slug_strip(value, separator="-"):
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))  # noqa: F523 # TODO: bug?
+        # FIXME: bug?
+        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -116,7 +122,7 @@ def _slug_strip(value, separator="-"):
     return value
 
 
-def serialize_flex_attributes():
+def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
     from django.db.models import F
 
     """
@@ -191,7 +197,7 @@ def serialize_flex_attributes():
     return result_dict
 
 
-def get_combined_attributes():
+def get_combined_attributes() -> Dict:
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     flex_attrs = serialize_flex_attributes()
@@ -204,34 +210,28 @@ def get_combined_attributes():
     }
 
 
-def get_attr_value(name, obj, default=None):
+def get_attr_value(name, obj, default=None) -> Any:
     if isinstance(obj, (MutableMapping, dict)):
         return obj.get(name, default)
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices):
-    return [{"name": name, "value": value} for value, name in choices]
+def to_choice_object(choices) -> List[Dict[str, Any]]:
+    return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(obj, convert_func):
+def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Union[Dict, List, Any]:
     if isinstance(obj, dict):
-        new = {}
-        for k, v in obj.items():
-            new[convert_func(k)] = rename_dict_keys(v, convert_func)
+        return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):
-        new = []
-        for v in obj:
-            new.append(rename_dict_keys(v, convert_func))
-    else:
-        return obj
-    return new
+        return [rename_dict_keys(v, convert_func) for v in obj]
+    return obj
 
 
 raise_attribute_error = object()
 
 
-def nested_getattr(obj, attr, default=raise_attribute_error):
+def nested_getattr(obj, attr, default=raise_attribute_error) -> Any:
     import functools
 
     try:
@@ -243,7 +243,7 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
         raise
 
 
-def nested_dict_get(dictionary, path):
+def nested_dict_get(dictionary, path) -> Any:
     import functools
 
     return functools.reduce(
@@ -253,14 +253,14 @@ def nested_dict_get(dictionary, path):
     )
 
 
-def get_count_and_percentage(input_list, all_items_list):
+def get_count_and_percentage(input_list, all_items_list) -> Dict[str, Any]:
     count = len(input_list)
     all_items_count = len(all_items_list) or 1
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
 
 
-def encode_ids(results: list[dict], model_name: str, key: str) -> list[dict]:
+def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
     if results:
         for result in results:
             result_id = result[key]
@@ -268,7 +268,7 @@ def encode_ids(results: list[dict], model_name: str, key: str) -> list[dict]:
     return results
 
 
-def to_dict(instance, fields=None, dict_fields=None):
+def to_dict(instance, fields=None, dict_fields=None) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -314,16 +314,16 @@ def to_dict(instance, fields=None, dict_fields=None):
     return data
 
 
-def build_arg_dict(model_object, mapping_dict):
+def build_arg_dict(model_object, mapping_dict) -> Dict:
     return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
-def build_arg_dict_from_dict(data_dict, mapping_dict):
+def build_arg_dict_from_dict(data_dict, mapping_dict) -> Dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
 class CustomOrderingFilter(OrderingFilter):
-    def filter(self, qs, value):
+    def filter(self, qs, value) -> QuerySet:
         from django.db.models.functions import Lower
 
         from django_filters.constants import EMPTY_VALUES
@@ -348,7 +348,7 @@ class CustomOrderingFilter(OrderingFilter):
                 new_ordering.append(field)
         return qs.order_by(*new_ordering)
 
-    def normalize_fields(self, fields):
+    def normalize_fields(self, fields) -> Dict:
         """
         Normalize the fields into an ordered map of {field name: param name}
         """
@@ -383,7 +383,7 @@ class CustomOrderingFilter(OrderingFilter):
         return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
 
 
-def is_valid_uuid(uuid_str):
+def is_valid_uuid(uuid_str) -> bool:
     from uuid import UUID
 
     try:
@@ -393,19 +393,25 @@ def is_valid_uuid(uuid_str):
         return False
 
 
-def choices_to_dict(choices):
+def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-def decode_and_get_object(encoded_id, model, required):
+def decode_and_get_object(encoded_id, model: Any, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
         return get_object_or_404(model, id=decoded_id)
 
+    return None
 
-def dict_to_camel_case(dictionary):
+
+def decode_and_get_object_required(encoded_id, model: Any) -> Any:
+    return decode_and_get_object(encoded_id, model, required=True)
+
+
+def dict_to_camel_case(dictionary) -> Dict:
     from graphene.utils.str_converters import to_camel_case
 
     if isinstance(dictionary, dict):
@@ -413,7 +419,7 @@ def dict_to_camel_case(dictionary):
     return {}
 
 
-def to_snake_case(camel_case_string):
+def to_snake_case(camel_case_string) -> str:
     if "_" in camel_case_string:
         return camel_case_string
     import re
@@ -422,7 +428,7 @@ def to_snake_case(camel_case_string):
     return snake_case[0] + snake_case[1:].lower()
 
 
-def check_concurrency_version_in_mutation(version, target):
+def check_concurrency_version_in_mutation(version, target) -> None:
     if version is None:
         return
 
@@ -430,7 +436,7 @@ def check_concurrency_version_in_mutation(version, target):
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file):
+def update_labels_mapping(csv_file) -> None:
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
 
@@ -494,7 +500,7 @@ def update_labels_mapping(csv_file):
         print(new_content, file=f, end="")
 
 
-def xlrd_rows_iterator(sheet):
+def xlrd_rows_iterator(sheet) -> Generator:
     import xlrd
 
     for row_number in range(1, sheet.nrows):
@@ -506,16 +512,16 @@ def xlrd_rows_iterator(sheet):
         yield row
 
 
-def chart_map_choices(choices):
+def chart_map_choices(choices) -> Dict:
     return dict(choices)
 
 
 def chart_get_filtered_qs(
     obj,
     year,
-    business_area_slug_filter: dict = None,
-    additional_filters: dict = None,
-    year_filter_path: str = None,
+    business_area_slug_filter: Optional[Dict] = None,
+    additional_filters: Optional[Dict] = None,
+    year_filter_path: Optional[str] = None,
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
@@ -528,11 +534,11 @@ def chart_get_filtered_qs(
     return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
-def parse_list_values_to_int(list_to_parse):
+def parse_list_values_to_int(list_to_parse) -> List[int]:
     return list(map(lambda x: int(x or 0), list_to_parse))
 
 
-def sum_lists_with_values(qs_values, list_len):
+def sum_lists_with_values(qs_values, list_len) -> List[int]:
     data = [0] * list_len
     for values in qs_values:
         parsed_values = parse_list_values_to_int(values)
@@ -542,12 +548,12 @@ def sum_lists_with_values(qs_values, list_len):
     return data
 
 
-def chart_permission_decorator(chart_resolve=None, permissions=None):
+def chart_permission_decorator(chart_resolve=None, permissions=None) -> Callable:
     if chart_resolve is None:
         return functools.partial(chart_permission_decorator, permissions=permissions)
 
     @functools.wraps(chart_resolve)
-    def resolve_f(*args, **kwargs):
+    def resolve_f(*args, **kwargs) -> Any:
         from hct_mis_api.apps.core.models import BusinessArea
 
         _, resolve_info = args
@@ -561,11 +567,11 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
     return resolve_f
 
 
-def chart_filters_decoder(filters):
+def chart_filters_decoder(filters) -> Dict:
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas") -> Dict:
     filter_query = {}
     if filters.get("program") is not None:
         filter_query.update({program_id_path: filters.get("program")})
@@ -580,39 +586,37 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
 
 
 class CaIdIterator:
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         self.name = name
         self.last_id = 0
 
-    def __iter__(self):
+    def __iter__(self: "CaIdIterator") -> "CaIdIterator":
         return self
 
-    def __next__(self):
+    def __next__(self: "CaIdIterator") -> str:
         self.last_id += 1
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 
 
-def resolve_flex_fields_choices_to_string(parent):
+def resolve_flex_fields_choices_to_string(parent) -> Dict:
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
-    flex_fields_with_str_choices = {**parent.flex_fields}
+    flex_fields_with_str_choices: Dict = {**parent.flex_fields}
     for flex_field_name, value in flex_fields_with_str_choices.items():
         flex_field = flex_fields.get(flex_field_name)
         if flex_field is None:
             continue
 
         if flex_field in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
-            if isinstance(value, list):
-                new_value = [str(current_choice_value) for current_choice_value in value]
-            else:
-                new_value = str(value)
-            flex_fields_with_str_choices[flex_field_name] = new_value
+            flex_fields_with_str_choices[flex_field_name] = (
+                [str(current_choice_value) for current_choice_value in value] if isinstance(value, list) else str(value)
+            )
 
     return flex_fields_with_str_choices
 
 
-def get_model_choices_fields(model, excluded=None):
+def get_model_choices_fields(model, excluded=None) -> List[str]:
     if excluded is None:
         excluded = []
 
@@ -628,7 +632,7 @@ class SheetImageLoader:
 
     _images = {}
 
-    def __init__(self, sheet):
+    def __init__(self, sheet) -> None:
         # Holds an array of A-ZZ
         col_holder = list(
             itertools.chain(
@@ -643,11 +647,11 @@ class SheetImageLoader:
             col = col_holder[image.anchor._from.col]
             self._images[f"{col}{row}"] = image._data
 
-    def image_in(self, cell):
+    def image_in(self, cell) -> bool:
         """Checks if there's an image in specified cell"""
         return cell in self._images
 
-    def get(self, cell):
+    def get(self, cell) -> Any:
         """Retrieves image data from a cell"""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
@@ -656,7 +660,7 @@ class SheetImageLoader:
             return Image.open(image)
 
 
-def fix_flex_type_fields(items, flex_fields):
+def fix_flex_type_fields(items, flex_fields) -> List[Dict]:
     for item in items:
         for key, value in item.flex_fields.items():
             if key in flex_fields:
@@ -668,7 +672,7 @@ def fix_flex_type_fields(items, flex_fields):
     return items
 
 
-def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
+def map_unicef_ids_to_households_unicef_ids(excluded_ids_string) -> List:
     excluded_ids_array = excluded_ids_string.split(",")
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
@@ -685,13 +689,13 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
 
 
 @functools.lru_cache(maxsize=None)
-def cached_business_areas_slug_id_dict():
+def cached_business_areas_slug_id_dict() -> Dict:
     from hct_mis_api.apps.core.models import BusinessArea
 
     return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
 
 
-def timezone_datetime(value):
+def timezone_datetime(value) -> datetime:
     if not value:
         return value
     datetime_value = value
@@ -702,3 +706,13 @@ def timezone_datetime(value):
     if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
+
+
+def save_data_in_cache(cache_key, data_lambda, timeout=60 * 60 * 24, cache_condition=None):
+    cache_data = cache.get(cache_key, "NOT_CACHED")
+    if cache_data == "NOT_CACHED":
+        cache_data = data_lambda()
+        if cache_condition and not cache_condition(cache_data):
+            return cache_data
+        cache.set(cache_key, cache_data, timeout=timeout)
+    return cache_data

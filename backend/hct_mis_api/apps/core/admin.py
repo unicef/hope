@@ -1,6 +1,7 @@
 import csv
 import logging
 from io import StringIO
+from typing import Any, Dict, List
 
 from django import forms
 from django.contrib import admin, messages
@@ -25,11 +26,12 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 import xlrd
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_extra_buttons.mixins import confirm_action
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import choice, view
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
@@ -37,8 +39,10 @@ from xlrd import XLRDError
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
+    create_target_population_task,
     upload_new_kobo_template_and_update_flex_fields_task,
 )
+from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
@@ -50,7 +54,12 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
 
@@ -91,7 +100,7 @@ class BusinessofficeFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
-    def value(self):
+    def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
     def queryset(self, request, queryset):
@@ -116,21 +125,19 @@ class GroupConcat(Aggregate):
 
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "slug",
         "code",
         "region_name",
         "region_code",
+        "active",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
-    # formfield_overrides = {
-    #     JSONField: {"widget": JSONEditor},
-    # }
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "custom_fields":
@@ -141,10 +148,9 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    # def get_readonly_fields(self, request, obj=None):
-    #     if not is_root(request):
-    #         return self.readonly_fields + ('slug')
-    #     return super().get_readonly_fields(request, obj)
+    @choice(label="DOAP", change_list=False)
+    def doap(self, button):
+        button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
     def split_business_area(self, request, pk):
@@ -181,7 +187,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
-    def _get_doap_matrix(self, obj):
+    def _get_doap_matrix(self, obj) -> List[Any]:
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
         fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
@@ -229,7 +235,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                     matrix.append(user_data)
         return matrix
 
-    @button(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
+    @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
     def force_sync_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
@@ -238,7 +244,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Send DOAP", group="doap")
+    @view(label="Send DOAP", group="doap")
     def send_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
@@ -277,7 +283,7 @@ UNICEF HOPE""",
 
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Export DOAP", group="doap", permission="core.can_export_doap")
+    @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
     def export_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
@@ -291,7 +297,7 @@ UNICEF HOPE""",
             writer.writerow(row)
         return response
 
-    @button(permission="core.can_send_doap")
+    @view(permission="core.can_send_doap")
     def view_ca_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         context["aeu_groups"] = ["doap"]
@@ -320,7 +326,7 @@ UNICEF HOPE""",
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
@@ -338,9 +344,11 @@ UNICEF HOPE""",
 
                     error, response = api.test_connection_start_flow(flow_name, phone_number)
                     if response:
-                        context["flow_uuid"] = response["flow"]["uuid"]
-                        context["flow_status"] = response["status"]
-                        context["timestamp"] = response["created_on"]
+                        for index, entry in enumerate(response):
+                            context[index] = {}
+                            context[index]["flow_uuid"] = entry["flow"]["uuid"]
+                            context[index]["flow_status"] = entry["status"]
+                            context[index]["timestamp"] = entry["created_on"]
 
                     if error:
                         messages.error(request, error)
@@ -389,7 +397,7 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     list_display = ("type", "name", "required")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
@@ -403,7 +411,7 @@ class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
@@ -419,7 +427,7 @@ class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeChoiceAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
@@ -432,7 +440,7 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
@@ -466,7 +474,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
     def original_file_name(self, obj):
         return obj.file_name
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
+    def get_form(self, request, obj=None, change=False, **kwargs) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
@@ -556,15 +564,15 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
     def change_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False
+        self.has_add_permission = lambda __: False  # type: ignore
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission
+        self.has_add_permission = has_add_permission  # type: ignore
 
         return template_response
 
 
 @admin.register(CountryCodeMap)
-class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
 
@@ -576,7 +584,7 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(admin.ModelAdmin):
+class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
     def has_change_permission(self, request, obj=None):
@@ -590,3 +598,26 @@ class StorageFileAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return request.user.can_download_storage_files()
+
+    @button(label="Create eDopomoga TP")
+    def create_tp(self, request, pk):
+        storage_obj = StorageFile.objects.get(pk=pk)
+        context = self.get_common_context(
+            request,
+            pk,
+        )
+        if request.method == "GET":
+            if TargetPopulation.objects.filter(storage_file=storage_obj).exists():
+                self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
+                return redirect("..")
+
+            form = ProgramForm()
+            context["form"] = form
+            return TemplateResponse(request, "core/admin/create_tp.html", context)
+        else:
+            rdi_name = request.POST.get("name")
+
+            create_target_population_task.delay(storage_obj.pk, rdi_name)
+
+            self.message_user(request, "Creation of TargetPopulation started")
+            return redirect("..")

@@ -1,24 +1,25 @@
 import logging
 from itertools import chain
-from typing import Iterable
+from typing import Any, Iterable, List, Optional
 
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import (
@@ -27,7 +28,6 @@ from adminfilters.filters import (
     ValueFilter,
 )
 from adminfilters.querystring import QueryStringFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
@@ -37,6 +37,8 @@ from hct_mis_api.apps.household.celery_tasks import (
     update_individuals_iban_from_xlsx_task,
 )
 from hct_mis_api.apps.household.forms import (
+    AddToTargetPopulationForm,
+    CreateTargetPopulationForm,
     MassWithdrawForm,
     RestoreForm,
     UpdateByXlsxStage1Form,
@@ -76,13 +78,17 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(Agency)
-class AgencyTypeAdmin(HOPEModelAdminBase):
+class AgencyAdmin(HOPEModelAdminBase):
     search_fields = ("label", "country")
     list_display = ("label", "type", "country")
     list_filter = (
         "type",
         ("country", ValueFilter.factory(label="Country ISO CODE 2")),
     )
+    autocomplete_fields = ("country",)
+
+    def get_queryset(self, request) -> QuerySet:
+        return super().get_queryset(request).select_related("country")
 
 
 @admin.register(Document)
@@ -93,8 +99,12 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_filter = (
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
+        ("country", AutoCompleteFilter),
     )
     autocomplete_fields = ["type"]
+
+    def get_queryset(self, request) -> QuerySet:
+        return super().get_queryset(request).select_related("individual", "type", "country")
 
 
 @admin.register(DocumentType)
@@ -106,6 +116,15 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
         "label",
     )
 
+    def get_queryset(self, request) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "country",
+            )
+        )
+
 
 @admin.register(Household)
 class HouseholdAdmin(
@@ -114,6 +133,7 @@ class HouseholdAdmin(
     LinkedObjectsMixin,
     PowerQueryMixin,
     SmartFieldsetMixin,
+    CursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
     list_display = (
@@ -125,21 +145,21 @@ class HouseholdAdmin(
     )
     list_filter = (
         DepotManager,
-        QueryStringFilter,
-        ("registration_data_import", AutoCompleteFilter),
-        ("withdrawn", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        "org_enumerator",
-        "last_registration_date",
+        QueryStringFilter,
+        "withdrawn",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = (
-        "registration_data_import",
         "admin_area",
-        "head_of_household",
         "business_area",
+        "country",
+        "country_origin",
+        "currency",
+        "head_of_household",
+        "registration_data_import",
     )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
@@ -172,44 +192,173 @@ class HouseholdAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
-    actions = ["mass_withdraw", "mass_unwithdraw"]
+    actions = [
+        "mass_withdraw",
+        "mass_unwithdraw",
+        "count_queryset",
+        "create_target_population",
+        "add_to_target_population",
+    ]
+    cursor_ordering_field = "unicef_id"
 
-    def get_ignored_linked_objects(self, request):
+    def get_queryset(self, request) -> QuerySet:
+        qs = self.model.all_objects.get_queryset().select_related(
+            "head_of_household", "country", "country_origin", "admin_area"
+        )
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+
+    def get_ignored_linked_objects(self, request) -> List:
         return []
 
-    def _toggle_withdraw_status(self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None):
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+
+    def _toggle_withdraw_status(
+        self,
+        request,
+        hh: Household,
+        tickets: Optional[Iterable] = None,
+        comment=None,
+        tag=None,
+    ) -> HouseholdWithdraw:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
-        if not tickets:
+        if tickets is None:
             tickets = GrievanceTicket.objects.belong_household(hh)
             if hh.withdrawn:
-                tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+                tickets = filter(
+                    lambda t: t.ticket.extras.get("status_before_withdrawn", False),
+                    tickets,
+                )
             else:
                 tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
         service = HouseholdWithdraw(hh)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
-            hh.withdraw()
-            message = "{} has been restored by {}. {}"
+            hh.unwithdraw()
+            message = "{target} has been restored by {user}. {comment}"
             ticket_message = "Ticket reopened due to Household restore"
         else:
             hh.withdraw(tag=tag)
-            message = "{} has been withdrawn by {}. {}"
+            message = "{target} has been withdrawn by {user}. {comment}"
             ticket_message = "Ticket closed due to Household withdrawn"
 
         for individual in service.individuals:
-            self.log_change(request, individual, message.format("Individual"))
+            self.log_change(
+                request,
+                individual,
+                message.format(target="Individual", user=request.user.username, comment=comment),
+            )
 
         for ticket in tickets:
             self.log_change(request, ticket.ticket, ticket_message)
-        self.log_change(request, hh, message.format("Household", request.user.username, comment))
+        self.log_change(
+            request,
+            hh,
+            message.format(target="Household", user=request.user.username, comment=comment),
+        )
 
         return service
 
-    def has_withdrawn_permission(self, request):
+    def has_withdrawn_permission(self, request) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
-    def mass_withdraw(self, request, qs):
+    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.targeting.models import TargetPopulation
+
+        context = self.get_common_context(request, title="Extend TargetPopulation")
+        if "apply" in request.POST:
+            form = AddToTargetPopulationForm(request.POST, read_only=True)
+            if form.is_valid():
+                tp: TargetPopulation = form.cleaned_data["target_population"]
+                ba: BusinessArea = tp.business_area
+                population = qs.filter(business_area=ba)
+                context["target_population"] = tp
+                context["population"] = population
+                context["queryset"] = qs
+                if population.count() != qs.count():
+                    context["mixed_household"] = True
+        elif "confirm" in request.POST:
+            form = AddToTargetPopulationForm(request.POST)
+            if form.is_valid():
+                tp: TargetPopulation = form.cleaned_data["target_population"]
+                ba: BusinessArea = tp.business_area
+                population = qs.filter(business_area=ba)
+                with atomic():
+                    tp.households.add(*population)
+                    tp.refresh_stats()
+                    tp.save()
+                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
+                return HttpResponseRedirect(url)
+        else:
+            form = AddToTargetPopulationForm(
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "action": "add_to_target_population",
+                }
+            )
+        context["form"] = form
+        return TemplateResponse(request, "admin/household/household/add_target_population.html", context)
+
+    add_to_target_population.allowed_permissions = ["create_target_population"]
+
+    def create_target_population(self, request, qs):
+        context = self.get_common_context(request, title="Create TargetPopulation")
+        if "apply" in request.POST:
+            form = CreateTargetPopulationForm(request.POST, read_only=True)
+            if form.is_valid():
+                program = form.cleaned_data["program"]
+                ba = program.business_area
+                population = qs.filter(business_area=ba)
+                context["program"] = program
+                context["population"] = population
+                context["queryset"] = qs
+                if population.count() != qs.count():
+                    context["mixed_household"] = True
+        elif "confirm" in request.POST:
+            form = CreateTargetPopulationForm(request.POST)
+            if form.is_valid():
+                from hct_mis_api.apps.targeting.models import TargetPopulation
+
+                program = form.cleaned_data["program"]
+                ba = program.business_area
+                population = qs.filter(business_area=ba)
+                with atomic():
+                    tp = TargetPopulation.objects.create(
+                        targeting_criteria=None,
+                        created_by=request.user,
+                        name=form.cleaned_data["name"],
+                        business_area=ba,
+                        program=program,
+                    )
+                    tp.households.set(population)
+                    tp.refresh_stats()
+                    tp.save()
+                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
+                return HttpResponseRedirect(url)
+        else:
+            form = CreateTargetPopulationForm(
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "action": "create_target_population",
+                }
+            )
+        context["form"] = form
+        return TemplateResponse(request, "admin/household/household/create_target_population.html", context)
+
+    create_target_population.allowed_permissions = ["create_target_population"]
+
+    def has_create_target_population_permission(self, request):
+        return request.user.has_perm("targeting.add_target_population")
+
+    def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
@@ -221,23 +370,31 @@ class HouseholdAdmin(
                 with atomic():
                     for hh in qs.filter(withdrawn=False):
                         service = self._toggle_withdraw_status(
-                            request, hh, tag=form.cleaned_data["tag"], comment=form.cleaned_data["reason"]
+                            request,
+                            hh,
+                            tag=form.cleaned_data["tag"],
+                            comment=form.cleaned_data["reason"],
                         )
                         if service.household.withdraw:
                             results += 1
-                self.message_user(request, f"Changed { results } Households.")
+                self.message_user(request, f"Changed {results} Households.")
+                return None
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
             context["form"] = MassWithdrawForm(
-                initial={"_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME), "reason": "", "tag": ""}
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "reason": "",
+                    "tag": "",
+                }
             )
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
 
-    def mass_unwithdraw(self, request, qs):
+    def mass_unwithdraw(self, request, qs) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Restore")
         context["action"] = "mass_unwithdraw"
         context["op"] = "restore"
@@ -248,22 +405,37 @@ class HouseholdAdmin(
             form = RestoreForm(request.POST)
             if form.is_valid():
                 with atomic():
+                    if form.cleaned_data["reopen_tickets"]:
+                        tickets = None
+                    else:
+                        tickets = []
                     for hh in qs.filter(withdrawn=True):
-                        service = self._toggle_withdraw_status(request, hh, comment=form.cleaned_data["reason"])
+                        service = self._toggle_withdraw_status(
+                            request,
+                            hh,
+                            tickets=tickets,
+                            comment=form.cleaned_data["reason"],
+                        )
                         if not service.household.withdraw:
                             results += 1
-                self.message_user(request, f"Changed { results } Households.")
+                self.message_user(request, f"Changed {results} Households.")
+                return None
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
-            context["form"] = RestoreForm(initial={"_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME)})
+            context["form"] = RestoreForm(
+                initial={
+                    "reopen_tickets": True,
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                }
+            )
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.can_withdrawn")
-    def withdraw(self, request, pk):
+    def withdraw(self, request, pk) -> Any:  # TODO: typing
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         context = self.get_common_context(request, pk)
@@ -292,17 +464,15 @@ class HouseholdAdmin(
                 except Exception as e:
                     self.message_user(request, str(e), messages.ERROR)
         else:
-            if obj.withdrawn:
-                form = Form()
-            else:
-                form = WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            context["form"] = (
+                Form() if obj.withdrawn else WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
+            )
 
-        context["form"] = form
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
     @button()
-    def tickets(self, request, pk):
+    def tickets(self, request, pk) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
         tickets = []
@@ -312,17 +482,17 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
     @button()
-    def members(self, request, pk):
+    def members(self, request, pk) -> HttpResponseRedirect:
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?qs=unicef_id={obj.unicef_id}")
 
     @button()
-    def sanity_check(self, request, pk):
+    def sanity_check(self, request, pk) -> TemplateResponse:
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
         hh = self.get_object(request, pk)
-        warnings = []
+        warnings: List[List] = []
         primary = None
         head = None
         try:
@@ -386,10 +556,10 @@ class IndividualRoleInHouseholdInline(TabularInline):
     readonly_fields = ("household", "role")
     fields = ("household", "role")
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj=None) -> bool:
         return False
 
 
@@ -406,11 +576,12 @@ class IndividualAdmin(
     LastSyncDateResetMixin,
     LinkedObjectsMixin,
     SmartFieldsetMixin,
-    AdminAdvancedFiltersMixin,
+    CursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
+    cursor_ordering_field = "unicef_id"
 
     list_display = (
         "unicef_id",
@@ -431,9 +602,8 @@ class IndividualAdmin(
     )
 
     search_fields = ("family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "registration_data_import")
     exclude = ("created_at", "updated_at")
-    inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -487,8 +657,19 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+    actions = ["count_queryset"]
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def get_queryset(self, request) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "household",
+                "registration_data_import",
+            )
+        )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Any:
         if isinstance(db_field, JSONField):
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -498,13 +679,14 @@ class IndividualAdmin(
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @button()
-    def household_members(self, request, pk):
+    def household_members(self, request, pk) -> HttpResponseRedirect:
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
+        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
+        return HttpResponseRedirect(f"{url}?{flt}")
 
     @button(html_attrs={"class": "aeb-green"})
-    def sanity_check(self, request, pk):
+    def sanity_check(self, request, pk) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
         context["roles"] = obj.households_and_roles.all()
@@ -513,11 +695,15 @@ class IndividualAdmin(
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
     @button(label="Add/Update Individual IBAN by xlsx")
-    def add_update_individual_iban_from_xlsx(self, request):
+    def add_update_individual_iban_from_xlsx(self, request) -> Any:
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
             context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
-            return TemplateResponse(request, "admin/household/individual/individuals_iban_xlsx_update.html", context)
+            return TemplateResponse(
+                request,
+                "admin/household/individual/individuals_iban_xlsx_update.html",
+                context,
+            )
         else:
             form = UpdateIndividualsIBANFromXlsxForm(request.POST, request.FILES)
             if form.is_valid():
@@ -547,13 +733,15 @@ class IndividualAdmin(
             else:
                 context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
                 return TemplateResponse(
-                    request, "admin/household/individual/individuals_iban_xlsx_update.html", context
+                    request,
+                    "admin/household/individual/individuals_iban_xlsx_update.html",
+                    context,
                 )
 
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("individual_id", "household_id", "role")
+    list_display = ("individual", "household", "role")
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -564,32 +752,59 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
         "household",
     )
 
+    def get_queryset(self, request) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "individual",
+                "household",
+            )
+        )
+
 
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
-    autocomplete_fields = ["agency"]
+    # autocomplete_fields = ["agency", "individual"]
+    raw_id_fields = (
+        "individual",
+        "agency",
+    )
+
+    def get_queryset(self, request) -> QuerySet:
+        return super().get_queryset(request).select_related("individual", "agency")
 
 
 @admin.register(EntitlementCard)
-class EntitlementCardAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class EntitlementCardAdmin(HOPEModelAdminBase):
     list_display = ("id", "card_number", "status", "card_type", "service_provider")
     search_fields = ("card_number",)
     date_hierarchy = "created_at"
     raw_id_fields = ("household",)
-    list_filter = ("status", ("card_type", ValueFilter), ("service_provider", ValueFilter))
+    list_filter = (
+        "status",
+        ("card_type", ValueFilter),
+        ("service_provider", ValueFilter),
+    )
 
 
 @admin.register(XlsxUpdateFile)
-class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
+class XlsxUpdateFileAdmin(HOPEModelAdminBase):
+    readonly_fields = (
+        "file",
+        "business_area",
+        "rdi",
+        "xlsx_match_columns",
+        "uploaded_by",
+    )
     list_filter = (
         ("business_area", AutoCompleteFilter),
         ("uploaded_by", AutoCompleteFilter),
     )
 
-    def xlsx_update_stage2(self, request, old_form):
+    def xlsx_update_stage2(self, request, old_form) -> TemplateResponse:
         xlsx_update_file = XlsxUpdateFile(
             file=old_form.cleaned_data["file"],
             business_area=old_form.cleaned_data["business_area"],
@@ -601,19 +816,24 @@ class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             updater = IndividualXlsxUpdate(xlsx_update_file)
         except InvalidColumnsError as e:
             self.message_user(request, str(e), messages.ERROR)
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
+            context = self.get_common_context(
+                request,
+                title="Update Individual by xlsx",
+                form=UpdateByXlsxStage1Form(),
+            )
             return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
         context = self.get_common_context(
             request,
             title="Update Individual by xlsx",
             form=UpdateByXlsxStage2Form(
-                xlsx_columns=updater.columns_names, initial={"xlsx_update_file": xlsx_update_file}
+                xlsx_columns=updater.columns_names,
+                initial={"xlsx_update_file": xlsx_update_file},
             ),
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
 
-    def xlsx_update_stage3(self, request, old_form):
+    def xlsx_update_stage3(self, request, old_form) -> TemplateResponse:
         xlsx_update_file = old_form.cleaned_data["xlsx_update_file"]
         xlsx_update_file.xlsx_match_columns = old_form.cleaned_data["xlsx_match_columns"]
         xlsx_update_file.save()
@@ -629,14 +849,13 @@ class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
-    def add_view(self, request, form_url="", extra_context=None):
+    def add_view(self, request, form_url="", extra_context=None) -> Any:
         return self.xlsx_update(request)
 
-    def xlsx_update(self, request):
+    def xlsx_update(self, request) -> Any:
+        form: forms.Form
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
-            # form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
-            # form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)
@@ -680,6 +899,10 @@ class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                     no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
                     xlsx_update_file=xlsx_update_file.id,
                 )
-                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
+                return TemplateResponse(
+                    request,
+                    "admin/household/individual/xlsx_update_stage3.html",
+                    context,
+                )
 
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)

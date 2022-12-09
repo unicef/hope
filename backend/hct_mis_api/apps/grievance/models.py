@@ -1,12 +1,13 @@
 import logging
 from decimal import Decimal
 from itertools import chain
+from typing import Any, Dict, Iterable, List, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketManager(models.Manager):
-    def belong_household(self, household):
+    def belong_household(self, household) -> Iterable:
         individuals = household.individuals.values_list("id", flat=True)
         return chain(
             (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
@@ -313,11 +314,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t):
+    def flatten(self, t) -> List:
         return [item for sublist in t for item in sublist]
 
     @property
-    def related_tickets(self):
+    def related_tickets(self) -> QuerySet["GrievanceTicket"]:
         all_through_objects = GrievanceTicketThrough.objects.filter(
             Q(linked_ticket=self) | Q(main_ticket=self)
         ).values_list("main_ticket", "linked_ticket")
@@ -326,7 +327,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return GrievanceTicket.objects.filter(id__in=ids)
 
     @property
-    def is_feedback(self):
+    def is_feedback(self) -> bool:
         return self.category in (
             self.CATEGORY_NEGATIVE_FEEDBACK,
             self.CATEGORY_POSITIVE_FEEDBACK,
@@ -334,7 +335,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         )
 
     @property
-    def ticket_details(self):
+    def ticket_details(self) -> Any:
         nested_dict_or_value = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
         if isinstance(nested_dict_or_value, dict):
             details_name = nested_dict_or_value.get(self.issue_type)
@@ -344,11 +345,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return getattr(self, details_name, None)
 
     @property
-    def status_log(self):
+    def status_log(self) -> Dict:
         return choices_to_dict(GrievanceTicket.STATUS_CHOICES)[self.status]
 
     @property
-    def category_log(self):
+    def category_log(self) -> Dict:
         return choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.category]
 
     @property
@@ -367,25 +368,26 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         )
         verbose_name = "Grievance Ticket"
 
-    def clean(self):
+    def clean(self) -> None:
+        # TODO: refactor that
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
+        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.description or str(self.pk)
 
-    def get_issue_type(self):
+    def get_issue_type(self) -> Union[Dict, str]:
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
 
