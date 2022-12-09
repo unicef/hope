@@ -18,7 +18,7 @@ export const FormikAdminAreaAutocomplete = ({
     }
   };
   return (
-    <Box display flexDirection='column'>
+    <Box display='flex' flexDirection='column'>
       {label && <FieldLabel>{label}</FieldLabel>}
       <AdminAreaFixedAutocomplete
         disabled={disabled}
