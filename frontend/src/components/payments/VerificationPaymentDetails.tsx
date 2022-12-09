@@ -16,6 +16,7 @@ import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
+import { Missing } from '../core/Missing';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -24,7 +25,7 @@ const Overview = styled(Paper)`
 `;
 
 interface VerificationPaymentDetailsProps {
-  payment: PaymentQuery["payment"];
+  payment: PaymentQuery['payment'];
   canViewActivityLog: boolean;
   choicesData;
 }
@@ -63,8 +64,8 @@ export function VerificationPaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              // TODO: remove PP.ID by distribution modality
-              value={payment.id}
+              // TODO: add distribution modality
+              value={<Missing />}
             />
           </Grid>
         </Grid>
@@ -120,10 +121,8 @@ export function VerificationPaymentDetails({
             <LabelizedField
               label={t('PHONE NUMBER')}
               value={getPhoneNoLabel(
-                payment.household.headOfHousehold
-                  .phoneNo,
-                payment.household.headOfHousehold
-                  .phoneNoValid,
+                payment.household.headOfHousehold.phoneNo,
+                payment.household.headOfHousehold.phoneNoValid,
               )}
             />
           </Grid>
@@ -131,10 +130,8 @@ export function VerificationPaymentDetails({
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
               value={getPhoneNoLabel(
-                payment.household.headOfHousehold
-                  .phoneNoAlternative,
-                payment.household.headOfHousehold
-                  .phoneNoAlternativeValid,
+                payment.household.headOfHousehold.phoneNoAlternative,
+                payment.household.headOfHousehold.phoneNoAlternativeValid,
               )}
             />
           </Grid>
@@ -158,27 +155,18 @@ export function VerificationPaymentDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField
-              label={t('CURRENCY')}
-              value={payment.currency}
-            />
+            <LabelizedField label={t('CURRENCY')} value={payment.currency} />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={
-                deliveryTypeDict[payment.deliveryType]
-              }
+              value={deliveryTypeDict[payment.deliveryType]}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY DATE')}
-              value={
-                <UniversalMoment>
-                  {payment.deliveryDate}
-                </UniversalMoment>
-              }
+              value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={3}>
@@ -190,7 +178,9 @@ export function VerificationPaymentDetails({
         </Grid>
       </Overview>
       {canViewActivityLog && (
-        <UniversalActivityLogTable objectId={payment.parent.verificationPlans.edges[0].node.id} />
+        <UniversalActivityLogTable
+          objectId={payment.parent.verificationPlans.edges[0].node.id}
+        />
       )}
     </>
   );
