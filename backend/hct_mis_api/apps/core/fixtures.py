@@ -7,10 +7,10 @@ faker = Faker()
 
 
 def create_afghanistan(
-    is_payment_plan_applicable=False,
-    approval_number_required=2,
-    authorization_number_required=2,
-    finance_review_number_required=3,
+    is_payment_plan_applicable: bool = False,
+    approval_number_required: int = 2,
+    authorization_number_required: int = 2,
+    finance_review_number_required: int = 3,
 ) -> BusinessArea:
     return BusinessArea.objects.create(
         **{

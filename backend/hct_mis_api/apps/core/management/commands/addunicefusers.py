@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
@@ -19,7 +21,7 @@ emails = [
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         afg = BusinessArea.objects.get(name="Afghanistan")
         role = Role.objects.get(name="Role with all permissions")
         for username in emails:
