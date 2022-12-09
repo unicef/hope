@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { countPercentage } from '../../utils/utils';
-import { CashPlanNode, PaymentPlanNode } from '../../__generated__/graphql';
+import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  planNode: CashPlanNode | PaymentPlanNode;
+  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
 export const CashPlanDetailsSection = ({

@@ -28,7 +28,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
-  PaymentVerificationPlanNode,
+  PaymentPlanQuery,
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
   useEditPaymentVerificationPlanMutation,
@@ -101,7 +101,7 @@ function prepareVariables(
 }
 
 export interface Props {
-  paymentVerificationPlanNode: PaymentVerificationPlanNode;
+  paymentVerificationPlanNode: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
   cashOrPaymentPlanId: string;
 }
 
@@ -126,16 +126,21 @@ export function EditVerificationPlan({
   }, [paymentVerificationPlanNode.sampling]);
 
   const initialValues = {
-    confidenceInterval: paymentVerificationPlanNode.confidenceInterval * 100 || 95,
+    confidenceInterval:
+      paymentVerificationPlanNode.confidenceInterval * 100 || 95,
     marginOfError: paymentVerificationPlanNode.marginOfError * 100 || 5,
     filterAgeMin: paymentVerificationPlanNode.ageFilter?.min || '',
     filterAgeMax: paymentVerificationPlanNode.ageFilter?.max || '',
     filterSex: paymentVerificationPlanNode.sexFilter || '',
-    excludedAdminAreasFull: paymentVerificationPlanNode.excludedAdminAreasFilter,
-    excludedAdminAreasRandom: paymentVerificationPlanNode.excludedAdminAreasFilter,
-    verificationChannel: paymentVerificationPlanNode.verificationChannel || null,
+    excludedAdminAreasFull:
+      paymentVerificationPlanNode.excludedAdminAreasFilter,
+    excludedAdminAreasRandom:
+      paymentVerificationPlanNode.excludedAdminAreasFilter,
+    verificationChannel:
+      paymentVerificationPlanNode.verificationChannel || null,
     rapidProFlow: paymentVerificationPlanNode.rapidProFlowId || '',
-    adminCheckbox: paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
+    adminCheckbox:
+      paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
     ageCheckbox:
       Boolean(paymentVerificationPlanNode.ageFilter?.min) ||
       Boolean(paymentVerificationPlanNode.ageFilter?.max) ||

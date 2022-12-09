@@ -5,10 +5,10 @@ import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { TableWrapper } from '../../../components/core/TableWrapper';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
 import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
 import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
@@ -19,10 +19,9 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  PaymentPlanNode,
   PaymentVerificationPlanStatus,
-  usePaymentPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
+  usePaymentPlanQuery,
 } from '../../../__generated__/graphql';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
@@ -75,7 +74,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
 
-  const paymentPlan = data.paymentPlan as PaymentPlanNode;
+  const { paymentPlan } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -89,7 +88,9 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
-  const statesArray = paymentPlan.verificationPlans?.edges?.map((v) => v.node.status);
+  const statesArray = paymentPlan.verificationPlans?.edges?.map(
+    (v) => v.node.status,
+  );
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
@@ -205,7 +206,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}
-            objectType="PaymentPlan"
+            objectType='PaymentPlan'
           />
         )}
     </>
