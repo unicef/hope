@@ -16,7 +16,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import Document, Household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
