@@ -1,24 +1,20 @@
 from collections import defaultdict
 
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.db.transaction import atomic
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import StorageFileFactory
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.household.fixtures import (
-    DocumentTypeFactory,
-    DocumentFactory,
     BankAccountInfoFactory,
-)
-from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
     create_household,
 )
-from hct_mis_api.apps.household.management.commands.detect_paid_households import find_paid_households
-from hct_mis_api.apps.household.models import Household, Document
+from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
@@ -45,7 +41,7 @@ def find_households_without_documents_or_iban():
     return households_loaded_via_sf
 
 
-def find_paid_households():
+def find_paid_households():  # noqa
     storage_file = StorageFile.objects.get(pk=3)
     households_loaded_via_sf = find_edopomoga_households()
     tax_ids_of_inds_loaded_via_sf = Document.objects.filter(
@@ -156,7 +152,7 @@ def create_tps():
         .values_list("id", flat=True)
     )
     print(
-        f"household_already_received_assistance",
+        "household_already_received_assistance",
         household_already_received_assistance.count(),
     )
     create_tp_with_hhs_ids(
@@ -173,7 +169,7 @@ def create_tps():
         .values_list("id", flat=True)
     )
     print(
-        f"duplicated_households_but_not_received_assistance",
+        "duplicated_households_but_not_received_assistance",
         duplicated_households_but_not_received_assistance.count(),
     )
     create_tp_with_hhs_ids(
@@ -198,7 +194,7 @@ def create_tps():
         .distinct()
         .values_list("id", flat=True)
     )
-    print(f"all_other_edopomoga_households", all_other_edopomoga_households.count())
+    print("all_other_edopomoga_households", all_other_edopomoga_households.count())
     create_tp_with_hhs_ids(
         "eDopomoga 1.12.2022 not meeting any of the criteria",
         all_other_edopomoga_households,

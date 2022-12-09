@@ -1,20 +1,24 @@
 import hashlib
 import json
+import logging
 from typing import Any
 
-import graphene
 from django.db.models import QuerySet
+
+import graphene
 from graphene.relay import PageInfo
 from graphene_django import DjangoConnectionField
 from graphene_django.utils import maybe_queryset
 from graphql_relay.connection.arrayconnection import (
-    cursor_to_offset,
-    offset_to_cursor,
-    get_offset_with_default,
     connection_from_list_slice,
+    cursor_to_offset,
+    get_offset_with_default,
+    offset_to_cursor,
 )
 
 from hct_mis_api.apps.core.utils import save_data_in_cache
+
+logger = logging.getLogger(__name__)
 
 
 class DjangoFastConnectionField(DjangoConnectionField):
@@ -27,7 +31,8 @@ class DjangoFastConnectionField(DjangoConnectionField):
             hashed_args = hashlib.sha1(json.dumps(important_args).encode()).hexdigest()
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
-        except:
+        except Exception as e:
+            logger.exception(e)
             return iterable.count()
 
     @classmethod
