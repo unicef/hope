@@ -263,7 +263,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_payment_plans(report: Report):
+    def get_payment_plans(report: Report) -> QuerySet[PaymentPlan]:
         filter_vars = {
             "business_area": report.business_area,
             "dispersion_start_date__gte": report.date_from,

@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Dict
+from typing import Any, Dict, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -278,11 +278,11 @@ class CashPlanFilter(FilterSet):
         )
     )
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         return super().filter_queryset(queryset)
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -303,7 +303,7 @@ class PaymentPlanFilter(FilterSet):
         fields = tuple()
         model = PaymentPlan
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         if not self.form.cleaned_data.get("order_by"):
             queryset = queryset.order_by("unicef_id")
@@ -435,7 +435,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     return queryset
 
 
-def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> ExtendedQuerySetSequence:
+def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> List[Any]:
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 

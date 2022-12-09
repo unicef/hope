@@ -33,7 +33,6 @@ def download_payment_verification_plan(  # type: ignore
     if not request.user.has_permission(
         Permissions.PAYMENT_VERIFICATION_EXPORT.value, payment_verification_plan.business_area
     ):
-        logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
     if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
         raise GraphQLError("You can only download verification file when XLSX channel is selected")
@@ -58,11 +57,10 @@ def download_payment_plan_payment_list(
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
     if not request.user.has_permission(Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area):
-        logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):
-        log_and_raise("Export XLSX is possible only for Payment Plan within status LOCK or ACCEPTED.")
+        raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK or ACCEPTED.")
 
     if payment_plan.has_export_file:
         return redirect(payment_plan.payment_list_export_file_link)

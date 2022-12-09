@@ -30,6 +30,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import FSMField, transition
+from graphql import GraphQLError
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
@@ -399,7 +400,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.unicef_id
 
     @property
@@ -778,7 +779,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         verbose_name=_("XLSX Template"),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
     def can_accept_any_volume(self) -> bool:
@@ -881,7 +882,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         source=Status.NOT_SENT,
         target=Status.SENT,
     )
-    def status_send(self, sent_by: settings.AUTH_USER_MODEL) -> None:
+    def status_send(self, sent_by: "settings.AUTH_USER_MODEL") -> None:
         self.sent_date = timezone.now()
         self.sent_by = sent_by
 
@@ -975,7 +976,7 @@ class CashPlan(GenericPaymentPlan):
         related_query_name="cash_plan",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
@@ -1210,21 +1211,21 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         return self.payment_plan_obj.business_area
 
     @property
-    def get_xlsx_verification_file(self) -> Optional[FileTemp]:
+    def get_xlsx_verification_file(self) -> FileTemp:
         try:
             return FileTemp.objects.get(object_id=self.pk, content_type=get_content_type_for_model(self))
         except FileTemp.DoesNotExist:
-            return None
+            raise GraphQLError("Xlsx Verification File does not exist.")
         except FileTemp.MultipleObjectsReturned as e:
             logger.exception(e)
-            return None
+            raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
 
     @property
     def has_xlsx_payment_verification_plan_file(self) -> bool:
         if all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
-                self.get_xlsx_verification_file,
+                FileTemp.objects.filter(object_id=self.pk, content_type=get_content_type_for_model(self)).count() == 1,
             ]
         ):
             return True
@@ -1480,10 +1481,10 @@ class Approval(TimeStampedUUIDModel):
             self.REJECT: "Rejected",
         }
 
-        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type)
+        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
 
 
-class ChoiceArrayField(ArrayField):
+class ChoiceArrayFieldDM(ArrayField):
     def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
         defaults = {
             "form_class": forms.TypedMultipleChoiceField,
@@ -1503,11 +1504,11 @@ class DeliveryMechanism(TimeStampedUUIDModel):
     # If CASH can't be created raise validation error
     # create separate logic for payment channel scoep and fill PCH delivery data
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
-    global_core_fields = ChoiceArrayField(
+    global_core_fields = ChoiceArrayFieldDM(
         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
         default=list,
     )
-    payment_channel_fields = ChoiceArrayField(
+    payment_channel_fields = ChoiceArrayFieldDM(
         models.CharField(
             max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
         ),

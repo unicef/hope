@@ -2,9 +2,9 @@ import datetime
 import typing
 from decimal import Decimal
 from math import ceil
-from typing import Dict, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
@@ -17,6 +17,11 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
+    from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 
 def get_number_of_samples(payment_records_sample_count: int, confidence_interval: int, margin_of_error: int) -> int:
@@ -79,7 +84,7 @@ def calculate_counts(cash_plan_verification: PaymentVerificationPlan) -> None:
 
 def get_payment_items_for_dashboard(
     year: int, business_area_slug: str, filters: Dict, only_with_delivered_quantity: bool = False
-) -> QuerySet:
+) -> "QuerySet":
     additional_filters = {}
     if only_with_delivered_quantity:
         additional_filters["delivered_quantity_usd__gt"] = 0
@@ -104,8 +109,8 @@ def get_quantity_in_usd(
     currency: str,
     exchange_rate: Decimal,
     currency_exchange_date: datetime.datetime,
-    exchange_rates_client=None,
-):
+    exchange_rates_client: Optional["ExchangeRateClient"] = None,
+) -> Optional[Decimal]:
     if amount is None:
         return None
 

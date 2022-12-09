@@ -156,7 +156,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def payment_verification_summary(self, create, extracted, **kwargs):
+    def payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 

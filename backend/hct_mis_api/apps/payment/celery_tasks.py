@@ -45,7 +45,7 @@ def get_sync_run_rapid_pro_task() -> None:
 
 @app.task
 @log_start_and_end
-def fsp_generate_xlsx_report_task(fsp_id):
+def fsp_generate_xlsx_report_task(fsp_id: UUID) -> None:
     try:
         from hct_mis_api.apps.payment.models import FinancialServiceProvider
         from hct_mis_api.apps.payment.services.generate_fsp_xlsx_service import (
@@ -108,7 +108,7 @@ def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
+def create_payment_plan_payment_list_xlsx(payment_plan_id: UUID, user_id: UUID) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
@@ -147,7 +147,7 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
+def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: UUID, user_id: UUID) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
@@ -186,7 +186,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
+def import_payment_plan_payment_list_from_xlsx(payment_plan_id: UUID) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
@@ -226,7 +226,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file_pk):
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: UUID, user_id: UUID, file_pk: str) -> None:
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -262,7 +262,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
 @app.task
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
+def payment_plan_apply_steficon(payment_plan_id: UUID, steficon_rule_id: UUID) -> None:
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
@@ -313,7 +313,7 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def remove_old_payment_plan_payment_list_xlsx(past_days=30):
+def remove_old_payment_plan_payment_list_xlsx(past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files"""
     try:
         from hct_mis_api.apps.core.models import FileTemp
