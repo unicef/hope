@@ -36,11 +36,8 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
-<<<<<<< HEAD
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-=======
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
->>>>>>> origin
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject

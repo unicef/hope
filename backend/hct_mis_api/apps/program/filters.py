@@ -39,7 +39,6 @@ class ProgramFilter(FilterSet):
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
         queryset = queryset.annotate(
-<<<<<<< HEAD
             total_payment_plans_hh_count=Count(
                 "cashplan__payment_items__household",
                 filter=Q(cashplan__payment_items__delivered_quantity__gte=0),
@@ -51,20 +50,13 @@ class ProgramFilter(FilterSet):
                 distinct=True,
             ),
         ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
-        return super().filter_queryset(queryset)
-=======
-            total_number_of_households=Count(
-                "cash_plans__payment_records__household",
-                filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
-                distinct=True,
-            )
-        )
+
         if min_value := value.get("min"):
-            queryset = queryset.filter(total_number_of_households__gte=min_value)
+            queryset = queryset.filter(total_hh_count__gte=min_value)
         if max_value := value.get("max"):
-            queryset = queryset.filter(total_number_of_households__lte=max_value)
-        return queryset
->>>>>>> origin
+            queryset = queryset.filter(total_hh_count__lte=max_value)
+
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
