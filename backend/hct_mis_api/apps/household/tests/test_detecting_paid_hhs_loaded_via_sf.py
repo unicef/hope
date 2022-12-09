@@ -10,7 +10,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 
 
 class TestDetectingAlreadyPaidHouseholds(TestCase):
