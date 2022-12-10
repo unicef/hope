@@ -72,7 +72,7 @@ export function DeleteIndividualGrievanceDetails({
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
     (previousValue, currentValue) => {
       // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
+      previousValue[currentValue?.name] = currentValue;
       return previousValue;
     },
     {},
