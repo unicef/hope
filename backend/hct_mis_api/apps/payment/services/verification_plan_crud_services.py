@@ -46,11 +46,11 @@ class VerificationPlanCrudServices:
 
         payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
         sampling = Sampling(input_data, payment_plan, payment_records)
-        payment_verification_plan, payment_records = sampling.process_sampling(payment_verification_plan)
+        payment_verification_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, payment_records).create()
+        CreatePaymentVerifications(payment_verification_plan, payment_records_qs).create()
 
         return payment_verification_plan
 
