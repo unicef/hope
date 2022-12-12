@@ -71,6 +71,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
+        tp.households.set(cls.households)
         cls.target_population_draft = tp
 
         tp = TargetPopulation(
@@ -115,7 +116,6 @@ class TestApproveTargetPopulationMutation(APITestCase):
     )
     def test_approve_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
