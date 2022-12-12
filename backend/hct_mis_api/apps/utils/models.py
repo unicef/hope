@@ -138,7 +138,7 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
-    def process_exception(self, exc, request=None):
+    def process_exception(self, exc: Exception, request=None) -> str:
         try:
             from sentry_sdk import capture_exception
 

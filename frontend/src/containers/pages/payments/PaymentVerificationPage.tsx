@@ -10,8 +10,8 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
-  ProgramNode, useAllProgramsForChoicesQuery,
-  useAllProgramsQuery,
+  ProgramNode,
+  useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';

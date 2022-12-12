@@ -10,13 +10,6 @@ export const RelatedGrievanceTickets = gql`
         issueType
         unicefId
       }
-      existingTickets {
-        id
-        status
-        category
-        issueType
-        unicefId
-      }
     }
   }
 `;
