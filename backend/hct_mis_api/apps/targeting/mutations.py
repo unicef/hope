@@ -382,7 +382,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "FinalizeTargetPopulationMutation":
         user = info.context.user
         old_target_population = kwargs.get("old_model_object")
-        target_population: TargetPopulation = kwargs.get("model_object")
+        target_population: TargetPopulation = kwargs["model_object"]
         if target_population.program.business_area.is_payment_plan_applicable:
             with transaction.atomic():
                 target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
