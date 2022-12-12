@@ -40,7 +40,7 @@ export function ProgramsPage(): React.ReactElement {
 
   if (choicesLoading) return <LoadingComponent />;
 
-  if (permissions === null) return null;
+  if (permissions === null || !choicesData) return null;
 
   if (
     !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)
