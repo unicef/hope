@@ -70,6 +70,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                     "memory_disability": "LOT_DIFFICULTY",
                     "selfcare_disability": "CANNOT_DO",
                     "comms_disability": "SOME_DIFFICULTY",
+                    "business_area": cls.business_area,
                 },
             ],
         )
@@ -78,7 +79,18 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             {
                 "business_area": cls.business_area,
             },
-            [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
+            [
+                {
+                    "sex": "MALE",
+                    "marital_status": "SINGLE",
+                    "business_area": cls.business_area,
+                },
+                {
+                    "sex": "FEMALE",
+                    "marital_status": "MARRIED",
+                    "business_area": cls.business_area,
+                },
+            ],
         )
         cls.not_targeted_household = household
 
