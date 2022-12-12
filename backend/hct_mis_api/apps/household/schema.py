@@ -398,7 +398,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         selection = parent.selections.first()
         return selection
 
-    def resolve_individuals(parent, info: Any, *args, **kwargs) -> QuerySet:
+    def resolve_individuals(parent, info: Any, *arg: Any, **kwargs: Any) -> QuerySet:
         individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(parent.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
