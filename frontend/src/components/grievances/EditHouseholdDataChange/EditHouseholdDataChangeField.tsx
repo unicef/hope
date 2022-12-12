@@ -22,8 +22,9 @@ export const EditHouseholdDataChangeField = ({
 }: EditHouseholdDataChangeField): React.ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
-
   let fieldProps;
+  if (!field) return null;
+
   switch (field.type) {
     case 'DECIMAL':
       fieldProps = {
