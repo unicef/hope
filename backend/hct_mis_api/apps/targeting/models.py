@@ -239,6 +239,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def household_list(self) -> "QuerySet":
+        print("targeting.models.TargetPopulation.household_list")
         queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
             return queryset
