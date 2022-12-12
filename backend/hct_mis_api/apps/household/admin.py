@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Any, Iterable, List, Optional
+from typing import Any, Iterable, List, Optional, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -269,16 +269,20 @@ class HouseholdAdmin(
     def has_withdrawn_permission(self, request) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
-    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
+    def add_to_target_population(
+        self, request: HttpRequest, qs: QuerySet
+    ) -> Union[TemplateResponse, HttpResponseRedirect]:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.targeting.models import TargetPopulation
 
         context = self.get_common_context(request, title="Extend TargetPopulation")
+        tp: TargetPopulation
+        ba: BusinessArea
         if "apply" in request.POST:
             form = AddToTargetPopulationForm(request.POST, read_only=True)
             if form.is_valid():
-                tp: TargetPopulation = form.cleaned_data["target_population"]
-                ba: BusinessArea = tp.business_area
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
                 population = qs.filter(business_area=ba)
                 context["target_population"] = tp
                 context["population"] = population
@@ -288,8 +292,8 @@ class HouseholdAdmin(
         elif "confirm" in request.POST:
             form = AddToTargetPopulationForm(request.POST)
             if form.is_valid():
-                tp: TargetPopulation = form.cleaned_data["target_population"]
-                ba: BusinessArea = tp.business_area
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
                 population = qs.filter(business_area=ba)
                 with atomic():
                     tp.households.add(*population)
