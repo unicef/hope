@@ -97,7 +97,7 @@ class PaymentPlanService:
     def get_action_function(self) -> Optional[Callable]:
         return self.actions_map.get(self.action)
 
-    def send_for_approval(self) -> Optional[PaymentPlan]:
+    def send_for_approval(self) -> PaymentPlan:
         self.payment_plan.status_send_to_approval()
         self.payment_plan.save()
         # create new ApprovalProcess
@@ -106,7 +106,7 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
-    def lock(self) -> Optional[PaymentPlan]:
+    def lock(self) -> PaymentPlan:
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
@@ -119,7 +119,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock(self) -> Optional[PaymentPlan]:
+    def unlock(self) -> PaymentPlan:
         self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -129,7 +129,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def lock_fsp(self) -> Optional[PaymentPlan]:
+    def lock_fsp(self) -> PaymentPlan:
         if not self.payment_plan.delivery_mechanisms.filter(
             Q(financial_service_provider__isnull=False) | Q(delivery_mechanism__isnull=False)
         ).exists():
@@ -377,7 +377,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def delete(self) -> Optional[PaymentPlan]:
+    def delete(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be deleted")
 
@@ -386,11 +386,11 @@ class PaymentPlanService:
         self.payment_plan.delete()
         return self.payment_plan
 
-    def export_xlsx(self, user: "User") -> Optional[PaymentPlan]:
+    def export_xlsx(self, user: "User") -> PaymentPlan:
         create_payment_plan_payment_list_xlsx.delay(self.payment_plan.pk, user.pk)
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user: "User") -> Optional[PaymentPlan]:
+    def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
         return self.payment_plan
 
