@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LookUpButton } from '../../LookUpButton';
-import { LookUpRelatedTicketsDisplay } from './LookUpRelatedTicketsDisplay';
-import { LookUpRelatedTicketsModal } from './LookUpRelatedTicketsModal';
+import { LookUpLinkedTicketsDisplay } from './LookUpLinkedTicketsDisplay';
+import { LookUpLinkedTicketsModal } from './LookUpLinkedTicketsModal';
 
-export const LookUpRelatedTickets = ({
+export const LookUpLinkedTickets = ({
   onValueChange,
   values,
 }): React.ReactElement => {
@@ -13,19 +13,19 @@ export const LookUpRelatedTickets = ({
 
   return (
     <>
-      {values.selectedRelatedTickets.length ? (
-        <LookUpRelatedTicketsDisplay
+      {values.selectedLinkedTickets.length ? (
+        <LookUpLinkedTicketsDisplay
           setLookUpDialogOpen={setLookUpDialogOpen}
           values={values}
           onValueChange={onValueChange}
         />
       ) : (
         <LookUpButton
-          title={t('Look up Related Ticket')}
+          title={t('Look up Linked Ticket')}
           handleClick={() => setLookUpDialogOpen(true)}
         />
       )}
-      <LookUpRelatedTicketsModal
+      <LookUpLinkedTicketsModal
         lookUpDialogOpen={lookUpDialogOpen}
         setLookUpDialogOpen={setLookUpDialogOpen}
         initialValues={values}

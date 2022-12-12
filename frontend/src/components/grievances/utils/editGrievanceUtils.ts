@@ -4,7 +4,10 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import { thingForSpecificGrievanceType, camelizeArrayObjects } from '../../../utils/utils';
+import {
+  thingForSpecificGrievanceType,
+  camelizeArrayObjects,
+} from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
@@ -22,7 +25,7 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
-  selectedRelatedTickets: string[];
+  selectedLinkedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
 }
@@ -188,7 +191,7 @@ export function prepareInitialValues(
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
       : [],
-    selectedRelatedTickets: ticket.relatedTickets.map(
+    selectedLinkedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
   };
@@ -219,7 +222,7 @@ function preparePositiveFeedbackVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             positiveFeedbackTicketExtras: {
@@ -239,7 +242,7 @@ function prepareNegativeFeedbackVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             negativeFeedbackTicketExtras: {
@@ -259,7 +262,7 @@ function prepareReferralVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             referralTicketExtras: {
@@ -279,7 +282,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };
@@ -291,7 +294,7 @@ function prepareSesitiveVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };
@@ -312,7 +315,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           addIndividualIssueTypeExtras: {
             individualData: { ...values.individualData, flexFields },
@@ -329,7 +332,7 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };
@@ -356,7 +359,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           individualDataUpdateIssueTypeExtras: {
             individualData: {
@@ -401,7 +404,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           householdDataUpdateIssueTypeExtras: {
             householdData,
@@ -418,7 +421,7 @@ function prepareDefaultVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };

@@ -74,10 +74,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
     payment_record = graphene.Field(PaymentRecordNode)
-    related_tickets = graphene.List(lambda: GrievanceTicketNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
+    linked_tickets = graphene.List(lambda: GrievanceTicketNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
+    related_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance) -> None:
@@ -108,10 +109,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
     @staticmethod
-    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.related_tickets
-
-    @staticmethod
     def resolve_household(grievance_ticket: GrievanceTicket, info):
         return getattr(grievance_ticket.ticket_details, "household", None)
 
@@ -132,12 +129,16 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return grievance_ticket.admin2
 
     @staticmethod
+    def resolve_linked_tickets(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket._linked_tickets
+
+    @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
-        return (
-            GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
-            .filter(household_unicef_id=grievance_ticket.household_unicef_id)
-            .exclude(pk=grievance_ticket.pk)
-        )
+        return grievance_ticket._existing_tickets
+
+    @staticmethod
+    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket._related_tickets
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -433,7 +434,18 @@ class Query(graphene.ObjectType):
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
+        queryset = GrievanceTicket.objects.filter(ignored=False).select_related("admin2", "assigned_to", "created_by")
+        to_prefetch = []
+        for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            to_prefetch.append(key)
+            if "household" in value:
+                to_prefetch.append(f"{key}__{value['household']}")
+            if "golden_records_individual" in value:
+                to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
+
+        queryset = queryset.prefetch_related(*to_prefetch)
+
+        return queryset
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
