@@ -102,15 +102,6 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
         "label",
     )
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "country",
-            )
-        )
-
 
 @admin.register(Household)
 class HouseholdAdmin(
