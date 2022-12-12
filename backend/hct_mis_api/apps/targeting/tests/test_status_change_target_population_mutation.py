@@ -24,7 +24,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
               lockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  householdList {
+                  householdList(orderBy: "size") {
                     totalCount
                     edges {
                       node {
@@ -45,11 +45,19 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -242,7 +250,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
               finalizeTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  householdList{
+                  householdList(orderBy: "size") {
                     edges{
                       node{
                         size
