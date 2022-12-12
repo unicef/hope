@@ -31,13 +31,13 @@ export function AddIndividualGrievanceDetails({
     return null;
   }
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
+    (previousValue, currentValue) => ({
+      ...previousValue,
+      [currentValue?.name]: currentValue,
+    }),
     {},
   );
+
   const individualData = {
     ...ticket.addIndividualTicketDetails?.individualData,
   };
