@@ -6,7 +6,7 @@ backend:
   image: #from-pipeline
   replicaCount: 6
   config:
-    POSTGRES_SSL: true
+    POSTGRES_SSL: "true"
     STORAGE_AZURE_ACCOUNT_NAME: saunihopestg
     STATIC_STORAGE_AZURE_ACCOUNT_NAME: saunihopeprd
     MEDIA_STORAGE_AZURE_ACCOUNT_NAME: saunihopemediaprd
