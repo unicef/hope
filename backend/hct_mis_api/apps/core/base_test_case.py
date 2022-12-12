@@ -2,8 +2,10 @@ import base64
 import os
 import random
 import sys
+import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
@@ -35,7 +37,12 @@ class APITestCase(SnapshotTestTestCase):
             print(f"Random seed: {self.seed}")
         self.maxDiff = None
 
+        self.start_time = time.time()
+
     def tearDown(self) -> None:
+        with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
+            f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
+
         # https://stackoverflow.com/a/39606065
         if hasattr(self._outcome, "errors"):
             # Python 3.4 - 3.10  (These two methods have no side effects)
