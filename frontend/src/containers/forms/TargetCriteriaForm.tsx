@@ -131,14 +131,14 @@ export function TargetCriteriaForm({
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
-      allFieldsAttributes: data.allFieldsAttributes
-        .filter(associatedWith('Individual'))
+      allFieldsAttributes: data?.allFieldsAttributes
+        ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     };
     setIndividualData(filteredIndividualData);
 
     const filteredHouseholdData = {
-      allFieldsAttributes: data.allFieldsAttributes.filter(
+      allFieldsAttributes: data?.allFieldsAttributes?.filter(
         associatedWith('Household'),
       ),
     };
