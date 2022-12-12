@@ -33,20 +33,8 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0
             'targetPopulation': {
                 'householdList': {
                     'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
                     ],
-                    'totalCount': 2
+                    'totalCount': 0
                 },
                 'status': 'LOCKED'
             }
