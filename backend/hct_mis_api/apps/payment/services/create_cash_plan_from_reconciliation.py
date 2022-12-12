@@ -51,7 +51,7 @@ class CreateCashPlanFromReconciliationService:
 
             self.column_index_mapping[column] = header.index(xlsx_column)
 
-    def _parse_row(self, row: tuple,index):
+    def _parse_row(self, row: tuple, index):
         delivered_amount = row[self.column_index_mapping[self.COLUMN_DELIVERED_AMOUNT]]
         status = row[self.column_index_mapping[self.COLUMN_PAYMENT_STATUS]]
         payment_id = row[self.column_index_mapping[self.COLUMN_PAYMENT_ID]]
@@ -65,28 +65,25 @@ class CreateCashPlanFromReconciliationService:
         # delivery_type
         # delivery_date
 
-        payment_record_id = self.cash_plan.ca_id + "-" + str(index+1).zfill(5)
-        payment_record = PaymentRecord.objects.create(busines_area=self.business_area,
-                                                      status=status,
-                                                      ca_id= payment_record_id,
-                                                      ca_hash_id= uuid.uuid4(),
-                                                        cash_plan=self.cash_plan,
-                                                      household = household,
-                                                      head_of_household = household.primary_collector,
-                                                      full_name= household.primary_collector.full_name,
-                                                      total_persons_covered = household.size,
-                                                      target_population= target_population,
-                                                      target_population_cash_assist_id ='',
-                                                      currency= currency,
-                                                      entitlement_quantity = delivered_amount,
-                                                      delivered_quantity = delivered_amount,
-                                                      service_provider = self.cash_plan.service_provider,
-                                                      )
+        payment_record_id = self.cash_plan.ca_id + "-" + str(index + 1).zfill(5)
+        payment_record = PaymentRecord.objects.create(
+            busines_area=self.business_area,
+            status=status,
+            ca_id=payment_record_id,
+            ca_hash_id=uuid.uuid4(),
+            cash_plan=self.cash_plan,
+            household=household,
+            head_of_household=household.primary_collector,
+            full_name=household.primary_collector.full_name,
+            total_persons_covered=household.size,
+            target_population=target_population,
+            target_population_cash_assist_id="",
+            currency=currency,
+            entitlement_quantity=delivered_amount,
+            delivered_quantity=delivered_amount,
+            service_provider=self.cash_plan.service_provider,
+        )
         payment_record.save()
-
-
-
-
 
     def _create_cash_plan(self):
         current_year = str(datetime.now().year)[-2:]
