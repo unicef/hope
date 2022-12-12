@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Tuple, List
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.models import (
     MALE,
     NON_BENEFICIARY,
     Household,
+    Individual,
 )
 
 
@@ -24,13 +25,21 @@ def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
 
 
 @transaction.atomic
-def recalculate_data(household: Household) -> None:
+def recalculate_data(household: Household, save: bool = True) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
     if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
-        return
+        return household, []
+
+    individuals_to_update = []
+    individuals_fields_to_update = []
     for individual in household.individuals.all().select_for_update():
-        individual.recalculate_data()
+        _individual, _fields_to_update = individual.recalculate_data(save=False)
+        individuals_to_update.append(_individual)
+        individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
+    print(len(individuals_to_update), individuals_fields_to_update)
+    Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
+
     date_6_years_ago = timezone.now() - relativedelta(years=+6)
     date_12_years_ago = timezone.now() - relativedelta(years=+12)
     date_18_years_ago = timezone.now() - relativedelta(years=+18)
@@ -167,4 +176,8 @@ def recalculate_data(household: Household) -> None:
         if household.head_of_household.sex == FEMALE:
             household.fchild_hoh = True
         household.child_hoh = True
-    household.save(update_fields=updated_fields)
+
+    if save:
+        household.save(update_fields=updated_fields)
+
+    return household, updated_fields
