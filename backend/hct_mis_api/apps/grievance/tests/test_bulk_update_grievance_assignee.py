@@ -2,7 +2,6 @@ import random
 from typing import Any, List
 from unittest.mock import patch
 
-from django.conf import settings
 from django.test import override_settings
 
 from parameterized import parameterized
@@ -113,7 +112,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.mutations.bulk_update_assigned_to")
     @override_settings(ELASTICSEARCH_DSL_AUTOSYNC=False)
-    def test_bulk_update_grievance_assignee_es_autosync_off(self, bulk_update_assigned_to_mock):
+    def test_bulk_update_grievance_assignee_es_autosync_off(self, bulk_update_assigned_to_mock: Any) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
         input_data = {
             "businessAreaSlug": self.business_area.slug,
