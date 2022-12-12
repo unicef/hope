@@ -35,7 +35,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             edges {
               node {
                 size
-                individuals(orderBy: "sex") {
+                individuals {
                     edges{
                         node{
                             sex
