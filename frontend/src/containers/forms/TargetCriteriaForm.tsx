@@ -10,6 +10,7 @@ import {
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -102,7 +103,6 @@ interface TargetCriteriaFormPropTypes {
   addCriteria: (values) => void;
   open: boolean;
   onClose: () => void;
-  title: string;
   shouldShowWarningForIndividualFilter?: boolean;
 }
 
@@ -114,9 +114,9 @@ export function TargetCriteriaForm({
   addCriteria,
   open,
   onClose,
-  title,
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const { data, loading } = useCachedImportedIndividualFieldsQuery(
     businessArea,
@@ -203,7 +203,6 @@ export function TargetCriteriaForm({
     addCriteria({ filters, individualsFiltersBlocks });
     return bag.resetForm();
   };
-
   if (loading || !open) return null;
 
   return (
@@ -226,7 +225,7 @@ export function TargetCriteriaForm({
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title' disableTypography>
-                <Typography variant='h6'>{title}</Typography>
+                <Typography variant='h6'>{t('Add Filter')}</Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>

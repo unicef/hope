@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
@@ -12,14 +12,14 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+)
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+    VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -60,12 +60,14 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
 
     def get_queryset(self, request):
         return (
-            super().get_queryset(request).select_related("household", "cash_plan", "target_population", "business_area")
+            super()
+            .get_queryset(request)
+            .select_related("household", "cash_plan", "service_provider", "target_population", "business_area")
         )
 
 
 @admin.register(CashPlanPaymentVerification)
-class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class CashPlanPaymentVerificationAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("cash_plan", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
@@ -99,8 +101,8 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 request,
                 self.execute_sync_rapid_pro,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                        <h3>Import will only be simulated</h3>
                         """
                 ),
                 "Successfully executed",
@@ -156,3 +158,4 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+    autocomplete_fields = ("business_area",)

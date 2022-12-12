@@ -1,4 +1,5 @@
-import graphene
+from typing import Tuple, Type
+
 from django.db.models import (
     Case,
     Count,
@@ -9,18 +10,23 @@ from django.db.models import (
     Value,
     When,
 )
+
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.cache_keys import PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY
+from hct_mis_api.apps.core.cache_keys import (
+    PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY,
+)
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -28,8 +34,8 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
-    to_choice_object,
     save_data_in_cache,
+    to_choice_object,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
@@ -69,7 +75,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
         hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     )
@@ -252,7 +258,7 @@ class Query(graphene.ObjectType):
         voucher_transfers = [0] * 12
 
         for data_dict in months_and_amounts:
-            month_index = data_dict.get("delivery_date__month") - 1
+            month_index = data_dict[("delivery_date__month")] - 1
             cash_transfers[month_index] = data_dict.get("total_delivered_cash") or 0
             voucher_transfers[month_index] = data_dict.get("total_delivered_voucher") or 0
 

@@ -1,10 +1,15 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  targetPopulationStatusMapping,
+  targetPopulationStatusToColor,
+} from '../../utils/utils';
 import { TargetPopulationQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { OverviewContainer } from '../core/OverviewContainer';
+import { StatusBox } from '../core/StatusBox';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 
@@ -44,6 +49,15 @@ export function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
+          <Grid item xs={4}>
+            <LabelizedField label={t('Status')}>
+              <StatusBox
+                status={targetPopulation.status}
+                statusToColor={targetPopulationStatusToColor}
+                statusNameMapping={targetPopulationStatusMapping}
+              />
+            </LabelizedField>
+          </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label={t('created by')}

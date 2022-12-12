@@ -1,7 +1,8 @@
 import json
 import re
+from typing import Any, Dict, List
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
 from constance import config
@@ -21,7 +22,7 @@ from hct_mis_api.apps.core.filters import (
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -38,8 +39,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program
 
+QueryType = List[Dict[str, Dict[str, Dict[str, str]]]]
 
-def _prepare_kobo_asset_id_value(code):
+
+def _prepare_kobo_asset_id_value(code) -> str:
     """
     preparing value for filter by kobo_asset_id
     value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
@@ -105,6 +108,7 @@ class HouseholdFilter(FilterSet):
             "unicef_id",
             "household_ca_id",
             "size",
+            "status_label",
             Lower("head_of_household__full_name"),
             Lower("admin_area__name"),
             "residence_status",
@@ -115,7 +119,7 @@ class HouseholdFilter(FilterSet):
         )
     )
 
-    def _search_es(self, qs, value):
+    def _search_es(self, qs, value) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
@@ -139,7 +143,7 @@ class HouseholdFilter(FilterSet):
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
-    def _search_db(self, qs, value):
+    def _search_db(self, qs, value) -> QuerySet:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -153,7 +157,6 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(head_of_household__middle_name__istartswith=value)
             inner_query |= Q(head_of_household__family_name__istartswith=value)
             inner_query |= Q(residence_status__istartswith=value)
-            inner_query |= Q(admin_area__title__istartswith=value)
             inner_query |= Q(admin_area__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
@@ -221,21 +224,26 @@ class IndividualFilter(FilterSet):
 
         return qs.filter(q_obj)
 
-    def _search_es(self, qs, value):
+    def _search_es(self, qs, value) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
-            IndividualDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            get_individual_doc(business_area)
+            .search()
+            .params(search_type="dfs_query_then_fetch")
+            .from_dict(query_dict)
+            .execute()
         )
+
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs, name, value) -> QuerySet:
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
-    def _search_db(self, qs, value):
+    def _search_db(self, qs, value) -> QuerySet:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -271,7 +279,7 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
 
-def get_elasticsearch_query_for_individuals(value, business_area):
+def get_elasticsearch_query_for_individuals(value, business_area) -> Dict:
     match_fields = [
         "phone_no_text",
         "phone_no_alternative",
@@ -280,14 +288,14 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         "admin2",
     ]
     prefix_fields = [
-        # "full_name",
         "middle_name",
         "unicef_id",
         "household.unicef_id",
         "phone_no_text",
     ]
     wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
-    match_queries = [
+
+    match_queries: QueryType = [
         {
             "match": {
                 x: {
@@ -297,7 +305,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         }
         for x in match_fields
     ]
-    prefix_queries = [
+    prefix_queries: QueryType = [
         {
             "match_phrase_prefix": {
                 x: {
@@ -307,7 +315,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         }
         for x in prefix_fields
     ]
-    wildcard_queries = [
+    wildcard_queries: QueryType = [
         {
             "wildcard": {
                 x: {
@@ -317,7 +325,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         }
         for x in wildcard_fields
     ]
-    all_queries = []
+    all_queries: List[QueryType] = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
@@ -347,25 +355,25 @@ def get_elasticsearch_query_for_individuals(value, business_area):
             }
         )
     elif len(values) == 1:
-        all_queries.extend(
-            [
-                {
-                    "match_phrase_prefix": {
-                        "given_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "given_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-                {
-                    "match_phrase_prefix": {
-                        "family_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+                }
+            }
+        )
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "family_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-            ],
+                }
+            },
         )
     else:
         all_queries.append(
@@ -393,14 +401,14 @@ def get_elasticsearch_query_for_individuals(value, business_area):
     return query
 
 
-def get_elasticsearch_query_for_households(value, business_area):
+def get_elasticsearch_query_for_households(value, business_area) -> Dict:
     match_fields = [
         "admin1",
         "admin2",
     ]
     prefix_fields = ["head_of_household.middle_name", "unicef_id", "residence_status"]
     wildcard_fields = ["unicef_id"]
-    match_queries = [
+    match_queries: QueryType = [
         {
             "match": {
                 x: {
@@ -410,7 +418,7 @@ def get_elasticsearch_query_for_households(value, business_area):
         }
         for x in match_fields
     ]
-    prefix_queries = [
+    prefix_queries: QueryType = [
         {
             "match_phrase_prefix": {
                 x: {
@@ -420,7 +428,7 @@ def get_elasticsearch_query_for_households(value, business_area):
         }
         for x in prefix_fields
     ]
-    wildcard_queries = [
+    wildcard_queries: QueryType = [
         {
             "wildcard": {
                 x: {
@@ -430,7 +438,7 @@ def get_elasticsearch_query_for_households(value, business_area):
         }
         for x in wildcard_fields
     ]
-    all_queries = []
+    all_queries: List[QueryType] = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
@@ -460,25 +468,25 @@ def get_elasticsearch_query_for_households(value, business_area):
             }
         )
     elif len(values) == 1:
-        all_queries.extend(
-            [
-                {
-                    "match_phrase_prefix": {
-                        "head_of_household.given_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "head_of_household.given_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-                {
-                    "match_phrase_prefix": {
-                        "head_of_household.family_name": {
-                            "query": value,
-                            "boost": 1.1,
-                        }
+                }
+            }
+        )
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "head_of_household.family_name": {
+                        "query": value,
+                        "boost": 1.1,
                     }
-                },
-            ],
+                }
+            },
         )
     else:
         all_queries.append(
@@ -491,7 +499,7 @@ def get_elasticsearch_query_for_households(value, business_area):
             },
         )
 
-    query = {
+    query: Dict[str, Any] = {
         "size": "100",
         "_source": False,
         "query": {

@@ -8,7 +8,7 @@ worker_class = "gthread"
 timeout = 65
 keepalive = 2
 workers = os.getenv("GUNICORN_WORKERS") if os.getenv("GUNICORN_WORKERS") else 4
-threads = os.getenv("GUNICORN_THREADS") if os.getenv("GUNICORN_THREADS") else 14
+threads = os.getenv("GUNICORN_THREADS") if os.getenv("GUNICORN_THREADS") else 10
 
 proc_name = None
 daemon = False

@@ -10,9 +10,9 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.celery_tasks import create_target_population_task
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.geo import models as geo_models
 
 
 class TestEdopomogaCreation(APITestCase):
@@ -49,7 +49,6 @@ class TestEdopomogaCreation(APITestCase):
 
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
-
 
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)

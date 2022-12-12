@@ -26,13 +26,12 @@ export const individualMinimal = gql`
         node {
           id
           country
+          countryIso3
           documentNumber
           photo
           type {
-            country
             label
             type
-            countryIso3
           }
         }
       }
@@ -115,7 +114,6 @@ export const individualDetailed = gql`
           country
           photo
           type {
-            country
             label
           }
           documentNumber
