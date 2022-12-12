@@ -16,7 +16,12 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
     QUERY = """
     query GoldenRecordFilter($targetingCriteria: TargetingCriteriaObjectType!, $program: ID!, $businessArea: String) {
-      goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, program: $program, businessArea: $businessArea, excludedIds: "") {
+      goldenRecordByTargetingCriteria(
+          targetingCriteria: $targetingCriteria,
+          program: $program,
+          businessArea: $businessArea,
+          excludedIds: ""
+        ) {
         totalCount
         edges {
           node {
