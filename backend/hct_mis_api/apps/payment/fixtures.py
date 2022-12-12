@@ -947,7 +947,7 @@ def generate_payment_plan() -> None:
         pk=fsp_1_pk,
         name="Test FSP 1",
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
     )[0]
 
     DeliveryMechanismPerPaymentPlanFactory(

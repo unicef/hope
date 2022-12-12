@@ -56,8 +56,8 @@ from hct_mis_api.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 logger = logging.getLogger(__name__)
 
