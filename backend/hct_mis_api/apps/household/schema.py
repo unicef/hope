@@ -350,10 +350,10 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
     active_individuals_count = graphene.Int()
     admin_area = graphene.Field(AreaNode)
-    # individuals = DjangoFilterConnectionField(
-    #     IndividualNode,
-    #     filterset_class=IndividualFilter,
-    # )
+    individuals = DjangoFilterConnectionField(
+        IndividualNode,
+        filterset_class=IndividualFilter,
+    )
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
@@ -398,7 +398,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         selection = parent.selections.first()
         return selection
 
-    def resolve_individuals(parent, info: Any, **kwargs) -> QuerySet:
+    def resolve_individuals(parent, info: Any, *args, **kwargs) -> QuerySet:
         individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(parent.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
