@@ -9,11 +9,9 @@ from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 
 class TestListQueryMessage(APITestCase):
@@ -57,30 +55,15 @@ class TestListQueryMessage(APITestCase):
     }
 """
 
-    QUERY_RECIPIENT = """
- query AccountabilityCommunicationMessageRecipient ($id: ID!) {
-  accountabilityCommunicationMessageRecipient(id: $id) {
-    id
-    size
-    headOfHousehold {
-      fullName
-    }
-  }
-}
-    """
-
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
 
         cls.tp = TargetPopulationFactory(business_area=cls.business_area)
         households = [create_household()[0] for _ in range(14)]
         cls.household = households[0]
-        HouseholdSelection.objects.bulk_create(
-            [HouseholdSelection(household=household, target_population=cls.tp) for household in households]
-        )
+        cls.tp.households.set(households)
 
         for i in range(1, 11):
             cls.communication_message = CommunicationMessageFactory(
@@ -188,41 +171,6 @@ class TestListQueryMessage(APITestCase):
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
-                **variables,
-            },
-        )
-
-    @parameterized.expand(
-        (
-            (
-                "with_view_details_permission",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
-                {},
-            ),
-            (
-                "with_as_creator_permission",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
-                {},
-            ),
-            (
-                "without_permission",
-                [],
-                {},
-            ),
-        )
-    )
-    def test_list_communication_message_recipient(self, _: str, permissions: Sequence[str], variables: dict) -> None:
-        self.create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.business_area,
-        )
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY_RECIPIENT,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(self.communication_message.id, "CommunicationMessage"),
                 **variables,
             },
         )
