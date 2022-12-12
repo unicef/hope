@@ -1,9 +1,8 @@
-from ctypes import Union
 import logging
 import math
 from base64 import b64decode
 from decimal import Decimal
-from typing import IO, TYPE_CHECKING, Any, Dict, List, Optional
+from typing import IO, TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
