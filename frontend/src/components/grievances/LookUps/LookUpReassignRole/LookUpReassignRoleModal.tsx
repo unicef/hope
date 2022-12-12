@@ -22,6 +22,7 @@ import {
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 
@@ -85,7 +86,8 @@ export const LookUpReassignRoleModal = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  if (loading) return null;
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
