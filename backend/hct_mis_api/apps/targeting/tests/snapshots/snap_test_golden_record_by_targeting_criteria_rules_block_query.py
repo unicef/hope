@@ -144,6 +144,12 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                     'node': {
                         'individuals': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
                             ]
                         },
                         'size': 1
@@ -153,6 +159,18 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                     'node': {
                         'individuals': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'SINGLE',
+                                        'sex': 'MALE'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'FEMALE'
+                                    }
+                                }
                             ]
                         },
                         'size': 2
@@ -172,6 +190,12 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                     'node': {
                         'individuals': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
                             ]
                         },
                         'size': 1
@@ -181,6 +205,18 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                     'node': {
                         'individuals': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'SINGLE',
+                                        'sex': 'MALE'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'FEMALE'
+                                    }
+                                }
                             ]
                         },
                         'size': 2
@@ -200,6 +236,12 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                     'node': {
                         'individuals': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
                             ]
                         },
                         'size': 1
