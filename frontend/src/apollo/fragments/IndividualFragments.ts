@@ -26,13 +26,12 @@ export const individualMinimal = gql`
         node {
           id
           country
+          countryIso3
           documentNumber
           photo
           type {
-            country
             label
             type
-            countryIso3
           }
         }
       }
@@ -41,16 +40,12 @@ export const individualMinimal = gql`
       edges {
         node {
           id
-          agency {
-            country
-            label
-            countryIso3
-          }
+          partner
+          country
           number
         }
       }
     }
-
     household {
       id
       unicefId
@@ -86,7 +81,6 @@ export const individualDetailed = gql`
     familyName
     estimatedBirthDate
     pregnant
-    status
     lastSyncAt
     deduplicationBatchStatus
     disability
@@ -115,37 +109,14 @@ export const individualDetailed = gql`
           country
           photo
           type {
-            country
             label
           }
           documentNumber
         }
       }
     }
-    identities {
-      edges {
-        node {
-          id
-          agency {
-            country
-            label
-          }
-          number
-        }
-      }
-    }
     enrolledInNutritionProgramme
     administrationOfRutf
-    identities {
-      edges {
-        node {
-          id
-          number
-          type
-          country
-        }
-      }
-    }
     household {
       status
       id
@@ -157,8 +128,6 @@ export const individualDetailed = gql`
         level
       }
     }
-    role
-    relationship
     headingHousehold {
       id
       headOfHousehold {

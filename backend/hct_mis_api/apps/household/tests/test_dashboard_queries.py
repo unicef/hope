@@ -80,7 +80,7 @@ class TestDashboardQueries(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()
@@ -212,7 +212,7 @@ class TestDashboardQueries(APITestCase):
             ("sectionChildReached",),
         ]
     )
-    def test_sections(self, query_name):
+    def test_sections(self, query_name: str) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_SECTION.format(query_name=query_name),
             variables={"businessAreaSlug": "afghanistan", "year": 2021},
@@ -225,7 +225,7 @@ class TestDashboardQueries(APITestCase):
             ("chartIndividualsWithDisabilityReachedByAge",),
         ]
     )
-    def test_charts(self, query_name):
+    def test_charts(self, query_name: str) -> None:
         self.snapshot_graphql_request(
             request_string=getattr(self, f"QUERY_{query_name}").format(query_name=query_name),
             variables={"businessAreaSlug": "afghanistan", "year": 2021},

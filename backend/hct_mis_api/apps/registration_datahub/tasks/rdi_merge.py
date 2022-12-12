@@ -1,25 +1,22 @@
 import logging
+from typing import Dict, List, Tuple
+from uuid import UUID
 
 from django.db import transaction
 from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
-from hct_mis_api.apps.household.elasticsearch_utils import (
-    populate_index,
-    remove_elasticsearch_documents_by_matching_ids,
-)
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     HEAD,
     NEEDS_ADJUDICATION,
-    Agency,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -41,6 +38,10 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    populate_index,
+    remove_elasticsearch_documents_by_matching_ids,
 )
 
 logger = logging.getLogger(__name__)
@@ -136,9 +137,9 @@ class RdiMergeTask:
 
     def merge_admin_area(
         self,
-        imported_household,
-        household,
-    ):
+        imported_household: ImportedHousehold,
+        household: Household,
+    ) -> None:
         admin1 = imported_household.admin1
         admin2 = imported_household.admin2
         try:
@@ -153,7 +154,9 @@ class RdiMergeTask:
         except Area.DoesNotExist as e:
             logger.exception(e)
 
-    def _prepare_households(self, imported_households, obj_hct):
+    def _prepare_households(
+        self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
+    ) -> Dict:
         households_dict = {}
         countries = {}
         for imported_household in imported_households:
@@ -162,9 +165,9 @@ class RdiMergeTask:
             country_origin = household_data.pop("country_origin")
 
             if country and country.code not in countries:
-                countries[country.code] = geo_models.Country.objects.get(iso_code2=country.code)
+                countries[country.code] = Country.objects.get(iso_code2=country.code)
             if country_origin and country_origin.code not in countries:
-                countries[country_origin.code] = geo_models.Country.objects.get(iso_code2=country_origin.code)
+                countries[country_origin.code] = Country.objects.get(iso_code2=country_origin.code)
 
             if country := countries.get(country.code):
                 household_data["country"] = country
@@ -182,15 +185,17 @@ class RdiMergeTask:
 
         return households_dict
 
-    def _prepare_individual_documents_and_identities(self, imported_individual, individual):
+    def _prepare_individual_documents_and_identities(
+        self, imported_individual: ImportedIndividual, individual: Individual
+    ) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
-                country=geo_models.Country.objects.get(iso_code2=imported_document.type.country.code),
                 type=imported_document.type.type,
             )
             document = Document(
                 document_number=imported_document.document_number,
+                country=Country.objects.get(iso_code2=str(imported_document.country)),
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
@@ -198,21 +203,20 @@ class RdiMergeTask:
             documents_to_create.append(document)
         identities_to_create = []
         for imported_identity in imported_individual.identities.all():
-            agency, _ = Agency.objects.get_or_create(
-                type=imported_identity.agency.type,
-                country=geo_models.Country.objects.get(iso_code2=imported_identity.agency.country.code),
-                label=imported_identity.agency.label,
-            )
+            partner, _ = Partner.objects.get_or_create(name=imported_identity.partner, defaults={"is_un": True})
             identity = IndividualIdentity(
-                agency=agency,
+                partner=partner,
                 number=imported_identity.document_number,
                 individual=individual,
+                country=Country.objects.get(iso_code2=str(imported_identity.country)),
             )
             identities_to_create.append(identity)
 
         return documents_to_create, identities_to_create
 
-    def _prepare_individuals(self, imported_individuals, households_dict, obj_hct):
+    def _prepare_individuals(
+        self, imported_individuals: List[ImportedIndividual], households_dict: Dict, obj_hct: RegistrationDataImport
+    ) -> Tuple[Dict, List, List]:
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
@@ -241,7 +245,9 @@ class RdiMergeTask:
 
         return individuals_dict, documents_to_create, identities_to_create
 
-    def _prepare_roles(self, imported_roles, households_dict, individuals_dict):
+    def _prepare_roles(
+        self, imported_roles: List[IndividualRoleInHousehold], households_dict: Dict, individuals_dict: Dict
+    ) -> List:
         roles_to_create = []
         for imported_role in imported_roles:
             role = IndividualRoleInHousehold(
@@ -253,7 +259,9 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _prepare_bank_account_info(self, imported_bank_account_infos, individuals_dict):
+    def _prepare_bank_account_info(
+        self, imported_bank_account_infos: List[BankAccountInfo], individuals_dict: Dict
+    ) -> List:
         roles_to_create = []
         for imported_bank_account_info in imported_bank_account_infos:
             role = BankAccountInfo(
@@ -266,7 +274,7 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _update_individuals_and_households(self, individual_ids):
+    def _update_individuals_and_households(self, individual_ids: List[UUID]) -> None:
         # update mis_unicef_id for ImportedIndividual
         individual_qs = Individual.objects.filter(id__in=individual_ids)
         for individual in individual_qs:
@@ -278,114 +286,121 @@ class RdiMergeTask:
                 imported_individual.household.mis_unicef_id = individual.household.unicef_id
                 imported_individual.household.save()
 
-    def execute(self, registration_data_import_id):
+    def execute(self, registration_data_import_id: UUID) -> None:
         individual_ids = []
         try:
-            with transaction.atomic(using="default"):
-                with transaction.atomic(using="registration_datahub"):
-                    obj_hct = RegistrationDataImport.objects.get(
-                        id=registration_data_import_id,
-                    )
+            with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+                obj_hct = RegistrationDataImport.objects.get(
+                    id=registration_data_import_id,
+                )
 
-                    obj_hub = RegistrationDataImportDatahub.objects.get(
-                        hct_id=registration_data_import_id,
-                    )
+                obj_hub = RegistrationDataImportDatahub.objects.get(
+                    hct_id=registration_data_import_id,
+                )
 
-                    old_obj_hct = copy_model_object(obj_hct)
-                    imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
-                    imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
-                        registration_data_import=obj_hub
-                    )
+                old_obj_hct = copy_model_object(obj_hct)
+                imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
+                imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
+                    registration_data_import=obj_hub
+                )
 
-                    imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
-                        household__in=imported_households,
-                        individual__in=imported_individuals,
-                    )
+                imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
+                    household__in=imported_households,
+                    individual__in=imported_individuals,
+                )
 
-                    imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(
-                        individual__in=imported_individuals
-                    )
+                imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(
+                    individual__in=imported_individuals
+                )
 
-                    households_dict = self._prepare_households(imported_households, obj_hct)
-                    (
-                        individuals_dict,
-                        documents_to_create,
-                        identities_to_create,
-                    ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
+                households_dict = self._prepare_households(imported_households, obj_hct)
+                (
+                    individuals_dict,
+                    documents_to_create,
+                    identities_to_create,
+                ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
 
-                    roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
-                    bank_account_infos_to_create = self._prepare_bank_account_info(
-                        imported_bank_account_infos, individuals_dict
-                    )
-                    Household.objects.bulk_create(households_dict.values())
-                    Individual.objects.bulk_create(individuals_dict.values())
-                    Document.objects.bulk_create(documents_to_create)
-                    IndividualIdentity.objects.bulk_create(identities_to_create)
-                    IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
-                    BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
+                roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
+                bank_account_infos_to_create = self._prepare_bank_account_info(
+                    imported_bank_account_infos, individuals_dict
+                )
+                Household.objects.bulk_create(households_dict.values())
+                Individual.objects.bulk_create(individuals_dict.values())
+                Document.objects.bulk_create(documents_to_create)
+                IndividualIdentity.objects.bulk_create(identities_to_create)
+                IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
+                BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
-                    individual_ids = [str(individual.id) for individual in individuals_dict.values()]
-                    household_ids = [str(household.id) for household in households_dict.values()]
+                individual_ids = [str(individual.id) for individual in individuals_dict.values()]
+                household_ids = [str(household.id) for household in households_dict.values()]
 
-                    recalculate_population_fields_task(household_ids)
+                recalculate_population_fields_task(household_ids)
 
-                    kobo_submissions = []
-                    for imported_household in imported_households:
-                        kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.kobo_asset_id
-                        kobo_submission_time = imported_household.kobo_submission_time
-                        if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
-                            submission = KoboImportedSubmission(
-                                kobo_submission_uuid=kobo_submission_uuid,
-                                kobo_asset_id=kobo_asset_id,
-                                kobo_submission_time=kobo_submission_time,
-                                registration_data_import=obj_hub,
-                                imported_household=imported_household,
-                            )
-                            kobo_submissions.append(submission)
-                    if kobo_submissions:
-                        KoboImportedSubmission.objects.bulk_create(kobo_submissions)
-
-                    # DEDUPLICATION
-
-                    populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
-                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
-                    if not obj_hct.business_area.postpone_deduplication:
-                        DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
-
-                        golden_record_duplicates = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                kobo_submissions = []
+                for imported_household in imported_households:
+                    kobo_submission_uuid = imported_household.kobo_submission_uuid
+                    kobo_asset_id = imported_household.kobo_asset_id
+                    kobo_submission_time = imported_household.kobo_submission_time
+                    if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
+                        submission = KoboImportedSubmission(
+                            kobo_submission_uuid=kobo_submission_uuid,
+                            kobo_asset_id=kobo_asset_id,
+                            kobo_submission_time=kobo_submission_time,
+                            registration_data_import=obj_hub,
+                            imported_household=imported_household,
                         )
+                        kobo_submissions.append(submission)
+                if kobo_submissions:
+                    KoboImportedSubmission.objects.bulk_create(kobo_submissions)
 
-                        create_needs_adjudication_tickets(
-                            golden_record_duplicates,
-                            "duplicates",
-                            obj_hct.business_area,
-                            registration_data_import=obj_hct,
-                        )
+                # DEDUPLICATION
 
-                        needs_adjudication = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                        )
+                populate_index(
+                    Individual.objects.filter(registration_data_import=obj_hct),
+                    get_individual_doc(obj_hct.business_area.slug),
+                )
+                populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
 
-                        create_needs_adjudication_tickets(
-                            needs_adjudication,
-                            "possible_duplicates",
-                            obj_hct.business_area,
-                            registration_data_import=obj_hct,
-                        )
+                if not obj_hct.business_area.postpone_deduplication:
+                    DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
-                    # SANCTION LIST CHECK
-                    if obj_hct.should_check_against_sanction_list():
-                        CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                    golden_record_duplicates = Individual.objects.filter(
+                        registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                    )
 
-                    obj_hct.status = RegistrationDataImport.MERGED
-                    obj_hct.save()
-                    transaction.on_commit(lambda: deduplicate_documents.delay())
-                    log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+                    create_needs_adjudication_tickets(
+                        golden_record_duplicates,
+                        "duplicates",
+                        obj_hct.business_area,
+                        registration_data_import=obj_hct,
+                    )
+
+                    needs_adjudication = Individual.objects.filter(
+                        registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                    )
+
+                    create_needs_adjudication_tickets(
+                        needs_adjudication,
+                        "possible_duplicates",
+                        obj_hct.business_area,
+                        registration_data_import=obj_hct,
+                    )
+
+                # SANCTION LIST CHECK
+                if obj_hct.should_check_against_sanction_list():
+                    CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+
+                obj_hct.status = RegistrationDataImport.MERGED
+                obj_hct.save()
+                transaction.on_commit(lambda: deduplicate_documents.delay())
+                log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 
             self._update_individuals_and_households(individual_ids)
 
-        except Exception:
-            remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
+        except Exception as e:
+            logger.error(e)
+
+            remove_elasticsearch_documents_by_matching_ids(
+                individual_ids, get_individual_doc(obj_hct.business_area.slug)
+            )
             raise

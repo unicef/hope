@@ -1,6 +1,7 @@
 import copy
 import logging
 from functools import reduce
+from typing import Any, Dict, List, Optional
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     admin_area1_query,
@@ -264,7 +265,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "child_hoh",
         "lookup": "child_hoh",
         "required": False,
-        "label": {"English(EN)": "Child is/ head of household"},
+        "label": {"English(EN)": "Child is head of household"},
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
@@ -446,7 +447,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "who_answers_alt_phone",
         "lookup": "who_answers_alt_phone",
         "required": False,
-        "label": {"English(EN)": "Who answers this phone?"},
+        "label": {"English(EN)": "Who answers this (alt) phone?"},
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
@@ -550,7 +551,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_tax_id_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_no_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
     },
     {
         "id": "762cb2a8-b05a-47dc-81da-c71e4b1fd68f",
@@ -564,7 +565,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_tax_id_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_issuer_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
     },
     {
         "id": "d0e84bc0-9ac5-4c5b-bbdc-0644f5349d53",
@@ -1635,7 +1636,9 @@ CORE_FIELDS_ATTRIBUTES = [
 
 
 class FieldFactory(list):
-    def __init__(self, fields=None, scopes=None, *args, **kwargs):
+    def __init__(
+        self, fields: Optional[Any] = None, scopes: Optional[list[Scope]] = None, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)
@@ -1643,7 +1646,7 @@ class FieldFactory(list):
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     @classmethod
-    def from_scopes(cls, scopes: list[Scope]):
+    def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
@@ -1651,14 +1654,14 @@ class FieldFactory(list):
         return factory
 
     @classmethod
-    def from_scope(cls, scope: Scope):
+    def from_scope(cls, scope: Scope) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.extend(filter(lambda field: scope in field["scope"], all_fields))
         factory.scopes.add(scope)
         return factory
 
-    def and_scope(self, scope: Scope):
+    def and_scope(self, scope: Scope) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
 
         if scope not in self.scopes:
@@ -1667,7 +1670,7 @@ class FieldFactory(list):
             factory.scopes.add(scope)
         return factory
 
-    def filtered_by_types(self, types: list):
+    def filtered_by_types(self, types: list) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
 
         for item in self:
@@ -1675,26 +1678,26 @@ class FieldFactory(list):
                 factory.append(item)
         return factory
 
-    def associated_with_individual(self):
+    def associated_with_individual(self) -> "FieldFactory":
         return self._associated_with(_INDIVIDUAL)
 
-    def associated_with_household(self):
+    def associated_with_household(self) -> "FieldFactory":
         return self._associated_with(_HOUSEHOLD)
 
-    def _associated_with(self, associated_with):
+    def _associated_with(self, associated_with: str) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
             if item.get("associated_with") == associated_with:
                 factory.append(item)
         return factory
 
-    def to_dict_by(self, attr: str):
+    def to_dict_by(self, attr: str) -> Dict:
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
-    def to_choices(self):
+    def to_choices(self) -> List[Any]:
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
-    def apply_business_area(self, business_area_slug: str):
+    def apply_business_area(self, business_area_slug: str) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
             choices = field.get("_choices")

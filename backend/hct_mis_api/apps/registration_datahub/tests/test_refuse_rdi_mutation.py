@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -26,7 +28,7 @@ class TestRefuseRdiMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"
@@ -53,7 +55,7 @@ class TestRefuseRdiMutation(APITestCase):
             ),
         ]
     )
-    def test_refuse_registration_data_import(self, _, permissions, status):
+    def test_refuse_registration_data_import(self, _: Any, permissions: List[Permissions], status: bool) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.rdi.status = status
         self.rdi.save()

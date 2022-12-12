@@ -4,11 +4,10 @@ import get from 'lodash/get';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { AllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { OverviewContainer } from '../core/OverviewContainer';
-import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
+import { FormikSelectFieldConfirmProgram } from './FormikSelectFieldConfirmProgram';
 import { PaperContainer } from './PaperContainer';
 
 const Title = styled.div`
@@ -23,10 +22,14 @@ export function TargetPopulationProgramme({
   allPrograms,
   loading,
   program,
+  setFieldValue,
+  values,
 }: {
   allPrograms: AllProgramsForChoicesQuery;
   loading: boolean;
   program: string;
+  setFieldValue;
+  values;
 }): React.ReactElement {
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
@@ -35,6 +38,7 @@ export function TargetPopulationProgramme({
   const mappedPrograms = allProgramsEdges.map((edge) => ({
     name: edge.node.name,
     value: edge.node.id,
+    individualDataNeeded: edge.node.individualDataNeeded,
   }));
 
   return (
@@ -54,9 +58,12 @@ export function TargetPopulationProgramme({
             variant='outlined'
             required
             choices={mappedPrograms}
+            component={FormikSelectFieldConfirmProgram}
             allProgramsEdges={allProgramsEdges}
-            component={program ? FormikSelectFieldConfirm : FormikSelectField}
             data-cy='input-program'
+            program={program}
+            setFieldValue={setFieldValue}
+            values={values}
           />
         </Box>
       </OverviewContainer>

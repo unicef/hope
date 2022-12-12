@@ -1,7 +1,10 @@
-from django.core.management import BaseCommand, call_command
-from django.db import connections
+import time
+from argparse import ArgumentParser
+from typing import Any
 
-from hct_mis_api.apps.core.management.sql import sql_drop_tables
+from django.core.management import BaseCommand, call_command
+from django.db import OperationalError, connections
+
 from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
     generate_real_cash_plans,
@@ -13,7 +16,7 @@ from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imp
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--skip-drop",
             action="store_true",
@@ -21,9 +24,21 @@ class Command(BaseCommand):
             help="Skip migrating - just reload the data",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
+        db_connection = connections["default"]
+        connected = False
+
+        while not connected:
+            try:
+                db_connection.cursor()
+                time.sleep(0.5)
+            except OperationalError:
+                connected = False
+            else:
+                connected = True
+
         if options["skip_drop"] is False:
-            self._drop_databases()
+            call_command("dropalldb")
             call_command("migratealldb")
 
         call_command("flush", "--noinput")
@@ -52,15 +67,3 @@ class Command(BaseCommand):
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
-
-    def _drop_databases(self):
-        for connection_name in connections:
-            if connection_name == "read_only":
-                continue
-            connection = connections[connection_name]
-            with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection, connection_name)
-                if not sql:
-                    continue
-                print(connection_name, ">>\n", sql)
-                cursor.execute(sql)

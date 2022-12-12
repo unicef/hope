@@ -1,6 +1,8 @@
 import json
 from datetime import date, timedelta
+from typing import Callable, Dict, Optional, Tuple, Type, Union
 
+from django.db.models import QuerySet
 from django.forms import (
     CharField,
     DateField,
@@ -13,12 +15,13 @@ from django.utils import timezone
 
 from dateutil.parser import parse
 from django_filters import Filter
+from traitlets import Any
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
-def _clean_data_for_range_field(value, field):
+def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
     if value:
         clean_data = {}
         values = json.loads(value)
@@ -34,29 +37,29 @@ def _clean_data_for_range_field(value, field):
 
 
 class IntegerRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, IntegerField)
 
 
 class DecimalRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, DecimalField)
 
 
 class DateTimeRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, DateTimeField)
 
 
 class DateRangeField(Field):
-    def clean(self, value):
+    def clean(self, value: Any) -> Optional[Dict]:
         return _clean_data_for_range_field(value, DateField)
 
 
 class BaseRangeFilter(Filter):
-    field_class = None
+    field_class: Optional[Type[Field]] = None
 
-    def filter(self, qs, values):
+    def filter(self, qs: QuerySet, values: Tuple) -> QuerySet:
         if values:
             min_value = values.get("min")
             max_value = values.get("max")
@@ -89,10 +92,10 @@ class DecimalRangeFilter(BaseRangeFilter):
     field_class = DecimalRangeField
 
 
-def filter_age(field_name, qs, min, max):
+def filter_age(field_name: str, qs: QuerySet, min: Optional[int], max: Optional[int]) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
-    values = None
+    values: Union[date, Tuple[date, date]]
     if min is not None and max is not None:
         lookup_expr = "range"
         # min year +1 , day-1
@@ -134,7 +137,7 @@ def filter_age(field_name, qs, min, max):
 class AgeRangeFilter(Filter):
     field_class = IntegerRangeField
 
-    def filter(self, qs, values):
+    def filter(self, qs: QuerySet, values: Union[date, Tuple[date, date]]) -> QuerySet:
         if values:
             min_value = values.get("min")  # 20
             max_value = values.get("max")  # 21
@@ -184,7 +187,7 @@ class IntegerFilter(Filter):
 class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
-    def filter(self, qs, business_area_slug):
+    def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
         cached_dict = cached_business_areas_slug_id_dict()
         business_area_id = (
             cached_dict[business_area_slug]

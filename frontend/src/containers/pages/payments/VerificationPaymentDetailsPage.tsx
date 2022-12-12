@@ -20,7 +20,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data: { payment }, loading, error } = usePaymentQuery({
+  const { data, loading, error } = usePaymentQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -31,10 +31,11 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!payment || !choicesData || permissions === null) return null;
+  if (!data || !choicesData || permissions === null) return null;
 
-  const verification =
-    payment.parent?.verificationPlans?.edges[0].node;
+  const { payment } = data;
+
+  const verification = payment.parent?.verificationPlans?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -50,9 +51,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     )
       ? [
           {
-            title: `${t('Payment Plan')} ${decodeIdString(
-              payment.parent.id,
-            )}`,
+            title: `${t('Payment Plan')} ${decodeIdString(payment.parent.id)}`,
             to: `/${businessArea}/payment-verification/payment-plan/${payment.parent.id}`,
           },
         ]
@@ -66,10 +65,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     >
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
-        <VerifyManual
-          paymentVerificationId={payment.id}
-          enabled={false}
-        />
+        <VerifyManual paymentVerificationId={payment.id} enabled={false} />
       ) : null}
     </PageHeader>
   );

@@ -1,14 +1,11 @@
-from typing import Union
+from typing import TYPE_CHECKING, Dict, Union
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.db.models import QuerySet
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import (
-    CashPlan,
-    PaymentPlan,
-    PaymentVerificationPlan,
-)
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
@@ -21,8 +18,11 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.payment.models import CashPlan, PaymentPlan
 
-def get_payment_records(payment_plan: Union[PaymentPlan, CashPlan], verification_channel):
+
+def get_payment_records(payment_plan: Union["PaymentPlan", "CashPlan"], verification_channel: str) -> QuerySet:
     payment_plan_type = payment_plan.__class__.__name__
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return payment_plan.available_payment_records(
@@ -33,7 +33,7 @@ def get_payment_records(payment_plan: Union[PaymentPlan, CashPlan], verification
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, payment_plan: Union[PaymentPlan, CashPlan], input_data: dict) -> PaymentVerificationPlan:
+    def create(cls, payment_plan: Union["PaymentPlan", "CashPlan"], input_data: Dict) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
@@ -46,16 +46,16 @@ class VerificationPlanCrudServices:
 
         payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
         sampling = Sampling(input_data, payment_plan, payment_records)
-        payment_verification_plan, payment_records = sampling.process_sampling(payment_verification_plan)
+        payment_verification_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, payment_records).create()
+        CreatePaymentVerifications(payment_verification_plan, payment_records_qs).create()
 
         return payment_verification_plan
 
     @classmethod
-    def update(cls, payment_verification_plan, input_data) -> PaymentVerificationPlan:
+    def update(cls, payment_verification_plan: PaymentVerificationPlan, input_data: Dict) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
@@ -67,16 +67,16 @@ class VerificationPlanCrudServices:
             payment_verification_plan.payment_plan_obj, payment_verification_plan.verification_channel
         )
         sampling = Sampling(input_data, payment_verification_plan.payment_plan_obj, payment_records)
-        payment_verification_plan, payment_records = sampling.process_sampling(payment_verification_plan)
-        ProcessVerification(input_data, payment_verification_plan).process()
-        payment_verification_plan.save()
+        pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
+        ProcessVerification(input_data, pv_plan).process()
+        pv_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, payment_records).create()
+        CreatePaymentVerifications(pv_plan, payment_records_qs).create()
 
-        return payment_verification_plan
+        return pv_plan
 
     @classmethod
-    def delete(cls, payment_verification_plan):
+    def delete(cls, payment_verification_plan: PaymentVerificationPlan) -> None:
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:
             raise GraphQLError("You can delete only PENDING verification")
 

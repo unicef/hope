@@ -21,7 +21,7 @@ def set_partner(apps, schema_editor):
         "WFP",
     )
     for name in names:
-        partner, __ = Partner.objects.get_or_create(name=name, is_un=True)
+        partner, __ = Partner.objects.get_or_create(name=name, defaults={'is_un': True})
         User.objects.filter(org=name).update(partner=partner)
 
 

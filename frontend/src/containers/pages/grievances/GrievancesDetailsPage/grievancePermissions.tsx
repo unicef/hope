@@ -85,7 +85,7 @@ export const grievancePermissions = (
     GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK,
     GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK,
     GRIEVANCE_CATEGORIES.REFERRAL,
-  ].includes(ticket.category.toString());
+  ].includes(ticket?.category?.toString());
   const canClose =
     (isFeedbackType &&
       hasCreatorOrOwnerPermissions(

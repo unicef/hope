@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.cache import caches
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -8,11 +10,11 @@ from smart_admin.site import SmartAdminSite
 cache = caches["default"]
 
 
-def clean(v):
+def clean(v: str) -> str:
     return v.replace(r"\n", "").strip()
 
 
-def get_bookmarks(request):
+def get_bookmarks(request: Any) -> List:
     quick_links = []
     for entry in config.QUICK_LINKS.split("\n"):
         if entry := clean(entry):
@@ -28,7 +30,8 @@ def get_bookmarks(request):
                     elif len(parts) == 3:
                         args = parts[0], "viewlink", parts[1], parts[0]
                     elif len(parts) == 4:
-                        args = parts.reverse()
+                        # TODO: parts.reverse() does not return anything
+                        args = parts.reverse()  # type: ignore
                     if args:
                         quick_links.append(format_html('<li><a target="{}" class="{}" href="{}">{}</a></li>', *args))
             except ValueError:

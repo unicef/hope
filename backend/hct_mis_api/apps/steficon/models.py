@@ -1,8 +1,10 @@
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, QuerySet
 from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
@@ -10,7 +12,7 @@ from django.utils.functional import cached_property
 from concurrency.fields import AutoIncVersionField
 
 from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
-from .interpreters import interpreters, mapping
+from .interpreters import Interpreter, interpreters, mapping
 from .result import Result
 from .validators import DoubleSpaceValidator, StartEndSpaceValidator
 
@@ -66,31 +68,31 @@ class Rule(models.Model):
 
     objects = RuleManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
-    def get_flag(self, name, default=None):
+    def get_flag(self, name: str, default: Optional[str] = None) -> str:
         return self.flags.get(name, default)
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         return model_to_dict(self, MONITORED_FIELDS)
 
-    def clean(self):
+    def clean(self) -> None:
         if self.pk:
             self.security = self.__original_security
 
-    def clean_definition(self):
+    def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using=None, keep_parents=False):
+    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:  # type: ignore
         self.enabled = False
         self.save()
 
-    def get_changes(self):
+    def get_changes(self) -> Tuple[Dict, List]:
         prev = self.latest_commit
         if prev:
             data1 = prev.after
@@ -102,14 +104,20 @@ class Rule(models.Model):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if "individual_data_needed" not in self.flags:
             self.flags["individual_data_needed"] = False
         with atomic():
             super().save(force_insert, force_update, using, update_fields)
             self.commit()
 
-    def commit(self, is_release=False, force=False):
+    def commit(self, is_release: bool = False, force: bool = False) -> Optional["RuleCommit"]:
         stored, changes = self.get_changes()
         release = None
         values = {
@@ -129,7 +137,7 @@ class Rule(models.Model):
             self.history.exclude(pk=release.pk).update(deprecated=True)
         return release
 
-    def release(self):
+    def release(self) -> Optional["RuleCommit"]:
         if self.deprecated or not self.enabled:
             raise ValueError("Cannot release disabled/deprecated rules")
         commit = self.history.filter(version=self.version).first()
@@ -142,21 +150,21 @@ class Rule(models.Model):
         return commit
 
     @property
-    def latest(self):
+    def latest(self) -> Union[QuerySet, None]:
         try:
             return self.history.filter(is_release=True).order_by("-version").first()
         except RuleCommit.DoesNotExist:
-            pass
+            return None
 
     @property
-    def latest_commit(self):
+    def latest_commit(self) -> Optional[QuerySet]:
         try:
             return self.history.order_by("version").last()
         except RuleCommit.DoesNotExist:
-            pass
+            return None
 
     @property
-    def last_changes(self):
+    def last_changes(self) -> Optional[Dict]:
         try:
             return {
                 "fields": self.latest_commit.affected_fields,
@@ -164,13 +172,14 @@ class Rule(models.Model):
                 "after": self.latest_commit.after,
             }
         except RuleCommit.DoesNotExist:
-            pass
+            return None
 
     @cached_property
-    def interpreter(self):
-        return mapping[self.language](self.definition)
+    def interpreter(self) -> Any:
+        func: Type[Interpreter] = mapping[self.language]
+        return func(self.definition)
 
-    def execute(self, context=None, only_release=True, only_enabled=True) -> Result:
+    def execute(self, context: Optional[Dict] = None, only_release: bool = True, only_enabled: bool = True) -> Result:
         if self.pk:
             qs = self.history
             if only_release:
@@ -214,7 +223,7 @@ class RuleCommit(models.Model):
         ordering = ("-version",)
         get_latest_by = "-version"
 
-    def __str__(self):
+    def __str__(self) -> str:
         value = f"{self.rule} #{self.id}"
         if not self.enabled:
             value = f"{value} (Disabled)"
@@ -225,27 +234,28 @@ class RuleCommit(models.Model):
         return value
 
     @cached_property
-    def prev(self):
+    def prev(self) -> Optional[QuerySet]:
         return self.rule.history.order_by("-version").filter(id__lt=self.id).first()
 
     @cached_property
-    def next(self):
+    def next(self) -> Optional[QuerySet]:
         return self.rule.history.order_by("version").filter(id__gt=self.id).first()
 
     @atomic
-    def revert(self, fields=MONITORED_FIELDS):
+    def revert(self, fields: Tuple[str, str, str, str, str] = MONITORED_FIELDS) -> None:
         for field in fields:
             setattr(self.rule, field, self.after[field])
         self.rule.save()
 
     @cached_property
-    def interpreter(self):
-        return mapping[self.language](self.definition)
+    def interpreter(self) -> Any:
+        func: Callable = mapping[self.language]
+        return func(self.definition)
 
-    def execute(self, context):
+    def execute(self, context: Dict) -> Any:
         return self.interpreter.execute(context)
 
-    def release(self):
+    def release(self) -> Optional["RuleCommit"]:
         if self.deprecated or not self.enabled:
             raise ValueError("Cannot release disabled/deprecated rules")
         if not self.is_release:

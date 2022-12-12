@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
@@ -6,7 +8,7 @@ from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
 class Command(BaseCommand):
     help = "Fix Population disability if disability certificate picture added"
 
-    def update_individual_disability(self):
+    def update_individual_disability(self) -> None:
         qs = (
             Individual.objects.filter(disability=NOT_DISABLED)
             .exclude(disability_certificate_picture__isnull=True)
@@ -16,7 +18,7 @@ class Command(BaseCommand):
 
         print(f"Fixed {qs} object(s).")
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Starting Fix Population Disability")
 
         self.update_individual_disability()

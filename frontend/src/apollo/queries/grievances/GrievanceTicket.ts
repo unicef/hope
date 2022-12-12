@@ -53,6 +53,7 @@ export const GrievanceTicket = gql`
       paymentRecord {
         id
         caId
+        deliveredQuantity
       }
       relatedTickets {
         id
@@ -95,6 +96,10 @@ export const GrievanceTicket = gql`
       deleteHouseholdTicketDetails {
         id
         approveStatus
+        reasonHousehold {
+          id
+          unicefId
+        }
       }
       systemFlaggingTicketDetails {
         id
@@ -156,10 +161,6 @@ export const GrievanceTicket = gql`
           edges {
             node {
               id
-              # paymentRecord {
-              #   id
-              #   caId
-              # }
             }
           }
         }
@@ -189,7 +190,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo
@@ -224,7 +224,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo
@@ -261,7 +260,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo

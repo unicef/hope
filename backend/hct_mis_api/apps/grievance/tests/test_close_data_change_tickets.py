@@ -1,4 +1,6 @@
+import uuid
 from datetime import date
+from typing import Any, List
 
 from django.core.management import call_command
 
@@ -56,7 +58,7 @@ class TestCloseDataChangeTickets(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -124,24 +126,23 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
+            IndividualFactory(household=household_one, **individual | {"unicef_id": str(uuid.uuid4())})
+            for individual in cls.individuals_to_create
         ]
         cls.individuals_household_two = [
-            IndividualFactory(household=household_two, **individual)
+            IndividualFactory(household=household_two, **individual | {"unicef_id": str(uuid.uuid4())})
             for individual in cls.individuals_to_create_for_second_household
         ]
 
         first_individual = cls.individuals[0]
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(
-            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
-        )
+        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
         cls.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=first_individual
+            type=national_id_type, document_number="789-789-645", individual=first_individual, country=country_pl
         )
         cls.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=first_individual
+            type=birth_certificate_type, document_number="ITY8456", individual=first_individual, country=country_pl
         )
         household_one.head_of_household = cls.individuals[0]
         household_one.save()
@@ -281,9 +282,8 @@ class TestCloseDataChangeTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_add_individual(cls, _, permissions, should_close):
+    def test_close_add_individual(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
-
         cls.graphql_request(
             request_string=cls.STATUS_CHANGE_MUTATION,
             context={"user": cls.user},
@@ -292,6 +292,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+
         created_individual = Individual.objects.exclude(id="257f6f84-313c-43bd-8f0e-89b96c41a7d5").filter(
             given_name="Test",
             full_name="Test Example",
@@ -304,7 +305,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
             document = Document.objects.get(document_number="123-123-UX-321")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
-            cls.assertEqual(document.type.country, country_pl)
+            cls.assertEqual(document.country, country_pl)
             cls.assertEqual(document.photo, "test_file_name.jpg")
 
             role = created_individual.households_and_roles.get(
@@ -324,7 +325,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_update_individual(cls, _, permissions, should_close):
+    def test_close_update_individual(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
 
         cls.graphql_request(
@@ -352,7 +353,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
             document = Document.objects.get(document_number="999-888-777")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
-            cls.assertEqual(document.type.country, country_pl)
+            cls.assertEqual(document.country, country_pl)
             cls.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
             cls.assertEqual(document.photo, "test_file_name.jpg")
 
@@ -363,18 +364,18 @@ class TestCloseDataChangeTickets(APITestCase):
             cls.assertEqual(individual.full_name, "Benjamin Butler")
             cls.assertEqual(individual.family_name, "Butler")
 
-    def test_close_update_individual_document_photo(cls):
+    def test_close_update_individual_document_photo(cls) -> None:
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
-
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
         national_id = DocumentFactory(
             type=national_id_type,
             document_number="999-888-777",
             individual=cls.individuals[0],
             photo="test_file_name.jpg",
+            country=country_pl,
         )
 
         grievance_ticket = GrievanceTicketFactory(
@@ -425,7 +426,7 @@ class TestCloseDataChangeTickets(APITestCase):
         individual.refresh_from_db()
 
         document = Document.objects.get(document_number="999-888-777")
-        cls.assertEqual(document.type.country, country_pl)
+        cls.assertEqual(document.country, country_pl)
         cls.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
         cls.assertEqual(document.photo.name, "new_test_file_name.jpg")
 
@@ -435,7 +436,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_update_household(cls, _, permissions, should_close):
+    def test_close_update_household(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
         cls.graphql_request(
             request_string=cls.STATUS_CHANGE_MUTATION,
@@ -451,7 +452,7 @@ class TestCloseDataChangeTickets(APITestCase):
         if should_close:
             cls.assertEqual(cls.household_one.village, "Test Village")
 
-    def test_close_individual_delete_with_correct_permissions(cls):
+    def test_close_individual_delete_with_correct_permissions(cls) -> None:
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
@@ -472,7 +473,7 @@ class TestCloseDataChangeTickets(APITestCase):
         ).exists()
         cls.assertTrue(changed_role_exists)
 
-    def test_close_individual_delete_without_permissions(cls):
+    def test_close_individual_delete_without_permissions(cls) -> None:
         cls.create_user_role_with_permissions(cls.user, [], cls.business_area)
 
         cls.graphql_request(
@@ -485,7 +486,7 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         cls.assertTrue(Individual.objects.filter(id=cls.individuals_household_two[0].id).exists())
 
-    def test_close_household_delete(cls):
+    def test_close_household_delete(cls) -> None:
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
@@ -521,7 +522,7 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.assertTrue(cls.individuals[0].withdrawn)
         cls.assertTrue(cls.individuals[1].withdrawn)
 
-    def test_close_add_individual_create_bank_account(self):
+    def test_close_add_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
@@ -549,7 +550,7 @@ class TestCloseDataChangeTickets(APITestCase):
         self.assertEqual(bank_account_info.bank_name, "privatbank")
         self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
 
-    def test_close_update_individual_create_bank_account(self):
+    def test_close_update_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
@@ -594,7 +595,7 @@ class TestCloseDataChangeTickets(APITestCase):
         self.assertEqual(bank_account_info.bank_name, "privatbank")
         self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
 
-    def test_close_update_individual_update_bank_account(self):
+    def test_close_update_individual_update_bank_account(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )

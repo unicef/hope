@@ -1,5 +1,7 @@
 import logging
+from datetime import datetime
 from tempfile import NamedTemporaryFile
+from typing import Any, Optional
 
 from django.core.files import File
 
@@ -16,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def _to_values_list(instances, field_name: str) -> str:
+    def _to_values_list(instances: Any, field_name: str) -> str:
         values_list = list(instances.values_list(field_name, flat=True))
         return ", ".join([str(value) for value in values_list])
 
     @staticmethod
-    def _format_date(date) -> str:
+    def _format_date(date: datetime) -> str:
         if not date:
             return ""
         return date.strftime("%Y-%m-%d")
@@ -31,7 +33,7 @@ class GenerateReportService:
     FILTERS_SHEET = "Meta"
     MAX_COL_WIDTH = 75
 
-    def __init__(self, fsp: FinancialServiceProvider, business_area_slug: str = None):
+    def __init__(self, fsp: FinancialServiceProvider, business_area_slug: Optional[str] = None) -> None:
         self.fsp = fsp
         self.business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug else None
 
@@ -44,10 +46,10 @@ class GenerateReportService:
         self.ws_filters = wb.create_sheet(self.FILTERS_SHEET)
         return wb
 
-    def _add_filters_info(self):
+    def _add_filters_info(self) -> None:
         self.ws_filters.append(["Business Area", self.business_area.name])
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         self.ws_report.append(self.fsp.fsp_xlsx_template.columns)
 
     def _add_rows(self) -> int:
@@ -66,7 +68,7 @@ class GenerateReportService:
         # TODO: adjust column widths
         return self.wb
 
-    def generate_report(self):
+    def generate_report(self) -> None:
         try:
             self.generate_workbook()
             with NamedTemporaryFile() as tmp:

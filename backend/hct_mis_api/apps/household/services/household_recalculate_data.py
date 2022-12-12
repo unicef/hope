@@ -1,3 +1,6 @@
+from typing import Any, Dict
+
+from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -14,16 +17,19 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-def aggregate_optionally(household, **kwargs):
+def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
     if household.collect_individual_data == COLLECT_TYPE_PARTIAL:
         return {key: None for key, _ in kwargs.items()}
     return household.individuals.aggregate(**kwargs)
 
 
+@transaction.atomic
 def recalculate_data(household: Household) -> None:
+    household = Household.objects.select_for_update().get(id=household.id)
+
     if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
         return
-    for individual in household.individuals.all():
+    for individual in household.individuals.all().select_for_update():
         individual.recalculate_data()
     date_6_years_ago = timezone.now() - relativedelta(years=+6)
     date_12_years_ago = timezone.now() - relativedelta(years=+12)
@@ -34,7 +40,7 @@ def recalculate_data(household: Household) -> None:
     active_beneficiary = Q(withdrawn=False, duplicate=False)
     female_beneficiary = Q(Q(sex=FEMALE) & active_beneficiary & is_beneficiary)
     male_beneficiary = Q(Q(sex=MALE) & active_beneficiary & is_beneficiary)
-    disabled_disability = Q(disability=DISABLED)
+    disabled_disability = Q(disability=DISABLED) & active_beneficiary & is_beneficiary
     female_disability_beneficiary = Q(disabled_disability & female_beneficiary)
     male_disability_beneficiary = Q(disabled_disability & male_beneficiary)
 
@@ -44,9 +50,9 @@ def recalculate_data(household: Household) -> None:
     from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
     from_60_years = Q(birth_date__lte=date_60_years_ago)
 
-    children_count = Q(birth_date__gt=date_18_years_ago)
+    children_count = Q(birth_date__gt=date_18_years_ago) & active_beneficiary & is_beneficiary
     female_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
-    male_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
+    male_children_count = Q(birth_date__gt=date_18_years_ago) & male_beneficiary
 
     children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
     female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary

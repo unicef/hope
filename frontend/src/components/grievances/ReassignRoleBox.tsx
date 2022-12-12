@@ -10,14 +10,14 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
-import { GrievanceTicketNode } from '../../__generated__/graphql';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
 
 const StyledBox = styled(Paper)`
-  border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
+  border: 1px solid ${({ theme }) => theme.hctPalette.orange};
   border-radius: 3px;
   background-color: #fff;
   display: flex;
@@ -27,7 +27,7 @@ const StyledBox = styled(Paper)`
 `;
 
 const OrangeTitle = styled.div`
-  color: ${({ theme }) => theme.hctPalette.oragne};
+  color: ${({ theme }) => theme.hctPalette.orange};
 `;
 
 const WarnIcon = styled(WarningIcon)`
@@ -41,7 +41,7 @@ export const ReassignRoleBox = ({
   shouldDisplayButton,
   shouldDisableButton,
 }: {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
 }): React.ReactElement => {

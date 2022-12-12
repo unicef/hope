@@ -15,7 +15,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
@@ -31,7 +31,7 @@ export function NeedsAdjudicationDetailsOld({
   ticket,
   canApprove,
 }: {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprove: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();

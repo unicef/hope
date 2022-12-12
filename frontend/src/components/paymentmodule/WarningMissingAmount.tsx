@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 const WarnIcon = styled(WarningIcon)`
-  color: ${({ theme }) => theme.hctPalette.oragne};
+  color: ${({ theme }) => theme.hctPalette.orange};
 `;
 
 interface WarningMissingAmountProps {

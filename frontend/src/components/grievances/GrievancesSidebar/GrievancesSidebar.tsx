@@ -10,9 +10,13 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { GrievanceTicketNode } from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 
-export const GrievancesSidebar = ({ ticket }: { ticket: GrievanceTicketNode }): React.ReactElement => {
+export const GrievancesSidebar = ({
+  ticket,
+}: {
+  ticket: GrievanceTicketQuery['grievanceTicket'];
+}): React.ReactElement => {
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
@@ -77,8 +81,12 @@ export const GrievancesSidebar = ({ ticket }: { ticket: GrievanceTicketNode }): 
               ?.hasMultiplePaymentVerifications ? (
               <PaymentIds
                 verifications={
-                  ticket.paymentVerificationTicketDetails?.paymentVerifications
-                    ?.edges.map((edge) => ({ "id": edge.node.id, "caId": ticket.paymentRecord.caId })) || []
+                  ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges.map(
+                    (edge) => ({
+                      id: edge.node.id,
+                      caId: ticket.paymentRecord.caId,
+                    }),
+                  ) || []
                 }
               />
             ) : null}

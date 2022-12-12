@@ -3,13 +3,13 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import styled from 'styled-components';
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import {
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
   useAllEditHouseholdFieldsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
@@ -17,7 +17,7 @@ import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
 
 interface RequestedHouseholdDataChangeTableProps {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
   isEdit;
   values;
