@@ -860,7 +860,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
-        delivery_mechanisms_in_order = input.get("delivery_mechanisms")
+        delivery_mechanisms_in_order = input.get("delivery_mechanisms", [])
         for delivery_mechanism in delivery_mechanisms_in_order:
             if delivery_mechanism == "":
                 raise GraphQLError("Delivery mechanism cannot be empty.")

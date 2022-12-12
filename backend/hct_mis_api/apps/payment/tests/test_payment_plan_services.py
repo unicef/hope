@@ -66,7 +66,7 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
@@ -74,19 +74,19 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError,
             f"TargetPopulation id:{targeting.id} does not exist or is not in status 'Ready for Payment Module'",
         ):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.save()
 
         with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
         targeting.program = ProgramFactory()
         targeting.save()
 
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -120,7 +120,7 @@ class TestPaymentPlanServices(APITestCase):
             currency="USD",
         )
 
-        pp = PaymentPlanService().create(input_data=input_data, user=self.user)
+        pp = PaymentPlanService.create(input_data=input_data, user=self.user)
 
         pp.refresh_from_db()
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)

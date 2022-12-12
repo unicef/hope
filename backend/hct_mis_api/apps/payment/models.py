@@ -1003,7 +1003,7 @@ class CashPlan(GenericPaymentPlan):
         return payment_record.currency if payment_record else None
 
     @property
-    def currency_exchange_date(self) -> datetime.date:
+    def currency_exchange_date(self) -> datetime:
         return self.dispersion_date
 
     def unicef_id(self) -> str:
