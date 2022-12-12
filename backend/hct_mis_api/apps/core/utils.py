@@ -34,13 +34,16 @@ class CaseInsensitiveTuple(tuple):
         return key.casefold() in (element.casefold() for element in self)
 
 
-def decode_id_string(id_string: str) -> Optional[str]:
-    if not id_string:
-        return None
-
+def decode_id_string_required(id_string: str) -> str:
     from base64 import b64decode
 
     return b64decode(id_string).decode().split(":")[1]
+
+
+def decode_id_string(id_string: str) -> Optional[str]:
+    if not id_string:
+        return None
+    return decode_id_string_required(id_string)
 
 
 def encode_id_base64_required(id_string: str, model_name: str) -> str:

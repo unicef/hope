@@ -64,5 +64,5 @@ def download_payment_plan_payment_list(
 
     if payment_plan.has_export_file:
         return redirect(payment_plan.payment_list_export_file_link)
-    else:
-        log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id}")
+
+    log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id}")
