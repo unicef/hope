@@ -1,3 +1,5 @@
+from typing import List, Tuple, Type
+
 import graphene
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType
@@ -5,6 +7,7 @@ from graphene_django import DjangoConnectionField, DjangoObjectType
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
+    BasePermission,
     Permissions,
     hopePermissionClass,
 )
@@ -24,7 +27,7 @@ def get_field_by_name(field_name: str):
     return field
 
 
-def filter_choices(field, args):
+def filter_choices(field, args) -> List:
     choices = field.get("choices")
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))
@@ -113,7 +116,7 @@ class StatsObjectType(graphene.ObjectType):
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     """Defines an individual target population record."""
 
-    permission_classes = (
+    permission_classes: Tuple[Type[BasePermission]] = (
         hopePermissionClass(
             Permissions.TARGETING_VIEW_DETAILS,
         ),

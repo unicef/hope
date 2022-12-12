@@ -1,16 +1,15 @@
 import abc
+from typing import Optional
 
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
-
-User = get_user_model()
 
 
 class HopeRedirect(abc.ABC):
@@ -123,7 +122,7 @@ class HopeRedirectPayment(HopeRedirect):
             return payment_verification.payment_record.business_area.slug
         return "/"
 
-    def _get_payment_verification(self) -> PaymentVerification:
+    def _get_payment_verification(self) -> Optional[PaymentVerification]:
         return PaymentVerification.objects.filter(payment_record__ca_id=self.ca_id).first()
 
 

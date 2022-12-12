@@ -1,6 +1,5 @@
 import logging
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
 from django.contrib.postgres.validators import (
@@ -17,24 +16,16 @@ from django.db.models import Count, JSONField, Q
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.core_fields_attributes import (
-    FieldFactory,
-    Scope,
-)
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.utils import (
-    map_unicef_ids_to_households_unicef_ids,
-)
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    MALE,
-    Household,
-    Individual,
-)
+from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -281,7 +272,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
         return queryset.distinct()
 
-    def refresh_stats(self):
+    def refresh_stats(self) -> None:
         households_ids = self.household_list.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
@@ -315,10 +306,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.build_status = TargetPopulation.BUILD_STATUS_OK
         self.built_at = timezone.now()
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         try:
             return self.targeting_criteria.get_criteria_string()
-        except:
+        except Exception:
             return ""
 
     @property
@@ -343,20 +334,20 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         return tp.steficon_rule.rule
 
-    def set_to_ready_for_cash_assist(self):
+    def set_to_ready_for_cash_assist(self) -> None:
         self.status = self.STATUS_READY_FOR_CASH_ASSIST
         self.sent_to_datahub = True
 
-    def is_finalized(self):
+    def is_finalized(self) -> bool:
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
-    def is_locked(self):
+    def is_locked(self) -> bool:
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
-    def is_open(self):
+    def is_open(self) -> bool:
         return self.status in (self.STATUS_OPEN,)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:

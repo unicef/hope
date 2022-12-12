@@ -10,38 +10,6 @@ class Command(BaseCommand):
 
         create_extra_permissions()
 
-        from hct_mis_api.apps.power_query.models import Formatter
+        from hct_mis_api.apps.power_query.defaults import create_defaults
 
-        Formatter.objects.get_or_create(
-            name="Dataset To HTML",
-            defaults={
-                "code": """
-<h1>{{dataset.query.name}}</h1>
-<table>
-    <tr>{% for fname in dataset.data.headers %}<th>{{ fname }}</th>{% endfor %}</tr>
-{% for row in dataset.data %}<tr>{% for col in row %}<td>{{ col }}</td>{% endfor %}</tr>
-{% endfor %}
-    </table>
-"""
-            },
-        )
-
-        Formatter.objects.get_or_create(
-            name="Queryset To HTML",
-            defaults={
-                "code": """
-<h1>{{dataset.query.name}}</h1>
-<table>
-    <tr><th>id</th><th>str</th></tr>
-{% for row in dataset.data %}<tr>
-    <td>{{ row.id }}</td>
-    <td>{{ row }}</td>
-    </tr>
-{% endfor %}
-    </table>
-""",
-                "content_type": "html",
-            },
-        )
-
-        Formatter.objects.get_or_create(name="Dataset To XLS", defaults={"code": "", "content_type": "xls"})
+        create_defaults()

@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal, InvalidOperation
+from typing import Dict, List, Optional, Tuple, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -23,11 +24,11 @@ class RapidProAPI:
     CONTACTS_ENDPOINT = "/contacts.json"
     FLOW_STARTS_ENDPOINT = "/flow_starts.json"
 
-    def __init__(self, business_area_slug):
+    def __init__(self, business_area_slug) -> None:
         self._client = requests.session()
         self._init_token(business_area_slug)
 
-    def _init_token(self, business_area_slug):
+    def _init_token(self, business_area_slug) -> None:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         token = business_area.rapid_pro_api_key
         self.url = business_area.rapid_pro_host
@@ -39,7 +40,7 @@ class RapidProAPI:
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
 
-    def _handle_get_request(self, url, is_absolute_url=False) -> dict:
+    def _handle_get_request(self, url, is_absolute_url=False) -> Dict:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
         response = self._client.get(url)
@@ -50,7 +51,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _handle_post_request(self, url, data) -> dict:
+    def _handle_post_request(self, url, data) -> Dict:
         response = self._client.post(url=f"{self._get_url()}{url}", data=data)
         try:
             response.raise_for_status()
@@ -60,7 +61,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e, phone_numbers):
+    def _parse_json_urns_error(self, e, phone_numbers) -> Union[bool, List]:
         if e.response and e.response.status_code != 400:
             return False
         try:
@@ -69,28 +70,28 @@ class RapidProAPI:
             if not urns:
                 return False
             errors = []
-            for index, error in urns.items():
+            for index in urns.keys():
                 errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
             return errors
 
-        except:
+        except Exception:
             return False
 
-    def _get_url(self):
+    def _get_url(self) -> str:
         return f"{self.url}/api/v2"
 
-    def get_flows(self):
+    def get_flows(self) -> List:
         flows = self._handle_get_request(RapidProAPI.FLOWS_ENDPOINT)
         return flows["results"]
 
-    def start_flows(self, flow_uuid, phone_numbers):
+    def start_flows(self, flow_uuid, phone_numbers) -> Tuple[List, Optional[Exception]]:
         array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
         all_urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         by_limit = [all_urns[i : i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
 
-        def _start_flow(data):
+        def _start_flow(data) -> Dict:
             try:
                 return self._handle_post_request(
                     RapidProAPI.FLOW_STARTS_ENDPOINT,
@@ -103,7 +104,7 @@ class RapidProAPI:
                     raise ValidationError(message={"phone_numbers": errors}) from e
                 raise
 
-        successful_flows = []
+        successful_flows: List = []
         for urns in by_limit:
             try:
                 successful_flows.append(
@@ -113,10 +114,10 @@ class RapidProAPI:
                 return successful_flows, e
         return successful_flows, None
 
-    def get_flow_runs(self):
+    def get_flow_runs(self) -> List:
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
 
-    def get_mapped_flow_runs(self, start_uuids):
+    def get_mapped_flow_runs(self, start_uuids) -> List:
         results = self.get_flow_runs()
         mapped_results = [
             self._map_to_internal_structure(x)
@@ -125,7 +126,7 @@ class RapidProAPI:
         ]
         return mapped_results
 
-    def _get_paginated_results(self, url) -> list:
+    def _get_paginated_results(self, url) -> List:
         next_url = f"{self._get_url()}{url}"
         results: list = []
         while next_url:
@@ -134,7 +135,7 @@ class RapidProAPI:
             results.extend(data["results"])
         return results
 
-    def _map_to_internal_structure(self, run):
+    def _map_to_internal_structure(self, run) -> Dict:
         variable_received_name = "cash_received_text"
         variable_received_positive_string = "YES"
         variable_amount_name = "cash_received_amount"
@@ -152,10 +153,10 @@ class RapidProAPI:
             try:
                 received_amount = Decimal(received_amount_variable.get("value", 0))
             except InvalidOperation:
-                received_amount = 0
+                received_amount = Decimal(0)
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
-    def test_connection_start_flow(self, flow_name, phone_number):
+    def test_connection_start_flow(self, flow_name, phone_number) -> Tuple[Optional[str], Optional[List]]:
         # find flow by name, get its uuid and start it
         # if no flow with that name is found, return error
         try:
@@ -165,7 +166,7 @@ class RapidProAPI:
                 return (
                     f"Initial connection was successful but no flow with name '{flow_name}' was found in results list."
                 ), None
-            response = self.start_flows(test_flow["uuid"], [phone_number])
+            response, _ = self.start_flows(test_flow["uuid"], [phone_number])
             return None, response
         except Exception as e:
             logger.exception(e)

@@ -1,3 +1,7 @@
+from typing import Any, Union
+
+from django.http import HttpRequest, HttpResponse
+
 from smart_admin.console.email import (
     concurrent,
     logger,
@@ -10,13 +14,13 @@ from smart_admin.console.email import (
 from hct_mis_api.apps.utils.security import is_root
 
 
-def masker(value, request):
+def masker(value: Any, request: HttpRequest) -> Union[Any, str]:
     if is_root(request):
         return value
     return "****"
 
 
-def email(self, request, extra_context=None):
+def email(self, request, extra_context=None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = "Test Email"
     context["smtp"] = {

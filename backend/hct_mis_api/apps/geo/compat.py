@@ -20,7 +20,7 @@ class GeoCountryDescriptor:
             return [self.country(code) for code in value]
         return self.country(value)
 
-    def country(self, code):
+    def country(self, code) -> Country:
         return Country.objects.get(iso_code2=code)
 
     def __set__(self, instance, value):
@@ -43,7 +43,8 @@ class GeoCountryField(models.CharField):
         super().__init__(*args, **kwargs)
 
     def get_choices(self, include_blank=True, blank_choice=None, *args, **kwargs):
-        if self.choices[0] == (None, None):
+        # TODO: refactor
+        if self.choices[0] == (None, None):  # type: ignore
             self.choices = Country.objects.all().values_list("iso_code2", "name")
         if blank_choice is None:
             if self.blank_label is None:

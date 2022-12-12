@@ -1,16 +1,9 @@
 import sys
+from typing import Any, Dict, List, Optional
 
 
-def post_process_dedupe_results(record):
-    # {"duplicates": [{"dob": "1965-11-05",
-    #                   "score": 11.0,
-    #                   "hit_id": "266704c0-d13c-4475-9445-52ad1f6d9cb8",
-    #                   "location": null,
-    #                   "full_name": "Lavone Burnham",
-    #                   "proximity_to_score": 5.0
-    #                 }],
-    #  "possible_duplicates": []
-    #  }
+def post_process_dedupe_results(record: Any) -> None:
+    # TODO: record: ImportedIndividual but circular import
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
@@ -22,7 +15,7 @@ def post_process_dedupe_results(record):
             field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
 
 
-def combine_collections(a, b, path=None, update=True):
+def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: bool = True) -> Dict:
     """merges b into a
     version from flex registration"""
     if path is None:
@@ -34,7 +27,7 @@ def combine_collections(a, b, path=None, update=True):
             elif a[key] == b[key]:
                 pass  # same leaf value
             elif isinstance(a[key], list) and isinstance(b[key], list):
-                for idx, val in enumerate(b[key]):
+                for idx in range(len(b[key])):
                     a[key][idx] = combine_collections(
                         a[key][idx], b[key][idx], path + [str(key), str(idx)], update=update
                     )
