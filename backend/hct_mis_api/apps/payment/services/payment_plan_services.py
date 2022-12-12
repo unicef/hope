@@ -1,9 +1,9 @@
 import logging
 from decimal import Decimal
 from functools import partial
+from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
@@ -29,19 +29,20 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
-User = get_user_model()
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
 
 
 class PaymentPlanService:
-    def __init__(self, payment_plan=None):
+    def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
 
-        self.action = None
-        self.user = None
-        self.input_data = None
+        self.action: Optional[str] = None
+        self.user: Optional["User"] = None
+        self.input_data: Optional[Dict] = None
 
     @property
-    def actions_map(self) -> dict:
+    def actions_map(self) -> Dict:
         return {
             PaymentPlan.Action.LOCK.value: self.lock,
             PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
@@ -55,7 +56,7 @@ class PaymentPlanService:
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
         }
 
-    def get_business_area_required_number_by_approval_type(self):
+    def get_business_area_required_number_by_approval_type(self) -> Optional[int]:
         business_area = self.payment_plan.business_area
         approval_count_map = {
             Approval.APPROVAL: business_area.approval_number_required,
@@ -65,7 +66,7 @@ class PaymentPlanService:
         }
         return approval_count_map.get(self.get_approval_type_by_action())
 
-    def get_approval_type_by_action(self):
+    def get_approval_type_by_action(self) -> Optional[str]:
         actions_to_approval_type_map = {
             PaymentPlan.Action.APPROVE.value: Approval.APPROVAL,
             PaymentPlan.Action.AUTHORIZE.value: Approval.AUTHORIZATION,
@@ -74,7 +75,7 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map.get(self.action)
 
-    def execute_update_status_action(self, input_data: dict, user: User) -> PaymentPlan:
+    def execute_update_status_action(self, input_data: Dict, user: "User") -> PaymentPlan:
         """Get function from get_action_function and execute it
         return PaymentPlan object
         """
@@ -88,15 +89,15 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def validate_action(self):
+    def validate_action(self) -> None:
         actions = self.actions_map.keys()
         if self.action not in actions:
             raise GraphQLError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
 
-    def get_action_function(self):
+    def get_action_function(self) -> Optional[Callable]:
         return self.actions_map.get(self.action)
 
-    def send_for_approval(self):
+    def send_for_approval(self) -> PaymentPlan:
         self.payment_plan.status_send_to_approval()
         self.payment_plan.save()
         # create new ApprovalProcess
@@ -105,7 +106,7 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
-    def lock(self):
+    def lock(self) -> PaymentPlan:
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
@@ -118,7 +119,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock(self):
+    def unlock(self) -> PaymentPlan:
         self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -128,7 +129,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def lock_fsp(self):
+    def lock_fsp(self) -> PaymentPlan:
         if not self.payment_plan.delivery_mechanisms.filter(
             Q(financial_service_provider__isnull=False) | Q(delivery_mechanism__isnull=False)
         ).exists():
@@ -152,7 +153,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock_fsp(self):
+    def unlock_fsp(self) -> Optional[PaymentPlan]:
         self.payment_plan.status_unlock_fsp()
         self.payment_plan.payment_items.all().update(
             financial_service_provider=None, assigned_payment_channel=None, delivery_type=None
@@ -161,7 +162,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def acceptance_process(self):
+    def acceptance_process(self) -> Optional[PaymentPlan]:
         self.validate_payment_plan_status_to_acceptance_process_approval_type()
 
         # every time we will create Approval for first created AcceptanceProcess
@@ -188,7 +189,7 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def validate_payment_plan_status_to_acceptance_process_approval_type(self):
+    def validate_payment_plan_status_to_acceptance_process_approval_type(self) -> None:
         action_to_statuses_map = {
             PaymentPlan.Action.APPROVE.value: [PaymentPlan.Status.IN_APPROVAL],
             PaymentPlan.Action.AUTHORIZE.value: [PaymentPlan.Status.IN_AUTHORIZATION],
@@ -199,12 +200,12 @@ class PaymentPlanService:
                 PaymentPlan.Status.IN_REVIEW,
             ],
         }
-        if self.payment_plan.status not in action_to_statuses_map.get(self.action):
+        if self.payment_plan.status not in action_to_statuses_map.get(self.action, []):
             raise GraphQLError(
                 f"Not possible to create {self.action} for Payment Plan within status {self.payment_plan.status}"
             )
 
-    def validate_acceptance_process_approval_count(self, acceptance_process):
+    def validate_acceptance_process_approval_count(self, acceptance_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_business_area_required_number_by_approval_type()
         if acceptance_process.approvals.filter(type=approval_type).count() >= required_number:
@@ -212,7 +213,7 @@ class PaymentPlanService:
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
 
-    def check_payment_plan_and_update_status(self, approval_process):
+    def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_business_area_required_number_by_approval_type()
 
@@ -240,7 +241,8 @@ class PaymentPlanService:
 
             self.payment_plan.save()
 
-    def _create_payments(self, payment_plan: PaymentPlan):
+    @staticmethod
+    def _create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
         for household in payment_plan.target_population.households.all():
             try:
@@ -267,7 +269,8 @@ class PaymentPlanService:
         except IntegrityError:
             raise GraphQLError("Duplicated Households in provided Targeting")
 
-    def create(self, input_data: dict, user: User) -> PaymentPlan:
+    @staticmethod
+    def create(input_data: Dict, user: "User") -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
         if not business_area.is_payment_plan_applicable:
             raise GraphQLError("PaymentPlan can not be created in provided Business Area")
@@ -301,7 +304,7 @@ class PaymentPlanService:
             end_date=input_data["end_date"],
         )
 
-        self._create_payments(payment_plan)
+        PaymentPlanService._create_payments(payment_plan)
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
@@ -311,7 +314,7 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: dict) -> PaymentPlan:
+    def update(self, input_data: Dict) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be edited")
 
@@ -383,15 +386,15 @@ class PaymentPlanService:
         self.payment_plan.delete()
         return self.payment_plan
 
-    def export_xlsx(self, user: User) -> PaymentPlan:
+    def export_xlsx(self, user: "User") -> PaymentPlan:
         create_payment_plan_payment_list_xlsx.delay(self.payment_plan.pk, user.pk)
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user: User) -> PaymentPlan:
+    def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
         return self.payment_plan
 
-    def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
+    def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
         with transaction.atomic():
             self.payment_plan.background_action_status_xlsx_importing_reconciliation()
             self.payment_plan.save()
@@ -410,9 +413,12 @@ class PaymentPlanService:
                     file_temp.pk,
                 )
             )
-        return self.payment_plan.refresh_from_db()
+        self.payment_plan.refresh_from_db()
+        return self.payment_plan
 
-    def validate_fsps_per_delivery_mechanisms(self, dm_to_fsp_mapping, update_dms=False, update_payments=False):
+    def validate_fsps_per_delivery_mechanisms(
+        self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False
+    ) -> None:
         processed_payments = []
 
         with transaction.atomic():

@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from typing import Any
 from unittest.mock import patch
 
 from django.db.utils import IntegrityError
@@ -24,15 +25,15 @@ class TestPaymentPlanModel(TestCase):
     databases = "__all__"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-    def test_create(self):
+    def test_create(self) -> None:
         pp = PaymentPlanFactory()
         self.assertIsInstance(pp, PaymentPlan)
 
-    def test_update_population_count_fields(self):
+    def test_update_population_count_fields(self) -> None:
         pp = PaymentPlanFactory()
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -57,7 +58,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_individuals_count, 4)
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_update_money_fields(self, get_exchange_rate_mock):
+    def test_update_money_fields(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory()
         PaymentFactory(
             parent=pp,
@@ -87,7 +88,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_undelivered_quantity, 100.00)
         self.assertEqual(pp.total_undelivered_quantity_usd, 200.00)
 
-    def test_not_excluded_payments(self):
+    def test_not_excluded_payments(self) -> None:
         pp = PaymentPlanFactory()
         PaymentFactory(parent=pp, excluded=False)
         PaymentFactory(parent=pp, excluded=True)
@@ -95,7 +96,7 @@ class TestPaymentPlanModel(TestCase):
         pp.refresh_from_db()
         self.assertEqual(pp.not_excluded_payments.count(), 1)
 
-    def test_can_be_locked(self):
+    def test_can_be_locked(self) -> None:
         pp1 = PaymentPlanFactory()
         self.assertEqual(pp1.can_be_locked, False)
 
@@ -117,15 +118,15 @@ class TestPaymentModel(TestCase):
     databases = "__all__"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-    def test_create(self):
+    def test_create(self) -> None:
         p1 = PaymentFactory()
         self.assertIsInstance(p1, Payment)
 
-    def test_unique_together(self):
+    def test_unique_together(self) -> None:
         pp = PaymentPlanFactory()
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
@@ -133,7 +134,7 @@ class TestPaymentModel(TestCase):
         with self.assertRaises(IntegrityError):
             PaymentFactory(parent=pp, excluded=False, household=hh1)
 
-    def test_manager_annotations__pp_conflicts(self):
+    def test_manager_annotations__pp_conflicts(self) -> None:
         pp1 = PaymentPlanFactory()
 
         # create hard conflicted payment
@@ -191,7 +192,7 @@ class TestPaymentModel(TestCase):
             ],
         )
 
-    def test_manager_annotations__payment_channels(self):
+    def test_manager_annotations__payment_channels(self) -> None:
         pp1 = PaymentPlanFactory()
         p1 = PaymentFactory(parent=pp1, excluded=False, assigned_payment_channel=None)
 

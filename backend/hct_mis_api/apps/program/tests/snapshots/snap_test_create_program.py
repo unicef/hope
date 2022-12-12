@@ -81,7 +81,7 @@ snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
                     'line': 3
                 }
             ],
-            'message': "'AnonymousUser' object has no attribute 'email'",
+            'message': 'Permission Denied: User is not authenticated.',
             'path': [
                 'createProgram'
             ]

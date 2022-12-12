@@ -64,6 +64,8 @@ services:
   celery_worker:
     <<: *django_envs
     image: ${backend_image}
+    build:
+      context: ../backend
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
@@ -81,13 +83,13 @@ services:
     image: unicef/hct-elasticsearch
     build:
       context: ../elasticsearch
-      dockerfile: Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
       - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1

@@ -1,22 +1,26 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CashPlanNode, PaymentPlanNode } from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
 import { paymentVerificationStatusToColor } from '../../utils/utils';
+import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
+import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 interface VerificationPlansSummaryProps {
-  planNode: CashPlanNode | PaymentPlanNode;
+  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
 export function VerificationPlansSummary({
   planNode,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
-  const {status, activationDate, completionDate} = planNode.paymentVerificationSummary;
+  const {
+    status,
+    activationDate,
+    completionDate,
+  } = planNode.paymentVerificationSummary;
 
   return (
     <Grid container>

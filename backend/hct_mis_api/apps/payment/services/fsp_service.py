@@ -1,16 +1,20 @@
+from typing import TYPE_CHECKING, Dict
+
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
 )
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
 
 class FSPService:
     @staticmethod
-    def create(inputs: dict, user: User):
+    def create(inputs: Dict, user: "User") -> FinancialServiceProvider:
         fsp_xlsx_template_id = decode_id_string(inputs["fsp_xlsx_template_id"])
         fsp_xlsx_template = get_object_or_404(FinancialServiceProviderXlsxTemplate, id=fsp_xlsx_template_id)
 
@@ -28,7 +32,7 @@ class FSPService:
         return fsp
 
     @staticmethod
-    def update(fsp_id: str, inputs: dict):
+    def update(fsp_id: str, inputs: Dict) -> FinancialServiceProvider:
         fsp_xlsx_template_id = decode_id_string(inputs["fsp_xlsx_template_id"])
 
         fsp = get_object_or_404(FinancialServiceProvider, id=fsp_id)

@@ -1,2 +1,4 @@
 /generated
 Makefile
+*.isorted
+test_times.txt

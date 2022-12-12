@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_with_programs_quantity_0_with_permission 1'] = {
+snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0_with_permission 1'] = {
     'data': {
         'household': {
             'programsWithDeliveredQuantity': [
@@ -51,7 +51,7 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_w
     }
 }
 
-snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_with_programs_quantity_1_without_permission 1'] = {
+snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_1_without_permission 1'] = {
     'data': {
         'household': None
     },

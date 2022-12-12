@@ -6,18 +6,18 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useConfirmation } from '../core/ConfirmationDialog';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {
@@ -30,7 +30,7 @@ export function DeleteIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
@@ -70,11 +70,10 @@ export function DeleteIndividualGrievanceDetails({
   if (loading) return <LoadingComponent />;
   const documents = ticket.individual?.documents;
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
+    (previousValue, currentValue) => ({
+      ...previousValue,
+      [currentValue?.name]: currentValue,
+    }),
     {},
   );
 
@@ -143,7 +142,7 @@ export function DeleteIndividualGrievanceDetails({
     documents?.edges?.map((edge) => {
       const item = edge.node;
       return (
-        <Grid key={item.type.country + item.type.label} item xs={6}>
+        <Grid key={item.country + item.type.label} item xs={6}>
           <LabelizedField
             label={item.type.label.replace(/_/g, ' ')}
             value={item.documentNumber}

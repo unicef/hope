@@ -161,7 +161,6 @@ export const importedIndividualDetailed = gql`
           country
           type {
             label
-            country
           }
           documentNumber
           photo
@@ -173,7 +172,7 @@ export const importedIndividualDetailed = gql`
         node {
           id
           documentNumber
-          type
+          partner
           country
         }
       }

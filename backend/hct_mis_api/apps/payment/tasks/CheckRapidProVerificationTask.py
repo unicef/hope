@@ -1,14 +1,19 @@
 import logging
+from typing import Any, List, Optional
 
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import (
+    PaymentRecord,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
-from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
 
 
-def does_payment_record_have_right_hoh_phone_number(record):
+def does_payment_record_have_right_hoh_phone_number(record: PaymentRecord) -> bool:
     hoh = record.head_of_household
     if not hoh:
         logging.warning("Payment record has no head of household")
@@ -17,7 +22,7 @@ def does_payment_record_have_right_hoh_phone_number(record):
 
 
 class CheckRapidProVerificationTask:
-    def execute(self):
+    def execute(self) -> None:
         active_rapidpro_verifications = PaymentVerificationPlan.objects.filter(
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
@@ -28,12 +33,12 @@ class CheckRapidProVerificationTask:
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan):
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
             "payment_obj__head_of_household"
         )
         business_area = payment_verification_plan.payment_plan_obj.business_area
-
+        # FIXME: payment_verification.payment_obj.head_of_household nullable field
         payment_record_verifications_phone_number_dict = {
             str(payment_verification.payment_obj.head_of_household.phone_no): payment_verification
             for payment_verification in payment_record_verifications
@@ -47,7 +52,7 @@ class CheckRapidProVerificationTask:
         calculate_counts(payment_verification_plan)
         payment_verification_plan.save()
 
-    def _get_payment_record_verification_to_update(self, results, phone_numbers):
+    def _get_payment_record_verification_to_update(self, results: Any, phone_numbers: List[str]) -> List:
         output = []
         for rapid_pro_result in results:
             payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
@@ -58,12 +63,12 @@ class CheckRapidProVerificationTask:
         return output
 
     def _rapid_pro_results_to_payment_record_verification(
-        self, payment_record_verifications_phone_number_dict, rapid_pro_result
-    ):
+        self, payment_record_verifications_phone_number_dict: Any, rapid_pro_result: Any
+    ) -> Optional[PaymentVerification]:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")
-        if not phone_number or not is_right_phone_number_format(phone_number):
+        if not phone_number or not is_valid_phone_number(phone_number):
             return None
         payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
         if not payment_record_verification:

@@ -1,16 +1,15 @@
 import abc
+from typing import Any, Optional
 
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
-
-User = get_user_model()
 
 
 class HopeRedirect(abc.ABC):
@@ -123,8 +122,10 @@ class HopeRedirectPayment(HopeRedirect):
             return payment_verification.payment_obj.business_area.slug
         return "/"
 
-    def _get_payment_verification(self) -> PaymentVerification:
-        return PaymentRecord.objects.filter(ca_id=self.ca_id).first().verification
+    def _get_payment_verification(self) -> Optional[PaymentVerification]:
+        if payment_record := PaymentRecord.objects.filter(ca_id=self.ca_id).first():
+            return payment_record.verification
+        return None
 
 
 class HopeRedirectTargetPopulation(HopeRedirect):
@@ -149,7 +150,7 @@ class HopeRedirectDefault(HopeRedirect):
         return ""
 
 
-def get_hope_redirect(user: User, ent, ca_id="", source_id="", program_id="") -> HopeRedirect:
+def get_hope_redirect(user: User, ent: Any, ca_id: str = "", source_id: str = "", program_id: str = "") -> HopeRedirect:
     if ent == "progres_registrationgroup":
         return HopeRedirectHousehold(user, ent, ca_id, source_id, program_id)
     if ent == "progres_individual":

@@ -1,7 +1,10 @@
+from typing import IO, TYPE_CHECKING
+
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 
 import openpyxl
+from xlwt import Row
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
@@ -17,11 +20,14 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "n")
 
-    def __init__(self, payment_plan: PaymentPlan, file):
+    def __init__(self, payment_plan: PaymentPlan, file: IO) -> None:
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments
         self.file = file
@@ -37,12 +43,12 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         self.ws_payments = wb[self.TITLE]
         return wb
 
-    def validate(self):
+    def validate(self) -> None:
         self._validate_headers()
         self._validate_rows()
         self._validate_imported_file()
 
-    def import_payment_list(self):
+    def import_payment_list(self) -> None:
         exchange_rate = self.payment_plan.get_exchange_rate()
 
         for row in self.ws_payments.iter_rows(min_row=2):
@@ -54,7 +60,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self.payments_to_save, ("entitlement_quantity", "entitlement_quantity_usd", "entitlement_date")
         )
 
-    def _validate_headers(self):
+    def _validate_headers(self) -> None:
         headers_row = self.ws_payments[1]
         accepted_headers = self.HEADERS
         if len(headers_row) != len(accepted_headers):
@@ -85,7 +91,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             column += 1
 
-    def _validate_row_types(self, row):
+    def _validate_row_types(self, row: Row) -> None:
         column = 0
         for cell in row:
             if cell.value is None:
@@ -103,7 +109,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             column += 1
 
-    def _validate_payment_id(self, row):
+    def _validate_payment_id(self, row: Row) -> None:
         cell = row[self.HEADERS.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
@@ -114,7 +120,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             )
 
-    def _validate_entitlement(self, row):
+    def _validate_entitlement(self, row: Row) -> None:
         payment_id = row[self.HEADERS.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
@@ -125,7 +131,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             if entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 
-    def _validate_payment_channel(self, row):
+    def _validate_payment_channel(self, row: Row) -> None:
         payment_id = row[self.HEADERS.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
@@ -169,7 +175,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             if not payment.collector.payment_channels.exists() and payment_channel:
                 self.is_updated = True
 
-    def _validate_imported_file(self):
+    def _validate_imported_file(self) -> None:
         if not self.is_updated:
             self.errors.append(
                 (
@@ -179,7 +185,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             )
 
-    def _validate_rows(self):
+    def _validate_rows(self) -> None:
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
@@ -188,7 +194,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_entitlement(row)
             self._validate_payment_channel(row)
 
-    def _import_row(self, row, exchange_rate):
+    def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.HEADERS.index("payment_id")].value
         entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
 
@@ -225,7 +231,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
                 self.payments_to_save.append(payment)
 
-    def create_import_xlsx_file(self, user):
+    def create_import_xlsx_file(self, user: "User") -> None:
         # remove old imported file
         self.payment_plan.remove_imported_file()
 

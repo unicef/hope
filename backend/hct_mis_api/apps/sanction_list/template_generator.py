@@ -12,7 +12,7 @@ class TemplateFileGenerator:
     )
 
     @classmethod
-    def get_template_file(cls):
+    def get_template_file(cls) -> Workbook:
         wb = Workbook()
         ws = wb.active
         ws.title = "Sanction List Check"

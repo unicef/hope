@@ -1,4 +1,6 @@
+from argparse import ArgumentParser
 from datetime import timedelta
+from typing import Any, Tuple
 
 from django.core.management import BaseCommand
 from django.utils import timezone
@@ -31,7 +33,7 @@ from hct_mis_api.apps.targeting.models import (
 faker = Faker()
 
 
-def create_household_with_individual(address):
+def create_household_with_individual(address: str) -> Tuple[Household, Individual]:
     now = timezone.now()
     delta_20_years = timedelta(days=365 * 20)
     afghanistan = BusinessArea.objects.get(name="Afghanistan")
@@ -69,7 +71,7 @@ def create_household_with_individual(address):
     return hh, hh.head_of_household
 
 
-def create_household_with_individual_for_payment_plan(address):
+def create_household_with_individual_for_payment_plan(address: str) -> None:
     hh, ind = create_household_with_individual(address)
     IndividualRoleInHousehold.objects.create(
         role=ROLE_PRIMARY,
@@ -82,12 +84,12 @@ def create_household_with_individual_for_payment_plan(address):
     )
 
 
-def init_targeting(seed):
+def init_targeting(seed: str) -> None:
     create_household_with_individual(address=f"TargetingVille-{seed}")
     ProgramFactory(name=f"TargetingProgram-{seed}", status=Program.ACTIVE)
 
 
-def init_payment_plan(seed):
+def init_payment_plan(seed: str) -> None:
     afghanistan = BusinessArea.objects.get(name="Afghanistan")
     addresses = [f"PaymentPlanVille-{seed}-1", f"PaymentPlanVille-{seed}-2", f"PaymentPlanVille-{seed}-3"]
     root = User.objects.get(username="root")
@@ -140,7 +142,7 @@ def init_payment_plan(seed):
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "scenario",
             action="store",
@@ -155,6 +157,6 @@ class Command(BaseCommand):
             type=int,
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         print("Initializing scenario with options:", {k: v for k, v in options.items() if k in ["scenario", "seed"]})
         {"targeting": init_targeting, "payment_plan": init_payment_plan}[options["scenario"]](options["seed"])

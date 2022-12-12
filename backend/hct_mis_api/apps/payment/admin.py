@@ -1,14 +1,16 @@
+from typing import TYPE_CHECKING, Any, Dict, Optional
+
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
@@ -35,6 +37,11 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.forms import Form
 
 
 @admin.register(PaymentRecord)
@@ -68,15 +75,15 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "service_provider",
     )
 
-    def cash_plan_name(self, obj):
+    def cash_plan_name(self, obj: Any) -> str:
         return obj.parent.name
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
 
 
 @admin.register(PaymentVerificationPlan)
-class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     # TODO: fix filtering
     list_display = ("payment_plan_obj", "status", "verification_channel")
     list_filter = (
@@ -90,13 +97,13 @@ class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEMo
     raw_id_fields = ("payment_plan",)
 
     @button()
-    def verifications(self, request, pk):
+    def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         list_url = reverse("admin:payment_paymentverification_changelist")
         url = f"{list_url}?payment_verification_plan__exact={pk}"
         return HttpResponseRedirect(url)
 
     @button()
-    def execute_sync_rapid_pro(self, request):
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:  # type: ignore
         if request.method == "POST":
             from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
                 CheckRapidProVerificationTask,
@@ -119,7 +126,7 @@ class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEMo
                 template="admin_extra_buttons/confirm.html",
             )
 
-    def activate(self, request, pk):
+    def activate(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         return confirm_action(
             self,
             request,
@@ -145,15 +152,15 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_verification_plan",)
 
-    def payment_plan_name(self, obj):
+    def payment_plan_name(self, obj: Any) -> str:
         payment_plan = obj.payment_verification_plan.payment_plan_obj
         return getattr(payment_plan, "name", "~no name~")
 
-    def household(self, obj):
+    def household(self, obj: Any) -> str:
         payment = obj.payment_obj
         return payment.household.unicef_id if payment else ""
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -171,10 +178,11 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+    autocomplete_fields = ("business_area",)
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class CashPlanAdmin(HOPEModelAdminBase):
     list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
@@ -187,11 +195,11 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)
 
-    def verification_status(self, obj):
+    def verification_status(self, obj: Any) -> Optional[str]:
         return obj.get_payment_verification_summary.status if obj.get_payment_verification_summary else None
 
     @button()
-    def payments(self, request, pk):
+    def payments(self, request: HttpRequest, pk: str) -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/cashplan/payments.html", context)
@@ -234,7 +242,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "financial_service_provider",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")
 
 
@@ -247,7 +255,7 @@ class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
 class PaymentChannelAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism_display_name")
 
-    def delivery_mechanism_display_name(self, obj):
+    def delivery_mechanism_display_name(self, obj: Any) -> str:
         return obj.delivery_mechanism
 
 
@@ -265,12 +273,14 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         "columns",
     )
 
-    def total_selected_columns(self, obj):
+    def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
 
     total_selected_columns.short_description = "# of columns"
 
-    def save_model(self, request, obj: FinancialServiceProviderXlsxTemplate, form, change: bool) -> None:
+    def save_model(
+        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+    ) -> None:
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
@@ -289,7 +299,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             delivery_mechanisms__financial_service_provider=obj,
         ).distinct()
 
-    def clean(self):
+    def clean(self) -> Optional[Dict[str, Any]]:
         if self.instance:
             payment_plans = self.locked_payment_plans_for_fsp(self.instance)
             if payment_plans.exists():
@@ -322,7 +332,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("data_transfer_configuration",),
     )
 
-    def save_model(self, request, obj: FinancialServiceProvider, form, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: FinancialServiceProvider, form: "Form", change: bool) -> None:
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
@@ -336,10 +346,10 @@ class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
     # search_fields = ("id",)
     readonly_fields = ("file", "status", "financial_service_provider")
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
 

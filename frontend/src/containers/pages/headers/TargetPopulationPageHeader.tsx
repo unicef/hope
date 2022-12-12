@@ -6,12 +6,9 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
 import {
-  targetPopulationBuildStatusToColor,
-  targetPopulationStatusMapping,
-  targetPopulationStatusToColor,
-} from '../../../utils/utils';
-import {
+  TargetPopulationBuildStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
   useBusinessAreaDataQuery,
@@ -35,7 +32,6 @@ const StatusWrapper = styled.div`
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  setEditState: Function;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   canEdit: boolean;
   canRemove: boolean;
@@ -47,7 +43,6 @@ export interface ProgramDetailsPageHeaderPropTypes {
 
 export const TargetPopulationPageHeader = ({
   targetPopulation,
-  setEditState,
   canEdit,
   canRemove,
   canDuplicate,
@@ -80,7 +75,6 @@ export const TargetPopulationPageHeader = ({
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
-          setEditState={setEditState}
           canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}
@@ -119,17 +113,15 @@ export const TargetPopulationPageHeader = ({
         title={
           <HeaderWrapper>
             {t(`${targetPopulation.name}`)}
-            <StatusWrapper>
-              <StatusBox
-                status={targetPopulation.status}
-                statusToColor={targetPopulationStatusToColor}
-                statusNameMapping={targetPopulationStatusMapping}
-              />
-              <StatusBox
-                status={targetPopulation.buildStatus}
-                statusToColor={targetPopulationBuildStatusToColor}
-              />
-            </StatusWrapper>
+            {targetPopulation.buildStatus !==
+              TargetPopulationBuildStatus.Ok && (
+              <StatusWrapper>
+                <StatusBox
+                  status={targetPopulation.buildStatus}
+                  statusToColor={targetPopulationBuildStatusToColor}
+                />
+              </StatusWrapper>
+            )}
           </HeaderWrapper>
         }
         breadCrumbs={breadCrumbsItems}

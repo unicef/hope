@@ -2,14 +2,14 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from time import sleep
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type
 
-from django.db.models import CharField, F, Q, Value
+from django.db import transaction
+from django.db.models import CharField, F, Q, QuerySet, Value
 from django.db.models.functions import Concat
 
 from constance import config
 from django_countries.fields import Country
-from elasticsearch_dsl import connections
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -19,8 +19,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.documents import IndividualDocument
-from hct_mis_api.apps.household.elasticsearch_utils import populate_index
+from hct_mis_api.apps.household.documents import IndividualDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -32,9 +31,14 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    populate_index,
+    wait_until_es_healthy,
+)
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)
 
@@ -50,12 +54,12 @@ class Thresholds:
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE: int = 0
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         for f in fields(self):
             setattr(self, f.name, getattr(config, f.name))
 
     @classmethod
-    def from_business_area(cls, ba):
+    def from_business_area(cls, ba: BusinessArea) -> "Thresholds":
         t = cls()
         for f in fields(cls):
             setattr(t, f.name, getattr(ba, f.name.lower()))
@@ -71,10 +75,10 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
     business_area = None
-    thresholds: Thresholds = None
+    thresholds: Optional[Thresholds] = None
 
     @classmethod
-    def _prepare_query_dict(cls, individual, fields, min_score):
+    def _prepare_query_dict(cls, individual: Individual, fields: Dict, min_score: int) -> Dict[str, Any]:
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -131,7 +135,7 @@ class DeduplicateTask:
         return query_dict
 
     @classmethod
-    def _prepare_queries_for_names_from_fields(cls, fields):
+    def _prepare_queries_for_names_from_fields(cls, fields: Dict) -> List[Dict]:
         given_name = fields.pop("given_name")
         family_name = fields.pop("family_name")
         full_name = fields.pop("full_name")
@@ -140,35 +144,38 @@ class DeduplicateTask:
         return cls._prepare_queries_for_names(given_name, family_name, full_name)
 
     @classmethod
-    def _prepare_households_and_roles_queries_from_fields(cls, fields):
+    def _prepare_households_and_roles_queries_from_fields(cls, fields: Dict) -> List[Dict[Any, Any]]:
         households_and_roles = fields.pop("households_and_roles", [])
         households_and_roles_queries = cls._prepare_households_and_roles_queries(households_and_roles)
         return households_and_roles_queries
 
     @classmethod
-    def _prepare_identities_queries_from_fields(cls, fields):
+    def _prepare_identities_queries_from_fields(cls, fields: Dict) -> List[Dict]:
         identities = fields.pop("identities", [])
         identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
         return identities_queries
 
     @classmethod
-    def _prepare_documents_queries_from_fields(cls, fields):
+    def _prepare_documents_queries_from_fields(cls, fields: Dict) -> List[Dict]:
         documents = fields.pop("documents", [])
         documents_queries = cls._prepare_identities_or_documents_query(documents, "document")
         return documents_queries
 
     @staticmethod
-    def _prepare_fields(individual, fields_names, dict_fields):
+    def _prepare_fields(
+        individual: List[Individual], fields_names: List[str], dict_fields: List[Any]
+    ) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
         if not isinstance(fields["phone_no_alternative"], str):
             fields["phone_no_alternative"] = fields["phone_no_alternative"].raw_input
-
         return fields
 
     @classmethod
-    def _prepare_households_and_roles_queries(cls, households_and_roles):
+    def _prepare_households_and_roles_queries(
+        cls, households_and_roles: List[Dict]
+    ) -> List[Dict[str, Dict[str, object]]]:
         """
         Not needed
         Not working
@@ -195,7 +202,7 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_household_query(cls, household_data):
+    def _prepare_household_query(cls, household_data: Dict) -> List[Dict[str, Dict[Any, Dict[str, Any]]]]:
         queries = []
         important_fields = (
             "address",
@@ -237,13 +244,10 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_identities_or_documents_query(cls, data, data_type):
+    def _prepare_identities_or_documents_query(cls, data: Dict, data_type: str) -> List[Dict]:
         queries = []
-        document_type_key = "type"
+        document_type_key = "partner" if data_type.lower() == "identity" else "type"
         prefix = "identities" if data_type.lower() == "identity" else "documents"
-
-        if data_type.lower() == "identity":
-            document_type_key = "agency"
 
         for item in data:
             doc_number = item.get("document_number") or item.get("number")
@@ -278,7 +282,7 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_queries_for_names(cls, given_name, family_name, full_name):
+    def _prepare_queries_for_names(cls, given_name: str, family_name: str, full_name: str) -> List[Dict]:
         """
         prepares ES queries for
         * givenName
@@ -315,7 +319,7 @@ class DeduplicateTask:
         return [max_from_should_and_must]
 
     @classmethod
-    def _get_complex_query_for_name(cls, name, field_name):
+    def _get_complex_query_for_name(cls, name: str, field_name: str) -> Dict:
         name_phonetic_query_dict = {"match": {f"{field_name}.phonetic": {"query": name}}}
         # phonetic analyzer not working with fuzziness
         name_fuzzy_query_dict = {
@@ -332,13 +336,12 @@ class DeduplicateTask:
         # choose max from fuzzy and phonetic
         # phonetic score === 0 or 1
         # fuzzy score <=1 changes if there is need make change
-        name_complex_query = {
-            "dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}
-        }
-        return name_complex_query
+        return {"dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}}
 
     @classmethod
-    def _get_duplicates_tuple(cls, query_dict, duplicate_score, document, individual):
+    def _get_duplicates_tuple(
+        cls, query_dict: Dict, duplicate_score: int, document: Type[IndividualDocument], individual: Individual
+    ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         duplicates = []
         possible_duplicates = []
         original_individuals_ids_duplicates = []
@@ -371,7 +374,7 @@ class DeduplicateTask:
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
                 results_data["duplicates"].append(results_core_data)
-            elif document == IndividualDocument:
+            elif document == get_individual_doc(individual.registration_data_import.business_area):
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
@@ -387,25 +390,9 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _wait_until_health_green(cls):
-        ok = False
-        while not ok:
-            health = connections.get_connection().cluster.health()
-            ok = (
-                health.get("status") == "green"
-                and not health.get("timed_out")
-                and health.get("number_of_pending_tasks") == 0
-            )
-            log.info(
-                f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')} "
-                f"number of pending tasks:{health.get('number_of_pending_tasks')}"
-            )
-            if ok:
-                break
-            sleep(5)
-
-    @classmethod
-    def deduplicate_single_imported_individual(cls, individual):
+    def deduplicate_single_imported_individual(
+        cls, individual: Individual
+    ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         fields_names = (
             "given_name",
             "full_name",
@@ -418,8 +405,8 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "type.country"),
-            "identities": ("document_number", "agency.type"),
+            "documents": ("document_number", "type.type", "country"),
+            "identities": ("document_number", "partner.name"),
             "household": (
                 "residence_status",
                 "country_origin",
@@ -473,12 +460,12 @@ class DeduplicateTask:
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            ImportedIndividualDocument,
+            get_imported_individual_doc(individual.registration_data_import.business_area),
             individual,
         )
 
     @classmethod
-    def deduplicate_single_individual(cls, individual):
+    def deduplicate_single_individual(cls, individual: Individual) -> Tuple[List, List, List, List, Dict[str, Any]]:
         fields_names = (
             "given_name",
             "full_name",
@@ -491,8 +478,8 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "type.country"),
-            "identities": ("number", "agency.type"),
+            "documents": ("document_number", "type.type", "country"),
+            "identities": ("number", "partner.name"),
             "household": (
                 "residence_status",
                 "country_origin",
@@ -542,17 +529,21 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"business_area": cls.business_area.slug}},
         ]
+
+        if isinstance(individual, ImportedIndividual):
+            document = get_individual_doc(individual.registration_data_import.business_area)
+        else:
+            document = get_individual_doc(individual.registration_data_import.business_area.slug)
+
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            IndividualDocument,
+            document,
             individual,
         )
 
     @classmethod
-    def _get_duplicated_individuals(cls, registration_data_import, individuals):
-        if individuals is None:
-            individuals = Individual.objects.filter(registration_data_import=registration_data_import)
+    def _get_duplicated_individuals(cls, individuals: QuerySet[Individual]) -> Tuple:
         all_duplicates = []
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
@@ -584,12 +575,13 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals(cls, registration_data_import, individuals=None):
-        cls._wait_until_health_green()
-        if registration_data_import:
-            cls.set_thresholds(registration_data_import.business_area)
-        else:
-            cls.set_thresholds(individuals[0].business_area)
+    @transaction.atomic
+    def deduplicate_individuals(cls, registration_data_import: RegistrationDataImport) -> None:
+        wait_until_es_healthy()
+        cls.set_thresholds(registration_data_import.business_area)
+        individuals = evaluate_qs(
+            Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
+        )
 
         (
             all_duplicates,
@@ -597,7 +589,8 @@ class DeduplicateTask:
             all_original_individuals_ids_duplicates,
             all_original_individuals_ids_possible_duplicates,
             to_bulk_update_results,
-        ) = cls._get_duplicated_individuals(registration_data_import, individuals)
+        ) = cls._get_duplicated_individuals(individuals)
+
         cls._mark_individuals(
             all_duplicates,
             all_possible_duplicates,
@@ -607,10 +600,14 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
-        cls._wait_until_health_green()
-        cls.set_thresholds(individuals[0].business_area)
-        # cls.business_area = individuals[0].business_area
+    @transaction.atomic
+    def deduplicate_individuals_from_other_source(
+        cls, individuals: QuerySet[Individual], business_area: BusinessArea
+    ) -> None:
+        wait_until_es_healthy()
+        cls.set_thresholds(business_area)
+
+        evaluate_qs(individuals.select_for_update())
 
         to_bulk_update_results = []
         for individual in individuals:
@@ -637,12 +634,12 @@ class DeduplicateTask:
 
     @staticmethod
     def _mark_individuals(
-        all_duplicates,
-        all_possible_duplicates,
-        to_bulk_update_results,
-        all_original_individuals_ids_duplicates,
-        all_original_individuals_ids_possible_duplicates,
-    ):
+        all_duplicates: List[Individual],
+        all_possible_duplicates: List[Individual],
+        to_bulk_update_results: List,
+        all_original_individuals_ids_duplicates: List[Individual],
+        all_original_individuals_ids_possible_duplicates: List[Individual],
+    ) -> None:
         Individual.objects.filter(
             id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
@@ -657,7 +654,7 @@ class DeduplicateTask:
         )
 
     @staticmethod
-    def set_error_message_and_status(registration_data_import, message):
+    def set_error_message_and_status(registration_data_import: RegistrationDataImport, message: str) -> None:
         old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
         registration_data_import.error_message = message
         registration_data_import.status = RegistrationDataImport.DEDUPLICATION_FAILED
@@ -667,20 +664,22 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def set_thresholds(cls, business_area: BusinessArea):
+    def set_thresholds(cls, business_area: BusinessArea) -> None:
         cls.business_area = business_area
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
     @classmethod
-    def deduplicate_imported_individuals(cls, registration_data_import_datahub):
+    def deduplicate_imported_individuals(cls, registration_data_import_datahub: RegistrationDataImport) -> None:
         business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
         cls.set_thresholds(business_area)
 
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
-        populate_index(imported_individuals, ImportedIndividualDocument)
-        cls._wait_until_health_green()
+
+        populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
+
+        wait_until_es_healthy()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
             (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
@@ -704,6 +703,7 @@ class DeduplicateTask:
                 _,
                 results_data_imported,
             ) = cls.deduplicate_single_imported_individual(imported_individual)
+
             imported_individual.deduplication_batch_results = results_data_imported
             post_process_dedupe_results(imported_individual)
 
@@ -826,8 +826,15 @@ class DeduplicateTask:
             )
 
     @classmethod
-    def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_to_dedup = [x for x in new_documents if x.status != Document.STATUS_VALID]
+    @transaction.atomic
+    def hard_deduplicate_documents(
+        cls, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
+    ) -> None:
+        documents_to_dedup = evaluate_qs(
+            new_documents.exclude(status=Document.STATUS_VALID)
+            .select_related("individual")
+            .select_for_update(of=("self", "individual"))
+        )
         documents_numbers = [x.document_number for x in documents_to_dedup]
         new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [
@@ -843,8 +850,10 @@ class DeduplicateTask:
         already_processed_signatures = []
         ticket_data_dict = {}
         possible_duplicates_individuals_id_set = set()
+
         for new_document in documents_to_dedup:
             new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
+
             if new_document_signature in all_matching_number_documents_signatures:
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data = ticket_data_dict.get(
@@ -855,6 +864,7 @@ class DeduplicateTask:
                 ticket_data_dict[new_document_signature] = ticket_data
                 possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
                 continue
+
             if (
                 new_document_signature in new_document_signatures_duplicated_in_batch
                 and new_document_signature in already_processed_signatures
@@ -863,6 +873,7 @@ class DeduplicateTask:
                 ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
                 possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
                 continue
+
             new_document.status = Document.STATUS_VALID
             already_processed_signatures.append(new_document_signature)
 
@@ -882,6 +893,7 @@ class DeduplicateTask:
                 f"new_document_signatures_duplicated_in_batch: {new_document_signatures_duplicated_in_batch}"
             )
             raise
+
         PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
         possible_duplicates_through_existing_list = (
             PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
@@ -892,10 +904,12 @@ class DeduplicateTask:
                 "ticketneedsadjudicationdetails__golden_records_individual",
             )
         )
+
         possible_duplicates_through_dict = defaultdict(set)
         for (ticked_details_id, individual_id, main_individual_id) in possible_duplicates_through_existing_list:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
+
         ticket_data_collected = []
         for ticket_data in ticket_data_dict.values():
             prepared_ticket = cls.prepare_grievance_ticket_documents_deduplication(
@@ -908,6 +922,7 @@ class DeduplicateTask:
             if prepared_ticket is None:
                 continue
             ticket_data_collected.append(prepared_ticket)
+
         GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
         TicketNeedsAdjudicationDetails.objects.bulk_create([x.ticket_details for x in ticket_data_collected])
         # makes flat list from list of lists models
@@ -916,13 +931,15 @@ class DeduplicateTask:
         )
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
 
+    @classmethod
     def prepare_grievance_ticket_documents_deduplication(
-        main_individual,
-        possible_duplicates_individuals,
-        business_area,
-        registration_data_import,
-        possible_duplicates_through_dict,
-    ):
+        cls,
+        main_individual: Individual,
+        possible_duplicates_individuals: List[Individual],
+        business_area: BusinessArea,
+        registration_data_import: RegistrationDataImport,
+        possible_duplicates_through_dict: Dict,
+    ) -> Optional[NamedTuple]:
         from hct_mis_api.apps.grievance.models import (
             GrievanceTicket,
             TicketNeedsAdjudicationDetails,

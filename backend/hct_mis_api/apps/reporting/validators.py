@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from django.core.exceptions import ValidationError
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ReportValidator(CommonValidator):
-    VALID_FILTERS = {
+    VALID_FILTERS: Dict[int, List[str]] = {
         Report.INDIVIDUALS: ["admin_area"],
         Report.HOUSEHOLD_DEMOGRAPHICS: ["admin_area"],
         Report.CASH_PLAN_VERIFICATION: ["program"],
@@ -23,7 +24,7 @@ class ReportValidator(CommonValidator):
     }
 
     @classmethod
-    def validate_report_type_filters(cls, *args, **kwargs):
+    def validate_report_type_filters(cls, *args: Any, **kwargs: Any) -> None:
         report_data = kwargs.get("report_data")
         report_type = report_data.get("report_type")
         if report_type not in dict(Report.REPORT_TYPES):

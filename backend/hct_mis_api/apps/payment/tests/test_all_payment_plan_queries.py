@@ -120,7 +120,7 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
@@ -204,14 +204,14 @@ class TestPaymentPlanQueries(APITestCase):
                 cls.pp_conflicted.update_population_count_fields()
                 cls.pp_conflicted.update_money_fields()
 
-    def test_fetch_payment_plan_status_choices(self):
+    def test_fetch_payment_plan_status_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_STATUS_CHOICES_QUERY,
             context={"user": self.user},
         )
 
     @freeze_time("2020-10-10")
-    def test_fetch_all_payment_plans(self):
+    def test_fetch_all_payment_plans(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_QUERY,
             context={"user": self.user},
@@ -221,7 +221,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
     @freeze_time("2020-10-10")
-    def test_fetch_all_payment_plans_filters(self):
+    def test_fetch_all_payment_plans_filters(self) -> None:
         for filter_data in [
             {"search": self.pp.unicef_id},
             {"status": self.pp.status},
@@ -241,7 +241,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
 
     @freeze_time("2020-10-10")
-    def test_fetch_all_payments_for_open_payment_plan(self):
+    def test_fetch_all_payments_for_open_payment_plan(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENTS_QUERY,
             context={"user": self.user},
@@ -249,7 +249,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
     @freeze_time("2020-10-10")
-    def test_fetch_all_payments_for_locked_payment_plan(self):
+    def test_fetch_all_payments_for_locked_payment_plan(self) -> None:
         """Conflicting payment are excluded"""
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENTS_QUERY,

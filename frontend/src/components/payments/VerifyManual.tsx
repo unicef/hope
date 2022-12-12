@@ -88,9 +88,7 @@ export function VerifyManual({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Verify Payment')}
-              </DialogTitle>
+              <DialogTitle>{t('Verify Payment')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>

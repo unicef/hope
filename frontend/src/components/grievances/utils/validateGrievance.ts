@@ -125,7 +125,8 @@ export function validate(
       if (values.individualDataUpdateFieldsIdentities?.length) {
         values.individualDataUpdateFieldsIdentities.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsIdentities[index];
-          if (!doc.country || !doc.agency || !doc.number) {
+          const partner = doc.partner || doc.agency; // For backward compatibility
+          if (!doc.country || !partner || !doc.number) {
             errors.individualDataUpdateFieldsIdentities =
               'Identity country, agency and number are required';
           }
@@ -136,7 +137,8 @@ export function validate(
           (el, index) => {
             const doc =
               values.individualDataUpdateFieldsIdentitiesToEdit[index];
-            if (!doc.country || !doc.agency || !doc.number) {
+            const partner = doc.partner || doc.agency; // For backward compatibility
+            if (!doc.country || !partner || !doc.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity country, agency and number are required';
             }

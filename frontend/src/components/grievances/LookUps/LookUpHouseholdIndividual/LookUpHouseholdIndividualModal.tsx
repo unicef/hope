@@ -23,6 +23,7 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { TabPanel } from '../../../core/TabPanel';
 import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
@@ -61,7 +62,7 @@ export const LookUpHouseholdIndividualModal = ({
     programs: [],
     lastRegistrationDate: { min: undefined, max: undefined },
     residenceStatus: '',
-    size: { min: undefined, max: undefined },
+    size: { min: '', max: '' },
     admin2: null,
   };
   const [filterHouseholdApplied, setFilterHouseholdApplied] = useState(
@@ -78,6 +79,7 @@ export const LookUpHouseholdIndividualModal = ({
     status: '',
     admin2: null,
     sex: '',
+    household: null,
   };
   const [filterIndividualApplied, setFilterIndividualApplied] = useState(
     individualFilterInitial,
@@ -97,7 +99,8 @@ export const LookUpHouseholdIndividualModal = ({
   } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
   });
-  if (loading || choicesLoading) return null;
+  if (!data || !choicesData) return null;
+  if (loading || choicesLoading) return <LoadingComponent />;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
@@ -154,7 +157,7 @@ export const LookUpHouseholdIndividualModal = ({
         >
           {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
+            <DialogTitle>
               <StyledTabs
                 value={selectedTab}
                 onChange={(event: React.ChangeEvent<{}>, newValue: number) => {

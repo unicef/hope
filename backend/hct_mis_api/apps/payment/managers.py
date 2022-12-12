@@ -8,6 +8,7 @@ from django.db.models import (
     JSONField,
     OuterRef,
     Q,
+    QuerySet,
     Subquery,
     Value,
     When,
@@ -22,10 +23,10 @@ class ArraySubquery(Subquery):
 
 
 class PaymentQuerySet(SoftDeletableQuerySet):
-    def with_payment_plan_conflicts(self):
+    def with_payment_plan_conflicts(self) -> QuerySet:
         from hct_mis_api.apps.payment.models import PaymentPlan
 
-        def _annotate_conflict_data(qs):
+        def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
             return qs.annotate(
                 formatted_pp_start_date=Func(
                     F("parent__start_date"),
@@ -93,7 +94,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             payment_plan_soft_conflicted_data=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
         )
 
-    def with_payment_channels(self):
+    def with_payment_channels(self) -> QuerySet:
         from hct_mis_api.apps.payment.models import PaymentChannel
 
         return self.select_related("assigned_payment_channel", "collector", "financial_service_provider").annotate(
@@ -110,5 +111,5 @@ class PaymentManager(SoftDeletableManager):
     _queryset_class = PaymentQuerySet
     use_for_related_fields = True
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return super().get_queryset().with_payment_plan_conflicts().with_payment_channels()

@@ -49,9 +49,7 @@ export const ViewSanctionList = ({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Sanction List View')}
-          </DialogTitle>
+          <DialogTitle>{t('Sanction List View')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mb={3}>

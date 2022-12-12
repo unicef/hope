@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal
+from typing import Any, Optional
 
 from django.db.models import Q
 
@@ -9,7 +10,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 logger = logging.getLogger(__name__)
 
 
-def fix_exchange_rates(all=None):
+def fix_exchange_rates(all: Optional[Any] = None) -> None:
 
     all_payment_records = PaymentRecord.objects.all()
     if not all:

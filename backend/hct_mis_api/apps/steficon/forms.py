@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+from typing import Any, Dict, List, Optional, Type
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -9,14 +10,14 @@ from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
 from .config import config
-from .interpreters import mapping
+from .interpreters import Interpreter, mapping
 from .models import Rule
 from .widget import ContentTypeChoiceField, PythonEditor
 
 logger = logging.getLogger(__name__)
 
 
-def format_code(code):
+def format_code(code: str) -> str:
     try:
         import black
 
@@ -62,7 +63,7 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
     )
     background = forms.BooleanField(label="Run in background", required=False)
 
-    def clean_results(self):
+    def clean_results(self) -> Dict:
         try:
             return self.cleaned_data["results"].split(",")
         except Exception as e:
@@ -71,21 +72,22 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     filename = forms.CharField(label="Output filename")
-    data = forms.CharField(widget=Textarea({"hidden": ""}))
-    fields = forms.CharField(widget=HiddenInput)
+    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # TODO: 'data' is an internal field
+    fields = forms.CharField(widget=HiddenInput)  # type: ignore # TODO: 'fields' is an internal field
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
-            self.fields[fname].widget = HiddenInput()
+            # TODO: fields is CharField but used as dict?
+            self.fields[fname].widget = HiddenInput()  # type: ignore
 
-    def clean_fields(self):
+    def clean_fields(self) -> Optional[List]:
         try:
             return self.cleaned_data["fields"].split(",")
         except Exception as e:
             raise ValidationError(e)
 
-    def clean_data(self):
+    def clean_data(self) -> Optional[Dict]:
         try:
             return json.loads(self.cleaned_data["data"])
         except Exception as e:
@@ -96,16 +98,16 @@ class TPModelChoiceField(forms.ModelChoiceField):
     def __init__(
         self,
         *,
-        empty_label="---------",
-        required=True,
-        widget=None,
-        label=None,
-        initial=None,
-        help_text="",
-        to_field_name=None,
-        limit_choices_to=None,
-        **kwargs,
-    ):
+        empty_label: str = "---------",
+        required: bool = True,
+        widget: Optional[Any] = None,
+        label: Optional[Any] = None,
+        initial: Optional[Any] = None,
+        help_text: str = "",
+        to_field_name: Optional[str] = None,
+        limit_choices_to: Optional[int] = None,
+        **kwargs: Any,
+    ) -> None:
         from hct_mis_api.apps.targeting.models import TargetPopulation
 
         queryset = TargetPopulation.objects.all()
@@ -122,7 +124,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj):
+    def label_from_instance(self, obj: Any) -> str:
         if obj and obj.business_area:
             return f"{obj.name} ({obj.business_area.name})"
         elif obj.name:
@@ -139,13 +141,13 @@ class RuleTestForm(forms.Form):
     target_population = TPModelChoiceField(required=False)
 
     @property
-    def media(self):
+    def media(self) -> Media:
         media = Media()
         for field in self.fields.values():
             media = media + field.widget.media
         return media
 
-    def clean_raw_data(self):
+    def clean_raw_data(self) -> Optional[Dict]:  # type: ignore
         original = self.cleaned_data["raw_data"]
         if original:
             try:
@@ -153,7 +155,7 @@ class RuleTestForm(forms.Form):
             except Exception as e:
                 raise ValidationError(e)
 
-    def clean_file(self):
+    def clean_file(self) -> Optional[Dict]:  # type: ignore
         original = self.cleaned_data["file"]
         if original:
             try:
@@ -161,7 +163,7 @@ class RuleTestForm(forms.Form):
             except Exception as e:
                 raise ValidationError(e)
 
-    def clean(self):
+    def clean(self) -> None:
         selection = self.cleaned_data["opt"]
         if selection == "optFile":
             if not self.cleaned_data.get("file"):
@@ -190,11 +192,12 @@ class RuleForm(forms.ModelForm):
         model = Rule
         exclude = ("updated_by", "created_by")
 
-    def clean(self):
+    def clean(self) -> Optional[Dict]:
         self._validate_unique = True
         code = self.cleaned_data.get("definition", "")
         language = self.cleaned_data["language"]
-        i = mapping[language](code)
+        interpreter: Type[Interpreter] = mapping[language]
+        i: Interpreter = interpreter(code)
         try:
             i.validate()
         except Exception as e:
