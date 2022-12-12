@@ -36,6 +36,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         )
 
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
+        super().setUpTestData()
 
     def test_execute_correct_data(self):
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")

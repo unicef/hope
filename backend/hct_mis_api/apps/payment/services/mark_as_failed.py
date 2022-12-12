@@ -3,14 +3,14 @@ from django.db.models import Sum
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def mark_as_failed(payment_record: PaymentRecord):
+def mark_as_failed(payment_record: PaymentRecord) -> None:
     payment_record.mark_as_failed()
     payment_record.save()
 
     recalculate_cash_received(payment_record.household)
 
 
-def recalculate_cash_received(household):
+def recalculate_cash_received(household) -> None:
     aggregated_delivered_quantity = household.payment_records.exclude(
         status=PaymentRecord.STATUS_FORCE_FAILED
     ).aggregate(

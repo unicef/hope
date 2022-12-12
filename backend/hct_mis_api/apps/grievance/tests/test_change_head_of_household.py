@@ -13,7 +13,12 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import AUNT_UNCLE, BROTHER_SISTER, HEAD
+from hct_mis_api.apps.household.models import (
+    AUNT_UNCLE,
+    BROTHER_SISTER,
+    HEAD,
+    Individual,
+)
 
 
 class TestChangeHeadOfHousehold(APITestCase):
@@ -46,8 +51,8 @@ class TestChangeHeadOfHousehold(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
 
-        cls.individual1 = IndividualFactory(household=cls.household)
-        cls.individual2 = IndividualFactory(household=cls.household)
+        cls.individual1: Individual = IndividualFactory(household=cls.household)
+        cls.individual2: Individual = IndividualFactory(household=cls.household)
         cls.individual1.relationship = HEAD
         cls.individual2.relationship = BROTHER_SISTER
         cls.individual1.save()
@@ -90,6 +95,7 @@ class TestChangeHeadOfHousehold(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 
@@ -104,7 +110,7 @@ class TestChangeHeadOfHousehold(APITestCase):
         self.household.head_of_household = self.individual1
         self.household.save()
 
-        self.graphql_request(
+        response = self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
             variables={
@@ -112,6 +118,7 @@ class TestChangeHeadOfHousehold(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+        self.assertFalse("errors" in response)
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 

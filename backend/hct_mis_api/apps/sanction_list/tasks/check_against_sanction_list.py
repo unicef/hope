@@ -19,7 +19,7 @@ from hct_mis_api.apps.sanction_list.models import (
 
 
 class CheckAgainstSanctionListTask:
-    def execute(self, uploaded_file_id, original_file_name):
+    def execute(self, uploaded_file_id, original_file_name) -> None:
         today = timezone.now()
         uploaded_file = UploadedXLSXFile.objects.get(id=uploaded_file_id)
         wb = load_workbook(uploaded_file.file, data_only=True)

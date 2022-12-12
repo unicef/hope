@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List
 
 from django.core.cache import cache
 from django.db import transaction
@@ -8,7 +9,9 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
-from hct_mis_api.apps.core.cache_keys import PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY
+from hct_mis_api.apps.core.cache_keys import (
+    PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY,
+)
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
@@ -94,14 +97,14 @@ class PullFromDatahubTask:
 
     def execute(self):
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
-        ret = {
-            "grouped_session": 0,
+        ret: Dict[str, List] = {
             "skipped_due_failure": [],
             "successes": [],
             "failures": [],
         }
+        grouped_session_count = 0
         for group in grouped_session:
-            ret["grouped_session"] += 1
+            grouped_session_count += 1
             business_area = group.get("business_area")
             session_queryset = Session.objects.filter(business_area=business_area)
             # if any session in this business area fails omit other sessions in this business area
@@ -116,28 +119,27 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
                     ret["failures"].append(session.id)
-        return ret
+        return ret | {"grouped_session": grouped_session_count}
 
-    def clear_cache(self, session):
+    def clear_cache(self, session) -> None:
         business_area = self.get_business_area_for_cash_assist_code(session.business_area)
         cache.delete_pattern(PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(business_area.id, "*"))
 
-    def copy_session(self, session):
+    def copy_session(self, session) -> None:
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
             session.save(update_fields=("status",))
             self.clear_cache(session)
             try:
-                with transaction.atomic(using="default"):
-                    with transaction.atomic(using="cash_assist_datahub_ca"):
-                        self.copy_service_providers(session)
-                        self.copy_programs(session)
-                        self.copy_target_population(session)
-                        self.copy_cash_plans(session)
-                        self.copy_payment_records(session)
-                        session.status = session.STATUS_COMPLETED
-                        session.save(update_fields=("status",))
+                with transaction.atomic(using="default"), transaction.atomic(using="cash_assist_datahub_ca"):
+                    self.copy_service_providers(session)
+                    self.copy_programs(session)
+                    self.copy_target_population(session)
+                    self.copy_cash_plans(session)
+                    self.copy_payment_records(session)
+                    session.status = session.STATUS_COMPLETED
+                    session.save(update_fields=("status",))
             except Exception as e:
                 session.process_exception(e)
                 session.save(
@@ -149,12 +151,12 @@ class PullFromDatahubTask:
                 )
                 raise
 
-    def get_business_area_for_cash_assist_code(self, cash_assist_code):
+    def get_business_area_for_cash_assist_code(self, cash_assist_code) -> BusinessArea:
         return BusinessArea.objects.get(
             code=BusinessArea.cash_assist_to_code_mapping.get(cash_assist_code, cash_assist_code)
         )
 
-    def copy_cash_plans(self, session):
+    def copy_cash_plans(self, session) -> None:
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
@@ -175,7 +177,7 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
 
-    def set_cash_plan_service_provider(self, cash_plan_args):
+    def set_cash_plan_service_provider(self, cash_plan_args) -> None:
         assistance_through = cash_plan_args.get("assistance_through")
         if not assistance_through:
             return
@@ -184,7 +186,7 @@ class PullFromDatahubTask:
             return
         cash_plan_args["service_provider"] = service_provider
 
-    def copy_payment_records(self, session):
+    def copy_payment_records(self, session) -> None:
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
         household_ids = []
         for dh_payment_record in dh_payment_records:
@@ -215,7 +217,7 @@ class PullFromDatahubTask:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
         handle_total_cash_in_specific_households(household_ids)
 
-    def copy_service_providers(self, session):
+    def copy_service_providers(self, session) -> None:
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)
         for dh_service_provider in dh_service_providers:
             service_provider_args = build_arg_dict(
@@ -228,7 +230,7 @@ class PullFromDatahubTask:
             service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
             ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
-    def copy_programs(self, session):
+    def copy_programs(self, session) -> None:
         dh_programs = ca_models.Programme.objects.filter(session=session)
         programs = []
         for dh_program in dh_programs:
@@ -238,7 +240,7 @@ class PullFromDatahubTask:
             programs.append(program)
         Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
 
-    def copy_target_population(self, session):
+    def copy_target_population(self, session) -> None:
         dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)
         target_populations = []
         for dh_target_population in dh_target_populations:

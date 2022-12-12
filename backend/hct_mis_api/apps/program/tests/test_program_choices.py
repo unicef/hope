@@ -28,7 +28,7 @@ class TestProgramChoices(APITestCase):
             name
             value
         }
-    }    
+    }
     """
 
     QUERY_PROGRAM_SCOPE_CHOICES = """

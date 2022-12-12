@@ -1,7 +1,8 @@
 import logging
+from typing import List
 
 from django import forms
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -15,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 from model_utils.models import UUIDModel
+from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -44,11 +46,11 @@ class Partner(models.Model):
         return self.name
 
     @classmethod
-    def get_partners_as_choices(cls):
+    def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
-class User(AbstractUser, UUIDModel):
+class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
@@ -84,7 +86,7 @@ class User(AbstractUser, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug):
+    def permissions_in_business_area(self, business_area_slug) -> List:
         all_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
@@ -95,7 +97,7 @@ class User(AbstractUser, UUIDModel):
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
-    def has_permission(self, permission, business_area, write=False):
+    def has_permission(self, permission, business_area, write=False) -> bool:
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
@@ -132,7 +134,7 @@ class ChoiceArrayField(ArrayField):
         return super(ArrayField, self).formfield(**defaults)
 
 
-class UserRole(TimeStampedUUIDModel):
+class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
@@ -144,7 +146,19 @@ class UserRole(TimeStampedUUIDModel):
         return f"{self.user} {self.role} in {self.business_area}"
 
 
-class Role(TimeStampedUUIDModel):
+class UserGroup(NaturalKeyModel, models.Model):
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
+    user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("business_area", "user", "group")
+
+    def __str__(self):
+        return f"{self.user} {self.group} in {self.business_area}"
+
+
+class Role(NaturalKeyModel, TimeStampedUUIDModel):
     API = "API"
     HOPE = "HOPE"
     KOBO = "KOBO"
@@ -184,12 +198,12 @@ class Role(TimeStampedUUIDModel):
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
-    def get_roles_as_choices(cls):
+    def get_roles_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user, business_area, role):
+    def validate_user_role(self, user, business_area, role) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
@@ -210,7 +224,7 @@ class IncompatibleRolesManager(models.Manager):
             )
 
 
-class IncompatibleRoles(TimeStampedUUIDModel):
+class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
     """
     Keeps track of what roles are incompatible:
     user cannot be assigned both of the roles in the same business area at the same time

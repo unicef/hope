@@ -42,7 +42,6 @@ class ProgramFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    locations = factory.SubFactory(AreaFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE,

@@ -34,6 +34,7 @@ import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndiv
 import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
 import { ReportingPage } from './pages/reporting/ReportingPage';
 import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
+import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 
@@ -87,6 +88,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/target-population/create'>
             <CreateTargetPopulationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/target-population/edit-tp/:id'>
+            <EditTargetPopulationPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />

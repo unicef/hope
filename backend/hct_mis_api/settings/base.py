@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -86,9 +87,6 @@ IS_PROD = False
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
-# EMAIL_CONFIG = env.email_url('EMAIL_URL', default='smtp://user@:password@localhost:25')
-# vars().update(EMAIL_CONFIG)
-
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
@@ -165,7 +163,7 @@ DATABASES = {
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
 # If app is not specified here it will use default db
-DATABASE_APPS_MAPPING = {
+DATABASE_APPS_MAPPING: Dict[str, str] = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
     "mis_datahub": "cash_assist_datahub_mis",
     "erp_datahub": "cash_assist_datahub_erp",
@@ -186,7 +184,7 @@ MIDDLEWARE = [
     "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
 
-TEMPLATES = [
+TEMPLATES: List[Dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
@@ -259,7 +257,6 @@ DJANGO_APPS = [
 
 OTHER_APPS = [
     "hijack",
-    # "hijack.contrib.admin",
     "jsoneditor",
     "django_countries",
     "phonenumber_field",
@@ -282,6 +279,8 @@ OTHER_APPS = [
     "import_export",
     "rest_framework",
     "drf_yasg",
+    "flags",
+    "admin_cursor_paginator",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -303,6 +302,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
+    "hct_mis_api.apps.power_query.backends.PowerQueryBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
@@ -318,7 +318,7 @@ def extend_list_avoid_repeats(list_to_extend, extend_with):
 
 
 LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
@@ -359,20 +359,6 @@ LOGGING = {
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
-# REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
-#
-# if REDIS_INSTANCE:
-#     CACHES = {
-#         "default": {
-#             "BACKEND": "django_redis.cache.RedisCache",
-#             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
-#             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-#             "TIMEOUT": 3600,
-#         }
-#     }
-#     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
-# else:
-#     CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
 
 REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
 if "CACHE_URL" not in os.environ:
@@ -663,6 +649,7 @@ SMART_ADMIN_SECTIONS = {
         "core",
         "constance",
         "household.agency",
+        "flags",
     ],
     "Power Query & Reports": [
         "power_query",
@@ -681,12 +668,6 @@ SMART_ADMIN_SECTIONS = {
         "core.FlexibleAttribute",
         "core.FlexibleAttributeGroup",
     ],
-    # "HUBs": [
-    #     "cash_assist_datahub",
-    #     "erp_datahub",
-    #     "mis_datahub",
-    #     "registration_datahub",
-    # ],
     "HUB (Hope->CA)": [
         "mis_datahub",
     ],
@@ -706,12 +687,6 @@ SMART_ADMIN_SECTIONS = {
     ],
 }
 
-# SMART_ADMIN_BOOKMARKS = [('GitHub', 'https://github.com/saxix/django-smart-admin'),
-#                          'https://github.com/saxix/django-adminactions',
-#                          'https://github.com/saxix/django-sysinfo',
-#                          'https://github.com/saxix/django-adminfilters',
-#                          'https://github.com/saxix/django-admin-extra-urls',
-#                          ]
 SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
@@ -776,39 +751,15 @@ IMPERSONATE = {
     "DISABLE_LOGGING": False,
 }
 
-# EXPLORER_SCHEMA_INCLUDE_TABLE_PREFIXES = (
-#     'hct_mis_api',
-# )
-# EXPLORER_SCHEMA_EXCLUDE_TABLE_PREFIXES = (
-#     'django.contrib.auth',
-#     'django.contrib.contenttypes',
-#     'django_site',
-#     'django_session',
-#     'django.contrib.sessions',
-#     'django.contrib.admin',
-#     'django_celery',
-#     'django_celery.beat',
-#     'django_celery_beat',
-#     'django_celery_results',
-#     'django_migrations',
-#     'social_auth',
-#     'django_admin',
-# )
-
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
 CONCURRENCY_ENABLED = False
 
-# import warnings
-# warnings.filterwarnings(
-#     'error', r"DateTimeField .* received a naive datetime",
-#     RuntimeWarning, r'django\.db\.models\.fields',
-# )
-
 PROFILING = env("PROFILING", default="off") == "on"
 if PROFILING:
+    # SILK
     INSTALLED_APPS.append("silk")
-    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+    MIDDLEWARE.append("hct_mis_api.middlewares.silk.DynamicSilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
 
 ADMIN_SYNC_USE_REVERSION = False
@@ -820,3 +771,45 @@ SWAGGER_SETTINGS = {
 }
 
 MAX_STORAGE_FILE_SIZE = 30
+
+FLAGS_STATE_LOGGING = DEBUG
+FLAGS = {
+    "DEVELOP_DEBUG_TOOLBAR": [],
+    "SILK_MIDDLEWARE": [],
+    "FRONT_DOOR_BYPASS": [],
+}
+
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+    # DEBUG TOOLBAR
+    def show_ddt(request):  # pragma: no-cover
+        from flags.state import flag_enabled
+
+        return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_ddt,
+        "JQUERY_URL": "",
+    }
+    DEBUG_TOOLBAR_PANELS = [
+        "debug_toolbar.panels.history.HistoryPanel",
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "flags.panels.FlagsPanel",
+        "flags.panels.FlagChecksPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.logging.LoggingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+    ]

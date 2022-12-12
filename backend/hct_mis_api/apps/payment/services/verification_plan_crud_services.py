@@ -1,3 +1,5 @@
+from django.db.models import QuerySet
+
 from graphql import GraphQLError
 
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
@@ -14,7 +16,7 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 
 
-def get_payment_records(cash_plan, verification_channel):
+def get_payment_records(cash_plan, verification_channel) -> QuerySet:
     if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
         return cash_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return cash_plan.available_payment_records()
@@ -35,11 +37,11 @@ class VerificationPlanCrudServices:
             cash_plan_verification.cash_plan, cash_plan_verification.verification_channel
         )
         sampling = Sampling(input_data, cash_plan, payment_records)
-        cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
+        cash_plan_verification, processed_payment_records = sampling.process_sampling(cash_plan_verification)
         ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
-        CreatePaymentVerifications(cash_plan_verification, payment_records).create()
+        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()
 
         return cash_plan_verification
 
@@ -56,16 +58,16 @@ class VerificationPlanCrudServices:
             cash_plan_verification.cash_plan, cash_plan_verification.verification_channel
         )
         sampling = Sampling(input_data, cash_plan_verification.cash_plan, payment_records)
-        cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
+        cash_plan_verification, processed_payment_records = sampling.process_sampling(cash_plan_verification)
         ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
-        CreatePaymentVerifications(cash_plan_verification, payment_records).create()
+        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()
 
         return cash_plan_verification
 
     @classmethod
-    def delete(cls, cash_plan_verification):
+    def delete(cls, cash_plan_verification) -> None:
         if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can delete only PENDING verification")
 

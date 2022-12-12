@@ -5,7 +5,6 @@ from datetime import datetime
 from functools import reduce
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     admin_area1_query,
@@ -49,10 +48,11 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
-    WORK_STATUS_CHOICE,
     SEX_CHOICE,
+    WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -297,7 +297,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "child_hoh",
         "lookup": "child_hoh",
         "required": False,
-        "label": {"English(EN)": "Child is/ head of household"},
+        "label": {"English(EN)": "Child is head of household"},
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
@@ -479,7 +479,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "who_answers_alt_phone",
         "lookup": "who_answers_alt_phone",
         "required": False,
-        "label": {"English(EN)": "Who answers this phone?"},
+        "label": {"English(EN)": "Who answers this (alt) phone?"},
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
@@ -1707,7 +1707,7 @@ CORE_FIELDS_ATTRIBUTES = [
 
 
 class FieldFactory(list):
-    def __init__(self, fields=None, scopes=None, *args, **kwargs):
+    def __init__(self, fields=None, scopes=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)
@@ -1753,7 +1753,7 @@ class FieldFactory(list):
     def associated_with_household(self):
         return self._associated_with(_HOUSEHOLD)
 
-    def _associated_with(self, associated_with):
+    def _associated_with(self, associated_with) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
             if item.get("associated_with") == associated_with:

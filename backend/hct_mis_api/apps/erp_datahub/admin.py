@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import Any, Dict
 
 from django import forms
 from django.conf import settings
@@ -14,7 +15,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.filters import ValueFilter
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -33,8 +34,8 @@ class FundsCommitmentAddForm(forms.ModelForm):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
     currency_code = forms.ChoiceField(choices=sorted(CURRENCY_CHOICES[1:], key=itemgetter(1)))
     funds_commitment_number = forms.CharField(required=True)
-    vendor_id = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
-    gl_account = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
+    vendor_id = forms.CharField(validators=[NumberValidator(), MinLengthValidator(10)])
+    gl_account = forms.CharField(validators=[NumberValidator(), MinLengthValidator(10)])
     business_office_code = forms.ModelChoiceField(
         queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=False
     )
@@ -103,7 +104,7 @@ class SplitBusinessAreaFilter(SimpleListFilter):
 
 
 @admin.register(FundsCommitment)
-class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class FundsCommitmentAdmin(HOPEModelAdminBase):
     list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
         SplitBusinessAreaFilter,
@@ -161,8 +162,8 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 request,
                 self.execute_exchange_rate_sync,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                        <h3>Import will only be simulated</h3>
                         """
                 ),
                 "Successfully executed",
@@ -170,7 +171,7 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             )
 
     def get_changeform_initial_data(self, request):
-        initial = super().get_changeform_initial_data(request)
+        initial: Dict[str, Any] = super().get_changeform_initial_data(request)
         initial["created_by"] = request.user.email
         initial["updated_by"] = request.user.email
         initial["posting_date"] = timezone.now()
@@ -197,7 +198,7 @@ class DownPaymentAssignBusinessOffice(forms.ModelForm):
 
 
 @admin.register(DownPayment)
-class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class DownPaymentAdmin(HOPEModelAdminBase):
     list_filter = (
         "mis_sync_date",
         "ca_sync_date",

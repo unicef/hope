@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from django.core.management import BaseCommand
 from django.db.models import Q
 
@@ -22,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        default_roles_matrix = [
+        default_roles_matrix: List[Dict[str, Any]] = [
             {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_COUNTRY]},
             {
                 "name": "Advanced Registration Reader",
