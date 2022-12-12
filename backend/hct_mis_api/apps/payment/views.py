@@ -48,13 +48,13 @@ def download_payment_verification_plan(  # type: ignore
 
 
 @login_required
-def download_payment_plan_payment_list(
+def download_payment_plan_payment_list(  # type: ignore # missing return
     request: "HttpRequest", payment_plan_id: str
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
 ]:
-    payment_plan_id = decode_id_string(payment_plan_id)
-    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    payment_plan_id_str = decode_id_string(payment_plan_id)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
 
     if not request.user.has_permission(Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
@@ -65,4 +65,4 @@ def download_payment_plan_payment_list(
     if payment_plan.has_export_file:
         return redirect(payment_plan.payment_list_export_file_link)
 
-    log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id}")
+    log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id_str}")

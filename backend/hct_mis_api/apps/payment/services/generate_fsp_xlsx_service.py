@@ -23,7 +23,7 @@ class GenerateReportContentHelpers:
         return ", ".join([str(value) for value in values_list])
 
     @staticmethod
-    def _format_date(date: datetime.date) -> str:
+    def _format_date(date: datetime) -> str:
         if not date:
             return ""
         return date.strftime("%Y-%m-%d")
