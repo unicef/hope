@@ -30,7 +30,6 @@ from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     FieldAttributeNode,

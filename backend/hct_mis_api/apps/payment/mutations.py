@@ -100,7 +100,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
         node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
 
-        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
         )
 
@@ -527,7 +527,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root: Any, info: Any, payment_verification_plan_id: str) -> "ExportXlsxPaymentVerificationPlanFile":
-        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan_id = decode_id_string_required(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, payment_verification_plan.business_area)
@@ -697,7 +697,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
         cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, input.get("business_area_slug"))
 
-        payment_plan = PaymentPlanService().create(input_data=input, user=info.context.user)
+        payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

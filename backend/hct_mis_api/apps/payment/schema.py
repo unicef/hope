@@ -887,7 +887,7 @@ class Query(graphene.ObjectType):
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
         node_name, obj_id = b64decode(input.get("cash_or_payment_plan_id")).decode().split(":")
-        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(
+        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(  # type: ignore
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
         )
 
@@ -896,13 +896,13 @@ class Query(graphene.ObjectType):
             payment_verification_plan: Optional[PaymentVerificationPlan],
             verification_channel: str,
         ) -> QuerySet:
-            kwargs = {}
+            kw: Dict = {}
             if payment_verification_plan:
-                kwargs["payment_verification_plan"] = payment_verification_plan
+                kw["payment_verification_plan"] = payment_verification_plan
             if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
-                kwargs["extra_validation"] = does_payment_record_have_right_hoh_phone_number
-            kwargs["class_name"] = payment_plan_object.__class__.__name__
-            return obj.available_payment_records(**kwargs)
+                kw["extra_validation"] = does_payment_record_have_right_hoh_phone_number
+            kw["class_name"] = obj.__class__.__name__
+            return obj.available_payment_records(**kw)
 
         payment_verification_plan = None
         if payment_verification_plan_id := decode_id_string(input.get("payment_verification_plan_id")):
