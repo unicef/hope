@@ -210,7 +210,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             edges {
               node {
                 size
-                individuals{
+                individuals(orderBy: "full_name", businessArea: $businessArea) {
                     edges{
                         node{
                             fullName

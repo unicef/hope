@@ -13,32 +13,30 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
             'edges': [
                 {
                     'node': {
-                        'individuals': None,
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'bankAccountInfo': {
+                                            'bankName': 'Santander'
+                                        },
+                                        'documents': {
+                                            'edges': [
+                                            ]
+                                        },
+                                        'fullName': 'individual_with_bank_account',
+                                        'phoneNo': '123456789'
+                                    }
+                                }
+                            ]
+                        },
                         'size': 1
                     }
                 }
             ],
             'totalCount': 1
         }
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 17,
-                    'line': 8
-                }
-            ],
-            'message': 'BusinessArea matching query does not exist.',
-            'path': [
-                'goldenRecordByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'individuals'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test_golden_record_by_targeting_criteria_has_not_bank_account_info 1'] = {
@@ -47,32 +45,28 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
             'edges': [
                 {
                     'node': {
-                        'individuals': None,
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'bankAccountInfo': None,
+                                        'documents': {
+                                            'edges': [
+                                            ]
+                                        },
+                                        'fullName': 'individual_without_bank_account',
+                                        'phoneNo': '123456789'
+                                    }
+                                }
+                            ]
+                        },
                         'size': 1
                     }
                 }
             ],
             'totalCount': 1
         }
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 17,
-                    'line': 8
-                }
-            ],
-            'message': 'BusinessArea matching query does not exist.',
-            'path': [
-                'goldenRecordByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'individuals'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test_golden_record_by_targeting_criteria_phone_number 1'] = {
@@ -81,32 +75,28 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
             'edges': [
                 {
                     'node': {
-                        'individuals': None,
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'bankAccountInfo': None,
+                                        'documents': {
+                                            'edges': [
+                                            ]
+                                        },
+                                        'fullName': 'individual_with_phone',
+                                        'phoneNo': '+48123456789'
+                                    }
+                                }
+                            ]
+                        },
                         'size': 1
                     }
                 }
             ],
             'totalCount': 1
         }
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 17,
-                    'line': 8
-                }
-            ],
-            'message': 'BusinessArea matching query does not exist.',
-            'path': [
-                'goldenRecordByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'individuals'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test_golden_record_by_targeting_criteria_tax_id 1'] = {
@@ -115,32 +105,35 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
             'edges': [
                 {
                     'node': {
-                        'individuals': None,
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'bankAccountInfo': None,
+                                        'documents': {
+                                            'edges': [
+                                                {
+                                                    'node': {
+                                                        'type': {
+                                                            'type': 'TAX_ID'
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        'fullName': 'individual_with_tax_id',
+                                        'phoneNo': '123456789'
+                                    }
+                                }
+                            ]
+                        },
                         'size': 1
                     }
                 }
             ],
             'totalCount': 1
         }
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 17,
-                    'line': 8
-                }
-            ],
-            'message': 'BusinessArea matching query does not exist.',
-            'path': [
-                'goldenRecordByTargetingCriteria',
-                'edges',
-                0,
-                'node',
-                'individuals'
-            ]
-        }
-    ]
+    }
 }
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_observed_disability 1'] = {
