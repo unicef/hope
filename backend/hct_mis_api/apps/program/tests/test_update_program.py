@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -22,12 +24,12 @@ class TestUpdateProgram(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(name="initial name", status=Program.DRAFT, business_area=cls.business_area)
 
-    def test_update_program_not_authenticated(self):
+    def test_update_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             variables={
@@ -53,7 +55,9 @@ class TestUpdateProgram(APITestCase):
             ("without_permissions", [], False),
         ]
     )
-    def test_update_program_authenticated(self, _, permissions, should_be_updated):
+    def test_update_program_authenticated(
+        self, _: Any, permissions: List[Permissions], should_be_updated: bool
+    ) -> None:
         user = UserFactory.create()
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 

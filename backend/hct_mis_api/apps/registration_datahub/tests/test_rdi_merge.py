@@ -29,8 +29,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
-        cls.maxDiff = None
+    def setUpTestData(cls) -> None:
         cls.rdi = RegistrationDataImportFactory()
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
@@ -39,9 +38,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         cls.rdi.datahub_id = cls.rdi_hub.id
         cls.rdi.save()
+        super().setUpTestData()
 
     @classmethod
-    def set_imported_individuals(cls, imported_household):
+    def set_imported_individuals(cls, imported_household: ImportedHouseholdFactory) -> None:
         individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -128,7 +128,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         cls.individuals = [ImportedIndividualFactory(**individual) for individual in individuals_to_create]
 
     @freeze_time("2022-01-01")
-    def test_merge_rdi_and_recalculation(self):
+    def test_merge_rdi_and_recalculation(self) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi_hub,
@@ -179,7 +179,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(household_data, expected)
 
     @freeze_time("2022-01-01")
-    def test_merge_rdi_and_recalculation_for_collect_data_partial(self):
+    def test_merge_rdi_and_recalculation_for_collect_data_partial(self) -> None:
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_PARTIAL,
             registration_data_import=self.rdi_hub,

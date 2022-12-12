@@ -5,6 +5,8 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
+from typing import Any, Callable, Dict, List, Type
+from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
@@ -21,10 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class Interpreter:
-    def __init__(self, init_string):
+    def __init__(self, init_string: str) -> None:
         self.init_string = init_string
 
-    def validate(self):
+    def validate(self) -> bool:
         try:
             self.execute()
             return True
@@ -32,7 +34,7 @@ class Interpreter:
             logger.exception(e)
             raise ValidationError(e)
 
-    def get_result(self):
+    def get_result(self) -> Any:
         return config.RESULT()
 
 
@@ -40,14 +42,14 @@ class PythonFunction(Interpreter):
     label = "internal"
 
     @cached_property
-    def code(self):
+    def code(self) -> str:
         return import_string(self.init_string)
 
-    def execute(self, **context):
-        return self.code(**context)
+    def execute(self, **context: Dict) -> Callable:
+        return self.code(**context)  # type: ignore
 
 
-def call_rule(rule_id, context):
+def call_rule(rule_id: UUID, context: Dict) -> Any:
     from .models import Rule
 
     rule: Rule = Rule.objects.get(id=rule_id)
@@ -58,10 +60,10 @@ class PythonExec(Interpreter):
     label = "Python"
 
     @cached_property
-    def code(self):
+    def code(self) -> Any:
         return compile(self.init_string, "<code>", mode="exec")
 
-    def execute(self, context):
+    def execute(self, context: Dict) -> Any:
         gl = {
             "__builtins__": {
                 "__build_class__": __build_class__,
@@ -125,7 +127,7 @@ class PythonExec(Interpreter):
         else:
             return pts
 
-    def validate(self):
+    def validate(self) -> bool:
         errors = []
         for forbidden in [
             "__import__",
@@ -151,7 +153,7 @@ class PythonExec(Interpreter):
             raise ValidationError(mark_safe(msg))
 
 
-def get_env(**options) -> Environment:
+def get_env(**options: Dict) -> Environment:
     env = Environment(**options)
     env.filters.update(
         {
@@ -162,8 +164,7 @@ def get_env(**options) -> Environment:
     return env
 
 
-interpreters = [
+interpreters: List[Type[Interpreter]] = [
     PythonExec,
-    # PythonFunction,
 ]
-mapping = {a.label.lower(): a for a in interpreters}
+mapping: Dict[str, Type[Interpreter]] = {a.label.lower(): a for a in interpreters}

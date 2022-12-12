@@ -2,9 +2,8 @@ import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import * as Yup from 'yup';
 import styled from 'styled-components';
+import * as Yup from 'yup';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
@@ -13,8 +12,10 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
-  TargetPopulationDocument,
-  useAllProgramsQuery,
+  ProgramStatus,
+  TargetPopulationQuery,
+  TargetPopulationStatus,
+  useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
@@ -29,14 +30,12 @@ const Label = styled.p`
 `;
 
 interface EditTargetPopulationProps {
-  cancelEdit?;
-  targetPopulation?;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
 }
 
-export function EditTargetPopulation({
-  cancelEdit,
+export const EditTargetPopulation = ({
   targetPopulation,
-}: EditTargetPopulationProps): React.ReactElement {
+}: EditTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
     id: targetPopulation.id,
@@ -48,13 +47,12 @@ export function EditTargetPopulation({
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
-  const { id } = useParams();
   const businessArea = useBusinessArea();
   const {
     data: allProgramsData,
     loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
+  } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, status: [ProgramStatus.Active] },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -97,7 +95,7 @@ export function EditTargetPopulation({
             programId: values.program,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
-            ...(targetPopulation.status === 'DRAFT' && {
+            ...(targetPopulation.status === TargetPopulationStatus.Open && {
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({
@@ -105,16 +103,7 @@ export function EditTargetPopulation({
             }),
           },
         },
-        refetchQueries: () => [
-          {
-            query: TargetPopulationDocument,
-            variables: {
-              id,
-            },
-          },
-        ],
       });
-      cancelEdit();
       showMessage(t('Target Population Updated'), {
         pathname: `/${businessArea}/target-population/${values.id}`,
         historyMethod: 'push',
@@ -132,8 +121,7 @@ export function EditTargetPopulation({
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const selectedProgram = (values) =>
+  const selectedProgram = (values): void =>
     getFullNodeFromEdgesById(
       allProgramsData?.allPrograms?.edges,
       values.program,
@@ -146,13 +134,12 @@ export function EditTargetPopulation({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => {
+      {({ values, submitForm, setFieldValue }) => {
         return (
           <Form>
             <AutoSubmitFormOnEnter />
             <EditTargetPopulationHeader
               handleSubmit={submitForm}
-              cancelEdit={cancelEdit}
               values={values}
               loading={loading}
               businessArea={businessArea}
@@ -162,6 +149,8 @@ export function EditTargetPopulation({
               allPrograms={allProgramsData}
               loading={loadingPrograms}
               program={values.program}
+              setFieldValue={setFieldValue}
+              values={values}
             />
 
             <FieldArray
@@ -169,9 +158,9 @@ export function EditTargetPopulation({
               render={(arrayHelpers) => (
                 <TargetingCriteria
                   helpers={arrayHelpers}
-                  candidateListRules={values.targetingCriteria}
-                  isEdit
+                  rules={values.targetingCriteria}
                   selectedProgram={selectedProgram(values)}
+                  isEdit
                 />
               )}
             />
@@ -181,7 +170,7 @@ export function EditTargetPopulation({
                 {t('Save to see the list of households')}
               </Typography>
               <Label>
-                {t('List of households will be available after save.')}
+                {t('List of households will be available after saving')}
               </Label>
             </PaperContainer>
           </Form>
@@ -189,4 +178,4 @@ export function EditTargetPopulation({
       }}
     </Formik>
   );
-}
+};

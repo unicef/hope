@@ -40,9 +40,7 @@ export const LookUpPaymentRecordModal = ({
           >
             {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Look up Payment Record')}
-              </DialogTitle>
+              <DialogTitle>{t('Look up Payment Record')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <LookUpPaymentRecordTable

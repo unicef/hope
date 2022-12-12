@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any, List
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -7,6 +8,7 @@ from django.core.management import call_command
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -30,7 +32,6 @@ from hct_mis_api.apps.household.models import (
     SINGLE,
     UNHCR,
     WIDOWED,
-    Agency,
     DocumentType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -71,7 +72,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -180,20 +181,22 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         cls.household_one = household_one
 
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
         cls.national_id = DocumentFactory.create(
+            country=country_pl,
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
             type=national_id_type,
             document_number="789-789-645",
             individual=cls.individuals[0],
         )
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
+        unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
         cls.identity = IndividualIdentityFactory.create(
             id=1,
-            agency=unhcr_agency,
+            partner=unhcr,
             individual=cls.individuals[0],
             number="1111",
+            country=country_pl,
         )
 
     @parameterized.expand(
@@ -206,7 +209,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_grievance_create_individual_data_change(self, _, permissions):
+    def test_grievance_create_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -242,7 +245,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 ],
                                 "identities": [
                                     {
-                                        "agency": UNHCR,
+                                        "partner": UNHCR,
                                         "country": "POL",
                                         "number": "2222",
                                     }
@@ -276,8 +279,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    def test_grievance_update_individual_data_change(self, _, permissions):
-        self.maxDiff = None
+    def test_grievance_update_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -318,7 +320,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 ],
                                 "identities": [
                                     {
-                                        "agency": UNHCR,
+                                        "partner": UNHCR,
                                         "country": "POL",
                                         "number": "2222",
                                     }
@@ -326,7 +328,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "identitiesToEdit": [
                                     {
                                         "id": self.id_to_base64(self.identity.id, "IndividualIdentityNode"),
-                                        "agency": UNHCR,
+                                        "partner": UNHCR,
                                         "country": "POL",
                                         "number": "3333",
                                     }
@@ -354,7 +356,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_payment_channel_for_individual(self, _, permissions):
+    def test_create_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -399,7 +401,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_edit_payment_channel_for_individual(self, _, permissions):
+    def test_edit_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         bank_account = BankAccountInfoFactory(
@@ -452,7 +454,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_delete_individual_data_change(self, _, permissions):
+    def test_grievance_delete_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -488,7 +490,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_update_household_data_change(self, _, permissions):
+    def test_grievance_update_household_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.household_one.female_age_group_6_11_count = 2
         self.household_one.save()
@@ -531,7 +533,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_grievance_delete_household_data_change(self, _, permissions):
+    def test_grievance_delete_household_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {

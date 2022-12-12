@@ -1,27 +1,44 @@
 import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
+    from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.household.models import Individual
+    from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
 
 logger = logging.getLogger(__name__)
 
 
-def _get_min_max_score(golden_records):
+def _get_min_max_score(golden_records: List[Dict[str, Any]]) -> Tuple[float, float]:
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)
 
 
-def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
+def create_grievance_ticket_with_details(
+    main_individual: "Individual",
+    possible_duplicate: "Individual",
+    business_area: "BusinessArea",
+    possible_duplicates: Optional[List["Individual"]] = None,
+    registration_data_import: Optional["RegistrationDataImport"] = None,
+    is_multiple_duplicates_version: bool = False,
+) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
     )
 
-    possible_duplicates = kwargs.get("possible_duplicates")
     if not possible_duplicates:
         return None, None
-
-    registration_data_import = kwargs.get("registration_data_import", None)
 
     ticket_all_individuals = {main_individual, *possible_duplicates}
 
@@ -55,7 +72,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
-        is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
+        is_multiple_duplicates_version=is_multiple_duplicates_version,
         selected_individual=None,
         extra_data=extra_data,
         score_min=score_min,
@@ -69,11 +86,16 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     return ticket, ticket_details
 
 
-def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, **kwargs):
+def create_needs_adjudication_tickets(
+    individuals_queryset: "QuerySet[Individual]",
+    results_key: str,
+    business_area: "BusinessArea",
+    registration_data_import: Optional["RegistrationDataImport"] = None,
+) -> Optional[List[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
-        return
+        return None
 
     ticket_details_to_create = []
     for possible_duplicate in individuals_queryset:
@@ -91,7 +113,7 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
             main_individual=possible_duplicate,
             possible_duplicate=possible_duplicate,  # for backward compatibility
             business_area=business_area,
-            registration_data_import=kwargs.get("registration_data_import", None),
+            registration_data_import=registration_data_import,
             possible_duplicates=possible_duplicates,
             is_multiple_duplicates_version=True,
         )

@@ -1,3 +1,5 @@
+from typing import Any
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -32,9 +34,8 @@ class TestIndividualFlagQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cached_business_areas_slug_id_dict.cache_clear()
-        cls.maxDiff = None
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -119,7 +120,7 @@ class TestIndividualFlagQuery(APITestCase):
             (None,),
         ]
     )
-    def test_individual_programme_filter(self, flags):
+    def test_individual_programme_filter(self, flags: Any) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user},

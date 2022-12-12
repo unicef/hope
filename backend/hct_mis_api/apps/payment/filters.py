@@ -1,7 +1,9 @@
 from base64 import b64decode
+from typing import Any, Dict, List
+from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, CharField, Count, Q, Value, When
+from django.db.models import Case, CharField, Count, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -69,7 +71,7 @@ class PaymentRecordFilter(FilterSet):
         )
     )
 
-    def individual_filter(self, qs, name, value):
+    def individual_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
         if is_valid_uuid(value):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
@@ -102,7 +104,7 @@ class PaymentVerificationFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -127,7 +129,7 @@ class PaymentVerificationFilter(FilterSet):
 
         return qs.filter(q_obj)
 
-    def payment_plan_filter(self, qs, name, value):
+    def payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         node_name, obj_id = b64decode(value).decode().split(":")
         # content type for PaymentPlan or CashPlan
         ct_id = ContentType.objects.filter(app_label="payment", model=node_name[:-4].lower()).first().pk
@@ -136,7 +138,7 @@ class PaymentVerificationFilter(FilterSet):
             payment_verification_plan__payment_plan_content_type_id=ct_id,
         )
 
-    def business_area_filter(self, qs, name, value):
+    def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(
             Q(payment_verification_plan__payment_plan__business_area__slug=value)
             | Q(payment_verification_plan__cash_plan__business_area__slug=value)
@@ -165,13 +167,18 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
     object_id = UUIDFilter(method="object_id_filter")
     object_type = ChoiceFilter(method="object_type_filter", choices=PLAN_TYPE_CHOICES)
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         cleaned_data = self.form.cleaned_data
         object_type = cleaned_data.get("object_type")
         object_id = cleaned_data.get("object_id")
         plan_object = (PaymentPlan if object_type == self.PLAN_TYPE_PAYMENT else CashPlan).objects.get(pk=object_id)
         verifications_ids = plan_object.payment_verification_plan.all().values_list("pk", flat=True)
         return queryset.filter(object_id__in=verifications_ids)
+
+    def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
+        cash_plan = CashPlan.objects.get(pk=value)
+        verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
+        return qs.filter(object_id__in=verifications_ids)
 
 
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
@@ -271,11 +278,11 @@ class CashPlanFilter(FilterSet):
         )
     )
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         return super().filter_queryset(queryset)
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -296,7 +303,7 @@ class PaymentPlanFilter(FilterSet):
         fields = tuple()
         model = PaymentPlan
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         if not self.form.cleaned_data.get("order_by"):
             queryset = queryset.order_by("unicef_id")
@@ -317,7 +324,7 @@ class PaymentPlanFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
 
 
@@ -325,7 +332,7 @@ class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
 
-    def payment_plan_id_filter(self, qs, name, value):
+    def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         payment_plan_id = decode_id_string(value)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         q = Q(parent=payment_plan)
@@ -352,7 +359,7 @@ class PaymentFilter(FilterSet):
         )
     )
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         # household__admin2
         queryset = queryset.annotate(
             admin2=Case(
@@ -385,7 +392,7 @@ class PaymentFilter(FilterSet):
         return super().filter_queryset(queryset)
 
 
-def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwargs) -> ExtendedQuerySetSequence:
+def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwargs: Dict) -> ExtendedQuerySetSequence:
     business_area = kwargs.get("business_area")
     program = kwargs.get("program")
     service_provider = kwargs.get("service_provider")
@@ -428,16 +435,15 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     return queryset
 
 
-def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, order_by) -> ExtendedQuerySetSequence:
+def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> List[Any]:
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
     if order_by == "verification_status":
-        queryset = queryset.order_by(reverse + "custom_order")
-
+        qs = queryset.order_by(reverse + "custom_order")
     elif order_by == "unicef_id":
-        queryset = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
     else:
-        queryset = queryset.order_by(reverse + order_by)
+        qs = queryset.order_by(reverse + order_by)
 
-    return queryset
+    return list(qs)

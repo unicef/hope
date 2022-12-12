@@ -1,6 +1,7 @@
 import csv
 import logging
 from io import StringIO
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -15,7 +16,12 @@ from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.db.models import Aggregate, CharField
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -25,11 +31,12 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 import xlrd
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_extra_buttons.mixins import confirm_action
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import choice, view
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
@@ -37,8 +44,10 @@ from xlrd import XLRDError
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
+    create_target_population_task,
     upload_new_kobo_template_and_update_flex_fields_task,
 )
+from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
@@ -50,9 +59,21 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.contrib.admin import ModelAdmin
+    from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -88,13 +109,13 @@ class BusinessofficeFilter(SimpleListFilter):
     title = "Business Ofiice"
     parameter_name = "bo"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> List[Tuple[int, str]]:
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
-    def value(self):
+    def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset: "QuerySet") -> "QuerySet":
         if self.value() == "2":
             return queryset.filter(parent_id__isnull=True)
         elif self.value() == "1":
@@ -106,7 +127,7 @@ class GroupConcat(Aggregate):
     function = "GROUP_CONCAT"
     template = "%(function)s(%(distinct)s%(expressions)s)"
 
-    def __init__(self, expression, distinct=False, **extra):
+    def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
         super().__init__(
             expression,
             distinct="DISTINCT " if distinct else "",
@@ -116,79 +137,21 @@ class GroupConcat(Aggregate):
 
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    fieldsets = (
-        (
-            None,
-            {
-                "fields": (
-                    "code",
-                    "name",
-                    "slug",
-                    "long_name",
-                    "region_code",
-                    "region_name",
-                    "countries",
-                )
-            },
-        ),
-        (
-            "Advanced options",
-            {
-                "fields": (
-                    "kobo_username",
-                    "rapid_pro_host",
-                    "rapid_pro_api_key",
-                    "custom_fields",
-                ),
-            },
-        ),
-        (
-            "Settings",
-            {
-                "fields": (
-                    "has_data_sharing_agreement",
-                    "postpone_deduplication",
-                    "deduplication_duplicate_score",
-                    "deduplication_possible_duplicate_score",
-                    "deduplication_batch_duplicates_percentage",
-                    "deduplication_batch_duplicates_allowed",
-                    "deduplication_golden_record_duplicates_percentage",
-                    "deduplication_golden_record_duplicates_allowed",
-                    "deduplication_golden_record_duplicates_percentage",
-                    "screen_beneficiary",
-                    "deduplication_ignore_withdraw",
-                    "approval_number_required",
-                    "authorization_number_required",
-                    "finance_review_number_required",
-                    "is_payment_plan_applicable",
-                ),
-            },
-        ),
-        (
-            "Read Only",
-            {
-                "fields": ("parent", "is_split"),
-            },
-        ),
-    )
-
+class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "slug",
         "code",
         "region_name",
         "region_code",
+        "active",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
-    # formfield_overrides = {
-    #     JSONField: {"widget": JSONEditor},
-    # }
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -197,13 +160,12 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    # def get_readonly_fields(self, request, obj=None):
-    #     if not is_root(request):
-    #         return self.readonly_fields + ('slug')
-    #     return super().get_readonly_fields(request, obj)
+    @choice(label="DOAP", change_list=False)
+    def doap(self, button: button) -> None:
+        button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
-    def split_business_area(self, request, pk):
+    def split_business_area(self, request: HttpRequest, pk: "UUID") -> Union[HttpResponseRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk)
         opts = self.object._meta
         if request.POST:
@@ -237,7 +199,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
-    def _get_doap_matrix(self, obj):
+    def _get_doap_matrix(self, obj: Any) -> List[Any]:
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
         fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
@@ -285,8 +247,8 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                     matrix.append(user_data)
         return matrix
 
-    @button(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
-    def force_sync_doap(self, request, pk):
+    @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
+    def force_sync_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         matrix = self._get_doap_matrix(obj)
@@ -294,8 +256,8 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Send DOAP", group="doap")
-    def send_doap(self, request, pk):
+    @view(label="Send DOAP", group="doap")
+    def send_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         try:
@@ -333,8 +295,8 @@ UNICEF HOPE""",
 
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Export DOAP", group="doap", permission="core.can_export_doap")
-    def export_doap(self, request, pk):
+    @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
+    def export_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
         environment = Site.objects.first().name
@@ -347,8 +309,8 @@ UNICEF HOPE""",
             writer.writerow(row)
         return response
 
-    @button(permission="core.can_send_doap")
-    def view_ca_doap(self, request, pk):
+    @view(permission="core.can_send_doap")
+    def view_ca_doap(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, title="DOAP matrix")
         context["aeu_groups"] = ["doap"]
         obj = context["original"]
@@ -359,7 +321,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/admin/ca_doap.html", context)
 
     @button(permission="account.view_user")
-    def members(self, request, pk):
+    def members(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
@@ -375,8 +337,8 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/admin/ba_members.html", context)
 
     @button(label="Test RapidPro Connection")
-    def _test_rapidpro_connection(self, request, pk):
-        context = self.get_common_context(request, pk)
+    def _test_rapidpro_connection(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
+        context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
@@ -394,9 +356,11 @@ UNICEF HOPE""",
 
                     error, response = api.test_connection_start_flow(flow_name, phone_number)
                     if response:
-                        context["flow_uuid"] = response["flow"]["uuid"]
-                        context["flow_status"] = response["status"]
-                        context["timestamp"] = response["created_on"]
+                        for index, entry in enumerate(response):
+                            context[index] = {}
+                            context[index]["flow_uuid"] = entry["flow"]["uuid"]
+                            context[index]["flow_status"] = entry["status"]
+                            context[index]["timestamp"] = entry["created_on"]
 
                     if error:
                         messages.error(request, error)
@@ -409,7 +373,7 @@ UNICEF HOPE""",
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
     @button(permission=is_root)
-    def mark_submissions(self, request, pk):
+    def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
             from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
@@ -445,7 +409,7 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     list_display = ("type", "name", "required")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
@@ -459,7 +423,7 @@ class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
@@ -475,7 +439,7 @@ class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeChoiceAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
@@ -488,7 +452,7 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
@@ -505,7 +469,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
         "error_description",
     )
 
-    def import_status(self, obj):
+    def import_status(self, obj: Any) -> str:
         if obj.status == self.model.SUCCESSFUL:
             color = "89eb34"
         elif obj.status == self.model.UNSUCCESSFUL:
@@ -519,16 +483,16 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
             obj.status,
         )
 
-    def original_file_name(self, obj):
+    def original_file_name(self, obj: Any) -> str:
         return obj.file_name
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
+    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request):
+    def download_last_valid_file(self, request: HttpRequest) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:  # type: ignore
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -542,14 +506,16 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
         label="Rerun KOBO Import",
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
     )
-    def rerun_kobo_import(self, request, pk):
+    def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
             xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
         )
         return redirect(".")
 
-    def add_view(self, request, form_url="", extra_context=None):
+    def add_view(
+        self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
+    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         if not self.has_add_permission(request):
             logger.error("The user did not have permission to do that")
             raise PermissionDenied
@@ -609,40 +575,65 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
 
         return TemplateResponse(request, "core/xls_form.html", payload)
 
-    def change_view(self, request, object_id=None, form_url="", extra_context=None):
+    def change_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
+    ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False
+        self.has_add_permission = lambda __: False  # type: ignore
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission
+        self.has_add_permission = has_add_permission  # type: ignore
 
         return template_response
 
 
 @admin.register(CountryCodeMap)
-class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
 
-    def alpha2(self, obj):
+    def alpha2(self, obj: Any) -> str:
         return obj.country.iso_code2
 
-    def alpha3(self, obj):
+    def alpha3(self, obj: Any) -> str:
         return obj.country.iso_code3
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(admin.ModelAdmin):
+class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return request.user.can_download_storage_files()
+
+    @button(label="Create eDopomoga TP")
+    def create_tp(self, request: HttpRequest, pk: "UUID") -> Union[TemplateResponse, HttpResponsePermanentRedirect]:
+        storage_obj = StorageFile.objects.get(pk=pk)
+        context = self.get_common_context(
+            request,
+            pk,
+        )
+        if request.method == "GET":
+            if TargetPopulation.objects.filter(storage_file=storage_obj).exists():
+                self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
+                return redirect("..")
+
+            form = ProgramForm()
+            context["form"] = form
+            return TemplateResponse(request, "core/admin/create_tp.html", context)
+        else:
+            rdi_name = request.POST.get("name")
+
+            create_target_population_task.delay(storage_obj.pk, rdi_name)
+
+            self.message_user(request, "Creation of TargetPopulation started")
+            return redirect("..")

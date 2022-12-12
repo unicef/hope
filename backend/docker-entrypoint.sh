@@ -6,11 +6,10 @@ wait_for_db() {
   do echo "waiting for database ${1}"; sleep 2; done;
 }
 
-
 if [ $# -eq 0 ]; then
-  export NEW_RELIC_CONFIG_FILE=/code/newrelic.ini
-  export NEW_RELIC_ENVIRONMENT=$ENV
-  exec newrelic-admin run-program gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
+    export NEW_RELIC_CONFIG_FILE=/code/newrelic.ini
+    export NEW_RELIC_ENVIRONMENT=$ENV
+    exec newrelic-admin run-program gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
 else
   case "$1" in
     "dev")
@@ -25,11 +24,15 @@ else
       wait_for_db mis_datahub_db
       wait_for_db erp_datahub_db
       wait_for_db registration_datahub_db
-      python manage.py test  --settings hct_mis_api.settings.test --noinput --parallel
+      python manage.py test --settings hct_mis_api.settings.test --noinput --parallel
       ;;
     "lint")
       mkdir -p ./lint-results
       flake8 --format=junit-xml . > ./lint-results/flake8.xml
+      ;;
+    "mypy")
+      mkdir -p ./mypy-results
+      mypy --junit-xml ./mypy-results/mypy.xml .
       ;;
     "celery-beat")
       waitforit -host=backend -port=8000 --timeout 300 && \

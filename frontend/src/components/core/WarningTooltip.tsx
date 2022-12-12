@@ -5,7 +5,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 
 const StyledWarning = styled(WarningIcon)`
   color: ${({ theme, confirmed }) =>
-    confirmed ? 'deeppink' : theme.hctPalette.oragne};
+    confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
 
 interface WarningTooltipProps {
@@ -15,13 +15,13 @@ interface WarningTooltipProps {
 }
 
 export const WarningTooltip = ({
-  confirmed,
+  confirmed = false,
   message = '',
   handleClick,
 }: WarningTooltipProps): React.ReactElement => {
   return (
     <Tooltip onClick={handleClick} title={message}>
-      <StyledWarning confirmed={confirmed} />
+      <StyledWarning confirmed={confirmed ? 1 : 0} />
     </Tooltip>
   );
 };

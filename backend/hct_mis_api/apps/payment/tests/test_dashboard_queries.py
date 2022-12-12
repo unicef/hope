@@ -96,7 +96,7 @@ class TestDashboardQueries(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         call_command("loadcountries")
         cls.user = UserFactory()
@@ -206,14 +206,14 @@ class TestDashboardQueries(APITestCase):
             ("chartPayment",),
         ]
     )
-    def test_charts(self, query_name):
+    def test_charts(self, query_name: str) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_CHART.format(query_name=query_name),
             variables={"businessAreaSlug": "afghanistan", "year": 2021},
             context={"user": self.user},
         )
 
-    def test_chart_total_transferred_by_country(self):
+    def test_chart_total_transferred_by_country(self) -> None:
         business_area = BusinessArea.objects.get(slug="global")
         self.create_user_role_with_permissions(self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area)
         self.snapshot_graphql_request(
@@ -227,14 +227,14 @@ class TestDashboardQueries(APITestCase):
             ("sectionTotalTransferred",),
         ]
     )
-    def test_sections(self, query_name):
+    def test_sections(self, query_name: str) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_SECTION.format(query_name=query_name),
             variables={"businessAreaSlug": "afghanistan", "year": 2021},
             context={"user": self.user},
         )
 
-    def test_table_total_cash_transferred_by_administrative_area(self):
+    def test_table_total_cash_transferred_by_administrative_area(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA,
             variables={"businessAreaSlug": "afghanistan", "year": 2021},

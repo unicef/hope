@@ -1,16 +1,18 @@
 import logging
+from typing import TYPE_CHECKING, Any, Optional, Tuple
+from uuid import UUID
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button, link
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.filters import ValueFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
@@ -33,15 +35,18 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 from hct_mis_api.apps.utils.security import is_root
 
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet, _QuerySet
+
 logger = logging.getLogger(__name__)
 
 
-class HUBAdminMixin(ExtraButtonsMixin, HOPEModelAdminBase):
+class HUBAdminMixin(HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
-    def truncate(self, request):
+    def truncate(self, request: HttpRequest) -> None:
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
             self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
-            return
+            return None
         if request.method == "POST":
             with atomic():
                 LogEntry.objects.log_action(
@@ -79,7 +84,7 @@ class HouseholdAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def members_sent_to_the_hub(self, button):
+    def members_sent_to_the_hub(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
@@ -87,9 +92,10 @@ class HouseholdAdmin(HUBAdminMixin):
             return f"{url}?session={obj.pk}&household_mis_id={obj.mis_id}"
         else:
             button.visible = False
+            return None
 
     @button()
-    def see_hope_record(self, request, pk):
+    def see_hope_record(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = self.get_object(request, pk)
         hh = households.Household.objects.get(id=obj.mis_id)
         url = reverse("admin:household_individual_change", args=[hh.pk])
@@ -109,7 +115,7 @@ class IndividualAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
 
     @link()
-    def household(self, button):
+    def household(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
@@ -117,6 +123,7 @@ class IndividualAdmin(HUBAdminMixin):
             return f"{url}?session={obj.pk}&household_mis_id={obj.mis_id}"
         else:
             button.visible = False
+            return None
 
 
 @admin.register(FundsCommitment)
@@ -152,34 +159,37 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     search_fields = ("id",)
 
     @link()
-    def target_population(self, button):
+    def target_population(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_targetpopulation_changelist")
             return f"{url}?session={obj.pk}"
         else:
             button.visible = False
+            return None
 
     @link()
-    def individuals(self, button):
+    def individuals(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
             return f"{url}?session={obj.pk}"
         else:
             button.visible = False
+            return None
 
     @link()
-    def households(self, button):
+    def households(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
             return f"{url}?session={obj.pk}"
         else:
             button.visible = False
+            return None
 
     @button(permission="account.can_inspect")
-    def inspect(self, request, pk):
+    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         obj = context["original"]
         context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
@@ -198,7 +208,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
-    def reset_sync_date(self, request, pk):
+    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> TemplateResponse:  # type: ignore
         if request.method == "POST":
             try:
                 with atomic():
@@ -246,27 +256,31 @@ class TargetPopulationAdmin(HUBAdminMixin):
     raw_id_fields = ("session",)
     search_fields = ("name",)
 
-    def get_search_results(self, request, queryset, search_term):
+    def get_search_results(
+        self, request: HttpRequest, queryset: "QuerySet", search_term: str
+    ) -> Tuple["_QuerySet[Any, Any]", bool]:
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         return queryset, use_distinct
 
     @link()
-    def individuals(self, button):
+    def individuals(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_individual_changelist")
             return f"{url}?session={obj.session.pk}"
         else:
             button.visible = False
+            return None
 
     @link()
-    def households(self, button):
+    def households(self, button: button) -> Optional[str]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:mis_datahub_household_changelist")
             return f"{url}?session={obj.session.pk}"
         else:
             button.visible = False
+            return None
 
 
 @admin.register(Program)

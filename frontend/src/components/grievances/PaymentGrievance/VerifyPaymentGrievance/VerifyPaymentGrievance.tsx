@@ -17,14 +17,14 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import {
-  GrievanceTicketNode,
   GrievanceTicketDocument,
+  GrievanceTicketQuery,
   useUpdateGrievanceMutation,
 } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 
 export interface VerifyPaymentGrievanceProps {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
 }
 export function VerifyPaymentGrievance({
   ticket,
@@ -93,9 +93,7 @@ export function VerifyPaymentGrievance({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Verify Payment')}
-              </DialogTitle>
+              <DialogTitle>{t('Verify Payment')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>

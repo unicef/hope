@@ -18,7 +18,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
         "TIMEOUT": 1800,
     }
 }
@@ -77,10 +77,6 @@ LOGGING = {
 }
 
 # ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    "default": {"hosts": "elasticsearch:9200"},
-    "test": {"hosts": "elasticsearch:9200"},
-}
 ELASTICSEARCH_INDEX_PREFIX = "test_"
 
 logging.disable(logging.CRITICAL)

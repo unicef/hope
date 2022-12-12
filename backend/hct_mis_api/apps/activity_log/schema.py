@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from django.contrib.contenttypes.models import ContentType
 
 import graphene
@@ -33,7 +35,7 @@ class LogEntryNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_changes_display_object(self, info):
+    def resolve_changes_display_object(self, info: Any) -> Arg:
         return self.changes
 
 
@@ -45,5 +47,5 @@ class Query(graphene.ObjectType):
     )
     log_entry_action_choices = graphene.List(ChoiceObject)
 
-    def resolve_log_entry_action_choices(self, info, **kwargs):
+    def resolve_log_entry_action_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES)

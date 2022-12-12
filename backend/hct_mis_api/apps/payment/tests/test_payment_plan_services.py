@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import patch
 
 from aniso8601 import parse_date
@@ -27,7 +28,7 @@ class TestPaymentPlanServices(APITestCase):
     databases = "__all__"
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
@@ -35,8 +36,8 @@ class TestPaymentPlanServices(APITestCase):
             cls.user, [Permissions.PAYMENT_MODULE_CREATE], BusinessArea.objects.get(slug="afghanistan")
         )
 
-    def test_delete_open(self):
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+    def test_delete_open(self) -> None:
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_OPEN)
 
         pp = PaymentPlanService(payment_plan=pp).delete()
@@ -44,14 +45,14 @@ class TestPaymentPlanServices(APITestCase):
         pp.target_population.refresh_from_db()
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
 
-    def test_delete_locked(self):
+    def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
 
         with self.assertRaises(GraphQLError):
             PaymentPlanService(payment_plan=pp).delete()
 
     @freeze_time("2020-10-10")
-    def test_create_validation_errors(self):
+    def test_create_validation_errors(self) -> None:
         targeting = TargetPopulationFactory()
 
         input_data = dict(
@@ -65,7 +66,7 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
@@ -73,23 +74,23 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError,
             f"TargetPopulation id:{targeting.id} does not exist or is not in status 'Ready for Payment Module'",
         ):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.save()
 
         with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
         targeting.program = ProgramFactory()
         targeting.save()
 
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
-            PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user)
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_create(self, get_exchange_rate_mock):
+    def test_create(self, get_exchange_rate_mock: Any) -> None:
         targeting = TargetPopulationFactory()
 
         self.business_area.is_payment_plan_applicable = True
@@ -119,7 +120,7 @@ class TestPaymentPlanServices(APITestCase):
             currency="USD",
         )
 
-        pp = PaymentPlanService().create(input_data=input_data, user=self.user)
+        pp = PaymentPlanService.create(input_data=input_data, user=self.user)
 
         pp.refresh_from_db()
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
@@ -129,7 +130,7 @@ class TestPaymentPlanServices(APITestCase):
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_update_validation_errors(self, get_exchange_rate_mock):
+    def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
         new_targeting = TargetPopulationFactory(program=None)
 
@@ -176,7 +177,7 @@ class TestPaymentPlanServices(APITestCase):
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_update(self, get_exchange_rate_mock):
+    def test_update(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)

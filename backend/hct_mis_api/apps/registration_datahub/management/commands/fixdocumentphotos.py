@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 from django.db.models import F
 
@@ -5,7 +7,7 @@ from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_datahub.models import ImportedDocument
 
 
-def fix_document_photos():
+def fix_document_photos() -> None:
     imported_documents = (
         ImportedDocument.objects.exclude(photo="")
         .annotate(hct_id=F("individual__registration_data_import__hct_id"))
@@ -31,6 +33,6 @@ def fix_document_photos():
 class Command(BaseCommand):
     help = "Fix document photos in existing data"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         fix_document_photos()
         self.stdout.write("Documents photos fixed")

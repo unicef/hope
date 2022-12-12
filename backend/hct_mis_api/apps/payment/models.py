@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -13,7 +13,15 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint, UUIDField
+from django.db.models import (
+    Count,
+    JSONField,
+    Q,
+    QuerySet,
+    Sum,
+    UniqueConstraint,
+    UUIDField,
+)
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -22,6 +30,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import FSMField, transition
+from graphql import GraphQLError
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
@@ -36,7 +45,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     _INDIVIDUAL,
     Scope,
 )
-from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -45,6 +54,10 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 logger = logging.getLogger(__name__)
 
@@ -109,18 +122,18 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         abstract = True
 
     @property
-    def get_unicef_id(self):
+    def get_unicef_id(self) -> str:
         # TODO: MB 'ca_id' rename to 'unicef_id'?
         return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
-    def get_exchange_rate(self, exchange_rates_client=None):
+    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
 
     @property
-    def get_payment_verification_summary(self):
+    def get_payment_verification_summary(self) -> Optional["PaymentVerificationSummary"]:
         """PaymentPlan has only one payment_verification_summary"""
         c_type = ContentType.objects.get_for_model(self.__class__)
         try:
@@ -132,7 +145,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return verification_summary
 
     @property
-    def get_payment_verification_plans(self):
+    def get_payment_verification_plans(self) -> QuerySet["PaymentVerificationPlan"]:
         c_type = ContentType.objects.get_for_model(self.__class__)
         payment_verification_plans = PaymentVerificationPlan.objects.filter(
             payment_plan_content_type_id=c_type.pk, payment_plan_object_id=self.pk
@@ -142,9 +155,9 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     def available_payment_records(
         self,
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
-        extra_validation=None,
-        class_name="",
-    ):
+        extra_validation: Optional[Callable] = None,
+        class_name: str = "",
+    ) -> QuerySet:
         params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
@@ -165,7 +178,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return qs
 
     @property
-    def can_create_payment_verification_plan(self):
+    def can_create_payment_verification_plan(self) -> int:
         return self.available_payment_records().count() > 0
 
 
@@ -272,7 +285,7 @@ class GenericPayment(TimeStampedUUIDModel):
         abstract = True
 
     @property
-    def verification(self):
+    def verification(self) -> Optional["PaymentVerification"]:
         c_type = ContentType.objects.get_for_model(self.__class__)
         try:
             verification = PaymentVerification.objects.get(payment_content_type_id=c_type.pk, payment_object_id=self.pk)
@@ -388,15 +401,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.unicef_id
 
     @property
-    def bank_reconciliation_success(self):
+    def bank_reconciliation_success(self) -> int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
 
     @property
-    def bank_reconciliation_error(self):
+    def bank_reconciliation_error(self) -> int:
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @transition(
@@ -405,7 +418,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
-    def background_action_status_xlsx_exporting(self):
+    def background_action_status_xlsx_exporting(self) -> None:
         pass
 
     @transition(
@@ -414,7 +427,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
-    def background_action_status_xlsx_export_error(self):
+    def background_action_status_xlsx_export_error(self) -> None:
         pass
 
     @transition(
@@ -423,7 +436,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.STEFICON_RUN,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
-    def background_action_status_steficon_run(self):
+    def background_action_status_steficon_run(self) -> None:
         pass
 
     @transition(
@@ -432,7 +445,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.STEFICON_ERROR,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
-    def background_action_status_steficon_error(self):
+    def background_action_status_steficon_error(self) -> None:
         pass
 
     @transition(
@@ -441,7 +454,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
-    def background_action_status_xlsx_importing_entitlements(self):
+    def background_action_status_xlsx_importing_entitlements(self) -> None:
         pass
 
     @transition(
@@ -450,7 +463,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
-    def background_action_status_xlsx_importing_reconciliation(self):
+    def background_action_status_xlsx_importing_reconciliation(self) -> None:
         pass
 
     @transition(
@@ -462,11 +475,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
-    def background_action_status_xlsx_import_error(self):
+    def background_action_status_xlsx_import_error(self) -> None:
         pass
 
     @transition(field=background_action_status, source="*", target=None)
-    def background_action_status_none(self):
+    def background_action_status_none(self) -> None:
         self.background_action_status = None  # little hack
 
     @transition(
@@ -474,7 +487,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.OPEN,
         target=Status.LOCKED,
     )
-    def status_lock(self):
+    def status_lock(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -482,7 +495,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.LOCKED,
         target=Status.OPEN,
     )
-    def status_unlock(self):
+    def status_unlock(self) -> None:
         self.background_action_status_none()
         self.status_date = timezone.now()
 
@@ -491,7 +504,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.LOCKED_FSP,
         target=Status.LOCKED,
     )
-    def status_unlock_fsp(self):
+    def status_unlock_fsp(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -499,7 +512,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.LOCKED,
         target=Status.LOCKED_FSP,
     )
-    def status_lock_fsp(self):
+    def status_lock_fsp(self) -> None:
         self.background_action_status_none()
         self.status_date = timezone.now()
 
@@ -508,7 +521,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
         target=Status.LOCKED_FSP,
     )
-    def status_reject(self):
+    def status_reject(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -516,7 +529,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.LOCKED_FSP,
         target=Status.IN_APPROVAL,
     )
-    def status_send_to_approval(self):
+    def status_send_to_approval(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -524,7 +537,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.IN_APPROVAL,
         target=Status.IN_AUTHORIZATION,
     )
-    def status_approve(self):
+    def status_approve(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -532,7 +545,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.IN_AUTHORIZATION,
         target=Status.IN_REVIEW,
     )
-    def status_authorize(self):
+    def status_authorize(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -540,7 +553,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.IN_REVIEW,
         target=Status.ACCEPTED,
     )
-    def status_mark_as_reviewed(self):
+    def status_mark_as_reviewed(self) -> None:
         self.status_date = timezone.now()
 
     @transition(
@@ -548,26 +561,26 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         source=Status.ACCEPTED,
         target=Status.RECONCILED,
     )
-    def status_reconciled(self):
+    def status_reconciled(self) -> None:
         self.status_date = timezone.now()
         PaymentVerificationSummary.objects.create(
             payment_plan_obj=self,
         )
 
     @property
-    def currency_exchange_date(self) -> datetime.date:
+    def currency_exchange_date(self) -> datetime:
         now = timezone.now().date()
         return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
-    def not_excluded_payments(self):
+    def not_excluded_payments(self) -> QuerySet:
         return self.payment_items.exclude(excluded=True)
 
     @property
     def can_be_locked(self) -> bool:
         return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
 
-    def update_population_count_fields(self):
+    def update_population_count_fields(self) -> None:
         households_ids = self.not_excluded_payments.values_list("household_id", flat=True)
 
         delta18 = relativedelta(years=+18)
@@ -600,7 +613,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             ]
         )
 
-    def update_money_fields(self):
+    def update_money_fields(self) -> None:
         self.exchange_rate = self.get_exchange_rate()
         payments = self.not_excluded_payments.aggregate(
             total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
@@ -630,30 +643,30 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     @property
-    def has_export_file(self):
+    def has_export_file(self) -> bool:
         return bool(self.export_file)
 
     @property
-    def payment_list_export_file_link(self):
+    def payment_list_export_file_link(self) -> Optional[str]:
         if self.export_file:
             return self.export_file.file.url
         return None
 
     @property
-    def is_reconciled(self):
+    def is_reconciled(self) -> bool:
         # TODO what in case of partial reconciliation or active grievance tickets?
         return (
             self.not_excluded_payments.filter(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS).count()
             == self.not_excluded_payments.count()
         )
 
-    def remove_export_file(self):
+    def remove_export_file(self) -> None:
         if self.export_file:
             self.export_file.file.delete(save=False)
             self.export_file.delete()
             self.export_file = None
 
-    def remove_imported_file(self):
+    def remove_imported_file(self) -> None:
         if self.imported_file:
             self.imported_file.file.delete(save=False)
             self.imported_file.delete()
@@ -694,7 +707,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     @classmethod
-    def get_column_value_from_payment(cls, payment, column_name: str):
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str:
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
             "household_id": (payment.household, "unicef_id"),
@@ -718,7 +731,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         return getattr(obj, nested_field, None) or ""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({len(self.columns)})"
 
 
@@ -767,7 +780,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         verbose_name=_("XLSX Template"),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
     def can_accept_any_volume(self) -> bool:
@@ -814,8 +827,13 @@ class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
     file = models.FileField(blank=True, null=True, editable=False)
     status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False, db_index=True)
 
-    def __str__(self):
-        return f"{self.template.name} ({self.status})"
+    def __str__(self) -> str:
+        name_ = (
+            self.financial_service_provider.fsp_xlsx_template.name
+            if self.financial_service_provider.fsp_xlsx_template
+            else self.financial_service_provider.name
+        )
+        return f"{name_} ({self.status})"
 
 
 class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
@@ -865,7 +883,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         source=Status.NOT_SENT,
         target=Status.SENT,
     )
-    def status_send(self, sent_by: settings.AUTH_USER_MODEL):
+    def status_send(self, sent_by: "User") -> None:
         self.sent_date = timezone.now()
         self.sent_by = sent_by
 
@@ -879,7 +897,7 @@ class PaymentChannel(TimeStampedUUIDModel):
     is_fallback = models.BooleanField(default=False)
 
     @property
-    def all_delivery_data(self) -> dict:
+    def all_delivery_data(self) -> Dict:
         associated_objects = {_INDIVIDUAL: self.individual, _HOUSEHOLD: self.individual.household}
         global_core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.PAYMENT_CHANNEL]).to_dict_by("name")
 
@@ -959,36 +977,36 @@ class CashPlan(GenericPaymentPlan):
         related_query_name="cash_plan",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
-    def payment_records_count(self):
+    def payment_records_count(self) -> int:
         return self.payment_items.count()
 
     @property
-    def bank_reconciliation_success(self):
+    def bank_reconciliation_success(self) -> int:
         return self.payment_items.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
 
     @property
-    def bank_reconciliation_error(self):
+    def bank_reconciliation_error(self) -> int:
         return self.payment_items.filter(status=PaymentRecord.STATUS_ERROR).count()
 
     @cached_property
-    def total_number_of_households(self):
+    def total_number_of_households(self) -> int:
         # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
         return self.payment_items.count()
 
     @property
-    def currency(self):
+    def currency(self) -> Optional[str]:
         payment_record = self.payment_items.first()
         return payment_record.currency if payment_record else None
 
     @property
-    def currency_exchange_date(self):
+    def currency_exchange_date(self) -> datetime:
         return self.dispersion_date
 
-    def unicef_id(self):
+    def unicef_id(self) -> str:
         # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id
 
@@ -1050,10 +1068,10 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     )
 
     @property
-    def unicef_id(self):
+    def unicef_id(self) -> str:
         return self.ca_id
 
-    def mark_as_failed(self):
+    def mark_as_failed(self) -> None:
         if self.status is self.STATUS_FORCE_FAILED:
             raise ValidationError("Status shouldn't be failed")
         self.status = self.STATUS_FORCE_FAILED
@@ -1106,7 +1124,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255, null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.full_name
 
 
@@ -1190,25 +1208,25 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         ]
 
     @property
-    def business_area(self):
+    def business_area(self) -> BusinessArea:
         return self.payment_plan_obj.business_area
 
     @property
-    def get_xlsx_verification_file(self) -> Optional[FileTemp]:
+    def get_xlsx_verification_file(self) -> FileTemp:
         try:
             return FileTemp.objects.get(object_id=self.pk, content_type=get_content_type_for_model(self))
         except FileTemp.DoesNotExist:
-            return None
+            raise GraphQLError("Xlsx Verification File does not exist.")
         except FileTemp.MultipleObjectsReturned as e:
             logger.exception(e)
-            return None
+            raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
 
     @property
     def has_xlsx_payment_verification_plan_file(self) -> bool:
         if all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
-                self.get_xlsx_verification_file,
+                FileTemp.objects.filter(object_id=self.pk, content_type=get_content_type_for_model(self)).count() == 1,
             ]
         ):
             return True
@@ -1226,12 +1244,12 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
             return self.get_xlsx_verification_file.was_downloaded
         return False
 
-    def set_active(self):
+    def set_active(self) -> None:
         self.status = PaymentVerificationPlan.STATUS_ACTIVE
         self.activation_date = timezone.now()
         self.error = None
 
-    def set_pending(self):
+    def set_pending(self) -> None:
         self.status = PaymentVerificationPlan.STATUS_PENDING
         self.responded_count = None
         self.received_count = None
@@ -1240,21 +1258,21 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         self.activation_date = None
         self.rapid_pro_flow_start_uuids = []
 
-    def can_activate(self):
+    def can_activate(self) -> bool:
         return self.status not in (
             PaymentVerificationPlan.STATUS_PENDING,
             PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
         )
 
     @property
-    def get_payment_plan(self) -> Union[PaymentPlan, CashPlan, None]:
+    def get_payment_plan(self) -> Union["PaymentPlan", "CashPlan", None]:
         try:
             return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
         except ObjectDoesNotExist:
             return None
 
 
-def build_summary(payment_plan):
+def build_summary(payment_plan: Union["CashPlan", "PaymentPlan"]) -> None:
     statuses_count = payment_plan.get_payment_verification_plans.aggregate(
         active=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
@@ -1278,7 +1296,7 @@ def build_summary(payment_plan):
     sender=PaymentVerificationPlan,
     dispatch_uid="update_verification_status_in_cash_plan",
 )
-def update_verification_status_in_cash_plan(sender, instance, **kwargs):
+def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerificationPlan, **kwargs: Any) -> None:
     build_summary(instance.payment_plan_obj)
 
 
@@ -1287,7 +1305,9 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     sender=PaymentVerificationPlan,
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
-def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs):
+def update_verification_status_in_cash_plan_on_delete(
+    sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
+) -> None:
     build_summary(instance.payment_plan_obj)
 
 
@@ -1341,24 +1361,24 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         ]
 
     @property
-    def get_payment(self):
+    def get_payment(self) -> Union[Payment, PaymentRecord, None]:
         try:
             return self.payment_content_type.model_class().objects.get(pk=self.payment_object_id)
         except ObjectDoesNotExist:
             return None
 
     @property
-    def is_manually_editable(self):
+    def is_manually_editable(self) -> bool:
         if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL:
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
         return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
     @property
-    def business_area(self):
+    def business_area(self) -> BusinessArea:
         return self.payment_verification_plan.payment_plan_obj.business_area
 
-    def set_pending(self):
+    def set_pending(self) -> None:
         self.status_date = timezone.now()
         self.status = PaymentVerification.STATUS_PENDING
         self.received_amount = None
@@ -1393,18 +1413,18 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
             )
         ]
 
-    def mark_as_active(self):
+    def mark_as_active(self) -> None:
         self.status = self.STATUS_ACTIVE
         self.completion_date = None
         if self.activation_date is None:
             self.activation_date = timezone.now()
 
-    def mark_as_finished(self):
+    def mark_as_finished(self) -> None:
         self.status = self.STATUS_FINISHED
         if self.completion_date is None:
             self.completion_date = timezone.now()
 
-    def mark_as_pending(self):
+    def mark_as_pending(self) -> None:
         self.status = self.STATUS_PENDING
         self.completion_date = None
         self.activation_date = None
@@ -1450,7 +1470,7 @@ class Approval(TimeStampedUUIDModel):
     class Meta:
         ordering = ("-created_at",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.type
 
     @property
@@ -1462,11 +1482,11 @@ class Approval(TimeStampedUUIDModel):
             self.REJECT: "Rejected",
         }
 
-        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type)
+        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
 
 
-class ChoiceArrayField(ArrayField):
-    def formfield(self, **kwargs):
+class ChoiceArrayFieldDM(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
         defaults = {
             "form_class": forms.TypedMultipleChoiceField,
             "choices": self.base_field.choices,
@@ -1485,16 +1505,16 @@ class DeliveryMechanism(TimeStampedUUIDModel):
     # If CASH can't be created raise validation error
     # create separate logic for payment channel scoep and fill PCH delivery data
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
-    global_core_fields = ChoiceArrayField(
+    global_core_fields = ChoiceArrayFieldDM(
         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
         default=list,
     )
-    payment_channel_fields = ChoiceArrayField(
+    payment_channel_fields = ChoiceArrayFieldDM(
         models.CharField(
             max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
         ),
         default=list,
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.delivery_mechanism

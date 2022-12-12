@@ -2,7 +2,6 @@ trigger: none
 pr:
   - master
   - develop
-  - feature/payment-module # TODO: remove when merging to develop
 resources:
   - repo: self
 
@@ -129,21 +128,13 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registry)
-          - task: DownloadSecureFile@1
-            inputs:
-              secureFile: '.env-django-test'
-          - task: CmdLine@2
-            displayName: "Setup .env and docker-compose.tst.yml"
-            inputs:
-              script: |
-               mv $(Agent.TempDirectory)/.env-django-test .env
 
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/deployment/docker-compose.tst.yml'
+              dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend lint'
               dockerComposeFileArgs: |
@@ -160,8 +151,47 @@ stages:
               failTaskOnFailedTests: true
               testRunTitle: 'Lint results'
 
+  - stage: mypy_backend
+    dependsOn: build_and_push
+    displayName: Mypy-Backend
+    jobs:
+      - job: django_mypy
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO MYPY]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend mypy'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+
+          - task: PublishTestResults@2
+            displayName: "Publish mypy result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/mypy-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'Mypy results'
+
   - stage: test_backend
-    dependsOn: lint_backend
+    dependsOn: [lint_backend, mypy_backend]
     displayName: Test-Backend
     jobs:
       - job: django_tests
@@ -176,21 +206,12 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registry)
-          - task: DownloadSecureFile@1
-            inputs:
-              secureFile: '.env-django-test'
-          - task: CmdLine@2
-            displayName: "Setup .env and docker-compose.tst.yml"
-            inputs:
-              script: |
-               mv $(Agent.TempDirectory)/.env-django-test .env
-
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/deployment/docker-compose.tst.yml'
+              dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
@@ -206,4 +227,3 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
-

@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -11,14 +10,14 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 
 
 class TestHouseholdWithdraw(TestCase):
-    databases = ("registration_datahub", "default")
+    databases = {"registration_datahub", "default"}
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
-        call_command("generatedocumenttypes")
 
-    def test_withdraw(self):
+    def test_withdraw(self) -> None:
         _, individuals = create_household_for_fixtures({"size": 5})
         for individual in individuals:
             DocumentFactory.create_batch(2, individual=individual, status=Document.STATUS_VALID)

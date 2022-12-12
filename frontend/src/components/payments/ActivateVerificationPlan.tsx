@@ -70,9 +70,7 @@ export function ActivateVerificationPlan({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Activate Verification Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Activate Verification Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

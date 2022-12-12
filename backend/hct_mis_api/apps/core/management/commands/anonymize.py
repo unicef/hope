@@ -1,6 +1,7 @@
 import hashlib
 from collections import defaultdict
 from random import random
+from typing import Any
 
 from django.core.management import BaseCommand
 from django.db.transaction import atomic
@@ -20,7 +21,7 @@ class Command(BaseCommand):
     help = "Anonymize data"
 
     @atomic()
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         pl_faker = Faker("pl_PL")
         ba_to_locale_dict = defaultdict(lambda: pl_faker)
         ba_to_locale_dict["afghanistan"] = Faker("fa_IR")
@@ -103,4 +104,3 @@ class Command(BaseCommand):
                 bulk_update_list = []
                 print(f"individuals {index}")
         BankAccountInfo.objects.bulk_update(bulk_update_list, ("bank_account_number", "debit_card_number"))
-        bulk_update_list = []

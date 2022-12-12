@@ -36,6 +36,9 @@
             "name": "UserNode"
           },
           {
+            "name": "IndividualIdentityNode"
+          },
+          {
             "name": "UserBusinessAreaNode"
           },
           {
@@ -166,9 +169,6 @@
           },
           {
             "name": "DocumentNode"
-          },
-          {
-            "name": "IndividualIdentityNode"
           },
           {
             "name": "BankAccountInfoNode"

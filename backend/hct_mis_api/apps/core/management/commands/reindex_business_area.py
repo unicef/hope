@@ -1,3 +1,6 @@
+from argparse import ArgumentParser
+from typing import Any
+
 from django.core.management.base import BaseCommand
 
 from elasticsearch import Elasticsearch
@@ -21,14 +24,14 @@ ES_MAPPING_INDEX_MODEL = {
 class Command(BaseCommand):
     help = "Re-index elasticsearch documents for given index and business_area"
 
-    ELASTICSEARCH_HOST = "http://elasticsearch:9200"
-
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("index", type=str)
         parser.add_argument("business_area", type=str)
 
-    def handle(self, *args, **options):
-        es = Elasticsearch(self.ELASTICSEARCH_HOST)
+    def handle(self, *args: Any, **options: Any) -> None:
+        from django.conf import settings
+
+        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
 
         index = options["index"]
         es_mapping = ES_MAPPING_INDEX_MODEL.get(index)
@@ -65,16 +68,16 @@ class Command(BaseCommand):
         else:
             qs = model.objects.filter(registration_data_import__business_area__slug=business_area)
 
-        i, count = 0, qs.count() // BATCH_SIZE + 1
-        document_list = []
+        i, count = 1, qs.count() // BATCH_SIZE + 1
 
         while i <= count:
+            document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * (i - 1) : BATCH_SIZE * i].iterator()
             for item in batch:
                 document = {**es_document().prepare(item), "_id": item.id}
                 document_list.append(document)
-                bulk(es, document_list, index=index)
+            bulk(es, document_list, index=index)
             i += 1
 
         self.stdout.write(self.style.SUCCESS(f"Documents for index: {index}, business_area: {business_area} created"))

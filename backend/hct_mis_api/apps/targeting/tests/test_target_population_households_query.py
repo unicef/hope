@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -44,7 +46,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
         _ = create_household(
@@ -98,7 +100,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.variables = {"businessArea": cls.business_area.slug}
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
@@ -116,7 +118,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_size(self, _, permissions):
+    def test_candidate_households_list_by_targeting_criteria_size(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -137,7 +139,9 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_residence_status(self, _, permissions):
+    def test_candidate_households_list_by_targeting_criteria_residence_status(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -161,7 +165,9 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_approved(self, _, permissions):
+    def test_candidate_households_list_by_targeting_criteria_approved(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -185,7 +191,9 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_first_10(self, _, permissions):
+    def test_candidate_households_list_by_targeting_criteria_first_10(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

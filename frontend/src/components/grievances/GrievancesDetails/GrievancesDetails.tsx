@@ -2,13 +2,13 @@ import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  choicesToDict,
   grievanceTicketStatusToColor,
-  reduceChoices,
   renderUserName,
 } from '../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
-  GrievanceTicketNode,
+  GrievanceTicketQuery,
 } from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { ContentLink } from '../../core/ContentLink';
@@ -19,7 +19,7 @@ import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
 interface GrievancesDetailsProps {
-  ticket: GrievanceTicketNode;
+  ticket: GrievanceTicketQuery['grievanceTicket'];
   choicesData: GrievancesChoiceDataQuery;
   businessArea: string;
   canViewHouseholdDetails: boolean;
@@ -36,11 +36,11 @@ export const GrievancesDetails = ({
   const { t } = useTranslation();
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices

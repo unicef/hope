@@ -1,5 +1,6 @@
 from io import BytesIO
 from pathlib import Path
+from typing import Any, List
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
@@ -43,7 +44,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -74,7 +75,9 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
             ("without_permission", [], True),
         ]
     )
-    def test_export_xlsx_payment_verification_plan(self, _, permissions, download_status):
+    def test_export_xlsx_payment_verification_plan(
+        self, _: Any, permissions: List[Permissions], download_status: str
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.xlsx_file.was_downloaded = download_status
         self.xlsx_file.save()

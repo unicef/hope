@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from queryset_sequence import ModelIterable, QuerySetSequence
 
@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExtendedQuerySetSequence(QuerySetSequence):
-    def _clone(self):
+    def _clone(self) -> "ExtendedQuerySetSequence":
         clone = ExtendedQuerySetSequence(*[qs._clone() for qs in self._querysets])
         clone._queryset_idxs = self._queryset_idxs
         clone._order_by = self._order_by
@@ -20,7 +20,7 @@ class ExtendedQuerySetSequence(QuerySetSequence):
 
         return clone
 
-    def aggregate(self, *args, **kwargs) -> dict:
+    def aggregate(self, *args: Any, **kwargs: Any) -> dict:
         results_dict = {}
 
         aggregated_querysets: List[dict] = [qs.aggregate(*args, **kwargs) for qs in self._querysets]
@@ -32,7 +32,10 @@ class ExtendedQuerySetSequence(QuerySetSequence):
         return results_dict
 
     def merge_by(
-        self, merge_field, aggregated_fields: Optional[List[str]] = None, regular_fields: Optional[List[str]] = None
+        self,
+        merge_field: str,
+        aggregated_fields: Optional[List[str]] = None,
+        regular_fields: Optional[List[str]] = None,
     ) -> List[dict]:
         """Merge grouped_by + annotated querysets"""
         aggregated_fields = aggregated_fields or []
@@ -58,7 +61,7 @@ class ExtendedQuerySetSequence(QuerySetSequence):
 
         return results_list
 
-    def distinct(self, *fields):
+    def distinct(self, *fields: Any) -> Any:
         clone = super().distinct(*fields)
 
         if clone._iterable_class != ModelIterable:

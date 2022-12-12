@@ -64,13 +64,13 @@ query chartTotalTransferredByMonth(
 
 class TestDashboardQueries(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], cls.business_area)
 
-    def test_chart_programmes_by_sector(self):
+    def test_chart_programmes_by_sector(self) -> None:
         household, individuals = create_household(
             household_args={"size": 2, "business_area": self.business_area},
         )
@@ -95,7 +95,7 @@ class TestDashboardQueries(APITestCase):
             context={"user": self.user},
         )
 
-    def test_chart_total_transferred_by_month(self):
+    def test_chart_total_transferred_by_month(self) -> None:
         household, individuals = create_household(
             household_args={"size": 2, "business_area": self.business_area},
         )

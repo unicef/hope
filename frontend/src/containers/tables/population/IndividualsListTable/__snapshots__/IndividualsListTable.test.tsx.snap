@@ -286,6 +286,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root sc-gzVnrw ehdClQ"
+                      confirmed="0"
                       focusable="false"
                       title="Possible Duplicate"
                       viewBox="0 0 24 24"

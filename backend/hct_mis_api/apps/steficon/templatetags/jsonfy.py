@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict, Union
 
 from django import template
 from django.core import serializers
@@ -19,13 +20,14 @@ json_value_escapes = {
 }
 
 
-def _jsonfy(value):
+# TODO: if passed a dict, it would go into infinite loop
+def _jsonfy(value: Any) -> Union[str, dict]:
     ret = None
     try:
         if isinstance(value, Model):
             ret = json.loads(serializers.serialize("json", [value]))
         elif isinstance(value, dict):
-            ret = _jsonfy(value)
+            ret = _jsonfy(value)  # FIXME: bug
         else:
             ret = str(value)
     except TypeError:
@@ -34,13 +36,18 @@ def _jsonfy(value):
 
 
 @register.filter
-def pretty_json(context):
-    data = {}
+def pretty_json(context: Dict) -> str:
+    data: Dict = {}
     if isinstance(context, dict):
         for key, value in context.items():
             data[key] = _jsonfy(value)
     else:
-        data = _jsonfy(context)
+        jsoned: Union[str, Dict] = _jsonfy(context)
+        if isinstance(jsoned, str):
+            data = {"obj": jsoned, "type": type(context).__name__}
+        else:
+            data = jsoned
+
     response = json.dumps(data, sort_keys=True, indent=2)
     formatter = HtmlFormatter(style="colorful")
     response = highlight(response, JsonLexer(), formatter)
@@ -48,7 +55,7 @@ def pretty_json(context):
 
 
 @register.filter
-def smart_json(value):
+def smart_json(value: Any) -> str:
     if isinstance(value, Model):
         data = json.loads(serializers.serialize("json", [value]))
     else:
@@ -57,21 +64,12 @@ def smart_json(value):
 
 
 @register.filter
-def pretty_python(value):
+def pretty_python(value: Any) -> str:
     formatter = HtmlFormatter(style="xcode", linenos="table")
     response = highlight(value, PythonLexer(), formatter)
     return mark_safe(response)
 
 
 @register.filter(name="repr")
-def _repr(value):
+def _repr(value: Any) -> str:
     return repr(value)
-
-
-#
-# @register.filter
-# def json_value(value):
-#     from django.core.serializers.json import DjangoJSONEncoder
-#
-#     json_str = json.dumps(value, cls=DjangoJSONEncoder).translate(json_value_escapes)
-#     return mark_safe(json_str)

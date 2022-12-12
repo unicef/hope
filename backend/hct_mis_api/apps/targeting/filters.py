@@ -1,4 +1,7 @@
-from django.db.models import Q
+from typing import TYPE_CHECKING, Any
+
+from django.contrib.postgres.fields import IntegerRangeField
+from django.db.models import DateTimeField, Q
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -14,6 +17,9 @@ import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 
 class HouseholdFilter(FilterSet):
@@ -60,7 +66,7 @@ class TargetPopulationFilter(FilterSet):
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
 
     @staticmethod
-    def filter_created_by_name(queryset, model_field, value):
+    def filter_created_by_name(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         """Gets full name of the associated user from query."""
         fname_query_key = f"{model_field}__given_name__icontains"
         lname_query_key = f"{model_field}__family_name__icontains"
@@ -68,19 +74,22 @@ class TargetPopulationFilter(FilterSet):
             queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
         return queryset
 
-    def filter_number_of_households_min(self, queryset, model_field, value):
+    @staticmethod
+    def filter_number_of_households_min(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__gte=value
         )
         return queryset
 
-    def filter_number_of_households_max(self, queryset, model_field, value):
+    @staticmethod
+    def filter_number_of_households_max(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__lte=value
         )
         return queryset
 
-    def filter_payment_plan_applicable(self, queryset, model_field, value):
+    @staticmethod
+    def filter_payment_plan_applicable(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         if value is True:
             return queryset.filter(
                 Q(business_area__is_payment_plan_applicable=True)
@@ -100,8 +109,8 @@ class TargetPopulationFilter(FilterSet):
         )
 
         filter_overrides = {
-            target_models.IntegerRangeField: {"filter_class": NumericRangeFilter},
-            target_models.models.DateTimeField: {"filter_class": DateTimeFilter},
+            IntegerRangeField: {"filter_class": NumericRangeFilter},
+            DateTimeField: {"filter_class": DateTimeFilter},
         }
 
     order_by = CustomOrderingFilter(
