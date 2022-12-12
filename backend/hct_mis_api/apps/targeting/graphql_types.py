@@ -123,9 +123,9 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
 
     total_family_size = graphene.Int(source="total_family_size")
     targeting_criteria = TargetingCriteriaRuleFilterNode()
-    householdList = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
+    # householdList = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
     # TODO: make it snake_case (some snapshots fail)
-    # household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
+    household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
 
     class Meta:
         model = target_models.TargetPopulation
