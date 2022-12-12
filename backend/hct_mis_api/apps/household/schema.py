@@ -615,7 +615,7 @@ class Query(graphene.ObjectType):
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         return {"total": payment_items_qs.values_list("household", flat=True).distinct().count()}
@@ -637,7 +637,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         individuals_counts = (
@@ -660,7 +660,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
         ]
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
@@ -686,7 +686,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         household_child_counts = (
@@ -728,7 +728,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
