@@ -20,7 +20,7 @@ def populate_symmetrical_relation_objects(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("grievance", "0050_migration"),
+        ("grievance", "0051_migration"),
     ]
 
     operations = [
