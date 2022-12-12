@@ -1,7 +1,7 @@
 import json
 from base64 import b64decode
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import (
@@ -1201,29 +1201,31 @@ class Query(graphene.ObjectType):
                 output_field=ArrayField(CharField(null=True)),
             ),
         )
-        qs = ExtendedQuerySetSequence(payment_plan_qs, cash_plan_qs)
-
-        qs = qs.annotate(
-            custom_order=Case(
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
-                    then=Value(1),
+        qs = (
+            ExtendedQuerySetSequence(payment_plan_qs, cash_plan_qs)
+            .annotate(
+                custom_order=Case(
+                    When(
+                        Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
+                        then=Value(1),
+                    ),
+                    When(
+                        Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
+                        then=Value(2),
+                    ),
+                    When(
+                        Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
+                        then=Value(3),
+                    ),
+                    output_field=IntegerField(),
+                    default=Value(0),
                 ),
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
-                    then=Value(2),
-                ),
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
-                    then=Value(3),
-                ),
-                output_field=IntegerField(),
-                default=Value(0),
-            ),
-        ).order_by("-updated_at", "custom_order")
+            )
+            .order_by("-updated_at", "custom_order")
+        )
 
         # filtering
-        qs = cash_plan_and_payment_plan_filter(qs, **kwargs)
+        qs: Iterable = cash_plan_and_payment_plan_filter(qs, **kwargs)  # type: ignore
 
         # ordering
         if order_by_value := kwargs.get("order_by"):

@@ -67,13 +67,13 @@ class VerificationPlanCrudServices:
             payment_verification_plan.payment_plan_obj, payment_verification_plan.verification_channel
         )
         sampling = Sampling(input_data, payment_verification_plan.payment_plan_obj, payment_records)
-        payment_verification_plan, payment_records = sampling.process_sampling(payment_verification_plan)
-        ProcessVerification(input_data, payment_verification_plan).process()
-        payment_verification_plan.save()
+        pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
+        ProcessVerification(input_data, pv_plan).process()
+        pv_plan.save()
 
-        CreatePaymentVerifications(payment_verification_plan, payment_records).create()
+        CreatePaymentVerifications(pv_plan, payment_records_qs).create()
 
-        return payment_verification_plan
+        return pv_plan
 
     @classmethod
     def delete(cls, payment_verification_plan: PaymentVerificationPlan) -> None:

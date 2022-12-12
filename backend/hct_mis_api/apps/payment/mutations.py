@@ -1,3 +1,4 @@
+from ctypes import Union
 import logging
 import math
 from base64 import b64decode
@@ -100,7 +101,9 @@ class CreateVerificationPlanMutation(PermissionMutation):
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
         node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
 
-        payment_plan_object = get_object_or_404(CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id)
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(
+            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        )
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
 

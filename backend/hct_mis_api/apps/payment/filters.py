@@ -440,11 +440,10 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
     order_by = order_by[1:] if reverse else order_by
 
     if order_by == "verification_status":
-        queryset = queryset.order_by(reverse + "custom_order")
-
+        qs = queryset.order_by(reverse + "custom_order")
     elif order_by == "unicef_id":
-        queryset = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
     else:
-        queryset = queryset.order_by(reverse + order_by)
+        qs = queryset.order_by(reverse + order_by)
 
-    return queryset
+    return list(qs)
