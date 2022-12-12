@@ -1,35 +1,35 @@
 import math
 import random
 import time
-
 from collections import namedtuple
 
-from django.core.management import call_command
-from django.core.management import BaseCommand
-
-from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory, Program
-from hct_mis_api.apps.program.models import CashPlan
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory, TargetingCriteriaFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
-)
-from hct_mis_api.apps.account.models import Role, UserRole
-from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from django.core.management import BaseCommand, call_command
 
 from faker import Faker
+
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+)
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, Program, ProgramFactory
+from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 def print_stats():
