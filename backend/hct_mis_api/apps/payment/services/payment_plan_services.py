@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 
 class PaymentPlanService:
-    def __init__(self, payment_plan: Optional["PaymentPlan"] = None):
+    def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
 
         self.action: Optional[str] = None
@@ -241,7 +241,8 @@ class PaymentPlanService:
 
             self.payment_plan.save()
 
-    def _create_payments(self, payment_plan: PaymentPlan) -> None:
+    @staticmethod
+    def _create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
         for household in payment_plan.target_population.households.all():
             try:
@@ -268,7 +269,8 @@ class PaymentPlanService:
         except IntegrityError:
             raise GraphQLError("Duplicated Households in provided Targeting")
 
-    def create(self, input_data: Dict, user: "User") -> PaymentPlan:
+    @staticmethod
+    def create(input_data: Dict, user: "User") -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
         if not business_area.is_payment_plan_applicable:
             raise GraphQLError("PaymentPlan can not be created in provided Business Area")
@@ -302,7 +304,7 @@ class PaymentPlanService:
             end_date=input_data["end_date"],
         )
 
-        self._create_payments(payment_plan)
+        PaymentPlanService._create_payments(payment_plan)
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()

@@ -887,7 +887,7 @@ class Query(graphene.ObjectType):
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
         node_name, obj_id = b64decode(input.get("cash_or_payment_plan_id")).decode().split(":")
-        payment_plan_object: "PaymentPlan" = get_object_or_404(
+        payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
         )
 
