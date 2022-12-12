@@ -121,11 +121,11 @@ class PullFromDatahubTask:
                     ret["failures"].append(session.id)
         return ret | {"grouped_session": grouped_session_count}
 
-    def clear_cache(self, session):
+    def clear_cache(self, session) -> None:
         business_area = self.get_business_area_for_cash_assist_code(session.business_area)
         cache.delete_pattern(PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(business_area.id, "*"))
 
-    def copy_session(self, session):
+    def copy_session(self, session) -> None:
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
