@@ -30,6 +30,10 @@ else
       mkdir -p ./lint-results
       flake8 --format=junit-xml . > ./lint-results/flake8.xml
       ;;
+    "mypy")
+      mkdir -p ./mypy-results
+      mypy --junit-xml ./mypy-results/mypy.xml .
+      ;;
     "celery-beat")
       waitforit -host=backend -port=8000 --timeout 300 && \
       celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler
