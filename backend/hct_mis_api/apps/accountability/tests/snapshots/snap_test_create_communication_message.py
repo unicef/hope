@@ -112,7 +112,7 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
             'locations': [
                 {
                     'column': 3,
-                    'line': 6
+                    'line': 5
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',

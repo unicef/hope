@@ -25,7 +25,7 @@ mutation ExportSurveySample($surveyId: ID!) {
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area, name="Test Target Population")
@@ -35,7 +35,7 @@ mutation ExportSurveySample($surveyId: ID!) {
 
         cls.survey = SurveyFactory(title="Test survey", target_population=cls.target_population, created_by=cls.user)
 
-    def test_create_export_survey_sample_without_permissions(self):
+    def test_create_export_survey_sample_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
@@ -50,7 +50,7 @@ mutation ExportSurveySample($surveyId: ID!) {
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",
         new=lambda *args, **kwargs: None,
     )
-    def test_create_export_survey_sample_with_valid_survey_id(self):
+    def test_create_export_survey_sample_with_valid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area
         )
@@ -67,7 +67,7 @@ mutation ExportSurveySample($surveyId: ID!) {
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",
         new=lambda *args, **kwargs: None,
     )
-    def test_create_export_survey_sample_with_invalid_survey_id(self):
+    def test_create_export_survey_sample_with_invalid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area
         )

@@ -12,12 +12,10 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 class TestCreateCommunicationMessage(APITestCase):
     MUTATION = """
 mutation CreateAccountabilityCommunicationMessage (
-  $businessAreaSlug: String!
-  $inputs: CreateAccountabilityCommunicationMessageInput!
+  $input: CreateAccountabilityCommunicationMessageInput!
 ) {
   createAccountabilityCommunicationMessage (
-    businessAreaSlug: $businessAreaSlug
-    inputs: $inputs
+    input: $input
   ) {
     message {
       title
@@ -45,7 +43,7 @@ mutation CreateAccountabilityCommunicationMessage (
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
@@ -70,15 +68,14 @@ mutation CreateAccountabilityCommunicationMessage (
             },
         }
 
-    def test_create_accountability_communication_message_without_permission(self):
+    def test_create_accountability_communication_message_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "businessAreaSlug": self.business_area.slug,
-                "inputs": {
+                "input": {
                     "title": "Test message",
                     "body": "Test body",
                     "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
@@ -94,7 +91,7 @@ mutation CreateAccountabilityCommunicationMessage (
             (Survey.SAMPLING_RANDOM,),
         ]
     )
-    def test_create_accountability_communication_message_by_target_population(self, sampling_type):
+    def test_create_accountability_communication_message_by_target_population(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
@@ -103,8 +100,7 @@ mutation CreateAccountabilityCommunicationMessage (
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "businessAreaSlug": self.business_area.slug,
-                "inputs": {
+                "input": {
                     "title": "Test message",
                     "body": "Test body",
                     "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
@@ -120,7 +116,7 @@ mutation CreateAccountabilityCommunicationMessage (
             (Survey.SAMPLING_RANDOM,),
         ]
     )
-    def test_create_accountability_communication_message_by_households(self, sampling_type):
+    def test_create_accountability_communication_message_by_households(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
         )
@@ -129,8 +125,7 @@ mutation CreateAccountabilityCommunicationMessage (
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "businessAreaSlug": self.business_area.slug,
-                "inputs": {
+                "input": {
                     "title": "Test message",
                     "body": "Test body",
                     "households": [self.id_to_base64(hh.id, "HouseholdNode") for hh in self.households],
