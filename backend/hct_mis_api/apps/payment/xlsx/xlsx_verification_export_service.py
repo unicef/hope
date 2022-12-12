@@ -148,7 +148,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         return context
 
-    def send_email(self, user: "User") -> None:
+    def send_email(self, user: "User") -> None:  # type: ignore
+        # TODO: this function is not used anywhere yet but once it is, the `user` arg should not override the `context` arg from the base class
         protocol = "http" if settings.IS_DEV else "https"
         payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
         api = reverse("download-payment-verification-plan", args=[payment_verification_id])

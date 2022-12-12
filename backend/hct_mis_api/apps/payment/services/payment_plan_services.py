@@ -312,7 +312,7 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: Dict) -> Optional[PaymentPlan]:
+    def update(self, input_data: Dict) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be edited")
 
@@ -392,7 +392,7 @@ class PaymentPlanService:
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
         return self.payment_plan
 
-    def import_xlsx_per_fsp(self, user: "User", file: IO) -> Optional[PaymentPlan]:
+    def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
         with transaction.atomic():
             self.payment_plan.background_action_status_xlsx_importing_reconciliation()
             self.payment_plan.save()
@@ -411,7 +411,8 @@ class PaymentPlanService:
                     file_temp.pk,
                 )
             )
-        return self.payment_plan.refresh_from_db()
+        self.payment_plan.refresh_from_db()
+        return self.payment_plan
 
     def validate_fsps_per_delivery_mechanisms(
         self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False
