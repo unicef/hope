@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    decode_id_string_required,
 )
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -199,7 +200,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, payment_verification_plan_id: str, **kwargs: Any
     ) -> "FinishPaymentVerificationPlan":
-        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan_id = decode_id_string_required(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
         old_payment_verification_plan = copy_model_object(payment_verification_plan)

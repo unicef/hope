@@ -57,6 +57,7 @@ from hct_mis_api.apps.utils.models import (
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
+    from hct_mis_api.apps.account.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -567,7 +568,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     @property
-    def currency_exchange_date(self) -> datetime.date:
+    def currency_exchange_date(self) -> datetime:
         now = timezone.now().date()
         return self.dispersion_end_date if self.dispersion_end_date < now else now
 
@@ -882,7 +883,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         source=Status.NOT_SENT,
         target=Status.SENT,
     )
-    def status_send(self, sent_by: "settings.AUTH_USER_MODEL") -> None:
+    def status_send(self, sent_by: "User") -> None:
         self.sent_date = timezone.now()
         self.sent_by = sent_by
 
