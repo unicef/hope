@@ -284,7 +284,10 @@ class Report(NaturalKeyModel, models.Model):
             if not dataset.size:
                 continue
             try:
-                context = {**dataset.arguments, **(pickle.loads(dataset.extra) or {})}
+                context = dataset.arguments
+                if dataset.extra:
+                    context.update(pickle.loads(dataset.extra) or {})
+
                 title = self.document_title % context
                 output = self.formatter.render({"dataset": dataset, "report": self, "title": title, "context": context})
                 res, __ = ReportDocument.objects.update_or_create(
