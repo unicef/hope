@@ -32,7 +32,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-def print_stats():
+def print_stats() -> None:
     print("-" * 30)
     print("Households:", Household.objects.count())
     print("Individuals:", Individual.objects.count())
@@ -49,11 +49,11 @@ def print_stats():
 start_time = time.time()
 
 
-def elapsed_print(*args, **kwargs):
+def elapsed_print(*args, **kwargs) -> None:
     print(f"[{time.time() - start_time:.2f}s]", *args, **kwargs)
 
 
-def create_household_with_individuals(business_area, size, rdi, faker):
+def create_household_with_individuals(business_area, size, rdi, faker) -> int:
     individuals = [
         IndividualFactory.create(
             household=None,
@@ -78,7 +78,7 @@ def create_household_with_individuals(business_area, size, rdi, faker):
     return size
 
 
-def create_households(individuals_amount, area_with_locale):
+def create_households(individuals_amount, area_with_locale) -> None:
     business_area = BusinessAreaFactory(name=area_with_locale.area)
     rdis = [
         RegistrationDataImportFactory(business_area=business_area)
@@ -98,7 +98,7 @@ def create_households(individuals_amount, area_with_locale):
         total += amount_of_individuals
 
 
-def create_payment_records(business_area_names):
+def create_payment_records(business_area_names) -> None:
     elapsed_print("Creating payment records")
 
     for business_area_name in business_area_names:
@@ -118,13 +118,13 @@ def create_payment_records(business_area_names):
                 )
 
 
-def create_user_roles_in_business_areas(user, business_areas):
+def create_user_roles_in_business_areas(user, business_areas) -> None:
     role = Role.objects.get(name="Role with all permissions")
     for area in business_areas:
         UserRole.objects.get_or_create(user=user, role=role, business_area=BusinessArea.objects.get(name=area))
 
 
-def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale):
+def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale) -> None:
     size = math.ceil(2 * pow(10, 6) * scale)
     elapsed_print(f"Creating {size} grievance tickets for {business_area.name}")
     individuals = Individual.objects.filter(business_area=business_area)
@@ -160,7 +160,7 @@ def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale):
             )
 
 
-def create_grievance_tickets(scale, business_areas):
+def create_grievance_tickets(scale, business_areas) -> None:
     for business_area_data in business_areas:
         faker = Faker([business_area_data.locale])
         country = geo_models.Country.objects.get_or_create(name=business_area_data.area)[0]
