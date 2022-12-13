@@ -325,7 +325,7 @@ def create_household_and_individuals(
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     household: Household = HouseholdFactory.build(**household_data)

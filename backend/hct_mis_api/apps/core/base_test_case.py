@@ -5,12 +5,12 @@ import sys
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-import factory
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 
+import factory
 from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
@@ -31,7 +31,7 @@ class APITestCase(SnapshotTestTestCase):
         super().setUp()
         self.client = Client(schema)
 
-        seed_in_env = 2137
+        seed_in_env = os.getenv("RANDOM_SEED")
         self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
         faker = factory.faker.Faker._get_faker()
         faker.random.seed(seed_in_env)
