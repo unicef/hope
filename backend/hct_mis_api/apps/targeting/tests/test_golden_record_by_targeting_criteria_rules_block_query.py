@@ -35,7 +35,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             edges {
               node {
                 size
-                individuals {
+                individuals(orderBy: "sex", businessArea: $businessArea) {
                     edges{
                         node{
                             sex
@@ -70,17 +70,31 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                     "memory_disability": "LOT_DIFFICULTY",
                     "selfcare_disability": "CANNOT_DO",
                     "comms_disability": "SOME_DIFFICULTY",
+                    "business_area": cls.business_area,
                 },
             ],
         )
         cls.household_targeted = household
+        cls.targeted_inds = individuals
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": cls.business_area,
             },
-            [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
+            [
+                {
+                    "sex": "MALE",
+                    "marital_status": "SINGLE",
+                    "business_area": cls.business_area,
+                },
+                {
+                    "sex": "FEMALE",
+                    "marital_status": "MARRIED",
+                    "business_area": cls.business_area,
+                },
+            ],
         )
         cls.not_targeted_household = household
+        cls.not_targeted_inds = individuals
 
         recalculate_data(cls.household_targeted)
         recalculate_data(cls.not_targeted_household)
@@ -210,7 +224,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             edges {
               node {
                 size
-                individuals{
+                individuals(orderBy: "full_name", businessArea: $businessArea) {
                     edges{
                         node{
                             fullName
@@ -248,11 +262,12 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_phone_number(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"phone_no": "+48 123456789", "full_name": "individual_with_phone"}],
+            [{"phone_no": "+48 123456789", "full_name": "individual_with_phone", "business_area": self.business_area}],
         )
 
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "", "full_name": "individual_without_phone"}]
+            {"business_area": self.business_area},
+            [{"phone_no": "", "full_name": "individual_without_phone", "business_area": self.business_area}],
         )
 
         variables = {
@@ -287,12 +302,24 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_has_bank_account_info(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_without_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         _, individuals = create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_with_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -329,12 +356,24 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_without_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         _, individuals = create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_with_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -371,11 +410,12 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_tax_id(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_without_tax_id", "phone_no": "123456789"}],
+            [{"full_name": "individual_without_tax_id", "phone_no": "123456789", "business_area": self.business_area}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}]
+            {"business_area": self.business_area},
+            [{"full_name": "individual_with_tax_id", "phone_no": "123456789", "business_area": self.business_area}],
         )
 
         create_individual_document(individuals[0], document_type="TAX_ID")
