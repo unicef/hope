@@ -2,9 +2,9 @@ import logging
 from typing import List, Optional
 from uuid import UUID
 
-from concurrency.api import disable_concurrency
 from django.core.paginator import Paginator
-from django.db.models import QuerySet
+
+from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
