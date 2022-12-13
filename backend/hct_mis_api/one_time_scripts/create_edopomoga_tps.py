@@ -1,5 +1,4 @@
 from collections import defaultdict
-from typing import List
 
 from django.db.models import Count, Q, QuerySet
 from django.db.transaction import atomic
