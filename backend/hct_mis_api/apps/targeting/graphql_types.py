@@ -126,6 +126,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     # householdList = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
     # TODO: make it snake_case (some snapshots fail)
     household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
+    households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
 
     class Meta:
         model = target_models.TargetPopulation
