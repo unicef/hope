@@ -1,7 +1,8 @@
 import json
 import os
 import shutil
-from typing import Any, Dict
+from typing import Any, Dict, List
+from uuid import UUID
 
 from django.conf import settings
 from django.core.management import BaseCommand, CommandParser
@@ -12,7 +13,7 @@ from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def find_paid_households(sf_pk: int, business_area_slug: str = "ukraine") -> Dict:
+def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Dict[str, List[str]]:
     storage_file = StorageFile.objects.get(pk=sf_pk)
     households_loaded_via_sf = Household.objects.filter(
         storage_obj=storage_file, business_area__slug=business_area_slug

@@ -11,7 +11,7 @@ function preparePositiveFeedbackVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             positiveFeedbackTicketExtras: {
@@ -31,7 +31,7 @@ function prepareNegativeFeedbackVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             negativeFeedbackTicketExtras: {
@@ -51,7 +51,7 @@ function prepareReferralVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             referralTicketExtras: {
@@ -71,7 +71,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             grievanceComplaintTicketExtras: {
@@ -93,7 +93,7 @@ function prepareSesitiveVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             sensitiveGrievanceTicketExtras: {
@@ -124,7 +124,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
             addIndividualIssueTypeExtras: {
@@ -145,7 +145,7 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
             individualDeleteIssueTypeExtras: {
@@ -165,7 +165,7 @@ function prepareDeleteHouseholdVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
             householdDeleteIssueTypeExtras: {
@@ -200,7 +200,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
             individualDataUpdateIssueTypeExtras: {
@@ -250,7 +250,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
             householdDataUpdateIssueTypeExtras: {
@@ -270,7 +270,7 @@ function prepareDefaultVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };
