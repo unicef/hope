@@ -145,7 +145,7 @@ class DocumentNode(DjangoObjectType):
 
     @staticmethod
     def resolve_photo(parent: Document, info: Any) -> Optional[String]:
-        return getattr(parent.photo, "url", None)
+        return getattr(parent.photo, "url")
 
     class Meta:
         model = Document
