@@ -4,21 +4,21 @@ import EditIcon from '@material-ui/icons/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';
-import { RelatedTicketIdDisplay } from './RelatedTicketIdDisplay';
+import { LinkedTicketIdDisplay } from './LinkedTicketIdDisplay';
 
-export const LookUpRelatedTicketsDisplay = ({
+export const LookUpLinkedTicketsDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
 }): React.ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (): void => {
-    onValueChange('selectedRelatedTickets', []);
+    onValueChange('selectedLinkedTickets', []);
   };
-  const renderRelatedTickets = (): React.ReactElement => {
-    if (values.selectedRelatedTickets.length) {
-      return values.selectedRelatedTickets.map((id) => (
-        <RelatedTicketIdDisplay ticketId={id} />
+  const renderLinkedTickets = (): React.ReactElement => {
+    if (values.selectedLinkedTickets.length) {
+      return values.selectedLinkedTickets.map((id) => (
+        <LinkedTicketIdDisplay ticketId={id} />
       ));
     }
     return <BlueText>-</BlueText>;
@@ -28,7 +28,7 @@ export const LookUpRelatedTicketsDisplay = ({
       <Grid container justify='space-between'>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            {t('Ticket ID')}:{renderRelatedTickets()}
+            {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
         <Grid item>

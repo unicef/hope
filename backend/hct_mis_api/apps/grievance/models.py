@@ -1,15 +1,16 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, Union
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, QuerySet
+from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -298,9 +299,10 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
     linked_tickets = models.ManyToManyField(
-        to="GrievanceTicket",
+        to="self",
         through="GrievanceTicketThrough",
         related_name="linked_tickets_related",
+        symmetrical=True,
     )
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
@@ -314,17 +316,25 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     objects = GrievanceTicketManager()
 
-    def flatten(self, t) -> List:
-        return [item for sublist in t for item in sublist]
+    @cached_property
+    def _linked_tickets(self) -> QuerySet["GrievanceTicket"]:
+        """Tickets linked explicitly via UI or in 'create_needs_adjudication_tickets' function"""
+        return self.linked_tickets.all()
 
-    @property
-    def related_tickets(self) -> QuerySet["GrievanceTicket"]:
-        all_through_objects = GrievanceTicketThrough.objects.filter(
-            Q(linked_ticket=self) | Q(main_ticket=self)
-        ).values_list("main_ticket", "linked_ticket")
-        ids = set(self.flatten(all_through_objects))
-        ids.discard(self.id)
-        return GrievanceTicket.objects.filter(id__in=ids)
+    @cached_property
+    def _existing_tickets(self) -> QuerySet["GrievanceTicket"]:
+        """All tickets for assigned Household"""
+        if not self.household_unicef_id:
+            return GrievanceTicket.objects.none()
+
+        return GrievanceTicket.objects.filter(
+            household_unicef_id=self.household_unicef_id,
+        ).exclude(pk=self.pk)
+
+    @cached_property
+    def _related_tickets(self) -> QuerySet["GrievanceTicket"]:
+        """Distinct linked + existing tickets"""
+        return self._linked_tickets.union(self._existing_tickets)
 
     @property
     def is_feedback(self) -> bool:
@@ -402,6 +412,14 @@ class GrievanceTicketThrough(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="grievance_tickets_through_linked",
     )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["main_ticket", "linked_ticket"],
+                name="unique_main_linked_ticket",
+            )
+        ]
 
 
 class TicketNote(TimeStampedUUIDModel):
