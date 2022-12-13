@@ -85,9 +85,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         ticket2 = GrievanceTicketFactory.create()
 
         ticket1.linked_tickets.set(self.grievance_tickets)
-        ticket2.linked_tickets.set([ticket for ticket in self.grievance_tickets] + [ticket1])
+        ticket2.linked_tickets.set(list(self.grievance_tickets) + [ticket1])
 
-        ticket1_related_tickets_count = len([ticket for ticket in ticket1.related_tickets])
-        ticket2_related_tickets_count = len([ticket for ticket in ticket2.related_tickets])
-        self.assertEqual(ticket1_related_tickets_count, 6)
-        self.assertEqual(ticket2_related_tickets_count, 6)
+        self.assertEqual(ticket1.linked_tickets.count(), 6)
+        self.assertEqual(ticket2.linked_tickets.count(), 6)

@@ -8,22 +8,22 @@ import {
   useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../core/TableWrapper';
-import { headCells } from './LookUpRelatedTicketsHeadCells';
-import { LookUpRelatedTicketsTableRow } from './LookUpRelatedTicketsTableRow';
+import { headCells } from './LookUpLinkedTicketsHeadCells';
+import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 
-interface LookUpRelatedTicketsTableProps {
+interface LookUpLinkedTicketsTableProps {
   businessArea: string;
   filter;
   setFieldValue;
   initialValues;
 }
 
-export const LookUpRelatedTicketsTable = ({
+export const LookUpLinkedTicketsTable = ({
   businessArea,
   filter,
   setFieldValue,
   initialValues,
-}: LookUpRelatedTicketsTableProps): React.ReactElement => {
+}: LookUpLinkedTicketsTableProps): React.ReactElement => {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search,
@@ -32,9 +32,7 @@ export const LookUpRelatedTicketsTable = ({
     createdAtRange: JSON.stringify(filter.createdAtRange),
     admin: [decodeIdString(filter?.admin?.node?.id)],
   };
-  const [selected, setSelected] = useState(
-    initialValues.selectedRelatedTickets,
-  );
+  const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -68,19 +66,19 @@ export const LookUpRelatedTicketsTable = ({
     }
 
     setSelected(newSelected);
-    setFieldValue('selectedRelatedTickets', newSelected);
+    setFieldValue('selectedLinkedTickets', newSelected);
   };
 
   const handleSelectAllCheckboxesClick = (event, rows): void => {
     if (!selected.length) {
       const newSelecteds = rows.map((row) => row.id);
       setSelected(newSelecteds);
-      setFieldValue('selectedRelatedTickets', newSelecteds);
+      setFieldValue('selectedLinkedTickets', newSelecteds);
 
       return;
     }
     setSelected([]);
-    setFieldValue('selectedRelatedTickets', []);
+    setFieldValue('selectedLinkedTickets', []);
   };
   const numSelected = selected.length;
 
@@ -98,7 +96,7 @@ export const LookUpRelatedTicketsTable = ({
         onSelectAllClick={handleSelectAllCheckboxesClick}
         numSelected={numSelected}
         renderRow={(row) => (
-          <LookUpRelatedTicketsTableRow
+          <LookUpLinkedTicketsTableRow
             key={row.id}
             ticket={row}
             statusChoices={statusChoices}

@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List, Union
 
 from django.core.cache import cache
 from django.db import transaction
@@ -95,7 +95,7 @@ class PullFromDatahubTask:
     def __init__(self, exchange_rates_client: ExchangeRates = None):
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
-    def execute(self):
+    def execute(self) -> Dict[str, Union[int, List[Any]]]:
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
         ret: Dict[str, List] = {
             "skipped_due_failure": [],
@@ -121,11 +121,11 @@ class PullFromDatahubTask:
                     ret["failures"].append(session.id)
         return ret | {"grouped_session": grouped_session_count}
 
-    def clear_cache(self, session) -> None:
+    def clear_cache(self, session: Session) -> None:
         business_area = self.get_business_area_for_cash_assist_code(session.business_area)
         cache.delete_pattern(PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(business_area.id, "*"))
 
-    def copy_session(self, session) -> None:
+    def copy_session(self, session: Session) -> None:
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
