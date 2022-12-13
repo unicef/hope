@@ -98,8 +98,9 @@ def create_needs_adjudication_tickets(
         return None
 
     ticket_details_to_create = []
+    linked_tickets = []
+
     for possible_duplicate in individuals_queryset:
-        linked_tickets = []
         possible_duplicates = []
 
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:

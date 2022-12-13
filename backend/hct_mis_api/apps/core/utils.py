@@ -723,7 +723,7 @@ def timezone_datetime(value: Any) -> datetime:
 
 def save_data_in_cache(
     cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Optional[Callable] = None
-) -> Any:
+) -> Union[str, Dict]:
     cache_data = cache.get(cache_key, "NOT_CACHED")
     if cache_data == "NOT_CACHED":
         cache_data = data_lambda()
