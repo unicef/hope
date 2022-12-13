@@ -77,7 +77,7 @@ django_settings_module = "hct_mis_api.settings.dev"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.12.1"
+version = "2022.12.3"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -142,7 +142,7 @@ newrelic = "8.4.0"
 openpyxl = "3.0.10"
 openpyxl_image_loader = "1.0.5"
 phonenumbers = "8.12.49"
-pillow = "9.2.0"
+pillow = "9.3.0"
 prompt-toolkit = "3.0.29"
 psycopg2 = "2.9.3"
 ptyprocess = "0.7.0"
