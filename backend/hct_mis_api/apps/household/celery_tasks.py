@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None:
     from hct_mis_api.apps.household.models import Household, Individual
 
-    _households_to_update = []
-    _fields_to_update = []
+    households_to_update = []
+    fields_to_update = []
 
     with configure_scope() as scope:
         with disable_concurrency(Household), disable_concurrency(Individual):
@@ -36,11 +36,11 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
                 .select_for_update(of=("self",))
             ):
                 scope.set_tag("business_area", hh.business_area)
-                household, fields_to_update = recalculate_data(hh, save=False)
-                _households_to_update.append(household)
-                _fields_to_update.extend(x for x in fields_to_update if x not in _fields_to_update)
+                household, updated_fields = recalculate_data(hh, save=False)
+                households_to_update.append(household)
+                fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
 
-            Household.objects.bulk_update(_households_to_update, _fields_to_update)
+            Household.objects.bulk_update(households_to_update, fields_to_update)
 
 
 @app.task()
