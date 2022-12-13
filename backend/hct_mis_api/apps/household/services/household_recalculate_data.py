@@ -33,11 +33,12 @@ def recalculate_data(household: Household, save: bool = True) -> Tuple[Household
 
     individuals_to_update = []
     individuals_fields_to_update = []
+
     for individual in household.individuals.all().select_for_update():
         _individual, _fields_to_update = individual.recalculate_data(save=False)
         individuals_to_update.append(_individual)
         individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
-    print(len(individuals_to_update), individuals_fields_to_update)
+
     Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
 
     date_6_years_ago = timezone.now() - relativedelta(years=+6)
