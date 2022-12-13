@@ -9,20 +9,20 @@ import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
 
-interface LookUpRelatedTicketsFiltersProps {
+interface LookUpLinkedTicketsFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
   setFilterApplied?;
   filterInitial?;
 }
-export function LookUpRelatedTicketsFilters({
+export function LookUpLinkedTicketsFilters({
   onFilterChange,
   filter,
   choicesData,
   setFilterApplied,
   filterInitial,
-}: LookUpRelatedTicketsFiltersProps): React.ReactElement {
+}: LookUpLinkedTicketsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
