@@ -65,7 +65,6 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
         program_one = ProgramFactory(
