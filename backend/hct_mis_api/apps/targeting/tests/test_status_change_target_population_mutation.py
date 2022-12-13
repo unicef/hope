@@ -258,7 +258,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                       }
                     }
                   }
-                  households {
+                  households(orderBy: "size") {
                     totalCount
                     edges {
                       node {
