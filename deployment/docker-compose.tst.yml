@@ -30,9 +30,9 @@ services:
   backend:
     <<: *django_envs
     image: ${backend_image}
-    build:
-      context: ../backend
     command: "test"
+    volumes:
+      - ../backend:/code/
     depends_on:
       - db
       - redis
@@ -65,8 +65,6 @@ services:
   celery_worker:
     <<: *django_envs
     image: ${backend_image}
-    build:
-      context: ../backend
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
