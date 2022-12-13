@@ -17,8 +17,6 @@ from dateutil.parser import parse
 from django_filters import Filter
 from traitlets import Any
 
-from hct_mis_api.apps.core.models import BusinessArea
-
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
     if value:
