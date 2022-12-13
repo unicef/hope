@@ -9,11 +9,9 @@ from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 
 class TestListQueryMessage(APITestCase):
@@ -59,18 +57,16 @@ class TestListQueryMessage(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
 
         cls.tp = TargetPopulationFactory(business_area=cls.business_area)
         households = [create_household()[0] for _ in range(14)]
-        HouseholdSelection.objects.bulk_create(
-            [HouseholdSelection(household=household, target_population=cls.tp) for household in households]
-        )
+        cls.household = households[0]
+        cls.tp.households.set(households)
 
         for i in range(1, 11):
-            CommunicationMessageFactory(
+            cls.communication_message = CommunicationMessageFactory(
                 title=f"You got credit of USD {i}",
                 body=f"Greetings, we have sent you USD {i} in your registered account on 2022-09-19 20:00:00 UTC",
                 business_area=cls.business_area,
@@ -152,7 +148,7 @@ class TestListQueryMessage(APITestCase):
                 {},
             ),
             (
-                "with_view_details_permission",
+                "with_as_creator_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
                 {},
             ),
@@ -163,7 +159,7 @@ class TestListQueryMessage(APITestCase):
             ),
         )
     )
-    def test_list_communication_messages_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
+    def test_list_communication_message_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
         self.create_user_role_with_permissions(
             self.user,
             permissions,
