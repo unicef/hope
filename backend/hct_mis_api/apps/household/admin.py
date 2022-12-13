@@ -104,99 +104,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
     )
 
 
-@admin.register(Household)
-class HouseholdAdmin(
-    SoftDeletableAdminMixin,
-    LastSyncDateResetMixin,
-    LinkedObjectsMixin,
-    PowerQueryMixin,
-    SmartFieldsetMixin,
-    CursorPaginatorAdmin,
-    HOPEModelAdminBase,
-):
-    list_display = (
-        "unicef_id",
-        "country",
-        "head_of_household",
-        "size",
-        "withdrawn",
-    )
-    list_filter = (
-        DepotManager,
-        ("business_area", AutoCompleteFilter),
-        QueryStringFilter,
-        "withdrawn",
-    )
-    search_fields = ("head_of_household__family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at")
-    filter_horizontal = ("representatives", "programs")
-    raw_id_fields = (
-        "admin_area",
-        "business_area",
-        "country",
-        "country_origin",
-        "currency",
-        "head_of_household",
-        "registration_data_import",
-    )
-    fieldsets = [
-        (None, {"fields": (("unicef_id", "head_of_household"),)}),
-        (
-            "Registration",
-            {
-                "classes": ("collapse",),
-                "fields": (
-                    "registration_data_import",
-                    "registration_method",
-                    "first_registration_date",
-                    "last_registration_date",
-                    "org_enumerator",
-                    "org_name_enumerator",
-                    "name_enumerator",
-                ),
-            },
-        ),
-        (
-            "Dates",
-            {
-                "classes": ("collapse",),
-                "fields": (
-                    ("created_at", "updated_at"),
-                    "last_sync_at",
-                    "removed_date",
-                    "withdrawn_date",
-                ),
-            },
-        ),
-        ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
-    ]
-    actions = [
-        "mass_withdraw",
-        "mass_unwithdraw",
-        "count_queryset",
-        "create_target_population",
-        "add_to_target_population",
-    ]
-    cursor_ordering_field = "unicef_id"
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        qs = self.model.all_objects.get_queryset().select_related(
-            "head_of_household", "country", "country_origin", "admin_area"
-        )
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        return qs
-
-    def get_ignored_linked_objects(self, request: HttpRequest) -> List:
-        return []
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return False
-
+class HouseholdWithDrawnMixin:
     def _toggle_withdraw_status(
         self,
         request: HttpRequest,
@@ -237,95 +145,6 @@ class HouseholdAdmin(
 
     def has_withdrawn_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("household.can_withdrawn")
-
-    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
-        from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.targeting.models import TargetPopulation
-
-        context = self.get_common_context(request, title="Extend TargetPopulation")
-        tp: TargetPopulation
-        ba: BusinessArea
-        if "apply" in request.POST:
-            form = AddToTargetPopulationForm(request.POST, read_only=True)
-            if form.is_valid():
-                tp = form.cleaned_data["target_population"]
-                ba = tp.business_area
-                population = qs.filter(business_area=ba)
-                context["target_population"] = tp
-                context["population"] = population
-                context["queryset"] = qs
-                if population.count() != qs.count():
-                    context["mixed_household"] = True
-        elif "confirm" in request.POST:
-            form = AddToTargetPopulationForm(request.POST)
-            if form.is_valid():
-                tp = form.cleaned_data["target_population"]
-                ba = tp.business_area
-                population = qs.filter(business_area=ba)
-                with atomic():
-                    tp.households.add(*population)
-                    refresh_stats(tp)
-                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
-                return HttpResponseRedirect(url)
-        else:
-            form = AddToTargetPopulationForm(
-                initial={
-                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
-                    "action": "add_to_target_population",
-                }
-            )
-        context["form"] = form
-        return TemplateResponse(request, "admin/household/household/add_target_population.html", context)
-
-    add_to_target_population.allowed_permissions = ["create_target_population"]
-
-    def create_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
-        context = self.get_common_context(request, title="Create TargetPopulation")
-        if "apply" in request.POST:
-            form = CreateTargetPopulationForm(request.POST, read_only=True)
-            if form.is_valid():
-                program = form.cleaned_data["program"]
-                ba = program.business_area
-                population = qs.filter(business_area=ba)
-                context["program"] = program
-                context["population"] = population
-                context["queryset"] = qs
-                if population.count() != qs.count():
-                    context["mixed_household"] = True
-        elif "confirm" in request.POST:
-            form = CreateTargetPopulationForm(request.POST)
-            if form.is_valid():
-                from hct_mis_api.apps.targeting.models import TargetPopulation
-
-                program = form.cleaned_data["program"]
-                ba = program.business_area
-                population = qs.filter(business_area=ba)
-                with atomic():
-                    tp = TargetPopulation.objects.create(
-                        targeting_criteria=None,
-                        created_by=request.user,
-                        name=form.cleaned_data["name"],
-                        business_area=ba,
-                        program=program,
-                    )
-                    tp.households.set(population)
-                    refresh_stats(tp)
-                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
-                return HttpResponseRedirect(url)
-        else:
-            form = CreateTargetPopulationForm(
-                initial={
-                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
-                    "action": "create_target_population",
-                }
-            )
-        context["form"] = form
-        return TemplateResponse(request, "admin/household/household/create_target_population.html", context)
-
-    create_target_population.allowed_permissions = ["create_target_population"]
-
-    def has_create_target_population_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("targeting.add_target_population")
 
     def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
@@ -427,6 +246,195 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
+
+class CustomTargetPopulationMixin:
+    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.targeting.models import TargetPopulation
+
+        context = self.get_common_context(request, title="Extend TargetPopulation")
+        tp: TargetPopulation
+        ba: BusinessArea
+        if "apply" in request.POST:
+            form = AddToTargetPopulationForm(request.POST, read_only=True)
+            if form.is_valid():
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
+                population = qs.filter(business_area=ba)
+                context["target_population"] = tp
+                context["population"] = population
+                context["queryset"] = qs
+                if population.count() != qs.count():
+                    context["mixed_household"] = True
+        elif "confirm" in request.POST:
+            form = AddToTargetPopulationForm(request.POST)
+            if form.is_valid():
+                tp = form.cleaned_data["target_population"]
+                ba = tp.business_area
+                population = qs.filter(business_area=ba)
+                with atomic():
+                    tp.households.add(*population)
+                    tp.refresh_stats()
+                    tp.save()
+                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
+                return HttpResponseRedirect(url)
+        else:
+            form = AddToTargetPopulationForm(
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "action": "add_to_target_population",
+                }
+            )
+        context["form"] = form
+        return TemplateResponse(request, "admin/household/household/add_target_population.html", context)
+
+    add_to_target_population.allowed_permissions = ["create_target_population"]
+
+    def create_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+        context = self.get_common_context(request, title="Create TargetPopulation")
+        if "apply" in request.POST:
+            form = CreateTargetPopulationForm(request.POST, read_only=True)
+            if form.is_valid():
+                program = form.cleaned_data["program"]
+                ba = program.business_area
+                population = qs.filter(business_area=ba)
+                context["program"] = program
+                context["population"] = population
+                context["queryset"] = qs
+                if population.count() != qs.count():
+                    context["mixed_household"] = True
+        elif "confirm" in request.POST:
+            form = CreateTargetPopulationForm(request.POST)
+            if form.is_valid():
+                from hct_mis_api.apps.targeting.models import TargetPopulation
+
+                program = form.cleaned_data["program"]
+                ba = program.business_area
+                population = qs.filter(business_area=ba)
+                with atomic():
+                    tp = TargetPopulation.objects.create(
+                        targeting_criteria=None,
+                        created_by=request.user,
+                        name=form.cleaned_data["name"],
+                        business_area=ba,
+                        program=program,
+                    )
+                    tp.households.set(population)
+                    tp.refresh_stats()
+                    tp.save()
+                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
+                return HttpResponseRedirect(url)
+        else:
+            form = CreateTargetPopulationForm(
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "action": "create_target_population",
+                }
+            )
+        context["form"] = form
+        return TemplateResponse(request, "admin/household/household/create_target_population.html", context)
+
+    create_target_population.allowed_permissions = ["create_target_population"]
+
+    def has_create_target_population_permission(self, request: HttpRequest) -> bool:
+        return request.user.has_perm("targeting.add_target_population")
+
+
+@admin.register(Household)
+class HouseholdAdmin(
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    LinkedObjectsMixin,
+    PowerQueryMixin,
+    SmartFieldsetMixin,
+    CursorPaginatorAdmin,
+    HouseholdWithDrawnMixin,
+    CustomTargetPopulationMixin,
+    HOPEModelAdminBase,
+):
+    list_display = (
+        "unicef_id",
+        "country",
+        "head_of_household",
+        "size",
+        "withdrawn",
+    )
+    list_filter = (
+        DepotManager,
+        ("business_area", AutoCompleteFilter),
+        QueryStringFilter,
+        "withdrawn",
+    )
+    search_fields = ("head_of_household__family_name", "unicef_id")
+    readonly_fields = ("created_at", "updated_at")
+    filter_horizontal = ("representatives", "programs")
+    raw_id_fields = (
+        "admin_area",
+        "business_area",
+        "country",
+        "country_origin",
+        "currency",
+        "head_of_household",
+        "registration_data_import",
+    )
+    fieldsets = [
+        (None, {"fields": (("unicef_id", "head_of_household"),)}),
+        (
+            "Registration",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "registration_data_import",
+                    "registration_method",
+                    "first_registration_date",
+                    "last_registration_date",
+                    "org_enumerator",
+                    "org_name_enumerator",
+                    "name_enumerator",
+                ),
+            },
+        ),
+        (
+            "Dates",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("created_at", "updated_at"),
+                    "last_sync_at",
+                    "removed_date",
+                    "withdrawn_date",
+                ),
+            },
+        ),
+        ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
+    ]
+    actions = [
+        "mass_withdraw",
+        "mass_unwithdraw",
+        "count_queryset",
+        "create_target_population",
+        "add_to_target_population",
+    ]
+    cursor_ordering_field = "unicef_id"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = self.model.all_objects.get_queryset().select_related(
+            "head_of_household", "country", "country_origin", "admin_area"
+        )
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+
+    def get_ignored_linked_objects(self, request: HttpRequest) -> List:
+        return []
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return False
+
     @button()
     def tickets(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
@@ -445,7 +453,7 @@ class HouseholdAdmin(
 
     @button()
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        # NOTE: this code is not should be optimized in the future and it is not
+        # NOTE: this code is should be optimized in the future and it is not
         # intended to be used in bulk
         hh = self.get_object(request, pk)
         warnings: List[List] = []
@@ -504,19 +512,6 @@ class HouseholdAdmin(
             "warnings": [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings],
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
-
-
-class IndividualRoleInHouseholdInline(TabularInline):
-    model = IndividualRoleInHousehold
-    extra = 0
-    readonly_fields = ("household", "role")
-    fields = ("household", "role")
-
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return False
-
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return False
 
 
 class BankAccountInfoStackedInline(admin.StackedInline):
