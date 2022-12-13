@@ -18,6 +18,7 @@ from hct_mis_api.apps.household.models import (
 
 
 class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
+    databases = "__all__"
 
     QUERY = """
     query AllIndividuals($flags: [String]) {
