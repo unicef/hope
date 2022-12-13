@@ -145,7 +145,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
               unlockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  households {
+                  households(orderBy: "size") {
                     totalCount
                   }
                 }
