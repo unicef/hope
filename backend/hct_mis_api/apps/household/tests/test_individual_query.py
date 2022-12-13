@@ -12,7 +12,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
-
+    databases = "__all__"
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
       allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
