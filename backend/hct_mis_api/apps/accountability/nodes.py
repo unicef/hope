@@ -19,7 +19,7 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.household.models import Household
 
 
-class CommunicationMessageRecipientMapNode(DjangoObjectType):
+class CommunicationMessageRecipientMapNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
             Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,

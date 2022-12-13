@@ -50,3 +50,27 @@ snapshots['TestUpdateGrievanceTickets::test_bulk_update_grievance_assignee_1_wit
         }
     ]
 }
+
+snapshots['TestUpdateGrievanceTickets::test_bulk_update_grievance_assignee_es_autosync_off 1'] = {
+    'data': {
+        'bulkUpdateGrievanceAssignee': {
+            'grievanceTickets': [
+                {
+                    'assignedTo': {
+                        'firstName': 'user_two'
+                    }
+                },
+                {
+                    'assignedTo': {
+                        'firstName': 'user_two'
+                    }
+                },
+                {
+                    'assignedTo': {
+                        'firstName': 'user_two'
+                    }
+                }
+            ]
+        }
+    }
+}
