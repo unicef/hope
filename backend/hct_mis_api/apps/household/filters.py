@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.filters import (
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -232,8 +232,13 @@ class IndividualFilter(FilterSet):
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
-            IndividualDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            get_individual_doc(business_area)
+            .search()
+            .params(search_type="dfs_query_then_fetch")
+            .from_dict(query_dict)
+            .execute()
         )
+
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
