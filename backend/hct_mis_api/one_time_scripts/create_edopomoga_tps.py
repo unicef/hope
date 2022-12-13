@@ -124,7 +124,7 @@ def find_duplicated_households() -> QuerySet[Household]:
     return edopomoga_duplicates
 
 
-def create_tp_with_hhs_ids(name: str, households: List[str]) -> None:
+def create_tp_with_hhs_ids(name: str, households: QuerySet[Household]) -> None:
     tp = TargetPopulation()
     tp.name = name
     tp.created_by = User.objects.get(email="jan.romaniak@tivix.com")
