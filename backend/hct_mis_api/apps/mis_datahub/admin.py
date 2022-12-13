@@ -214,10 +214,10 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
                 with atomic():
                     obj = self.get_object(request, pk)
                     # Programs
-                    hub_program_ids = Program.objects.filter(session=obj.id).values_list("mis_id", flat=True)
+                    hub_program_ids = list(Program.objects.filter(session=obj.id).values_list("mis_id", flat=True))
                     programs.Program.objects.filter(id__in=hub_program_ids).update(last_sync_at=None)
                     # Documents
-                    hub_document_ids = Document.objects.filter(session=obj.id).values_list("mis_id", flat=True)
+                    hub_document_ids = list(Document.objects.filter(session=obj.id).values_list("mis_id", flat=True))
                     households.Document.objects.filter(id__in=hub_document_ids).update(last_sync_at=None)
                     # HH / Ind
                     for hub_tp in TargetPopulation.objects.filter(session=obj.id):
@@ -230,9 +230,6 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             except Exception as e:
                 logger.exception(e)
                 self.message_user(request, str(e), messages.ERROR)
-            # for m in [hope_models.Household, hope_models.Individual]:
-            #     hh = hope_models.Household.objects.filter(id__in=Household.)
-            #     m.objects(request).update(last_sync_at=None)
         else:
             return confirm_action(
                 self,
