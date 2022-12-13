@@ -1,9 +1,9 @@
 import datetime
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.core.files.storage import default_storage
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 import graphene
 from graphene import relay
@@ -57,10 +57,6 @@ from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
-
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
-
 
 logger = logging.getLogger(__name__)
 
@@ -319,10 +315,10 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
         possible_duplicate = parent.extra_data.get("possible_duplicate")
         return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
 
-    def resolve_possible_duplicates(self, info: Any) -> "QuerySet":
+    def resolve_possible_duplicates(self, info: Any) -> QuerySet:
         return self.possible_duplicates.all()
 
-    def resolve_selected_individuals(self, info: Any) -> "QuerySet":
+    def resolve_selected_individuals(self, info: Any) -> QuerySet:
         return self.selected_individuals.all()
 
 
@@ -434,7 +430,7 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
-    def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> "QuerySet":
+    def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
         queryset = GrievanceTicket.objects.filter(ignored=False).select_related("admin2", "assigned_to", "created_by")
         to_prefetch = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
