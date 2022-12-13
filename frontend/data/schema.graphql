@@ -764,12 +764,11 @@ type GrievanceTicketNode implements Node {
   language: String!
   consent: Boolean!
   businessArea: UserBusinessAreaNode!
-  linkedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  linkedTickets: [GrievanceTicketNode]
   registrationDataImport: RegistrationDataImportNode
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
-  linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
@@ -787,9 +786,9 @@ type GrievanceTicketNode implements Node {
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
-  relatedTickets: [GrievanceTicketNode]
   admin: String
   existingTickets: [GrievanceTicketNode]
+  relatedTickets: [GrievanceTicketNode]
 }
 
 type GrievanceTicketNodeConnection {
