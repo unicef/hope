@@ -326,5 +326,5 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         url = reverse("power_query:document", args=[obj.report.pk, pk])
         return HttpResponseRedirect(url)
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
