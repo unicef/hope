@@ -12,10 +12,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
-    databases = (
-        "default",
-        "registration_datahub",
-    )
 
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {

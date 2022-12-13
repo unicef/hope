@@ -339,7 +339,7 @@ class HouseholdAdmin(
     def has_create_target_population_permission(self, request: HttpRequest) -> bool:
         return request.user.has_perm("targeting.add_target_population")
 
-    def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:
+    def mass_withdraw(self, request: HttpRequest, qs: QuerySet) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"
