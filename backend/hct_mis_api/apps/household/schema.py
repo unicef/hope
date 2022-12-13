@@ -16,6 +16,7 @@ from django.db.models import (
 import graphene
 from graphene import Boolean, DateTime, Enum, Field, Int, String, relay
 from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
@@ -190,135 +191,6 @@ class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
     quantity = graphene.List(DeliveredQuantityNode)
 
 
-class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
-        hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
-        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS),
-        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
-        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
-    )
-
-    admin_area_title = graphene.String(description="Admin area title")
-    total_cash_received = graphene.Decimal()
-    total_cash_received_usd = graphene.Decimal()
-    country_origin = graphene.String(description="Country origin name")
-    country = graphene.String(description="Country name")
-    currency = graphene.String()
-    flex_fields = FlexFieldsScalar()
-    selection = graphene.Field(HouseholdSelectionNode)
-    sanction_list_possible_match = graphene.Boolean()
-    sanction_list_confirmed_match = graphene.Boolean()
-    has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
-    consent_sharing = graphene.List(graphene.String)
-    admin1 = graphene.Field(AreaNode)
-    admin2 = graphene.Field(AreaNode)
-    status = graphene.String()
-    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
-    active_individuals_count = graphene.Int()
-    admin_area = graphene.Field(AreaNode)
-
-    @staticmethod
-    def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
-        if hasattr(parent, "sanction_list_possible_match_annotated"):
-            return parent.sanction_list_possible_match_annotated
-        return parent.sanction_list_possible_match
-
-    @staticmethod
-    def resolve_sanction_list_confirmed_match(parent: Household, info: Any) -> bool:
-        if hasattr(parent, "sanction_list_confirmed_match_annotated"):
-            return parent.sanction_list_confirmed_match_annotated
-        return parent.sanction_list_confirmed_match
-
-    def resolve_admin1(parent, info: Any) -> Field:
-        return parent.admin1
-
-    def resolve_admin2(parent, info: Any) -> Field:
-        return parent.admin2
-
-    def resolve_admin_area(parent, info: Any) -> Field:
-        return parent.admin_area
-
-    def resolve_admin_area_title(parent, info: Any) -> str:
-        if parent.admin_area:
-            return parent.admin_area.name
-        return ""
-
-    def resolve_programs_with_delivered_quantity(parent, info: Any) -> Dict[Any, Dict[str, Any]]:
-        return programs_with_delivered_quantity(parent)
-
-    def resolve_country(parent, info: Any) -> str:
-        if parent.country:
-            return parent.country.name
-        return ""
-
-    def resolve_country_origin(parent, info: Any) -> str:
-        if parent.country_origin:
-            return parent.country_origin.name
-        return ""
-
-    def resolve_selection(parent, info: Any) -> Any:
-        selection = parent.selections.first()
-        return selection
-
-    def resolve_individuals(parent, info: Any) -> QuerySet:
-        individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(parent.representatives.values_list("id", flat=True))
-        ids = list(set(individuals_ids + collectors_ids))
-        return Individual.objects.filter(id__in=ids).prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),
-            )
-        )
-
-    def resolve_has_duplicates(parent, info: Any) -> QuerySet:
-        if hasattr(parent, "has_duplicates_annotated"):
-            return parent.has_duplicates_annotated
-        return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
-
-    def resolve_flex_fields(parent, info: Any) -> Dict:
-        return resolve_flex_fields_choices_to_string(parent)
-
-    def resolve_active_individuals_count(parent, info: Any) -> int:
-        return parent.active_individuals.count()
-
-    @classmethod
-    def check_node_permission(cls, info: Any, object_instance: Household) -> None:
-        super().check_node_permission(info, object_instance)
-        user = info.context.user
-
-        # if user doesn't have permission to view all households, we check based on their grievance tickets
-        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
-            grievance_tickets = GrievanceTicket.objects.filter(
-                complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
-            )
-            cls.check_creator_or_owner_permission(
-                info,
-                object_instance,
-                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
-                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
-                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
-                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
-                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
-            )
-
-    @classmethod
-    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
-        queryset = queryset.annotate(
-            status_label=Case(
-                When(withdrawn=True, then=Value(STATUS_INACTIVE)),
-                default=Value(STATUS_ACTIVE),
-            )
-        )
-        return super().get_queryset(queryset, info)
-
-    class Meta:
-        model = Household
-        filter_fields = []
-        interfaces = (relay.Node,)
-        connection_class = ExtendedHouseHoldConnection
-
-
 class IndividualRoleInHouseholdNode(DjangoObjectType):
     class Meta:
         model = IndividualRoleInHousehold
@@ -451,6 +323,139 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 "work_status",
             ],
         )
+
+
+class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
+    )
+
+    admin_area_title = graphene.String(description="Admin area title")
+    total_cash_received = graphene.Decimal()
+    total_cash_received_usd = graphene.Decimal()
+    country_origin = graphene.String(description="Country origin name")
+    country = graphene.String(description="Country name")
+    currency = graphene.String()
+    flex_fields = FlexFieldsScalar()
+    selection = graphene.Field(HouseholdSelectionNode)
+    sanction_list_possible_match = graphene.Boolean()
+    sanction_list_confirmed_match = graphene.Boolean()
+    has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
+    consent_sharing = graphene.List(graphene.String)
+    admin1 = graphene.Field(AreaNode)
+    admin2 = graphene.Field(AreaNode)
+    status = graphene.String()
+    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    active_individuals_count = graphene.Int()
+    admin_area = graphene.Field(AreaNode)
+    individuals = DjangoFilterConnectionField(
+        IndividualNode,
+        filterset_class=IndividualFilter,
+    )
+
+    @staticmethod
+    def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
+        if hasattr(parent, "sanction_list_possible_match_annotated"):
+            return parent.sanction_list_possible_match_annotated
+        return parent.sanction_list_possible_match
+
+    @staticmethod
+    def resolve_sanction_list_confirmed_match(parent: Household, info: Any) -> bool:
+        if hasattr(parent, "sanction_list_confirmed_match_annotated"):
+            return parent.sanction_list_confirmed_match_annotated
+        return parent.sanction_list_confirmed_match
+
+    def resolve_admin1(parent, info: Any) -> Field:
+        return parent.admin1
+
+    def resolve_admin2(parent, info: Any) -> Field:
+        return parent.admin2
+
+    def resolve_admin_area(parent, info: Any) -> Field:
+        return parent.admin_area
+
+    def resolve_admin_area_title(parent, info: Any) -> str:
+        if parent.admin_area:
+            return parent.admin_area.name
+        return ""
+
+    def resolve_programs_with_delivered_quantity(parent, info: Any) -> Dict[Any, Dict[str, Any]]:
+        return programs_with_delivered_quantity(parent)
+
+    def resolve_country(parent, info: Any) -> str:
+        if parent.country:
+            return parent.country.name
+        return ""
+
+    def resolve_country_origin(parent, info: Any) -> str:
+        if parent.country_origin:
+            return parent.country_origin.name
+        return ""
+
+    def resolve_selection(parent, info: Any) -> Any:
+        selection = parent.selections.first()
+        return selection
+
+    def resolve_individuals(parent, info: Any, *arg: Any, **kwargs: Any) -> QuerySet:
+        individuals_ids = list(parent.individuals.values_list("id", flat=True))
+        collectors_ids = list(parent.representatives.values_list("id", flat=True))
+        ids = list(set(individuals_ids + collectors_ids))
+        return Individual.objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),
+            )
+        )
+
+    def resolve_has_duplicates(parent, info: Any) -> QuerySet:
+        if hasattr(parent, "has_duplicates_annotated"):
+            return parent.has_duplicates_annotated
+        return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+
+    def resolve_flex_fields(parent, info: Any) -> Dict:
+        return resolve_flex_fields_choices_to_string(parent)
+
+    def resolve_active_individuals_count(parent, info: Any) -> int:
+        return parent.active_individuals.count()
+
+    @classmethod
+    def check_node_permission(cls, info: Any, object_instance: Household) -> None:
+        super().check_node_permission(info, object_instance)
+        user = info.context.user
+
+        # if user doesn't have permission to view all households, we check based on their grievance tickets
+        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+            grievance_tickets = GrievanceTicket.objects.filter(
+                complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
+            )
+            cls.check_creator_or_owner_permission(
+                info,
+                object_instance,
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
+            )
+
+    @classmethod
+    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
+        queryset = queryset.annotate(
+            status_label=Case(
+                When(withdrawn=True, then=Value(STATUS_INACTIVE)),
+                default=Value(STATUS_ACTIVE),
+            )
+        )
+        return super().get_queryset(queryset, info)
+
+    class Meta:
+        model = Household
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedHouseHoldConnection
 
 
 class Query(graphene.ObjectType):
