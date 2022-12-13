@@ -30,8 +30,8 @@ class GoldenRecordTargetingCriteriaAgeFilterQueryTestCase(APITestCase):
         cls.business_area = BusinessArea.objects.first()
         cls.user = UserFactory.create()
         cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
-        (household1, individuals1) = create_household({"size": 2, "business_area": cls.business_area})
-        (household2, individuals2) = create_household({"size": 2, "business_area": cls.business_area})
+        (household1, individuals1) = create_household({"size": 2, "business_area": cls.business_area}, {"business_area": cls.business_area})
+        (household2, individuals2) = create_household({"size": 2, "business_area": cls.business_area}, {"business_area": cls.business_area})
 
         individuals1[0].birth_date = datetime.date.today() - relativedelta(years=+20, days=+5)  # age 20
         individuals1[1].birth_date = datetime.date.today() - relativedelta(years=+22, days=-5)  # age 21

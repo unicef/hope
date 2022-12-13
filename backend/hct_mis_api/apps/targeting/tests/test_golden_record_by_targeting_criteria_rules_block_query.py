@@ -260,11 +260,12 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_phone_number(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"phone_no": "+48 123456789", "full_name": "individual_with_phone"}],
+            [{"phone_no": "+48 123456789", "full_name": "individual_with_phone", "business_area": self.business_area}],
         )
 
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "", "full_name": "individual_without_phone"}]
+            {"business_area": self.business_area},
+            [{"phone_no": "", "full_name": "individual_without_phone", "business_area": self.business_area}],
         )
 
         variables = {
@@ -299,12 +300,24 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_has_bank_account_info(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_without_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         _, individuals = create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_with_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -341,12 +354,24 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_without_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         _, individuals = create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}],
+            [
+                {
+                    "full_name": "individual_with_bank_account",
+                    "phone_no": "123456789",
+                    "business_area": self.business_area,
+                }
+            ],
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -383,11 +408,12 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
     def test_golden_record_by_targeting_criteria_tax_id(self) -> None:
         create_household_and_individuals(
             {"business_area": self.business_area},
-            [{"full_name": "individual_without_tax_id", "phone_no": "123456789"}],
+            [{"full_name": "individual_without_tax_id", "phone_no": "123456789", "business_area": self.business_area}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}]
+            {"business_area": self.business_area},
+            [{"full_name": "individual_with_tax_id", "phone_no": "123456789", "business_area": self.business_area}],
         )
 
         create_individual_document(individuals[0], document_type="TAX_ID")
