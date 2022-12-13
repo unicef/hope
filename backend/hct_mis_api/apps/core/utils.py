@@ -701,13 +701,6 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: List[str]) -> L
     return excluded_household_ids_array
 
 
-@functools.lru_cache(maxsize=None)
-def cached_business_areas_slug_id_dict() -> Dict:
-    from hct_mis_api.apps.core.models import BusinessArea
-
-    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
-
-
 def timezone_datetime(value: Any) -> datetime:
     if not value:
         return value

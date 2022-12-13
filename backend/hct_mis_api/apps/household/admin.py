@@ -67,6 +67,7 @@ from hct_mis_api.apps.household.services.individual_xlsx_update import (
     InvalidColumnsError,
 )
 from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -263,8 +264,7 @@ class HouseholdAdmin(
                 population = qs.filter(business_area=ba)
                 with atomic():
                     tp.households.add(*population)
-                    tp.refresh_stats()
-                    tp.save()
+                    refresh_stats(tp)
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
         else:
@@ -309,8 +309,7 @@ class HouseholdAdmin(
                         program=program,
                     )
                     tp.households.set(population)
-                    tp.refresh_stats()
-                    tp.save()
+                    refresh_stats(tp)
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
         else:
