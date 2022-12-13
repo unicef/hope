@@ -14,7 +14,7 @@ from django.db.models import (
 )
 
 import graphene
-from graphene import Boolean, DateTime, Enum, Field, Int, String, relay
+from graphene import Boolean, DateTime, Enum, Int, String, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -45,6 +45,7 @@ from hct_mis_api.apps.core.utils import (
     sum_lists_with_values,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
@@ -367,38 +368,40 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             return parent.sanction_list_confirmed_match_annotated
         return parent.sanction_list_confirmed_match
 
-    def resolve_admin1(parent, info: Any) -> Field:
+    @staticmethod
+    def resolve_admin1(parent: Household, info: Any) -> Area:
         return parent.admin1
 
-    def resolve_admin2(parent, info: Any) -> Field:
+    @staticmethod
+    def resolve_admin2(parent: Household, info: Any) -> Area:
         return parent.admin2
 
-    def resolve_admin_area(parent, info: Any) -> Field:
+    @staticmethod
+    def resolve_admin_area(parent: Household, info: Any) -> Area:
         return parent.admin_area
 
-    def resolve_admin_area_title(parent, info: Any) -> str:
-        if parent.admin_area:
-            return parent.admin_area.name
-        return ""
+    @staticmethod
+    def resolve_admin_area_title(parent: Household, info: Any) -> str:
+        return getattr(parent.admin_area, "name", "")
 
-    def resolve_programs_with_delivered_quantity(parent, info: Any) -> Dict[Any, Dict[str, Any]]:
+    @staticmethod
+    def resolve_programs_with_delivered_quantity(parent: Household, info: Any) -> List[Dict[str, Any]]:
         return programs_with_delivered_quantity(parent)
 
-    def resolve_country(parent, info: Any) -> str:
-        if parent.country:
-            return parent.country.name
-        return ""
+    @staticmethod
+    def resolve_country(parent: Household, info: Any) -> str:
+        return getattr(parent.country, "name", "")
 
-    def resolve_country_origin(parent, info: Any) -> str:
-        if parent.country_origin:
-            return parent.country_origin.name
-        return ""
+    @staticmethod
+    def resolve_country_origin(parent: Household, info: Any) -> str:
+        return getattr(parent.country_origin, "name", "")
 
-    def resolve_selection(parent, info: Any) -> Any:
-        selection = parent.selections.first()
-        return selection
+    @staticmethod
+    def resolve_selection(parent: Household, info: Any) -> HouseholdSelection:
+        return parent.selections.first()
 
-    def resolve_individuals(parent, info: Any, *arg: Any, **kwargs: Any) -> QuerySet:
+    @staticmethod
+    def resolve_individuals(parent: Household, info: Any) -> QuerySet:
         individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(parent.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
@@ -409,15 +412,18 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             )
         )
 
-    def resolve_has_duplicates(parent, info: Any) -> QuerySet:
+    @staticmethod
+    def resolve_has_duplicates(parent: Household, info: Any) -> bool:
         if hasattr(parent, "has_duplicates_annotated"):
             return parent.has_duplicates_annotated
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
-    def resolve_flex_fields(parent, info: Any) -> Dict:
+    @staticmethod
+    def resolve_flex_fields(parent: Household, info: Any) -> Dict:
         return resolve_flex_fields_choices_to_string(parent)
 
-    def resolve_active_individuals_count(parent, info: Any) -> int:
+    @staticmethod
+    def resolve_active_individuals_count(parent: Household, info: Any) -> int:
         return parent.active_individuals.count()
 
     @classmethod
@@ -441,7 +447,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             )
 
     @classmethod
-    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
+    def get_queryset(cls, queryset: QuerySet[Household], info: Any) -> QuerySet[Household]:
         queryset = queryset.annotate(
             status_label=Case(
                 When(withdrawn=True, then=Value(STATUS_INACTIVE)),
