@@ -55,7 +55,6 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
         create_afghanistan()
-        print("BAs", BusinessArea.objects.all(), file=sys.stderr)
         cls.business_area = BusinessArea.objects.first()
         cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         (household, individuals) = create_household_and_individuals(
@@ -104,28 +103,6 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
 
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
-
-    def tearDown(self) -> None:
-        super().tearDown()
-
-        # https://stackoverflow.com/a/39606065
-        if hasattr(self._outcome, "errors"):
-            # Python 3.4 - 3.10  (These two methods have no side effects)
-            result = self.defaultTestResult()
-            self._feedErrorsToResult(result, self._outcome.errors)
-        else:
-            # Python 3.11+
-            result = self._outcome.result
-
-        for typ, errors in (("ERROR", result.errors), ("FAIL", result.failures)):
-            for test, text in errors:
-                if test is self:
-                    msg = [x for x in text.split("\n")[1:] if not x.startswith(" ")][0]
-                    print("%s: %s\n%s" % (typ, self.id(), msg), file=sys.stderr)
-                    print(self.household_targeted.__dict__, file=sys.stderr)
-                    print(self.not_targeted_household.__dict__, file=sys.stderr)
-                    print(self.targeted_inds[0].__dict__, file=sys.stderr)
-                    print(self.not_targeted_inds[0].__dict__, file=sys.stderr)
 
     def test_golden_record_by_targeting_criteria_size(self) -> None:
         variables = {
