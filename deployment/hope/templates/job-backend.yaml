@@ -32,6 +32,7 @@ spec:
             {{- toYaml .Values.backend.resources | nindent 12 }}
       restartPolicy: Never
   backoffLimit: 3
+  activeDeadlineSeconds: 600 # 10min max for migrations
 ---
 apiVersion: batch/v1
 kind: Job
@@ -70,5 +71,6 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
       restartPolicy: Never
-  backoffLimit: 20
+  backoffLimit: 3
+  activeDeadlineSeconds: 600 # 10min max for migrations
 
