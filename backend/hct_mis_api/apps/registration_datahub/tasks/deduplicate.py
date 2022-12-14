@@ -2,7 +2,7 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type, Union
 
 from django.db import transaction
 from django.db.models import CharField, F, Q, QuerySet, Value
@@ -78,7 +78,7 @@ class DeduplicateTask:
     thresholds: Optional[Thresholds] = None
 
     @classmethod
-    def _prepare_query_dict(cls, individual: Individual, fields: Dict, min_score: int) -> Dict[str, Any]:
+    def _prepare_query_dict(cls, individual: Individual, fields: Dict, min_score: Union[int, float]) -> Dict[str, Any]:
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -163,7 +163,7 @@ class DeduplicateTask:
 
     @staticmethod
     def _prepare_fields(
-        individual: List[Individual], fields_names: List[str], dict_fields: List[Any]
+        individual: Union[Individual, ImportedIndividual], fields_names: Tuple[str], dict_fields: Dict[str, Any]
     ) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
@@ -340,7 +340,11 @@ class DeduplicateTask:
 
     @classmethod
     def _get_duplicates_tuple(
-        cls, query_dict: Dict, duplicate_score: int, document: Type[IndividualDocument], individual: Individual
+        cls,
+        query_dict: Dict,
+        duplicate_score: int,
+        document: Type[IndividualDocument],
+        individual: Union[Individual, ImportedIndividual],
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         duplicates = []
         possible_duplicates = []
@@ -465,7 +469,9 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_single_individual(cls, individual: Individual) -> Tuple[List, List, List, List, Dict[str, Any]]:
+    def deduplicate_single_individual(
+        cls, individual: Union[Individual, ImportedIndividual]
+    ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         fields_names = (
             "given_name",
             "full_name",
@@ -533,7 +539,7 @@ class DeduplicateTask:
         if isinstance(individual, ImportedIndividual):
             document = get_imported_individual_doc(individual.registration_data_import.business_area)
         else:
-            document = get_individual_doc(individual.registration_data_import.business_area.slug)
+            document = get_individual_doc(individual.business_area.slug)
 
         return cls._get_duplicates_tuple(
             query_dict,
