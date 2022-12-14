@@ -276,6 +276,7 @@ class HouseholdAdmin(
                 with atomic():
                     tp.households.add(*population)
                     refresh_stats(tp)
+                    tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
         else:
@@ -321,6 +322,7 @@ class HouseholdAdmin(
                     )
                     tp.households.set(population)
                     refresh_stats(tp)
+                    tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
         else:
