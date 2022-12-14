@@ -36,8 +36,7 @@ class RapidProAPI:
         if not self.url:
             self.url = settings.RAPID_PRO_URL
         if not token:
-            logger.error(f"Token is not set for this business area, business_area={business_area.name}")
-            raise TokenNotProvided("Token is not set for this business area.")
+            raise TokenNotProvided(f"Token is not set for {business_area.name}.")
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
 
