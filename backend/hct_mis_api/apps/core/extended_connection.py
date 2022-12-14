@@ -1,10 +1,12 @@
 import hashlib
 import json
-from typing import Any, Dict, Optional
+import logging
+from typing import Any, Dict, List, Optional, Union
 
 from django.db.models import QuerySet
 
 import graphene
+from graphene import Connection
 from graphene.relay import PageInfo
 from graphene_django import DjangoConnectionField
 from graphene_django.utils import maybe_queryset
@@ -17,10 +19,12 @@ from graphql_relay.connection.arrayconnection import (
 
 from hct_mis_api.apps.core.utils import save_data_in_cache
 
+logger = logging.getLogger(__name__)
+
 
 class DjangoFastConnectionField(DjangoConnectionField):
     @classmethod
-    def cache_count(cls, connection: str, args: Dict, iterable: QuerySet) -> int:
+    def cache_count(cls, connection: Connection, args: Dict, iterable: QuerySet) -> int:
         try:
             excluded_args = ["first", "last", "before", "after"]
             business_area = args.get("business_area")
@@ -28,13 +32,14 @@ class DjangoFastConnectionField(DjangoConnectionField):
             hashed_args = hashlib.sha1(json.dumps(important_args).encode()).hexdigest()
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
-        except Exception:
+        except Exception as e:
+            logger.exception(e)
             return iterable.count()
 
     @classmethod
     def resolve_connection(
-        cls, connection: str, args: Dict, iterable: QuerySet, max_limit: Optional[int] = None
-    ) -> Any:
+        cls, connection: Connection, args: Dict, iterable: Union[QuerySet, List], max_limit: Optional[int] = None
+    ) -> Connection:
         # Remove the offset parameter and convert it to an after cursor.
         offset = args.pop("offset", None)
         after = args.get("after")
