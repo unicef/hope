@@ -83,10 +83,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
             ) : null}
           </Box>
           <Box mt={3}>
-            <OtherRelatedTickets
-              ticket={ticket}
-              linkedTickets={ticket.relatedTickets}
-            />
+            <OtherRelatedTickets ticket={ticket} />
           </Box>
         </Box>
       );
@@ -119,10 +116,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
     return (
       <Box p={3}>
         <Box display='flex' flexDirection='column'>
-          <OtherRelatedTickets
-            ticket={ticket}
-            linkedTickets={ticket.relatedTickets}
-          />
+          <OtherRelatedTickets ticket={ticket} />
         </Box>
       </Box>
     );

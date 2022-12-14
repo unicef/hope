@@ -152,12 +152,10 @@ class TicketAddIndividualDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketAddIndividualDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
     household = None
     individual_data = {}
@@ -168,12 +166,10 @@ class TicketDeleteIndividualDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketDeleteIndividualDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
     )
     individual = None
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
@@ -183,12 +179,10 @@ class TicketDeleteHouseholdDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketDeleteHouseholdDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
     )
     household = None
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
@@ -198,12 +192,10 @@ class TicketIndividualDataUpdateDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketIndividualDataUpdateDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
     individual = None
     individual_data = {}
@@ -213,12 +205,10 @@ class TicketHouseholdDataUpdateDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketHouseholdDataUpdateDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
     )
     household = None
     household_data = {}
@@ -228,12 +218,10 @@ class TicketSystemFlaggingDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketSystemFlaggingDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-            issue_type=None,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        issue_type=None,
     )
 
 
@@ -241,12 +229,10 @@ class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketNeedsAdjudicationDetails
 
-    ticket = (
-        factory.SubFactory(
-            GrievanceTicketFactory,
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            issue_type=None,
-        ),
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=None,
     )
 
 
