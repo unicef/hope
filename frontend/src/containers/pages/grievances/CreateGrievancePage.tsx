@@ -94,7 +94,7 @@ export function CreateGrievancePage(): React.ReactElement {
     selectedHousehold: null,
     selectedIndividual: null,
     selectedPaymentRecords: [],
-    selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
+    selectedLinkedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
   };
