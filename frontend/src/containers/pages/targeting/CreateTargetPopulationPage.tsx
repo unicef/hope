@@ -50,7 +50,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     loading: loadingPrograms,
   } = useAllProgramsForChoicesQuery({
     variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
 
   if (loadingPrograms) return <LoadingComponent />;
