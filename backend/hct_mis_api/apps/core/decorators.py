@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 def cached_in_django_cache(timeout_in_hours: int) -> Callable:
     def decorator(func: Callable) -> Callable:
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             hashed_args = hashlib.sha1(json.dumps(kwargs).encode()).hexdigest()
             key = f"{func.__name__}_{hashed_args}"
             value = cache.get(key)

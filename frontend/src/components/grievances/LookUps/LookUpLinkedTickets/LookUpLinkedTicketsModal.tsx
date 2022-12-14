@@ -13,10 +13,10 @@ import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWr
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { LoadingComponent } from '../../../core/LoadingComponent';
-import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
-import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
+import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
+import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
 
-export const LookUpRelatedTicketsModal = ({
+export const LookUpLinkedTicketsModal = ({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
@@ -45,7 +45,7 @@ export const LookUpRelatedTicketsModal = ({
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        onValueChange('selectedRelatedTickets', values.selectedRelatedTickets);
+        onValueChange('selectedLinkedTickets', values.selectedLinkedTickets);
         setLookUpDialogOpen(false);
       }}
     >
@@ -59,17 +59,19 @@ export const LookUpRelatedTicketsModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle>{t('Look up Related Tickets')}</DialogTitle>
+            <DialogTitle id='scroll-dialog-title'>
+              {t('Look up Linked Tickets')}
+            </DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
-            <LookUpRelatedTicketsFilters
+            <LookUpLinkedTicketsFilters
               choicesData={choicesData}
               filter={filter}
               setFilterApplied={setFilterApplied}
               filterInitial={filterInitial}
               onFilterChange={setFilter}
             />
-            <LookUpRelatedTicketsTable
+            <LookUpLinkedTicketsTable
               filter={filterApplied}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
