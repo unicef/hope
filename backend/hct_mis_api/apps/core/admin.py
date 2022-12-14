@@ -627,13 +627,14 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
                 return redirect("..")
 
-            form = ProgramForm()
+            form = ProgramForm(business_area_id=storage_obj.business_area_id)
             context["form"] = form
             return TemplateResponse(request, "core/admin/create_tp.html", context)
         else:
-            rdi_name = request.POST.get("name")
+            program_id = request.POST.get("program")
+            tp_name = request.POST.get("name")
 
-            create_target_population_task.delay(storage_obj.pk, rdi_name)
+            create_target_population_task.delay(storage_obj.pk, program_id, tp_name)
 
             self.message_user(request, "Creation of TargetPopulation started")
             return redirect("..")
