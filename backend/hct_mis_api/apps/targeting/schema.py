@@ -18,7 +18,6 @@ from hct_mis_api.apps.core.utils import (
     map_unicef_ids_to_households_unicef_ids,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.filters import HouseholdFilter
