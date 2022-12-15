@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Prefetch, QuerySet
 
 import graphene
 from graphene import relay
@@ -12,47 +12,10 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import (
-    decode_and_get_object_required,
-    decode_id_string,
-    map_unicef_ids_to_households_unicef_ids,
-    to_choice_object,
-)
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.schema import HouseholdNode
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.filters import HouseholdFilter
-from hct_mis_api.apps.targeting.graphql_types import (
-    TargetingCriteriaObjectType,
-    TargetPopulationNode,
-)
-from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
-
-
-def targeting_criteria_object_type_to_query(
-    targeting_criteria_object_type: TargetingCriteriaObjectType, program: Union[str, Program], excluded_ids: str = ""
-) -> Q:
-    TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
-    given_program: Program = decode_and_get_object_required(program, Program) if isinstance(program, str) else program
-    targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
-        [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
-    )
-    for rule in targeting_criteria_object_type.get("rules", []):
-        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingBase(
-            filters=[], individuals_filters_blocks=[]
-        )
-        for filter_dict in rule.get("filters", []):
-            targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
-        for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
-            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockBase(
-                [], not given_program.individual_data_needed
-            )
-            targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
-            for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
-                individuals_filters_block.individual_block_filters.append(
-                    target_models.TargetingIndividualBlockRuleFilter(**individual_block_filter_dict)
-                )
-        targeting_criteria_querying.rules.append(targeting_criteria_rule_querying)
-    return targeting_criteria_querying.get_query()
+from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 
 
 def prefetch_selections(qs: QuerySet, target_population: Optional[target_models.TargetPopulation] = None) -> QuerySet:
