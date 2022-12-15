@@ -26,6 +26,7 @@ from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_tas
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
+from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -35,10 +36,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
-from hct_mis_api.apps.targeting.schema import (
-    TargetPopulationNode,
-)
-from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
+from hct_mis_api.apps.targeting.schema import TargetPopulationNode
 from hct_mis_api.apps.targeting.validators import (
     FinalizeTargetPopulationValidator,
     LockTargetPopulationValidator,

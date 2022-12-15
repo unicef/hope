@@ -1,10 +1,10 @@
 import datetime
-from dateutil.relativedelta import relativedelta
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from django.core.management import call_command
 
-from hct_mis_api.apps.household.models import Individual
+from dateutil.relativedelta import relativedelta
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -13,7 +13,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -52,7 +52,7 @@ class TestTargetingCriteriaQuery(APITestCase):
         assert Household.objects.all().distinct().count() == 2
 
     @classmethod
-    def create_criteria(cls, *args, **kwargs):
+    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
         criteria = cls.get_targeting_criteria_for_rule(*args, **kwargs)
         TargetPopulation(
             name="tp",
@@ -85,7 +85,7 @@ class TestTargetingCriteriaQuery(APITestCase):
         )
         assert Household.objects.filter(criteria.get_query()).distinct().count() == 1
 
-    def test_flex_field_variables(self):
+    def test_flex_field_variables(self) -> None:
         criteria = self.create_criteria(
             {
                 "comparison_method": "EQUALS",
@@ -96,7 +96,7 @@ class TestTargetingCriteriaQuery(APITestCase):
         )
         assert Household.objects.filter(criteria.get_query()).distinct().count() == 0
 
-    def test_select_many_variables(self):
+    def test_select_many_variables(self) -> None:
         criteria = self.create_criteria(
             {
                 "comparison_method": "CONTAINS",
@@ -123,7 +123,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         return targeting_criteria
 
     @classmethod
-    def create_criteria(cls, *args, **kwargs):
+    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetPopulation:
         criteria = cls.get_targeting_criteria_for_filters(*args, **kwargs)
         TargetPopulation(
             name="tp",
@@ -213,7 +213,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         )
         assert Household.objects.filter(criteria.get_query()).distinct().count() == 2
 
-    def test_ranges(self):
+    def test_ranges(self) -> None:
         assert (
             Household.objects.filter(
                 self.create_criteria(
