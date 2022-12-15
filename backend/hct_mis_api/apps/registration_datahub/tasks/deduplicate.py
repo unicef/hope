@@ -346,6 +346,7 @@ class DeduplicateTask:
         document: Type[IndividualDocument],
         individual: Union[Individual, ImportedIndividual],
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
+        # TODO: "Tuple[List, List, List, List, Dict[str, Any]]" > could become some dataclass
         duplicates = []
         possible_duplicates = []
         original_individuals_ids_duplicates = []
