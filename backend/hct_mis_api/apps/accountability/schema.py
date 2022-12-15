@@ -42,6 +42,7 @@ from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
 
 class Query(graphene.ObjectType):
@@ -86,6 +87,7 @@ class Query(graphene.ObjectType):
         input=AccountabilitySampleSizeInput(),
     )
     survey_category_choices = graphene.List(ChoiceObject)
+    available_flows = graphene.List(graphene.String)
 
     def resolve_all_accountability_communication_messages(self, info: Any, **kwargs: Any) -> QuerySet[Message]:
         business_area_slug = info.context.headers.get("Business-Area")
@@ -132,3 +134,7 @@ class Query(graphene.ObjectType):
             "number_of_recipients": number_of_recipients,
             "sample_size": sample_size,
         }
+
+    def resolve_available_flows(self, info, *args, **kwargs) -> List[str]:
+        api = RapidProAPI(info.context.headers["Business-Area"])
+        return api.get_flows()

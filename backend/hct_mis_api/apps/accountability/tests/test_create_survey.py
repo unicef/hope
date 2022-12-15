@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Survey
@@ -20,6 +22,12 @@ class TestCreateSurvey(APITestCase):
           }
         }
       }
+    }
+    """
+
+    AVAILABLE_FLOWS = """
+    query AvailableFlows {
+        availableFlows
     }
     """
 
@@ -106,3 +114,16 @@ class TestCreateSurvey(APITestCase):
                 }
             },
         )
+
+    def test_getting_available_flows(self) -> None:
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
+        ), patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flows",
+            MagicMock(return_value=["flow1", "flow2"]),
+        ):
+            self.snapshot_graphql_request(
+                request_string=self.AVAILABLE_FLOWS,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={},
+            )
