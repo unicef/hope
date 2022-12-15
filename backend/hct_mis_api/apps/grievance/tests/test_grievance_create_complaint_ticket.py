@@ -242,9 +242,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
     def _create_variables(
         self,
-        household: Optional["Household"] = None,
-        individual: Optional["Individual"] = None,
-        payment_records: Optional["PaymentRecord"] = None,
+        household: Optional[str] = None,
+        individual: Optional[str] = None,
+        payment_records: Optional[List[str]] = None,
     ) -> Dict:
         return {
             "input": {

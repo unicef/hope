@@ -33,7 +33,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
-    def create_hh(self, collect_individual_data: Dict) -> Household:
+    def create_hh(self, collect_individual_data: str) -> Household:
         household, _ = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.registration_data_import,

@@ -33,7 +33,7 @@ class CaseInsensitiveTuple(tuple):
         return key.casefold() in (element.casefold() for element in self)
 
 
-def decode_id_string(id_string: str) -> Optional[str]:
+def decode_id_string(id_string: Optional[str]) -> Optional[str]:
     if not id_string:
         return None
 
