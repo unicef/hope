@@ -5,7 +5,6 @@ from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import TabularInline
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
@@ -67,7 +66,6 @@ from hct_mis_api.apps.household.services.individual_xlsx_update import (
     InvalidColumnsError,
 )
 from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -118,7 +116,10 @@ class HouseholdWithDrawnMixin:
         if tickets is None:
             tickets = GrievanceTicket.objects.belong_household(hh)
             if hh.withdrawn:
-                tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+                tickets = filter(
+                    lambda t: t.ticket.extras.get("status_before_withdrawn", False),
+                    tickets,
+                )
             else:
                 tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
         service = HouseholdWithdraw(hh)
@@ -134,12 +135,18 @@ class HouseholdWithDrawnMixin:
 
         for individual in service.individuals:
             self.log_change(
-                request, individual, message.format(target="Individual", user=request.user.username, comment=comment)
+                request,
+                individual,
+                message.format(target="Individual", user=request.user.username, comment=comment),
             )
 
         for ticket in tickets:
             self.log_change(request, ticket.ticket, ticket_message)
-        self.log_change(request, hh, message.format(target="Household", user=request.user.username, comment=comment))
+        self.log_change(
+            request,
+            hh,
+            message.format(target="Household", user=request.user.username, comment=comment),
+        )
 
         return service
 
@@ -158,7 +165,10 @@ class HouseholdWithDrawnMixin:
                 with atomic():
                     for hh in qs.filter(withdrawn=False):
                         service = self._toggle_withdraw_status(
-                            request, hh, tag=form.cleaned_data["tag"], comment=form.cleaned_data["reason"]
+                            request,
+                            hh,
+                            tag=form.cleaned_data["tag"],
+                            comment=form.cleaned_data["reason"],
                         )
                         if service.household.withdraw:
                             results += 1
@@ -169,7 +179,11 @@ class HouseholdWithDrawnMixin:
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
             context["form"] = MassWithdrawForm(
-                initial={"_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME), "reason": "", "tag": ""}
+                initial={
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                    "reason": "",
+                    "tag": "",
+                }
             )
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
@@ -192,7 +206,10 @@ class HouseholdWithDrawnMixin:
                         tickets = []
                     for hh in qs.filter(withdrawn=True):
                         service = self._toggle_withdraw_status(
-                            request, hh, tickets=tickets, comment=form.cleaned_data["reason"]
+                            request,
+                            hh,
+                            tickets=tickets,
+                            comment=form.cleaned_data["reason"],
                         )
                         if not service.household.withdraw:
                             results += 1
@@ -203,7 +220,10 @@ class HouseholdWithDrawnMixin:
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
             context["form"] = RestoreForm(
-                initial={"reopen_tickets": True, "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME)}
+                initial={
+                    "reopen_tickets": True,
+                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
+                }
             )
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
@@ -650,7 +670,11 @@ class IndividualAdmin(
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
             context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
-            return TemplateResponse(request, "admin/household/individual/individuals_iban_xlsx_update.html", context)
+            return TemplateResponse(
+                request,
+                "admin/household/individual/individuals_iban_xlsx_update.html",
+                context,
+            )
         else:
             form = UpdateIndividualsIBANFromXlsxForm(request.POST, request.FILES)
             if form.is_valid():
@@ -680,7 +704,9 @@ class IndividualAdmin(
             else:
                 context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
                 return TemplateResponse(
-                    request, "admin/household/individual/individuals_iban_xlsx_update.html", context
+                    request,
+                    "admin/household/individual/individuals_iban_xlsx_update.html",
+                    context,
                 )
 
 
@@ -727,12 +753,22 @@ class EntitlementCardAdmin(HOPEModelAdminBase):
     search_fields = ("card_number",)
     date_hierarchy = "created_at"
     raw_id_fields = ("household",)
-    list_filter = ("status", ("card_type", ValueFilter), ("service_provider", ValueFilter))
+    list_filter = (
+        "status",
+        ("card_type", ValueFilter),
+        ("service_provider", ValueFilter),
+    )
 
 
 @admin.register(XlsxUpdateFile)
 class XlsxUpdateFileAdmin(HOPEModelAdminBase):
-    readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
+    readonly_fields = (
+        "file",
+        "business_area",
+        "rdi",
+        "xlsx_match_columns",
+        "uploaded_by",
+    )
     list_filter = (
         ("business_area", AutoCompleteFilter),
         ("uploaded_by", AutoCompleteFilter),
@@ -750,14 +786,19 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
             updater = IndividualXlsxUpdate(xlsx_update_file)
         except InvalidColumnsError as e:
             self.message_user(request, str(e), messages.ERROR)
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
+            context = self.get_common_context(
+                request,
+                title="Update Individual by xlsx",
+                form=UpdateByXlsxStage1Form(),
+            )
             return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
         context = self.get_common_context(
             request,
             title="Update Individual by xlsx",
             form=UpdateByXlsxStage2Form(
-                xlsx_columns=updater.columns_names, initial={"xlsx_update_file": xlsx_update_file}
+                xlsx_columns=updater.columns_names,
+                initial={"xlsx_update_file": xlsx_update_file},
             ),
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
@@ -828,6 +869,10 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
                     no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
                     xlsx_update_file=xlsx_update_file.id,
                 )
-                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
+                return TemplateResponse(
+                    request,
+                    "admin/household/individual/xlsx_update_stage3.html",
+                    context,
+                )
 
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)

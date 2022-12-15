@@ -4,7 +4,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -16,7 +16,9 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-class TestIndividualFlagQuery(APITestCase):
+class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
+    databases = "__all__"
+
     QUERY = """
     query AllIndividuals($flags: [String]) {
       allIndividuals(flags: $flags, businessArea: "afghanistan", orderBy: "id") {
@@ -99,6 +101,7 @@ class TestIndividualFlagQuery(APITestCase):
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
         )
+        super().setUpTestData()
 
     @parameterized.expand(
         [
