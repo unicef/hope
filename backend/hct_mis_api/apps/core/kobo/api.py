@@ -75,11 +75,15 @@ class KoboAPI:
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))
 
-        token = settings.KOBO_MASTER_API_TOKEN
+        if self.business_area is None:
+            token = settings.KOBO_MASTER_API_TOKEN
+        else:
+            token = self.business_area.kobo_token
 
         if not token:
-            logger.error("KOBO Token is not set")
-            raise TokenNotProvided("Token is not set")
+            msg = f"KOBO Token is not set for business area {self.business_area}"
+            logger.error(msg)
+            raise TokenNotProvided(msg)
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
