@@ -1,5 +1,5 @@
 import datetime
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 from django.utils import timezone
@@ -279,7 +279,9 @@ class TestRecalculateData(TestCase):
 
     @patch("hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay")
     @freeze_time("2021-07-29")
-    def test_interval_recalculate_population_fields_task(self, recalculate_population_fields_task_mock: MagicMock) -> None:
+    def test_interval_recalculate_population_fields_task(
+        self, recalculate_population_fields_task_mock: MagicMock
+    ) -> None:
         from hct_mis_api.apps.household.celery_tasks import (
             interval_recalculate_population_fields_task,
         )
