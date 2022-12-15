@@ -13,25 +13,25 @@ snapshots['TestDashboardQueries::test_chart_total_transferred_by_country 1'] = {
             'datasets': [
                 {
                     'data': [
-                        600.6,
-                        600.6,
-                        600.6
+                        80.0,
+                        88.0,
+                        84.0
                     ],
                     'label': 'Actual cash transferred'
                 },
                 {
                     'data': [
-                        300.0,
-                        300.0,
-                        300.0
+                        40.0,
+                        44.0,
+                        42.0
                     ],
                     'label': 'Actual voucher transferred'
                 },
                 {
                     'data': [
-                        900.6,
-                        900.6,
-                        900.6
+                        120.0,
+                        132.0,
+                        126.0
                     ],
                     'label': 'Total transferred'
                 }
