@@ -1,7 +1,7 @@
 import { Box, Button } from '@material-ui/core';
 import { Field } from 'formik';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
@@ -25,11 +25,12 @@ export const EditTargetPopulationHeader = ({
   loading,
 }: EditTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { id } = useParams();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Targeting'),
-      to: `/${businessArea}/target-population/`,
+      to: `/${businessArea}/target-population/${id}`,
     },
   ];
 
