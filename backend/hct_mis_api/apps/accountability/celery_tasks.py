@@ -32,3 +32,11 @@ def export_survey_sample_task(survey_id: str, user_id: str) -> None:
     except Exception as e:
         logger.exception(e)
         raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def send_survey_to_users(survey_id: str, flow: str) -> None:
+    survey = Survey.objects.get(id=survey_id)
+    print("S", survey, flow)

@@ -85,8 +85,14 @@ snapshots['TestCreateSurvey::test_create_survey_without_target_population_and_pr
 snapshots['TestCreateSurvey::test_getting_available_flows 1'] = {
     'data': {
         'availableFlows': [
-            'flow1',
-            'flow2'
+            {
+                'id': '123',
+                'name': 'flow2'
+            },
+            {
+                'id': '234',
+                'name': 'flow2'
+            }
         ]
     }
 }

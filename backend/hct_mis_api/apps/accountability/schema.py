@@ -44,6 +44,16 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
+# from hct_mis_api.apps.payment.schema import RapidProFlow
+
+
+class RapidProFlowNode(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+
+    def resolve_id(parent, info: Any) -> str:
+        return parent["uuid"]  # type: ignore
+
 
 class Query(graphene.ObjectType):
     accountability_communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
@@ -87,7 +97,7 @@ class Query(graphene.ObjectType):
         input=AccountabilitySampleSizeInput(),
     )
     survey_category_choices = graphene.List(ChoiceObject)
-    available_flows = graphene.List(graphene.String)
+    available_flows = graphene.List(RapidProFlowNode)
 
     def resolve_all_accountability_communication_messages(self, info: Any, **kwargs: Any) -> QuerySet[Message]:
         business_area_slug = info.context.headers.get("Business-Area")
@@ -135,6 +145,6 @@ class Query(graphene.ObjectType):
             "sample_size": sample_size,
         }
 
-    def resolve_available_flows(self, info, *args, **kwargs) -> List[str]:
+    def resolve_available_flows(self, info, *args, **kwargs):
         api = RapidProAPI(info.context.headers["Business-Area"])
         return api.get_flows()

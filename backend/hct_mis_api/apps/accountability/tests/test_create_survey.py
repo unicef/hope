@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Survey
@@ -27,7 +28,10 @@ class TestCreateSurvey(APITestCase):
 
     AVAILABLE_FLOWS = """
     query AvailableFlows {
-        availableFlows
+        availableFlows {
+            id
+            name
+        }
     }
     """
 
@@ -48,6 +52,7 @@ class TestCreateSurvey(APITestCase):
                     "title": "Test survey",
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_RANDOM,
+                    "flow": "flow123",
                 }
             },
         )
@@ -65,6 +70,7 @@ class TestCreateSurvey(APITestCase):
                     "title": "Test survey",
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_RANDOM,
+                    "flow": "flow123",
                 }
             },
         )
@@ -90,9 +96,15 @@ class TestCreateSurvey(APITestCase):
                     "fullListArguments": {
                         "excludedAdminAreas": [],
                     },
+                    "flow": "flow123",
                 }
             },
         )
+        # It would be nice to test that the celery task was called, but it's called with transaction.on_commit
+        # and it looks like it's not trivial to check that
+
+        send_survey_to_users(Survey.objects.get(title="Test survey").id, "flow123")
+        # TODO: test that task was started
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(
@@ -111,6 +123,7 @@ class TestCreateSurvey(APITestCase):
                     "fullListArguments": {
                         "excludedAdminAreas": [],
                     },
+                    "flow": "flow123",
                 }
             },
         )
@@ -120,7 +133,7 @@ class TestCreateSurvey(APITestCase):
             "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
         ), patch(
             "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flows",
-            MagicMock(return_value=["flow1", "flow2"]),
+            MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
         ):
             self.snapshot_graphql_request(
                 request_string=self.AVAILABLE_FLOWS,

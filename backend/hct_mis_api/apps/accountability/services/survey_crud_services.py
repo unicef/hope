@@ -45,5 +45,4 @@ class SurveyCrudServices:
             raise ValidationError("No recipients found for the given criteria.")
 
         survey.save()
-
         return survey
