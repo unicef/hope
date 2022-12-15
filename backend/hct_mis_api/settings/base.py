@@ -576,6 +576,11 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "Automatically merge the population after server-triggered RDI import",
         bool,
     ),
+    "RECALCULATE_POPULATION_FIELDS_CHUNK": (
+        100000,
+        "recalculate_population_fields_task Household table pagination value",
+        "positive_integers",
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
