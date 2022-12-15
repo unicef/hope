@@ -18,7 +18,6 @@ from hct_mis_api.apps.core.utils import (
     map_unicef_ids_to_households_unicef_ids,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.filters import HouseholdFilter
@@ -70,18 +69,6 @@ class Query(graphene.ObjectType):
     all_target_population = DjangoPermissionFilterConnectionField(
         TargetPopulationNode, permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),)
     )
-    golden_record_by_targeting_criteria = DjangoPermissionFilterConnectionField(
-        HouseholdNode,
-        targeting_criteria=TargetingCriteriaObjectType(required=True),
-        program=graphene.Argument(graphene.ID, required=True),
-        excluded_ids=graphene.Argument(graphene.String, required=True),
-        filterset_class=HouseholdFilter,
-        permission_classes=(
-            hopePermissionClass(Permissions.TARGETING_UPDATE),
-            hopePermissionClass(Permissions.TARGETING_CREATE),
-            hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),
-        ),
-    )
     target_population_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
@@ -99,18 +86,3 @@ class Query(graphene.ObjectType):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
         return prefetch_selections(target_population_model.household_list, target_population_model)
-
-    def resolve_golden_record_by_targeting_criteria(
-        parent,
-        info: Any,
-        targeting_criteria: target_models.TargetPopulation,
-        program: Program,
-        excluded_ids: str,
-        **kwargs: Any
-    ) -> QuerySet:
-        household_queryset = Household.objects
-        return prefetch_selections(
-            household_queryset.filter(
-                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids)
-            )
-        ).distinct()

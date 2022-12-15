@@ -11,7 +11,7 @@ import {
 import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 
-interface LookUpRelatedTicketsTableRowProps {
+interface LookUpLinkedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   selected: Array<string>;
   checkboxClickHandler: (
@@ -24,13 +24,13 @@ interface LookUpRelatedTicketsTableRowProps {
   categoryChoices: { [id: number]: string };
 }
 
-export function LookUpRelatedTicketsTableRow({
+export function LookUpLinkedTicketsTableRow({
   ticket,
   selected,
   checkboxClickHandler,
   statusChoices,
   categoryChoices,
-}: LookUpRelatedTicketsTableRowProps): React.ReactElement {
+}: LookUpLinkedTicketsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);
