@@ -147,7 +147,7 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
-    const filterNull = (filter): boolean => filter.value === null;
+    const filterNullOrNoSelections = (filter): boolean => filter.value === null || (filter?.fieldAttribute?.type === "SELECT_MANY" && filter.value && filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
       filter.value?.hasOwnProperty('from') &&
@@ -155,7 +155,7 @@ export function TargetCriteriaForm({
       !filter.value.from &&
       !filter.value.to;
 
-    const hasFiltersNullValues = Boolean(filters.filter(filterNull).length);
+    const hasFiltersNullValues = Boolean(filters.filter(filterNullOrNoSelections).length);
 
     const hasFiltersEmptyFromToValues = Boolean(
       filters.filter(filterEmptyFromTo).length,
@@ -166,7 +166,7 @@ export function TargetCriteriaForm({
 
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
-        const hasNulls = block.individualBlockFilters.some(filterNull);
+        const hasNulls = block.individualBlockFilters.some(filterNullOrNoSelections);
         const hasFromToError = block.individualBlockFilters.some(
           filterEmptyFromTo,
         );

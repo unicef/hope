@@ -6,7 +6,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -66,7 +65,6 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cached_business_areas_slug_id_dict.cache_clear()
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
         program_one = ProgramFactory(
