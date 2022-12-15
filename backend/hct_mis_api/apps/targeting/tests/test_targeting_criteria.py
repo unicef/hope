@@ -64,48 +64,72 @@ class TestTargetingCriteriaQuery(APITestCase):
         return criteria
 
     def test_size(self) -> None:
-        criteria = self.create_criteria(
-            {
-                "comparison_method": "EQUALS",
-                "arguments": [2],
-                "field_name": "size",
-                "is_flex_field": False,
-            }
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "comparison_method": "EQUALS",
+                        "arguments": [2],
+                        "field_name": "size",
+                        "is_flex_field": False,
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
         )
-        assert Household.objects.filter(criteria.get_query()).distinct().count() == 1
 
     def test_residence_status(self) -> None:
-        criteria = self.create_criteria(
-            {
-                "comparison_method": "EQUALS",
-                "arguments": ["REFUGEE"],
-                "field_name": "residence_status",
-                "is_flex_field": False,
-            }
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "comparison_method": "EQUALS",
+                        "arguments": ["REFUGEE"],
+                        "field_name": "residence_status",
+                        "is_flex_field": False,
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
         )
-        assert Household.objects.filter(criteria.get_query()).distinct().count() == 1
 
     def test_flex_field_variables(self) -> None:
-        criteria = self.create_criteria(
-            {
-                "comparison_method": "EQUALS",
-                "arguments": ["0"],
-                "field_name": "unaccompanied_child_h_f",
-                "is_flex_field": True,
-            }
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "comparison_method": "EQUALS",
+                        "arguments": ["0"],
+                        "field_name": "unaccompanied_child_h_f",
+                        "is_flex_field": True,
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 0
         )
-        assert Household.objects.filter(criteria.get_query()).distinct().count() == 0
 
     def test_select_many_variables(self) -> None:
-        criteria = self.create_criteria(
-            {
-                "comparison_method": "CONTAINS",
-                "arguments": ["other_public", "pharmacy", "other_private"],
-                "field_name": "treatment_facility_h_f",
-                "is_flex_field": True,
-            }
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "comparison_method": "CONTAINS",
+                        "arguments": ["other_public", "pharmacy", "other_private"],
+                        "field_name": "treatment_facility_h_f",
+                        "is_flex_field": True,
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 0
         )
-        assert Household.objects.filter(criteria.get_query()).distinct().count() == 0
 
 
 class TestTargetingCriteriaIndividualRules(APITestCase):
@@ -182,36 +206,48 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         assert Household.objects.all().distinct().count() == 2
 
     def test_marital_status(self) -> None:
-        criteria = self.create_criteria(
-            [
-                {
-                    "comparison_method": "EQUALS",
-                    "arguments": ["MARRIED"],
-                    "field_name": "marital_status",
-                    "is_flex_field": False,
-                },
-                {
-                    "comparison_method": "EQUALS",
-                    "arguments": ["MALE"],
-                    "field_name": "sex",
-                    "is_flex_field": False,
-                },
-            ]
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "EQUALS",
+                            "arguments": ["MARRIED"],
+                            "field_name": "marital_status",
+                            "is_flex_field": False,
+                        },
+                        {
+                            "comparison_method": "EQUALS",
+                            "arguments": ["MALE"],
+                            "field_name": "sex",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
         )
-        assert Household.objects.filter(criteria.get_query()).distinct().count() == 1
 
     def test_observed_disability(self) -> None:
-        criteria = self.create_criteria(
-            [
-                {
-                    "comparison_method": "CONTAINS",
-                    "arguments": ["COMMUNICATING", "HEARING", "MEMORY", "SEEING", "WALKING", "SELF_CARE"],
-                    "field_name": "observed_disability",
-                    "is_flex_field": False,
-                },
-            ]
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "CONTAINS",
+                            "arguments": ["COMMUNICATING", "HEARING", "MEMORY", "SEEING", "WALKING", "SELF_CARE"],
+                            "field_name": "observed_disability",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 2
         )
-        assert Household.objects.filter(criteria.get_query()).distinct().count() == 2
 
     def test_ranges(self) -> None:
         assert (
