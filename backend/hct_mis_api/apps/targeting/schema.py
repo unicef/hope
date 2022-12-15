@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Prefetch, QuerySet
 
 import graphene
 from graphene import relay
@@ -13,19 +13,14 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    decode_and_get_object_required,
     decode_id_string,
-    map_unicef_ids_to_households_unicef_ids,
     to_choice_object,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.filters import HouseholdFilter
 from hct_mis_api.apps.targeting.graphql_types import (
-    TargetingCriteriaObjectType,
     TargetPopulationNode,
 )
-from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 
 
 def prefetch_selections(qs: QuerySet, target_population: Optional[target_models.TargetPopulation] = None) -> QuerySet:
