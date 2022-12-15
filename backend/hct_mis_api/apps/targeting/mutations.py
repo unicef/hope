@@ -36,9 +36,9 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.targeting.schema import (
-    TargetingCriteriaObjectType,
     TargetPopulationNode,
 )
+from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 from hct_mis_api.apps.targeting.validators import (
     FinalizeTargetPopulationValidator,
     LockTargetPopulationValidator,

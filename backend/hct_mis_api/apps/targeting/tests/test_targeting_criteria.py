@@ -115,7 +115,6 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         filter_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)
         filter_block.save()
         for filter in filters:
-            print("Creating filter", filter)
             block_filter = TargetingIndividualBlockRuleFilter(**filter, individuals_filters_block=filter_block)
             block_filter.save()
         return targeting_criteria
@@ -175,10 +174,6 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         assert Household.objects.all().distinct().count() == 2
 
     def test_marital_status(self) -> None:
-        # TODO
-        # 2 households, one with married only, one with married and single
-        # choosing 2 comparisons - married and single (AND)
-        # only 1 matches both
         criteria = self.create_criteria(
             [
                 {
@@ -189,12 +184,23 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                 },
                 {
                     "comparison_method": "EQUALS",
-                    "arguments": ["SINGLE"],
-                    "field_name": "marital_status",
+                    "arguments": ["MALE"],
+                    "field_name": "sex",
                     "is_flex_field": False,
                 },
             ]
         )
-        print(criteria.get_query())
-        print(Household.objects.filter(criteria.get_query()).distinct())
+        assert Household.objects.filter(criteria.get_query()).distinct().count() == 1
+
+    def test_observed_disability(self) -> None:
+        criteria = self.create_criteria(
+            [
+                {
+                    "comparison_method": "CONTAINS",
+                    "arguments": ["COMMUNICATING", "HEARING", "MEMORY", "SEEING", "WALKING", "SELF_CARE"],
+                    "field_name": "observed_disability",
+                    "is_flex_field": False,
+                },
+            ]
+        )
         assert Household.objects.filter(criteria.get_query()).distinct().count() == 2
