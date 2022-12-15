@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import wraps
 
 from django.db import transaction
+from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
@@ -23,7 +24,9 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -93,11 +96,16 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id, rdi_name):
+def create_target_population_task(storage_id, program_id, tp_name):
     storage_obj = StorageFile.objects.get(id=storage_id)
     file_path = None
+    program = Program.objects.get(id=program_id)
+
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
+            registration_data_import = RegistrationDataImport.objects.create(
+                name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
+            )
 
             business_area = storage_obj.business_area
             country = business_area.countries.first()
@@ -105,10 +113,10 @@ def create_target_population_task(storage_id, rdi_name):
             passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
             tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
 
-            first_registration_date = datetime.now()
+            first_registration_date = timezone.now()
             last_registration_date = first_registration_date
 
-            family_ids = set()
+            families = {}
             individuals, documents, bank_infos = [], [], []
 
             storage_obj.status = StorageFile.STATUS_PROCESSING
@@ -122,25 +130,12 @@ def create_target_population_task(storage_id, rdi_name):
 
             with open(file_path, encoding="cp1251") as file:
                 reader = csv.DictReader(file, delimiter=";")
-                batch_size = 10000
-                current_batch_index = 0
-                registration_data_import = None
                 for row in reader:
                     rows_count += 1
                     family_id = row["ID_FAM"]
                     iban = row["IBAN"]
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
-                    size = row["FAM_NUM"]
-                    if current_batch_index % batch_size == 0:
-                        registration_data_import = RegistrationDataImport.objects.create(
-                            name=f"{rdi_name} part {int(current_batch_index//batch_size)+1}",
-                            number_of_individuals=0,
-                            number_of_households=0,
-                            business_area=storage_obj.business_area,
-                            data_source=RegistrationDataImport.EDOPOMOGA,
-                        )
-                    current_batch_index += 1
 
                     individual_data = {
                         "given_name": row.get("NAME", ""),
@@ -154,8 +149,8 @@ def create_target_population_task(storage_id, rdi_name):
                         "last_registration_date": last_registration_date,
                         "sex": MALE,
                     }
-                    if family_id in family_ids:
-                        individual = Individual(**individual_data, household=Household.objects.get(family_id=family_id))
+                    if family_id in families:
+                        individual = Individual(**individual_data, household_id=families.get(family_id))
                         individuals.append(individual)
                     else:
                         individual = Individual.objects.create(**individual_data)
@@ -167,16 +162,16 @@ def create_target_population_task(storage_id, rdi_name):
                             first_registration_date=first_registration_date,
                             last_registration_date=last_registration_date,
                             registration_data_import=registration_data_import,
-                            size=size,
+                            size=1,
                             family_id=family_id,
                             storage_obj=storage_obj,
                             collect_individual_data=COLLECT_TYPE_NONE,
                         )
 
                         individual.household = household
-                        individual.save()
+                        individual.save(update_fields=("household",))
 
-                        family_ids.add(family_id)
+                        families[family_id] = household.id
 
                     passport = Document(
                         document_number=passport_id,
@@ -211,6 +206,28 @@ def create_target_population_task(storage_id, rdi_name):
             Individual.objects.bulk_create(individuals)
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
+
+            households = Household.objects.filter(family_id__in=list(families.keys())).only("id")
+            if len(families) != rows_count:
+                for household in households:
+                    household.size = Individual.objects.filter(household=household).count()
+                Household.objects.bulk_update(households, ("size",))
+
+            households.update(withdrawn=True, withdrawn_date=timezone.now())
+            Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
+
+            target_population = TargetPopulation.objects.create(
+                name=tp_name,
+                created_by=storage_obj.created_by,
+                program=program,
+                status=TargetPopulation.STATUS_LOCKED,
+                build_status=TargetPopulation.BUILD_STATUS_OK,
+                business_area=business_area,
+                storage_file=storage_obj,
+            )
+            target_population.households.set(households)
+            target_population.refresh_stats()
+            target_population.save()
 
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
