@@ -28,7 +28,7 @@ class DjangoFastConnectionField(DjangoConnectionField):
         try:
             excluded_args = ["first", "last", "before", "after"]
             business_area = args.get("business_area")
-            important_args = {k: v for k, v in args.items() if k not in excluded_args}
+            important_args = {k: str(v) for k, v in args.items() if k not in excluded_args}
             hashed_args = hashlib.sha1(json.dumps(important_args).encode()).hexdigest()
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
