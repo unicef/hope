@@ -5,6 +5,8 @@ from uuid import UUID
 from django.core.paginator import Paginator
 
 from concurrency.api import disable_concurrency
+from constance import config
+from django.utils import timezone
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
@@ -59,13 +61,31 @@ def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = Non
         .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
         .order_by("pk")
     )
-    paginator = Paginator(queryset, 10000)
+    paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
 
     for page_number in paginator.page_range:
         page = paginator.page(page_number)
         recalculate_population_fields_chunk_task.delay(
             households_ids=list(page.object_list.values_list("pk", flat=True))
         )
+
+
+@app.task()
+@log_start_and_end
+@sentry_tags
+def interval_recalculate_population_fields_task() -> None:
+    from hct_mis_api.apps.household.models import Individual
+
+    datetime_now = timezone.now()
+    now_day, now_month = datetime_now.day, datetime_now.month
+
+    households = (
+        Individual.objects.filter(birth_date__day=now_day, birth_date__month=now_month)
+        .values_list("household_id", flat=True)
+        .distinct()
+    )
+
+    recalculate_population_fields_task.delay(households_ids=list(households))
 
 
 @app.task()

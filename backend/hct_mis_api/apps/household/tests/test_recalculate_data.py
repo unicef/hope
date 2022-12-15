@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.utils import timezone
@@ -275,3 +276,11 @@ class TestRecalculateData(TestCase):
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
         self.assertEqual(household.pregnant_count, 2)
+
+    @patch("hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay")
+    @freeze_time("2021-07-29")
+    def test_interval_recalculate_population_fields_task(self, recalculate_population_fields_task_mock) -> None:
+        from hct_mis_api.apps.household.celery_tasks import interval_recalculate_population_fields_task
+
+        interval_recalculate_population_fields_task.delay()
+        recalculate_population_fields_task_mock.assert_called_once_with(households_ids=[self.household.pk])
