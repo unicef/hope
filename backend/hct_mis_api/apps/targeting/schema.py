@@ -12,15 +12,10 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-    to_choice_object,
-)
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.targeting.filters import HouseholdFilter
-from hct_mis_api.apps.targeting.graphql_types import (
-    TargetPopulationNode,
-)
+from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 
 
 def prefetch_selections(qs: QuerySet, target_population: Optional[target_models.TargetPopulation] = None) -> QuerySet:
