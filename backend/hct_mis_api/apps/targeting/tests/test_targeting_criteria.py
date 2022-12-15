@@ -1,7 +1,10 @@
+import datetime
+from dateutil.relativedelta import relativedelta
 from typing import Dict, List
 
 from django.core.management import call_command
 
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -138,7 +141,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.first()
 
-        (household, individuals) = create_household_and_individuals(
+        (household, individuals1) = create_household_and_individuals(
             {"business_area": cls.business_area},
             [
                 {
@@ -155,7 +158,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                 },
             ],
         )
-        (household, individuals) = create_household_and_individuals(
+        (household, individuals2) = create_household_and_individuals(
             {"business_area": cls.business_area},
             [
                 {
@@ -170,6 +173,11 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                 },
             ],
         )
+
+        individuals1[0].birth_date = datetime.date.today() - relativedelta(years=+20, days=+5)  # age 20
+        individuals2[0].birth_date = datetime.date.today() - relativedelta(years=+24, days=+5)  # age 24
+        individuals2[1].birth_date = datetime.date.today() - relativedelta(years=+26, days=-5)  # age 25
+        Individual.objects.bulk_update(individuals1 + individuals2, ["birth_date"])
 
         assert Household.objects.all().distinct().count() == 2
 
@@ -204,3 +212,94 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
             ]
         )
         assert Household.objects.filter(criteria.get_query()).distinct().count() == 2
+
+    def test_ranges(self):
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "RANGE",
+                            "arguments": [20, 25],
+                            "field_name": "age",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 2
+        )
+
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "RANGE",
+                            "arguments": [22, 26],
+                            "field_name": "age",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
+        )
+
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "LESS_THAN",
+                            "arguments": [20],
+                            "field_name": "age",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
+        )
+
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "LESS_THAN",
+                            "arguments": [24],
+                            "field_name": "age",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 2
+        )
+
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    [
+                        {
+                            "comparison_method": "GREATER_THAN",
+                            "arguments": [20],
+                            "field_name": "age",
+                            "is_flex_field": False,
+                        },
+                    ]
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 2
+        )
