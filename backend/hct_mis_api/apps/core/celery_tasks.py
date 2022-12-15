@@ -104,7 +104,11 @@ def create_target_population_task(storage_id, program_id, tp_name):
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
             registration_data_import = RegistrationDataImport.objects.create(
-                name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
+                name=f"{storage_obj.file.name}_{program.name}",
+                number_of_individuals=0,
+                number_of_households=0,
+                business_area=program.business_area,
+                data_source=RegistrationDataImport.EDOPOMOGA,
             )
 
             business_area = storage_obj.business_area
