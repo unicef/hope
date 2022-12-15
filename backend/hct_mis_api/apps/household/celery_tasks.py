@@ -3,10 +3,10 @@ from typing import List, Optional
 from uuid import UUID
 
 from django.core.paginator import Paginator
+from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 from constance import config
-from django.utils import timezone
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
