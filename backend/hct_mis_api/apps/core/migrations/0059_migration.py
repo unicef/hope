@@ -15,4 +15,9 @@ class Migration(migrations.Migration):
             name='kobo_token',
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
+        migrations.AddField(
+            model_name='businessarea',
+            name='kobo_url',
+            field=models.URLField(blank=True, max_length=255, null=True),
+        ),
     ]
