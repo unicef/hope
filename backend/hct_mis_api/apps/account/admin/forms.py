@@ -2,19 +2,11 @@ import csv
 import logging
 from typing import Dict, Optional
 
+from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.forms import (
-    BaseInlineFormSet,
-    EmailField,
-    ModelChoiceField,
-    ModelForm,
-    MultipleChoiceField,
-    forms,
-    widgets,
-)
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
@@ -29,8 +21,8 @@ from ..permissions import Permissions
 logger = logging.getLogger(__name__)
 
 
-class RoleAdminForm(ModelForm):
-    permissions = MultipleChoiceField(
+class RoleAdminForm(forms.ModelForm):
+    permissions = forms.MultipleChoiceField(
         required=False,
         widget=FilteredSelectMultiple("", False),
         choices=Permissions.choices(),
@@ -41,9 +33,9 @@ class RoleAdminForm(ModelForm):
         fields = "__all__"
 
 
-class UserRoleAdminForm(ModelForm):
-    role = ModelChoiceField(account_models.Role.objects.order_by("name"))
-    business_area = ModelChoiceField(BusinessArea.objects.filter(is_split=False))
+class UserRoleAdminForm(forms.ModelForm):
+    role = forms.ModelChoiceField(account_models.Role.objects.order_by("name"))
+    business_area = forms.ModelChoiceField(BusinessArea.objects.filter(is_split=False))
 
     class Meta:
         model = account_models.UserRole
@@ -60,7 +52,7 @@ class UserRoleAdminForm(ModelForm):
         account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
 
 
-class UserRoleInlineFormSet(BaseInlineFormSet):
+class UserRoleInlineFormSet(forms.BaseInlineFormSet):
     model = account_models.UserRole
 
     def add_fields(self, form: "forms.Form", index: Optional[int]) -> None:
@@ -102,7 +94,7 @@ class HopeUserCreationForm(UserCreationForm):
     class Meta:
         model = account_models.User
         fields = ()
-        field_classes = {"username": UsernameField, "email": EmailField}
+        field_classes = {"username": UsernameField, "email": forms.EmailField}
 
 
 class AddRoleForm(forms.Form):
@@ -110,7 +102,7 @@ class AddRoleForm(forms.Form):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     roles = forms.ModelMultipleChoiceField(
         queryset=Role.objects.all(),
-        widget=widgets.FilteredSelectMultiple("Roles", False),
+        widget=FilteredSelectMultiple("Roles", False),
     )
 
 
