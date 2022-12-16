@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+import django
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
@@ -110,24 +112,30 @@ class TestCreateSurvey(APITestCase):
         households = [create_household({"size": 3})[0] for _ in range(3)]
         self.tp.households.set(households)
 
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_SURVEY_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
-            variables={
-                "input": {
-                    "title": "Test survey",
-                    "category": Survey.CATEGORY_MANUAL,
-                    "samplingType": Survey.SAMPLING_FULL_LIST,
-                    "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
-                    "fullListArguments": {
-                        "excludedAdminAreas": [],
-                    },
-                    "flow": "flow123",
-                }
-            },
-        )
-        # It would be nice to test that the celery task was called, but it's called with transaction.on_commit
-        # and it looks like it's not trivial to check that
+        with patch.object(django.db.transaction, "on_commit", lambda t: t()), patch(
+            "hct_mis_api.apps.accountability.celery_tasks.send_survey_to_users.delay"
+        ) as task_mock:
+            self.snapshot_graphql_request(
+                request_string=self.CREATE_SURVEY_MUTATION,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={
+                    "input": {
+                        "title": "Test survey",
+                        "category": Survey.CATEGORY_MANUAL,
+                        "samplingType": Survey.SAMPLING_FULL_LIST,
+                        "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                        "fullListArguments": {
+                            "excludedAdminAreas": [],
+                        },
+                        "flow": "flow123",
+                    }
+                },
+            )
+            survey = Survey.objects.get(title="Test survey")
+            assert task_mock.called
+            assert task_mock.call_args[0][0] == survey.id
+            assert task_mock.call_args[0][1] == "flow123"
+            assert task_mock.call_args[0][2] == self.business_area.id
 
         households = self.tp.households.all()
         assert len(households) == 3
@@ -155,7 +163,7 @@ class TestCreateSurvey(APITestCase):
                 "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
                 start_flows_mock_1,
             ):
-                survey = Survey.objects.get(title="Test survey")
+                survey.refresh_from_db()
                 assert len(survey.successful_rapid_pro_calls) == 0
 
                 send_survey_to_users(survey.id, "flow123", self.business_area.id)
