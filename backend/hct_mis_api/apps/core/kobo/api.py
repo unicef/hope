@@ -37,14 +37,14 @@ class KoboRequestsSession(requests.Session):
 
 
 class KoboAPI:
-    # KPI_URL = os.getenv("KOBO_KF_URL", "https://kobo.humanitarianresponse.info")
-
-    def __init__(self, business_area_slug: Optional[str] = None, kpi_url: Optional[str] = None):
-        self.KPI_URL = kpi_url or settings.KOBO_KF_URL
+    def __init__(self, business_area_slug: Optional[str] = None):
         if business_area_slug is not None:
             self.business_area = BusinessArea.objects.get(slug=business_area_slug)
+            self.KPI_URL = self.business_area.kobo_url or settings.KOBO_KF_URL
         else:
             self.business_area = None
+            self.KPI_URL = settings.KOBO_KF_URL
+
         self._get_token()
 
     def _handle_paginated_results(self, url) -> List[Dict]:
