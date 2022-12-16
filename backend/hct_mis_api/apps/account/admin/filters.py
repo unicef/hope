@@ -18,7 +18,7 @@ class HasKoboAccount(SimpleListFilter):
     parameter_name = "kobo_account"
     title = "Has Kobo Access"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin[Any]) -> Tuple:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Tuple:
         return (1, "Yes"), (0, "No")
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
