@@ -43,16 +43,25 @@ def send_survey_to_users(survey_id: str, flow_uuid: str, business_area_id: str) 
     survey = Survey.objects.get(id=survey_id)
     business_area = BusinessArea.objects.get(id=business_area_id)
     api = RapidProAPI(business_area.slug)
-    print(survey.title)
-    print(survey.target_population.households.all())
 
-    # phone_numbers = survey.target_population.households.all().values_list("phone_no", flat=True)
-    # get all individuals from households and get their phone numbers
-    phone_numbers = survey.target_population.households.all().values_list("individuals__phone_no", flat=True)
-    print(phone_numbers)
+    already_received = [
+        phone_number
+        for successful_call in survey.successful_rapid_pro_calls
+        for phone_number in successful_call["phone_numbers"]
+    ]
+    phone_numbers = [
+        phone_number
+        for phone_number in survey.target_population.households.all().values_list("individuals__phone_no", flat=True)
+        if phone_number not in already_received
+    ]
 
     successful_flows, error = api.start_flows(flow_uuid, phone_numbers)
-    print("Successful flows: ", successful_flows)
-    print("Error: ", error)
 
-    # save successful ones to target population under successful_rapid_pro_flows list with phone numbers
+    for successful_flow in successful_flows:
+        survey.successful_rapid_pro_calls.append(
+            {
+                "flow_uuid": successful_flow[0]["uuid"],
+                "phone_numbers": list(map(str, successful_flow[1])),
+            }
+        )
+    survey.save()

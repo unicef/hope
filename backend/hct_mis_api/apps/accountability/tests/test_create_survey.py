@@ -133,12 +133,12 @@ class TestCreateSurvey(APITestCase):
         assert households.count() == 3
         phone_number_1 = households[0].individuals.first().phone_no
         phone_number_2 = households[1].individuals.first().phone_no
+        phone_number_3 = households[2].individuals.first().phone_no
 
         with patch(
             "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
-        ), patch(
-            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
-            MagicMock(
+        ):
+            start_flows_mock_1 = MagicMock(
                 return_value=(
                     [
                         (
@@ -150,15 +150,49 @@ class TestCreateSurvey(APITestCase):
                     ],
                     None,
                 )
-            ),
-        ):
-            survey = Survey.objects.get(title="Test survey")
-            assert len(survey.successful_rapid_pro_calls) == 0
-            send_survey_to_users(survey.id, "flow123", self.business_area.id)
-            survey.refresh_from_db()
-            assert len(survey.successful_rapid_pro_calls) == 1
-            assert survey.successful_rapid_pro_calls[0]["flow_uuid"] == "flow123"
-            assert survey.successful_rapid_pro_calls[0]["phone_numbers"] == [phone_number_1, phone_number_2]
+            )
+            with patch(
+                "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
+                start_flows_mock_1,
+            ):
+                survey = Survey.objects.get(title="Test survey")
+                assert len(survey.successful_rapid_pro_calls) == 0
+
+                send_survey_to_users(survey.id, "flow123", self.business_area.id)
+                survey.refresh_from_db()
+
+                assert start_flows_mock_1.call_count == 1
+                assert start_flows_mock_1.call_args[0][0] == "flow123"
+                assert len(start_flows_mock_1.call_args[0][1]) == 9  # 3 inds in 3 households, 9 total
+                assert len(survey.successful_rapid_pro_calls) == 1
+                assert survey.successful_rapid_pro_calls[0]["flow_uuid"] == "flow123"
+                assert survey.successful_rapid_pro_calls[0]["phone_numbers"] == [phone_number_1, phone_number_2]
+
+            start_flows_mock_2 = MagicMock(
+                return_value=(
+                    [
+                        (
+                            {
+                                "uuid": "flow123",
+                            },
+                            [phone_number_3],
+                        )
+                    ],
+                    None,
+                )
+            )
+            with patch(
+                "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
+                start_flows_mock_2,
+            ):
+                send_survey_to_users(survey.id, "flow123", self.business_area.id)
+                survey.refresh_from_db()
+                assert start_flows_mock_2.call_count == 1
+                assert start_flows_mock_2.call_args[0][0] == "flow123"
+                assert len(start_flows_mock_2.call_args[0][1]) == 7  # 7 inds in households remaining total
+                assert len(survey.successful_rapid_pro_calls) == 2
+                assert survey.successful_rapid_pro_calls[1]["flow_uuid"] == "flow123"
+                assert survey.successful_rapid_pro_calls[1]["phone_numbers"] == [phone_number_3]
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(
