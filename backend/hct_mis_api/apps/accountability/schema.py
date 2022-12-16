@@ -44,8 +44,6 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
-# from hct_mis_api.apps.payment.schema import RapidProFlow
-
 
 class RapidProFlowNode(graphene.ObjectType):
     id = graphene.String()

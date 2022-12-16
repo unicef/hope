@@ -100,11 +100,65 @@ class TestCreateSurvey(APITestCase):
                 }
             },
         )
+
+    def test_create_survey_and_send_via_rapidpro(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+        )
+
+        create_household({"size": 3})
+        households = [create_household({"size": 3})[0] for _ in range(3)]
+        self.tp.households.set(households)
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_SURVEY_MUTATION,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "input": {
+                    "title": "Test survey",
+                    "category": Survey.CATEGORY_MANUAL,
+                    "samplingType": Survey.SAMPLING_FULL_LIST,
+                    "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                    "fullListArguments": {
+                        "excludedAdminAreas": [],
+                    },
+                    "flow": "flow123",
+                }
+            },
+        )
         # It would be nice to test that the celery task was called, but it's called with transaction.on_commit
         # and it looks like it's not trivial to check that
 
-        send_survey_to_users(Survey.objects.get(title="Test survey").id, "flow123")
-        # TODO: test that task was started
+        households = self.tp.households.all()
+        assert households.count() == 3
+        phone_number_1 = households[0].individuals.first().phone_no
+        phone_number_2 = households[1].individuals.first().phone_no
+
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
+        ), patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.start_flows",
+            MagicMock(
+                return_value=(
+                    [
+                        (
+                            {
+                                "uuid": "flow123",
+                            },
+                            [phone_number_1, phone_number_2],
+                        )
+                    ],
+                    None,
+                )
+            ),
+        ):
+            survey = Survey.objects.get(title="Test survey")
+            assert len(survey.successful_rapid_pro_calls) == 0
+            send_survey_to_users(survey.id, "flow123", self.business_area.id)
+            survey.refresh_from_db()
+            assert len(survey.successful_rapid_pro_calls) == 1
+            assert survey.successful_rapid_pro_calls[0]["flow_uuid"] == "flow123"
+            assert survey.successful_rapid_pro_calls[0]["phone_numbers"] == [phone_number_1, phone_number_2]
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(

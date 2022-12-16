@@ -22,6 +22,21 @@ snapshots['TestCreateSurvey::test_create_survey 1'] = {
     }
 }
 
+snapshots['TestCreateSurvey::test_create_survey_and_send_via_rapidpro 1'] = {
+    'data': {
+        'createSurvey': {
+            'survey': {
+                'createdBy': {
+                    'firstName': 'John',
+                    'lastName': 'Doe'
+                },
+                'numberOfRecipients': 3,
+                'title': 'Test survey'
+            }
+        }
+    }
+}
+
 snapshots['TestCreateSurvey::test_create_survey_without_permission 1'] = {
     'data': {
         'createSurvey': None
