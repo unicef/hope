@@ -33,6 +33,7 @@ import {
   CreateSurveyAccountabilityMutationVariables,
   useAccountabilitySampleSizeLazyQuery,
   useAllAdminAreasQuery,
+  useAvailableFlowsQuery,
   useCreateSurveyAccountabilityMutation,
 } from '../../../../__generated__/graphql';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
@@ -44,6 +45,7 @@ import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { FormikEffect } from '../../../../components/core/FormikEffect';
+import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -121,7 +123,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  const { data } = useAllAdminAreasQuery({
+  const {
+    data: adminAreasData,
+    loading: adminAreasLoading,
+  } = useAllAdminAreasQuery({
     variables: {
       first: 100,
       businessArea,
@@ -130,9 +135,13 @@ export const CreateSurveyPage = (): React.ReactElement => {
 
   const [
     loadSampleSize,
-    { data: sampleSizesData },
+    { data: sampleSizesData, loading: sampleSizesLoading },
   ] = useAccountabilitySampleSizeLazyQuery({
     variables: prepareVariables(selectedSampleSizeType, formValues),
+    fetchPolicy: 'network-only',
+  });
+
+  const { data: flowsData, loading: flowsLoading } = useAvailableFlowsQuery({
     fetchPolicy: 'network-only',
   });
 
@@ -164,6 +173,14 @@ export const CreateSurveyPage = (): React.ReactElement => {
     return Yup.object().shape(datum);
   }, [activeStep, t, category]);
 
+  if (permissions === null || !adminAreasData || !flowsData) return null;
+  if (
+    !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE, permissions)
+  )
+    return <PermissionDenied />;
+  if (adminAreasLoading || flowsLoading || sampleSizesLoading)
+    return <LoadingComponent />;
+
   const validate = (values): { error?: string } => {
     const { program, targetPopulation } = values;
     const errors: { [key: string]: string | { [key: string]: string } } = {};
@@ -173,18 +190,15 @@ export const CreateSurveyPage = (): React.ReactElement => {
     return errors;
   };
 
-  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
-    ? data.allAdminAreas.edges.map((el) => ({
+  const mappedAdminAreas = adminAreasData?.allAdminAreas?.edges?.length
+    ? adminAreasData.allAdminAreas.edges.map((el) => ({
         value: el.node.id,
         name: el.node.name,
       }))
     : [];
-
-  if (permissions === null) return null;
-  if (
-    !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE, permissions)
-  )
-    return <PermissionDenied />;
+  const mappedFlows = flowsData?.availableFlows?.length
+    ? flowsData.availableFlows.map((el) => ({ value: el.id, name: el.name }))
+    : [];
 
   const getSampleSizePercentage = (): string => {
     return `(${getPercentage(
@@ -238,6 +252,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 sex: values.sexCheckbox ? values.filterSex : null,
               }
             : null,
+        flow: values.flow,
       },
     };
   };
@@ -497,12 +512,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
                     <Grid item xs={12}>
                       <Field
                         name='title'
-                        required
-                        fullWidth
-                        variant='outlined'
                         label={t('Title')}
-                        component={FormikTextField}
-                        data-cy='input-title'
+                        color='primary'
+                        choices={mappedFlows}
+                        component={FormikSelectField}
                       />
                     </Grid>
                   </Box>
