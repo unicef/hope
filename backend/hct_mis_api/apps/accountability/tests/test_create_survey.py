@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock, patch
 
-from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.accountability.celery_tasks import send_survey_to_users
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -130,7 +130,7 @@ class TestCreateSurvey(APITestCase):
         # and it looks like it's not trivial to check that
 
         households = self.tp.households.all()
-        assert households.count() == 3
+        assert len(households) == 3
         phone_number_1 = households[0].individuals.first().phone_no
         phone_number_2 = households[1].individuals.first().phone_no
         phone_number_3 = households[2].individuals.first().phone_no

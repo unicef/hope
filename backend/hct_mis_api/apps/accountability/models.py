@@ -2,11 +2,11 @@ from datetime import timedelta
 from typing import Optional
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.files import File
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, UnicefIdentifiedModel

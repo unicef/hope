@@ -40,9 +40,9 @@ from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVe
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
 
 class RapidProFlowNode(graphene.ObjectType):
@@ -143,6 +143,6 @@ class Query(graphene.ObjectType):
             "sample_size": sample_size,
         }
 
-    def resolve_available_flows(self, info, *args, **kwargs):
+    def resolve_available_flows(self, info: Any, *args: Any, **kwargs: Any) -> List:
         api = RapidProAPI(info.context.headers["Business-Area"])
         return api.get_flows()

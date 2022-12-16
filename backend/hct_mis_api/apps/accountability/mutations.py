@@ -5,7 +5,6 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.accountability.celery_tasks import export_survey_sample_task
@@ -41,6 +40,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
+
 from .celery_tasks import send_survey_to_users
 
 
