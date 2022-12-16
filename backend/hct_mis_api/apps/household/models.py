@@ -1,7 +1,8 @@
 import logging
 import re
 from datetime import date
-from typing import Any, List, Optional
+from decimal import Decimal
+from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -561,7 +562,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(SoftDeletableModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
@@ -875,7 +876,9 @@ class Individual(
             return self.user_fields["sys"][key]
         return None
 
-    def recalculate_data(self) -> None:
+    def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
+        update_fields = ["disability"]
+
         disability_fields = (
             "seeing_disability",
             "hearing_disability",
@@ -889,7 +892,11 @@ class Individual(
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
-        self.save(update_fields=["disability"])
+
+        if save:
+            self.save(update_fields=update_fields)
+
+        return self, update_fields
 
     def count_all_roles(self) -> int:
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()

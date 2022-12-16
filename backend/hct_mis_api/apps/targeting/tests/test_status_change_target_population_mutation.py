@@ -20,16 +20,22 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
-            mutation LockTargetPopulation($id: ID!) {
-              lockTargetPopulation(id: $id) {
-                targetPopulation {
-                  status
-                  householdList {
-                    totalCount
+                mutation LockTargetPopulation($id: ID!) {
+                  lockTargetPopulation(id: $id) {
+                    targetPopulation {
+                      status
+                      householdList(orderBy: "size") {
+                        totalCount
+                        edges {
+                          node {
+                            size
+                            residenceStatus
+                          }
+                        }
+                      }
+                    }
                   }
                 }
-              }
-            }
             """
 
     @classmethod
@@ -39,11 +45,19 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -57,6 +71,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
+        tp.households.set(cls.households)
         cls.target_population_draft = tp
 
         tp = TargetPopulation(
@@ -101,7 +116,6 @@ class TestApproveTargetPopulationMutation(APITestCase):
     )
     def test_approve_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -131,7 +145,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
               unlockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  households {
+                  households(orderBy: "size") {
                     totalCount
                   }
                 }
@@ -236,11 +250,22 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
               finalizeTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  householdList{
-                    totalCount
+                  householdList(orderBy: "size") {
+                    edges{
+                      node{
+                        size
+                        residenceStatus
+                      }
+                    }
                   }
-                  households {
+                  households(orderBy: "size") {
                     totalCount
+                    edges {
+                      node {
+                        size
+                        residenceStatus
+                      }
+                    }
                   }
                 }
               }

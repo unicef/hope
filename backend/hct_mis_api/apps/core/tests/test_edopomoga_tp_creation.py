@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestEdopomogaCreation(APITestCase):
@@ -45,10 +46,11 @@ class TestEdopomogaCreation(APITestCase):
 
     def test_edopomoga_tp_creation(self) -> None:
         create_target_population_inner = create_target_population_task.__wrapped__
-        create_target_population_inner(self.storage_file.id, self.program.id, "test_edopomoga", "test_edopomoga")
+        create_target_population_inner(self.storage_file.id, self.program.id, "test_edopomoga")
 
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
+        self.assertEqual(TargetPopulation.objects.count(), 1)
 
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)

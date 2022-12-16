@@ -6,7 +6,17 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from django.core.cache import cache
 from django.db.models import Q
@@ -288,7 +298,9 @@ def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
     return results
 
 
-def to_dict(instance: "Model", fields: Optional[List] = None, dict_fields: Optional[Dict] = None) -> Dict[str, Any]:
+def to_dict(
+    instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
+) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -738,13 +750,6 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: List[str]) -> L
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
-
-
-@functools.lru_cache(maxsize=None)
-def cached_business_areas_slug_id_dict() -> Dict:
-    from hct_mis_api.apps.core.models import BusinessArea
-
-    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
 
 
 def timezone_datetime(value: Any) -> datetime:

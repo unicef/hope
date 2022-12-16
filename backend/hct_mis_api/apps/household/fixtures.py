@@ -313,12 +313,12 @@ def create_household_for_fixtures(
 
 
 def create_household_and_individuals(
-    household_data: Optional[Dict] = None, individuals_data: Optional[Dict] = None, imported: bool = False
+    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
 ) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     household: Household = HouseholdFactory.build(**household_data)

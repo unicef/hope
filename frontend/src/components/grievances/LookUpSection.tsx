@@ -4,7 +4,7 @@ import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../utils/utils';
 import { LookUpHouseholdIndividual } from './LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from './LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
+import { LookUpLinkedTickets } from './LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 
 export const LookUpSection = ({
   onValueChange,
@@ -34,11 +34,11 @@ export const LookUpSection = ({
       </Box>
     </Grid>
   );
-  const renderedLookupRelatedTickets = (
+  const renderedLookupLinkedTickets = (
     <Grid container>
       <Grid item xs={6}>
         <Box p={3}>
-          <LookUpRelatedTickets values={values} onValueChange={onValueChange} />
+          <LookUpLinkedTickets values={values} onValueChange={onValueChange} />
         </Box>
       </Grid>
     </Grid>
@@ -58,28 +58,28 @@ export const LookUpSection = ({
     <Grid container alignItems='center'>
       {renderedLookupHouseholdIndividual}
       {renderedLookupPaymentRecords}
-      {renderedLookupRelatedTickets}
+      {renderedLookupLinkedTickets}
     </Grid>
   );
 
-  const householdIndividualRelatedTicketsLookups = (
+  const householdIndividualLinkedTicketsLookups = (
     <Grid container alignItems='center'>
       <Grid container>{renderedLookupHouseholdIndividual}</Grid>
-      {renderedLookupRelatedTickets}
+      {renderedLookupLinkedTickets}
     </Grid>
   );
   const lookupDict = {
-    [GRIEVANCE_CATEGORIES.DATA_CHANGE]: householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.DATA_CHANGE]: householdIndividualLinkedTicketsLookups,
     [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: allThree,
     [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: allThree,
-    [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: householdIndividualRelatedTicketsLookups,
-    [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: householdIndividualRelatedTicketsLookups,
-    [GRIEVANCE_CATEGORIES.REFERRAL]: householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: householdIndividualLinkedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: householdIndividualLinkedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.REFERRAL]: householdIndividualLinkedTicketsLookups,
   };
   return thingForSpecificGrievanceType(
     { category: values.category },
     lookupDict,
-    renderedLookupRelatedTickets,
+    renderedLookupLinkedTickets,
     {
       [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
       [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: false,
