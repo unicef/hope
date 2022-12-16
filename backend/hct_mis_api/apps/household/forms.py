@@ -72,7 +72,9 @@ class WithdrawForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     tag = forms.SlugField(
-        max_length=100, required=False, help_text="HH will have a user_field with this name with value 'True'"
+        max_length=100,
+        required=False,
+        help_text="HH will have a user_field with this name with value 'True'",
     )
 
 
