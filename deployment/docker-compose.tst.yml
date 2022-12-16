@@ -20,6 +20,7 @@ x-django-envs: &django_envs
     - KOBO_MASTER_API_TOKEN=token
     - EXCHANGE_RATES_API_KEY=token
     - REDIS_INSTANCE=redis:6379
+    - PYTHONUNBUFFERED=1
 
 services:
   redis:
@@ -29,9 +30,9 @@ services:
   backend:
     <<: *django_envs
     image: ${backend_image}
-    build:
-      context: ../backend
     command: "test"
+    volumes:
+      - ../backend:/code/
     depends_on:
       - db
       - redis
@@ -64,8 +65,6 @@ services:
   celery_worker:
     <<: *django_envs
     image: ${backend_image}
-    build:
-      context: ../backend
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:

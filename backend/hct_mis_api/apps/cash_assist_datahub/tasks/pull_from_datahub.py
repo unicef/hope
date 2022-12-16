@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
@@ -97,7 +97,7 @@ class PullFromDatahubTask:
     def __init__(self, exchange_rates_client: Optional[ExchangeRates] = None) -> None:
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
-    def execute(self) -> Dict:
+    def execute(self) -> Dict[str, Union[int, List[Any]]]:
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
         ret: Dict[str, List] = {
             "skipped_due_failure": [],
