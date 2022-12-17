@@ -58,12 +58,25 @@ class Query(graphene.ObjectType):
     all_accountability_communication_messages = DjangoPermissionFilterConnectionField(
         CommunicationMessageNode,
         filterset_class=MessagesFilter,
+        permission_classes=(
+            hopeOneOfPermissionClass(
+                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+            ),
+        ),
     )
 
-    accountability_communication_message_recipient = graphene.relay.Node.Field(CommunicationMessageRecipientMapNode)
     all_accountability_communication_message_recipients = DjangoPermissionFilterConnectionField(
         CommunicationMessageRecipientMapNode,
         filterset_class=MessageRecipientsMapFilter,
+        permission_classes=(
+            hopeOneOfPermissionClass(
+                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+                Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+            ),
+        ),
     )
 
     accountability_communication_message_sample_size = graphene.Field(

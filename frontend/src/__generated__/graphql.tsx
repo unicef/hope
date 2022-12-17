@@ -3819,7 +3819,6 @@ export type Query = {
    __typename?: 'Query',
   accountabilityCommunicationMessage?: Maybe<CommunicationMessageNode>,
   allAccountabilityCommunicationMessages?: Maybe<CommunicationMessageNodeConnection>,
-  accountabilityCommunicationMessageRecipient?: Maybe<CommunicationMessageRecipientMapNode>,
   allAccountabilityCommunicationMessageRecipients?: Maybe<CommunicationMessageRecipientMapNodeConnection>,
   accountabilityCommunicationMessageSampleSize?: Maybe<GetCommunicationMessageSampleSizeNode>,
   feedback?: Maybe<FeedbackNode>,
@@ -3977,11 +3976,6 @@ export type QueryAllAccountabilityCommunicationMessagesArgs = {
   body?: Maybe<Scalars['String']>,
   samplingType?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryAccountabilityCommunicationMessageRecipientArgs = {
-  id: Scalars['ID']
 };
 
 
@@ -22602,9 +22596,9 @@ export type ResolversTypes = {
   GrievanceDocumentNodeEdge: ResolverTypeWrapper<GrievanceDocumentNodeEdge>,
   GrievanceDocumentNode: ResolverTypeWrapper<GrievanceDocumentNode>,
   MessageSamplingType: MessageSamplingType,
-  CommunicationMessageRecipientMapNode: ResolverTypeWrapper<CommunicationMessageRecipientMapNode>,
   CommunicationMessageRecipientMapNodeConnection: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeConnection>,
   CommunicationMessageRecipientMapNodeEdge: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeEdge>,
+  CommunicationMessageRecipientMapNode: ResolverTypeWrapper<CommunicationMessageRecipientMapNode>,
   GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput,
   SamplingChoices: SamplingChoices,
   AccountabilityFullListArguments: AccountabilityFullListArguments,
@@ -23025,9 +23019,9 @@ export type ResolversParentTypes = {
   GrievanceDocumentNodeEdge: GrievanceDocumentNodeEdge,
   GrievanceDocumentNode: GrievanceDocumentNode,
   MessageSamplingType: MessageSamplingType,
-  CommunicationMessageRecipientMapNode: CommunicationMessageRecipientMapNode,
   CommunicationMessageRecipientMapNodeConnection: CommunicationMessageRecipientMapNodeConnection,
   CommunicationMessageRecipientMapNodeEdge: CommunicationMessageRecipientMapNodeEdge,
+  CommunicationMessageRecipientMapNode: CommunicationMessageRecipientMapNode,
   GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput,
   SamplingChoices: SamplingChoices,
   AccountabilityFullListArguments: AccountabilityFullListArguments,
@@ -24820,7 +24814,6 @@ export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, Parent
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   accountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageArgs, 'id'>>,
   allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, QueryAllAccountabilityCommunicationMessagesArgs>,
-  accountabilityCommunicationMessageRecipient?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageRecipientArgs, 'id'>>,
   allAccountabilityCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessageRecipientsArgs, 'messageId'>>,
   accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeNode']>, ParentType, ContextType, QueryAccountabilityCommunicationMessageSampleSizeArgs>,
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>,
