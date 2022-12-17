@@ -72,7 +72,7 @@ const initialValues = {
   sexCheckbox: false,
   title: '',
   body: '',
-  samplingType: 'FULL_LIST',
+  samplingType: SamplingChoices.FullList,
 };
 
 function prepareVariables(
