@@ -299,61 +299,220 @@ export const CreateCommunicationPage = (): React.ReactElement => {
         }
       }}
     >
-      {({ submitForm, setValues, values, setFieldValue, errors }) => {
-        return (
-          <>
-            <PageHeader
-              title='New Message'
-              breadCrumbs={
-                hasPermissions(
-                  PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
-                  permissions,
-                )
-                  ? breadCrumbsItems
-                  : null
-              }
-            />
-            <PaperContainer>
-              <Grid xs={9} item>
-                <Stepper activeStep={activeStep}>
-                  {steps.map((label) => {
-                    const stepProps: { completed?: boolean } = {};
-                    const labelProps: {
-                      optional?: React.ReactNode;
-                    } = {};
-                    return (
-                      <Step key={label} {...stepProps}>
-                        <StepLabel {...labelProps}>{label}</StepLabel>
-                      </Step>
-                    );
-                  })}
-                </Stepper>
-              </Grid>
-              <Form>
-                <FormikEffect
-                  values={values}
-                  onChange={() => setFormValues(values)}
-                />
-                {activeStep === CommunicationSteps.LookUp && (
-                  <Box display='flex' flexDirection='column'>
-                    <LookUpSelection
-                      businessArea={businessArea}
-                      values={values}
-                      onValueChange={setFieldValue}
-                      setValues={setValues}
-                      selectedTab={selectedTab}
-                      setSelectedTab={setSelectedTab}
-                    />
+      {({ submitForm, setValues, values, setFieldValue, errors }) => (
+        <>
+          <PageHeader
+            title='New Message'
+            breadCrumbs={
+              hasPermissions(
+                PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
+                permissions,
+              )
+                ? breadCrumbsItems
+                : null
+            }
+          />
+          <PaperContainer>
+            <Grid xs={9} item>
+              <Stepper activeStep={activeStep}>
+                {steps.map((label) => {
+                  const stepProps: { completed?: boolean } = {};
+                  const labelProps: {
+                    optional?: React.ReactNode;
+                  } = {};
+                  return (
+                    <Step key={label} {...stepProps}>
+                      <StepLabel {...labelProps}>{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+            </Grid>
+            <Form>
+              <FormikEffect
+                values={values}
+                onChange={() => setFormValues(values)}
+              />
+              {activeStep === CommunicationSteps.LookUp && (
+                <Box display='flex' flexDirection='column'>
+                  <LookUpSelection
+                    businessArea={businessArea}
+                    values={values}
+                    onValueChange={setFieldValue}
+                    setValues={setValues}
+                    selectedTab={selectedTab}
+                    setSelectedTab={setSelectedTab}
+                  />
+                </Box>
+              )}
+              {activeStep === CommunicationSteps.SampleSize &&
+                (values.households.length ? (
+                  <Box px={8}>
+                    <Box pt={3}>
+                      <Box fontSize={12} color='#797979'>
+                        {t(
+                          'You have selected households as the recipients group',
+                        )}
+                      </Box>
+                      <Box
+                        pb={3}
+                        pt={3}
+                        fontSize={16}
+                        fontWeight='fontWeightBold'
+                      >
+                        {t('Survey will be sent to all households selected')}: (
+                        {values.households.length})
+                      </Box>
+                    </Box>
                   </Box>
-                )}
-                {activeStep === CommunicationSteps.SampleSize &&
-                  (values.households.length ? (
-                    <Box px={8}>
+                ) : (
+                  <Box px={8}>
+                    <Box display='flex' alignItems='center'>
+                      <Box pr={5} fontWeight='500' fontSize='medium'>
+                        {t('Sample Size')}:
+                      </Box>
+                      <RadioGroup
+                        aria-labelledby='selection-radio-buttons-group'
+                        value={selectedSampleSizeType}
+                        row
+                        name='radio-buttons-group'
+                      >
+                        {SampleSizeTabs.map((tab, index) => (
+                          <FormControlLabel
+                            value={index}
+                            onChange={() => {
+                              setFormValues(values);
+                              setSelectedSampleSizeType(index);
+                            }}
+                            key={tab}
+                            control={<Radio color='primary' />}
+                            label={tab}
+                          />
+                        ))}
+                      </RadioGroup>
+                    </Box>
+                    <TabPanel value={selectedSampleSizeType} index={0}>
+                      {mappedAdminAreas && (
+                        <Field
+                          name='excludedAdminAreasFull'
+                          choices={mappedAdminAreas}
+                          variant='outlined'
+                          label={t('Filter Out Administrative Level Areas')}
+                          component={FormikMultiSelectField}
+                        />
+                      )}
                       <Box pt={3}>
-                        <Box fontSize={12} color='#797979'>
-                          {t(
-                            'You have selected households as the recipients group',
+                        <Box
+                          pb={3}
+                          pt={3}
+                          fontSize={16}
+                          fontWeight='fontWeightBold'
+                        >
+                          Sample size:{' '}
+                          {
+                            sampleSizesData
+                              ?.accountabilityCommunicationMessageSampleSize
+                              ?.sampleSize
+                          }{' '}
+                          out of{' '}
+                          {
+                            sampleSizesData
+                              ?.accountabilityCommunicationMessageSampleSize
+                              ?.numberOfRecipients
+                          }{' '}
+                          {getSampleSizePercentage()}
+                        </Box>
+                      </Box>
+                    </TabPanel>
+                    <TabPanel value={selectedSampleSizeType} index={1}>
+                      <Box pt={3}>
+                        <Field
+                          name='confidenceInterval'
+                          label={t('Confidence Interval')}
+                          min={90}
+                          max={99}
+                          component={FormikSliderField}
+                          suffix='%'
+                        />
+                        <Field
+                          name='marginOfError'
+                          label={t('Margin of Error')}
+                          min={0}
+                          max={9}
+                          component={FormikSliderField}
+                          suffix='%'
+                        />
+                        <Typography variant='caption'>
+                          {t('Cluster Filters')}
+                        </Typography>
+                        <Box flexDirection='column' display='flex'>
+                          <Box display='flex'>
+                            <Field
+                              name='adminCheckbox'
+                              label={t('Administrative Level')}
+                              component={FormikCheckboxField}
+                            />
+                            <Field
+                              name='ageCheckbox'
+                              label={t('Age of HoH')}
+                              component={FormikCheckboxField}
+                            />
+                            <Field
+                              name='sexCheckbox'
+                              label={t('Gender of HoH')}
+                              component={FormikCheckboxField}
+                            />
+                          </Box>
+                          {values.adminCheckbox && (
+                            <Field
+                              name='excludedAdminAreasRandom'
+                              choices={mappedAdminAreas}
+                              variant='outlined'
+                              label={t('Filter Out Administrative Level Areas')}
+                              component={FormikMultiSelectField}
+                            />
                           )}
+
+                          <Grid container>
+                            {values.ageCheckbox && (
+                              <Grid item xs={12}>
+                                <Grid container>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name='filterAgeMin'
+                                      label={t('Minimum Age')}
+                                      type='number'
+                                      color='primary'
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name='filterAgeMax'
+                                      label={t('Maximum Age')}
+                                      type='number'
+                                      color='primary'
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                </Grid>
+                              </Grid>
+                            )}
+                            {values.sexCheckbox && (
+                              <Grid item xs={5}>
+                                <Field
+                                  name='filterSex'
+                                  label={t('Gender')}
+                                  color='primary'
+                                  choices={[
+                                    { value: 'FEMALE', name: t('Female') },
+                                    { value: 'MALE', name: t('Male') },
+                                  ]}
+                                  component={FormikSelectField}
+                                />
+                              </Grid>
+                            )}
+                          </Grid>
                         </Box>
                         <Box
                           pb={3}
@@ -361,249 +520,86 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                           fontSize={16}
                           fontWeight='fontWeightBold'
                         >
-                          {t('Survey will be sent to all households selected')}:
-                          ({values.households.length})
+                          Sample size:{' '}
+                          {
+                            sampleSizesData
+                              ?.accountabilityCommunicationMessageSampleSize
+                              ?.sampleSize
+                          }{' '}
+                          out of{' '}
+                          {
+                            sampleSizesData
+                              ?.accountabilityCommunicationMessageSampleSize
+                              ?.numberOfRecipients
+                          }{' '}
+                          {getSampleSizePercentage()}
                         </Box>
                       </Box>
-                    </Box>
-                  ) : (
-                    <Box px={8}>
-                      <Box display='flex' alignItems='center'>
-                        <Box pr={5} fontWeight='500' fontSize='medium'>
-                          {t('Sample Size')}:
-                        </Box>
-                        <RadioGroup
-                          aria-labelledby='selection-radio-buttons-group'
-                          value={selectedSampleSizeType}
-                          row
-                          name='radio-buttons-group'
-                        >
-                          {SampleSizeTabs.map((tab, index) => (
-                            <FormControlLabel
-                              value={index}
-                              onChange={() => {
-                                setFormValues(values);
-                                setSelectedSampleSizeType(index);
-                              }}
-                              key={tab}
-                              control={<Radio color='primary' />}
-                              label={tab}
-                            />
-                          ))}
-                        </RadioGroup>
-                      </Box>
-                      <TabPanel value={selectedSampleSizeType} index={0}>
-                        {mappedAdminAreas && (
-                          <Field
-                            name='excludedAdminAreasFull'
-                            choices={mappedAdminAreas}
-                            variant='outlined'
-                            label={t('Filter Out Administrative Level Areas')}
-                            component={FormikMultiSelectField}
-                          />
-                        )}
-                        <Box pt={3}>
-                          <Box
-                            pb={3}
-                            pt={3}
-                            fontSize={16}
-                            fontWeight='fontWeightBold'
-                          >
-                            Sample size:{' '}
-                            {
-                              sampleSizesData
-                                ?.accountabilityCommunicationMessageSampleSize
-                                ?.sampleSize
-                            }{' '}
-                            out of{' '}
-                            {
-                              sampleSizesData
-                                ?.accountabilityCommunicationMessageSampleSize
-                                ?.numberOfRecipients
-                            }{' '}
-                            {getSampleSizePercentage()}
-                          </Box>
-                        </Box>
-                      </TabPanel>
-                      <TabPanel value={selectedSampleSizeType} index={1}>
-                        <Box pt={3}>
-                          <Field
-                            name='confidenceInterval'
-                            label={t('Confidence Interval')}
-                            min={90}
-                            max={99}
-                            component={FormikSliderField}
-                            suffix='%'
-                          />
-                          <Field
-                            name='marginOfError'
-                            label={t('Margin of Error')}
-                            min={0}
-                            max={9}
-                            component={FormikSliderField}
-                            suffix='%'
-                          />
-                          <Typography variant='caption'>
-                            {t('Cluster Filters')}
-                          </Typography>
-                          <Box flexDirection='column' display='flex'>
-                            <Box display='flex'>
-                              <Field
-                                name='adminCheckbox'
-                                label={t('Administrative Level')}
-                                component={FormikCheckboxField}
-                              />
-                              <Field
-                                name='ageCheckbox'
-                                label={t('Age of HoH')}
-                                component={FormikCheckboxField}
-                              />
-                              <Field
-                                name='sexCheckbox'
-                                label={t('Gender of HoH')}
-                                component={FormikCheckboxField}
-                              />
-                            </Box>
-                            {values.adminCheckbox && (
-                              <Field
-                                name='excludedAdminAreasRandom'
-                                choices={mappedAdminAreas}
-                                variant='outlined'
-                                label={t(
-                                  'Filter Out Administrative Level Areas',
-                                )}
-                                component={FormikMultiSelectField}
-                              />
-                            )}
-
-                            <Grid container>
-                              {values.ageCheckbox && (
-                                <Grid item xs={12}>
-                                  <Grid container>
-                                    <Grid item xs={4}>
-                                      <Field
-                                        name='filterAgeMin'
-                                        label={t('Minimum Age')}
-                                        type='number'
-                                        color='primary'
-                                        component={FormikTextField}
-                                      />
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                      <Field
-                                        name='filterAgeMax'
-                                        label={t('Maximum Age')}
-                                        type='number'
-                                        color='primary'
-                                        component={FormikTextField}
-                                      />
-                                    </Grid>
-                                  </Grid>
-                                </Grid>
-                              )}
-                              {values.sexCheckbox && (
-                                <Grid item xs={5}>
-                                  <Field
-                                    name='filterSex'
-                                    label={t('Gender')}
-                                    color='primary'
-                                    choices={[
-                                      { value: 'FEMALE', name: t('Female') },
-                                      { value: 'MALE', name: t('Male') },
-                                    ]}
-                                    component={FormikSelectField}
-                                  />
-                                </Grid>
-                              )}
-                            </Grid>
-                          </Box>
-                          <Box
-                            pb={3}
-                            pt={3}
-                            fontSize={16}
-                            fontWeight='fontWeightBold'
-                          >
-                            Sample size:{' '}
-                            {
-                              sampleSizesData
-                                ?.accountabilityCommunicationMessageSampleSize
-                                ?.sampleSize
-                            }{' '}
-                            out of{' '}
-                            {
-                              sampleSizesData
-                                ?.accountabilityCommunicationMessageSampleSize
-                                ?.numberOfRecipients
-                            }{' '}
-                            {getSampleSizePercentage()}
-                          </Box>
-                        </Box>
-                      </TabPanel>
-                    </Box>
-                  ))}
-                {activeStep === CommunicationSteps.Details && (
-                  <>
-                    <Border />
-                    <Box my={3}>
-                      <Grid item xs={12}>
-                        <Field
-                          name='title'
-                          required
-                          fullWidth
-                          variant='outlined'
-                          label={t('Title')}
-                          component={FormikTextField}
-                          data-cy='input-title'
-                        />
-                      </Grid>
-                    </Box>
+                    </TabPanel>
+                  </Box>
+                ))}
+              {activeStep === CommunicationSteps.Details && (
+                <>
+                  <Border />
+                  <Box my={3}>
                     <Grid item xs={12}>
                       <Field
-                        name='body'
+                        name='title'
                         required
-                        multiline
                         fullWidth
                         variant='outlined'
-                        label={t('Message')}
+                        label={t('Title')}
                         component={FormikTextField}
-                        data-cy='input-body'
+                        data-cy='input-title'
                       />
                     </Grid>
-                  </>
-                )}
-                {dataChangeErrors(errors)}
-              </Form>
-              <Box pt={3} display='flex' flexDirection='row'>
-                <Box mr={3}>
-                  <Button
-                    component={Link}
-                    to={`/${businessArea}/accountability/communication`}
-                  >
-                    {t('Cancel')}
-                  </Button>
-                </Box>
-                <Box display='flex' ml='auto'>
-                  <Button
-                    disabled={activeStep === CommunicationSteps.LookUp}
-                    onClick={() => handleBack(values)}
-                  >
-                    {t('Back')}
-                  </Button>
-                  <LoadingButton
-                    loading={loading}
-                    color='primary'
-                    variant='contained'
-                    onClick={submitForm}
-                    data-cy='button-submit'
-                  >
-                    {activeStep === steps.length - 1 ? t('Save') : t('Next')}
-                  </LoadingButton>
-                </Box>
+                  </Box>
+                  <Grid item xs={12}>
+                    <Field
+                      name='body'
+                      required
+                      multiline
+                      fullWidth
+                      variant='outlined'
+                      label={t('Message')}
+                      component={FormikTextField}
+                      data-cy='input-body'
+                    />
+                  </Grid>
+                </>
+              )}
+              {dataChangeErrors(errors)}
+            </Form>
+            <Box pt={3} display='flex' flexDirection='row'>
+              <Box mr={3}>
+                <Button
+                  component={Link}
+                  to={`/${businessArea}/accountability/communication`}
+                >
+                  {t('Cancel')}
+                </Button>
               </Box>
-            </PaperContainer>
-          </>
-        );
-      }}
+              <Box display='flex' ml='auto'>
+                <Button
+                  disabled={activeStep === CommunicationSteps.LookUp}
+                  onClick={() => handleBack(values)}
+                >
+                  {t('Back')}
+                </Button>
+                <LoadingButton
+                  loading={loading}
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                  data-cy='button-submit'
+                >
+                  {activeStep === steps.length - 1 ? t('Save') : t('Next')}
+                </LoadingButton>
+              </Box>
+            </Box>
+          </PaperContainer>
+        </>
+      )}
     </Formik>
   );
 };
