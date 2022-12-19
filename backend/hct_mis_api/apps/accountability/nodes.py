@@ -19,6 +19,14 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.household.models import Household
 
 
+class RapidProFlowNode(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+
+    def resolve_id(parent, info: Any) -> str:
+        return parent["uuid"]  # type: ignore
+
+
 class CommunicationMessageRecipientMapNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(

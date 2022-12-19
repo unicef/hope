@@ -69,6 +69,7 @@ class CreateSurveyInput(graphene.InputObjectType):
     sampling_type = graphene.String(required=True)
     full_list_arguments = AccountabilityFullListArguments()
     random_sampling_arguments = AccountabilityRandomSamplingArguments()
+    flow = graphene.String(required=True)
 
 
 class AccountabilitySampleSizeInput(graphene.InputObjectType):
