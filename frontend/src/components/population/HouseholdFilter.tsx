@@ -20,12 +20,21 @@ interface HouseholdFiltersProps {
   programs: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
 }
-export function HouseholdFilters({
+
+const orderOptions = [
+  { name: 'Household Id: ascending', value: 'unicef_id' },
+  { name: 'Household Id: descending', value: '-unicef_id' },
+  { name: 'Status: ascending', value: 'status_label' },
+  { name: 'Status: descending', value: '-status_label' },
+  { name: 'Household Size: ascending', value: 'size' },
+  { name: 'Household Size: descending', value: '-size' },
+];
+export const HouseholdFilters = ({
   onFilterChange,
   filter,
   programs,
   choicesData,
-}: HouseholdFiltersProps): React.ReactElement {
+}: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -116,7 +125,23 @@ export function HouseholdFilters({
             }
           />
         </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'orderBy')}
+            label={t('Sort by')}
+            value={filter.orderBy}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {orderOptions.map((order) => (
+              <MenuItem key={order.value} value={order.value}>
+                {order.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
+        </Grid>
       </Grid>
     </ContainerWithBorder>
   );
-}
+};
