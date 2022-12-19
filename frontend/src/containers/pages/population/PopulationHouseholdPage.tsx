@@ -24,6 +24,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
     program: '',
     residenceStatus: '',
     householdSize: { min: '', max: '' },
+    orderBy: 'unicef_id',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
@@ -53,7 +54,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const programs = allPrograms.map((edge) => edge.node);
 
   return (
-    <div>
+    <>
       <PageHeader title={t('Households')} />
       <HouseholdFilters
         programs={programs as ProgramNode[]}
@@ -74,8 +75,9 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             permissions,
           )}
+          filterOrderBy={filter.orderBy}
         />
       </Box>
-    </div>
+    </>
   );
 };
