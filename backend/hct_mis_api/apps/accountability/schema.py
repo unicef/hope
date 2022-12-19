@@ -29,6 +29,7 @@ from hct_mis_api.apps.accountability.nodes import (
     CommunicationMessageRecipientMapNode,
     FeedbackNode,
     GetCommunicationMessageSampleSizeNode,
+    RapidProFlowNode,
     RecipientNode,
     SurveyNode,
 )
@@ -43,14 +44,6 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
-
-
-class RapidProFlowNode(graphene.ObjectType):
-    id = graphene.String()
-    name = graphene.String()
-
-    def resolve_id(parent, info: Any) -> str:
-        return parent["uuid"]  # type: ignore
 
 
 class Query(graphene.ObjectType):
