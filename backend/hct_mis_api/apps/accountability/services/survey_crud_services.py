@@ -42,7 +42,7 @@ class SurveyCrudServices:
         survey.recipients.set(result.households)
 
         if not result.households:
-            raise ValidationError("No recipients found for the given criteria.")
+            raise ValidationError("There are no selected recipients.")
 
         survey.save()
         return survey
