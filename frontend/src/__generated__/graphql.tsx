@@ -1013,6 +1013,7 @@ export type CreateSurveyInput = {
   samplingType: Scalars['String'],
   fullListArguments?: Maybe<AccountabilityFullListArguments>,
   randomSamplingArguments?: Maybe<AccountabilityRandomSamplingArguments>,
+  flow: Scalars['String'],
 };
 
 export type CreateSurveyMutation = {
@@ -3828,6 +3829,7 @@ export type Query = {
   recipients?: Maybe<RecipientNodeConnection>,
   accountabilitySampleSize?: Maybe<AccountabilitySampleSizeNode>,
   surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  availableFlows?: Maybe<Array<Maybe<RapidProFlowNode>>>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -4798,6 +4800,12 @@ export type RapidProFlow = {
   modifiedOn?: Maybe<Scalars['DateTime']>,
 };
 
+export type RapidProFlowNode = {
+   __typename?: 'RapidProFlowNode',
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+};
+
 export type RapidProFlowResult = {
    __typename?: 'RapidProFlowResult',
   key?: Maybe<Scalars['String']>,
@@ -5562,6 +5570,7 @@ export type SurveyNode = Node & {
   fullListArguments: Scalars['JSONString'],
   randomSamplingArguments: Scalars['JSONString'],
   sampleSize: Scalars['Int'],
+  successfulRapidProCalls: Array<Scalars['JSONString']>,
   sampleFilePath?: Maybe<Scalars['String']>,
   hasValidSampleFile?: Maybe<Scalars['Boolean']>,
 };
@@ -10944,6 +10953,17 @@ export type AllSurveysQuery = (
       )> }
     )>> }
   )> }
+);
+
+export type AvailableFlowsQueryVariables = {};
+
+
+export type AvailableFlowsQuery = (
+  { __typename?: 'Query' }
+  & { availableFlows: Maybe<Array<Maybe<(
+    { __typename?: 'RapidProFlowNode' }
+    & Pick<RapidProFlowNode, 'id' | 'name'>
+  )>>> }
 );
 
 export type RecipientsQueryVariables = {
@@ -21493,6 +21513,56 @@ export function useAllSurveysLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
 export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
 export type AllSurveysQueryResult = ApolloReactCommon.QueryResult<AllSurveysQuery, AllSurveysQueryVariables>;
+export const AvailableFlowsDocument = gql`
+    query AvailableFlows {
+  availableFlows {
+    id
+    name
+  }
+}
+    `;
+export type AvailableFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>, 'query'>;
+
+    export const AvailableFlowsComponent = (props: AvailableFlowsComponentProps) => (
+      <ApolloReactComponents.Query<AvailableFlowsQuery, AvailableFlowsQueryVariables> query={AvailableFlowsDocument} {...props} />
+    );
+    
+export type AvailableFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AvailableFlowsQuery, AvailableFlowsQueryVariables> & TChildProps;
+export function withAvailableFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AvailableFlowsQuery,
+  AvailableFlowsQueryVariables,
+  AvailableFlowsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AvailableFlowsQuery, AvailableFlowsQueryVariables, AvailableFlowsProps<TChildProps>>(AvailableFlowsDocument, {
+      alias: 'availableFlows',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAvailableFlowsQuery__
+ *
+ * To run a query within a React component, call `useAvailableFlowsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAvailableFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAvailableFlowsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAvailableFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AvailableFlowsQuery, AvailableFlowsQueryVariables>(AvailableFlowsDocument, baseOptions);
+      }
+export function useAvailableFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvailableFlowsQuery, AvailableFlowsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AvailableFlowsQuery, AvailableFlowsQueryVariables>(AvailableFlowsDocument, baseOptions);
+        }
+export type AvailableFlowsQueryHookResult = ReturnType<typeof useAvailableFlowsQuery>;
+export type AvailableFlowsLazyQueryHookResult = ReturnType<typeof useAvailableFlowsLazyQuery>;
+export type AvailableFlowsQueryResult = ApolloReactCommon.QueryResult<AvailableFlowsQuery, AvailableFlowsQueryVariables>;
 export const RecipientsDocument = gql`
     query Recipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $survey: String!, $orderBy: String) {
   recipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, survey: $survey, orderBy: $orderBy) {
@@ -22541,6 +22611,7 @@ export type ResolversTypes = {
   RecipientNode: ResolverTypeWrapper<RecipientNode>,
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: ResolverTypeWrapper<AccountabilitySampleSizeNode>,
+  RapidProFlowNode: ResolverTypeWrapper<RapidProFlowNode>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -22963,6 +23034,7 @@ export type ResolversParentTypes = {
   RecipientNode: RecipientNode,
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: AccountabilitySampleSizeNode,
+  RapidProFlowNode: RapidProFlowNode,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -24752,6 +24824,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
   accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeNode']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
   surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  availableFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowNode']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -24886,6 +24959,11 @@ export type RapidProFlowResolvers<ContextType = any, ParentType extends Resolver
   results?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowResult']>>>, ParentType, ContextType>,
   createdOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   modifiedOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+};
+
+export type RapidProFlowNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowNode'] = ResolversParentTypes['RapidProFlowNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type RapidProFlowResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']> = {
@@ -25321,6 +25399,7 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   fullListArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  successfulRapidProCalls?: Resolver<Array<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleFilePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
@@ -26092,6 +26171,7 @@ export type Resolvers<ContextType = any> = {
   ProgramsWithDeliveredQuantityNode?: ProgramsWithDeliveredQuantityNodeResolvers<ContextType>,
   Query?: QueryResolvers<ContextType>,
   RapidProFlow?: RapidProFlowResolvers<ContextType>,
+  RapidProFlowNode?: RapidProFlowNodeResolvers<ContextType>,
   RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>,
   RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
   ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
