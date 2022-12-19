@@ -9,6 +9,7 @@ from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProFlowResponse
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
@@ -149,11 +150,11 @@ class TestCreateSurvey(APITestCase):
             start_flows_mock_1 = MagicMock(
                 return_value=(
                     [
-                        (
-                            {
+                        RapidProFlowResponse(
+                            response={
                                 "uuid": "flow123",
                             },
-                            [phone_number_1, phone_number_2],
+                            urns=[phone_number_1, phone_number_2],
                         )
                     ],
                     None,
@@ -174,16 +175,16 @@ class TestCreateSurvey(APITestCase):
                 assert len(start_flows_mock_1.call_args[0][1]) == 9  # 3 inds in 3 households, 9 total
                 assert len(survey.successful_rapid_pro_calls) == 1
                 assert survey.successful_rapid_pro_calls[0]["flow_uuid"] == "flow123"
-                assert survey.successful_rapid_pro_calls[0]["phone_numbers"] == [phone_number_1, phone_number_2]
+                assert survey.successful_rapid_pro_calls[0]["urns"] == [phone_number_1, phone_number_2]
 
             start_flows_mock_2 = MagicMock(
                 return_value=(
                     [
-                        (
-                            {
+                        RapidProFlowResponse(
+                            response={
                                 "uuid": "flow123",
                             },
-                            [phone_number_3],
+                            urns=[phone_number_3],
                         )
                     ],
                     None,
@@ -200,7 +201,7 @@ class TestCreateSurvey(APITestCase):
                 assert len(start_flows_mock_2.call_args[0][1]) == 7  # 7 inds in households remaining total
                 assert len(survey.successful_rapid_pro_calls) == 2
                 assert survey.successful_rapid_pro_calls[1]["flow_uuid"] == "flow123"
-                assert survey.successful_rapid_pro_calls[1]["phone_numbers"] == [phone_number_3]
+                assert survey.successful_rapid_pro_calls[1]["urns"] == [phone_number_3]
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(

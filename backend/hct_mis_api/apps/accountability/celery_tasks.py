@@ -47,7 +47,7 @@ def send_survey_to_users(survey_id: str, flow_uuid: str, business_area_id: str) 
     already_received = [
         phone_number
         for successful_call in survey.successful_rapid_pro_calls
-        for phone_number in successful_call["phone_numbers"]
+        for phone_number in successful_call["urns"]
     ]
     phone_numbers = [
         phone_number
@@ -60,8 +60,8 @@ def send_survey_to_users(survey_id: str, flow_uuid: str, business_area_id: str) 
     for successful_flow in successful_flows:
         survey.successful_rapid_pro_calls.append(
             {
-                "flow_uuid": successful_flow[0]["uuid"],
-                "phone_numbers": list(map(str, successful_flow[1])),
+                "flow_uuid": successful_flow.response["uuid"],
+                "urns": list(map(str, successful_flow.urns)),
             }
         )
     survey.save()
