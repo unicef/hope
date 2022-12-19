@@ -16,6 +16,7 @@ interface HouseholdTableProps {
   filter;
   choicesData: HouseholdChoiceDataQuery;
   canViewDetails: boolean;
+  filterOrderBy: string;
 }
 
 export const HouseholdTable = ({
@@ -23,6 +24,7 @@ export const HouseholdTable = ({
   filter,
   choicesData,
   canViewDetails,
+  filterOrderBy,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialVariables: AllHouseholdsQueryVariables = {
@@ -45,6 +47,8 @@ export const HouseholdTable = ({
         query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        allowSort={false}
+        filterOrderBy={filterOrderBy}
         renderRow={(row) => (
           <HouseHoldTableRow
             key={row.id}
