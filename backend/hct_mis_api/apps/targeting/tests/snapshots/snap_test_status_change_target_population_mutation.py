@@ -15,7 +15,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
         {
             'locations': [
                 {
-                    'column': 15,
+                    'column': 19,
                     'line': 3
                 }
             ],
@@ -32,6 +32,20 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0
         'lockTargetPopulation': {
             'targetPopulation': {
                 'householdList': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ],
                     'totalCount': 2
                 },
                 'status': 'LOCKED'
@@ -48,7 +62,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1
         {
             'locations': [
                 {
-                    'column': 15,
+                    'column': 19,
                     'line': 3
                 }
             ],
@@ -85,9 +99,36 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
         'finalizeTargetPopulation': {
             'targetPopulation': {
                 'householdList': {
-                    'totalCount': 2
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ]
                 },
                 'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ],
                     'totalCount': 2
                 },
                 'status': 'PROCESSING'
@@ -121,9 +162,36 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
         'finalizeTargetPopulation': {
             'targetPopulation': {
                 'householdList': {
-                    'totalCount': 2
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ]
                 },
                 'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ],
                     'totalCount': 2
                 },
                 'status': 'PROCESSING'
