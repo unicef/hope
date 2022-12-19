@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Any, Dict
 
 from django.db import transaction
@@ -39,6 +40,8 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
+
+from .celery_tasks import send_survey_to_users
 
 
 class CreateCommunicationMessageMutation(PermissionMutation):
@@ -141,6 +144,7 @@ class CreateSurveyMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE, business_area)
         survey = SurveyCrudServices.create(info.context.user, business_area, input)
+        transaction.on_commit(partial(send_survey_to_users.delay, survey.id, input["flow"], business_area.id))
         log_create(
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",

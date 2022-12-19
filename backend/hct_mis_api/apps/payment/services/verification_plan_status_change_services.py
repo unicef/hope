@@ -98,13 +98,11 @@ class VerificationPlanStatusChangeServices:
             heading_household__payment_records__verification__sent_to_rapid_pro=False,
         )
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
-        flow_start_info_list, error = api.start_flows(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
-        for (flow_start_info, _) in flow_start_info_list:
-            self.cash_plan_verification.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))
+        successful_flows, error = api.start_flows(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
+        for successful_flow in successful_flows:
+            self.cash_plan_verification.rapid_pro_flow_start_uuids.append(successful_flow.response.get("uuid"))
 
-        all_urns = []
-        for (_, urns) in flow_start_info_list:
-            all_urns.extend(urn.split(":")[-1] for urn in urns)
+        all_urns = [urn.split(":")[-1] for successful_flow in successful_flows for urn in successful_flow.urns]
         processed_individuals = individuals.filter(phone_no__in=all_urns)
         CashPlanPaymentVerification.objects.get(id=pv_id).payment_record_verifications.filter(
             payment_record__head_of_household__in=processed_individuals

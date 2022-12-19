@@ -655,6 +655,7 @@ input CreateSurveyInput {
   samplingType: String!
   fullListArguments: AccountabilityFullListArguments
   randomSamplingArguments: AccountabilityRandomSamplingArguments
+  flow: String!
 }
 
 type CreateSurveyMutation {
@@ -2489,6 +2490,7 @@ type Query {
   recipients(offset: Int, before: String, after: String, first: Int, last: Int, survey: String!, orderBy: String): RecipientNodeConnection
   accountabilitySampleSize(input: AccountabilitySampleSizeInput): AccountabilitySampleSizeNode
   surveyCategoryChoices: [ChoiceObject]
+  availableFlows: [RapidProFlowNode]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -2635,6 +2637,11 @@ type RapidProFlow {
   results: [RapidProFlowResult]
   createdOn: DateTime
   modifiedOn: DateTime
+}
+
+type RapidProFlowNode {
+  id: String
+  name: String
 }
 
 type RapidProFlowResult {
@@ -3168,6 +3175,7 @@ type SurveyNode implements Node {
   fullListArguments: JSONString!
   randomSamplingArguments: JSONString!
   sampleSize: Int!
+  successfulRapidProCalls: [JSONString!]!
   sampleFilePath: String
   hasValidSampleFile: Boolean
 }
