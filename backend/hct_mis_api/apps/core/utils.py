@@ -216,7 +216,7 @@ def get_combined_attributes() -> Dict:
     flex_attrs = serialize_flex_attributes()
     return {
         **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
-        .apply_business_area(None)
+        .apply_business_area(None)  # type: ignore # TODO: none business area?
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
         **flex_attrs["households"],
@@ -461,8 +461,8 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
 
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
-    with open(csv_file, newline="") as csv_file:  # type: ignore
-        reader = csv.reader(csv_file)
+    with open(csv_file, newline="") as csv_file_ptr:  # type: ignore
+        reader = csv.reader(csv_file_ptr)
         next(reader, None)
         fields_mapping = dict(reader)
 

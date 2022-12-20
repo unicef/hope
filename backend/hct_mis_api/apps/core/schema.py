@@ -128,7 +128,9 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: str, root: Any, info: Any, **args: Any) -> Callable:
+def _custom_dict_or_attr_resolver(
+    attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any
+) -> Callable:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
@@ -182,7 +184,7 @@ class FieldAttributeNode(graphene.ObjectType):
     def resolve_label_en(parent, info: Any) -> Any:
         return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore
 
-    def resolve_associated_with(self, info: Any) -> Union:
+    def resolve_associated_with(self, info: Any) -> Any:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
         if resolved == 0:  # type: ignore
             return "Household"

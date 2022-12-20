@@ -153,14 +153,9 @@ class PythonExec(Interpreter):
             raise ValidationError(mark_safe(msg))
 
 
-def get_env(**options: Dict) -> Environment:
+def get_env(**options: Any) -> Environment:
     env = Environment(**options)
-    env.filters.update(
-        {
-            "adults": engine.adults
-            # 'url': reverse,
-        }
-    )
+    env.filters.update({"adults": engine.adults})
     return env
 
 
