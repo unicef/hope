@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, Iterable, List, Optional, Type, Union
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -229,7 +229,7 @@ def get_attr_value(name: str, obj: Any, default: Optional[Any] = None) -> Any:
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices: Dict) -> List[Dict[str, Any]]:
+def to_choice_object(choices: Iterable) -> List[Dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 

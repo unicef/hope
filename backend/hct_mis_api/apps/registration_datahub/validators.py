@@ -433,7 +433,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def integer_validator(self, value: int, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
+    def integer_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -451,7 +451,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def float_validator(self, value: float, header: str, *args: Any, **kwargs: Any) -> bool:
+    def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -478,7 +478,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def date_validator(self, value: datetime, header: str, *args: Any, **kwargs: Any) -> bool:
+    def date_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
@@ -826,7 +826,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file: File, business_area_slug: str) -> List[Dict[str, Any]]:
+    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
