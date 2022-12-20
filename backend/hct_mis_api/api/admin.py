@@ -146,7 +146,7 @@ class APITokenAdmin(SmartModelAdmin):
 
     @button()
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
 
     def changeform_view(

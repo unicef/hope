@@ -86,7 +86,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def datasets(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponseRedirect]:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             url = reverse("admin:power_query_dataset_changelist")
             return HttpResponseRedirect(f"{url}?query__exact={obj.pk}")
@@ -97,7 +97,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button(visible=settings.DEBUG)
     def run(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
-        if not (query := self.get_object(request, pk)):
+        if not (query := self.get_object(request, str(pk))):
             raise Exception("Query not found")
         results = query.execute_matrix(persist=True)
         self.message_user(request, "Done", messages.SUCCESS)
@@ -114,7 +114,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Query not found")
         try:
             context = self.get_common_context(request, pk, title="Results")
@@ -172,7 +172,7 @@ class DatasetAdmin(HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             context = self.get_common_context(request, pk, title="Results")
             context["dataset"] = to_dataset(obj.data)
@@ -266,7 +266,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
         try:
             result = obj.execute(run_query=True)
@@ -304,7 +304,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
     def refresh(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Parametrizer not found")
         obj.refresh()
 
@@ -321,7 +321,7 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def view(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report document not found")
         url = reverse("power_query:document", args=[obj.report.pk, pk])
         return HttpResponseRedirect(url)

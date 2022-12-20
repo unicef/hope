@@ -645,7 +645,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     )
     def remove_kobo_access(self, request: HttpRequest, pk: "UUID") -> None:
         try:
-            obj = self.get_object(request, pk)
+            obj = self.get_object(request, str(pk))
             api = DjAdminManager()
             api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
             obj.custom_fields["kobo_username"] = None
@@ -841,7 +841,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_single(self, request: HttpRequest, pk: "UUID") -> None:
         try:
-            self._sync_ad_data(self.get_object(request, pk))
+            self._sync_ad_data(self.get_object(request, str(pk)))
             self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
         except Exception as e:
             logger.exception(e)
@@ -995,7 +995,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
     def _perms(self, request: HttpRequest, object_id: "UUID") -> set:
-        return set(self.get_object(request, object_id).permissions or [])
+        return set(self.get_object(request, str(object_id)).permissions or [])
 
     def changeform_view(
         self,
@@ -1114,7 +1114,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
         return _import_fixture(self, request)
 
     def _perms(self, request: HttpRequest, object_id: "UUID") -> set:
-        return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
+        return set(self.get_object(request, str(object_id)).permissions.values_list("codename", flat=True))
 
     @button()
     def users(self, request: HttpRequest, pk: "UUID") -> HttpResponse:

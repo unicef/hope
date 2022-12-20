@@ -129,7 +129,7 @@ class AutocompleteWidget(forms.Widget):
 class TestRuleMixin:
     @button()
     def test(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        rule: Rule = self.get_object(request, pk)
+        rule: Rule = self.get_object(request, str(pk))
         context = self.get_common_context(
             request,
             pk,
@@ -345,7 +345,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Optional[Rule] = self.get_object(request, pk)
+            rule: Optional[Rule] = self.get_object(request, str(pk))
             form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
