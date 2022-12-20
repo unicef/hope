@@ -8,7 +8,7 @@ def field_list_to_dict(field_list: List) -> Dict:
     return {field: field for field in field_list}
 
 
-def create_mapping_dict(simple_mapping: Dict, complex_mapping: Optional[Dict] = None) -> Dict:
+def create_mapping_dict(simple_mapping: List[str], complex_mapping: Optional[Dict[str, str]] = None) -> Dict[str, str]:
     concatenated_dict = {}
     concatenated_dict.update({field: field for field in simple_mapping})
     if complex_mapping is not None:
