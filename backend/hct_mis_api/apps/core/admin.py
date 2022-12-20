@@ -244,7 +244,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
                 if action:
                     user_data["Action"] = action
-                    matrix.append(user_data)
+                    matrix.append(user_data)  # type: ignore
         return matrix
 
     @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")

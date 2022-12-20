@@ -212,7 +212,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID") -> None:
+    def execute(self, registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: str) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
@@ -367,6 +367,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if not self.business_area.postpone_deduplication:
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
-    def _handle_exception(self, assigned_to: ImportedIndividual, field_name: str, e: BaseException) -> None:
+    def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:
         logger.warning(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e

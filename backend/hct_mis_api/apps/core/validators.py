@@ -210,7 +210,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_db(cls) -> Dict:
-        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
+        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)  # type: ignore # TODO: none business area?
         return {
             core_field_data["xlsx_field"]: {
                 "type": core_field_data["type"],

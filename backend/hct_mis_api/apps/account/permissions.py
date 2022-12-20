@@ -282,7 +282,7 @@ class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,
         filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[Type[BasePermission]] = (AllowAny,),  # type: ignore
+        permission_classes: Tuple[Type[BasePermission]] = (AllowAny,),
         *args: Any,
         **kwargs: Any,
     ) -> None:

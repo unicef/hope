@@ -249,7 +249,7 @@ class ImportDataInstanceValidator:
         self.all_fields = self.get_all_fields()
 
     def get_combined_attributes(self) -> Dict:
-        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area(None)
+        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area(None)  # type: ignore # TODO: none business area?
 
         for field in fields:
             field["choices"] = [x.get("value") for x in field["choices"]]
