@@ -423,11 +423,11 @@ class LoadSanctionListXMLTask:
             )
             individuals_from_file.add(individual)
 
-            documents_from_file.update(individual_data_dict.get("documents"))
-            nationalities_from_file.update(individual_data_dict.get("nationalities"))
-            countries_from_file.update(individual_data_dict.get("countries"))
-            aliases_from_file.update(individual_data_dict.get("alias_names"))
-            dob_from_file.update(individual_data_dict.get("birth_dates"))
+            documents_from_file.update(individual_data_dict["documents"])
+            nationalities_from_file.update(individual_data_dict["nationalities"])
+            countries_from_file.update(individual_data_dict["countries"])
+            aliases_from_file.update(individual_data_dict["alias_names"])
+            dob_from_file.update(individual_data_dict["birth_dates"])
 
         # SanctionListIndividual
         individuals_to_check_against_sanction_list = []
