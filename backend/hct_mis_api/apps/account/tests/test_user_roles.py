@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import List
 
 from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
@@ -76,5 +76,6 @@ class UserRolesTest(TestCase):
         self.assertFalse(formset.is_valid())
         self.assertEqual(len(formset.errors), 2)
 
-        errors: List[Union[ErrorList, Any]] = formset.errors
-        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", errors[0]["role"])
+        errors: List[ErrorList] = formset.errors
+        # TODO: No overload variant of "__getitem__" of "UserList" matches argument type "str"
+        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", errors[0]["role"])  # type: ignore
