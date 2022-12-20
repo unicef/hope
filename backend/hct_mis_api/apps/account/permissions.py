@@ -277,7 +277,7 @@ class BaseNodePermissionMixin:
 class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
-        type: str,
+        type: Type,
         fields: Optional[Any] = None,
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,

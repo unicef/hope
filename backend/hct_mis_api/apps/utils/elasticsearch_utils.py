@@ -30,20 +30,26 @@ def _create(models: List[Model]) -> None:
         index.create()
 
 
-def _populate(models: List[Model], options: Dict) -> None:
+def _populate(models: Optional[List[Model]], options: Dict) -> None:
+    if not models:
+        return
+
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
 
 
-def _delete(models: List[Model]) -> bool:
+def _delete(models: Optional[List[Model]]) -> bool:
+    if not models:
+        return True
+
     for index in registry.get_indices(models):
         index.delete(ignore=404)
     return True
 
 
-def _rebuild(models: List[Model], options: Dict) -> None:
+def _rebuild(models: Optional[List[Model]], options: Dict) -> None:
     if not _delete(models):
         return
 
