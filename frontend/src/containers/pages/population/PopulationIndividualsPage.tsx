@@ -29,6 +29,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
     sex: [],
     age: { min: '', max: '' },
     flags: [],
+    orderBy: 'unicef_id',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {
@@ -68,6 +69,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
           )}
+          filterOrderBy={filter.orderBy}
         />
       </Box>
     </>

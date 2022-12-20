@@ -6,7 +6,17 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, Iterable, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -281,7 +291,9 @@ def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
     return results
 
 
-def to_dict(instance: "Model", fields: Optional[List] = None, dict_fields: Optional[Dict] = None) -> Dict[str, Any]:
+def to_dict(
+    instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
+) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 

@@ -618,5 +618,6 @@
   "Please provide the reason of withdrawal of this household.": "Please provide the reason of withdrawal of this household.",
   "Confirm": "Confirm",
   "Household Id": "Household Id",
-  "This household is a duplicate of a household ID": "This household is a duplicate of a household ID"
+  "This household is a duplicate of a household ID": "This household is a duplicate of a household ID",
+  "Sort by": "Sort by"
 }
