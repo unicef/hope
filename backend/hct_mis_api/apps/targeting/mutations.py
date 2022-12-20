@@ -190,7 +190,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
         input = kwargs.get("input")
         id = input.get("id")
-        target_population = cls.get_object(id)
+        target_population = cls.get_object_required(id)
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
         old_target_population = cls.get_object(id)
 
@@ -286,10 +286,16 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError("Locked Target Population can't be changed")
 
     @classmethod
-    def get_object(cls, id: str) -> Optional[TargetPopulation]:
+    def get_object_required(cls, id: str) -> TargetPopulation:
         if id is None:
             return None
         return get_object_or_404(TargetPopulation, id=decode_id_string(id))
+
+    @classmethod
+    def get_object(cls, id: str) -> Optional[TargetPopulation]:
+        if id is None:
+            return None
+        return cls.get_object_required(id)
 
 
 class LockTargetPopulationMutation(ValidatedMutation):

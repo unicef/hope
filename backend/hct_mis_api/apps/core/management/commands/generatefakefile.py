@@ -1,7 +1,7 @@
 import datetime
 import random
 from argparse import ArgumentParser
-from typing import Any
+from typing import Any, List
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -114,7 +114,7 @@ class Command(BaseCommand):
                 single_household_data.append(value)
 
             for i in range(1, 5):
-                single_individual_data = []
+                single_individual_data: List = []
 
                 name = faker.name()
                 name_list = name.split(" ")

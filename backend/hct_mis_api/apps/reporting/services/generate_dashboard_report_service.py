@@ -4,7 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -594,7 +594,7 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def _get_business_areas_or_programs(
-        cls, report: DashboardReport, valid_payment_records: List[PaymentRecord]
+        cls, report: DashboardReport, valid_payment_records: Iterable[PaymentRecord]
     ) -> Tuple[Any, str]:
         if cls._is_report_global(report):
             business_area_code_path = "code"

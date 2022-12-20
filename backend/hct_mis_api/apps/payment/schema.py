@@ -268,7 +268,7 @@ class Query(graphene.ObjectType):
         def get_payment_records(
             cash_plan: CashPlan,
             payment_verification_plan: Optional[CashPlanPaymentVerification],
-            verification_channel: str,
+            verification_channel: Any,
         ) -> QuerySet:
             if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
                 return cash_plan.available_payment_records(

@@ -132,7 +132,7 @@ class APITokenAdmin(SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request: HttpRequest, obj: Any, template: Template) -> None:
+    def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
         try:
             send_mail(
                 f"HOPE API Token {obj} infos",
