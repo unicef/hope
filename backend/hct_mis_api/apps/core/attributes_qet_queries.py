@@ -96,7 +96,7 @@ def get_other_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_number_query(document_type: DocumentType, number: str) -> Q:
+def get_documents_number_query(document_type: str, number: str) -> Q:
     return Q(documents__type__type=document_type, documents__document_number=number)
 
 
@@ -128,7 +128,7 @@ def get_other_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_issuer_query(document_type: DocumentType, country_alpha3: str) -> Q:
+def get_documents_issuer_query(document_type: str, country_alpha3: str) -> Q:
     return Q(documents__type__type=document_type, documents__type__country__iso_code3=country_alpha3)
 
 

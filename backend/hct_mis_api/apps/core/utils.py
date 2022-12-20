@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -406,7 +406,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-def decode_and_get_object(encoded_id: str, model: "Model", required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
