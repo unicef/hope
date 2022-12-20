@@ -27,6 +27,7 @@ from .. import models as account_models
 from .ad import ADUSerMixin
 from .filters import BusinessAreaFilter, HasKoboAccount
 from .forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
+from .mixins import KoboAccessMixin
 from .user_role import UserRoleInline
 
 if TYPE_CHECKING:
@@ -38,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(account_models.User)
-class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmin, ADUSerMixin):
+class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMixin, BaseUserAdmin, ADUSerMixin):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
