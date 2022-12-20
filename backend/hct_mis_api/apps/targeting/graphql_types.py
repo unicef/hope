@@ -35,7 +35,9 @@ def get_field_by_name(field_name: str) -> Optional[Any]:
     return field
 
 
-def filter_choices(field: Dict, args: List) -> Dict:
+def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
+    if not field:
+        return None
     choices = field.get("choices")
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))

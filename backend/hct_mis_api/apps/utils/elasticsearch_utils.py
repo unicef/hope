@@ -51,7 +51,7 @@ def _rebuild(models: List[Model], options: Dict) -> None:
     _populate(models, options)
 
 
-def rebuild_search_index(models: Optional[List[Model]] = None, options: Optional[Dict] = None) -> None:
+def rebuild_search_index(models: List[Model] = None, options: Optional[Dict] = None) -> None:
     if options is None:
         options = {"parallel": False, "quiet": True}
     _rebuild(models=models, options=options)
