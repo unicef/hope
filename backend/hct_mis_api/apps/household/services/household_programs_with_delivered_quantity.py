@@ -1,5 +1,3 @@
-from decimal import Decimal
-from typing import Any, Dict
 from collections import defaultdict
 from decimal import Decimal
 from typing import Any, Dict, List, TypedDict
@@ -24,7 +22,7 @@ class ProgramType(TypedDict):
     quantity: List[QuantityType]
 
 
-def programs_with_delivered_quantity(household: Household) -> Dict[Any, Dict[str, Any]]:
+def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any]]:
     payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.all())
     programs = (
         payment_items.select_related("parent__program")

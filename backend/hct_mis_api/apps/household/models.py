@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import date
-from decimal import Decimal
 from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
