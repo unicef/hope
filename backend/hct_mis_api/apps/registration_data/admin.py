@@ -80,7 +80,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
                 from hct_mis_api.apps.registration_datahub.celery_tasks import (

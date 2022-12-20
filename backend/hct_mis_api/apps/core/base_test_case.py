@@ -90,7 +90,7 @@ class APITestCase(SnapshotTestTestCase):
         request = RequestFactory()
         context_value = request.get("/api/graphql/")
         context_value.user = user or AnonymousUser()
-        self.__set_context_files(context_value, files)
+        self.__set_context_files(context_value, files or {})
         return context_value
 
     @classmethod

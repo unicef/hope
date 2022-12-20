@@ -180,7 +180,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status: List[Document]) -> Dict[str, Dict]:
+def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import (
@@ -205,7 +205,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status: List[Doc
     return previous_documents
 
 
-def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
+def prepare_edit_documents(documents_to_edit: List[Dict]) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -251,7 +251,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status: List[IndividualIdentity]) -> Dict[int, Any]:
+def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[int, Any]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -295,7 +295,7 @@ def prepare_previous_payment_channels(
     return previous_payment_channels
 
 
-def prepare_edit_identities(identities: List[IndividualIdentity]) -> List[Dict]:
+def prepare_edit_identities(identities: List[Dict]) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64

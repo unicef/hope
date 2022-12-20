@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import graphene
 
-from hct_mis_api.apps.core.utils import decode_and_get_object
+from hct_mis_api.apps.core.utils import decode_and_get_object_required
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -40,13 +40,13 @@ def create_new_ticket(grievance_ticket: GrievanceTicket, household: Household, i
     )
 
 
-def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], Optional[Individual]]:
+def fetch_household_and_individual(extras: Dict) -> Tuple[Household, Individual]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
     individual_encoded_id = feedback_ticket_extras.get("individual")
-    individual = decode_and_get_object(individual_encoded_id, Individual, False)
+    individual = decode_and_get_object_required(individual_encoded_id, Individual)
     household_encoded_id = feedback_ticket_extras.get("household")
-    household = decode_and_get_object(household_encoded_id, Household, False)
+    household = decode_and_get_object_required(household_encoded_id, Household)
     return household, individual
 
 
