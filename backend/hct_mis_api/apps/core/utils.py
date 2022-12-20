@@ -437,7 +437,7 @@ def to_snake_case(camel_case_string: str) -> str:
     return snake_case[0] + snake_case[1:].lower()
 
 
-def check_concurrency_version_in_mutation(version: int, target: Any) -> None:
+def check_concurrency_version_in_mutation(version: Optional[int], target: Any) -> None:
     if version is None:
         return
 

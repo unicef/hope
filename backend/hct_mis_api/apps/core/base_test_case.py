@@ -86,7 +86,7 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user: Optional["User"] = None, files: Optional[List] = None) -> WSGIRequest:
+    def generate_context(self, user: Optional["User"] = None, files: Optional[Dict] = None) -> WSGIRequest:
         request = RequestFactory()
         context_value = request.get("/api/graphql/")
         context_value.user = user or AnonymousUser()
