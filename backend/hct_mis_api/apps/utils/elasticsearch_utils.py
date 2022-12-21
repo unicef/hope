@@ -25,7 +25,9 @@ def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> No
     doc().update(qs, parallel=parallel)
 
 
-def _create(models: List[Model]) -> None:
+def _create(models: Optional[List[Model]]) -> None:
+    if not models:
+        return
     for index in registry.get_indices(models):
         index.create()
 

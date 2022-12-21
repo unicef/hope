@@ -810,7 +810,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_file_extension(self, xlsx_file: File) -> List:
+    def validate_file_extension(self, xlsx_file: Any) -> List:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":

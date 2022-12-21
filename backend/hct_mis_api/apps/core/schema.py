@@ -137,7 +137,7 @@ def _custom_dict_or_attr_resolver(
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options: Dict, attrs: str) -> List:
+def sort_by_attr(options: Iterable, attrs: str) -> List:
     def key_extractor(el: Any) -> Any:
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)

@@ -204,7 +204,7 @@ class FlexRegistrationService:
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
-        household = self._create_object_and_validate(household_data, ImportedHousehold)
+        household: ImportedHousehold = self._create_object_and_validate(household_data, ImportedHousehold)
         admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
         admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
         if admin_area1:
@@ -225,7 +225,7 @@ class FlexRegistrationService:
                 role = individual_data.pop("role")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual = self._create_object_and_validate(individual_data, ImportedIndividual)
+                individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
                 individual.kobo_asset_id = record.source_id

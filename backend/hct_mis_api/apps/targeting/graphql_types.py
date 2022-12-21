@@ -51,7 +51,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Dict:
+    def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
