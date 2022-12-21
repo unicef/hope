@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
@@ -13,7 +13,6 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
-    IndividualDocument,
     IndividualDocumentAfghanistan,
     IndividualDocumentOthers,
     IndividualDocumentUkraine,

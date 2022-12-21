@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
