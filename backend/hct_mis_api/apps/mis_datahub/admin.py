@@ -208,7 +208,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
-    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> Optional[TemplateResponse]:
         if request.method == "POST":
             try:
                 with atomic():
@@ -230,14 +230,15 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             except Exception as e:
                 logger.exception(e)
                 self.message_user(request, str(e), messages.ERROR)
-
-        return confirm_action(
-            self,
-            request,
-            self.reset_sync_date,
-            "Continuing will reset last_sync_date of any" " object linked to this Session.",
-            "Successfully executed",
-        )
+        else:
+            return confirm_action(
+                self,
+                request,
+                self.reset_sync_date,
+                "Continuing will reset last_sync_date of any" " object linked to this Session.",
+                "Successfully executed",
+            )
+        return None
 
 
 @admin.register(TargetPopulationEntry)

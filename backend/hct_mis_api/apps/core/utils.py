@@ -268,7 +268,7 @@ def nested_dict_get(dictionary: str, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else "",
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME
         path.split("."),
         dictionary,
     )
