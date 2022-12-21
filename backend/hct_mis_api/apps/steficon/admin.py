@@ -92,7 +92,7 @@ class AutocompleteWidget(forms.Widget):
         }
 
     @property
-    def media(self) -> forms.Media:  # type: ignore
+    def media(self) -> forms.Media:  # type: ignore # FIXME: Signature of "media" incompatible with supertype "Widget"
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
         i18n_file: List = (

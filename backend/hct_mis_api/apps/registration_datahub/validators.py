@@ -47,8 +47,7 @@ logger = logging.getLogger(__name__)
 
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, *args: Any, **kwargs: Any) -> List:  # type: ignore
-        # TODO: Signature of "validate" incompatible with supertype "BaseValidator"
+    def validate(cls, *args: Any, **kwargs: Any) -> List:  # type: ignore # FIXME: Signature of "validate" incompatible with supertype "BaseValidator"
         try:
             validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -107,7 +106,7 @@ class ImportDataValidator(BaseValidator):
     }
 
     @classmethod
-    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore  # FIXME: Signature of "validate" incompatible with supertype "BaseValidator"
         try:
             validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -423,7 +422,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:  # type: ignore
+    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -432,6 +431,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+        return None
 
     def integer_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
@@ -722,7 +722,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
-                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore
+                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore # FIXME: On Python 3 formatting "b'abc'" with "{}" produces "b'abc'", not "abc"; use "{!r}" if this is desired behavior
                             f"{value} for type "
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
@@ -1019,7 +1019,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:  # type: ignore
+    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:
         try:
             value_type_name = type(value).__name__
 
@@ -1049,6 +1049,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+        return None
 
     def image_validator(
         self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
@@ -1203,7 +1204,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
         try:
-            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore
+            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore # FIXME
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;

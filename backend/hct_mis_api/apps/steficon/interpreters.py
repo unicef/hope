@@ -46,7 +46,7 @@ class PythonFunction(Interpreter):
         return import_string(self.init_string)
 
     def execute(self, **context: Dict) -> Callable:
-        return self.code(**context)  # type: ignore
+        return self.code(**context)  # type: ignore # FIXME: "str" not callable
 
 
 def call_rule(rule_id: UUID, context: Dict) -> Any:

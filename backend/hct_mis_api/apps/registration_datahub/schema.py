@@ -1,6 +1,6 @@
 import json
 from datetime import date
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 
 from django.db.models import Prefetch, Q
 
@@ -66,11 +66,12 @@ class DeduplicationResultNode(graphene.ObjectType):
     location = graphene.String()
     age = graphene.Int()
 
-    def resolve_age(self, info: Any) -> int:  # type: ignore
+    def resolve_age(self, info: Any) -> Optional[int]:
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()
             return relativedelta(today, parse(date_of_birth)).years
+        return None
 
     def resolve_location(self, info: Any) -> str:
         return self.get("location", "Not provided")

@@ -53,8 +53,7 @@ class GeoCountryField(models.CharField):
         *args: Any,
         **kwargs: Any
     ) -> List:
-        # TODO: refactor
-        if self.choices[0] == (None, None):  # type: ignore
+        if self.choices[0] == (None, None):  # type: ignore # FIXME: Value of type "Optional[List[Union[Tuple[Any, Any], Tuple[str, Iterable[Tuple[Any, Any]]]]]]" is not indexable
             self.choices = Country.objects.all().values_list("iso_code2", "name")
         if blank_choice is None:
             if self.blank_label is None:

@@ -72,14 +72,13 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     filename = forms.CharField(label="Output filename")
-    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # TODO: 'data' is an internal field
-    fields = forms.CharField(widget=HiddenInput)  # type: ignore # TODO: 'fields' is an internal field
+    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # FIXME: 'data' is an internal field
+    fields = forms.CharField(widget=HiddenInput)  # type: ignore # FIXME: 'fields' is an internal field
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
-            # TODO: fields is CharField but used as dict?
-            self.fields[fname].widget = HiddenInput()  # type: ignore
+            self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
 
     def clean_fields(self) -> Optional[List]:
         try:
@@ -147,7 +146,7 @@ class RuleTestForm(forms.Form):
             media = media + field.widget.media
         return media
 
-    def clean_raw_data(self) -> Optional[Dict]:  # type: ignore
+    def clean_raw_data(self) -> Optional[Dict]:
         original = self.cleaned_data["raw_data"]
         if original:
             try:
@@ -155,7 +154,7 @@ class RuleTestForm(forms.Form):
             except Exception as e:
                 raise ValidationError(str(e))
 
-    def clean_file(self) -> Optional[Dict]:  # type: ignore
+    def clean_file(self) -> Optional[Dict]:
         original = self.cleaned_data["file"]
         if original:
             try:

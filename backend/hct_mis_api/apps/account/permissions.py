@@ -23,8 +23,7 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    # TODO: signature differs from superclass
-    def _generate_next_value_(name, *args: Any) -> "Permissions":  # type: ignore
+    def _generate_next_value_(name, *args: Any) -> "Permissions":  # type: ignore # FIXME: signature differs from superclass
         return name
 
     # RDI
@@ -247,9 +246,9 @@ class BaseNodePermissionMixin:
     @classmethod
     def get_node(cls, info: Any, object_id: str) -> Optional[Model]:
         try:
-            object_instance = cls._meta.model.objects.get(pk=object_id)  # type: ignore
+            object_instance = cls._meta.model.objects.get(pk=object_id)
             cls.check_node_permission(info, object_instance)
-        except cls._meta.model.DoesNotExist:  # type: ignore
+        except cls._meta.model.DoesNotExist:
             object_instance = None
         return object_instance
 

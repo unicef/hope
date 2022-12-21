@@ -1,12 +1,10 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import register
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import QuerySet
@@ -82,7 +80,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore
+        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore # FIXME
 
     @button()
     def datasets(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponseRedirect]:
@@ -253,15 +251,15 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     search_fields = ("name",)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore
+        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore # FIXME
 
-    def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Union[AbstractBaseUser, AnonymousUser]]:  # type: ignore
-        kwargs = {"owner": request.user}
+    def get_changeform_initial_data(self, request: HttpRequest) -> Dict:
+        kwargs: Dict = {"owner": request.user}
         if "q" in request.GET:
             q = Query.objects.get(pk=request.GET["q"])
             kwargs["query"] = q
-            kwargs["name"] = f"Report for {q.name}"  # type: ignore
-            kwargs["notify_to"] = [request.user]  # type: ignore
+            kwargs["name"] = f"Report for {q.name}"
+            kwargs["notify_to"] = [request.user]
         return kwargs
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)

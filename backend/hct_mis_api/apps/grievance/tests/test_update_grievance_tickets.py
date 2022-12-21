@@ -510,7 +510,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             }
 
         else:
-            expected_result: Dict = {  # type: ignore # defined above; once it's refactored, it shouldn't be an issue
+            expected_result: Dict = {  # type: ignore # FIXME: defined above; once it's refactored, it shouldn't be an issue
                 "sex": {"value": "MALE", "approve_status": False},
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [

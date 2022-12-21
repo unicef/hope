@@ -19,7 +19,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-def comparison_method_resolver(obj: Any) -> Union[List[str], str]:  # type: ignore
+def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
     core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
@@ -30,6 +30,7 @@ def comparison_method_resolver(obj: Any) -> Union[List[str], str]:  # type: igno
         return random.choice(["EQUALS", "NOT_EQUALS"])
     if core_field_attr.get("type") == "STRING":
         return "CONTAINS"
+    return None
 
 
 @typing.no_type_check

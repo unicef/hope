@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
@@ -13,7 +13,6 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
-    IndividualDocument,
     IndividualDocumentAfghanistan,
     IndividualDocumentOthers,
     IndividualDocumentUkraine,
@@ -81,15 +80,15 @@ class CheckAgainstSanctionListPreMergeTask:
     @transaction.atomic
     def execute(
         cls,
-        individuals: "QuerySet[SanctionListIndividual]" = None,  # type: ignore
+        individuals: Optional["QuerySet[SanctionListIndividual]"] = None,
         registration_data_import: Optional[RegistrationDataImport] = None,
     ) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        documents: Tuple[Type[IndividualDocument]] = (
-            (  # type: ignore # TODO: look into this typing
+        documents: Tuple = (
+            (
                 IndividualDocumentAfghanistan,
                 IndividualDocumentUkraine,
                 IndividualDocumentOthers,
