@@ -53,7 +53,7 @@ class AutocompleteWidget(forms.Widget):
 
     def __init__(
         self,
-        model: Model,
+        model: Type,
         admin_site: str,
         attrs: Optional[Collection[Any]] = None,
         choices: Tuple = (),
