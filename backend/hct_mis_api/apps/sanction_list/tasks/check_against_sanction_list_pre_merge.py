@@ -81,15 +81,15 @@ class CheckAgainstSanctionListPreMergeTask:
     @transaction.atomic
     def execute(
         cls,
-        individuals: "QuerySet[SanctionListIndividual]" = None,  # type: ignore
+        individuals: Optional["QuerySet[SanctionListIndividual]"] = None,
         registration_data_import: Optional[RegistrationDataImport] = None,
     ) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        documents: Tuple[Type[IndividualDocument]] = (
-            (  # type: ignore # TODO: look into this typing
+        documents: Tuple = (
+            (
                 IndividualDocumentAfghanistan,
                 IndividualDocumentUkraine,
                 IndividualDocumentOthers,
