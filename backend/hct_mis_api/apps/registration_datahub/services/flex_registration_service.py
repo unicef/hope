@@ -264,7 +264,7 @@ class FlexRegistrationService:
             else:
                 raise ValidationError("There should be only two collectors!")
 
-    def _create_object_and_validate(self, data: Dict, model_class: Type) -> Model:
+    def _create_object_and_validate(self, data: Dict, model_class: Type) -> Any:
         ModelClassForm = modelform_factory(model_class, fields=data.keys())
         form = ModelClassForm(data)
         if not form.is_valid():

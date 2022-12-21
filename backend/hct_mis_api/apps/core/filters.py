@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Callable, Dict, Optional, Tuple, Type, Union, Any
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from django.db.models import QuerySet
 from django.forms import (

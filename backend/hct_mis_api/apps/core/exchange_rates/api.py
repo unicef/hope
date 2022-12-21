@@ -24,7 +24,7 @@ class ExchangeRateAPI:
 
         self._client = session()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
-        self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
+        self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))  # type: ignore # FIXME
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
     def fetch_exchange_rates(self, with_history: bool = True) -> Dict:

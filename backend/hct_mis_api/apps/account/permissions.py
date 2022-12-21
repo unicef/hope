@@ -258,11 +258,11 @@ class BaseNodePermissionMixin:
         cls,
         info: Any,
         object_instance: Any,
-        general_permission: BasePermission,
+        general_permission: Permissions,
         is_creator: bool,
-        creator_permission: BasePermission,
+        creator_permission: Permissions,
         is_owner: bool,
-        owner_permission: BasePermission,
+        owner_permission: Permissions,
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area

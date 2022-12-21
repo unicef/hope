@@ -69,7 +69,7 @@ class ValidatedMutation(PermissionMutation):
     object_validators: List = []
     permissions: Optional[Any] = None
 
-    model_class: Optional[Type] = None
+    model_class: Type
 
     @classmethod
     @is_authenticated
@@ -251,7 +251,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     def rebuild_tp(
-        cls, should_rebuild_list: List, should_rebuild_stats: bool, target_population: TargetPopulation
+        cls, should_rebuild_list: bool, should_rebuild_stats: bool, target_population: TargetPopulation
     ) -> None:
         rebuild_list = target_population.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats

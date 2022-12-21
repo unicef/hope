@@ -82,7 +82,7 @@ def get_household(registration_id: UUID, business_area_code: str) -> ImportedHou
     raise Exception("Household with given registration_id not found")
 
 
-def get_household_or_individual(tax_id: str, registration_id: UUID, business_area_code: str) -> Dict:
+def get_household_or_individual(tax_id: str, registration_id: str, business_area_code: str) -> Dict:
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
 

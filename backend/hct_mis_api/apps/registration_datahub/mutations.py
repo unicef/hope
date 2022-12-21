@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(
-    registration_data_import_data: Dict, user: "User", data_source: Dict
+    registration_data_import_data: Dict, user: "User", data_source: str
 ) -> Tuple[RegistrationDataImportDatahub, RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)

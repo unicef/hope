@@ -2,7 +2,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import graphene
 
-from hct_mis_api.apps.core.utils import decode_and_get_object, decode_and_get_object_required
+from hct_mis_api.apps.core.utils import (
+    decode_and_get_object,
+    decode_and_get_object_required,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNegativeFeedbackDetails,
