@@ -86,7 +86,7 @@ class RapidProFlow(graphene.ObjectType):
     modified_on = graphene.DateTime()
 
     def resolve_id(parent, info: Any) -> str:
-        return parent["uuid"]  # type: ignore
+        return parent["uuid"]  # type: ignore # FIXME
 
 
 class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
