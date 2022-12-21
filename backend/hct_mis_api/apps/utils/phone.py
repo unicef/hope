@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Type
 
 from django.db.models import Model
 
@@ -23,7 +23,7 @@ def calculate_phone_numbers_validity(obj: Any) -> Any:
     return obj
 
 
-def recalculate_phone_numbers_validity(obj: Any, model: Model) -> Any:
+def recalculate_phone_numbers_validity(obj: Any, model: Type) -> Any:
     # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
     if current := model.objects.filter(pk=obj.pk).first():
         # update

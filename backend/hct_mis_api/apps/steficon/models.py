@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -24,7 +24,7 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
-    LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
+    LANGUAGES: List = [[a.label.lower(), a.label] for a in interpreters]
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,

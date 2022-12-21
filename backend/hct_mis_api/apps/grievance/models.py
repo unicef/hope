@@ -349,12 +349,16 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     @property
     def ticket_details(self) -> Any:
         nested_dict_or_value = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
-        if isinstance(nested_dict_or_value, dict):
-            details_name = nested_dict_or_value.get(self.issue_type)
-        else:
-            details_name = nested_dict_or_value
+        if not nested_dict_or_value:
+            return None
 
-        return getattr(self, details_name, None)
+        return getattr(
+            self,
+            nested_dict_or_value.get(self.issue_type)
+            if isinstance(nested_dict_or_value, dict)
+            else nested_dict_or_value,
+            None,
+        )
 
     @property
     def status_log(self) -> str:

@@ -18,7 +18,7 @@ class Sampling:
     def __init__(self, input_data: Dict, cash_plan: "CashPlan", payment_records: QuerySet) -> None:
         self.input_data = input_data
         self.cash_plan = cash_plan
-        self.payment_records: Optional[QuerySet] = payment_records
+        self.payment_records: QuerySet = payment_records
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification

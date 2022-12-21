@@ -6,18 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, Iterable, List, Optional, Tuple, Union, Type
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -284,7 +273,7 @@ def get_count_and_percentage(input_list: List, all_items_list: List) -> Dict[str
     return {"count": count, "percentage": percentage}
 
 
-def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
+def encode_ids(results: Any, model_name: str, key: str) -> List[Dict]:
     if results:
         for result in results:
             result_id = result[key]
@@ -429,7 +418,7 @@ def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optio
     return None
 
 
-def decode_and_get_object_required(encoded_id: str, model: "Model") -> Any:
+def decode_and_get_object_required(encoded_id: str, model: Type) -> Any:
     return decode_and_get_object(encoded_id, model, required=True)
 
 
@@ -534,7 +523,7 @@ def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
         yield row
 
 
-def chart_map_choices(choices: List) -> Dict:
+def chart_map_choices(choices: Iterable) -> Dict:
     return dict(choices)
 
 

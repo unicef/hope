@@ -65,9 +65,9 @@ def fetch_household_and_individual_required(extras: Dict, ticket_type: str) -> T
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get(ticket_type, {})
     individual_encoded_id = feedback_ticket_extras.get("individual")
-    individual: Individual = decode_and_get_object_required(individual_encoded_id, Individual, False)
+    individual: Individual = decode_and_get_object_required(individual_encoded_id, Individual)
     household_encoded_id = feedback_ticket_extras.get("household")
-    household: Household = decode_and_get_object_required(household_encoded_id, Household, False)
+    household: Household = decode_and_get_object_required(household_encoded_id, Household)
     return household, individual
 
 

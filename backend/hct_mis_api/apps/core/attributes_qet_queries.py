@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -25,7 +25,7 @@ from hct_mis_api.apps.household.models import (
 logger = logging.getLogger(__name__)
 
 
-def age_to_birth_date_range_query(field_name: str, age_min: int, age_max: int) -> Q:
+def age_to_birth_date_range_query(field_name: str, age_min: Optional[int], age_max: Optional[int]) -> Q:
     query_dict = {}
     current_date = dt.date.today()
     if age_min is not None:

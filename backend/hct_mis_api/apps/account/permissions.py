@@ -199,7 +199,7 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def check_permissions(user: Any, permissions: List[Permissions], **kwargs: Any) -> bool:
+def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
     business_area_arg = kwargs.get("business_area")
@@ -260,9 +260,9 @@ class BaseNodePermissionMixin:
         object_instance: Any,
         general_permission: BasePermission,
         is_creator: bool,
-        creator_permission: Any,
+        creator_permission: BasePermission,
         is_owner: bool,
-        owner_permission: List[BasePermission],
+        owner_permission: BasePermission,
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
@@ -282,7 +282,7 @@ class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,
         filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[Type[BasePermission]] = (AllowAny,),
+        permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,),
         *args: Any,
         **kwargs: Any,
     ) -> None:

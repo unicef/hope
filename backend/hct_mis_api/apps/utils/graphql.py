@@ -12,4 +12,5 @@ def does_path_exist_in_query(path: str, info: ResolveInfo) -> bool:
                 return does_path_exist_in_selection(right, field.selection_set)
         return False
 
-    return does_path_exist_in_selection(path, info.field_asts[0].selection_set)
+    # TODO: Argument 2 to "does_path_exist_in_selection" has incompatible type "Optional[SelectionSet]"; expected "SelectionSet"
+    return does_path_exist_in_selection(path, info.field_asts[0].selection_set)  # type: ignore

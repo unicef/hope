@@ -101,7 +101,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
-    def has_permission(self, permission: BasePermission, business_area: "BusinessArea", write: bool = False) -> bool:
+    def has_permission(self, permission: str, business_area: "BusinessArea", write: bool = False) -> bool:
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,

@@ -263,7 +263,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
         return queryset
 
     def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
+        return GrievanceTicketFilter.permissions_filter(self, qs, name, [value])
 
 
 class TicketNoteFilter(FilterSet):

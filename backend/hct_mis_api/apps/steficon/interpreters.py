@@ -32,7 +32,7 @@ class Interpreter:
             return True
         except Exception as e:
             logger.exception(e)
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
     def get_result(self) -> Any:
         return config.RESULT()
