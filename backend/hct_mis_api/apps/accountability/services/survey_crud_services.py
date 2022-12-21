@@ -42,7 +42,7 @@ class SurveyCrudServices:
         survey.recipients.set(result.households)
 
         if not result.households:
-            raise ValidationError("There are no selected recipients.")
+            raise Exception("There are no selected recipients.")
 
         survey.save()
         return survey

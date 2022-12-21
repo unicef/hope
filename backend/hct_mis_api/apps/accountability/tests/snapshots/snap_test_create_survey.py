@@ -69,7 +69,7 @@ snapshots['TestCreateSurvey::test_create_survey_without_recipients 1'] = {
                     'line': 3
                 }
             ],
-            'message': "['There are no selected recipients.']",
+            'message': 'There are no selected recipients.',
             'path': [
                 'createSurvey'
             ]
