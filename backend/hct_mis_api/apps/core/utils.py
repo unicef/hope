@@ -641,7 +641,7 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
     return flex_fields_with_str_choices
 
 
-def get_model_choices_fields(model: "Model", excluded: Optional[List] = None) -> List[str]:
+def get_model_choices_fields(model: Type, excluded: Optional[List] = None) -> List[str]:
     if excluded is None:
         excluded = []
 
