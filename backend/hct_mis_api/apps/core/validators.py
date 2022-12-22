@@ -304,7 +304,7 @@ class KoboTemplateValidator:
             if field_type_error:
                 validation_errors.append(field_type_error)
 
-            field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)
+            field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)  # type: ignore # FIXME: Argument 3 to "_check_field_choices" of "KoboTemplateValidator" has incompatible type "List[Any]"; expected "Dict[Any, Any]"
             if field_choices_errors:
                 validation_errors.extend(field_choices_errors)
 

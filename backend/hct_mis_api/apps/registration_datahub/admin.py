@@ -253,13 +253,13 @@ class RemeberDataForm(forms.Form):
     remember = forms.BooleanField(label="Remember me", required=False)
 
     def get_signed_cookie(self, request: HttpRequest) -> Any:
-        signer = Signer(request.user.password)
+        signer = Signer(str(request.user.password))
         return signer.sign_object(self.cleaned_data)
 
     @classmethod
     def get_saved_config(cls, request: HttpRequest) -> Dict:
         try:
-            signer = Signer(request.user.password)
+            signer = Signer(str(request.user.password))
             obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
             return obj
         except BadSignature:

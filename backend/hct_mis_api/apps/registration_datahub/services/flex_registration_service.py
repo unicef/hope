@@ -2,7 +2,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Type, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -86,7 +86,7 @@ class FlexRegistrationService:
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by: "User", rdi_name: str = "rdi_name") -> RegistrationDataImport:
+    def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
@@ -123,7 +123,7 @@ class FlexRegistrationService:
     def process_records(
         self,
         rdi_id: "UUID",
-        records_ids: List["UUID"],
+        records_ids: Iterable,
     ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
@@ -265,7 +265,7 @@ class FlexRegistrationService:
                 raise ValidationError("There should be only two collectors!")
 
     def _create_object_and_validate(self, data: Dict, model_class: Type) -> Any:
-        ModelClassForm = modelform_factory(model_class, fields=data.keys())
+        ModelClassForm = modelform_factory(model_class, fields=list(data.keys()))
         form = ModelClassForm(data)
         if not form.is_valid():
             raise ValidationError(form.errors)
@@ -363,7 +363,7 @@ class FlexRegistrationService:
                 "document_number": document_number,
                 "individual": individual,
             }
-            ModelClassForm = modelform_factory(ImportedDocument, fields=document_kwargs.keys())
+            ModelClassForm = modelform_factory(ImportedDocument, fields=list(document_kwargs.keys()))
             form = ModelClassForm(document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)

@@ -66,7 +66,7 @@ class XLSXValidator(BaseValidator):
     @classmethod
     def validate_file_extension(cls, *args: Any, **kwargs: Any) -> List:
         try:
-            xlsx_file = kwargs.get("file")
+            xlsx_file = kwargs["file"]
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
                 return [
@@ -599,7 +599,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True
-            return self.image_loader.image_in(cell.coordinate)
+            return self.image_loader.image_in(cell.coordinate)  # type: ignore # FIXME: Argument 1 to "image_in" of "SheetImageLoader" has incompatible type "str"; expected "Cell"
         except Exception as e:
             logger.exception(e)
             raise
@@ -858,7 +858,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             for row, cell in data_dict.items():
                 if not cell.value:
                     continue
-                list_of_ids = set(collectors_str_ids_to_list(cell.value))
+                list_of_ids = set(collectors_str_ids_to_list(cell.value) or [])
                 contains_correct_ids = list_of_ids.issubset(household_ids)
                 if not contains_correct_ids:
                     errors.append(
@@ -1190,7 +1190,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         "message": message,
                     }
             else:
-                message = self.standard_type_validator(value, field, field_type)
+                message = self.standard_type_validator(value, field, field_type)  # type: ignore # FIXME: Argument 1 to "standard_type_validator" of "KoboProjectImportDataInstanceValidator" has incompatible type "Union[str, List[Any]]"; expected "str"
                 if message:
                     return {
                         "header": field,

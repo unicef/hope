@@ -121,7 +121,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if not is_flex_field:
             return value
         if isinstance(value, numbers.Number):
-            return float(value)
+            return float(value)  # type: ignore # intentional
         return value
 
     def _cast_and_assign(
@@ -152,7 +152,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities: List[Dict]) -> None:
+    def _handle_documents_and_identities(self, documents_and_identities: List) -> None:
         identity_fields = {
             "scope_id",
             "unhcr_id",

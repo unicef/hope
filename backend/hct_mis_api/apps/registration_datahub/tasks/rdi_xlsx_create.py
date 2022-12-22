@@ -216,7 +216,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if not is_flex_field:
             return value
         if isinstance(value, numbers.Number):
-            return float(value)
+            return float(value)  # type: ignore # FIXME: Argument 1 to "float" has incompatible type "Number"; expected "Union[SupportsFloat, SupportsIndex, str, bytes, array[Any], mmap, _CData, PickleBuffer]"
         return value
 
     def _handle_bool_field(
