@@ -260,7 +260,7 @@ class RemeberDataForm(forms.Form):
     def get_saved_config(cls, request: HttpRequest) -> Dict:
         try:
             signer = Signer(request.user.password)
-            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
             return obj
         except BadSignature:
             return {}

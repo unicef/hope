@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 from uuid import UUID
 from zipfile import BadZipfile
 
@@ -850,7 +850,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header: str, data_dict: Dict, household_ids: List[UUID]) -> List[Dict[str, Any]]:
+    def collector_column_validator(header: str, data_dict: Dict, household_ids: Iterable[str]) -> List[Dict[str, Any]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []
@@ -1276,7 +1276,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             household: Dict[str, Any]
             for household in reduced_submissions:
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
-                    household.get("_uuid"), []
+                    str(household.get("_uuid")), []
                 )
                 if submission_exists is True:
                     continue

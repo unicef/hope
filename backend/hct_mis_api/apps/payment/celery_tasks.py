@@ -38,7 +38,7 @@ def get_sync_run_rapid_pro_task() -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id: UUID, user_id: UUID) -> None:
+def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id: str, user_id: str) -> None:
     try:
         user = get_user_model().objects.get(pk=user_id)
         cash_plan_payment_verification = CashPlanPaymentVerification.objects.get(id=cash_plan_payment_verification_id)

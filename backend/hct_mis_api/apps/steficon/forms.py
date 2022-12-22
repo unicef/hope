@@ -153,6 +153,7 @@ class RuleTestForm(forms.Form):
                 return json.loads(original)
             except Exception as e:
                 raise ValidationError(str(e))
+        return None
 
     def clean_file(self) -> Optional[Dict]:
         original = self.cleaned_data["file"]
@@ -161,6 +162,7 @@ class RuleTestForm(forms.Form):
                 return json.loads(original.read())
             except Exception as e:
                 raise ValidationError(str(e))
+        return None
 
     def clean(self) -> None:
         selection = self.cleaned_data["opt"]

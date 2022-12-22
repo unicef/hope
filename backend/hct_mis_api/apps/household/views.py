@@ -49,7 +49,7 @@ def get_individual(tax_id: str, business_area_code: str) -> Document:
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id: UUID, business_area_code: str) -> ImportedHousehold:
+def get_household(registration_id: str, business_area_code: str) -> ImportedHousehold:
     kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
     households = (
         Household.objects.all()

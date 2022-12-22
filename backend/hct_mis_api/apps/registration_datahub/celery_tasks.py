@@ -90,9 +90,7 @@ def registration_xlsx_import_task(
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID"
-) -> None:
+def registration_kobo_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (

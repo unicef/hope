@@ -2,7 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -331,9 +331,7 @@ class LoadSanctionListXMLTask:
             )
         }
 
-    def _get_individuals_to_update(
-        self, individuals_from_file: Iterable[SanctionListIndividual]
-    ) -> set[SanctionListIndividual]:
+    def _get_individuals_to_update(self, individuals_from_file: Iterable) -> Set[SanctionListIndividual]:
         individuals_to_update = set()
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         for individual in individuals_from_file:
