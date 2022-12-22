@@ -38,8 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    # TODO Signature of "__contains__" incompatible with supertype tuple
-    def __contains__(self, key: str, *args: Any, **kwargs: Any) -> bool:  # type: ignore
+    def __contains__(self, key: str, *args: Any, **kwargs: Any) -> bool:  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
         return key.casefold() in (element.casefold() for element in self)
 
 
@@ -134,8 +133,7 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        # FIXME: bug?
-        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523
+        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523 # FIXME
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -270,7 +268,7 @@ def nested_dict_get(dictionary: str, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME
         path.split("."),
         dictionary,
     )
@@ -473,7 +471,7 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
 
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
-    with open(csv_file, newline="") as csv_file:  # type: ignore
+    with open(csv_file, newline="") as csv_file:  # type: ignore # FIXME: No overload variant of "open" matches argument types "BytesIO", "str"
         reader = csv.reader(csv_file)
         next(reader, None)
         fields_mapping = dict(reader)
