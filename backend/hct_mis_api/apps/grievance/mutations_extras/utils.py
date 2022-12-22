@@ -383,10 +383,10 @@ def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) 
         if key != input_data.get(field_name):
             continue
         for required in value.get("required"):
-            if nested_dict_get(input_data, required) is None: # type: ignore # FIXME: expected str, got dict
+            if nested_dict_get(input_data, required) is None:  # type: ignore # FIXME: expected str, got dict
                 raise ValidationError(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
-            if nested_dict_get(input_data, not_allowed) is not None: # type: ignore # FIXME: expected str, got dict
+            if nested_dict_get(input_data, not_allowed) is not None:  # type: ignore # FIXME: expected str, got dict
                 raise ValidationError(f"You can't provide {not_allowed} in {key}")
 
 

@@ -1,7 +1,17 @@
 import csv
 import logging
 from collections import defaultdict, namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+)
 
 from django import forms
 from django.conf import settings
