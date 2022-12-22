@@ -131,7 +131,7 @@ class Query(NaturalKeyModel, models.Model):
         result = query.run(persist=False, arguments=arguments)
         return result
 
-    def update_results(self, results: List) -> None:
+    def update_results(self, results: Any) -> None:
         self.info["last_run_results"] = results
         self.save()
 
@@ -181,7 +181,7 @@ class Query(NaturalKeyModel, models.Model):
                 }
                 dataset, __ = Dataset.objects.update_or_create(
                     query=self,
-                    hash=dict_hash({"query": self.pk, **arguments}),
+                    hash=dict_hash({"query": self.pk, **(arguments if arguments else {})}),
                     defaults={
                         "info": info,
                         "last_run": timezone.now(),
@@ -226,7 +226,7 @@ class Dataset(NaturalKeyModel, models.Model):
 
 class Formatter(NaturalKeyModel, models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
+    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))  # type: ignore # internal mypy error
     code = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:  # TODO: name is a nullable charfield?
@@ -328,7 +328,7 @@ class ReportDocument(models.Model):
     output = models.BinaryField(null=True, blank=True)
     arguments = models.JSONField(default=dict)
     limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
-    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
+    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))  # type: ignore # internal mypy error
 
     objects = ReportDocumentManager()
 
