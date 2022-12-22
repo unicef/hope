@@ -95,7 +95,7 @@ class Command(BaseCommand):
         # Hook for backends needing any database preparation
         connection.prepare_database()
         # Work out which apps have migrations and which do not
-        executor = MigrationExecutor(connection, self.migration_progress_callback)
+        executor = MigrationExecutor(connection, self.migration_progress_callback)  # type: ignore # Argument 2 to "MigrationExecutor" has incompatible type "Callable[[str, Optional[str], Optional[bool]], None]"; expected "Optional[_ProgressCallbackT]"
 
         # Raise an error if any migrations are applied before their dependencies.
         executor.loader.check_consistent_history(connection)
@@ -382,5 +382,5 @@ class Command(BaseCommand):
             is_error = True
         if action:
             action = " -> " + action
-        truncated = Truncator(action)
+        truncated = Truncator(action)  # type: ignore # FIXME: Argument 1 to "Truncator" has incompatible type "Optional[str]"; expected "Union[Model, str]"
         return prefix + operation.describe() + truncated.chars(40), is_error

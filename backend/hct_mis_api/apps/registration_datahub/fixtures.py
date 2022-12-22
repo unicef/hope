@@ -146,7 +146,7 @@ def create_imported_household_and_individuals(
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     household: ImportedHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
     individuals: List[ImportedIndividual] = [
         ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data
