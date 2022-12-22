@@ -51,8 +51,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
 
     @atomic()
     @atomic(using="registration_datahub")
-    def perform_create(self, serializer: serializers.Serializer) -> Optional[RegistrationDataImport]:  # type: ignore
-        # TODO: perform_create from CreateModelMixin returns None
+    def perform_create(self, serializer: serializers.Serializer) -> Optional[RegistrationDataImport]:  # type: ignore # FIXME: perform_create from CreateModelMixin returns None
         obj = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )

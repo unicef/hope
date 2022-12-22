@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_for_individual_0_with_permission 1'] = {
@@ -199,9 +200,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'given_name': 'Test',
                             'identities': [
                                 {
-                                    'partner': 'UNHCR',
                                     'country': 'POL',
-                                    'number': '2222'
+                                    'number': '2222',
+                                    'partner': 'UNHCR'
                                 }
                             ],
                             'marital_status': 'SINGLE',
@@ -408,7 +409,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'disability': {
                                 'approve_status': False,
                                 'previous_value': 'not disabled',
-                                'value': "disabled"
+                                'value': 'disabled'
                             },
                             'documents': [
                                 {
@@ -461,9 +462,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 {
                                     'approve_status': False,
                                     'value': {
-                                        'partner': 'UNHCR',
                                         'country': 'POL',
-                                        'number': '2222'
+                                        'number': '2222',
+                                        'partner': 'UNHCR'
                                     }
                                 }
                             ],
@@ -471,18 +472,18 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 {
                                     'approve_status': False,
                                     'previous_value': {
-                                        'partner': 'UNHCR',
                                         'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
                                         'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
-                                        'number': '1111'
+                                        'number': '1111',
+                                        'partner': 'UNHCR'
                                     },
                                     'value': {
-                                        'partner': 'UNHCR',
                                         'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
                                         'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
-                                        'number': '3333'
+                                        'number': '3333',
+                                        'partner': 'UNHCR'
                                     }
                                 }
                             ],

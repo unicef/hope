@@ -29,7 +29,7 @@ class APITestCase(SnapshotTestTestCase):
         from hct_mis_api.schema import schema
 
         super().setUp()
-        self.client = Client(schema)
+        self.client: Client = Client(schema)
 
         seed_in_env = os.getenv("RANDOM_SEED")
         self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
