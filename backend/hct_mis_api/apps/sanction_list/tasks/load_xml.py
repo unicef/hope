@@ -36,7 +36,7 @@ class LoadSanctionListXMLTask:
     def __init__(self, file_path: Optional[str] = None) -> None:
         self.file_path = file_path
 
-        self.VALUES_PATHS = {
+        self.VALUES_PATHS: Dict[str, Any] = {
             "data_id": "DATAID",
             "version_num": "VERSIONNUM",
             "first_name": "FIRST_NAME",
@@ -73,7 +73,7 @@ class LoadSanctionListXMLTask:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, ET.Element):
-            designations = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
+            designations: List[str] = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
             return " ".join(designations)
         return ""
 
@@ -97,7 +97,7 @@ class LoadSanctionListXMLTask:
                     # this XML file is so weird that the date of birth
                     # can be placed in the NOTE tag
                     note_tag = date_of_birth_tag.find("NOTE")
-                    value = None
+                    value: Optional[str] = None
                     if isinstance(date_tag, ET.Element) and date_tag.text:
                         value = date_tag.text
                     elif isinstance(year_tag, ET.Element) and year_tag.text:
@@ -105,7 +105,7 @@ class LoadSanctionListXMLTask:
                     elif isinstance(note_tag, ET.Element) and note_tag.text:
                         value = note_tag.text
                     try:
-                        parsed_date = dateutil.parser.parse(value, default=default_datetime)
+                        parsed_date = dateutil.parser.parse(value, default=default_datetime)  # type: ignore # FIXME: Argument 1 to "parse" has incompatible type "Optional[str]"; expected "Union[bytes, str, IO[str], IO[Any]]"
                         dates_of_birth.add(
                             SanctionListIndividualDateOfBirth(
                                 individual=self._get_individual_from_db_or_file(individual),
@@ -115,14 +115,14 @@ class LoadSanctionListXMLTask:
                     except Exception:
                         pass
                 elif type_of_date == "BETWEEN":
-                    from_year = date_of_birth_tag.find("FROM_YEAR").text
-                    to_year = date_of_birth_tag.find("TO_YEAR").text
+                    from_year: Optional[str] = date_of_birth_tag.find("FROM_YEAR").text
+                    to_year: Optional[str] = date_of_birth_tag.find("TO_YEAR").text
                     years = {
                         SanctionListIndividualDateOfBirth(
                             individual=self._get_individual_from_db_or_file(individual),
                             date=date(year=year, month=1, day=1),
                         )
-                        for year in range(int(from_year), int(to_year) + 1)
+                        for year in range(int(from_year), int(to_year) + 1)  # type: ignore # FIXME: Argument 1 to "int" has incompatible type "Union[str, None, Any]"; expected "Union[str, bytes, array[Any], mmap, _CData, PickleBuffer, SupportsInt, SupportsIndex, SupportsTrunc]"
                     }
                     dates_of_birth.update(years)
 
@@ -408,7 +408,7 @@ class LoadSanctionListXMLTask:
 
         for individual_tag in root.findall(self.INDIVIDUAL_TAG_PATH):
             individual_data_dict = self._get_individual_data(individual_tag)
-            individual = individual_data_dict.get("individual")
+            individual = individual_data_dict["individual"]
             individual.full_name = (
                 (
                     f"{individual.first_name} "

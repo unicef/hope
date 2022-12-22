@@ -345,7 +345,7 @@ class Query(graphene.ObjectType):
             "label.English(EN)",
         )
 
-    def resolve_kobo_project(self, info: Any, uid: "UUID", business_area_slug: str, **kwargs: Any) -> Tuple:
+    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Tuple:
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
     def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> Tuple:

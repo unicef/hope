@@ -76,7 +76,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         ctx["matrix2"] = matrix2
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
-    def _perms(self, request: HttpRequest, object_id: UUID) -> set:
+    def _perms(self, request: HttpRequest, object_id: str) -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
     def changeform_view(

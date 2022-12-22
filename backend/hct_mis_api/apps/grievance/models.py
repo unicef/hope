@@ -354,7 +354,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
         return getattr(
             self,
-            nested_dict_or_value.get(self.issue_type)
+            nested_dict_or_value.get(self.issue_type)  # type: ignore # FIXME: Argument 2 to "getattr" has incompatible type "Union[Collection[object], Any, None]"; expected "str"
             if isinstance(nested_dict_or_value, dict)
             else nested_dict_or_value,
             None,

@@ -51,11 +51,11 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
         return _import_fixture(self, request)
 
-    def _perms(self, request: HttpRequest, object_id: "UUID") -> set:
+    def _perms(self, request: HttpRequest, object_id: str) -> set:
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
 
     @button()
-    def users(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    def users(self, request: HttpRequest, pk: str) -> HttpResponse:
         User = get_user_model()
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
