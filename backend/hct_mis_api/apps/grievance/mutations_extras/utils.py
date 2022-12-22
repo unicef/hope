@@ -221,7 +221,7 @@ def prepare_edit_documents(documents_to_edit: List[Dict]) -> List[Dict]:
         document_photo = document_to_edit.get("photo")
         document_photoraw = document_to_edit.get("photoraw")
 
-        document_photo = handle_photo(document_photo, document_photoraw)
+        document_photo = handle_photo(document_photo, document_photoraw)  # type: ignore # FIXME: non-opt
 
         document_id = decode_id_string(encoded_id)
         document = get_object_or_404(Document, id=document_id)
@@ -341,7 +341,7 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     }
 
     for pc in payment_channels:
-        handler = handlers.get(pc.get("type"))
+        handler = handlers.get(pc["type"])
         items.append(handler(pc))
     return items
 
@@ -383,10 +383,10 @@ def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) 
         if key != input_data.get(field_name):
             continue
         for required in value.get("required"):
-            if nested_dict_get(input_data, required) is None:
+            if nested_dict_get(input_data, required) is None: # type: ignore # FIXME: expected str, got dict
                 raise ValidationError(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
-            if nested_dict_get(input_data, not_allowed) is not None:
+            if nested_dict_get(input_data, not_allowed) is not None: # type: ignore # FIXME: expected str, got dict
                 raise ValidationError(f"You can't provide {not_allowed} in {key}")
 
 
