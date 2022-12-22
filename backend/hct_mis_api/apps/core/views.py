@@ -48,8 +48,9 @@ class CommandForm(forms.Form):
     no_input = forms.BooleanField(label="No input", required=False)
 
 
-def trigger_error(request: HttpRequest) -> None:
+def trigger_error(request: HttpRequest) -> HttpResponse:
     division_by_zero = 1 / 0  # noqa: F841
+    return HttpResponse(division_by_zero)
 
 
 @login_required
