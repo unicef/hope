@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Dict
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase

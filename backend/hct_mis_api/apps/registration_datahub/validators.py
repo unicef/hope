@@ -7,11 +7,9 @@ from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
-from uuid import UUID
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
-from django.core.files import File
 
 import openpyxl
 import phonenumbers

@@ -4,7 +4,6 @@ from uuid import UUID
 
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
-from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse

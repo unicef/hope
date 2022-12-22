@@ -2,7 +2,6 @@ import json
 import numbers
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union
-from uuid import UUID
 
 from django.contrib.gis.geos import Point
 from django.core.files import File

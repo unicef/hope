@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Type, Uni
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import Model
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
@@ -49,7 +48,7 @@ if TYPE_CHECKING:
 
     from django.db.models.query import QuerySet
 
-    from hct_mis_api.apps.account.models import Role, User
+    from hct_mis_api.apps.account.models import Role
 
 logger = logging.getLogger(__name__)
 

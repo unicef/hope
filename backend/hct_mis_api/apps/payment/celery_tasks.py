@@ -1,6 +1,5 @@
 import datetime
 import logging
-from uuid import UUID
 
 from django.contrib.auth import get_user_model
 

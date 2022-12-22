@@ -19,7 +19,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
-    DocumentType,
 )
 
 logger = logging.getLogger(__name__)

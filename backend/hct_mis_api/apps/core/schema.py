@@ -40,7 +40,6 @@ from hct_mis_api.apps.core.models import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
 
     from django.db.models.query import QuerySet
 

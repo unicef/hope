@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
@@ -25,9 +25,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs
-
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
 
 log = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Type
+from typing import Callable, Optional
 
 from graphql import GraphQLError
 

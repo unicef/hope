@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group, Permission
 from django.db.models import QuerySet
-from django.forms import Form
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -26,9 +25,6 @@ from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from uuid import UUID
 
 
 class GroupResource(resources.ModelResource):

@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form, ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect

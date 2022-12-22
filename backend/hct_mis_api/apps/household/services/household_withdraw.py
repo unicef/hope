@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Optional
+from typing import Any, Iterable, Optional
 
 from django.db import transaction
 

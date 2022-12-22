@@ -1,5 +1,4 @@
 import logging
-from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django.contrib.auth import get_user_model

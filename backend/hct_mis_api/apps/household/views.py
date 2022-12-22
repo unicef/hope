@@ -1,5 +1,4 @@
 from typing import Dict, Optional
-from uuid import UUID
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request

@@ -1,7 +1,6 @@
 import logging
 from io import BytesIO
 from typing import Optional
-from uuid import UUID
 
 from django.utils import timezone
 

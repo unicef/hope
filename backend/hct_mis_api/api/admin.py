@@ -10,7 +10,6 @@ from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.template import Template
 from django.urls import reverse
 
 from admin_extra_buttons.decorators import button

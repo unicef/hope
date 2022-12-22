@@ -1,7 +1,5 @@
 from typing import Any, Type
 
-from django.db.models import Model
-
 import phonenumbers
 
 
