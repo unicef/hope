@@ -160,7 +160,7 @@ class APITokenAdmin(SmartModelAdmin):
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:
             self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
-            return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))
+            return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))  # type: ignore # str vs SafeString
 
     def log_addition(self, request: HttpRequest, object: Any, message: str) -> LogEntry:
         return super().log_addition(request, object, message)

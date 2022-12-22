@@ -59,6 +59,6 @@ class TestAdminSite(WebTest):
 
     @parameterized.expand(model_admins)
     def test_changelist(self, name: str, model_admin: ModelAdmin) -> None:
-        url = reverse(admin_urlname(model_admin.model._meta, "changelist"))
+        url = reverse(admin_urlname(model_admin.model._meta, "changelist"))  # type: ignore # str vs SafeString
         res = self.app.get(url, user=self.superuser)
         self.assertEqual(res.status_code, 200)
