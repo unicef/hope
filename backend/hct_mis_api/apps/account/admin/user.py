@@ -1,7 +1,7 @@
 import csv
 import logging
 from collections import defaultdict, namedtuple
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Type, Union
 
 from django import forms
 from django.conf import settings
@@ -156,7 +156,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
         kobo_pk = user.custom_fields.get("kobo_pk", None)
         kobo_username = user.custom_fields.get("kobo_username", None)
         if kobo_pk:
-            to_delete.append(f"Kobo: {kobo_username}")
+            to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # FIXME: Incompatible types in assignment (expression has type "List[Model]", variable has type "List[str]")
         return to_delete, model_count, perms_needed, protected
 
     @button()
@@ -237,7 +237,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
     def import_csv(self, request: HttpRequest) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
 
-        context = self.get_common_context(request, processed=False)
+        context: Dict = self.get_common_context(request, processed=False)
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": account_models.Partner.objects.first()})
             context["form"] = form
@@ -321,8 +321,8 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
                 self.message_user(request, "Please correct errors below", messages.ERROR)
                 context["form"] = form
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
-        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})
+        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
-    def __init__(self, model: Model, admin_site: Any) -> None:
+    def __init__(self, model: Type, admin_site: Any) -> None:
         super().__init__(model, admin_site)

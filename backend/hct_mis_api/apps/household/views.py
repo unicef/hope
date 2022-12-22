@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from uuid import UUID
 
 from rest_framework.permissions import IsAuthenticated
@@ -82,7 +82,7 @@ def get_household(registration_id: str, business_area_code: str) -> ImportedHous
     raise Exception("Household with given registration_id not found")
 
 
-def get_household_or_individual(tax_id: str, registration_id: str, business_area_code: str) -> Dict:
+def get_household_or_individual(tax_id: Optional[str], registration_id: Optional[str], business_area_code: str) -> Dict:
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
 
@@ -106,7 +106,7 @@ class HouseholdStatusView(APIView):
 
         tax_id = query_params.get("tax_id", None)
         registration_id = query_params.get("registration_id", None)
-        business_area_code = query_params.get("business_area_code", None)
+        business_area_code: str = str(query_params["business_area_code"])
 
         try:
             data = get_household_or_individual(tax_id, registration_id, business_area_code)
