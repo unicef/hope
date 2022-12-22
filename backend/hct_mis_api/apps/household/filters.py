@@ -61,7 +61,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:
         # TODO: not sure if this one is correct?
         # code[5] is the day of month (or the first digit of it)
         # month 4 id is 12068..157380
-        if len(code) == 12 and code[5] in "123":
+        if len(code) == 12 and code[5] in ["1", "2", "3"]:
             code = code[-5:]
         else:
             code = code[-6:]
