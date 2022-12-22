@@ -56,7 +56,7 @@ class Command(BaseCommand):
 
         for number in range(1, options["households_count"] + 1):
             print(f"household: {number}")
-            single_household_data = []
+            single_household_data: List = []
             for cell in households_ws[1]:
                 header = cell.value or ""
                 if header in ("admin1_h_c", "admin2_h_c"):
