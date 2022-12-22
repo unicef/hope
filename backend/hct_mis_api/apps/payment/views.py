@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def download_cash_plan_payment_verification(  # type: ignore
+def download_cash_plan_payment_verification(  # type: ignore # FIXME
     request: "HttpRequest", verification_id: str
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"

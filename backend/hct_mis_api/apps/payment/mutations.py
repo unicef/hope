@@ -456,7 +456,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore
+        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore # FIXME
 
 
 # TODO: what about typing [0] on XlsxErrorNode
@@ -466,13 +466,13 @@ class XlsxErrorNode(graphene.ObjectType):
     message = graphene.String()
 
     def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[0]  # type: ignore
+        return parent[0]  # type: ignore # FIXME
 
     def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[1]  # type: ignore
+        return parent[1]  # type: ignore # FIXME
 
     def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[2]  # type: ignore
+        return parent[2]  # type: ignore # FIXME
 
 
 class ExportXlsxCashPlanVerification(PermissionMutation):

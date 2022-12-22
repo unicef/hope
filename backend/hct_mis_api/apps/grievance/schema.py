@@ -172,7 +172,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore
+        individual_data: Dict = self.individual_data  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Arg", variable has type "Dict[Any, Any]")
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -231,7 +231,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore
+        individual_data: Dict = self.individual_data  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Arg", variable has type "Dict[Any, Any]")
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)

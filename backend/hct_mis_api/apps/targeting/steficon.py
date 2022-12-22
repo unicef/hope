@@ -96,5 +96,5 @@ try:
 
 except ImportError:
 
-    class SteficonExecutorMixin:  # type: ignore
+    class SteficonExecutorMixin:  # type: ignore # intentional
         pass
