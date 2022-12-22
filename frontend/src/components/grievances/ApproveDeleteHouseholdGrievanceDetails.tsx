@@ -37,17 +37,6 @@ const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
 `;
 
-const validationSchema = Yup.object().shape({
-  reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
-    if (withdrawReasonValue === 'duplicate') {
-      return Yup.string()
-        .required('Household Unicef Id is required')
-        .max(15, 'Too long');
-    }
-    return Yup.string();
-  }),
-});
-
 export const ApproveDeleteHouseholdGrievanceDetails = ({
   ticket,
   type,
@@ -61,6 +50,17 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     approveStatus,
     reasonHousehold,
   } = ticket.deleteHouseholdTicketDetails;
+
+  const validationSchema = Yup.object().shape({
+    reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
+      if (withdrawReasonValue === 'duplicate' && !approveStatus) {
+        return Yup.string()
+          .required('Household Unicef Id is required')
+          .max(15, 'Too long');
+      }
+      return Yup.string();
+    }),
+  });
 
   const matchDialogTitle = (): string => {
     if (approveStatus && type !== 'edit') {
@@ -83,7 +83,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     <Formik
       enableReinitialize
       initialValues={{
-        withdrawReason: '',
+        withdrawReason: reasonHousehold ? 'duplicate' : 'other',
         reasonHhId: type === 'edit' ? reasonHousehold?.unicefId : '',
       }}
       validationSchema={validationSchema}
