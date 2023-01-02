@@ -2,10 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import graphene
 
-from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
-    decode_and_get_object_required,
-)
+from hct_mis_api.apps.core.utils import decode_and_get_object
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNegativeFeedbackDetails,
@@ -28,7 +25,7 @@ class NegativeFeedbackTicketExtras(graphene.InputObjectType):
 def save_positive_feedback_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
 ) -> List[GrievanceTicket]:
-    household, individual = fetch_household_and_individual_required(extras, "positive_feedback_ticket_extras")
+    household, individual = fetch_household_and_individual(extras, "positive_feedback_ticket_extras")
     create_new_positive_feedback_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
@@ -37,7 +34,7 @@ def save_positive_feedback_extras(
 def update_positive_feedback_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
 ) -> GrievanceTicket:
-    household, individual = fetch_household_and_individual_required(extras, "positive_feedback_ticket_extras")
+    household, individual = fetch_household_and_individual(extras, "positive_feedback_ticket_extras")
 
     update_ticket(grievance_ticket.positive_feedback_ticket_details, household, individual)
     grievance_ticket.refresh_from_db()
@@ -47,7 +44,7 @@ def update_positive_feedback_extras(
 def save_negative_feedback_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
 ) -> List[GrievanceTicket]:
-    household, individual = fetch_household_and_individual_required(extras, "negative_feedback_ticket_extras")
+    household, individual = fetch_household_and_individual(extras, "negative_feedback_ticket_extras")
 
     create_new_negative_feedback_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
@@ -57,21 +54,11 @@ def save_negative_feedback_extras(
 def update_negative_feedback_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
 ) -> GrievanceTicket:
-    household, individual = fetch_household_and_individual_required(extras, "negative_feedback_ticket_extras")
+    household, individual = fetch_household_and_individual(extras, "negative_feedback_ticket_extras")
 
     update_ticket(grievance_ticket.negative_feedback_ticket_details, household, individual)
     grievance_ticket.refresh_from_db()
     return grievance_ticket
-
-
-def fetch_household_and_individual_required(extras: Dict, ticket_type: str) -> Tuple[Household, Individual]:
-    category_extras = extras.get("category", {})
-    feedback_ticket_extras = category_extras.get(ticket_type, {})
-    individual_encoded_id = feedback_ticket_extras.get("individual")
-    individual: Individual = decode_and_get_object_required(individual_encoded_id, Individual)
-    household_encoded_id = feedback_ticket_extras.get("household")
-    household: Household = decode_and_get_object_required(household_encoded_id, Household)
-    return household, individual
 
 
 def fetch_household_and_individual(extras: Dict, ticket_type: str) -> Tuple[Optional[Household], Optional[Individual]]:

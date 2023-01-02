@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.core.management import call_command
 
@@ -15,6 +15,10 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.household.models import Household, Individual
+    from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class TestGrievanceCreateComplaintTicketQuery(APITestCase):
@@ -238,9 +242,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
     def _create_variables(
         self,
-        household: Optional[str] = None,
-        individual: Optional[str] = None,
-        payment_records: Optional[List[str]] = None,
+        household: Optional["Household"] = None,
+        individual: Optional["Individual"] = None,
+        payment_records: Optional["PaymentRecord"] = None,
     ) -> Dict:
         return {
             "input": {
