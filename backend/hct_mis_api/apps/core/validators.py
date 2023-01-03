@@ -210,7 +210,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_db(cls) -> Dict:
-        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
+        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)  # type: ignore # TODO: none business area?
         return {
             core_field_data["xlsx_field"]: {
                 "type": core_field_data["type"],
@@ -304,7 +304,7 @@ class KoboTemplateValidator:
             if field_type_error:
                 validation_errors.append(field_type_error)
 
-            field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)
+            field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)  # type: ignore # FIXME: Argument 3 to "_check_field_choices" of "KoboTemplateValidator" has incompatible type "List[Any]"; expected "Dict[Any, Any]"
             if field_choices_errors:
                 validation_errors.extend(field_choices_errors)
 

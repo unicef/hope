@@ -48,7 +48,7 @@ class GeoCountryField(models.CharField):
 
     def get_choices(
         self,
-        include_blank: Optional[bool] = True,
+        include_blank: bool = True,
         blank_choice: Optional[List[Union[Tuple[Any, Any], Tuple[str, Iterable[Tuple[Any, Any]]]]]] = None,
         *args: Any,
         **kwargs: Any

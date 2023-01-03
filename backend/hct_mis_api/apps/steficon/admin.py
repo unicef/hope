@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form, ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -53,7 +53,7 @@ class AutocompleteWidget(forms.Widget):
 
     def __init__(
         self,
-        model: Model,
+        model: Type,
         admin_site: str,
         attrs: Optional[Collection[Any]] = None,
         choices: Tuple = (),
@@ -129,7 +129,7 @@ class AutocompleteWidget(forms.Widget):
 class TestRuleMixin:
     @button()
     def test(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        rule: Rule = self.get_object(request, pk)
+        rule: Rule = self.get_object(request, str(pk))
         context = self.get_common_context(
             request,
             pk,
@@ -345,7 +345,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Optional[Rule] = self.get_object(request, pk)
+            rule: Optional[Rule] = self.get_object(request, str(pk))
             form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)

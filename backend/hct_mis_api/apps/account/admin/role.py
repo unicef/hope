@@ -4,7 +4,6 @@ from uuid import UUID
 
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
-from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -76,7 +75,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
         ctx["matrix2"] = matrix2
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
-    def _perms(self, request: HttpRequest, object_id: UUID) -> set:
+    def _perms(self, request: HttpRequest, object_id: str) -> set:
         return set(self.get_object(request, object_id).permissions or [])
 
     def changeform_view(
@@ -90,9 +89,7 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(
-        self, request: HttpRequest, form: Form, formsets: Any, add: bool = False
-    ) -> List[Dict]:
+    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)

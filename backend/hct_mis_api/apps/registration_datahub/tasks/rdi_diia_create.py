@@ -75,7 +75,9 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
-    def create_rdi(self, imported_by: ImportedIndividual, rdi_name: str = "rdi_name") -> RegistrationDataImport:
+    def create_rdi(
+        self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name"
+    ) -> RegistrationDataImport:
 
         number_of_individuals = 0
         number_of_households = 0
@@ -244,7 +246,7 @@ class RdiDiiaCreateTask:
                 DiiaIndividual.objects.bulk_update(individuals_to_update_list, ["imported_individual"], 1000)
 
                 if diia_household.vpo_doc and not pass_hh_and_individuals_tax_id_error:
-                    self._add_vpo_document(head_of_household, diia_household)
+                    self._add_vpo_document(head_of_household, diia_household)  # type: ignore # FIXME: Argument 1 to "_add_vpo_document" of "RdiDiiaCreateTask" has incompatible type "Optional[ImportedIndividual]"; expected "ImportedIndividual"
 
                 if not pass_hh_and_individuals_tax_id_error:
                     ImportedDocument.objects.bulk_create(self.documents)

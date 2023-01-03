@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -15,7 +15,6 @@ from django.utils import timezone
 
 from dateutil.parser import parse
 from django_filters import Filter
-from traitlets import Any
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
