@@ -287,12 +287,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     def get_object_required(cls, id: str) -> TargetPopulation:
-        if id is None:
-            return None
         return get_object_or_404(TargetPopulation, id=decode_id_string(id))
 
     @classmethod
-    def get_object(cls, id: str) -> Optional[TargetPopulation]:
+    def get_object(cls, id: Optional[str]) -> Optional[TargetPopulation]:
         if id is None:
             return None
         return cls.get_object_required(id)
