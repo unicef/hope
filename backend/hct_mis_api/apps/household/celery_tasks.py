@@ -3,6 +3,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
@@ -31,17 +32,19 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
 
     with configure_scope() as scope:
         with disable_concurrency(Household), disable_concurrency(Individual):
-            for hh in (
-                Household.objects.filter(pk__in=households_ids)
-                .only("id", "collect_individual_data")
-                .prefetch_related("individuals")
-            ):
-                scope.set_tag("business_area", hh.business_area)
-                household, updated_fields = recalculate_data(hh, save=False)
-                households_to_update.append(household)
-                fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
+            with transaction.atomic():
+                for hh in (
+                    Household.objects.filter(pk__in=households_ids)
+                    .only("id", "collect_individual_data")
+                    .prefetch_related("individuals")
+                    .select_for_update(of=("self",))
+                ):
+                    scope.set_tag("business_area", hh.business_area)
+                    household, updated_fields = recalculate_data(hh, save=False)
+                    households_to_update.append(household)
+                    fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
 
-            Household.objects.bulk_update(households_to_update, fields_to_update)
+                Household.objects.bulk_update(households_to_update, fields_to_update)
 
 
 @app.task()
