@@ -80,7 +80,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
                 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -150,7 +150,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,
+                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",
@@ -239,7 +239,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,
+                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",

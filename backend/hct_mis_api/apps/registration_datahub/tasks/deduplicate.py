@@ -163,7 +163,7 @@ class DeduplicateTask:
 
     @staticmethod
     def _prepare_fields(
-        individual: Union[Individual, ImportedIndividual], fields_names: Tuple[str], dict_fields: Dict[str, Any]
+        individual: Union[Individual, ImportedIndividual], fields_names: Tuple[str, ...], dict_fields: Dict[str, Any]
     ) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
@@ -342,7 +342,7 @@ class DeduplicateTask:
     def _get_duplicates_tuple(
         cls,
         query_dict: Dict,
-        duplicate_score: int,
+        duplicate_score: float,
         document: Type[IndividualDocument],
         individual: Union[Individual, ImportedIndividual],
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
@@ -398,7 +398,7 @@ class DeduplicateTask:
     def deduplicate_single_imported_individual(
         cls, individual: Individual
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
-        fields_names = (
+        fields_names: Tuple[str, ...] = (
             "given_name",
             "full_name",
             "middle_name",
@@ -409,7 +409,7 @@ class DeduplicateTask:
             "sex",
             "birth_date",
         )
-        dict_fields = {
+        dict_fields: Dict[str, Tuple[str, ...]] = {
             "documents": ("document_number", "type.type", "country"),
             "identities": ("document_number", "partner.name"),
             "household": (
@@ -452,13 +452,12 @@ class DeduplicateTask:
         }
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
-        # query_dict = cls._prepare_query_dict(individual, fields, config.DEDUPLICATION_BATCH_MIN_SCORE, only_in_rdi,)
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
         )
-        # noinspection PyTypeChecker
+
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
         ]
@@ -922,7 +921,7 @@ class DeduplicateTask:
             prepared_ticket = cls.prepare_grievance_ticket_documents_deduplication(
                 main_individual=ticket_data["original"].individual,
                 business_area=ticket_data["original"].individual.business_area,
-                registration_data_import=registration_data_import,
+                registration_data_import=registration_data_import,  # type: ignore # FIXME: Argument "registration_data_import" to "prepare_grievance_ticket_documents_deduplication" of "DeduplicateTask" has incompatible type "Optional[RegistrationDataImport]"; expected "RegistrationDataImport"
                 possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
                 possible_duplicates_through_dict=possible_duplicates_through_dict,
             )

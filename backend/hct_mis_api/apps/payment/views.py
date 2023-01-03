@@ -44,6 +44,6 @@ def download_cash_plan_payment_verification(  # type: ignore # FIXME
         if not cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded:
             cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded = True
             cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.save()
-        return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)
+        return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)  # type: ignore # FIXME: Argument 1 to "redirect" has incompatible type "Optional[str]"; expected "Union[Callable[..., Any], str, SupportsGetAbsoluteUrl]"
     else:
         log_and_raise(f"File not found. CashPlanPaymentVerification ID: {verification_id}")

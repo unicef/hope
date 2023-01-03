@@ -130,7 +130,7 @@ class GroupConcat(Aggregate):
     def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
         super().__init__(
             expression,
-            distinct="DISTINCT " if distinct else "",
+            distinct="DISTINCT " if distinct else "",  # type: ignore # FIXME: Argument "distinct" to "__init__" of "Aggregate" has incompatible type "str"; expected "bool"
             output_field=CharField(),
             **extra,
         )
@@ -244,7 +244,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
                 if action:
                     user_data["Action"] = action
-                    matrix.append(user_data)
+                    matrix.append(user_data)  # type: ignore
         return matrix
 
     @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
