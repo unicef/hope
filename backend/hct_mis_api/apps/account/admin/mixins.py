@@ -218,7 +218,7 @@ class KoboAccessMixin:
     def create_kobo_user_qs(self, request: HttpRequest, queryset: QuerySet) -> None:
         for user in queryset.all():
             try:
-                self._grant_kobo_accesss_to_user(request, user)
+                self._grant_kobo_accesss_to_user(user)
             except Exception as e:
                 logger.exception(e)
                 self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)

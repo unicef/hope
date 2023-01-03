@@ -295,7 +295,7 @@ class PaymentRecordAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             instance = model.objects.filter(**{rk: getattr(payment_record, field_name)}).first()
             details = None
             if instance:
-                details = reverse(admin_urlname(model._meta, "change"), args=[instance.pk])
+                details = reverse(admin_urlname(model._meta, "change"), args=[instance.pk])  # type: ignore # str vs SafeString?
             ctx["data"][model] = {"instance": instance, "details": details, "meta": model._meta}
 
         return TemplateResponse(request, "admin/cash_assist_datahub/payment_record/inspect.html", ctx)

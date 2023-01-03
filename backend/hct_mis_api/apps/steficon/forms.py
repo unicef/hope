@@ -67,7 +67,7 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
         try:
             return self.cleaned_data["results"].split(",")
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
@@ -84,13 +84,13 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
         try:
             return self.cleaned_data["fields"].split(",")
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
     def clean_data(self) -> Optional[Dict]:
         try:
             return json.loads(self.cleaned_data["data"])
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
 
 class TPModelChoiceField(forms.ModelChoiceField):
@@ -119,7 +119,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             initial=initial,
             help_text=help_text,
             to_field_name=to_field_name,
-            limit_choices_to=limit_choices_to,
+            limit_choices_to=limit_choices_to,  # type: ignore # FIXME
             **kwargs,
         )
 
@@ -152,7 +152,7 @@ class RuleTestForm(forms.Form):
             try:
                 return json.loads(original)
             except Exception as e:
-                raise ValidationError(e)
+                raise ValidationError(str(e))
         return None
 
     def clean_file(self) -> Optional[Dict]:
@@ -161,7 +161,7 @@ class RuleTestForm(forms.Form):
             try:
                 return json.loads(original.read())
             except Exception as e:
-                raise ValidationError(e)
+                raise ValidationError(str(e))
         return None
 
     def clean(self) -> None:

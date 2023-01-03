@@ -474,7 +474,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
         for invalid_option in invalid_geolocations:
             self.assertEqual(
                 validator.geopoint_validator(
-                    invalid_option,
+                    invalid_option,  # type: ignore # FIXME: Argument 1 to "geopoint_validator" of "KoboProjectImportDataInstanceValidator" has incompatible type "Optional[Sequence[Any]]"; expected "str"
                     "hh_geopoint_h_c",
                 ),
                 f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",

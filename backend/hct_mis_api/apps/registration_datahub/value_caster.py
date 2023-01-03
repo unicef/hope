@@ -75,7 +75,7 @@ class SelectManyValueCaster(BaseValueCaster):
             values = value.split(";")
         else:
             values = value.split(" ")
-        valid_choices = []
+        valid_choices: List = []
         for single_choice in values:
             if isinstance(single_choice, str):
                 without_trailing_whitespace = single_choice.strip()
