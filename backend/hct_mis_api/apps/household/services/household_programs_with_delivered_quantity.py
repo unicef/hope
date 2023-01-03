@@ -35,7 +35,7 @@ def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any
         .order_by("cash_plan__program__created_at")
     )
 
-    programs_dict: Dict[str, ProgramType] = defaultdict(dict)
+    programs_dict: Dict[str, Dict] = defaultdict(dict)
 
     for program in programs:
         programs_dict[program["program_id"]]["id"] = encode_id_base64_required(program["program_id"], "Program")

@@ -52,7 +52,7 @@ class HUBAdminMixin(HOPEModelAdminBase):
                 LogEntry.objects.log_action(
                     user_id=request.user.pk,
                     content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                    object_id=None,
+                    object_id=None,  # type: ignore # FIXME: Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                     object_repr=f"TRUNCATE TABLE {self.model._meta.verbose_name}",
                     action_flag=DELETION,
                     change_message="truncate table",
@@ -96,7 +96,7 @@ class HouseholdAdmin(HUBAdminMixin):
 
     @button()
     def see_hope_record(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         hh = households.Household.objects.get(id=obj.mis_id)
         url = reverse("admin:household_individual_change", args=[hh.pk])
         return HttpResponseRedirect(url)
@@ -212,7 +212,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         if request.method == "POST":
             try:
                 with atomic():
-                    obj = self.get_object(request, pk)
+                    obj = self.get_object(request, str(pk))
                     # Programs
                     hub_program_ids = list(Program.objects.filter(session=obj.id).values_list("mis_id", flat=True))
                     programs.Program.objects.filter(id__in=hub_program_ids).update(last_sync_at=None)

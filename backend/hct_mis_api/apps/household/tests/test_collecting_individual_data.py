@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Dict
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -33,7 +32,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
-    def create_hh(self, collect_individual_data: Dict) -> Household:
+    def create_hh(self, collect_individual_data: str) -> Household:
         household, _ = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.registration_data_import,
