@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group, Permission
 from django.db.models import QuerySet
-from django.forms import Form
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -26,9 +25,6 @@ from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from uuid import UUID
 
 
 class GroupResource(resources.ModelResource):
@@ -51,11 +47,11 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
 
         return _import_fixture(self, request)
 
-    def _perms(self, request: HttpRequest, object_id: "UUID") -> set:
+    def _perms(self, request: HttpRequest, object_id: str) -> set:
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
 
     @button()
-    def users(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    def users(self, request: HttpRequest, pk: str) -> HttpResponse:
         User = get_user_model()
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
@@ -76,9 +72,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(
-        self, request: HttpRequest, form: Form, formsets: Any, add: bool = False
-    ) -> List[Dict]:
+    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> List[Dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)

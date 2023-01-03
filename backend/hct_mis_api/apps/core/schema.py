@@ -40,7 +40,6 @@ from hct_mis_api.apps.core.models import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
 
     from django.db.models.query import QuerySet
 
@@ -127,14 +126,16 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: str, root: Any, info: Any, **args: Any) -> Callable:
+def _custom_dict_or_attr_resolver(
+    attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any
+) -> Callable:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options: Dict, attrs: str) -> List:
+def sort_by_attr(options: Iterable, attrs: str) -> List:
     def key_extractor(el: Any) -> Any:
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
@@ -176,7 +177,7 @@ class FieldAttributeNode(graphene.ObjectType):
         return False
 
     def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))  # type: ignore # FIXME: Argument 1 to "resolve_label" has incompatible type "Callable[..., Any]"; expected "Dict[Any, Any]"
 
     def resolve_label_en(parent, info: Any) -> Any:
         return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore # FIXME: Value of type "Callable[..., Any]" is not indexable
@@ -237,7 +238,7 @@ def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[st
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-            business_area_slug
+            business_area_slug  # type: ignore # FIXME: Argument 1 to "apply_business_area" of "FieldFactory" has incompatible type "Optional[str]"; expected "str"
         )
 
 
@@ -337,13 +338,13 @@ class Query(graphene.ObjectType):
         return sort_by_attr(
             (
                 attr
-                for attr in get_fields_attr_generators(flex_field, business_area_slug)
+                for attr in get_fields_attr_generators(flex_field, business_area_slug)  # type: ignore # FIXME: Argument 1 to "get_fields_attr_generators" has incompatible type "Optional[bool]"; expected "bool"
                 if not is_a_killer_filter(attr)
             ),
             "label.English(EN)",
         )
 
-    def resolve_kobo_project(self, info: Any, uid: "UUID", business_area_slug: str, **kwargs: Any) -> Tuple:
+    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Tuple:
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
     def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> Tuple:
