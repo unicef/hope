@@ -140,7 +140,7 @@ class KoboAPI:
         file_import_response = self._post_request(
             url=self._get_url("imports/", append_api=False, add_limit=False),
             data=file_import_data,
-            files={"file": bytes_io_file},
+            files={"file": bytes_io_file},  # type: ignore # FIXME
         )
         file_import_response_dict = file_import_response.json()
         url = file_import_response_dict.get("url")

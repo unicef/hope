@@ -18,7 +18,7 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
-from hct_mis_api.apps.account.permissions import BasePermission, Permissions
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -101,7 +101,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
-    def has_permission(self, permission: BasePermission, business_area: "BusinessArea", write: bool = False) -> bool:
+    def has_permission(self, permission: str, business_area: "BusinessArea", write: bool = False) -> bool:
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,

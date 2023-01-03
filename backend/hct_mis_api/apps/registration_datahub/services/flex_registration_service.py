@@ -2,12 +2,11 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Type, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import Model
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
@@ -49,7 +48,7 @@ if TYPE_CHECKING:
 
     from django.db.models.query import QuerySet
 
-    from hct_mis_api.apps.account.models import Role, User
+    from hct_mis_api.apps.account.models import Role
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +85,7 @@ class FlexRegistrationService:
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by: "User", rdi_name: str = "rdi_name") -> RegistrationDataImport:
+    def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
@@ -123,7 +122,7 @@ class FlexRegistrationService:
     def process_records(
         self,
         rdi_id: "UUID",
-        records_ids: List["UUID"],
+        records_ids: Iterable,
     ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
@@ -204,7 +203,7 @@ class FlexRegistrationService:
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
-        household = self._create_object_and_validate(household_data, ImportedHousehold)
+        household: ImportedHousehold = self._create_object_and_validate(household_data, ImportedHousehold)
         admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
         admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
         if admin_area1:
@@ -225,7 +224,7 @@ class FlexRegistrationService:
                 role = individual_data.pop("role")
                 phone_no = individual_data.pop("phone_no", "")
 
-                individual = self._create_object_and_validate(individual_data, ImportedIndividual)
+                individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
                 individual.kobo_asset_id = record.source_id
@@ -264,8 +263,8 @@ class FlexRegistrationService:
             else:
                 raise ValidationError("There should be only two collectors!")
 
-    def _create_object_and_validate(self, data: Dict, model_class: Model) -> Type:
-        ModelClassForm = modelform_factory(model_class, fields=data.keys())
+    def _create_object_and_validate(self, data: Dict, model_class: Type) -> Any:
+        ModelClassForm = modelform_factory(model_class, fields=list(data.keys()))
         form = ModelClassForm(data)
         if not form.is_valid():
             raise ValidationError(form.errors)
@@ -363,7 +362,7 @@ class FlexRegistrationService:
                 "document_number": document_number,
                 "individual": individual,
             }
-            ModelClassForm = modelform_factory(ImportedDocument, fields=document_kwargs.keys())
+            ModelClassForm = modelform_factory(ImportedDocument, fields=list(document_kwargs.keys()))
             form = ModelClassForm(document_kwargs)
             if not form.is_valid():
                 raise ValidationError(form.errors)
