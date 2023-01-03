@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id: "UUID", e: BaseException) -> None:
+def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -58,9 +58,7 @@ def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_xlsx_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID"
-) -> None:
+def registration_xlsx_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -90,9 +88,7 @@ def registration_xlsx_import_task(
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID"
-) -> None:
+def registration_kobo_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -187,7 +183,7 @@ def registration_xlsx_import_hourly_task() -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def merge_registration_data_import_task(registration_data_import_id: "UUID") -> bool:
+def merge_registration_data_import_task(registration_data_import_id: str) -> bool:
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
@@ -218,7 +214,7 @@ def merge_registration_data_import_task(registration_data_import_id: "UUID") -> 
 @app.task(queue="priority")
 @log_start_and_end
 @sentry_tags
-def rdi_deduplication_task(registration_data_import_id: "UUID") -> None:
+def rdi_deduplication_task(registration_data_import_id: str) -> None:
 
     try:
         from hct_mis_api.apps.registration_datahub.models import (

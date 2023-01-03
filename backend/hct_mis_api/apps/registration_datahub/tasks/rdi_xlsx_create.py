@@ -47,7 +47,6 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 if TYPE_CHECKING:
-    from uuid import UUID
 
     from xlrd.sheet import Sheet
 
@@ -216,7 +215,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if not is_flex_field:
             return value
         if isinstance(value, numbers.Number):
-            return float(value)
+            return float(value)  # type: ignore # FIXME: Argument 1 to "float" has incompatible type "Number"; expected "Union[SupportsFloat, SupportsIndex, str, bytes, array[Any], mmap, _CData, PickleBuffer]"
         return value
 
     def _handle_bool_field(
@@ -579,7 +578,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID") -> None:
+    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )

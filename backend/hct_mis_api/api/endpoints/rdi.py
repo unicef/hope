@@ -51,7 +51,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
 
     @atomic()
     @atomic(using="registration_datahub")
-    def perform_create(self, serializer: serializers.Serializer) -> Optional[RegistrationDataImport]:  # type: ignore # FIXME: perform_create from CreateModelMixin returns None
+    def perform_create(self, serializer: serializers.BaseSerializer) -> Optional[RegistrationDataImport]:  # type: ignore # FIXME: perform_create from CreateModelMixin returns None
         obj = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )
@@ -83,7 +83,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
     permission = Grant.API_RDI_CREATE
 
     @cached_property
-    def selected_rdi(self) -> QuerySet:
+    def selected_rdi(self) -> RegistrationDataImportDatahub:
         return RegistrationDataImportDatahub.objects.get(
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
@@ -95,7 +95,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data)
             return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
-        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
+        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)  # type: ignore # FIXME
 
 
 class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
@@ -125,7 +125,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             else:
                 out.append(serializer.errors)
                 total_errors += 1
-        results = humanize_errors({"households": out})
+        results = humanize_errors({"households": out})  # type: ignore # FIXME
         return Response(
             {
                 "id": self.selected_rdi.id,
