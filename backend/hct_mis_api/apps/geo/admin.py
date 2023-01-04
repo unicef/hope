@@ -99,7 +99,6 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
                 )
             },
         ),
-        # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
