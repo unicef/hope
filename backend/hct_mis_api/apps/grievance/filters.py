@@ -263,7 +263,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
         return queryset
 
     def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
+        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)  # type: ignore # FIXME: Argument 4 to "permissions_filter" of "GrievanceTicketFilter" has incompatible type "str"; expected "List[Permissions]"
 
 
 class TicketNoteFilter(FilterSet):

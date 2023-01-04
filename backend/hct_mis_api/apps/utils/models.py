@@ -54,7 +54,7 @@ class SoftDeletableModelWithDate(models.Model):
         if soft:
             self.is_removed = True
             self.removed_date = timezone.now()
-            self.save(using=using)
+            self.save(using=using)  # type: ignore # FIXME: Argument "using" to "save" of "Model" has incompatible type "bool"; expected "Optional[str]"
         else:
             return super().delete(using=using, *args, **kwargs)
         return None

@@ -266,7 +266,7 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: str, path: str) -> Optional[str]:
+def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(

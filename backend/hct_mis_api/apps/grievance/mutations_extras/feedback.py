@@ -72,7 +72,7 @@ def fetch_household_and_individual(extras: Dict, ticket_type: str) -> Tuple[Opti
 
 
 def create_new_positive_feedback_ticket(
-    grievance_ticket: GrievanceTicket, household: Household, individual: Individual
+    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
 ) -> None:
     TicketPositiveFeedbackDetails.objects.create(
         individual=individual,
@@ -81,7 +81,7 @@ def create_new_positive_feedback_ticket(
     )
 
 
-def update_ticket(ticket_details: Any, household: Household, individual: Individual) -> None:
+def update_ticket(ticket_details: Any, household: Optional[Household], individual: Optional[Individual]) -> None:
     if individual:
         ticket_details.individual = individual
     if household:
@@ -90,7 +90,7 @@ def update_ticket(ticket_details: Any, household: Household, individual: Individ
 
 
 def create_new_negative_feedback_ticket(
-    grievance_ticket: GrievanceTicket, household: Household, individual: Individual
+    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
 ) -> None:
     TicketNegativeFeedbackDetails.objects.create(
         individual=individual,

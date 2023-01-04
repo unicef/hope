@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from django.conf import settings
 
@@ -12,7 +12,7 @@ def do_nothing_decorator(func: Callable) -> Callable:
     return wrapped
 
 
-def profiling(**silk_kwargs: Dict) -> Any:
+def profiling(**silk_kwargs: Any) -> Any:
     if not settings.PROFILING:
         return do_nothing_decorator
 

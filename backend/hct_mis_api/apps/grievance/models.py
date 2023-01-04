@@ -354,7 +354,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         else:
             details_name = nested_dict_or_value
 
-        return getattr(self, details_name, None)
+        return getattr(self, details_name, None)  # type: ignore # FIXME: Argument 2 to "getattr" has incompatible type "Optional[Any]"; expected "str"
 
     @property
     def status_log(self) -> str:
