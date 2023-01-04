@@ -341,7 +341,7 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     }
 
     for pc in payment_channels:
-        handler = handlers.get(pc.get("type"))
+        handler = handlers.get(pc.get("type"))  # type: ignore # FIXME: Argument 1 to "get" of "dict" has incompatible type "Optional[Any]"; expected "str"
         items.append(handler(pc))
     return items
 
