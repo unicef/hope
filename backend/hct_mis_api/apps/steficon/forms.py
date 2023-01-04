@@ -67,31 +67,30 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
         try:
             return self.cleaned_data["results"].split(",")
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     filename = forms.CharField(label="Output filename")
-    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # TODO: 'data' is an internal field
-    fields = forms.CharField(widget=HiddenInput)  # type: ignore # TODO: 'fields' is an internal field
+    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # FIXME: 'data' is an internal field
+    fields = forms.CharField(widget=HiddenInput)  # type: ignore # FIXME: 'fields' is an internal field
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
-            # TODO: fields is CharField but used as dict?
-            self.fields[fname].widget = HiddenInput()  # type: ignore
+            self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
 
     def clean_fields(self) -> Optional[List]:
         try:
             return self.cleaned_data["fields"].split(",")
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
     def clean_data(self) -> Optional[Dict]:
         try:
             return json.loads(self.cleaned_data["data"])
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
 
 class TPModelChoiceField(forms.ModelChoiceField):
@@ -120,7 +119,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             initial=initial,
             help_text=help_text,
             to_field_name=to_field_name,
-            limit_choices_to=limit_choices_to,
+            limit_choices_to=limit_choices_to,  # type: ignore # FIXME
             **kwargs,
         )
 
@@ -147,21 +146,23 @@ class RuleTestForm(forms.Form):
             media = media + field.widget.media
         return media
 
-    def clean_raw_data(self) -> Optional[Dict]:  # type: ignore
+    def clean_raw_data(self) -> Optional[Dict]:
         original = self.cleaned_data["raw_data"]
         if original:
             try:
                 return json.loads(original)
             except Exception as e:
-                raise ValidationError(e)
+                raise ValidationError(str(e))
+        return None
 
-    def clean_file(self) -> Optional[Dict]:  # type: ignore
+    def clean_file(self) -> Optional[Dict]:
         original = self.cleaned_data["file"]
         if original:
             try:
                 return json.loads(original.read())
             except Exception as e:
-                raise ValidationError(e)
+                raise ValidationError(str(e))
+        return None
 
     def clean(self) -> None:
         selection = self.cleaned_data["opt"]

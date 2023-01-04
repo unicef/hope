@@ -3,7 +3,7 @@ import enum
 import logging
 from datetime import datetime
 from functools import reduce
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -69,7 +69,7 @@ TYPE_SELECT_MANY = "SELECT_MANY"
 TYPE_GEOPOINT = "GEOPOINT"
 TYPE_DECIMAL = "DECIMAL"
 
-FIELD_TYPES_TO_INTERNAL_TYPE = {
+FIELD_TYPES_TO_INTERNAL_TYPE: Dict[str, Union[Type, Tuple]] = {
     TYPE_ID: str,
     TYPE_INTEGER: int,
     TYPE_STRING: str,
@@ -1709,12 +1709,12 @@ CORE_FIELDS_ATTRIBUTES = [
 
 class FieldFactory(list):
     def __init__(
-        self, fields: Optional[Any] = None, scopes: Optional[list[Scope]] = None, *args: Any, **kwargs: Any
+        self, fields: Optional[Any] = None, scopes: Optional[Iterable[Scope]] = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)
-        self.scopes = scopes or set()
+        self.scopes: Iterable = scopes or set()
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     @classmethod
@@ -1742,7 +1742,7 @@ class FieldFactory(list):
             factory.scopes.add(scope)
         return factory
 
-    def filtered_by_types(self, types: list) -> "FieldFactory":
+    def filtered_by_types(self, types: List) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
 
         for item in self:

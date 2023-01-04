@@ -130,7 +130,7 @@ class GroupConcat(Aggregate):
     def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
         super().__init__(
             expression,
-            distinct="DISTINCT " if distinct else "",
+            distinct="DISTINCT " if distinct else "",  # type: ignore # FIXME: Argument "distinct" to "__init__" of "Aggregate" has incompatible type "str"; expected "bool"
             output_field=CharField(),
             **extra,
         )
@@ -244,7 +244,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
                 if action:
                     user_data["Action"] = action
-                    matrix.append(user_data)
+                    matrix.append(user_data)  # type: ignore
         return matrix
 
     @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
@@ -492,7 +492,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request: HttpRequest) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:  # type: ignore
+    def download_last_valid_file(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -501,6 +503,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             "There is no valid file to download",
             level=ERROR,
         )
+        return None
 
     @button(
         label="Rerun KOBO Import",
@@ -580,9 +583,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False  # type: ignore
+        self.has_add_permission = lambda __: False  # type: ignore # intentional
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission  # type: ignore
+        self.has_add_permission = has_add_permission  # type: ignore # intentional
 
         return template_response
 

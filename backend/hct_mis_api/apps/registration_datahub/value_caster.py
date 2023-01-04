@@ -75,7 +75,7 @@ class SelectManyValueCaster(BaseValueCaster):
             values = value.split(";")
         else:
             values = value.split(" ")
-        valid_choices = []
+        valid_choices: List = []
         for single_choice in values:
             if isinstance(single_choice, str):
                 without_trailing_whitespace = single_choice.strip()
@@ -99,7 +99,7 @@ class SelectOneValueCaster(BaseValueCaster):
     def can_process(self, field: Any) -> bool:
         return field["type"] == TYPE_SELECT_ONE
 
-    def process(self, field: Any, value: Any) -> Union[int, str]:  # type: ignore
+    def process(self, field: Any, value: Any) -> Optional[Union[int, str]]:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
@@ -123,6 +123,8 @@ class SelectOneValueCaster(BaseValueCaster):
                 return int(value)
             except ValueError:
                 return str(value)
+
+        return None
 
 
 class DateValueCaster(BaseValueCaster):

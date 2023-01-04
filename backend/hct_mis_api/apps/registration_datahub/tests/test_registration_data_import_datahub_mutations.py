@@ -99,7 +99,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             field_name="consent",
             name="consent.jpg",
             content_type="'image/jpeg'",
-            size=(60, 30),
+            size=60,
             charset=None,
         )
 

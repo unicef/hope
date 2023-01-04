@@ -6,12 +6,10 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Union
-from uuid import UUID
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
-from django.core.files import File
 
 import openpyxl
 import phonenumbers
@@ -47,8 +45,7 @@ logger = logging.getLogger(__name__)
 
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, *args: Any, **kwargs: Any) -> List:  # type: ignore
-        # TODO: Signature of "validate" incompatible with supertype "BaseValidator"
+    def validate(cls, *args: Any, **kwargs: Any) -> List:  # type: ignore # FIXME: Signature of "validate" incompatible with supertype "BaseValidator"
         try:
             validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -67,7 +64,7 @@ class XLSXValidator(BaseValidator):
     @classmethod
     def validate_file_extension(cls, *args: Any, **kwargs: Any) -> List:
         try:
-            xlsx_file = kwargs.get("file")
+            xlsx_file = kwargs["file"]
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
                 return [
@@ -107,7 +104,7 @@ class ImportDataValidator(BaseValidator):
     }
 
     @classmethod
-    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore  # FIXME: Signature of "validate" incompatible with supertype "BaseValidator"
         try:
             validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
@@ -249,7 +246,7 @@ class ImportDataInstanceValidator:
         self.all_fields = self.get_all_fields()
 
     def get_combined_attributes(self) -> Dict:
-        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area(None)
+        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area(None)  # type: ignore # TODO: none business area?
 
         for field in fields:
             field["choices"] = [x.get("value") for x in field["choices"]]
@@ -423,7 +420,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:  # type: ignore
+    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -432,8 +429,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+        return None
 
-    def integer_validator(self, value: int, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
+    def integer_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -451,7 +449,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def float_validator(self, value: float, header: str, *args: Any, **kwargs: Any) -> bool:
+    def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -478,7 +476,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def date_validator(self, value: datetime, header: str, *args: Any, **kwargs: Any) -> bool:
+    def date_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
         try:
             if self.integer_validator(value, header, *args, **kwargs):
                 return False
@@ -599,7 +597,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True
-            return self.image_loader.image_in(cell.coordinate)
+            return self.image_loader.image_in(cell.coordinate)  # type: ignore # FIXME: Argument 1 to "image_in" of "SheetImageLoader" has incompatible type "str"; expected "Cell"
         except Exception as e:
             logger.exception(e)
             raise
@@ -722,7 +720,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
-                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore
+                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore # FIXME: On Python 3 formatting "b'abc'" with "{}" produces "b'abc'", not "abc"; use "{!r}" if this is desired behavior
                             f"{value} for type "
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
@@ -810,7 +808,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_file_extension(self, xlsx_file: File) -> List:
+    def validate_file_extension(self, xlsx_file: Any) -> List:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
@@ -826,7 +824,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file: File, business_area_slug: str) -> List[Dict[str, Any]]:
+    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
@@ -850,7 +848,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header: str, data_dict: Dict, household_ids: List[UUID]) -> List[Dict[str, Any]]:
+    def collector_column_validator(header: str, data_dict: Dict, household_ids: Iterable[str]) -> List[Dict[str, Any]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []
@@ -858,7 +856,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             for row, cell in data_dict.items():
                 if not cell.value:
                     continue
-                list_of_ids = set(collectors_str_ids_to_list(cell.value))
+                list_of_ids = set(collectors_str_ids_to_list(cell.value) or [])
                 contains_correct_ids = list_of_ids.issubset(household_ids)
                 if not contains_correct_ids:
                     errors.append(
@@ -1019,7 +1017,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:  # type: ignore
+    def standard_type_validator(self, value: str, field: str, field_type: str) -> Optional[str]:
         try:
             value_type_name = type(value).__name__
 
@@ -1049,6 +1047,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+        return None
 
     def image_validator(
         self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any
@@ -1189,7 +1188,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         "message": message,
                     }
             else:
-                message = self.standard_type_validator(value, field, field_type)
+                message = self.standard_type_validator(value, field, field_type)  # type: ignore # FIXME: Argument 1 to "standard_type_validator" of "KoboProjectImportDataInstanceValidator" has incompatible type "Union[str, List[Any]]"; expected "str"
                 if message:
                     return {
                         "header": field,
@@ -1203,7 +1202,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
         try:
-            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore
+            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore # FIXME
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;
@@ -1275,7 +1274,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             household: Dict[str, Any]
             for household in reduced_submissions:
                 submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
-                    household.get("_uuid"), []
+                    str(household.get("_uuid")), []
                 )
                 if submission_exists is True:
                     continue

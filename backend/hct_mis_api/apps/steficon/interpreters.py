@@ -32,7 +32,7 @@ class Interpreter:
             return True
         except Exception as e:
             logger.exception(e)
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
     def get_result(self) -> Any:
         return config.RESULT()
@@ -46,7 +46,7 @@ class PythonFunction(Interpreter):
         return import_string(self.init_string)
 
     def execute(self, **context: Dict) -> Callable:
-        return self.code(**context)  # type: ignore
+        return self.code(**context)  # type: ignore # FIXME: "str" not callable
 
 
 def call_rule(rule_id: UUID, context: Dict) -> Any:
@@ -153,14 +153,9 @@ class PythonExec(Interpreter):
             raise ValidationError(mark_safe(msg))
 
 
-def get_env(**options: Dict) -> Environment:
+def get_env(**options: Any) -> Environment:
     env = Environment(**options)
-    env.filters.update(
-        {
-            "adults": engine.adults
-            # 'url': reverse,
-        }
-    )
+    env.filters.update({"adults": engine.adults})
     return env
 
 
