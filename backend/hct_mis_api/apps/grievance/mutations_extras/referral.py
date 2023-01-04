@@ -52,7 +52,9 @@ def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], O
     return household, individual
 
 
-def update_ticket(grievance_ticket: GrievanceTicket, household: Household, individual: Individual) -> None:
+def update_ticket(
+    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
+) -> None:
     ticket_details = grievance_ticket.referral_ticket_details
     if individual:
         ticket_details.individual = individual

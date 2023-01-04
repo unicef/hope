@@ -90,7 +90,7 @@ def update_ticket(ticket_details: Any, household: Optional[Household], individua
 
 
 def create_new_negative_feedback_ticket(
-    grievance_ticket: GrievanceTicket, household: Household, individual: Individual
+    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
 ) -> None:
     TicketNegativeFeedbackDetails.objects.create(
         individual=individual,
