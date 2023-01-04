@@ -62,7 +62,6 @@ ignore_missing_imports = true # TODO
 # TODO: remove one, fix errors, repeat
 disable_error_code = [
   "var-annotated", # this enforces Django Model fields to have type annotations
-  "arg-type",
   "attr-defined",
   "misc", # cannot subclass DjangoObjectType
   "union-attr",
