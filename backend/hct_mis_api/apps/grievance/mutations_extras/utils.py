@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -390,7 +390,7 @@ def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) 
                 raise ValidationError(f"You can't provide {not_allowed} in {key}")
 
 
-def remove_parsed_data_fields(data_dict: Dict, fields_list: List[str]) -> None:
+def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> None:
     for field in fields_list:
         data_dict.pop(field, None)
 

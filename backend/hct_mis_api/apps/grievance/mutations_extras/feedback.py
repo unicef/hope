@@ -72,7 +72,7 @@ def fetch_household_and_individual(extras: Dict, ticket_type: str) -> Tuple[Opti
 
 
 def create_new_positive_feedback_ticket(
-    grievance_ticket: GrievanceTicket, household: Household, individual: Individual
+    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
 ) -> None:
     TicketPositiveFeedbackDetails.objects.create(
         individual=individual,
