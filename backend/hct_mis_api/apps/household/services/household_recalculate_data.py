@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Tuple
 
-from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -24,7 +23,6 @@ def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
     return household.individuals.aggregate(**kwargs)
 
 
-@transaction.atomic
 def recalculate_data(household: Household, save: bool = True) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
