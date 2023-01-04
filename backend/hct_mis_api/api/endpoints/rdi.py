@@ -1,12 +1,15 @@
 from dataclasses import asdict
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
+from django.db.models import QuerySet
 from django.db.transaction import atomic
+from django.http import HttpRequest
 from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
 from rest_framework import serializers, status
 from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -21,13 +24,16 @@ from .base import HOPEAPIBusinessAreaView, HOPEAPIView
 from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import BusinessArea
+
 
 class RDISerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationDataImportDatahub
         exclude = ("business_area_slug", "import_data", "hct_id")
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> None:
         return super().create(validated_data)
 
 
@@ -37,16 +43,15 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     permission = Grant.API_RDI_CREATE
     serializer_class = RDISerializer
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return RegistrationDataImportDatahub.objects.filter(business_area=self.selected_business_area)
 
-    def dispatch(self, request, *args, **kwargs) -> HttpResponseBase:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         return super().dispatch(request, *args, **kwargs)
 
     @atomic()
     @atomic(using="registration_datahub")
-    def perform_create(self, serializer) -> Optional[RegistrationDataImport]:  # type: ignore
-        # TODO: perform_create from CreateModelMixin returns None
+    def perform_create(self, serializer: serializers.BaseSerializer) -> Optional[RegistrationDataImport]:  # type: ignore # FIXME: perform_create from CreateModelMixin returns None
         obj = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )
@@ -60,7 +65,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             business_area=self.selected_business_area,
         )
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         r2 = self.perform_create(serializer)
@@ -78,19 +83,19 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
     permission = Grant.API_RDI_CREATE
 
     @cached_property
-    def selected_rdi(self):
+    def selected_rdi(self) -> RegistrationDataImportDatahub:
         return RegistrationDataImportDatahub.objects.get(
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
 
     @atomic(using="registration_datahub")
-    def post(self, request, business_area, rdi):
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         serializer = HouseholdSerializer(data=request.data, many=True)
 
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data)
             return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
-        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
+        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)  # type: ignore # FIXME
 
 
 class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
@@ -99,12 +104,12 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
     permission = Grant.API_RDI_CREATE
 
     @cached_property
-    def selected_rdi(self):
+    def selected_rdi(self) -> QuerySet[RegistrationDataImport]:
         return RegistrationDataImportDatahub.objects.get(
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
 
-    def post(self, request, business_area, rdi):
+    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         # The initial serializer
         total_households = 0
         total_errors = 0
@@ -120,7 +125,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             else:
                 out.append(serializer.errors)
                 total_errors += 1
-        results = humanize_errors({"households": out})
+        results = humanize_errors({"households": out})  # type: ignore # FIXME
         return Response(
             {
                 "id": self.selected_rdi.id,
@@ -140,17 +145,17 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
     serializer_class = RDISerializer
 
     @cached_property
-    def selected_rdi(self):
+    def selected_rdi(self) -> QuerySet[RegistrationDataImport]:
         return RegistrationDataImportDatahub.objects.get(
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self.update(request, *args, **kwargs)
 
     @atomic()
     @atomic(using="registration_datahub")
-    def update(self, request, *args, **kwargs) -> Response:
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.selected_rdi.import_done = RegistrationDataImportDatahub.DONE
         self.selected_rdi.save()
 

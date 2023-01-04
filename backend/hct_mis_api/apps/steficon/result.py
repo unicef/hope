@@ -12,7 +12,7 @@ class Result:
 class Score(Result):
     def __init__(self) -> None:
         super().__init__()
-        self.extra = {}
+        self.extra: dict = {}
 
     def __repr__(self) -> str:
         return "<steficon.result.Score object at {}>".format(id(self))

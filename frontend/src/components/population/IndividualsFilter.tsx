@@ -16,6 +16,15 @@ interface IndividualsFilterProps {
   choicesData: IndividualChoiceDataQuery;
 }
 
+const orderOptions = [
+  { name: 'Individual Id: ascending', value: 'unicef_id' },
+  { name: 'Individual Id: descending', value: '-unicef_id' },
+  { name: 'Individual: ascending', value: 'full_name' },
+  { name: 'Individual: descending', value: '-full_name' },
+  { name: 'Gender: ascending', value: 'sex' },
+  { name: 'Gender: descending', value: '-sex' },
+];
+
 export const IndividualsFilter = ({
   onFilterChange,
   filter,
@@ -44,7 +53,7 @@ export const IndividualsFilter = ({
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
-            value={filter.sex || ''}
+            value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
             SelectDisplayProps={{
@@ -66,12 +75,13 @@ export const IndividualsFilter = ({
             topLabel={t('Age')}
             placeholder={t('From')}
             value={filter.age.min}
-            onChange={(e) =>
+            onChange={(e) => {
+              if (e.target.value < 0 || e.target.value > 120) return;
               onFilterChange({
                 ...filter,
-                age: { ...filter.age, min: e.target.value || undefined },
-              })
-            }
+                age: { ...filter.age, min: e.target.value },
+              });
+            }}
             icon={<CakeIcon />}
           />
         </Grid>
@@ -79,12 +89,13 @@ export const IndividualsFilter = ({
           <NumberTextField
             placeholder={t('To')}
             value={filter.age.max}
-            onChange={(e) =>
+            onChange={(e) => {
+              if (e.target.value < 0 || e.target.value > 120) return;
               onFilterChange({
                 ...filter,
-                age: { ...filter.age, max: e.target.value || undefined },
-              })
-            }
+                age: { ...filter.age, max: e.target.value },
+              });
+            }}
             icon={<CakeIcon />}
           />
         </Grid>
@@ -106,6 +117,22 @@ export const IndividualsFilter = ({
                 data-cy={`select-option-${index}`}
               >
                 {each.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'orderBy')}
+            label={t('Sort by')}
+            value={filter.orderBy}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {orderOptions.map((order) => (
+              <MenuItem key={order.value} value={order.value}>
+                {order.name}
               </MenuItem>
             ))}
           </SelectFilter>

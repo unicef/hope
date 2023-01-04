@@ -1,7 +1,8 @@
 import logging
 import time
+import typing
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -29,11 +30,11 @@ class TokenInvalid(Exception):
 class KoboRequestsSession(requests.Session):
     AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
 
-    def should_strip_auth(self, old_url, new_url) -> bool:
+    def should_strip_auth(self, old_url: str, new_url: str) -> bool:
         new_parsed = urlparse(new_url)
         if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:
             return False
-        return super().should_strip_auth(old_url, new_url)  # type: ignore # Call to untyped function "should_strip_auth" in typed context
+        return super().should_strip_auth(old_url, new_url)  # type: ignore # FIXME: Call to untyped function "should_strip_auth" in typed context
 
 
 class KoboAPI:
@@ -47,7 +48,7 @@ class KoboAPI:
 
         self._get_token()
 
-    def _handle_paginated_results(self, url) -> List[Dict]:
+    def _handle_paginated_results(self, url: str) -> List[Dict]:
         next_url = url
         results: List = []
 
@@ -59,7 +60,13 @@ class KoboAPI:
             results.extend(data["results"])
         return results
 
-    def _get_url(self, endpoint: str, append_api=True, add_limit=True, additional_query_params=None):
+    def _get_url(
+        self,
+        endpoint: str,
+        append_api: bool = True,
+        add_limit: bool = True,
+        additional_query_params: Optional[Any] = None,
+    ) -> str:
         endpoint.strip("/")
         if endpoint != "token" and append_api is True:
             endpoint = f"api/v2/{endpoint}"
@@ -87,7 +94,7 @@ class KoboAPI:
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
-    def _handle_request(self, url) -> Dict:
+    def _handle_request(self, url: str) -> Dict:
         response = self._client.get(url=url)
         try:
             response.raise_for_status()
@@ -96,16 +103,20 @@ class KoboAPI:
             raise
         return response.json()
 
-    def _post_request(self, url, data=None, files=None) -> requests.Response:
+    def _post_request(
+        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
+    ) -> requests.Response:
         response = self._client.post(url=url, data=data, files=files)
         return response
 
-    def _patch_request(self, url, data=None, files=None) -> requests.Response:
+    def _patch_request(
+        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
+    ) -> requests.Response:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
     def create_template_from_file(
-        self, bytes_io_file, xlsx_kobo_template_object, template_id=""
+        self, bytes_io_file: Optional[typing.IO], xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
     ) -> Optional[Tuple[Dict, str]]:
         data = {
             "name": "Untitled",
@@ -133,7 +144,7 @@ class KoboAPI:
         file_import_response = self._post_request(
             url=self._get_url("imports/", append_api=False, add_limit=False),
             data=file_import_data,
-            files={"file": bytes_io_file},
+            files={"file": bytes_io_file},  # type: ignore # FIXME
         )
         file_import_response_dict = file_import_response.json()
         url = file_import_response_dict.get("url")
@@ -167,7 +178,7 @@ class KoboAPI:
 
         return self._handle_request(projects_url)
 
-    def get_project_submissions(self, uid: str, only_active_submissions) -> List:
+    def get_project_submissions(self, uid: str, only_active_submissions: bool) -> List:
         additional_query_params = None
         if only_active_submissions:
             additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'

@@ -12,7 +12,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 class TestTargetingSteficon(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         rule, __ = Rule.objects.update_or_create(
             name="TestRule1", defaults={"definition": "result.value=Decimal('1.3')"}
         )
@@ -28,7 +28,7 @@ class TestTargetingSteficon(TestCase):
         entry = cls.target_population.selections.first()
         assert entry.vulnerability_score is None
 
-    def test_queue(self):
+    def test_queue(self) -> None:
         target_population_apply_steficon(self.target_population.pk)
 
         entry = self.target_population.selections.first()

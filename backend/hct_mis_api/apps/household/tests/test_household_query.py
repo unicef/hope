@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -6,7 +8,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -102,8 +103,7 @@ class TestHouseholdQuery(APITestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
-        cached_business_areas_slug_id_dict.cache_clear()
+    def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -145,7 +145,7 @@ class TestHouseholdQuery(APITestCase):
             ("all_max_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MAX),
         ]
     )
-    def test_household_query_all(self, _, permissions, query_string):
+    def test_household_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -159,7 +159,7 @@ class TestHouseholdQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_household_filter_by_programme(self, _, permissions):
+    def test_household_filter_by_programme(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -174,7 +174,7 @@ class TestHouseholdQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_household_query_single(self, _, permissions):
+    def test_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

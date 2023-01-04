@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any
+
 from django.db.models import Q
 from django.db.models.functions import Lower
 
@@ -10,6 +12,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 
 class ImportedIndividualFilter(FilterSet):
@@ -33,10 +38,10 @@ class ImportedIndividualFilter(FilterSet):
         )
     )
 
-    def filter_rdi_id(self, queryset, model_field, value):
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
         return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
 
-    def filter_duplicates_only(self, queryset, model_field, value):
+    def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value is True:
             return queryset.filter(
                 Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
@@ -63,5 +68,5 @@ class ImportedHouseholdFilter(FilterSet):
         )
     )
 
-    def filter_rdi_id(self, queryset, model_field, value):
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
         return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
