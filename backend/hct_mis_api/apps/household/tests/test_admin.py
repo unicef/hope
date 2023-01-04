@@ -10,7 +10,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 class BaseTest(WebTest):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.household = HouseholdFactory.build(business_area=BusinessAreaFactory(name="Test"))
         cls.individual = IndividualFactory(household=cls.household)
         cls.household.head_of_household = cls.individual
@@ -22,12 +22,12 @@ class BaseTest(WebTest):
 
 
 class HouseholdAdminTest(BaseTest):
-    def test_hh_change(self):
+    def test_hh_change(self) -> None:
         url = reverse("admin:household_household_change", args=[self.household.pk])
         res = self.app.get(url, user=self.superuser)  # noqa: F841
 
 
 class IndividualAdminTest(BaseTest):
-    def test_individual_change(self):
+    def test_individual_change(self) -> None:
         url = reverse("admin:household_individual_change", args=[self.individual.pk])
         res = self.app.get(url, user=self.superuser)  # noqa: F841

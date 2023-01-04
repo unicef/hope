@@ -9,6 +9,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     HEAD,
     MALE,
+    Household,
 )
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
@@ -18,7 +19,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 class TestOptionalRecalculationOfIndividuals(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         cls.business_area = BusinessAreaFactory(
             code="0060",
@@ -31,7 +32,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
-    def create_hh(self, collect_individual_data):
+    def create_hh(self, collect_individual_data: str) -> Household:
         household, _ = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.registration_data_import,
@@ -55,7 +56,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         )
         return household
 
-    def test_recalculating_data_when_flag_is_full(self):
+    def test_recalculating_data_when_flag_is_full(self) -> None:
         household = self.create_hh(COLLECT_TYPE_FULL)
         self.assertEqual(household.collect_individual_data, COLLECT_TYPE_FULL)
         household.female_age_group_0_5_count = 123
@@ -64,7 +65,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, 0)
 
-    def test_recalculating_data_when_flag_is_partial(self):
+    def test_recalculating_data_when_flag_is_partial(self) -> None:
         household = self.create_hh(COLLECT_TYPE_PARTIAL)
         self.assertEqual(household.collect_individual_data, COLLECT_TYPE_PARTIAL)
         household.female_age_group_0_5_count = 123
@@ -73,7 +74,7 @@ class TestOptionalRecalculationOfIndividuals(APITestCase):
         household.refresh_from_db()
         self.assertEqual(household.female_age_group_0_5_count, None)
 
-    def test_recalculating_data_when_flag_is_none(self):
+    def test_recalculating_data_when_flag_is_none(self) -> None:
         household = self.create_hh(COLLECT_TYPE_NONE)
         self.assertEqual(household.collect_individual_data, COLLECT_TYPE_NONE)
         household.female_age_group_0_5_count = 123

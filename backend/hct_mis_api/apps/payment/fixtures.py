@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
+from typing import TYPE_CHECKING, Any, List
 
 import factory
 from factory import fuzzy
@@ -28,6 +29,10 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
@@ -258,7 +263,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def cash_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
@@ -339,7 +344,7 @@ def generate_real_cash_plans() -> None:
     )
 
 
-def generate_real_cash_plans_for_households(households):
+def generate_real_cash_plans_for_households(households: List[Household]) -> None:
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
     program = RealProgramFactory(business_area=households[0].business_area)
@@ -358,32 +363,38 @@ def generate_real_cash_plans_for_households(households):
     )
 
 
-def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+def create_payment_verification_plan_with_status(
+    cash_plan: CashPlan,
+    user: "User",
+    business_area: BusinessArea,
+    program: Program,
+    target_population: "TargetPopulation",
+    status: str,
+) -> CashPlanPaymentVerification:
     cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
     cash_plan_payment_verification.status = status
     cash_plan_payment_verification.save(update_fields=("status",))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    for _ in range(5):
-        household, _ = create_household(
-            {
-                "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
-            },
-            {"registration_data_import": registration_data_import},
-        )
+    household, _ = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+        },
+        {"registration_data_import": registration_data_import},
+    )
 
-        household.programs.add(program)
+    household.programs.add(program)
 
-        payment_record = PaymentRecordFactory(
-            cash_plan=cash_plan,
-            household=household,
-            target_population=target_population,
-        )
+    payment_record = PaymentRecordFactory(
+        cash_plan=cash_plan,
+        household=household,
+        target_population=target_population,
+    )
 
-        PaymentVerificationFactory(
-            cash_plan_payment_verification=cash_plan_payment_verification,
-            payment_record=payment_record,
-            status=PaymentVerification.STATUS_PENDING,
-        )
-        EntitlementCardFactory(household=household)
+    PaymentVerificationFactory(
+        cash_plan_payment_verification=cash_plan_payment_verification,
+        payment_record=payment_record,
+        status=PaymentVerification.STATUS_PENDING,
+    )
+    EntitlementCardFactory(household=household)
     return cash_plan_payment_verification

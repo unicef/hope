@@ -1,3 +1,5 @@
+from typing import Any, Iterable, Optional
+
 from django.db import transaction
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -10,7 +12,7 @@ class HouseholdWithdraw:
         self.documents = None
 
     @transaction.atomic
-    def withdraw(self, tag=None) -> None:
+    def withdraw(self, tag: Optional[Any] = None) -> None:
         self.household.withdraw(tag)
 
         for individual in self.household.individuals.select_for_update().filter(duplicate=False):
@@ -23,7 +25,7 @@ class HouseholdWithdraw:
         for individual in self.household.individuals.select_for_update().filter(duplicate=False):
             individual.unwithdraw()
 
-    def change_tickets_status(self, tickets) -> None:
+    def change_tickets_status(self, tickets: Iterable) -> None:
         for ticket in tickets:
             if self.household.withdrawn:
                 ticket.ticket.extras["status_before_withdrawn"] = ticket.ticket.status

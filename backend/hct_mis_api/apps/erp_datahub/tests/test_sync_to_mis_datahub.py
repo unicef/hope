@@ -19,7 +19,7 @@ class TestSyncToMisDatahubTask(TestCase):
     funds_commitment_2 = None
 
     @classmethod
-    def _prepare_business_areas(cls):
+    def _prepare_business_areas(cls) -> None:
         call_command("loadbusinessareas")
         cls.bosnia_and_herzegovina = BusinessArea.objects.get(code="0530")
         cls.bosnia = BusinessArea(
@@ -42,10 +42,10 @@ class TestSyncToMisDatahubTask(TestCase):
         cls.herzegovina.save()
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._prepare_business_areas()
 
-    def test_dont_sync_parent(self):
+    def test_dont_sync_parent(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
             business_area=self.bosnia_and_herzegovina.code,
             funds_commitment_number="123456",
@@ -71,7 +71,7 @@ class TestSyncToMisDatahubTask(TestCase):
         self.assertEqual(0, mis_models.FundsCommitment.objects.count())
         self.assertEqual(0, mis_models.DownPayment.objects.count())
 
-    def test_sync_with_set_new_business_area(self):
+    def test_sync_with_set_new_business_area(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
             business_area=self.bosnia_and_herzegovina.code,
             funds_commitment_number="123456",
@@ -99,7 +99,7 @@ class TestSyncToMisDatahubTask(TestCase):
         self.assertEqual(1, mis_models.FundsCommitment.objects.count())
         self.assertEqual(1, mis_models.DownPayment.objects.count())
 
-    def test_sync_normal(self):
+    def test_sync_normal(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
             business_area=BusinessArea.objects.first().code,
             funds_commitment_number="123456",
@@ -125,7 +125,7 @@ class TestSyncToMisDatahubTask(TestCase):
         self.assertEqual(1, mis_models.FundsCommitment.objects.count())
         self.assertEqual(1, mis_models.DownPayment.objects.count())
 
-    def test_dont_sync_with_set_new_business_area_already_synced(self):
+    def test_dont_sync_with_set_new_business_area_already_synced(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
             business_area=self.bosnia_and_herzegovina.code,
             funds_commitment_number="123456",
@@ -155,7 +155,7 @@ class TestSyncToMisDatahubTask(TestCase):
         self.assertEqual(0, mis_models.FundsCommitment.objects.count())
         self.assertEqual(0, mis_models.DownPayment.objects.count())
 
-    def test_dont_sync_normal_already_synced(self):
+    def test_dont_sync_normal_already_synced(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
             business_area=BusinessArea.objects.first().code,
             funds_commitment_number="123456",

@@ -33,7 +33,7 @@ class TestChangeHeadOfHousehold(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -80,7 +80,7 @@ class TestChangeHeadOfHousehold(APITestCase):
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
 
-    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self):
+    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self) -> None:
         self.individual1.relationship = HEAD
         self.individual1.save()
 
@@ -103,7 +103,7 @@ class TestChangeHeadOfHousehold(APITestCase):
         self.assertEqual(self.individual1.relationship, "HEAD")
         self.assertEqual(self.individual2.relationship, "BROTHER_SISTER")
 
-    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(self):
+    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(self) -> None:
         self.individual1.relationship = AUNT_UNCLE
         self.individual1.save()
 

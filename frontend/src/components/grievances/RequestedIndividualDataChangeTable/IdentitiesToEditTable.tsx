@@ -64,6 +64,10 @@ export const IdentitiesToEditTable = ({
     );
   };
 
+  const getPreviousPartner = (previousIdentity): string => {
+    return previousIdentity.partner || previousIdentity.agency;
+  };
+
   return (
     <>
       <TableTitle>
@@ -104,9 +108,11 @@ export const IdentitiesToEditTable = ({
           <TableRow>
             <TableCell />
             <TableCell align='left'>{t('Agency')}</TableCell>
-            <TableCell align='left'>{identity.previous_value.agency}</TableCell>
             <TableCell align='left'>
-              {identity.value?.agency ?? (
+              {getPreviousPartner(identity.previous_value)}
+            </TableCell>
+            <TableCell align='left'>
+              {identity.value?.partner ?? (
                 <GreyText>{t('Not updated')}</GreyText>
               )}
             </TableCell>

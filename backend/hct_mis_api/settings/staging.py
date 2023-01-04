@@ -59,8 +59,3 @@ if os.getenv("POSTGRES_SSL", False):
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
     }
-
-# ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
-}

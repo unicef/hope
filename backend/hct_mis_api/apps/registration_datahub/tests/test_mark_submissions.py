@@ -26,7 +26,7 @@ class TestMarkSubmissions(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
 
         cls.business_area = BusinessArea.objects.first()
@@ -35,22 +35,22 @@ class TestMarkSubmissions(TestCase):
         cls._create_submission_with_merged_rdi()
         cls._create_submission_with_in_review_rdi()
 
-    def test_mark_submissions(self):
+    def test_mark_submissions(self) -> None:
         task = MarkSubmissions(self.business_area)
         task.execute()
 
         self.assertEqual(KoboImportedSubmission.objects.filter(amended=True).count(), 1)
 
     @classmethod
-    def _create_submission_with_in_review_rdi(cls):
+    def _create_submission_with_in_review_rdi(cls) -> None:
         cls._create_submission("IN_REVIEW")
 
     @classmethod
-    def _create_submission_with_merged_rdi(cls):
+    def _create_submission_with_merged_rdi(cls) -> None:
         cls._create_submission("MERGED")
 
     @classmethod
-    def _create_submission(cls, status):
+    def _create_submission(cls, status: str) -> None:
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()

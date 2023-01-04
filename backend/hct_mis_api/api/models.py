@@ -13,8 +13,7 @@ from ..apps.core.models import BusinessArea
 
 @unique
 class Grant(Enum):
-    # TODO: signature differs from superclass
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
         return name
 
     API_READ_ONLY = auto()
@@ -43,7 +42,7 @@ class APIToken(models.Model):
     def __str__(self) -> str:
         return f"Token #{self.pk}"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.key:
             self.key = self.generate_key()
         return super().save(*args, **kwargs)

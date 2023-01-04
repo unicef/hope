@@ -1,10 +1,11 @@
-from django.core.management import BaseCommand, call_command
+from argparse import ArgumentParser
+from typing import Any
 
-from hct_mis_api.apps.core.management.sql import drop_databases
+from django.core.management import BaseCommand, call_command
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--skip-drop",
             action="store_true",
@@ -12,9 +13,9 @@ class Command(BaseCommand):
             help="Skip migrating - just reload the data",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if options["skip_drop"] is False:
-            drop_databases()
+            call_command("dropalldb")
             call_command("migratealldb")
 
         call_command("flush", "--noinput")

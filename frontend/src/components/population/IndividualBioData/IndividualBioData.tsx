@@ -85,7 +85,7 @@ export const IndividualBioData = ({
     <Grid item xs={3} key={item.node.id}>
       <Box flexDirection='column'>
         <Box mb={1}>
-          <LabelizedField label={`${item.node.type} ID`}>
+          <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.number}
           </LabelizedField>
         </Box>

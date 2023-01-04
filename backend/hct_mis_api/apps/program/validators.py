@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
 
@@ -10,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 class ProgramValidator(BaseValidator):
     @classmethod
-    def validate_status_change(cls, *args, **kwargs):
+    def validate_status_change(cls, *args: Any, **kwargs: Any) -> Optional[None]:
         status_to_set = kwargs.get("program_data").get("status")
         program = kwargs.get("program")
         current_status = program.status
         if status_to_set is None or status_to_set == current_status:
-            return
+            return None
         if status_to_set not in dict(Program.STATUS_CHOICE):
             logger.error(f"Wrong status: {status_to_set}")
             raise ValidationError("Wrong status")
@@ -32,7 +33,7 @@ class ProgramValidator(BaseValidator):
 
 class ProgramDeletionValidator(BaseValidator):
     @classmethod
-    def validate_is_deletable(cls, program, *args, **kwargs):
+    def validate_is_deletable(cls, program: Program, *args: Any, **kwargs: Any) -> None:
         if program.status != Program.DRAFT:
             logger.error("Only Draft Program can be deleted.")
             raise ValidationError("Only Draft Program can be deleted.")
