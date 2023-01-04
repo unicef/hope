@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import call_command
 from django.db.utils import IntegrityError
 from django.test import TestCase
@@ -5,6 +7,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -17,7 +20,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    Agency,
     Document,
     DocumentType,
     IndividualIdentity,
@@ -33,13 +35,14 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class TestSendTpToDatahub(TestCase):
     databases = "__all__"
 
     @staticmethod
-    def _pre_test_commands():
+    def _pre_test_commands() -> None:
         create_afghanistan()
         call_command("loadcountries")
         call_command("generatedocumenttypes")
@@ -49,7 +52,7 @@ class TestSendTpToDatahub(TestCase):
         business_area_with_data_sharing.save()
 
     @staticmethod
-    def _create_target_population(**kwargs):
+    def _create_target_population(**kwargs: Any) -> TargetPopulation:
         tp_nullable = {
             "ca_id": None,
             "ca_hash_id": None,
@@ -66,7 +69,7 @@ class TestSendTpToDatahub(TestCase):
         )
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
@@ -79,7 +82,7 @@ class TestSendTpToDatahub(TestCase):
         )
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
+        cls.unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,
@@ -111,6 +114,7 @@ class TestSendTpToDatahub(TestCase):
             relationship="HEAD",
             registration_data_import=rdi_second,
         )
+        unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
         IndividualRoleInHousehold.objects.create(
             individual=cls.second_household_head,
             household=cls.household_second,
@@ -136,9 +140,10 @@ class TestSendTpToDatahub(TestCase):
             type=DocumentType.objects.filter(type="NATIONAL_ID").first(),
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
+            partner=cls.unhcr,
             individual=cls.individual_primary,
             number="1111",
+            country=country,
         )
 
         cls.individual_alternate = IndividualFactory(
@@ -151,9 +156,10 @@ class TestSendTpToDatahub(TestCase):
             role=ROLE_ALTERNATE,
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
             individual=cls.individual_alternate,
             number="2222",
+            partner=cls.unhcr,
+            country=country,
         )
 
         cls.individual_no_role_first = IndividualFactory(
@@ -161,9 +167,10 @@ class TestSendTpToDatahub(TestCase):
             registration_data_import=rdi,
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
             individual=cls.individual_no_role_first,
             number="3333",
+            partner=cls.unhcr,
+            country=country,
         )
 
         cls.individual_no_role_second = IndividualFactory(
@@ -171,9 +178,10 @@ class TestSendTpToDatahub(TestCase):
             registration_data_import=rdi,
         )
         IndividualIdentity.objects.create(
-            agency=unhcr_agency,
             individual=cls.individual_no_role_second,
             number="4444",
+            partner=cls.unhcr,
+            country=country,
         )
 
         cls.household.head_of_household = cls.individual_primary
@@ -187,7 +195,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_first.households.set([cls.household])
-        cls.target_population_first.refresh_stats()
+        cls.target_population_first = refresh_stats(cls.target_population_first)
         cls.target_population_first.save()
 
         cls.target_population_second = cls._create_target_population(
@@ -198,7 +206,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_second.households.set([cls.household])
-        cls.target_population_second.refresh_stats()
+        cls.target_population_second = refresh_stats(cls.target_population_second)
         cls.target_population_second.save()
 
         cls.target_population_third = cls._create_target_population(
@@ -209,10 +217,10 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_third.households.set([cls.household_second])
-        cls.target_population_third.refresh_stats()
+        cls.target_population_third = refresh_stats(cls.target_population_third)
         cls.target_population_third.save()
 
-    def test_individual_data_needed_true(self):
+    def test_individual_data_needed_true(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_first)
 
@@ -226,7 +234,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_documents.count(), 1)
         self.assertEqual(dh_roles.count(), 2)
 
-    def test_individual_data_needed_false(self):
+    def test_individual_data_needed_false(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_second)
 
@@ -240,7 +248,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_documents.count(), 1)
         self.assertEqual(dh_roles.count(), 2)
 
-    def test_individual_sharing_is_true_and_unhcr_id(self):
+    def test_individual_sharing_is_true_and_unhcr_id(self) -> None:
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population_third)
 
@@ -254,7 +262,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_documents.count(), 0)
         self.assertEqual(dh_roles.count(), 1)
 
-    def test_send_two_times_household_with_different(self):
+    def test_send_two_times_household_with_different(self) -> None:
         business_area_with_data_sharing = BusinessArea.objects.first()
 
         program_individual_data_needed_true = ProgramFactory(
@@ -277,7 +285,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_first.households.set([household])
-        target_population_first.refresh_stats()
+        target_population_first = refresh_stats(target_population_first)
         target_population_second = self._create_target_population(
             sent_to_datahub=False,
             name="Test TP xD 2",
@@ -286,7 +294,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_second.households.set([household])
-        target_population_second.refresh_stats()
+        target_population_second = refresh_stats(target_population_second)
         task = SendTPToDatahubTask()
         task.send_target_population(target_population_first)
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
@@ -305,7 +313,7 @@ class TestSendTpToDatahub(TestCase):
             ("custom_code", "AU", "AUL"),
         ]
     )
-    def test_send_household_country(self, _, iso_code2, expected_ca_code):
+    def test_send_household_country(self, _: Any, iso_code2: str, expected_ca_code: str) -> None:
         (household, individuals) = create_household(household_args={"size": 1})
         household.country = geo_models.Country.objects.filter(iso_code2=iso_code2).first()
         household.save()
@@ -314,7 +322,7 @@ class TestSendTpToDatahub(TestCase):
         dh_household = task._prepare_datahub_object_household(household)
         self.assertEqual(dh_household.country, expected_ca_code)
 
-    def test_trim_targeting_criteria(self):
+    def test_trim_targeting_criteria(self) -> None:
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
@@ -329,7 +337,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
             targeting_criteria=targeting_criteria,
         )
-        target_population.refresh_stats()
+        target_population = refresh_stats(target_population)
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -339,7 +347,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(len(dh_target_population.targeting_criteria), 390)
         self.assertTrue("..." in dh_target_population.targeting_criteria)
 
-    def test_should_not_trim_targeting_criteria(self):
+    def test_should_not_trim_targeting_criteria(self) -> None:
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
@@ -354,7 +362,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
             targeting_criteria=targeting_criteria,
         )
-        target_population.refresh_stats()
+        target_population = refresh_stats(target_population)
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -364,7 +372,7 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(len(dh_target_population.targeting_criteria), 194)
         self.assertFalse("..." in dh_target_population.targeting_criteria)
 
-    def test_not_creating_duplicate_households(self):
+    def test_not_creating_duplicate_households(self) -> None:
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(

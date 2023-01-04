@@ -1,5 +1,6 @@
 import io
 import uuid
+from typing import Any
 
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
@@ -34,7 +35,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestXlsxVerificationImport(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         payment_record_amount = 10
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -89,7 +90,7 @@ class TestXlsxVerificationImport(APITestCase):
             ("from_received_with_issues", PaymentVerification.STATUS_RECEIVED_WITH_ISSUES, "YES"),
         ]
     )
-    def test_export_received_from_pending(self, _, initial_status, result):
+    def test_export_received_from_pending(self, _: Any, initial_status: str, result: Any) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_IMPORT], self.business_area)
 
         TestXlsxVerificationImport.verification.payment_record_verifications.all().update(status=initial_status)
@@ -98,7 +99,7 @@ class TestXlsxVerificationImport(APITestCase):
         wb = export_service.generate_workbook()
         self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, result)
 
-    def test_validation_valid_not_changed_file(self):
+    def test_validation_valid_not_changed_file(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         file = io.BytesIO(save_virtual_workbook(wb))
@@ -108,7 +109,7 @@ class TestXlsxVerificationImport(APITestCase):
 
         self.assertEqual(import_service.errors, [])
 
-    def test_validation_valid_status_changed(self):
+    def test_validation_valid_status_changed(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
@@ -119,7 +120,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.validate()
         self.assertEqual(import_service.errors, [])
 
-    def test_validation_invalid_received_changed(self):
+    def test_validation_invalid_received_changed(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NOT_CORRECT_RECEIVED"
@@ -139,7 +140,7 @@ class TestXlsxVerificationImport(APITestCase):
             ],
         )
 
-    def test_validation_invalid_version(self):
+    def test_validation_invalid_version(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wb[XlsxVerificationExportService.META_SHEET][XlsxVerificationExportService.VERSION_CELL_COORDINATES] = "-1"
@@ -152,7 +153,7 @@ class TestXlsxVerificationImport(APITestCase):
             import_service.validate,
         )
 
-    def test_validation_payment_record_id(self):
+    def test_validation_payment_record_id(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wrong_uuid = str(uuid.uuid4())
@@ -172,7 +173,7 @@ class TestXlsxVerificationImport(APITestCase):
             ],
         )
 
-    def test_validation_wrong_type(self):
+    def test_validation_wrong_type(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3"] = "A"
@@ -191,7 +192,7 @@ class TestXlsxVerificationImport(APITestCase):
             ],
         )
 
-    def test_validation_invalid_received_not_received_with_amount(self):
+    def test_validation_invalid_received_not_received_with_amount(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
@@ -211,7 +212,7 @@ class TestXlsxVerificationImport(APITestCase):
             ],
         )
 
-    def test_validation_invalid_received_received_with_0_amount(self):
+    def test_validation_invalid_received_received_with_0_amount(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
@@ -231,7 +232,7 @@ class TestXlsxVerificationImport(APITestCase):
             ],
         )
 
-    def test_import_valid_status_changed_received_no(self):
+    def test_import_valid_status_changed_received_no(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -248,7 +249,7 @@ class TestXlsxVerificationImport(APITestCase):
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_NOT_RECEIVED)
 
-    def test_import_valid_status_changed_received_yes_not_full(self):
+    def test_import_valid_status_changed_received_yes_not_full(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
@@ -275,7 +276,7 @@ class TestXlsxVerificationImport(APITestCase):
             payment_verification.payment_record.delivered_quantity - 1,
         )
 
-    def test_import_valid_status_changed_received_yes_full(self):
+    def test_import_valid_status_changed_received_yes_full(self) -> None:
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value

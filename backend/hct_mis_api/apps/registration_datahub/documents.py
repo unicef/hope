@@ -1,15 +1,18 @@
-from typing import Optional, Type
+from typing import TYPE_CHECKING, Optional, Type
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
-from .models import ImportedIndividual
+if TYPE_CHECKING:
+    from hct_mis_api.apps.geo.models import Area
+
 
 index_settings = {
     "number_of_shards": 1,
@@ -88,7 +91,7 @@ class ImportedIndividualDocument(Document):
     identities = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
-            "agency": fields.KeywordField(attr="agency.type", similarity="boolean"),
+            "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
         }
     )
     households_and_roles = fields.ObjectField(
@@ -98,22 +101,22 @@ class ImportedIndividualDocument(Document):
         }
     )
 
-    def prepare_admin1(self, instance):
+    def prepare_admin1(self, instance: ImportedIndividual) -> Optional["Area"]:
         household = instance.household
         if household:
             return instance.household.admin1
-        return
+        return None
 
-    def prepare_admin2(self, instance):
+    def prepare_admin2(self, instance: ImportedIndividual) -> Optional["Area"]:
         household = instance.household
         if household:
             return instance.household.admin2
-        return
+        return None
 
-    def prepare_hash_key(self, instance):
+    def prepare_hash_key(self, instance: ImportedIndividual) -> str:
         return instance.get_hash_key
 
-    def prepare_business_area(self, instance):
+    def prepare_business_area(self, instance: ImportedIndividual) -> str:
         return instance.registration_data_import.business_area_slug
 
     class Django:
@@ -131,7 +134,7 @@ class ImportedIndividualDocumentAfghanistan(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_afghanistan"
         settings = index_settings
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="afghanistan")
 
 
@@ -141,7 +144,7 @@ class ImportedIndividualDocumentUkraine(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_ukraine"
         settings = index_settings
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="ukraine")
 
 
@@ -151,14 +154,14 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_others"
         settings = index_settings
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return ImportedIndividual.objects.exclude(
             Q(registration_data_import__business_area_slug="ukraine")
             | Q(registration_data_import__business_area_slug="afghanistan")
         )
 
 
-def get_imported_individual_doc(business_area_slug) -> Optional[Type[Document]]:
+def get_imported_individual_doc(business_area_slug: str) -> Type[Document]:
     return {
         "afghanistan": ImportedIndividualDocumentAfghanistan,
         "ukraine": ImportedIndividualDocumentUkraine,

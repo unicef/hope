@@ -31,7 +31,7 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
       restartPolicy: Never
-  backoffLimit: 20
+  backoffLimit: 3
 ---
 apiVersion: batch/v1
 kind: Job

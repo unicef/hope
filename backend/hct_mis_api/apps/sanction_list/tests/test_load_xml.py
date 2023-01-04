@@ -9,10 +9,10 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 
 
 class TestLoadXML(BaseElasticSearchTestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         main_test_files_path = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/original-consolidated.xml")

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -120,7 +120,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         return self.screen_beneficiary
 
     @classmethod
-    def get_choices(cls, business_area_slug=None) -> List[Dict[str, Any]]:
+    def get_choices(cls, business_area_slug: Optional[str] = None) -> List[Dict[str, Any]]:
         filters = {}
         if business_area_slug:
             filters["business_area__slug"] = business_area_slug

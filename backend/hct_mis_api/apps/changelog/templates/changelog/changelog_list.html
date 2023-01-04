@@ -1,0 +1,13 @@
+
+{% extends "base.html" %}
+{% load markdownify %}
+{% block content %}
+  {% for object in object_list %}
+  <h1>
+      <a href="{{object.get_absolute_url}}">{{object.version}}   </a><span class="badge"> {{object.date|date:"l d M Y" }}</span>
+  </h1>
+  <div class="well">
+      {{ object.description|markdownify }}
+  </div>
+  {% endfor %}
+{% endblock %}

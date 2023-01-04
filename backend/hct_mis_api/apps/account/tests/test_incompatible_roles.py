@@ -9,22 +9,22 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 class IncompatibleRolesTest(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.role_1 = Role.objects.create(name="Role_1")
         cls.role_2 = Role.objects.create(name="Role_2")
 
-    def test_unique_pair_allowed(self):
+    def test_unique_pair_allowed(self) -> None:
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
         test_role.full_clean()
         test_role.save()
         self.assertTrue(IncompatibleRoles.objects.filter(role_one=self.role_1, role_two=self.role_2).exists())
 
-    def test_roles_must_be_different(self):
+    def test_roles_must_be_different(self) -> None:
         incomp_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_1)
         with self.assertRaisesMessage(ValidationError, "Choose two different roles."):
             incomp_role.full_clean()
 
-    def test_only_unique_combinations_allowed(self):
+    def test_only_unique_combinations_allowed(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
 
         test_role = IncompatibleRoles(role_one=self.role_2, role_two=self.role_1)
@@ -33,7 +33,7 @@ class IncompatibleRolesTest(TestCase):
         ):
             test_role.full_clean()
 
-    def test_any_users_already_with_both_roles(self):
+    def test_any_users_already_with_both_roles(self) -> None:
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
         user = UserFactory()

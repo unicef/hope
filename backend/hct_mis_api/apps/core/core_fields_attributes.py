@@ -3,6 +3,7 @@ import enum
 import logging
 from datetime import datetime
 from functools import reduce
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -68,7 +69,7 @@ TYPE_SELECT_MANY = "SELECT_MANY"
 TYPE_GEOPOINT = "GEOPOINT"
 TYPE_DECIMAL = "DECIMAL"
 
-FIELD_TYPES_TO_INTERNAL_TYPE = {
+FIELD_TYPES_TO_INTERNAL_TYPE: Dict[str, Union[Type, Tuple]] = {
     TYPE_ID: str,
     TYPE_INTEGER: int,
     TYPE_STRING: str,
@@ -1707,15 +1708,17 @@ CORE_FIELDS_ATTRIBUTES = [
 
 
 class FieldFactory(list):
-    def __init__(self, fields=None, scopes=None, *args, **kwargs) -> None:
+    def __init__(
+        self, fields: Optional[Any] = None, scopes: Optional[Iterable[Scope]] = None, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)
-        self.scopes = scopes or set()
+        self.scopes: Iterable = scopes or set()
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     @classmethod
-    def from_scopes(cls, scopes: list[Scope]):
+    def from_scopes(cls, scopes: list[Scope]) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
@@ -1723,14 +1726,14 @@ class FieldFactory(list):
         return factory
 
     @classmethod
-    def from_scope(cls, scope: Scope):
+    def from_scope(cls, scope: Scope) -> "FieldFactory":
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
         factory.extend(filter(lambda field: scope in field["scope"], all_fields))
         factory.scopes.add(scope)
         return factory
 
-    def and_scope(self, scope: Scope):
+    def and_scope(self, scope: Scope) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
 
         if scope not in self.scopes:
@@ -1739,7 +1742,7 @@ class FieldFactory(list):
             factory.scopes.add(scope)
         return factory
 
-    def filtered_by_types(self, types: list):
+    def filtered_by_types(self, types: List) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
 
         for item in self:
@@ -1747,23 +1750,23 @@ class FieldFactory(list):
                 factory.append(item)
         return factory
 
-    def associated_with_individual(self):
+    def associated_with_individual(self) -> "FieldFactory":
         return self._associated_with(_INDIVIDUAL)
 
-    def associated_with_household(self):
+    def associated_with_household(self) -> "FieldFactory":
         return self._associated_with(_HOUSEHOLD)
 
-    def _associated_with(self, associated_with) -> "FieldFactory":
+    def _associated_with(self, associated_with: str) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
             if item.get("associated_with") == associated_with:
                 factory.append(item)
         return factory
 
-    def to_dict_by(self, attr: str):
+    def to_dict_by(self, attr: str) -> Dict:
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
-    def apply_business_area(self, business_area_slug: str):
+    def apply_business_area(self, business_area_slug: str) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
             choices = field.get("_choices")

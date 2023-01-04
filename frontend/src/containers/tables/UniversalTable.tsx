@@ -23,6 +23,8 @@ interface UniversalTableProps<T, K> {
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event, rows) => void;
   numSelected?: number;
+  allowSort?: boolean;
+  filterOrderBy?: string;
 }
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
@@ -39,6 +41,8 @@ export function UniversalTable<T, K>({
   defaultOrderBy,
   defaultOrderDirection = 'asc',
   numSelected = 0,
+  allowSort = true,
+  filterOrderBy,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
@@ -46,14 +50,20 @@ export function UniversalTable<T, K>({
   const [orderDirection, setOrderDirection] = useState<Order>(
     defaultOrderDirection,
   );
+
   const initVariables = {
     ...initialVariables,
     first: rowsPerPage,
     orderBy: null,
   };
-  if (orderBy) {
+
+  if (orderBy && !filterOrderBy && allowSort) {
     initVariables.orderBy = columnToOrderBy(orderBy, orderDirection);
   }
+  if (filterOrderBy) {
+    initVariables.orderBy = filterOrderBy;
+  }
+
   const { data, refetch, loading, error } = query({
     variables: initVariables,
     notifyOnNetworkStatusChange: true,
@@ -70,7 +80,8 @@ export function UniversalTable<T, K>({
     console.error(error);
     return <div>Unexpected error</div>;
   }
-  if (!data && loading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
 
   let correctTitle = title;
   if (getTitle) {
@@ -151,6 +162,7 @@ export function UniversalTable<T, K>({
       order={orderDirection}
       onSelectAllClick={onSelectAllClick}
       numSelected={numSelected}
+      allowSort={allowSort}
     />
   );
 }
