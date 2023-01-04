@@ -80,23 +80,8 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
-                  >
-                    
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
-                  </span>
+                    class="sc-bxivhb fYYxJD"
+                  />
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
@@ -104,22 +89,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Individual ID
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -128,22 +100,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Individual
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -152,22 +111,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Household ID
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -176,22 +122,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Relationship to HoH
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -200,22 +133,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Age
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -224,22 +144,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Gender
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -248,22 +155,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Administrative Level 2
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
               </tr>

@@ -23,8 +23,7 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    # TODO: signature differs from superclass
-    def _generate_next_value_(name, *args: Any) -> "Permissions":  # type: ignore
+    def _generate_next_value_(name, *args: Any) -> "Permissions":  # type: ignore # FIXME: signature differs from superclass
         return name
 
     # RDI
@@ -199,7 +198,7 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def check_permissions(user: Any, permissions: List[Permissions], **kwargs: Any) -> bool:
+def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
     business_area_arg = kwargs.get("business_area")
@@ -247,9 +246,9 @@ class BaseNodePermissionMixin:
     @classmethod
     def get_node(cls, info: Any, object_id: str) -> Optional[Model]:
         try:
-            object_instance = cls._meta.model.objects.get(pk=object_id)  # type: ignore
+            object_instance = cls._meta.model.objects.get(pk=object_id)
             cls.check_node_permission(info, object_instance)
-        except cls._meta.model.DoesNotExist:  # type: ignore
+        except cls._meta.model.DoesNotExist:
             object_instance = None
         return object_instance
 
@@ -258,11 +257,11 @@ class BaseNodePermissionMixin:
         cls,
         info: Any,
         object_instance: Any,
-        general_permission: BasePermission,
+        general_permission: Permissions,
         is_creator: bool,
-        creator_permission: Any,
+        creator_permission: Permissions,
         is_owner: bool,
-        owner_permission: List[BasePermission],
+        owner_permission: Permissions,
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
@@ -277,12 +276,12 @@ class BaseNodePermissionMixin:
 class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
-        type: str,
+        type: Type,
         fields: Optional[Any] = None,
         order_by: Optional[Any] = None,
         extra_filter_meta: Optional[Any] = None,
         filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[BasePermission] = (AllowAny,),  # type: ignore
+        permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,),
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -357,7 +356,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @classmethod
-    def has_permission(cls, info: Any, permission: Iterable, business_area_arg: str, raise_error: bool = True) -> bool:
+    def has_permission(cls, info: Any, permission: Any, business_area_arg: str, raise_error: bool = True) -> bool:
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):

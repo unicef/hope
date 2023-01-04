@@ -7,7 +7,7 @@ import responses
 from constance.test import override_config
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.admin import get_valid_kobo_username
+from hct_mis_api.apps.account.admin.mixins import get_valid_kobo_username
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleFactory,

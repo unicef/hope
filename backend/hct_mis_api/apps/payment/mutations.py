@@ -406,7 +406,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         received: Optional[int],
         **kwargs: Any,
     ) -> "UpdatePaymentVerificationReceivedAndReceivedAmount":
-        if math.isnan(received_amount):
+        if received_amount is not None and math.isnan(received_amount):
             received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
@@ -442,7 +442,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)  # type: ignore # FIXME
         payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()
@@ -456,7 +456,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore
+        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore # FIXME
 
 
 # TODO: what about typing [0] on XlsxErrorNode
@@ -466,13 +466,13 @@ class XlsxErrorNode(graphene.ObjectType):
     message = graphene.String()
 
     def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[0]  # type: ignore
+        return parent[0]  # type: ignore # FIXME
 
     def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[1]  # type: ignore
+        return parent[1]  # type: ignore # FIXME
 
     def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[2]  # type: ignore
+        return parent[2]  # type: ignore # FIXME
 
 
 class ExportXlsxCashPlanVerification(PermissionMutation):

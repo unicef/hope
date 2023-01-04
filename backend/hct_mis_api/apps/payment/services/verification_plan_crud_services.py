@@ -39,14 +39,14 @@ class VerificationPlanCrudServices:
         cash_plan_verification.verification_channel = input_data.get("verification_channel")
 
         payment_records = get_payment_records(
-            cash_plan_verification.cash_plan, cash_plan_verification.verification_channel
+            cash_plan_verification.cash_plan, cash_plan_verification.verification_channel  # type: ignore # FIXME: Argument 2 to "get_payment_records" has incompatible type "Optional[Any]"; expected "str"
         )
         sampling = Sampling(input_data, cash_plan, payment_records)
         cash_plan_verification, processed_payment_records = sampling.process_sampling(cash_plan_verification)
         ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
-        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()
+        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()  # type: ignore # FIXME: Argument 2 to "CreatePaymentVerifications" has incompatible type "Optional[_QuerySet[Any, Any]]"; expected "List[PaymentRecord]"
 
         return cash_plan_verification
 
@@ -69,7 +69,7 @@ class VerificationPlanCrudServices:
         ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
-        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()
+        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()  # type: ignore # FIXME: Argument 2 to "CreatePaymentVerifications" has incompatible type "Optional[_QuerySet[Any, Any]]"; expected "List[PaymentRecord]"
 
         return cash_plan_verification
 

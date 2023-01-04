@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 import graphene
 from graphene import relay
@@ -31,11 +31,13 @@ def get_field_by_name(field_name: str) -> Optional[Any]:
     field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name").get(field_name)
     choices = field.get("choices")
     if choices and callable(choices):
-        field["choices"] = choices()  # type: ignore
+        field["choices"] = choices()  # type: ignore # FIXME: Unsupported target for indexed assignment ("Optional[Any]")
     return field
 
 
-def filter_choices(field: Dict, args: List) -> Dict:
+def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
+    if not field:
+        return None
     choices = field.get("choices")
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))
@@ -49,12 +51,12 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Dict:
+    def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
             field_attribute = get_field_by_name(parent.field_name)
-            return filter_choices(field_attribute, parent.arguments)
+            return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -67,12 +69,12 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Union[Dict, FlexibleAttribute]:
+    def resolve_field_attribute(parent, info: Any) -> Any:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
-        else:
-            field_attribute = get_field_by_name(parent.field_name)
-            return filter_choices(field_attribute, parent.arguments)
+
+        field_attribute = get_field_by_name(parent.field_name)
+        return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
