@@ -32,7 +32,9 @@ def update_referral_extras(
     return grievance_ticket
 
 
-def create_new_ticket(grievance_ticket: GrievanceTicket, household: Household, individual: Individual) -> None:
+def create_new_ticket(
+    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
+) -> None:
     TicketReferralDetails.objects.create(
         individual=individual,
         household=household,
