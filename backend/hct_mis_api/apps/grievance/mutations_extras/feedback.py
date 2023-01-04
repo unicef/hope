@@ -81,7 +81,7 @@ def create_new_positive_feedback_ticket(
     )
 
 
-def update_ticket(ticket_details: Any, household: Household, individual: Individual) -> None:
+def update_ticket(ticket_details: Any, household: Optional[Household], individual: Optional[Individual]) -> None:
     if individual:
         ticket_details.individual = individual
     if household:

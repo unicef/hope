@@ -395,7 +395,7 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: List[str]) -> None:
         data_dict.pop(field, None)
 
 
-def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -> None:
+def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,
