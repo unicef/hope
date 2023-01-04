@@ -86,7 +86,7 @@ class RapidProFlow(graphene.ObjectType):
     modified_on = graphene.DateTime()
 
     def resolve_id(parent, info: Any) -> str:
-        return parent["uuid"]  # type: ignore
+        return parent["uuid"]  # type: ignore # FIXME
 
 
 class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -268,7 +268,7 @@ class Query(graphene.ObjectType):
         def get_payment_records(
             cash_plan: CashPlan,
             payment_verification_plan: Optional[CashPlanPaymentVerification],
-            verification_channel: str,
+            verification_channel: Any,
         ) -> QuerySet:
             if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
                 return cash_plan.available_payment_records(

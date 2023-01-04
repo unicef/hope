@@ -107,17 +107,19 @@ class IndividualDocument(Document):
     def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_admin1(self, instance: Individual) -> Optional[str]:  # type: ignore
+    def prepare_admin1(self, instance: Individual) -> Optional[str]:
         household = instance.household
         if household:
             if household.admin1:
                 return household.admin1.name
+        return None
 
-    def prepare_admin2(self, instance: Individual) -> Optional[str]:  # type: ignore
+    def prepare_admin2(self, instance: Individual) -> Optional[str]:
         household = instance.household
         if household:
             if household.admin2:
                 return household.admin2.name
+        return None
 
     def prepare_hash_key(self, instance: Individual) -> str:
         return instance.get_hash_key
@@ -176,9 +178,8 @@ class IndividualDocumentOthers(IndividualDocument):
         return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
-def get_individual_doc(business_area_slug: str) -> Type[IndividualDocument]:
-    # TODO: Incompatible return value type (got "Type[object]", expected "Type[IndividualDocument]")
-    return {  # type: ignore
+def get_individual_doc(business_area_slug: str) -> Type:
+    return {
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,
     }.get(business_area_slug, IndividualDocumentOthers)
@@ -200,15 +201,17 @@ class HouseholdDocument(Document):
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
 
-    def prepare_admin1(self, household: Household) -> Optional[str]:  # type: ignore
+    def prepare_admin1(self, household: Household) -> Optional[str]:
         if household:
             if household.admin1:
                 return household.admin1.name
+        return None
 
-    def prepare_admin2(self, household: Household) -> Optional[str]:  # type: ignore
+    def prepare_admin2(self, household: Household) -> Optional[str]:
         if household:
             if household.admin2:
                 return household.admin2.name
+        return None
 
     def prepare_business_area(self, instance: Household) -> str:
         return instance.business_area.slug

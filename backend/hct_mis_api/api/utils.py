@@ -4,7 +4,7 @@ from typing import Dict, List, Union
 def humanize_errors(errors: List) -> Union[Dict, List]:
     # TODO: refactor
     try:
-        households = errors.pop("households")
+        households = errors.pop("households")  # type: ignore
         errs = {}
         if len(households) == 1 and isinstance(households[0], str):
             hh_info = households
@@ -24,7 +24,7 @@ def humanize_errors(errors: List) -> Union[Dict, List]:
                     hh_info.append({f"Household #{i}": [h]})
         if hh_info:
             errs["households"] = hh_info
-        errs.update(**errors)
+        errs.update(**errors)  # type: ignore
         return errs
     except (ValueError, AttributeError):
         return errors

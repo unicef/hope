@@ -40,7 +40,6 @@ from hct_mis_api.apps.core.models import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
 
     from django.db.models.query import QuerySet
 
@@ -80,8 +79,7 @@ class FlexibleAttributeNode(DjangoObjectType):
         return self.choices.all()
 
     def resolve_associated_with(self, info: Any) -> str:
-        # TODO: need some stubs for graphene-django?
-        associated_number: int = int(self.associated_with)  # type: ignore
+        associated_number: int = int(self.associated_with)  # type: ignore # FIXME: need some stubs for graphene-django
         choice: Tuple[int, str] = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[associated_number]
         return str(choice[1])
 
@@ -128,14 +126,16 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: str, root: Any, info: Any, **args: Any) -> Callable:
+def _custom_dict_or_attr_resolver(
+    attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any
+) -> Callable:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options: Dict, attrs: str) -> List:
+def sort_by_attr(options: Iterable, attrs: str) -> List:
     def key_extractor(el: Any) -> Any:
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
@@ -177,16 +177,16 @@ class FieldAttributeNode(graphene.ObjectType):
         return False
 
     def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))  # type: ignore # FIXME: Argument 1 to "resolve_label" has incompatible type "Callable[..., Any]"; expected "Dict[Any, Any]"
 
     def resolve_label_en(parent, info: Any) -> Any:
-        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore # FIXME: Value of type "Callable[..., Any]" is not indexable
 
-    def resolve_associated_with(self, info: Any) -> Union:
+    def resolve_associated_with(self, info: Any) -> Any:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
-        if resolved == 0:  # type: ignore
+        if resolved == 0:  # type: ignore # FIXME: Non-overlapping equality check (left operand type: "Callable[..., Any]", right operand type: "Literal[0]")
             return "Household"
-        elif resolved == 1:  # type: ignore
+        elif resolved == 1:  # type: ignore # FIXME: Non-overlapping equality check (left operand type: "Callable[..., Any]", right operand type: "Literal[1]")
             return "Individual"
         else:
             return resolved
@@ -205,7 +205,7 @@ class GroupAttributeNode(DjangoObjectType):
         fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
     def resolve_label_en(self, info: Any) -> Any:
-        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]  # type: ignore
+        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]  # type: ignore # FIXME: Value of type "Callable[..., Any]" is not indexable
 
     def resolve_flex_attributes(self, info: Any) -> "QuerySet":
         return self.flex_attributes.all()
@@ -238,15 +238,15 @@ def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[st
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-            business_area_slug
+            business_area_slug  # type: ignore # FIXME: Argument 1 to "apply_business_area" of "FieldFactory" has incompatible type "Optional[str]"; expected "str"
         )
 
 
 def resolve_assets(business_area_slug: str, uid: Optional[str] = None, *args: Any, **kwargs: Any) -> Tuple:
-    method: Iterable
+    method: Optional[Union[List[Any], Dict[Any, Any]]]
     return_method: Callable
     method, return_method = (
-        (  # type: ignore # TODO: refactor that
+        (  # type: ignore # FIXME: Incompatible types in assignment (expression has type "function", variable has type "Callable[..., Any]")
             KoboAPI(business_area_slug).get_single_project_data(uid),
             reduce_asset,
         )
@@ -338,13 +338,13 @@ class Query(graphene.ObjectType):
         return sort_by_attr(
             (
                 attr
-                for attr in get_fields_attr_generators(flex_field, business_area_slug)
+                for attr in get_fields_attr_generators(flex_field, business_area_slug)  # type: ignore # FIXME: Argument 1 to "get_fields_attr_generators" has incompatible type "Optional[bool]"; expected "bool"
                 if not is_a_killer_filter(attr)
             ),
             "label.English(EN)",
         )
 
-    def resolve_kobo_project(self, info: Any, uid: "UUID", business_area_slug: str, **kwargs: Any) -> Tuple:
+    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Tuple:
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
     def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> Tuple:

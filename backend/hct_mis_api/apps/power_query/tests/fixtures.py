@@ -112,8 +112,7 @@ class user_grant_permission:
 
     def start(self) -> None:
         """Activate a patch, returning any created mock."""
-        result = self.__enter__()  # type: ignore
-        return result
+        self.__enter__()
 
     def stop(self) -> None:
         """Stop an active patch."""
@@ -166,5 +165,4 @@ class user_grant_office_permission(object):
 
     def stop(self) -> None:
         """Stop an active patch."""
-        # TODO: __exit__ needs arguments
-        return self.__exit__()  # type: ignore
+        return self.__exit__()  # type: ignore # FIXME: __exit__ needs arguments

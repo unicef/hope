@@ -24,7 +24,7 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
-    LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
+    LANGUAGES: List = [[a.label.lower(), a.label] for a in interpreters]
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,
@@ -77,7 +77,7 @@ class Rule(models.Model):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:  # type: ignore
+    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:  # type: ignore # FIXME: Return type "None" of "delete" incompatible with return type "Tuple[int, Dict[str, int]]" in supertype "Model"
         self.enabled = False
         self.save()
 

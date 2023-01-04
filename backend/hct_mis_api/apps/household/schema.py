@@ -114,15 +114,15 @@ class IndividualIdentityNode(DjangoObjectType):
 
     @staticmethod
     def resolve_partner(parent: IndividualIdentity, info: Any) -> str:
-        return parent.partner.name
+        return getattr(parent.partner, "name", "")
 
     @staticmethod
     def resolve_country(parent: IndividualIdentity, info: Any) -> str:
-        return parent.country.name
+        return getattr(parent.country, "name", "")
 
     @staticmethod
     def resolve_country_iso3(parent: IndividualIdentity, info: Any) -> str:
-        return parent.country.iso_code3
+        return getattr(parent.country, "iso_code3", "")
 
     class Meta:
         model = IndividualIdentity
@@ -136,16 +136,17 @@ class DocumentNode(DjangoObjectType):
     country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
+    @staticmethod
     def resolve_country(parent: Document, info: Any) -> str:
-        return getattr(parent.country, "name", parent.country)
+        return getattr(parent.country, "name", "")
 
+    @staticmethod
     def resolve_country_iso3(parent: Document, info: Any) -> str:
-        return parent.country.iso_code3
+        return getattr(parent.country, "iso_code3", "")
 
+    @staticmethod
     def resolve_photo(parent: Document, info: Any) -> Optional[String]:
-        if parent.photo:
-            return parent.photo.url
-        return None
+        return parent.photo.url if parent.photo else None
 
     class Meta:
         model = Document
