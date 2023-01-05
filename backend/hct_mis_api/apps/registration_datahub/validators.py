@@ -89,144 +89,6 @@ class XLSXValidator(BaseValidator):
             raise
 
 
-class ImportDataValidator(BaseValidator):
-    BUSINESS_AREA_SLUG = None
-    DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
-        "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
-        "drivers_license_issuer_i_c": "drivers_license_no_i_c",
-        "electoral_card_issuer_i_c": "electoral_card_no_i_c",
-        "national_id_issuer_i_c": "national_id_no_i_c",
-        "national_passport_issuer_i_c": "national_passport_i_c",
-        "tax_id_issuer_i_c": "tax_id_no_i_c",
-        "other_id_issuer_i_c": "other_id_type_i_c",
-        # identities
-        "scope_id_issuer_i_c": "scope_id_no_i_c",
-        "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
-    }
-
-    @classmethod
-    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:
-        try:
-            validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
-
-            errors_list = []
-            for method in validate_methods:
-                errors = method(*args, **kwargs)
-                errors_list.extend(errors)
-
-            errors_list.sort(key=itemgetter("header"))
-
-            return errors_list
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    @classmethod
-    def documents_validator(cls, documents_numbers_dict: Dict, is_xlsx: bool = True) -> List:
-        try:
-            invalid_rows = []
-            for key, values in documents_numbers_dict.items():
-                if key == "other_id_no_i_c":
-                    continue
-                issuing_countries = values.get("issuing_countries")
-                if not issuing_countries:
-                    issuing_countries = [None] * len(values["validation_data"])
-                if key == "other_id_type_i_c":
-                    for name, value, validation_data, issuing_country in zip(
-                        values["names"], values["numbers"], values["validation_data"], issuing_countries
-                    ):
-                        row_number = validation_data.get("row_number")
-                        if not name and value:
-                            error = {
-                                "header": key,
-                                "message": f"Name for other_id_type is required, when number is provided: no: {value}",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if name and not value:
-                            error = {
-                                "header": key,
-                                "message": "Number for other_id_no_i_c is required, when name is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if (name or value) and not issuing_country:
-                            error = {
-                                "header": key,
-                                "message": "Issuing country for other_id_no_i_c is required, "
-                                "when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                else:
-                    for validation_data, value, issuing_country in zip_longest(
-                        values["validation_data"], values["numbers"], issuing_countries
-                    ):
-                        row_number = (
-                            validation_data.get("row_number") if isinstance(validation_data, dict) else validation_data
-                        )
-                        if value and not issuing_country:
-                            error = {
-                                "header": key,
-                                "message": f"Issuing country for {key} is required, when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        elif issuing_country and not value:
-                            error = {
-                                "header": key,
-                                "message": f"Number for {key} is required, when issuing country is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-
-            return invalid_rows
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    @classmethod
-    def identity_validator(cls, identities_numbers_dict: Dict, is_xlsx: bool = True) -> List:
-        try:
-            invalid_rows = []
-            for key, values in identities_numbers_dict.items():
-                issuing_countries = values.get("issuing_countries")
-                if not issuing_countries:
-                    issuing_countries = [None] * len(values["validation_data"])
-                for data_dict, value, issuing_country in zip_longest(
-                    values["validation_data"], values["numbers"], issuing_countries
-                ):
-                    row_number = data_dict.get("row_number") if isinstance(data_dict, dict) else data_dict
-                    if not value and not issuing_country:
-                        continue
-                    elif value and not issuing_country:
-                        error = {
-                            "header": key,
-                            "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
-                        }
-                        if is_xlsx is True:
-                            error["row_number"] = row_number
-                        invalid_rows.append(error)
-                    elif issuing_country and not value:
-                        error = {
-                            "header": key,
-                            "message": f"Number for {key} is required, when issuing country is provided",
-                        }
-                        if is_xlsx is True:
-                            error["row_number"] = row_number
-                        invalid_rows.append(error)
-
-            return invalid_rows
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-
 class ImportDataInstanceValidator:
     BUSINESS_AREA_SLUG = None
     business_area_code = None
@@ -598,7 +460,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True
-            return self.image_loader.image_in(cell.coordinate)
+            return self.image_loader.image_in(cell)
         except Exception as e:
             logger.exception(e)
             raise
@@ -721,7 +583,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
-                            f"Sheet: {sheet.title}, Unexpected value: "
+                            f"Sheet: {sheet.title!r}, Unexpected value: "
                             f"{value} for type "
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
