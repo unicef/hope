@@ -24,6 +24,7 @@ class TestCreateSurvey(APITestCase):
             firstName
             lastName
           }
+          rapidProUrl
         }
       }
     }
@@ -34,7 +35,6 @@ class TestCreateSurvey(APITestCase):
         availableFlows {
             id
             name
-            url
         }
     }
     """

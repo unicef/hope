@@ -16,6 +16,7 @@ snapshots['TestCreateSurvey::test_create_survey 1'] = {
                     'lastName': 'Doe'
                 },
                 'numberOfRecipients': 3,
+                'rapidProUrl': 'https://app.rapidpro.io/flow/results/flow123/',
                 'title': 'Test survey'
             }
         }
@@ -31,6 +32,7 @@ snapshots['TestCreateSurvey::test_create_survey_and_send_via_rapidpro 1'] = {
                     'lastName': 'Doe'
                 },
                 'numberOfRecipients': 3,
+                'rapidProUrl': 'https://app.rapidpro.io/flow/results/flow123/',
                 'title': 'Test survey'
             }
         }
@@ -102,13 +104,11 @@ snapshots['TestCreateSurvey::test_getting_available_flows 1'] = {
         'availableFlows': [
             {
                 'id': '123',
-                'name': 'flow2',
-                'url': 'https://app.rapidpro.io/flow/results/123/'
+                'name': 'flow2'
             },
             {
                 'id': '234',
-                'name': 'flow2',
-                'url': 'https://app.rapidpro.io/flow/results/234/'
+                'name': 'flow2'
             }
         ]
     }
