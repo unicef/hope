@@ -243,7 +243,7 @@ def to_choice_object(choices: Iterable) -> List[Dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Union[Dict, List, Any]:
+def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Any:
     if isinstance(obj, dict):
         return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):

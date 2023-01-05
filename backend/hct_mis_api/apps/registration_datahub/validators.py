@@ -1029,7 +1029,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def _get_field_type_error(self, field: str, value: Union[str, list], attachments: list) -> Union[dict, None]:
+    def _get_field_type_error(self, field: str, value: Any, attachments: list) -> Union[dict, None]:
         try:
             field_dict = self.all_fields.get(field)
             if field_dict is None:
@@ -1067,7 +1067,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
         try:
-            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)
+            reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;
