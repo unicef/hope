@@ -28,7 +28,7 @@ class RapidProFlowNode(graphene.ObjectType):
         return parent["uuid"]  # type: ignore
 
     def resolve_url(parent, info: Any) -> str:
-        return f"https://app.rapidpro.io/flow/results/{parent['uuid']}/"
+        return f"https://app.rapidpro.io/flow/results/{parent['uuid']}/"  # type: ignore
 
 
 class CommunicationMessageRecipientMapNode(BaseNodePermissionMixin, DjangoObjectType):
