@@ -75,7 +75,10 @@ export const SurveyDetailsPage = (): React.ReactElement => {
           variant='contained'
           color='primary'
           component={Link}
-          to={survey?.rapidProUrl}
+          to={{
+            pathname: survey?.rapidProUrl,
+          }}
+          target='_blank'
         >
           {t('Check Answers')}
         </Button>

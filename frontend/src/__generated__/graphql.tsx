@@ -4804,7 +4804,6 @@ export type RapidProFlowNode = {
    __typename?: 'RapidProFlowNode',
   id?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  url?: Maybe<Scalars['String']>,
 };
 
 export type RapidProFlowResult = {
@@ -5571,9 +5570,11 @@ export type SurveyNode = Node & {
   fullListArguments: Scalars['JSONString'],
   randomSamplingArguments: Scalars['JSONString'],
   sampleSize: Scalars['Int'],
+  flowId?: Maybe<Scalars['String']>,
   successfulRapidProCalls: Array<Scalars['JSONString']>,
   sampleFilePath?: Maybe<Scalars['String']>,
   hasValidSampleFile?: Maybe<Scalars['Boolean']>,
+  rapidProUrl?: Maybe<Scalars['String']>,
 };
 
 
@@ -10963,7 +10964,7 @@ export type AvailableFlowsQuery = (
   { __typename?: 'Query' }
   & { availableFlows: Maybe<Array<Maybe<(
     { __typename?: 'RapidProFlowNode' }
-    & Pick<RapidProFlowNode, 'id' | 'name' | 'url'>
+    & Pick<RapidProFlowNode, 'id' | 'name'>
   )>>> }
 );
 
@@ -11018,7 +11019,7 @@ export type SurveyQuery = (
   { __typename?: 'Query' }
   & { survey: Maybe<(
     { __typename?: 'SurveyNode' }
-    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body' | 'sampleFilePath' | 'hasValidSampleFile'>
+    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body' | 'rapidProUrl' | 'sampleFilePath' | 'hasValidSampleFile'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
@@ -21519,7 +21520,6 @@ export const AvailableFlowsDocument = gql`
   availableFlows {
     id
     name
-    url
   }
 }
     `;
@@ -21675,6 +21675,7 @@ export const SurveyDocument = gql`
     }
     body
     title
+    rapidProUrl
     sampleFilePath
     hasValidSampleFile
   }
@@ -24966,7 +24967,6 @@ export type RapidProFlowResolvers<ContextType = any, ParentType extends Resolver
 export type RapidProFlowNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowNode'] = ResolversParentTypes['RapidProFlowNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type RapidProFlowResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']> = {
@@ -25402,9 +25402,11 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   fullListArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  flowId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   successfulRapidProCalls?: Resolver<Array<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleFilePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  rapidProUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type SurveyNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SurveyNodeConnection'] = ResolversParentTypes['SurveyNodeConnection']> = {
