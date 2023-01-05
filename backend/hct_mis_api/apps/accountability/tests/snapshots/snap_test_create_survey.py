@@ -102,11 +102,13 @@ snapshots['TestCreateSurvey::test_getting_available_flows 1'] = {
         'availableFlows': [
             {
                 'id': '123',
-                'name': 'flow2'
+                'name': 'flow2',
+                'url': 'https://app.rapidpro.io/flow/results/123/'
             },
             {
                 'id': '234',
-                'name': 'flow2'
+                'name': 'flow2',
+                'url': 'https://app.rapidpro.io/flow/results/234/'
             }
         ]
     }

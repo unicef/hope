@@ -34,6 +34,7 @@ class TestCreateSurvey(APITestCase):
         availableFlows {
             id
             name
+            url
         }
     }
     """

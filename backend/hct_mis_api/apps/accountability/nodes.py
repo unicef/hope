@@ -22,9 +22,13 @@ from hct_mis_api.apps.household.models import Household
 class RapidProFlowNode(graphene.ObjectType):
     id = graphene.String()
     name = graphene.String()
+    url = graphene.String()
 
     def resolve_id(parent, info: Any) -> str:
         return parent["uuid"]  # type: ignore
+
+    def resolve_url(parent, info: Any) -> str:
+        return f"https://app.rapidpro.io/flow/results/{parent['uuid']}/"
 
 
 class CommunicationMessageRecipientMapNode(BaseNodePermissionMixin, DjangoObjectType):
