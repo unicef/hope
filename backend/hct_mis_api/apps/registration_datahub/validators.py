@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -1076,7 +1076,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def geopoint_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> Union[str, None]:
+    def geopoint_validator(
+        self, value: Optional[Sequence[Any]], field: str, *args: Any, **kwargs: Any
+    ) -> Union[str, None]:
         message = f"Invalid geopoint {value} for field {field}"
 
         if not value or not isinstance(value, str):
