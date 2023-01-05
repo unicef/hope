@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name, *args: Any) -> "Permissions":  # type: ignore # FIXME: signature differs from superclass
+    @staticmethod
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> "Permissions":
         return name
 
     # RDI

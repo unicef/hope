@@ -33,7 +33,7 @@ class ActiveRecordFilter(ListFilter):
     parameter_name = "active"
 
     def __init__(self, request: "HttpRequest", params: List[str], model: Model, model_admin: ModelAdmin) -> None:
-        super().__init__(request, params, model, model_admin)  # type: ignore # FIXME
+        super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
             if p in params:
                 value = params.pop(p)
