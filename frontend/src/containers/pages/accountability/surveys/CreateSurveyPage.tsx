@@ -197,7 +197,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
       }))
     : [];
   const mappedFlows = flowsData?.availableFlows?.length
-    ? flowsData.availableFlows.map((el) => ({ value: el.name, name: el.name }))
+    ? flowsData.availableFlows.map((el) => ({ value: el.id, name: el.name }))
     : [];
 
   const getSampleSizePercentage = (): string => {
@@ -228,7 +228,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
   ): CreateSurveyAccountabilityMutationVariables => {
     return {
       input: {
-        title: values.title,
+        title: flowsData?.availableFlows.find((el) => values.title === el.id)
+          .name,
         body: values.body,
         category: values.category,
         targetPopulation: values.targetPopulation,

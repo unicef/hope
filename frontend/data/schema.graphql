@@ -2642,6 +2642,7 @@ type RapidProFlow {
 type RapidProFlowNode {
   id: String
   name: String
+  url: String
 }
 
 type RapidProFlowResult {

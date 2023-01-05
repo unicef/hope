@@ -4804,6 +4804,7 @@ export type RapidProFlowNode = {
    __typename?: 'RapidProFlowNode',
   id?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
+  url?: Maybe<Scalars['String']>,
 };
 
 export type RapidProFlowResult = {
@@ -10962,7 +10963,7 @@ export type AvailableFlowsQuery = (
   { __typename?: 'Query' }
   & { availableFlows: Maybe<Array<Maybe<(
     { __typename?: 'RapidProFlowNode' }
-    & Pick<RapidProFlowNode, 'id' | 'name'>
+    & Pick<RapidProFlowNode, 'id' | 'name' | 'url'>
   )>>> }
 );
 
@@ -21518,6 +21519,7 @@ export const AvailableFlowsDocument = gql`
   availableFlows {
     id
     name
+    url
   }
 }
     `;
@@ -24964,6 +24966,7 @@ export type RapidProFlowResolvers<ContextType = any, ParentType extends Resolver
 export type RapidProFlowNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowNode'] = ResolversParentTypes['RapidProFlowNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type RapidProFlowResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']> = {
