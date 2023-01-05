@@ -4,6 +4,7 @@ import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
+import NewReleases from '@material-ui/icons/NewReleases';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
@@ -153,5 +154,10 @@ export const resourcesItems = [
     name: 'Tools and Materials',
     href: 'https://unicef.sharepoint.com/sites/EMOPS-HOPE',
     icon: <InfoIcon />,
+  },
+  {
+    name: 'Release Note',
+    href: '/api/changelog/',
+    icon: <NewReleases />,
   },
 ];
