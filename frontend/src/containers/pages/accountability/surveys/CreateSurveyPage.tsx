@@ -197,7 +197,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
       }))
     : [];
   const mappedFlows = flowsData?.availableFlows?.length
-    ? flowsData.availableFlows.map((el) => ({ value: el.id, name: el.name }))
+    ? flowsData.availableFlows.map((el) => ({ value: el.name, name: el.name }))
     : [];
 
   const getSampleSizePercentage = (): string => {
