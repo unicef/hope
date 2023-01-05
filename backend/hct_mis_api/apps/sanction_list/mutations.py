@@ -5,7 +5,7 @@ from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.registration_datahub.schema import XlsxRowErrorNode
-from hct_mis_api.apps.registration_datahub.validators import XLSXValidator
+from hct_mis_api.apps.registration_datahub.validators import XLSXValidator, XlsxException
 from hct_mis_api.apps.sanction_list.celery_tasks import check_against_sanction_list_task
 from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
 
@@ -23,9 +23,10 @@ class CheckAgainstSanctionListMutation(
     @classmethod
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO) -> "CheckAgainstSanctionListMutation":
-        errors = cls.validate(file=file)
-        if errors:
-            return CheckAgainstSanctionListMutation(False, errors)
+        try:
+            cls.validate(file=file)
+        except XlsxException as e:
+            return CheckAgainstSanctionListMutation(ok=False, errors=e.errors)
 
         user = info.context.user
         uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
@@ -35,7 +36,7 @@ class CheckAgainstSanctionListMutation(
             original_file_name=file.name,
         )
 
-        return CheckAgainstSanctionListMutation(True, errors)
+        return CheckAgainstSanctionListMutation(ok=True, errors=[])
 
 
 class Mutations(graphene.ObjectType):
