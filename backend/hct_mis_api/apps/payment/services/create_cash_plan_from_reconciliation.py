@@ -16,18 +16,22 @@ class CreateCashPlanFromReconciliationService:
     COLUMN_PAYMENT_ID = "PAYMENT_ID"
     COLUMN_PAYMENT_STATUS = "PAYMENT_STATUS"
     COLUMN_DELIVERED_AMOUNT = "DELIVERED_AMOUNT"
-    COLUMN_CURRENCY = "CURRENCY"
+    COLUMN_ENTITLEMENT_QUANTITY = "ENTITLEMENT_QUANTITY"
     ALL_COLUMNS = (
         COLUMN_PAYMENT_ID,
         COLUMN_PAYMENT_STATUS,
         COLUMN_DELIVERED_AMOUNT,
-        COLUMN_CURRENCY,
+        COLUMN_ENTITLEMENT_QUANTITY,
     )
 
-    def __init__(self, business_area_slug, reconciliation_xlsx_file, column_mapping, cash_plan_form_data):
+    def __init__(
+        self, business_area_slug, reconciliation_xlsx_file, column_mapping, cash_plan_form_data, currency, delivery_type
+    ):
         self.business_area = BusinessArea.objects.get(slug=business_area_slug)
         self.reconciliation_xlsx_file = reconciliation_xlsx_file
         self.column_mapping = column_mapping
+        self.currency = currency
+        self.delivery_type = delivery_type
         self.column_index_mapping = {}
         self.cash_plan_form_data = cash_plan_form_data
 
