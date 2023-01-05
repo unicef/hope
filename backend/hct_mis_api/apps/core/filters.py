@@ -184,5 +184,6 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
-
-        return qs.filter(business_area__slug=business_area_slug)
+        if business_area_slug:
+            return qs.filter(business_area__slug=business_area_slug)
+        return qs
