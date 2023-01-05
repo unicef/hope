@@ -38,8 +38,6 @@ class KoboRequestsSession(requests.Session):
 
 
 class KoboAPI:
-    # KPI_URL = os.getenv("KOBO_KF_URL", "https://kobo.humanitarianresponse.info")
-
     def __init__(self, business_area_slug: Optional[str] = None, kpi_url: Optional[str] = None):
         self.KPI_URL = kpi_url or settings.KOBO_KF_URL
         if business_area_slug is not None:
