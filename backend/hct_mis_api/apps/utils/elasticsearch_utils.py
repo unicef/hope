@@ -2,7 +2,6 @@ import enum
 import logging
 from time import sleep
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from uuid import UUID
 
 from django.db.models import Model
 
@@ -59,13 +58,6 @@ def rebuild_search_index(models: Optional[List[Model]] = None, options: Optional
 
 def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
-
-
-def remove_document_by_matching_ids(id_list: List["UUID"]) -> None:
-    query_dict = {"query": {"terms": {"id": id_list}}}
-    search = Search(index="individuals")
-    search.update_from_dict(query_dict)
-    search.delete()
 
 
 def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Document") -> None:

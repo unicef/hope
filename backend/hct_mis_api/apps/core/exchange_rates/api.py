@@ -23,7 +23,7 @@ class ExchangeRateAPI:
             raise ValueError("Missing Ocp Apim Subscription Key")
 
         self._client = session()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)  # type: ignore # FIXME: Argument "method_whitelist" to "Retry" has incompatible type "bool"; expected "Optional[Collection[str]]"
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=None)
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
