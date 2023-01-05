@@ -157,7 +157,7 @@ export const resourcesItems = [
   },
   {
     name: 'Release Note',
-    href: 'https://hope.unicef.org/api/changelog/',
+    href: '/api/changelog/',
     icon: <NewReleases />,
   },
 ];
