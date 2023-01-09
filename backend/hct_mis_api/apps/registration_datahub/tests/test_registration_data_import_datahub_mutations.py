@@ -1,4 +1,5 @@
 import io
+from typing import Any, List
 
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
@@ -85,7 +86,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"
@@ -98,7 +99,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             field_name="consent",
             name="consent.jpg",
             content_type="'image/jpeg'",
-            size=(60, 30),
+            size=60,
             charset=None,
         )
 
@@ -115,7 +116,9 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             ("without_permission", [], False),
         ]
     )
-    def test_registration_data_import_datahub_upload(self, _, permissions, should_have_import_data):
+    def test_registration_data_import_datahub_upload(
+        self, _: Any, permissions: List[Permissions], should_have_import_data: bool
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
@@ -142,7 +145,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             ),
         ]
     )
-    def test_registration_data_import_create(self, _, permissions):
+    def test_registration_data_import_create(self, _: Any, permissions: List[Permissions]) -> None:
         import_data_obj = ImportData.objects.create(
             file=self.valid_file,
             number_of_households=3,

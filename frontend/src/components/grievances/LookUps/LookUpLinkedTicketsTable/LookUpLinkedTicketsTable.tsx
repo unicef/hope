@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString, reduceChoices } from '../../../../utils/utils';
+import { decodeIdString, choicesToDict } from '../../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -42,11 +42,11 @@ export const LookUpLinkedTicketsTable = ({
   }
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const handleCheckboxClick = (event, name): void => {
     const selectedIndex = selected.indexOf(name);

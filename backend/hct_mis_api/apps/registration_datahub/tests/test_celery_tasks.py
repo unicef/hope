@@ -2,6 +2,7 @@ import base64
 import json
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Generator
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -23,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 )
 
 
-def create_record(registration, status):
+def create_record(registration: int, status: str) -> Record:
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
     fields = {
@@ -86,12 +87,12 @@ def create_record(registration, status):
     )
 
 
-def create_imported_document_types():
+def create_imported_document_types() -> None:
     for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
         ImportedDocumentType.objects.create(type=document_type_string)
 
 
-def create_ukraine_business_area():
+def create_ukraine_business_area() -> None:
     BusinessArea.objects.create(
         slug="ukraine",
         code="1234",
@@ -103,9 +104,9 @@ def create_ukraine_business_area():
     )
 
 
-def run_automate_rdi_creation_task(*args, **kwargs):
+def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
     @contextmanager
-    def do_nothing_cache(*_args, **_kwargs):
+    def do_nothing_cache(*_args: Any, **_kwargs: Any) -> Generator:
         yield Mock()
 
     with patch(
@@ -116,20 +117,20 @@ def run_automate_rdi_creation_task(*args, **kwargs):
 
 
 class TestAutomatingRDICreationTask(TestCase):
-    databases = [
+    databases = {
         "default",
         "cash_assist_datahub_ca",
         "cash_assist_datahub_erp",
         "cash_assist_datahub_mis",
         "registration_datahub",
-    ]
+    }
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
-    def test_successful_run_without_records_to_import(self):
+    def test_successful_run_without_records_to_import(self) -> None:
         result = run_automate_rdi_creation_task(registration_id=123, page_size=1)
         assert result[0] == "No Records found"
 
-    def test_not_running_with_record_status_not_to_import(self):
+    def test_not_running_with_record_status_not_to_import(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
         record = create_record(registration=234, status=Record.STATUS_ERROR)
@@ -142,7 +143,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedIndividual.objects.count() == 0
         assert result[0] == "No Records found"
 
-    def test_successful_run_with_records_to_import(self):
+    def test_successful_run_with_records_to_import(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -169,7 +170,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[2][1] == page_size
         assert result[3][1] == amount_of_records - 3 * page_size
 
-    def test_successful_run_and_automatic_merge(self):
+    def test_successful_run_and_automatic_merge(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -196,7 +197,7 @@ class TestAutomatingRDICreationTask(TestCase):
             assert len(result) == 4
             assert merge_task_mock.called
 
-    def test_successful_run_and_fix_task_id(self):
+    def test_successful_run_and_fix_task_id(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
 

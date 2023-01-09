@@ -1,20 +1,17 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
-    databases = (
-        "default",
-        "registration_datahub",
-    )
-
+    databases = "__all__"
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
       allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
@@ -67,9 +64,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
-        cls.maxDiff = None
-        cached_business_areas_slug_id_dict.cache_clear()
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
         program_one = ProgramFactory(
@@ -149,7 +144,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_all(self, _, permissions):
+    def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -163,7 +158,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_single(self, _, permissions):
+    def test_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -178,7 +173,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_programme_filter(self, _, permissions):
+    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -193,7 +188,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_filter(self, _, permissions):
+    def test_query_individuals_by_search_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,

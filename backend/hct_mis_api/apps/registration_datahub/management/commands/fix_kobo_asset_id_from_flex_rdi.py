@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 from django.db.models import OuterRef, Subquery
 
@@ -25,6 +27,6 @@ def update_kobo_asset_id() -> None:
 class Command(BaseCommand):
     help = "Fix unicef id for imported Households and Individuals"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         update_kobo_asset_id()
         self.stdout.write("Kobo asset id fixed for imported Households and Individuals")

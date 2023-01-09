@@ -4,7 +4,7 @@ from django.conf import settings
 
 
 class VersionMiddleware:
-    def __init__(self, get_response: Callable):
+    def __init__(self, get_response: Callable) -> None:
         self.get_response = get_response
         super().__init__()
 

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const StyledFlag = styled(FlagIcon)`
   color: ${({ theme, confirmed }) =>
-    confirmed ? 'deeppink' : theme.hctPalette.oragne};
+    confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
 interface FlagTooltipProps {
   confirmed?: boolean;
@@ -17,7 +17,7 @@ export const FlagTooltip = ({
 }: FlagTooltipProps): React.ReactElement => {
   return (
     <Tooltip title={message}>
-      <StyledFlag confirmed={confirmed} />
+      <StyledFlag confirmed={confirmed ? 1 : 0} />
     </Tooltip>
   );
 };

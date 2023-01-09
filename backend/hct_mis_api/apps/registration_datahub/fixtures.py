@@ -1,6 +1,6 @@
 import random
 import time
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from django.contrib.gis.geos import Point
 
@@ -115,7 +115,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Faker("phone_number")
+    phone_no = factory.LazyFunction(faker.phone_number)
     phone_no_alternative = ""
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
@@ -125,7 +125,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
 
 
 def create_imported_household(
-    household_args=None, individual_args=None
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
 ) -> Tuple[ImportedHousehold, ImportedIndividual]:
     if household_args is None:
         household_args = {}
@@ -141,12 +141,12 @@ def create_imported_household(
 
 
 def create_imported_household_and_individuals(
-    household_data=None, individuals_data=None
+    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None
 ) -> Tuple[ImportedHousehold, List[ImportedIndividual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     household: ImportedHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
     individuals: List[ImportedIndividual] = [
         ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data

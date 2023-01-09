@@ -13,14 +13,14 @@ from hct_mis_api.apps.household.models import Document, Household, Individual
 
 
 class TestDocumentStatusFixer(TestCase):
-    databases = ("registration_datahub", "default")
+    databases = {"registration_datahub", "default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("generatedocumenttypes")
 
-    def test_fix_status(self):
+    def test_fix_status(self) -> None:
         _, individuals = create_household_for_fixtures({"size": 5})
         for individual in individuals:
             DocumentFactory.create_batch(2, individual=individual, status=Document.STATUS_VALID)

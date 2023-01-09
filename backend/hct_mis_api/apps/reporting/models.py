@@ -55,7 +55,7 @@ class Report(TimeStampedUUIDModel):
     )
     admin_area = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"[{self.report_type}] Report for [{self.business_area}]"
 
     class Meta:

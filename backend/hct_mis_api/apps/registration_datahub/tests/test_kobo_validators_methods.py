@@ -1,4 +1,5 @@
 from operator import itemgetter
+from typing import Dict, Tuple
 
 from django.test import TestCase
 
@@ -10,7 +11,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
     VALID_JSON = [
         {
@@ -362,10 +363,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
     ]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
 
-    def test_image_validator(self):
+    def test_image_validator(self) -> None:
         # test for valid value
         valid_attachments = [
             {
@@ -448,7 +449,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
         expected = "Specified image signature-17_10_32.txt for field " "consent_sign_h_c is not a valid image file"
         self.assertEqual(result, expected)
 
-    def test_geopoint_validator(self):
+    def test_geopoint_validator(self) -> None:
         valid_geolocations = (
             "33.937574 67.709401 100 100",
             "1.22521 29.68428",
@@ -473,14 +474,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
         for invalid_option in invalid_geolocations:
             self.assertEqual(
                 validator.geopoint_validator(
-                    invalid_option,
+                    invalid_option,  # type: ignore # FIXME: Argument 1 to "geopoint_validator" of "KoboProjectImportDataInstanceValidator" has incompatible type "Optional[Sequence[Any]]"; expected "str"
                     "hh_geopoint_h_c",
                 ),
                 f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
             )
 
-    def test_date_validator(self):
-        test_data = (
+    def test_date_validator(self) -> None:
+        test_data: Tuple = (
             {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
@@ -505,10 +506,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             result = validator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
 
-    def test_get_field_type_error(self):
+    def test_get_field_type_error(self) -> None:
         attachments = self.VALID_JSON[0]["_attachments"]
 
-        test_data = (
+        test_data: Tuple[Dict, ...] = (
             # INTEGER
             {"args": ("size_h_c", 4, attachments), "expected": None},
             {
@@ -596,7 +597,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             result = validator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
-    def test_validate_everything(self):
+    def test_validate_everything(self) -> None:
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
 

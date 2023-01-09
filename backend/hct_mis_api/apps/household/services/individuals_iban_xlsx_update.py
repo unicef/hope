@@ -8,6 +8,7 @@ from django.db.models import QuerySet
 from django.template.loader import render_to_string
 
 import openpyxl
+from xlwt import Row
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.household.models import (
@@ -49,7 +50,7 @@ class IndividualsIBANXlsxUpdate:
         self.iban_update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMNS[0]]
         self.bank_name_update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMNS[1]]
 
-    def _row_report_data(self, row) -> Any:
+    def _row_report_data(self, row: Row) -> Any:
         return row[0].row
 
     def _get_queryset(self) -> QuerySet[Individual]:
@@ -75,7 +76,7 @@ class IndividualsIBANXlsxUpdate:
             if column not in columns:
                 self.validation_errors.append(f"No {column} column in provided file")
 
-    def _get_matching_report_for_single_row(self, row) -> Tuple[str, Any]:
+    def _get_matching_report_for_single_row(self, row: Row) -> Tuple[str, Any]:
         # TODO: refactor output types
         filter_value = row[self.matching_column_index - 1].value
         individuals = self._get_queryset().filter(**{self.MATCHING_COLUMN.lower(): filter_value})
@@ -134,7 +135,7 @@ class IndividualsIBANXlsxUpdate:
 
                 BankAccountInfo.objects.bulk_update(updated_bank_accounts, ["bank_account_number", "bank_name"])
 
-    def _get_email_context(self, message: str):
+    def _get_email_context(self, message: str) -> Dict:
         return {
             "first_name": self.xlsx_update_file.uploaded_by.first_name,
             "last_name": self.xlsx_update_file.uploaded_by.last_name,
@@ -176,7 +177,7 @@ class IndividualsIBANXlsxUpdate:
             logger.exception(e)
 
     @staticmethod
-    def _prepare_email(context: Dict):
+    def _prepare_email(context: Dict) -> EmailMultiAlternatives:
         text_body = render_to_string(
             "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
         )

@@ -1,7 +1,7 @@
+import { Box } from '@material-ui/core';
 import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -17,16 +17,14 @@ import {
 } from '../../../__generated__/graphql';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
-
 export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
-    householdSize: { min: undefined, max: undefined },
+    text: '',
+    program: '',
+    residenceStatus: '',
+    householdSize: { min: '', max: '' },
+    orderBy: 'unicef_id',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
@@ -56,7 +54,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const programs = allPrograms.map((edge) => edge.node);
 
   return (
-    <div>
+    <>
       <PageHeader title={t('Households')} />
       <HouseholdFilters
         programs={programs as ProgramNode[]}
@@ -64,7 +62,11 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
         onFilterChange={setFilter}
         choicesData={choicesData}
       />
-      <Container data-cy='page-details-container'>
+      <Box
+        display='flex'
+        flexDirection='column'
+        data-cy='page-details-container'
+      >
         <HouseholdTable
           filter={debouncedFilter}
           businessArea={businessArea}
@@ -73,8 +75,9 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             permissions,
           )}
+          filterOrderBy={filter.orderBy}
         />
-      </Container>
-    </div>
+      </Box>
+    </>
   );
 };
