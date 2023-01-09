@@ -821,7 +821,7 @@ class GenerateDashboardReportService:
             ),
         },
     }
-    ROW_CONTENT_METHODS: Dict[str, Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]]] = {
+    ROW_CONTENT_METHODS: Dict = {
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
             GenerateDashboardReportContentHelpers.format_beneficiaries_row,
@@ -904,9 +904,7 @@ class GenerateDashboardReportService:
 
     def _add_rows(self, active_sheet: "Worksheet", report_type: str) -> int:
         is_hq_report = self.hq_or_country == self.HQ
-        get_row_methods: Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]] = self.ROW_CONTENT_METHODS[
-            report_type
-        ]
+        get_row_methods: Tuple[Callable, Callable] = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)
