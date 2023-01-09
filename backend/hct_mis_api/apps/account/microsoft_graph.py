@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.conf import settings
 from django.http import Http404
@@ -50,7 +50,7 @@ class MicrosoftGraphAPI:
         token = json_response["access_token"]
         return token
 
-    def get_results(self, url) -> Dict:
+    def get_results(self, url: str) -> Dict:
         headers = {"Authorization": f"Bearer {self.access_token}"}
         response = requests.get(url, headers=headers)
         try:
@@ -61,7 +61,7 @@ class MicrosoftGraphAPI:
         json_response = response.json()
         return json_response
 
-    def get_user_data(self, *, email=None, uuid=None) -> Any:
+    def get_user_data(self, *, email: Optional[str] = None, uuid: Optional[str] = None) -> Any:
         try:
             if uuid:
                 q = f"https://graph.microsoft.com/v1.0/users/{uuid}"

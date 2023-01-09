@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -51,7 +53,7 @@ class TestDiscardVerificationMutation(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         payment_record_amount = 10
@@ -110,7 +112,7 @@ class TestDiscardVerificationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_discard_active(self, _, permissions):
+    def test_discard_active(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(

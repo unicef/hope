@@ -1,11 +1,11 @@
 import json
 import os
 import shutil
-from typing import Dict, List
+from typing import Any, Dict, List
 from uuid import UUID
 
 from django.conf import settings
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandParser
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.core.models import StorageFile
@@ -42,7 +42,7 @@ def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Di
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("storage_file_pk", type=int)
 
         parser.add_argument(
@@ -51,7 +51,7 @@ class Command(BaseCommand):
             default="ukraine",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if not options["storage_file_pk"]:
             raise ValueError("storage_file_pk arg is required")
 

@@ -12,6 +12,7 @@ RUN apt-get update && \
   python3-gdal \
   gdal-bin \
   curl \
+  vim \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

@@ -2,6 +2,7 @@ import math
 import random
 import time
 from collections import namedtuple
+from typing import Any, List
 
 from django.core.management import BaseCommand, call_command
 
@@ -49,11 +50,11 @@ def print_stats() -> None:
 start_time = time.time()
 
 
-def elapsed_print(*args, **kwargs) -> None:
+def elapsed_print(*args: Any, **kwargs: Any) -> None:
     print(f"[{time.time() - start_time:.2f}s]", *args, **kwargs)
 
 
-def create_household_with_individuals(business_area, size, rdi, faker) -> int:
+def create_household_with_individuals(business_area: Any, size: int, rdi: Any, faker: Any) -> int:
     individuals = [
         IndividualFactory.create(
             household=None,
@@ -78,7 +79,7 @@ def create_household_with_individuals(business_area, size, rdi, faker) -> int:
     return size
 
 
-def create_households(individuals_amount, area_with_locale) -> None:
+def create_households(individuals_amount: int, area_with_locale: Any) -> None:
     business_area = BusinessAreaFactory(name=area_with_locale.area)
     rdis = [
         RegistrationDataImportFactory(business_area=business_area)
@@ -98,7 +99,7 @@ def create_households(individuals_amount, area_with_locale) -> None:
         total += amount_of_individuals
 
 
-def create_payment_records(business_area_names) -> None:
+def create_payment_records(business_area_names: List) -> None:
     elapsed_print("Creating payment records")
 
     for business_area_name in business_area_names:
@@ -118,13 +119,13 @@ def create_payment_records(business_area_names) -> None:
                 )
 
 
-def create_user_roles_in_business_areas(user, business_areas) -> None:
+def create_user_roles_in_business_areas(user: Any, business_areas: List) -> None:
     role = Role.objects.get(name="Role with all permissions")
     for area in business_areas:
         UserRole.objects.get_or_create(user=user, role=role, business_area=BusinessArea.objects.get(name=area))
 
 
-def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale) -> None:
+def create_grievance_tickets_for_ba(business_area: Any, admin_area: Any, faker: Any, scale: float) -> None:
     size = math.ceil(2 * pow(10, 6) * scale)
     elapsed_print(f"Creating {size} grievance tickets for {business_area.name}")
     individuals = Individual.objects.filter(business_area=business_area)
@@ -160,7 +161,7 @@ def create_grievance_tickets_for_ba(business_area, admin_area, faker, scale) -> 
             )
 
 
-def create_grievance_tickets(scale, business_areas) -> None:
+def create_grievance_tickets(scale: float, business_areas: Any) -> None:
     for business_area_data in business_areas:
         faker = Faker([business_area_data.locale])
         country = geo_models.Country.objects.get_or_create(name=business_area_data.area)[0]
@@ -175,14 +176,14 @@ def create_grievance_tickets(scale, business_areas) -> None:
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
             "--scale",
             action="store",
             default=1.0,
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         elapsed_print("Clearing db")
 
         call_command("flush", "--noinput")

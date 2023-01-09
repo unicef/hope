@@ -1,22 +1,26 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
+import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { choicesToDict } from '../../utils/utils';
 import {
-  GrievanceTicketDocument,
   GrievanceTicketQuery,
-  useApproveDeleteHouseholdDataChangeMutation,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
+import { BlackLink } from '../core/BlackLink';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
+import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+
+const Info = styled(InfoIcon)`
+  color: ${({ theme }) => theme.hctPalette.gray};
+  margin-right: 10px;
+`;
 
 export const DeleteHouseholdGrievanceDetails = ({
   ticket,
@@ -26,81 +30,52 @@ export const DeleteHouseholdGrievanceDetails = ({
   canApproveDataChange: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
-  const confirm = useConfirmation();
+
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const approveEnabled = isForApproval;
-
-  let dialogText = t(
-    'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
-  );
-  if (!ticket.deleteHouseholdTicketDetails.approveStatus) {
-    dialogText = t(
-      'You are approving the following household to be withdrawn. Are you sure you want to continue?',
-    );
-  }
   if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
 
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
 
+  const { approveStatus } = ticket.deleteHouseholdTicketDetails;
+
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
+        <Box display='flex' justifyContent='space-between' alignItems='center'>
           <Typography variant='h6'>{t('Household to be withdrawn')}</Typography>
+          {approveStatus &&
+            ticket.deleteHouseholdTicketDetails.reasonHousehold && (
+              <Box display='flex' alignItems='center'>
+                <Info />
+                <Box mr={2}>
+                  <p>This household is a duplicate of a household ID:</p>
+                </Box>
+                <BlackLink
+                  to={`/${businessArea}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
+                >
+                  {ticket.deleteHouseholdTicketDetails.reasonHousehold.unicefId}
+                </BlackLink>
+                {canApproveDataChange && (
+                  <ApproveDeleteHouseholdGrievanceDetails
+                    type='edit'
+                    ticket={ticket}
+                  />
+                )}
+              </Box>
+            )}
           {canApproveDataChange && (
-            <Button
-              onClick={() =>
-                confirm({
-                  title: t('Warning'),
-                  content: dialogText,
-                }).then(async () => {
-                  try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.deleteHouseholdTicketDetails
-                          ?.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
-                    });
-                    if (ticket.deleteHouseholdTicketDetails.approveStatus) {
-                      showMessage(t('Changes Disapproved'));
-                    }
-                    if (!ticket.deleteHouseholdTicketDetails.approveStatus) {
-                      showMessage(t('Changes Approved'));
-                    }
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
-                  }
-                })
-              }
-              variant={
-                ticket.deleteHouseholdTicketDetails?.approveStatus
-                  ? 'outlined'
-                  : 'contained'
-              }
-              color='primary'
-              disabled={!approveEnabled}
-            >
-              {ticket.deleteHouseholdTicketDetails?.approveStatus
-                ? t('Disapprove')
-                : t('Approve')}
-            </Button>
+            <ApproveDeleteHouseholdGrievanceDetails
+              type='button'
+              ticket={ticket}
+            />
           )}
         </Box>
       </Title>

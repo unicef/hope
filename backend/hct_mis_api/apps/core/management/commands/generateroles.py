@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from typing import Any, Dict, List
 
 from django.core.management import BaseCommand
@@ -10,7 +11,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 class Command(BaseCommand):
     help = "Generate roles"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--delete_all",
             action="store_true",
@@ -22,8 +23,7 @@ class Command(BaseCommand):
             help="Should delete all current incompatible roles, but only update Roles.",
         )
 
-    def handle(self, *args, **options):
-
+    def handle(self, *args: Any, **options: Any) -> None:
         default_roles_matrix: List[Dict[str, Any]] = [
             {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_COUNTRY]},
             {

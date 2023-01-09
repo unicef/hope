@@ -20,6 +20,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 def find_edopomoga_households() -> QuerySet[Household]:
@@ -131,7 +132,7 @@ def create_tp_with_hhs_ids(name: str, households: QuerySet[Household]) -> None:
     tp.status = TargetPopulation.STATUS_LOCKED
     tp.save()
     tp.households.set(households)
-    tp.refresh_stats()
+    tp = refresh_stats(tp)
     tp.save()
 
 

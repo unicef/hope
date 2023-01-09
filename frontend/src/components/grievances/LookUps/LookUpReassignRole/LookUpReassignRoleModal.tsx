@@ -21,6 +21,7 @@ import {
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 
@@ -84,7 +85,8 @@ export const LookUpReassignRoleModal = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  if (loading) return null;
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
@@ -146,9 +148,7 @@ export const LookUpReassignRoleModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              {t('Reassign Role')}
-            </DialogTitle>
+            <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpIndividualFilters

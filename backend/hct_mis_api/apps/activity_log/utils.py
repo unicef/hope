@@ -1,5 +1,5 @@
 import decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from hct_mis_api.apps.core.utils import nested_getattr
 
@@ -8,7 +8,7 @@ def field_list_to_dict(field_list: List) -> Dict:
     return {field: field for field in field_list}
 
 
-def create_mapping_dict(simple_mapping, complex_mapping=None) -> Dict:
+def create_mapping_dict(simple_mapping: List, complex_mapping: Optional[Dict] = None) -> Dict:
     concatenated_dict = {}
     concatenated_dict.update({field: field for field in simple_mapping})
     if complex_mapping is not None:
@@ -16,7 +16,7 @@ def create_mapping_dict(simple_mapping, complex_mapping=None) -> Dict:
     return concatenated_dict
 
 
-def create_diff(old_object, new_object, mapping) -> Dict:
+def create_diff(old_object: Any, new_object: Any, mapping: Dict) -> Dict:
     changes_dict = {}
     for (field_name, repr_name) in mapping.items():
         old_value = None
@@ -45,7 +45,7 @@ def create_diff(old_object, new_object, mapping) -> Dict:
     return changes_dict
 
 
-def copy_model_object(model_object) -> Dict:
+def copy_model_object(model_object: Any) -> Dict:
     model_dict = {}
     model_dict.update(model_object.__dict__)
     if "_state" in model_dict:

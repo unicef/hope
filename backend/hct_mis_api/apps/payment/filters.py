@@ -1,4 +1,6 @@
-from django.db.models import Q
+from uuid import UUID
+
+from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
@@ -42,8 +44,8 @@ class PaymentRecordFilter(FilterSet):
         )
     )
 
-    def individual_filter(self, qs, name, value):
-        if is_valid_uuid(value):
+    def individual_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
+        if is_valid_uuid(str(value)):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
 
@@ -73,7 +75,7 @@ class PaymentVerificationFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -99,7 +101,7 @@ class CashPlanPaymentVerificationFilter(FilterSet):
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
     object_id = UUIDFilter(method="object_id_filter")
 
-    def object_id_filter(self, qs, name, value):
+    def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
         cash_plan = CashPlan.objects.get(pk=value)
         verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)

@@ -26,22 +26,22 @@ s = s.upper()
 
 class TestBasicRule(TestCase):
     @classmethod
-    def setUpTestData(self):
-        self.household = HouseholdFactory.build()
+    def setUpTestData(cls) -> None:
+        cls.household = HouseholdFactory.build()
 
-    def test_rule(self):
+    def test_rule(self) -> None:
         r = Rule(definition="result.value=1.0")
         self.assertEqual(
             r.as_dict(),
             {"definition": "result.value=1.0", "deprecated": False, "enabled": False, "language": "python", "name": ""},
         )
 
-    def test_execution(self):
+    def test_execution(self) -> None:
         rule = Rule(definition="result.value=101")
         result = rule.execute({"hh": self.household})
         self.assertEqual(result.value, 101)
 
-    def test_history(self):
+    def test_history(self) -> None:
         rule = Rule(definition="result.value=1", enabled=True, name="Rule1")
         rule.save()
         # history on first save
@@ -74,7 +74,7 @@ class TestBasicRule(TestCase):
             sorted(history[1].affected_fields), ["definition", "deprecated", "enabled", "language", "name"]
         )
 
-    def test_revert(self):
+    def test_revert(self) -> None:
         rule = Rule(definition="result.value=1", enabled=True)
         rule.save()
         first_commit = rule.latest_commit
@@ -94,7 +94,7 @@ class TestBasicRule(TestCase):
         self.assertGreater(rule.version, original_version)
         self.assertEqual(rule.version, rule.latest_commit.version)
 
-    def test_release(self):
+    def test_release(self) -> None:
         rule = Rule(definition="result.value=1", enabled=True)
         rule.save()
         release1 = rule.release()
@@ -108,7 +108,7 @@ class TestBasicRule(TestCase):
         self.assertNotEqual(release1, release2)
         self.assertNotEqual(release1, release2)
 
-    def test_nested_rule(self):
+    def test_nested_rule(self) -> None:
         rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
         rule2 = Rule.objects.create(
             name="Rule2", definition=f"result.value=invoke({rule1.pk}, context).value", enabled=True
@@ -119,7 +119,7 @@ class TestBasicRule(TestCase):
         result = rule2.execute({"hh": self.household})
         self.assertEqual(result.value, 101)
 
-    def test_modules(self):
+    def test_modules(self) -> None:
         rule = Rule.objects.create(
             name="Rule1", definition="age1=dateutil.relativedelta.relativedelta(years=17)", enabled=True
         )

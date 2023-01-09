@@ -11,7 +11,7 @@ from snapshottest.django import TestRunner
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 
 
-def elastic_search_partition_suite_by_case(suite) -> List:
+def elastic_search_partition_suite_by_case(suite: Any) -> List:
     """Ensure to run all elastic search without parallel"""
     groups = []
     other_tests = []
@@ -30,7 +30,7 @@ def elastic_search_partition_suite_by_case(suite) -> List:
 
 
 class MisParallelTestSuite(ParallelTestSuite):
-    def __init__(self, suite, processes, failfast=False) -> None:
+    def __init__(self, suite: Any, processes: Any, failfast: bool = False) -> None:
         self.processes = processes
         self.failfast = failfast
         super().__init__(suite, processes, failfast)
@@ -70,11 +70,10 @@ class PostgresTestRunner(TestRunner):
             "verbosity": verbosity,
             "descriptions": getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
             "failfast": self.failfast,
-            "resultclass": self.get_resultclass(),  # type: ignore
             "output": output,
         }
 
-    def run_suite(self, suite, **kwargs) -> Any:
+    def run_suite(self, suite: Any, **kwargs: Any) -> Any:
         runner_kwargs = self.get_test_runner_kwargs()
         runner = self.test_runner(**runner_kwargs)
         results = runner.run(suite)
@@ -82,5 +81,5 @@ class PostgresTestRunner(TestRunner):
             runner_kwargs["output"].close()
         return results
 
-    def setup_databases(self, **kwargs: Any) -> Any:
+    def setup_databases(self, **kwargs: Dict) -> Any:
         return super().setup_databases(**kwargs)

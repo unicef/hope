@@ -172,7 +172,7 @@ export const importedIndividualDetailed = gql`
         node {
           id
           documentNumber
-          type
+          partner
           country
         }
       }

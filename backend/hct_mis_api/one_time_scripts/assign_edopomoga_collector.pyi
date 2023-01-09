@@ -16,7 +16,7 @@ def create_collector_for_household(household: Household) -> None:
         return
     individual = household.head_of_household
     if not individual:
-        print("No head of household for household {}".format(household.id))
+        print(f"No head of household for household {household.id}")
         return
     role = IndividualRoleInHousehold(role=ROLE_PRIMARY, individual=individual, household=household)
     role.save()

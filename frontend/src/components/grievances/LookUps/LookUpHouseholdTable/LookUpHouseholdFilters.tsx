@@ -71,7 +71,7 @@ export function LookUpHouseholdFilters({
                 ...filter,
                 lastRegistrationDate: {
                   ...filter.lastRegistrationDate,
-                  min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  min: date ? moment(date).format('YYYY-MM-DD') : undefined,
                 },
               })
             }
@@ -86,7 +86,7 @@ export function LookUpHouseholdFilters({
                 ...filter,
                 lastRegistrationDate: {
                   ...filter.lastRegistrationDate,
-                  max: date ? moment(date).format('YYYY-MM-DD') : null,
+                  max: date ? moment(date).format('YYYY-MM-DD') : undefined,
                 },
               })
             }
@@ -97,9 +97,9 @@ export function LookUpHouseholdFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Status')}
-            value={filter.residenceStatus || ''}
+            value={filter.residenceStatus}
           >
-            {choicesData.residenceStatusChoices.map((item) => {
+            {choicesData.residenceStatusChoices?.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -117,9 +117,8 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='minFilter'
             topLabel={t('Household Size')}
-            value={filter.size.min || ''}
+            value={filter.size.min}
             placeholder='From'
             icon={<GroupIcon />}
             onChange={(e) =>
@@ -127,7 +126,7 @@ export function LookUpHouseholdFilters({
                 ...filter,
                 size: {
                   ...filter.size,
-                  min: e.target.value || undefined,
+                  min: e.target.value,
                 },
               })
             }
@@ -135,8 +134,7 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='maxFilter'
-            value={filter.size.max || ''}
+            value={filter.size.max}
             placeholder='To'
             icon={<GroupIcon />}
             onChange={(e) =>
@@ -144,7 +142,7 @@ export function LookUpHouseholdFilters({
                 ...filter,
                 size: {
                   ...filter.size,
-                  max: e.target.value || undefined,
+                  max: e.target.value,
                 },
               })
             }

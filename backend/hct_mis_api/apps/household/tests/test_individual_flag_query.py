@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -5,7 +7,6 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -16,7 +17,7 @@ from hct_mis_api.apps.household.models import (
 
 
 class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
-    databases = ("default", "registration_datahub")
+    databases = "__all__"
 
     QUERY = """
     query AllIndividuals($flags: [String]) {
@@ -34,14 +35,12 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
-        cached_business_areas_slug_id_dict.cache_clear()
-        cls.maxDiff = None
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        individuals_to_create = [
+        individuals_to_create: List[Dict] = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -122,7 +121,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
             (None,),
         ]
     )
-    def test_individual_programme_filter(self, flags):
+    def test_individual_programme_filter(self, flags: Any) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY,
             context={"user": self.user},
