@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -35,7 +37,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         create_household(
@@ -56,12 +58,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_mutation(self, _, permissions):
+    def test_create_mutation(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.program.business_area)
 
         variables = {
             "createTargetPopulationInput": {
-                "name": "Example name 5",
+                "name": "Example name 5 ",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "excludedIds": "",
@@ -76,6 +78,44 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "isFlexField": False,
                                 }
                             ]
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_CREATE]),
+            ("without_permission", []),
+        ]
+    )
+    def test_create_mutation_with_comparison_method_contains(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.program.business_area)
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5 ",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "CONTAINS",
+                                    "arguments": [],
+                                    "fieldName": "registration_data_import",
+                                    "isFlexField": False,
+                                }
+                            ],
+                            "individualsFiltersBlocks": [],
                         }
                     ]
                 },

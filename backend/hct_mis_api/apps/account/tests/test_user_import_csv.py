@@ -7,7 +7,7 @@ import responses
 from constance.test import override_config
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.admin import get_valid_kobo_username
+from hct_mis_api.apps.account.admin.mixins import get_valid_kobo_username
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleFactory,
@@ -21,7 +21,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 class UserImportCSVTest(WebTest):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
@@ -31,7 +31,7 @@ class UserImportCSVTest(WebTest):
         IncompatibleRoles.objects.create(role_one=cls.role, role_two=cls.role_2)
 
     @responses.activate
-    def test_import_csv(self):
+    def test_import_csv(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
         res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
@@ -46,7 +46,7 @@ class UserImportCSVTest(WebTest):
         assert u, "User not found"
 
     @responses.activate
-    def test_import_csv_with_kobo(self):
+    def test_import_csv_with_kobo(self) -> None:
         responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
 
         url = reverse("admin:account_user_import_csv")
@@ -64,7 +64,7 @@ class UserImportCSVTest(WebTest):
         assert u.custom_fields["kobo_username"] == u.username
 
     @responses.activate
-    def test_import_csv_detect_incompatible_roles(self):
+    def test_import_csv_detect_incompatible_roles(self) -> None:
         u: User = UserFactory(email="test@example.com", partner=self.partner)
         UserRoleFactory(user=u, role=self.role_2, business_area=self.business_area)
         url = reverse("admin:account_user_import_csv")
@@ -80,7 +80,7 @@ class UserImportCSVTest(WebTest):
         assert not u.user_roles.filter(role=self.role, business_area=self.business_area).exists()
 
     @responses.activate
-    def test_import_csv_do_not_change_partner(self):
+    def test_import_csv_do_not_change_partner(self) -> None:
         partner2 = PartnerFactory(name="Partner2")
         u: User = UserFactory(email="test@example.com", partner=self.partner)  # noqa: F841
 
@@ -96,7 +96,7 @@ class UserImportCSVTest(WebTest):
         assert not User.objects.filter(email="test@example.com", partner=partner2).exists()
 
     @responses.activate
-    def test_import_csv_with_username(self):
+    def test_import_csv_with_username(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
         res.form["file"] = ("users2.csv", (Path(__file__).parent / "users2.csv").read_bytes())
@@ -111,23 +111,21 @@ class UserImportCSVTest(WebTest):
 
 class UserKoboActionsTest(WebTest):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         cls.role = RoleFactory(name="NoAccess")
 
     @responses.activate
-    def test_sync_user(self):
-        # responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
-
+    def test_sync_user(self) -> None:
         url = reverse("admin:account_user_kobo_users_sync")
         res = self.app.get(url, user=self.superuser)
         assert res.status_code == 200
 
     @responses.activate
     @override_config(KOBO_ADMIN_CREDENTIALS="kobo_admin:pwd")
-    def test_create_kobo_user(self):
+    def test_create_kobo_user(self) -> None:
         responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
         responses.add(
             responses.POST,

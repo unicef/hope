@@ -4,6 +4,7 @@ import os
 import tempfile
 from datetime import datetime
 from functools import wraps
+from typing import Any, Callable
 
 from django.db import transaction
 from django.utils import timezone
@@ -27,6 +28,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -34,13 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 class transaction_celery_task:  # used as decorator
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.task_args = args
         self.task_kwargs = kwargs
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Any:
         @wraps(func)
-        def wrapper_func(*args, **kwargs):
+        def wrapper_func(*args: Any, **kwargs: Any) -> None:
             try:
                 with transaction.atomic():
                     return func(*args, **kwargs)
@@ -54,7 +56,7 @@ class transaction_celery_task:  # used as decorator
 @app.task(bind=True, default_retry_delay=60)
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -80,7 +82,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
 @app.task
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
+def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -96,7 +98,7 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id, program_id, tp_name):
+def create_target_population_task(storage_id: str, program_id: str, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
     file_path = None
     program = Program.objects.get(id=program_id)
@@ -104,7 +106,11 @@ def create_target_population_task(storage_id, program_id, tp_name):
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
             registration_data_import = RegistrationDataImport.objects.create(
-                name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
+                name=f"{storage_obj.file.name}_{program.name}",
+                number_of_individuals=0,
+                number_of_households=0,
+                business_area=program.business_area,
+                data_source=RegistrationDataImport.EDOPOMOGA,
             )
 
             business_area = storage_obj.business_area
@@ -226,7 +232,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                 storage_file=storage_obj,
             )
             target_population.households.set(households)
-            target_population.refresh_stats()
+            refresh_stats(target_population)
             target_population.save()
 
             storage_obj.status = StorageFile.STATUS_FINISHED

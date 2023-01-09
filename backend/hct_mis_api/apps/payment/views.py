@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Union
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -11,11 +12,22 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
+if TYPE_CHECKING:
+    from django.http import (
+        HttpRequest,
+        HttpResponsePermanentRedirect,
+        HttpResponseRedirect,
+    )
+
 logger = logging.getLogger(__name__)
 
 
 @login_required
-def download_cash_plan_payment_verification(request, verification_id):
+def download_cash_plan_payment_verification(  # type: ignore # FIXME
+    request: "HttpRequest", verification_id: str
+) -> Union[
+    "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
+]:
     cash_plan_payment_verification_id = decode_id_string(verification_id)
     cash_plan_payment_verification = get_object_or_404(
         CashPlanPaymentVerification, id=cash_plan_payment_verification_id
@@ -32,6 +44,6 @@ def download_cash_plan_payment_verification(request, verification_id):
         if not cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded:
             cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded = True
             cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.save()
-        return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)
+        return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)  # type: ignore # FIXME: Argument 1 to "redirect" has incompatible type "Optional[str]"; expected "Union[Callable[..., Any], str, SupportsGetAbsoluteUrl]"
     else:
         log_and_raise(f"File not found. CashPlanPaymentVerification ID: {verification_id}")

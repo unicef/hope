@@ -16,7 +16,7 @@ export const PhotoModalHeader = ({
 }): React.ReactElement => {
   return (
     <DialogTitleWrapper>
-      <DialogTitle id='scroll-dialog-title'>
+      <DialogTitle>
         <Box display='flex' justifyContent='space-between' alignItems='center'>
           <span>{title}</span>
           {showRotate ? (

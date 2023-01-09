@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.logs import log_start_and_end
@@ -24,7 +25,7 @@ def sync_sanction_list_task() -> None:
 
 @app.task
 @sentry_tags
-def check_against_sanction_list_task(uploaded_file_id, original_file_name) -> None:
+def check_against_sanction_list_task(uploaded_file_id: UUID, original_file_name: str) -> None:
     try:
         from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
             CheckAgainstSanctionListTask,

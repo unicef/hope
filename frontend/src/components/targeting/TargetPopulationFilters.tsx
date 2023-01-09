@@ -32,7 +32,7 @@ export function TargetPopulationFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            value={filter.name || ''}
+            value={filter.name}
             onChange={(e) => handleFilterChange(e, 'name')}
             data-cy='filters-search'
           />
@@ -40,6 +40,7 @@ export function TargetPopulationFilters({
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
+            value={filter.status}
             label={t('Status')}
             icon={<Person />}
           >
@@ -47,7 +48,7 @@ export function TargetPopulationFilters({
             {Object.values(TargetPopulationStatus)
               .sort()
               .map((key) => (
-                <MenuItem value={key}>
+                <MenuItem key={key} value={key}>
                   {targetPopulationStatusMapping(key)}
                 </MenuItem>
               ))}
@@ -57,7 +58,7 @@ export function TargetPopulationFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
-            value={filter.program || ''}
+            value={filter.program}
             icon={<FlashOnIcon />}
           >
             <MenuItem value=''>
@@ -72,7 +73,6 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='minFilter'
             topLabel={t('Number of Households')}
             value={filter.numIndividuals.min}
             placeholder={t('From')}
@@ -81,7 +81,7 @@ export function TargetPopulationFilters({
                 ...filter,
                 numIndividuals: {
                   ...filter.numIndividuals,
-                  min: e.target.value || undefined,
+                  min: e.target.value,
                 },
               })
             }
@@ -90,7 +90,6 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='maxFilter'
             value={filter.numIndividuals.max}
             placeholder={t('To')}
             onChange={(e) =>
@@ -98,7 +97,7 @@ export function TargetPopulationFilters({
                 ...filter,
                 numIndividuals: {
                   ...filter.numIndividuals,
-                  max: e.target.value || undefined,
+                  max: e.target.value,
                 },
               })
             }

@@ -9,7 +9,7 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 class TestGrievanceModelValidation(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.base_model_data = {
@@ -43,7 +43,7 @@ class TestGrievanceModelValidation(TestCase):
             "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
         }
 
-    def test_valid_issue_types(self):
+    def test_valid_issue_types(self) -> None:
         grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.valid_model_data)
         grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.valid_model_2_data)
 
@@ -53,7 +53,7 @@ class TestGrievanceModelValidation(TestCase):
         self.assertEqual(self.valid_model_data["issue_type"], grievance_ticket_1.issue_type)
         self.assertEqual(self.valid_model_2_data["issue_type"], grievance_ticket_2.issue_type)
 
-    def test_invalid_issue_types(self):
+    def test_invalid_issue_types(self) -> None:
         grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.invalid_model_data)
         grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.invalid_model_2_data)
 

@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from sentry_sdk import configure_scope
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 @app.task
 @log_start_and_end
 @sentry_tags
-def report_export_task(report_id):
+def report_export_task(report_id: UUID) -> None:
     try:
         from hct_mis_api.apps.reporting.models import Report
         from hct_mis_api.apps.reporting.services.generate_report_service import (
@@ -33,7 +34,7 @@ def report_export_task(report_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def dashboard_report_export_task(dashboard_report_id) -> None:
+def dashboard_report_export_task(dashboard_report_id: UUID) -> None:
     try:
         from hct_mis_api.apps.reporting.models import DashboardReport
         from hct_mis_api.apps.reporting.services.generate_dashboard_report_service import (

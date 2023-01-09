@@ -11,10 +11,10 @@ from hct_mis_api.apps.registration_datahub.models import Record
 
 
 class TestExtractRecords(TestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
 
         fields = {
@@ -74,13 +74,13 @@ class TestExtractRecords(TestCase):
             files=json.dumps(files).encode(),
         )
 
-    def test_extract_to_data_field(self):
+    def test_extract_to_data_field(self) -> None:
         extract_records_task()
 
         record = Record.objects.first()
         self.assertTrue(record.data)
 
-    def test_extract_without_image(self):
+    def test_extract_without_image(self) -> None:
         extract_records_task()
 
         record = Record.objects.first()
@@ -118,7 +118,7 @@ class TestExtractRecords(TestCase):
             ],
         )
 
-    def test_extract_counters(self):
+    def test_extract_counters(self) -> None:
         extract_records_task()
 
         record = Record.objects.first()

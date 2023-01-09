@@ -70,11 +70,10 @@ export function DeleteIndividualGrievanceDetails({
   if (loading) return <LoadingComponent />;
   const documents = ticket.individual?.documents;
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
+    (previousValue, currentValue) => ({
+      ...previousValue,
+      [currentValue?.name]: currentValue,
+    }),
     {},
   );
 

@@ -1,5 +1,6 @@
 import logging
 from io import BytesIO
+from typing import Optional
 
 from django.utils import timezone
 
@@ -13,22 +14,26 @@ logger = logging.getLogger(__name__)
 
 
 class KoboRetriableError(Exception):
-    def __init__(self, xlsx_kobo_template_object) -> None:
+    def __init__(self, xlsx_kobo_template_object: XLSXKoboTemplate) -> None:
         self.xlsx_kobo_template_object = xlsx_kobo_template_object
 
 
 class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
-    def _save_message_status_template_id(self, xlsx_kobo_template_object, message, status, template_id="") -> None:
+    def _save_message_status_template_id(
+        self, xlsx_kobo_template_object: XLSXKoboTemplate, message: str, status: str, template_id: str = ""
+    ) -> None:
         xlsx_kobo_template_object.error_description = message
         xlsx_kobo_template_object.status = status
         xlsx_kobo_template_object.template_id = template_id
         xlsx_kobo_template_object.save()
 
-    def execute(self, xlsx_kobo_template_id) -> None:
-        xlsx_kobo_template_object = XLSXKoboTemplate.objects.filter(id=xlsx_kobo_template_id).first()
+    def execute(self, xlsx_kobo_template_id: str) -> None:
+        xlsx_kobo_template_object: Optional[XLSXKoboTemplate] = XLSXKoboTemplate.objects.filter(
+            id=xlsx_kobo_template_id
+        ).first()
         if not xlsx_kobo_template_object:
             self._save_message_status_template_id(
-                xlsx_kobo_template_object, "Uploaded file is not found on the server", XLSXKoboTemplate.UNSUCCESSFUL
+                xlsx_kobo_template_object, "Uploaded file is not found on the server", XLSXKoboTemplate.UNSUCCESSFUL  # type: ignore # FIXME: Argument 1 to "_save_message_status_template_id" of "UploadNewKoboTemplateAndUpdateFlexFieldsTask" has incompatible type "Optional[XLSXKoboTemplate]"; expected "XLSXKoboTemplate"
             )
             return
 

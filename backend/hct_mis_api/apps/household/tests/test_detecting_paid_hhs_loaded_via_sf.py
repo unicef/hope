@@ -18,7 +18,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
     databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.storage_file = StorageFileFactory()
 
         cls.business_area = BusinessArea.objects.create(
@@ -89,7 +89,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             DocumentAllowDuplicatesFactory(individual=cls.individuals_5[0], type=cls.document_type, document_number="2")
         )
 
-    def test_detecting_paid_hhs_loaded_via_sf(self):
+    def test_detecting_paid_hhs_loaded_via_sf(self) -> None:
         hhs = find_paid_households(self.storage_file.pk)
 
         # hh1 and hh3 were loaded via SF and hh2 (e.g. from RDI) was already paid and had the same doc number for individual

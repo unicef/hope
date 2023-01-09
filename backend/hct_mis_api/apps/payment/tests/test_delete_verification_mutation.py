@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -36,7 +38,7 @@ class TestDeleteVerificationMutation(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -61,7 +63,7 @@ class TestDeleteVerificationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_delete_pending_verification_plan(self, _, permissions):
+    def test_delete_pending_verification_plan(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.create_active_payment_verification_plan()
         cash_plan_payment_verification = self.create_pending_payment_verification_plan()
@@ -82,7 +84,7 @@ class TestDeleteVerificationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_delete_active_verification_plan(self, _, permissions):
+    def test_delete_active_verification_plan(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         cash_plan_payment_verification = self.create_active_payment_verification_plan()
         self.create_pending_payment_verification_plan()
@@ -97,7 +99,7 @@ class TestDeleteVerificationMutation(APITestCase):
             },
         )
 
-    def create_pending_payment_verification_plan(self):
+    def create_pending_payment_verification_plan(self) -> CashPlanPaymentVerification:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
@@ -107,7 +109,7 @@ class TestDeleteVerificationMutation(APITestCase):
             CashPlanPaymentVerification.STATUS_PENDING,
         )
 
-    def create_active_payment_verification_plan(self):
+    def create_active_payment_verification_plan(self) -> CashPlanPaymentVerification:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
