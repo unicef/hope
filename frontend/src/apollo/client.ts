@@ -25,8 +25,8 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       }
     });
 
-  // eslint-disable-next-line no-console
   if (networkError)
+    // eslint-disable-next-line no-console
     console.error(
       `[Network error]: ${networkError}`,
       networkError,
