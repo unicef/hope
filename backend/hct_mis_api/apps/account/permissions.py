@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # https://github.com/python/mypy/issues/7591
         return name
 
     # RDI
