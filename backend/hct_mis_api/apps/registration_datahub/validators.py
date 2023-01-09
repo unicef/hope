@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -43,23 +43,24 @@ from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids
 logger = logging.getLogger(__name__)
 
 
+class XlsxException(Exception):
+    def __init__(self, errors: List) -> None:
+        self.errors = errors
+
+
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, *args: Any, **kwargs: Any) -> List:  # type: ignore # FIXME: Signature of "validate" incompatible with supertype "BaseValidator"
-        try:
-            validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
+    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> None:
+        validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
-            errors_list = []
-            for method in validate_methods:
-                errors = method(*args, **kwargs)
-                errors_list.extend(errors)
+        errors_list = []
+        for method in validate_methods:
+            errors = method(*args, **kwargs)
+            errors_list.extend(errors)
 
+        if errors_list:
             errors_list.sort(key=itemgetter("header"))
-
-            return errors_list
-        except Exception as e:
-            logger.exception(e)
-            raise
+            raise XlsxException(errors_list)
 
     @classmethod
     def validate_file_extension(cls, *args: Any, **kwargs: Any) -> List:
@@ -83,144 +84,6 @@ class XLSXValidator(BaseValidator):
                 return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
             return []
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-
-class ImportDataValidator(BaseValidator):
-    BUSINESS_AREA_SLUG = None
-    DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
-        "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
-        "drivers_license_issuer_i_c": "drivers_license_no_i_c",
-        "electoral_card_issuer_i_c": "electoral_card_no_i_c",
-        "national_id_issuer_i_c": "national_id_no_i_c",
-        "national_passport_issuer_i_c": "national_passport_i_c",
-        "tax_id_issuer_i_c": "tax_id_no_i_c",
-        "other_id_issuer_i_c": "other_id_type_i_c",
-        # identities
-        "scope_id_issuer_i_c": "scope_id_no_i_c",
-        "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
-    }
-
-    @classmethod
-    def validate(cls, excluded_validators: Optional[Any] = None, *args: Any, **kwargs: Any) -> List:  # type: ignore  # FIXME: Signature of "validate" incompatible with supertype "BaseValidator"
-        try:
-            validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
-
-            errors_list = []
-            for method in validate_methods:
-                errors = method(*args, **kwargs)
-                errors_list.extend(errors)
-
-            errors_list.sort(key=itemgetter("header"))
-
-            return errors_list
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    @classmethod
-    def documents_validator(cls, documents_numbers_dict: Dict, is_xlsx: bool = True) -> List:
-        try:
-            invalid_rows = []
-            for key, values in documents_numbers_dict.items():
-                if key == "other_id_no_i_c":
-                    continue
-                issuing_countries = values.get("issuing_countries")
-                if not issuing_countries:
-                    issuing_countries = [None] * len(values["validation_data"])
-                if key == "other_id_type_i_c":
-                    for name, value, validation_data, issuing_country in zip(
-                        values["names"], values["numbers"], values["validation_data"], issuing_countries
-                    ):
-                        row_number = validation_data.get("row_number")
-                        if not name and value:
-                            error = {
-                                "header": key,
-                                "message": f"Name for other_id_type is required, when number is provided: no: {value}",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if name and not value:
-                            error = {
-                                "header": key,
-                                "message": "Number for other_id_no_i_c is required, when name is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        if (name or value) and not issuing_country:
-                            error = {
-                                "header": key,
-                                "message": "Issuing country for other_id_no_i_c is required, "
-                                "when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                else:
-                    for validation_data, value, issuing_country in zip_longest(
-                        values["validation_data"], values["numbers"], issuing_countries
-                    ):
-                        row_number = (
-                            validation_data.get("row_number") if isinstance(validation_data, dict) else validation_data
-                        )
-                        if value and not issuing_country:
-                            error = {
-                                "header": key,
-                                "message": f"Issuing country for {key} is required, when any document data are provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-                        elif issuing_country and not value:
-                            error = {
-                                "header": key,
-                                "message": f"Number for {key} is required, when issuing country is provided",
-                            }
-                            if is_xlsx is True:
-                                error["row_number"] = row_number
-                            invalid_rows.append(error)
-
-            return invalid_rows
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    @classmethod
-    def identity_validator(cls, identities_numbers_dict: Dict, is_xlsx: bool = True) -> List:
-        try:
-            invalid_rows = []
-            for key, values in identities_numbers_dict.items():
-                issuing_countries = values.get("issuing_countries")
-                if not issuing_countries:
-                    issuing_countries = [None] * len(values["validation_data"])
-                for data_dict, value, issuing_country in zip_longest(
-                    values["validation_data"], values["numbers"], issuing_countries
-                ):
-                    row_number = data_dict.get("row_number") if isinstance(data_dict, dict) else data_dict
-                    if not value and not issuing_country:
-                        continue
-                    elif value and not issuing_country:
-                        error = {
-                            "header": key,
-                            "message": f"Issuing country is required: partner: {values['partner']} no: {value}",
-                        }
-                        if is_xlsx is True:
-                            error["row_number"] = row_number
-                        invalid_rows.append(error)
-                    elif issuing_country and not value:
-                        error = {
-                            "header": key,
-                            "message": f"Number for {key} is required, when issuing country is provided",
-                        }
-                        if is_xlsx is True:
-                            error["row_number"] = row_number
-                        invalid_rows.append(error)
-
-            return invalid_rows
         except Exception as e:
             logger.exception(e)
             raise
@@ -597,7 +460,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True
-            return self.image_loader.image_in(cell.coordinate)  # type: ignore # FIXME: Argument 1 to "image_in" of "SheetImageLoader" has incompatible type "str"; expected "Cell"
+            return self.image_loader.image_in(cell)
         except Exception as e:
             logger.exception(e)
             raise
@@ -720,7 +583,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
-                            f"Sheet: {sheet.title}, Unexpected value: "  # type: ignore # FIXME: On Python 3 formatting "b'abc'" with "{}" produces "b'abc'", not "abc"; use "{!r}" if this is desired behavior
+                            f"Sheet: {sheet.title!r}, Unexpected value: "
                             f"{value} for type "
                             f"{field_type.replace('_', ' ').lower()} "
                             f"of field {header.value}"
@@ -1076,7 +939,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def geopoint_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> Union[str, None]:
+    def geopoint_validator(
+        self, value: Optional[Sequence[Any]], field: str, *args: Any, **kwargs: Any
+    ) -> Union[str, None]:
         message = f"Invalid geopoint {value} for field {field}"
 
         if not value or not isinstance(value, str):
@@ -1164,7 +1029,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def _get_field_type_error(self, field: str, value: Union[str, list], attachments: list) -> Union[dict, None]:
+    def _get_field_type_error(self, field: str, value: Any, attachments: list) -> Union[dict, None]:
         try:
             field_dict = self.all_fields.get(field)
             if field_dict is None:
@@ -1188,7 +1053,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         "message": message,
                     }
             else:
-                message = self.standard_type_validator(value, field, field_type)  # type: ignore # FIXME: Argument 1 to "standard_type_validator" of "KoboProjectImportDataInstanceValidator" has incompatible type "Union[str, List[Any]]"; expected "str"
+                message = self.standard_type_validator(value, field, field_type)
                 if message:
                     return {
                         "header": field,
@@ -1202,7 +1067,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
         try:
-            reduced_submissions: List[Dict[Any, Any]] = rename_dict_keys(submissions, get_field_name)  # type: ignore # FIXME
+            reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
             errors = []
             # have fun debugging this ;_;
