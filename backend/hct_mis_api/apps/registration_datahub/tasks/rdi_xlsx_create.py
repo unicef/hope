@@ -1,4 +1,3 @@
-import numbers
 from collections import defaultdict
 from datetime import datetime
 from functools import partial
@@ -214,9 +213,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value = cell.value
         if not is_flex_field:
             return value
-        if isinstance(value, numbers.Number):
-            return float(value)  # type: ignore # FIXME: Argument 1 to "float" has incompatible type "Number"; expected "Union[SupportsFloat, SupportsIndex, str, bytes, array[Any], mmap, _CData, PickleBuffer]"
-        return value
+        return float(value)
 
     def _handle_bool_field(
         self, cell: Any, is_flex_field: bool = False, is_field_required: bool = False, *args: Any, **kwargs: Any

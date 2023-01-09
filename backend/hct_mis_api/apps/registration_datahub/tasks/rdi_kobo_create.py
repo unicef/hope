@@ -1,5 +1,4 @@
 import json
-import numbers
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union
 
@@ -119,9 +118,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _handle_decimal_field(self, value: Any, is_flex_field: bool) -> Any:
         if not is_flex_field:
             return value
-        if isinstance(value, numbers.Number):
-            return float(value)  # type: ignore # intentional
-        return value
+        return float(value)
 
     def _cast_and_assign(
         self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]
