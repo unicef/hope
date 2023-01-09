@@ -25,6 +25,7 @@ export const Survey = gql`
       }
       body
       title
+      rapidProUrl
       sampleFilePath
       hasValidSampleFile
     }

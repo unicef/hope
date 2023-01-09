@@ -71,7 +71,15 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const renderActions = (): React.ReactElement => {
     if (survey.category === SurveyCategory.RapidPro) {
       return (
-        <Button variant='contained' color='primary' component={Link} to='/'>
+        <Button
+          variant='contained'
+          color='primary'
+          component={Link}
+          to={{
+            pathname: survey?.rapidProUrl,
+          }}
+          target='_blank'
+        >
           {t('Check Answers')}
         </Button>
       );
