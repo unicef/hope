@@ -133,7 +133,7 @@ class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_rapid_pro_url(survey: Survey, info: Any) -> Optional[str]:
         if not survey.flow_id:
             return None
-        return f"{settings.RAPIDPRO_URL}/flow/results/{survey.flow_id}/"
+        return f"{settings.RAPID_PRO_URL}/flow/results/{survey.flow_id}/"
 
 
 class RecipientNode(BaseNodePermissionMixin, DjangoObjectType):
