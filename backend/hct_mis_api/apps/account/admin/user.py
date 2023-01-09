@@ -156,7 +156,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
         kobo_pk = user.custom_fields.get("kobo_pk", None)
         kobo_username = user.custom_fields.get("kobo_username", None)
         if kobo_pk:
-            to_delete.append(f"Kobo: {kobo_username}")
+            to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # this is somehow intentional
         return to_delete, model_count, perms_needed, protected
 
     @button()
@@ -321,7 +321,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
                 self.message_user(request, "Please correct errors below", messages.ERROR)
                 context["form"] = form
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
-        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})
+        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
     def __init__(self, model: Type, admin_site: Any) -> None:
