@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     @staticmethod
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> "Permissions":
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> str:
         return name
 
     # RDI
@@ -258,11 +258,11 @@ class BaseNodePermissionMixin:
         cls,
         info: Any,
         object_instance: Any,
-        general_permission: Permissions,
+        general_permission: str,
         is_creator: bool,
-        creator_permission: Permissions,
+        creator_permission: str,
         is_owner: bool,
-        owner_permission: Permissions,
+        owner_permission: str,
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
