@@ -45,7 +45,6 @@ from hct_mis_api.apps.core.utils import (
     sum_lists_with_values,
     to_choice_object,
 )
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
@@ -333,8 +332,6 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
     )
-
-    admin_area_title = graphene.String(description="Admin area title")
     total_cash_received = graphene.Decimal()
     total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
@@ -346,12 +343,13 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
+    admin_area = graphene.Field(AreaNode)
+    admin_area_title = graphene.String(description="Admin area title")
     admin1 = graphene.Field(AreaNode)
     admin2 = graphene.Field(AreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
     active_individuals_count = graphene.Int()
-    admin_area = graphene.Field(AreaNode)
     individuals = DjangoFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
@@ -368,18 +366,6 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         if hasattr(parent, "sanction_list_confirmed_match_annotated"):
             return parent.sanction_list_confirmed_match_annotated
         return parent.sanction_list_confirmed_match
-
-    @staticmethod
-    def resolve_admin1(parent: Household, info: Any) -> Area:
-        return parent.admin1
-
-    @staticmethod
-    def resolve_admin2(parent: Household, info: Any) -> Area:
-        return parent.admin2
-
-    @staticmethod
-    def resolve_admin_area(parent: Household, info: Any) -> Area:
-        return parent.admin_area
 
     @staticmethod
     def resolve_admin_area_title(parent: Household, info: Any) -> str:
