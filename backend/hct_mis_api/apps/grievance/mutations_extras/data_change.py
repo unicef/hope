@@ -301,9 +301,9 @@ def update_data_change_extras(
 ) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
-        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
+        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL:
-        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
+        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
     return grievance_ticket

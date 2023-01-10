@@ -354,7 +354,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         else:
             details_name = nested_dict_or_value
 
-        return getattr(self, details_name, None)  # type: ignore # FIXME: Argument 2 to "getattr" has incompatible type "Optional[Any]"; expected "str"
+        return getattr(self, details_name, None)
 
     @property
     def status_log(self) -> str:
@@ -383,7 +383,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def clean(self) -> None:
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
+        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")

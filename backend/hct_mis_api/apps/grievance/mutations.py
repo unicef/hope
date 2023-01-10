@@ -667,9 +667,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
         if isinstance(function_or_nested_issue_types, dict) and issue_type:
             return function_or_nested_issue_types.get(issue_type)
-        return function_or_nested_issue_types  # type: ignore # FIXME: Incompatible return value type (got "Union[Dict[int, Callable[..., Any]], Callable[..., Any], None]", expected "Optional[Callable[..., Any]]")
-        # TODO: what if there's no issue type and function_or_nested_issue_types is a dict?
-        # it would return a dict instead of a callable
+        return function_or_nested_issue_types
 
     @classmethod
     @is_authenticated
