@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
-def get_field_by_name(field_name: str) -> Optional[Any]:
+def get_field_by_name(field_name: str) -> Dict:
     field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")[field_name]
     choices = field.get("choices")
     if choices and callable(choices):
