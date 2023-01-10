@@ -774,7 +774,7 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
     identities = individual_data.pop("identities", [])
     identities_to_remove_encoded = individual_data.pop("identities_to_remove", [])
     identities_to_remove = [
-        identity_data["value"] for identity_data in identities_to_remove_encoded if is_approved(identity_data)
+        decode_id_string(identity_data["value"]) for identity_data in identities_to_remove_encoded if is_approved(identity_data)
     ]
     identities_to_edit = individual_data.pop("identities_to_edit", [])
 
