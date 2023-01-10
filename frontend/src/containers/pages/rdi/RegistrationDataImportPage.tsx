@@ -13,16 +13,11 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
-<<<<<<< HEAD
-    size: { min: undefined, max: undefined },
-    importDateRange: { min: undefined, max: undefined },
-=======
     search: '',
-    importDate: null,
-    userInputValue: '',
     importedBy: '',
     status: '',
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
+    size: { min: undefined, max: undefined },
+    importDateRange: { min: undefined, max: undefined },
   });
   const debounceFilter = useDebounce(filter, 500);
   if (permissions === null) return null;

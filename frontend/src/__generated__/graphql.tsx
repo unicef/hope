@@ -1447,15 +1447,11 @@ export type GrievanceTicketNode = Node & {
   extras: Scalars['JSONString'],
   ignored: Scalars['Boolean'],
   householdUnicefId?: Maybe<Scalars['String']>,
-<<<<<<< HEAD
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<PartnerType>,
   programme?: Maybe<ProgramNode>,
   comments?: Maybe<Scalars['String']>,
-  linkedTicketsRelated: GrievanceTicketNodeConnection,
-=======
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
   sensitiveTicketDetails?: Maybe<TicketSensitiveDetailsNode>,
@@ -1477,30 +1473,9 @@ export type GrievanceTicketNode = Node & {
   paymentRecord?: Maybe<PaymentRecordNode>,
   admin?: Maybe<Scalars['String']>,
   existingTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
-<<<<<<< HEAD
   totalDays?: Maybe<Scalars['String']>,
   documentation?: Maybe<Array<Maybe<GrievanceDocumentNode>>>,
-};
-
-
-export type GrievanceTicketNodeLinkedTicketsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-=======
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 };
 
 
@@ -23854,15 +23829,11 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-<<<<<<< HEAD
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
   programme?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
-=======
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
   sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
@@ -23884,12 +23855,9 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
-<<<<<<< HEAD
   totalDays?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   documentation?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceDocumentNode']>>>, ParentType, ContextType>,
-=======
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {

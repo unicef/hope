@@ -27,12 +27,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
-<<<<<<< HEAD
   paymentRecord?: string;
-  selectedRelatedTickets: string[];
-=======
   selectedLinkedTickets: string[];
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   individualData?;
   householdDataUpdateFields?;
   partner?;
@@ -304,12 +300,8 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-<<<<<<< HEAD
         issueType: values.issueType,
-        linkedTickets: values.selectedRelatedTickets,
-=======
         linkedTickets: values.selectedLinkedTickets,
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
       },
     },
   };

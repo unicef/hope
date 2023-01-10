@@ -1040,15 +1040,11 @@ type GrievanceTicketNode implements Node {
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
-<<<<<<< HEAD
   priority: Int
   urgency: Int
   partner: PartnerType
   programme: ProgramNode
   comments: String
-  linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-=======
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
@@ -1070,12 +1066,9 @@ type GrievanceTicketNode implements Node {
   paymentRecord: PaymentRecordNode
   admin: String
   existingTickets: [GrievanceTicketNode]
-<<<<<<< HEAD
   totalDays: String
   documentation: [GrievanceDocumentNode]
-=======
   relatedTickets: [GrievanceTicketNode]
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 }
 
 type GrievanceTicketNodeConnection {
@@ -1203,13 +1196,8 @@ type HouseholdNode implements Node {
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
-<<<<<<< HEAD
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
-=======
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelectionNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
@@ -2580,12 +2568,7 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
-<<<<<<< HEAD
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
-=======
-  allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   allActiveTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection

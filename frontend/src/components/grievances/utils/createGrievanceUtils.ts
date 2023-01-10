@@ -71,12 +71,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-<<<<<<< HEAD
-        linkedTickets: values.selectedRelatedTickets,
-        issueType: values.issueType,
-=======
         linkedTickets: values.selectedLinkedTickets,
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         extras: {
           category: {
             grievanceComplaintTicketExtras: {
@@ -97,14 +92,9 @@ function prepareSesitiveVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-<<<<<<< HEAD
         issueType: parseInt(values.issueType, 10),
         partner: parseInt(values.partner, 10),
-        linkedTickets: values.selectedRelatedTickets,
-=======
-        issueType: values.issueType,
         linkedTickets: values.selectedLinkedTickets,
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         extras: {
           category: {
             sensitiveGrievanceTicketExtras: {

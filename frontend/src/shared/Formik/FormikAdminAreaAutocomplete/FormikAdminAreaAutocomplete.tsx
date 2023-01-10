@@ -1,12 +1,7 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
-<<<<<<< HEAD
 import { FieldLabel } from '../../../components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
-=======
-import { AdminAreaFixedAutocomplete } from '../../../components/population/AdminAreaFixedAutocomplete';
-import { FieldLabel } from '../../../components/core/FieldLabel';
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 
 export const FormikAdminAreaAutocomplete = ({
   field,

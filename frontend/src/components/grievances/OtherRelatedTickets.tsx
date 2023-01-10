@@ -15,10 +15,8 @@ import {
 
 export const OtherRelatedTickets = ({
   ticket,
-  canViewHouseholdDetails,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-  canViewHouseholdDetails: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -74,30 +72,10 @@ export const OtherRelatedTickets = ({
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
-<<<<<<< HEAD
-        <LabelizedField label={t('For Household')}>
-          <>
-            {ticket.household?.id ? (
-              <ContentLink
-                href={
-                  canViewHouseholdDetails
-                    ? `/${businessArea}/population/household/${ticket.household.id}`
-                    : undefined
-                }
-              >
-                {ticket.household.unicefId}
-              </ContentLink>
-            ) : (
-              '-'
-            )}
-            <Box mt={3}>{renderIds(openHouseholdTickets)}</Box>
-          </>
-=======
         <LabelizedField
           label={`For Household ${ticket.household?.unicefId || '-'} `}
         >
           <>{renderIds(openExistingTickets)}</>
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         </LabelizedField>
         <LabelizedField label={t('Tickets')}>
           <>{renderIds(openLinkedTickets)}</>
@@ -114,31 +92,11 @@ export const OtherRelatedTickets = ({
         {show && (
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
-<<<<<<< HEAD
-            <LabelizedField label={t('For Household')}>
-              <>
-                {ticket.household?.id ? (
-                  <ContentLink
-                    href={
-                      canViewHouseholdDetails
-                        ? `/${businessArea}/population/household/${ticket.household.id}`
-                        : undefined
-                    }
-                  >
-                    {ticket.household.unicefId}
-                  </ContentLink>
-                ) : (
-                  '-'
-                )}
-                <Box mt={3}>{renderIds(closedHouseholdTickets)}</Box>
-              </>
-=======
             <LabelizedField
               label={`${t('For Household')} ${ticket.household?.unicefId ||
                 '-'} `}
             >
               <>{renderIds(closedExistingTickets)}</>
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
             </LabelizedField>
             <LabelizedField label={t('Tickets')}>
               <>{renderIds(closedLinkedTickets)}</>

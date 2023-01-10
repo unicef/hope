@@ -9,18 +9,7 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-<<<<<<< HEAD:frontend/src/components/rdi/RegistrationFilter.tsx
-import { UsersAutocomplete } from '../../shared/autocompletes/UsersAutocomplete';
-=======
-import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
-
-const StyledTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f:frontend/src/components/rdi/RegistrationFilters.tsx
+import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 
 interface RegistrationFiltersProps {
   onFilterChange;
@@ -40,14 +29,13 @@ export function RegistrationFilters({
     return null;
   }
 
-<<<<<<< HEAD:frontend/src/components/rdi/RegistrationFilter.tsx
   const renderTable = (): React.ReactElement => {
     return (
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
-            value={filter.search || ''}
+            value={filter.search}
             onChange={(e) =>
               onFilterChange({ ...filter, search: e.target.value })
             }
@@ -56,71 +44,21 @@ export function RegistrationFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <UsersAutocomplete
-            onInputTextChange={(value) =>
-              onFilterChange({ ...filter, userInputValue: value })
-            }
-            fullWidth
-            inputValue={filter.userInputValue}
-            onChange={(e, option) => {
-              if (!option) {
-                onFilterChange({ ...filter, importedBy: undefined });
-                return;
-              }
-              onFilterChange({ ...filter, importedBy: option.node.id });
-            }}
-            value={filter.importedBy}
+          <AssigneeAutocomplete
+            onFilterChange={onFilterChange}
+            name='importedBy'
+            label={t('Imported By')}
           />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            value={filter.status || ''}
+            value={filter.status}
             label={t('Status')}
             onChange={(e) => handleFilterChange(e, 'status')}
             fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
-=======
-  return (
-    <ContainerWithBorder>
-      <StyledTextField
-        variant='outlined'
-        label={t('Search')}
-        margin='dense'
-        onChange={(e) => handleFilterChange(e, 'search')}
-        value={filter.search}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-      <DatePickerFilter
-        label={t('Import Date')}
-        onChange={(date) => onFilterChange({ ...filter, importDate: date })}
-        value={filter.importDate}
-      />
-      <AssigneeAutocomplete
-        onFilterChange={onFilterChange}
-        name='importedBy'
-        label={t('Imported By')}
-      />
-      <SelectFilter
-        value={filter.status}
-        label={t('Status')}
-        onChange={(e) => handleFilterChange(e, 'status')}
-      >
-        <MenuItem value=''>
-          <em>{t('None')}</em>
-        </MenuItem>
-        {registrationChoicesData.registrationDataStatusChoices.map((item) => {
-          return (
-            <MenuItem key={item.value} value={item.value}>
-              {item.name}
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f:frontend/src/components/rdi/RegistrationFilters.tsx
             </MenuItem>
             {registrationChoicesData.registrationDataStatusChoices.map(
               (item) => {
@@ -138,7 +76,7 @@ export function RegistrationFilters({
             <NumberTextField
               id='minFilter'
               topLabel={t('Household Size')}
-              value={filter.size.min || ''}
+              value={filter.size.min}
               placeholder='From'
               icon={<GroupIcon />}
               onChange={(e) =>
@@ -155,7 +93,7 @@ export function RegistrationFilters({
           <Grid item xs={6}>
             <NumberTextField
               id='maxFilter'
-              value={filter.size.max || ''}
+              value={filter.size.max}
               placeholder='To'
               icon={<GroupIcon />}
               onChange={(e) =>

@@ -30,11 +30,7 @@ export const AssigneeAutocomplete = ({
   onFilterChange?;
   name?: string;
   value?;
-<<<<<<<< HEAD:frontend/src/shared/autocompletes/AssigneeAutocomplete.tsx
   label?: string;
-========
-  label?;
->>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f:frontend/src/shared/AssigneeAutocomplete/AssigneeAutocomplete.tsx
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);

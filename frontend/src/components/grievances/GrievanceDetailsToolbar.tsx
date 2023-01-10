@@ -107,14 +107,9 @@ export const GrievanceDetailsToolbar = ({
     };
     delete allData.previous_documents;
     delete allData.previous_identities;
-<<<<<<< HEAD
     delete allData.previous_payment_channels;
     delete allData.flex_fields;
-=======
-    delete allData.flex_fields;
-    delete allData.previous_payment_channels;
 
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
     const { approved, notApproved } = countApprovedAndUnapproved(
       Object.values(allData),
     );

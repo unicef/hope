@@ -624,7 +624,6 @@
   "Confirm": "Confirm",
   "Household Id": "Household Id",
   "This household is a duplicate of a household ID": "This household is a duplicate of a household ID",
-<<<<<<< HEAD
   "Grievance Dashboard": "Grievance Dashboard",
   "SYSTEM-GENERATED": "SYSTEM-GENERATED",
   "USER-GENERATED": "USER-GENERATED",
@@ -685,8 +684,6 @@
   "Are you sure you want to send this message?": "Are you sure you want to send this message?",
   "Survey will be sent to all households selected": "Survey will be sent to all households selected",
   "You have selected households as the recipients group": "You have selected households as the recipients group",
-  "New message": "New message"
-=======
+  "New message": "New message",
   "Sort by": "Sort by"
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 }

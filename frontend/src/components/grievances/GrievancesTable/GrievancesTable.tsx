@@ -1,8 +1,8 @@
 import { Box, Button } from '@material-ui/core';
+import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import get from 'lodash/get';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
@@ -10,17 +10,12 @@ import {
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
-<<<<<<< HEAD
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
-import { decodeIdString, reduceChoices } from '../../../utils/utils';
-=======
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { decodeIdString, choicesToDict } from '../../../utils/utils';
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
+import { choicesToDict, decodeIdString } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -31,9 +26,9 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
+import { BulkAssignModal } from './BulkAssignModal';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
-import { BulkAssignModal } from './BulkAssignModal';
 
 interface GrievancesTableProps {
   businessArea: string;

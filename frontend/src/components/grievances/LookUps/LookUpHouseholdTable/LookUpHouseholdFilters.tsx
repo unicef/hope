@@ -102,12 +102,7 @@ export function LookUpHouseholdFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Status')}
-<<<<<<< HEAD
-            value={filter.residenceStatus || ''}
-            fullWidth
-=======
             value={filter.residenceStatus}
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
           >
             {choicesData.residenceStatusChoices?.map((item) => {
               return (

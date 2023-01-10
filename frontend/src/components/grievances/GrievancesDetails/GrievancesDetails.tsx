@@ -2,15 +2,12 @@ import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-<<<<<<< HEAD
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
-=======
   choicesToDict,
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';

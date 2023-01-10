@@ -1,9 +1,11 @@
 import { Box, Grid, MenuItem } from '@material-ui/core';
+import { AccountBalance } from '@material-ui/icons';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccountBalance } from '@material-ui/icons';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GrievanceSearchTypes,
@@ -16,17 +18,10 @@ import {
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
+import { FieldLabel } from '../../core/FieldLabel';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-<<<<<<< HEAD
-import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
-import { NumberTextField } from '../../core/NumberTextField';
-=======
-import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -72,7 +67,6 @@ export function GrievancesFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-<<<<<<< HEAD
         <Grid container item xs={5} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
@@ -101,15 +95,6 @@ export function GrievancesFilters({
               ))}
             </SelectFilter>
           </Grid>
-=======
-        <Grid item>
-          <SearchTextField
-            value={filter.search}
-            label='Search'
-            onChange={(e) => handleFilterChange(e, 'search')}
-            data-cy='filters-search'
-          />
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         </Grid>
         <Grid container item xs={2}>
           <SelectFilter
@@ -228,7 +213,6 @@ export function GrievancesFilters({
             name='assignedTo'
           />
         </Grid>
-<<<<<<< HEAD
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid container item xs={3} spacing={3} alignItems='flex-end'>
             <Grid item xs={6}>
@@ -248,25 +232,6 @@ export function GrievancesFilters({
             </Grid>
           </Grid>
         )}
-=======
-        <Grid item>
-          <NumberTextField
-            topLabel={t('Similarity Score')}
-            value={filter.scoreMin}
-            placeholder={t('From')}
-            onChange={(e) => handleFilterChange(e, 'scoreMin')}
-          />
-        </Grid>
-        <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <NumberTextField
-              value={filter.scoreMax}
-              placeholder='To'
-              onChange={(e) => handleFilterChange(e, 'scoreMax')}
-            />
-          </Box>
-        </Grid>
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         <Grid item>
           <RdiAutocomplete
             onFilterChange={onFilterChange}

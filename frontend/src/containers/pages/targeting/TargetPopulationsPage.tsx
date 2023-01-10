@@ -31,12 +31,7 @@ export function TargetPopulationsPage(): React.ReactElement {
       min: undefined,
       max: undefined,
     },
-<<<<<<< HEAD
     createdAtRange: { min: undefined, max: undefined },
-    name: '',
-    status: '',
-=======
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   });
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);

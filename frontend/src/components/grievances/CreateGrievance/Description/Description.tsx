@@ -13,7 +13,6 @@ import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdm
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import { reduceChoices } from '../../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
   UserChoiceDataQuery,
@@ -23,9 +22,10 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from '../../LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { Title } from '../../../core/Title';
+import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
+import { choicesToDict } from '../../../../utils/utils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -73,7 +73,7 @@ export const Description = ({
   const { t } = useTranslation();
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices || []);
+  } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
   const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
   const canAddDocumentation = hasPermissions(
@@ -247,7 +247,7 @@ export const Description = ({
             <Grid container spacing={4}>
               <Grid item xs={6}>
                 <Box py={3}>
-                  <LookUpRelatedTickets
+                  <LookUpLinkedTickets
                     values={values}
                     onValueChange={setFieldValue}
                   />

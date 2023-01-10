@@ -78,7 +78,6 @@ export function TargetPopulationFilters({
             ))}
           </SelectFilter>
         </Grid>
-<<<<<<< HEAD
         <Grid container item xs={3} spacing={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <NumberTextField
@@ -91,7 +90,7 @@ export function TargetPopulationFilters({
                   ...filter,
                   numIndividuals: {
                     ...filter.numIndividuals,
-                    min: e.target.value || undefined,
+                    min: e.target.value,
                   },
                 })
               }
@@ -108,7 +107,7 @@ export function TargetPopulationFilters({
                   ...filter,
                   numIndividuals: {
                     ...filter.numIndividuals,
-                    max: e.target.value || undefined,
+                    max: e.target.value,
                   },
                 })
               }
@@ -148,40 +147,6 @@ export function TargetPopulationFilters({
               value={filter.createdAtRange.max}
             />
           </Grid>
-=======
-        <Grid item>
-          <NumberTextField
-            topLabel={t('Number of Households')}
-            value={filter.numIndividuals.min}
-            placeholder={t('From')}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                numIndividuals: {
-                  ...filter.numIndividuals,
-                  min: e.target.value,
-                },
-              })
-            }
-            icon={<Group />}
-          />
-        </Grid>
-        <Grid item>
-          <NumberTextField
-            value={filter.numIndividuals.max}
-            placeholder={t('To')}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                numIndividuals: {
-                  ...filter.numIndividuals,
-                  max: e.target.value,
-                },
-              })
-            }
-            icon={<Group />}
-          />
->>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         </Grid>
       </Grid>
     );
