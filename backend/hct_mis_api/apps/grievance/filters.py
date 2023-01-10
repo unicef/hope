@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Sequence, Tuple
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -62,7 +62,7 @@ class GrievanceOrderingFilter(OrderingFilter):
 
 
 class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
-    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH: Sequence = (
+    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH: Tuple = (
         "search",
         "created_at_range",
         "assigned_to",

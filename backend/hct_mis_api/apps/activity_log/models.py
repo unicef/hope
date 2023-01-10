@@ -11,7 +11,7 @@ from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User, AbstractUser
+    from hct_mis_api.apps.account.models import AbstractUser, User
 
 
 class LogEntry(models.Model):

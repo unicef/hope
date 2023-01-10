@@ -347,7 +347,7 @@ def generate_filename() -> str:
     return f"{file_name}-{timezone.now()}"
 
 
-def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: Optional[str]) -> Optional[str]:
+def handle_photo(photo: Optional[Union[InMemoryUploadedFile, str]], photoraw: Optional[str]) -> Optional[str]:
     if isinstance(photo, InMemoryUploadedFile):
         return default_storage.save(f"{generate_filename()}.jpg", photo)
     elif isinstance(photo, str):

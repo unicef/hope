@@ -6,7 +6,7 @@ import sys
 import time
 from functools import reduce
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
