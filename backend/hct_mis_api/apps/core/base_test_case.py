@@ -3,9 +3,9 @@ import os
 import random
 import shutil
 import sys
+import time
 from functools import reduce
 from io import BytesIO
-import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.conf import settings
