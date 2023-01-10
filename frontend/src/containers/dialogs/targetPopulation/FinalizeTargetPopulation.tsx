@@ -1,9 +1,4 @@
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -51,9 +46,7 @@ export const FinalizeTargetPopulation = ({
       aria-labelledby='form-dialog-title'
     >
       <DialogTitleWrapper>
-        <DialogTitle id='scroll-dialog-title'>
-          <Typography variant='h6'>{t('Send to Cash Assist')}</Typography>
-        </DialogTitle>
+        <DialogTitle>{t('Send to Cash Assist')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
@@ -62,7 +55,6 @@ export const FinalizeTargetPopulation = ({
             'households to CashAssist? Target population will not be editable further.',
           )}
         </DialogDescription>
-        {/* {!totalHouseholds && <ErrorMessage>There are not any households selected in this criteria.</ErrorMessage>} */}
       </DialogContent>
       <DialogFooter>
         <DialogActions>

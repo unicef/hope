@@ -43,8 +43,7 @@ class RapidProAPI:
         if not self.url:
             self.url = settings.RAPID_PRO_URL
         if not token:
-            logger.error(f"Token is not set for this business area, business_area={business_area.name}")
-            raise TokenNotProvided("Token is not set for this business area.")
+            raise TokenNotProvided(f"Token is not set for {business_area.name}.")
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
 
@@ -129,7 +128,7 @@ class RapidProAPI:
     def get_flow_runs(self) -> List:
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
 
-    def get_mapped_flow_runs(self, start_uuids: List[UUID]) -> List:
+    def get_mapped_flow_runs(self, start_uuids: List[str]) -> List:
         results = self.get_flow_runs()
         mapped_results = [
             self._map_to_internal_structure(x)

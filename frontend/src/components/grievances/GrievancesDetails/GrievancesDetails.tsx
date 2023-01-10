@@ -2,13 +2,16 @@ import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+<<<<<<< HEAD
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
+=======
+  choicesToDict,
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   grievanceTicketStatusToColor,
-  reduceChoices,
   renderUserName,
 } from '../../../utils/utils';
 import {
@@ -42,14 +45,14 @@ export const GrievancesDetails = ({
   const { t } = useTranslation();
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices

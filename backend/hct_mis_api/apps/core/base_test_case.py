@@ -5,13 +5,16 @@ import shutil
 import sys
 from functools import reduce
 from io import BytesIO
+import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 
+import factory
 from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
@@ -30,15 +33,21 @@ class APITestCase(SnapshotTestTestCase):
         from hct_mis_api.schema import schema
 
         super().setUp()
-        self.client = Client(schema)
+        self.client: Client = Client(schema)
 
-        seed_in_env = os.getenv("RANDOM_SEED", None)
+        seed_in_env = os.getenv("RANDOM_SEED")
         self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
+        faker = factory.faker.Faker._get_faker()
+        faker.random.seed(seed_in_env)
         random.seed(self.seed)
-        if seed_in_env is not None:
-            print(f"Random seed: {self.seed}")
+        self.maxDiff = None
+
+        self.start_time = time.time()
 
     def tearDown(self) -> None:
+        with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
+            f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
+
         # https://stackoverflow.com/a/39606065
         if hasattr(self._outcome, "errors"):
             # Python 3.4 - 3.10  (These two methods have no side effects)
@@ -92,7 +101,7 @@ class APITestCase(SnapshotTestTestCase):
         )
         context_value = request.get("/api/graphql/", **prepared_headers)
         context_value.user = user or AnonymousUser()
-        self.__set_context_files(context_value, files)
+        self.__set_context_files(context_value, files or {})
         return context_value
 
     @classmethod

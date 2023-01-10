@@ -43,7 +43,7 @@ def run_background_query(query_id: int, **kwargs: Any) -> Union[str, bool, None]
 def refresh_reports() -> None:
     try:
         for report in Report.objects.filter(active=True, refresh_daily=True):
-            run_background_query.delay()
+            run_background_query.delay(report.query.id)
             with atomic():
                 report.last_run = timezone.now()
                 report.execute()

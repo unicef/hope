@@ -27,8 +27,12 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
+<<<<<<< HEAD
   paymentRecord?: string;
   selectedRelatedTickets: string[];
+=======
+  selectedLinkedTickets: string[];
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   individualData?;
   householdDataUpdateFields?;
   partner?;
@@ -206,7 +210,7 @@ export function prepareInitialValues(
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
       : [],
-    selectedRelatedTickets: ticket.relatedTickets.map(
+    selectedLinkedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
     documentation: null,
@@ -240,7 +244,7 @@ function preparePositiveFeedbackVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             positiveFeedbackTicketExtras: {
@@ -260,7 +264,7 @@ function prepareNegativeFeedbackVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             negativeFeedbackTicketExtras: {
@@ -280,7 +284,7 @@ function prepareReferralVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
             referralTicketExtras: {
@@ -300,8 +304,12 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+<<<<<<< HEAD
         issueType: values.issueType,
         linkedTickets: values.selectedRelatedTickets,
+=======
+        linkedTickets: values.selectedLinkedTickets,
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
       },
     },
   };
@@ -313,7 +321,7 @@ function prepareSesitiveVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };
@@ -334,7 +342,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           addIndividualIssueTypeExtras: {
             individualData: { ...values.individualData, flexFields },
@@ -351,7 +359,7 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };
@@ -378,7 +386,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           individualDataUpdateIssueTypeExtras: {
             individualData: {
@@ -423,7 +431,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
         extras: {
           householdDataUpdateIssueTypeExtras: {
             householdData,
@@ -440,7 +448,7 @@ function prepareDefaultVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        linkedTickets: values.selectedRelatedTickets,
+        linkedTickets: values.selectedLinkedTickets,
       },
     },
   };

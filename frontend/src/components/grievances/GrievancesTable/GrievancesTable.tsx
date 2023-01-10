@@ -10,12 +10,17 @@ import {
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
+<<<<<<< HEAD
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import { decodeIdString, reduceChoices } from '../../../utils/utils';
+=======
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import { decodeIdString, choicesToDict } from '../../../utils/utils';
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -96,11 +101,11 @@ export const GrievancesTable = ({
 
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;

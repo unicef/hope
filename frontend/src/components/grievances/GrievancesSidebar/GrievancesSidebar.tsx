@@ -86,11 +86,15 @@ export const GrievancesSidebar = ({
             ) : null}
           </Box>
           <Box mt={3}>
+<<<<<<< HEAD
             <OtherRelatedTickets
               ticket={ticket}
               linkedTickets={ticket.relatedTickets}
               canViewHouseholdDetails={canViewHouseholdDetails}
             />
+=======
+            <OtherRelatedTickets ticket={ticket} />
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
           </Box>
         </Box>
       );
@@ -123,11 +127,15 @@ export const GrievancesSidebar = ({
     return (
       <Box p={3}>
         <Box display='flex' flexDirection='column'>
+<<<<<<< HEAD
           <OtherRelatedTickets
             ticket={ticket}
             linkedTickets={ticket.relatedTickets}
             canViewHouseholdDetails={canViewHouseholdDetails}
           />
+=======
+          <OtherRelatedTickets ticket={ticket} />
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         </Box>
       </Box>
     );

@@ -4,7 +4,10 @@ from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
 from django.test import TestCase
 
-from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineFormSet
+from hct_mis_api.apps.account.admin.forms import (
+    UserRoleAdminForm,
+    UserRoleInlineFormSet,
+)
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -74,5 +77,5 @@ class UserRolesTest(TestCase):
         self.assertEqual(len(formset.errors), 2)
 
         errors: List[ErrorList] = formset.errors
-        # TODO: No overload variant of "__getitem__" of "UserList" matches argument type "str"
-        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", errors[0]["role"])  # type: ignore
+        role = errors[0]["role"]  # type: ignore # mypy doesn't see that you can call __getitem__ with str on ErrorList
+        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", role)

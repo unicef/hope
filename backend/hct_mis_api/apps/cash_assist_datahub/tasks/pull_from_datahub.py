@@ -1,6 +1,7 @@
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 
@@ -8,6 +9,9 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
+from hct_mis_api.apps.core.cache_keys import (
+    PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY,
+)
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
@@ -95,7 +99,7 @@ class PullFromDatahubTask:
     def __init__(self, exchange_rates_client: Optional[ExchangeRates] = None) -> None:
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
-    def execute(self) -> Dict:
+    def execute(self) -> Dict[str, Union[int, List[Any]]]:
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
         ret: Dict[str, List] = {
             "skipped_due_failure": [],
@@ -121,11 +125,16 @@ class PullFromDatahubTask:
                     ret["failures"].append(session.id)
         return ret | {"grouped_session": grouped_session_count}
 
+    def clear_cache(self, session: "AbstractSession") -> None:
+        business_area = self.get_business_area_for_cash_assist_code(session.business_area)
+        cache.delete_pattern(PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(business_area.id, "*"))
+
     def copy_session(self, session: "AbstractSession") -> None:
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
             session.save(update_fields=("status",))
+            self.clear_cache(session)
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="cash_assist_datahub_ca"):
                     self.copy_service_providers(session)

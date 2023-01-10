@@ -46,7 +46,7 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:  # type: ignore
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Optional[Tuple[int, dict[str, int]]]:  # type: ignore # FIXME: Signature of "delete" incompatible with supertype "Model"
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -54,9 +54,10 @@ class SoftDeletableModelWithDate(models.Model):
         if soft:
             self.is_removed = True
             self.removed_date = timezone.now()
-            self.save(using=using)
+            self.save(using=using)  # type: ignore # FIXME: Argument "using" to "save" of "Model" has incompatible type "bool"; expected "Optional[str]"
         else:
             return super().delete(using=using, *args, **kwargs)
+        return None
 
 
 class SoftDeletionTreeManager(TreeManager):
@@ -81,7 +82,9 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = models.Manager()
 
-    def delete(self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Optional[Tuple[int, dict[str, int]]]:  # type: ignore
+    def delete(
+        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -92,6 +95,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
+        return None
 
 
 class AbstractSession(models.Model):
@@ -193,7 +197,9 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any) -> Tuple[int, dict[str, int]]:  # type: ignore
+    def delete(  # type: ignore # FIXME: Signature of "delete" incompatible with supertype "Model"
+        self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -203,6 +209,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
+        return None
 
 
 class ConcurrencyModel(models.Model):

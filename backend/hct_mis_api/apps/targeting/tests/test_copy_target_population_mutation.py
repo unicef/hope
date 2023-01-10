@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict, List
 
 from parameterized import parameterized
 
@@ -73,7 +73,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         cls.empty_target_population_1.save()
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: TargetingCriteriaRuleFilter) -> TargetingCriteria:
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)

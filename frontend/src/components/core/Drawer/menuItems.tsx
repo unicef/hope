@@ -6,9 +6,13 @@ import BallotIcon from '@material-ui/icons/Ballot';
 import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
+<<<<<<< HEAD
 import ForumIcon from '@material-ui/icons/Forum';
 import InfoIcon from '@material-ui/icons/Info';
 import ListIcon from '@material-ui/icons/List';
+=======
+import NewReleases from '@material-ui/icons/NewReleases';
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
 import MessageIcon from '@material-ui/icons/Message';
@@ -194,5 +198,10 @@ export const resourcesItems = [
     name: 'Tools and Materials',
     href: 'https://unicef.sharepoint.com/sites/EMOPS-HOPE',
     icon: <InfoIcon />,
+  },
+  {
+    name: 'Release Note',
+    href: '/api/changelog/',
+    icon: <NewReleases />,
   },
 ];

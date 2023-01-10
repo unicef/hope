@@ -38,6 +38,7 @@ export const DeleteHouseholdGrievanceDetails = ({
   } = useHouseholdChoiceDataQuery();
 
   if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
 
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,

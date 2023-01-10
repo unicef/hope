@@ -6,8 +6,21 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
+from django.core.cache import cache
 from django.utils import timezone
 
 import pytz
@@ -27,12 +40,11 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    # TODO Signature of "__contains__" incompatible with supertype tuple
-    def __contains__(self, key: str, *args: Any, **kwargs: Any) -> bool:  # type: ignore
+    def __contains__(self, key: str, *args: Any, **kwargs: Any) -> bool:  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
         return key.casefold() in (element.casefold() for element in self)
 
 
-def decode_id_string(id_string: str) -> Optional[str]:
+def decode_id_string(id_string: Optional[str]) -> Optional[str]:
     if not id_string:
         return None
 
@@ -123,8 +135,7 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        # FIXME: bug?
-        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523
+        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523 # FIXME
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -215,7 +226,7 @@ def get_combined_attributes() -> Dict:
     flex_attrs = serialize_flex_attributes()
     return {
         **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
-        .apply_business_area(None)
+        .apply_business_area(None)  # type: ignore # TODO: none business area?
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
         **flex_attrs["households"],
@@ -228,11 +239,11 @@ def get_attr_value(name: str, obj: Any, default: Optional[Any] = None) -> Any:
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices: Dict) -> List[Dict[str, Any]]:
+def to_choice_object(choices: Iterable) -> List[Dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Union[Dict, List, Any]:
+def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Any:
     if isinstance(obj, dict):
         return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -255,11 +266,11 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: str, path: str) -> Optional[str]:
+def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME
         path.split("."),
         dictionary,
     )
@@ -272,7 +283,7 @@ def get_count_and_percentage(input_list: List, all_items_list: List) -> Dict[str
     return {"count": count, "percentage": percentage}
 
 
-def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
+def encode_ids(results: Any, model_name: str, key: str) -> List[Dict]:
     if results:
         for result in results:
             result_id = result[key]
@@ -280,7 +291,9 @@ def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
     return results
 
 
-def to_dict(instance: "Model", fields: Optional[List] = None, dict_fields: Optional[Dict] = None) -> Dict[str, Any]:
+def to_dict(
+    instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
+) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -436,7 +449,7 @@ def to_snake_case(camel_case_string: str) -> str:
     return snake_case[0] + snake_case[1:].lower()
 
 
-def check_concurrency_version_in_mutation(version: int, target: Any) -> None:
+def check_concurrency_version_in_mutation(version: Optional[int], target: Any) -> None:
     if version is None:
         return
 
@@ -460,8 +473,8 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
 
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
-    with open(csv_file, newline="") as csv_file:  # type: ignore
-        reader = csv.reader(csv_file)
+    with open(csv_file, newline="") as csv_file_ptr:  # type: ignore # FIXME: No overload variant of "open" matches argument types "BytesIO", "str"
+        reader = csv.reader(csv_file_ptr)
         next(reader, None)
         fields_mapping = dict(reader)
 
@@ -520,7 +533,7 @@ def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
         yield row
 
 
-def chart_map_choices(choices: List) -> Dict:
+def chart_map_choices(choices: Iterable) -> Dict:
     return dict(choices)
 
 
@@ -546,7 +559,7 @@ def parse_list_values_to_int(list_to_parse: List) -> List[int]:
     return list(map(lambda x: int(x or 0), list_to_parse))
 
 
-def sum_lists_with_values(qs_values: List, list_len: int) -> List[int]:
+def sum_lists_with_values(qs_values: Iterable, list_len: int) -> List[int]:
     data = [0] * list_len
     for values in qs_values:
         parsed_values = parse_list_values_to_int(values)
@@ -628,7 +641,7 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
     return flex_fields_with_str_choices
 
 
-def get_model_choices_fields(model: "Model", excluded: Optional[List] = None) -> List[str]:
+def get_model_choices_fields(model: Type, excluded: Optional[List] = None) -> List[str]:
     if excluded is None:
         excluded = []
 
@@ -700,13 +713,6 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: List[str]) -> L
     return excluded_household_ids_array
 
 
-@functools.lru_cache(maxsize=None)
-def cached_business_areas_slug_id_dict() -> Dict:
-    from hct_mis_api.apps.core.models import BusinessArea
-
-    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
-
-
 def timezone_datetime(value: Any) -> datetime:
     if not value:
         return value
@@ -718,3 +724,15 @@ def timezone_datetime(value: Any) -> datetime:
     if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
+
+
+def save_data_in_cache(
+    cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Optional[Callable] = None
+) -> Any:
+    cache_data = cache.get(cache_key, "NOT_CACHED")
+    if cache_data == "NOT_CACHED":
+        cache_data = data_lambda()
+        if cache_condition and not cache_condition(cache_data):
+            return cache_data
+        cache.set(cache_key, cache_data, timeout=timeout)
+    return cache_data

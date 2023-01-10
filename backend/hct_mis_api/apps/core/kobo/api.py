@@ -34,12 +34,10 @@ class KoboRequestsSession(requests.Session):
         new_parsed = urlparse(new_url)
         if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:
             return False
-        return super().should_strip_auth(old_url, new_url)  # type: ignore # Call to untyped function "should_strip_auth" in typed context
+        return super().should_strip_auth(old_url, new_url)  # type: ignore # FIXME: Call to untyped function "should_strip_auth" in typed context
 
 
 class KoboAPI:
-    # KPI_URL = os.getenv("KOBO_KF_URL", "https://kobo.humanitarianresponse.info")
-
     def __init__(self, business_area_slug: Optional[str] = None, kpi_url: Optional[str] = None):
         self.KPI_URL = kpi_url or settings.KOBO_KF_URL
         if business_area_slug is not None:
@@ -140,7 +138,7 @@ class KoboAPI:
         file_import_response = self._post_request(
             url=self._get_url("imports/", append_api=False, add_limit=False),
             data=file_import_data,
-            files={"file": bytes_io_file},
+            files={"file": bytes_io_file},  # type: ignore # FIXME
         )
         file_import_response_dict = file_import_response.json()
         url = file_import_response_dict.get("url")

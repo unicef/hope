@@ -241,7 +241,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-    def permissions_filter(self, qs: QuerySet, name: str, value: List[Permissions]) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
@@ -372,7 +372,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
         return queryset
 
     def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
+        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)  # type: ignore # FIXME: Argument 4 to "permissions_filter" of "GrievanceTicketFilter" has incompatible type "str"; expected "List[Permissions]"
 
 
 class TicketNoteFilter(FilterSet):

@@ -63,7 +63,11 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Linked Tickets',
+<<<<<<< HEAD
     id: 'linked_tickets',
+=======
+    id: '',
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
     numeric: false,
     dataCy: 'linkedTickets',
   },

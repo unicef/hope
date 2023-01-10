@@ -37,10 +37,13 @@ export function GrievancesTablePage(): React.ReactElement {
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
+<<<<<<< HEAD
     grievanceType: GrievanceTypes[0],
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
+=======
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
   });
   const [selectedTab, setSelectedTab] = useState(
     GRIEVANCE_TICKETS_TYPES.userGenerated,

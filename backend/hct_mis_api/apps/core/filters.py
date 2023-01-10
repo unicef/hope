@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -15,10 +15,6 @@ from django.utils import timezone
 
 from dateutil.parser import parse
 from django_filters import Filter
-from traitlets import Any
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
@@ -188,10 +184,5 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
-        cached_dict = cached_business_areas_slug_id_dict()
-        business_area_id = (
-            cached_dict[business_area_slug]
-            if business_area_slug in cached_dict
-            else BusinessArea.objects.get(slug=business_area_slug).id
-        )
-        return qs.filter(business_area_id=business_area_id)
+
+        return qs.filter(business_area__slug=business_area_slug)

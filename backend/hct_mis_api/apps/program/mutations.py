@@ -71,8 +71,8 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
         cls.validate(
-            start_date=datetime.combine(program_data.get("start_date"), datetime.min.time()),
-            end_date=datetime.combine(program_data.get("end_date"), datetime.min.time()),
+            start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
         )
 
         program = Program(

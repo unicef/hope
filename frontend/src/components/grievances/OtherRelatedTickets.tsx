@@ -4,14 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
-import {
-  GrievanceTicketQuery,
-  useExistingGrievanceTicketsQuery,
-} from '../../__generated__/graphql';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import {
   ApproveBox,
@@ -19,11 +14,9 @@ import {
 } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export const OtherRelatedTickets = ({
-  linkedTickets,
   ticket,
   canViewHouseholdDetails,
 }: {
-  linkedTickets: GrievanceTicketQuery['grievanceTicket']['relatedTickets'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canViewHouseholdDetails: boolean;
 }): React.ReactElement => {
@@ -32,33 +25,9 @@ export const OtherRelatedTickets = ({
   const { id } = useParams();
 
   const [show, setShow] = useState(false);
+  const { existingTickets, linkedTickets } = ticket;
 
-  const { data, loading } = useExistingGrievanceTicketsQuery({
-    variables: {
-      businessArea,
-      household:
-        decodeIdString(ticket.household?.id) ||
-        '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      //adding some random ID to get 0 results if there is no household id.
-    },
-  });
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
-
-  const householdTickets = data.existingGrievanceTickets.edges;
   const renderIds = (tickets): React.ReactElement =>
-    tickets.length
-      ? tickets.map((edge) => (
-          <Box key={edge.node.id} mb={1}>
-            <ContentLink
-              href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
-            >
-              {edge.node.unicefId}
-            </ContentLink>
-          </Box>
-        ))
-      : '-';
-  const renderRelatedIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.id} mb={1}>
@@ -71,42 +40,41 @@ export const OtherRelatedTickets = ({
         ))
       : '-';
 
-  const openHouseholdTickets =
-    ticket.household?.id && householdTickets.length
-      ? householdTickets.filter(
+  const openExistingTickets =
+    ticket.household?.id && existingTickets.length
+      ? existingTickets.filter(
           (edge) =>
-            edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED &&
-            edge.node.id !== id,
+            edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
         )
       : [];
-  const closedHouseholdTickets =
-    ticket.household?.id && householdTickets.length
-      ? householdTickets.filter(
+  const closedExistingTickets =
+    ticket.household?.id && existingTickets.length
+      ? existingTickets.filter(
           (edge) =>
-            edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED &&
-            edge.node.id !== id,
+            edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
         )
       : [];
 
-  const openTickets = linkedTickets.length
+  const openLinkedTickets = linkedTickets.length
     ? linkedTickets.filter(
         (edge) =>
           edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
       )
     : [];
-  const closedTickets = linkedTickets.length
+  const closedLinkedTickets = linkedTickets.length
     ? linkedTickets.filter(
         (edge) =>
           edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
       )
     : [];
 
-  return linkedTickets.length || householdTickets.length ? (
+  return linkedTickets.length || existingTickets.length ? (
     <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
+<<<<<<< HEAD
         <LabelizedField label={t('For Household')}>
           <>
             {ticket.household?.id ? (
@@ -124,21 +92,29 @@ export const OtherRelatedTickets = ({
             )}
             <Box mt={3}>{renderIds(openHouseholdTickets)}</Box>
           </>
+=======
+        <LabelizedField
+          label={`For Household ${ticket.household?.unicefId || '-'} `}
+        >
+          <>{renderIds(openExistingTickets)}</>
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
         </LabelizedField>
         <LabelizedField label={t('Tickets')}>
-          <>{renderRelatedIds(openTickets)}</>
+          <>{renderIds(openLinkedTickets)}</>
         </LabelizedField>
-        {!show && (closedTickets.length || closedHouseholdTickets.length) ? (
+        {!show &&
+        (closedLinkedTickets.length || closedExistingTickets.length) ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
               {t('SHOW CLOSED TICKETS')} (
-              {closedTickets.length + closedHouseholdTickets.length})
+              {closedLinkedTickets.length + closedExistingTickets.length})
             </BlueBold>
           </Box>
         ) : null}
         {show && (
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
+<<<<<<< HEAD
             <LabelizedField label={t('For Household')}>
               <>
                 {ticket.household?.id ? (
@@ -156,16 +132,24 @@ export const OtherRelatedTickets = ({
                 )}
                 <Box mt={3}>{renderIds(closedHouseholdTickets)}</Box>
               </>
+=======
+            <LabelizedField
+              label={`${t('For Household')} ${ticket.household?.unicefId ||
+                '-'} `}
+            >
+              <>{renderIds(closedExistingTickets)}</>
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
             </LabelizedField>
             <LabelizedField label={t('Tickets')}>
-              <>{renderRelatedIds(closedTickets)}</>
+              <>{renderIds(closedLinkedTickets)}</>
             </LabelizedField>
           </Box>
         )}
-        {show && (closedTickets.length || closedHouseholdTickets.length) ? (
+        {show &&
+        (closedLinkedTickets.length || closedExistingTickets.length) ? (
           <BlueBold onClick={() => setShow(false)}>
             {t('HIDE CLOSED TICKETS')} (
-            {closedTickets.length + closedHouseholdTickets.length})
+            {closedLinkedTickets.length + closedExistingTickets.length})
           </BlueBold>
         ) : null}
       </Box>

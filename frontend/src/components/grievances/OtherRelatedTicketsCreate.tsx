@@ -32,7 +32,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   if (loading) return <LoadingComponent />;
   if (!data) return null;
 
-  const householdTickets = data.existingGrievanceTickets.edges;
+  const existingTickets = data.existingGrievanceTickets.edges;
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => (
@@ -46,20 +46,24 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
         ))
       : '-';
 
-  const openHouseholdTickets = householdTickets.length
-    ? householdTickets.filter(
+  const openExistingTickets = existingTickets.length
+    ? existingTickets.filter(
         (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
       )
     : [];
-  const closedHouseholdTickets = householdTickets.length
-    ? householdTickets.filter(
+  const closedExistingTickets = existingTickets.length
+    ? existingTickets.filter(
         (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
       )
     : [];
 
+<<<<<<< HEAD
   const shouldShowBox = values.category && values.selectedHousehold?.id;
 
   return shouldShowBox && householdTickets.length ? (
+=======
+  return existingTickets.length ? (
+>>>>>>> ab41040977c8bcdc1e7773291724a43c1c58bf4f
     <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
@@ -69,12 +73,12 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           label={`${t('For Household')} ${values?.selectedHousehold?.unicefId ||
             '-'} `}
         >
-          <>{renderIds(openHouseholdTickets)}</>
+          <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
-        {!show && closedHouseholdTickets.length ? (
+        {!show && closedExistingTickets.length ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
-              {t('SHOW CLOSED TICKETS')} ({closedHouseholdTickets.length})
+              {t('SHOW CLOSED TICKETS')} ({closedExistingTickets.length})
             </BlueBold>
           </Box>
         ) : null}
@@ -85,13 +89,13 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
               label={`${t('For Household')} ${values?.selectedHousehold
                 ?.unicefId || '-'} `}
             >
-              <>{renderIds(closedHouseholdTickets)}</>
+              <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>
           </Box>
         )}
-        {show && closedHouseholdTickets.length ? (
+        {show && closedExistingTickets.length ? (
           <BlueBold onClick={() => setShow(false)}>
-            {t('HIDE CLOSED TICKETS')} ({closedHouseholdTickets.length})
+            {t('HIDE CLOSED TICKETS')} ({closedExistingTickets.length})
           </BlueBold>
         ) : null}
       </Box>

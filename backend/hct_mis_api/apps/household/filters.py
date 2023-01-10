@@ -1,6 +1,6 @@
 import json
 import re
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.filters import (
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -43,9 +43,6 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
 
 
-QueryType = List[Dict[str, Dict[str, Dict[str, str]]]]
-
-
 def _prepare_kobo_asset_id_value(code: str) -> str:
     """
     preparing value for filter by kobo_asset_id
@@ -64,7 +61,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:
         # TODO: not sure if this one is correct?
         # code[5] is the day of month (or the first digit of it)
         # month 4 id is 12068..157380
-        if code[5] in [1, 2, 3] and len(code) == 12:  # type: ignore
+        if len(code) == 12 and code[5] in ["1", "2", "3"]:
             code = code[-5:]
         else:
             code = code[-6:]
@@ -232,8 +229,13 @@ class IndividualFilter(FilterSet):
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
-            IndividualDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            get_individual_doc(business_area)
+            .search()
+            .params(search_type="dfs_query_then_fetch")
+            .from_dict(query_dict)
+            .execute()
         )
+
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
@@ -294,7 +296,7 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
     ]
     wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
 
-    match_queries: QueryType = [
+    match_queries: Iterable = [
         {
             "match": {
                 x: {
@@ -304,7 +306,7 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
         }
         for x in match_fields
     ]
-    prefix_queries: QueryType = [
+    prefix_queries: Iterable = [
         {
             "match_phrase_prefix": {
                 x: {
@@ -314,7 +316,7 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
         }
         for x in prefix_fields
     ]
-    wildcard_queries: QueryType = [
+    wildcard_queries: Iterable = [
         {
             "wildcard": {
                 x: {
@@ -324,7 +326,7 @@ def get_elasticsearch_query_for_individuals(value: str, business_area: "Business
         }
         for x in wildcard_fields
     ]
-    all_queries: List[QueryType] = []
+    all_queries: List = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
@@ -407,7 +409,7 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
     ]
     prefix_fields = ["head_of_household.middle_name", "unicef_id", "residence_status"]
     wildcard_fields = ["unicef_id"]
-    match_queries: QueryType = [
+    match_queries: Iterable = [
         {
             "match": {
                 x: {
@@ -417,7 +419,7 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
         }
         for x in match_fields
     ]
-    prefix_queries: QueryType = [
+    prefix_queries: Iterable = [
         {
             "match_phrase_prefix": {
                 x: {
@@ -427,7 +429,7 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
         }
         for x in prefix_fields
     ]
-    wildcard_queries: QueryType = [
+    wildcard_queries: Iterable = [
         {
             "wildcard": {
                 x: {
@@ -437,7 +439,7 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
         }
         for x in wildcard_fields
     ]
-    all_queries: List[QueryType] = []
+    all_queries: List = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)

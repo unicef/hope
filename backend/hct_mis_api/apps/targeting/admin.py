@@ -56,7 +56,7 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
 
     @button()
     def selection(self, request: "HttpRequest", pk: "UUID") -> "HttpResponse":
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         url = reverse("admin:targeting_householdselection_changelist")
         return HttpResponseRedirect(f"{url}?target_population={obj.id}")
 
@@ -79,7 +79,7 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
 
-        obj: Optional[TargetPopulation] = self.get_object(request, pk)
+        obj: Optional[TargetPopulation] = self.get_object(request, str(pk))
         if not obj:
             raise Exception("Target population not found")
         return confirm_action(

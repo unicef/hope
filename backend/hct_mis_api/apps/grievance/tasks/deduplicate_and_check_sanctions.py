@@ -2,10 +2,8 @@ from typing import List
 
 from django.db import transaction
 
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
-    create_needs_adjudication_tickets,
-)
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import create_needs_adjudication_tickets
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
@@ -26,7 +24,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
         business_area = individuals.first().business_area
 
         if should_populate_index is True:
-            populate_index(individuals, IndividualDocument)
+            populate_index(individuals, get_individual_doc(business_area))
 
         DeduplicateTask.deduplicate_individuals_from_other_source(individuals, business_area)
 

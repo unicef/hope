@@ -28,8 +28,7 @@ def get_class(value: Any) -> Any:
 
 @register.filter()
 def dataset_to_json(value: Any) -> str:
-    # TODO: json.dump needs a second argument (fp)
-    return json.dump(value)  # type: ignore
+    return json.dump(value)  # type: ignore # FIXME: json.dump needs a second argument (fp)
 
 
 @register.filter()
