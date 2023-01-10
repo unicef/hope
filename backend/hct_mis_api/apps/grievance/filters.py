@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Sequence
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -62,7 +62,7 @@ class GrievanceOrderingFilter(OrderingFilter):
 
 
 class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
-    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = (
+    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH: Sequence = (
         "search",
         "created_at_range",
         "assigned_to",
@@ -82,7 +82,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
         return execute_es_query(grievance_es_query_dict)
 
-    def prepare_filters(self, allowed_fields: List[str]) -> Dict:
+    def prepare_filters(self, allowed_fields: Sequence[str]) -> Dict:
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):

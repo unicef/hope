@@ -6,7 +6,7 @@ from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64, decode_id_string_required
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -125,7 +125,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             "description": "Test description",
         }
 
-    def submit_feedback(self, data: Dict) -> Optional[str]:
+    def submit_feedback(self, data: Dict) -> str:
         amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
@@ -134,9 +134,9 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response, response
         self.assertEqual(Feedback.objects.count(), amount + 1)
-        return decode_id_string(response["data"]["createFeedback"]["feedback"]["id"])
+        return decode_id_string_required(response["data"]["createFeedback"]["feedback"]["id"])
 
-    def create_new_feedback(self, data: Optional[Dict] = None) -> Optional[str]:
+    def create_new_feedback(self, data: Optional[Dict] = None) -> str:
         return self.submit_feedback(data or self.create_dummy_correct_input())
 
     def test_creating_new_feedback(self) -> None:

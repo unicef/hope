@@ -6,7 +6,7 @@ import sys
 import time
 from functools import reduce
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -91,7 +91,7 @@ class APITestCase(SnapshotTestTestCase):
         )
 
     def generate_context(
-        self, user: Optional["User"] = None, files: Optional[List] = None, headers: Optional[Dict[str, str]] = None
+        self, user: Optional["User"] = None, files: Optional[Dict] = None, headers: Optional[Dict[str, str]] = None
     ) -> WSGIRequest:
         request = RequestFactory()
         prepared_headers: Dict = reduce(
@@ -124,7 +124,9 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def create_user_role_with_permissions(user: "User", permissions: List, business_area: "BusinessArea") -> UserRole:
+    def create_user_role_with_permissions(
+        user: "User", permissions: Iterable, business_area: "BusinessArea"
+    ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}

@@ -92,7 +92,7 @@ class RapidProAPI:
         return flows["results"]
 
     def start_flows(
-        self, flow_uuid: UUID, phone_numbers: List[str]
+        self, flow_uuid: str, phone_numbers: List[str]
     ) -> Tuple[List[RapidProFlowResponse], Optional[Exception]]:
         array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)

@@ -76,6 +76,6 @@ mutation ExportSurveySample($surveyId: ID!) {
             request_string=self.MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "surveyId": self.id_to_base64(uuid4(), "SurveyNode"),
+                "surveyId": self.id_to_base64(str(uuid4()), "SurveyNode"),
             },
         )

@@ -415,7 +415,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             variables={
                 "input": {
                     **self.grievance_data_to_update,
-                    "documentationToDelete": [self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode")],
+                    "documentationToDelete": [self.id_to_base64(str(uuid.uuid4()), "GrievanceDocumentNode")],
                 }
             },
         )
@@ -439,7 +439,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     **self.grievance_data_to_update,
                     "documentationToUpdate": [
                         {
-                            "id": self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(str(uuid.uuid4()), "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
