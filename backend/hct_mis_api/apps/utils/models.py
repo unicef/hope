@@ -183,6 +183,7 @@ class AbstractSyncable(models.Model):
         abstract = True
 
 
+# TODO: maybe remove? if don't using
 class SoftDeletableDefaultManagerModel(models.Model):
     """
     An abstract base class model with a ``is_removed`` field that
