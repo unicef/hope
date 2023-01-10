@@ -261,8 +261,9 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[D
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
-        previous_identities[identity.id] = {
-            "id": encode_id_base64(identity.id, "IndividualIdentity"),
+        encoded_identity = encode_id_base64(identity.id, "IndividualIdentity")
+        previous_identities[encoded_identity] = {
+            "id": encoded_identity,  # TODO: can be removed maybe
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "partner": identity.partner.name,
