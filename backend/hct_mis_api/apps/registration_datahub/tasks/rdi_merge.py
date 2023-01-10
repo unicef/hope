@@ -139,19 +139,22 @@ class RdiMergeTask:
         imported_household: ImportedHousehold,
         household: Household,
     ) -> None:
-        admin1 = imported_household.admin1
-        admin2 = imported_household.admin2
-        try:
-            if admin2:
-                admin_area = Area.objects.filter(p_code=admin2).first()
-                household.admin_area = admin_area
-                return
-            if admin1:
-                admin_area = Area.objects.filter(p_code=admin1).first()
-                household.admin_area = admin_area
-                return
-        except Area.DoesNotExist as e:
-            logger.exception(e)
+
+        admins = {
+            "admin_area": imported_household.admin_area,
+            "admin1": imported_household.admin1,
+            "admin2": imported_household.admin2,
+            "admin3": imported_household.admin3,
+            "admin4": imported_household.admin4,
+        }
+
+        for admin_key, admin_value in admins.items():
+            if admin_value:
+                admin_area = Area.objects.filter(p_code=admin_value).first()
+                if admin_area:
+                    setattr(household, admin_key, admin_area)
+                else:
+                    logger.exception(f"Provided {admin_key} {admin_value} does not exist")
 
     def _prepare_households(
         self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
