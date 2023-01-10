@@ -43,7 +43,7 @@ class GrievanceOrderingFilter(OrderingFilter):
             qs = super().filter(qs, value)
             qs = (
                 qs.annotate(linked=Count("linked_tickets"))
-                .annotate(linked_related=Count("linked_tickets_related"))
+                .annotate(linked_related=Count("linked_tickets"))
                 .annotate(total_linked=F("linked") + F("linked_related"))
                 .annotate(
                     household_unicef_id_count=Window(
