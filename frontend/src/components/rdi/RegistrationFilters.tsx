@@ -48,6 +48,7 @@ export function RegistrationFilters({
             onFilterChange={onFilterChange}
             name='importedBy'
             label={t('Imported By')}
+            fullWidth
           />
         </Grid>
         <Grid item xs={3}>
