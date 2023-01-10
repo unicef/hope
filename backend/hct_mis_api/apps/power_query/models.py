@@ -17,7 +17,6 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 
 from natural_keys import NaturalKeyModel
-from sentry_sdk import capture_exception
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -193,9 +192,7 @@ class Query(NaturalKeyModel, models.Model):
             else:
                 return_value = result, extra
         except Exception as e:
-            logger.exception(e)
-            sentry_error_id = capture_exception(e)
-            raise QueryRunError(e, sentry_error_id)
+            raise QueryRunError(e) from e
         return return_value
 
 
