@@ -422,7 +422,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            log_and_raise("Grievance Ticket in status Closed is not editable")
+            raise ValidationError("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
