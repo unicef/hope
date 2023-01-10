@@ -78,7 +78,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_status_change_f
                     'line': 3
                 }
             ],
-            'message': 'New status is incorrect',
+            'message': "['New status is incorrect']",
             'path': [
                 'grievanceStatusChange'
             ]
