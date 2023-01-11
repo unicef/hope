@@ -3,8 +3,9 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Union
 
-import graphene
 from django.db.models import QuerySet
+
+import graphene
 from graphene import Connection
 from graphene.relay import PageInfo
 from graphene_django import DjangoConnectionField
