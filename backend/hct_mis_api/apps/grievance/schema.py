@@ -461,7 +461,12 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
-        fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
+        business_area_slug = info.context.headers.get("Business-Area")
+        fields = (
+            FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
+            .associated_with_individual()
+            .apply_business_area(business_area_slug)
+        )
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
         )
