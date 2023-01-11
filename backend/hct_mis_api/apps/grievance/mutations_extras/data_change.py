@@ -488,7 +488,7 @@ def save_individual_data_update_extras(
 
 def update_individual_data_update_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
-) -> List[GrievanceTicket]:
+) -> GrievanceTicket:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
 
     individual_data_update_extras = extras.get("individual_data_update_issue_type_extras")
@@ -653,7 +653,7 @@ def save_add_individual_extras(
 
 def update_add_individual_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
-) -> List[GrievanceTicket]:
+) -> GrievanceTicket:
     ticket_details = grievance_ticket.add_individual_ticket_details
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
