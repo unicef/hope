@@ -120,7 +120,7 @@ class CreateCashPlanReconciliationService:
         return CashPlan.objects.create(
             **self.cash_plan_form_data,
             business_area=self.business_area,
-            ca_id=f"CHSP-HOPE-{current_year}-{new_cash_plan_index_with_padding}",
+            ca_id=f"HOPE-CSH-{current_year}-{new_cash_plan_index_with_padding}",
             ca_hash_id=uuid.uuid4(),
             total_persons_covered=0,
             total_persons_covered_revised=0,
