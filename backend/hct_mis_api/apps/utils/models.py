@@ -58,8 +58,8 @@ class SoftDeletableModelWithDate(models.Model):
             self.removed_date = timezone.now()
             self.save(using=using)
             return 1, {self._meta.label: 1}
-        else:
-            return super().delete(using=using, *args, **kwargs)
+
+        return super().delete(using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):
@@ -183,7 +183,6 @@ class AbstractSyncable(models.Model):
         abstract = True
 
 
-# TODO: maybe remove? if don't using
 class SoftDeletableDefaultManagerModel(models.Model):
     """
     An abstract base class model with a ``is_removed`` field that
@@ -211,8 +210,8 @@ class SoftDeletableDefaultManagerModel(models.Model):
             self.is_removed = True
             self.save(using=using)
             return 1, {self._meta.label: 1}
-        else:
-            return super().delete(using=using, *args, **kwargs)
+
+        return super().delete(using=using, *args, **kwargs)
 
 
 class ConcurrencyModel(models.Model):
