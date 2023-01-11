@@ -1,3 +1,5 @@
+from typing import IO, Any
+
 import graphene
 from graphene_file_upload.scalars import Upload
 
@@ -20,7 +22,7 @@ class CheckAgainstSanctionListMutation(
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, file):
+    def mutate(cls, root: Any, info: Any, file: IO) -> "CheckAgainstSanctionListMutation":
         errors = cls.validate(file=file)
         if errors:
             return CheckAgainstSanctionListMutation(False, errors)

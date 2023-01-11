@@ -25,10 +25,12 @@ export function AdminAreaAutocompleteMultiple({
   value,
   onChange,
   disabled,
+  parentId,
 }: {
   value;
   onChange;
   disabled?;
+  parentId?;
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
@@ -42,6 +44,7 @@ export function AdminAreaAutocompleteMultiple({
       first: 100,
       name: debouncedInputText,
       businessArea,
+      parentId: parentId || '',
     },
   });
   useEffect(() => {

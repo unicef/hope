@@ -14,7 +14,7 @@ const ConfirmationDialogContext = createContext<
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
   title?: string;
-  content?: string;
+  content?: string | React.ReactElement;
   continueText?: string;
   extraContent?: string;
   disabled?: boolean;

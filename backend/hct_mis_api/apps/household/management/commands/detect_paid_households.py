@@ -1,17 +1,19 @@
 import json
 import os
 import shutil
+from typing import Any, Dict, List
+from uuid import UUID
 
 from django.conf import settings
-from django.core.management import BaseCommand
-from django.db.models import Q
+from django.core.management import BaseCommand, CommandParser
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def find_paid_households(sf_pk, business_area_slug="ukraine"):
+def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Dict[str, List[str]]:
     storage_file = StorageFile.objects.get(pk=sf_pk)
     households_loaded_via_sf = Household.objects.filter(
         storage_obj=storage_file, business_area__slug=business_area_slug
@@ -28,7 +30,7 @@ def find_paid_households(sf_pk, business_area_slug="ukraine"):
     payment_records = PaymentRecord.objects.filter(household__id__in=hh_ids_not_loaded_via_sf).distinct("household")
     already_paid_households = payment_records.values_list("household", flat=True)
 
-    def match(household_to_match):
+    def match(household_to_match: Household) -> QuerySet[Household]:
         tax_ids_in_household_to_match = Document.objects.filter(
             individual__household=household_to_match, type__type="TAX_ID"
         ).values_list("document_number", flat=True)
@@ -40,7 +42,7 @@ def find_paid_households(sf_pk, business_area_slug="ukraine"):
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("storage_file_pk", type=int)
 
         parser.add_argument(
@@ -49,7 +51,7 @@ class Command(BaseCommand):
             default="ukraine",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if not options["storage_file_pk"]:
             raise ValueError("storage_file_pk arg is required")
 

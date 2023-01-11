@@ -77,7 +77,7 @@ export const menuItems = [
     ],
   },
   {
-    name: 'Payment Management',
+    name: 'Cash Assist',
     selectedRegexp: /^\/unique.*$/,
     icon: <PaymentIcon />,
     external: true,

@@ -57,20 +57,6 @@ input AgeInput {
   max: Int
 }
 
-type AgencyNode {
-  id: ID!
-  type: AgencyType!
-  label: String!
-  country: String
-  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
-  countryIso3: String
-}
-
-enum AgencyType {
-  UNHCR
-  WFP
-}
-
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -515,8 +501,9 @@ input CreateReportInput {
   businessAreaSlug: String!
   dateFrom: Date!
   dateTo: Date!
-  adminArea: [ID]
   program: ID
+  adminArea1: ID
+  adminArea2: [ID]
 }
 
 input CreateTargetPopulationInput {
@@ -559,6 +546,10 @@ type DeduplicationResultNode {
 
 type DeleteCashPlanVerificationMutation {
   cashPlan: CashPlanNode
+}
+
+type DeleteHouseholdApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 type DeleteProgram {
@@ -614,6 +605,7 @@ type DocumentNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  lastSyncAt: DateTime
   documentNumber: String!
   photo: String
   individual: IndividualNode!
@@ -691,7 +683,7 @@ input EditIndividualDocumentObjectType {
 input EditIndividualIdentityObjectType {
   id: ID!
   country: String!
-  agency: String!
+  partner: String!
   number: String!
 }
 
@@ -777,12 +769,11 @@ type GrievanceTicketNode implements Node {
   language: String!
   consent: Boolean!
   businessArea: UserBusinessAreaNode!
-  linkedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  linkedTickets: [GrievanceTicketNode]
   registrationDataImport: RegistrationDataImportNode
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
-  linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
@@ -800,9 +791,9 @@ type GrievanceTicketNode implements Node {
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
-  relatedTickets: [GrievanceTicketNode]
   admin: String
   existingTickets: [GrievanceTicketNode]
+  relatedTickets: [GrievanceTicketNode]
 }
 
 type GrievanceTicketNodeConnection {
@@ -930,7 +921,7 @@ type HouseholdNode implements Node {
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelectionNode!]!
   adminAreaTitle: String
@@ -1421,8 +1412,8 @@ type ImportedIndividualIdentityNode implements Node {
   id: ID!
   individual: ImportedIndividualNode!
   documentNumber: String!
-  type: String
   country: String
+  partner: String
 }
 
 type ImportedIndividualIdentityNodeConnection {
@@ -1462,7 +1453,9 @@ type ImportedIndividualNode implements Node {
   estimatedBirthDate: Boolean
   maritalStatus: ImportedIndividualMaritalStatus!
   phoneNo: String!
+  phoneNoValid: Boolean
   phoneNoAlternative: String!
+  phoneNoAlternativeValid: Boolean
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
@@ -1494,8 +1487,6 @@ type ImportedIndividualNode implements Node {
   role: String
   age: Int
   importId: String
-  phoneNoValid: Boolean
-  phoneNoAlternativeValid: Boolean
 }
 
 type ImportedIndividualNodeConnection {
@@ -1558,11 +1549,11 @@ input IndividualDocumentObjectType {
 
 type IndividualIdentityNode implements Node {
   id: ID!
-  agency: AgencyNode!
   individual: IndividualNode!
   number: String!
-  type: String
+  partner: String
   country: String
+  countryIso3: String
 }
 
 type IndividualIdentityNodeConnection {
@@ -1579,7 +1570,7 @@ type IndividualIdentityNodeEdge {
 
 input IndividualIdentityObjectType {
   country: String!
-  agency: String!
+  partner: String!
   number: String!
 }
 
@@ -1616,7 +1607,9 @@ type IndividualNode implements Node {
   estimatedBirthDate: Boolean
   maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
+  phoneNoValid: Boolean
   phoneNoAlternative: String!
+  phoneNoAlternativeValid: Boolean
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
@@ -1672,8 +1665,6 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
-  phoneNoValid: Boolean
-  phoneNoAlternativeValid: Boolean
   paymentChannels: [BankAccountInfoNode]
 }
 
@@ -1896,7 +1887,7 @@ type Mutations {
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): DeleteHouseholdApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
@@ -1961,6 +1952,7 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
 type PaymentDetailsApproveMutation {
@@ -2196,7 +2188,7 @@ type ProgramsWithDeliveredQuantityNode {
 
 type Query {
   adminArea(id: ID!): AreaNode
-  allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
+  allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
@@ -2261,7 +2253,6 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
@@ -2372,6 +2363,7 @@ enum RegistrationDataImportDataSource {
   DIIA
   FLEX_REGISTRATION
   API
+  EDOPOMOGA
 }
 
 enum RegistrationDataImportDatahubImportDone {
@@ -2503,8 +2495,10 @@ type ReportNode implements Node {
   dateTo: Date!
   numberOfRecords: Int
   program: ProgramNode
-  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
+  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   fileUrl: String
+  adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
+  adminArea2(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
 }
 
 type ReportNodeConnection {
@@ -2842,7 +2836,7 @@ type TargetPopulationNode implements Node {
   status: TargetPopulationStatus!
   buildStatus: TargetPopulationBuildStatus!
   builtAt: DateTime
-  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  households(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   program: ProgramNode
   targetingCriteria: TargetingCriteriaNode
   sentToDatahub: Boolean!
@@ -2861,7 +2855,7 @@ type TargetPopulationNode implements Node {
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelectionNode!]!
   totalFamilySize: Int
-  householdList(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
+  householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
 }
 
 type TargetPopulationNodeConnection {
@@ -3028,6 +3022,7 @@ type TicketDeleteHouseholdDetailsNode implements Node {
   household: HouseholdNode
   roleReassignData: JSONString!
   approveStatus: Boolean!
+  reasonHousehold: HouseholdNode
   householdData: Arg
 }
 

@@ -315,14 +315,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <div
-                  class="sc-ifAKCX iPKgts"
-                >
-                  <div
-                    class="sc-EHOje cjSgDD"
-                    data-cy="status-container"
-                  />
-                </div>
+                -
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"

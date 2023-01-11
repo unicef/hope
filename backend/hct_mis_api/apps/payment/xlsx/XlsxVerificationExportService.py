@@ -1,6 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from django.conf import settings
 from django.core.files import File
@@ -11,12 +11,18 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
     PaymentVerification,
     XlsxCashPlanPaymentVerificationFile,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +56,7 @@ class XlsxVerificationExportService:
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
-    def __init__(self, cashplan_payment_verification) -> None:
+    def __init__(self, cashplan_payment_verification: CashPlanPaymentVerification) -> None:
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
 
@@ -73,7 +79,7 @@ class XlsxVerificationExportService:
         headers_row = XlsxVerificationExportService.HEADERS
         self.ws_verifications.append(headers_row)
 
-    def _to_received_column(self, payment_record_verification) -> Optional[str]:
+    def _to_received_column(self, payment_record_verification: PaymentVerification) -> Optional[str]:
         status = payment_record_verification.status
         if payment_record_verification.status == PaymentVerification.STATUS_PENDING:
             return None
@@ -81,7 +87,7 @@ class XlsxVerificationExportService:
             return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
-    def _add_payment_record_verification_row(self, payment_record_verification) -> None:
+    def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification) -> None:
         household = payment_record_verification.payment_record.household
         head_of_household = payment_record_verification.payment_record.head_of_household
 
@@ -120,11 +126,11 @@ class XlsxVerificationExportService:
         self._adjust_column_width_from_col(self.ws_verifications, 0, 1, 8)
         return self.wb
 
-    def generate_file(self, filename) -> None:
+    def generate_file(self, filename: str) -> None:
         self.generate_workbook()
         self.wb.save(filename=filename)
 
-    def save_xlsx_file(self, user) -> None:
+    def save_xlsx_file(self, user: "User") -> None:
         filename = f"payment_verification_{self.cashplan_payment_verification.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
@@ -135,7 +141,7 @@ class XlsxVerificationExportService:
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
-    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col) -> None:
+    def _adjust_column_width_from_col(self, ws: Worksheet, min_row: int, min_col: int, max_col: int) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
@@ -158,7 +164,7 @@ class XlsxVerificationExportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def send_email(user, cash_plan_payment_verification_id) -> None:
+    def send_email(user: "User", cash_plan_payment_verification_id: str) -> None:
         protocol = "http" if settings.IS_DEV else "https"
         payment_verification_id = encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")
         api = reverse("download-cash-plan-payment-verification", args=[payment_verification_id])

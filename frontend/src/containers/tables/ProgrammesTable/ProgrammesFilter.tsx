@@ -44,7 +44,7 @@ export function ProgrammesFilters({
             <Grid item>
               <SearchTextField
                 label='Search'
-                value={filter.search || ''}
+                value={filter.search}
                 onChange={(e) => handleFilterChange(e, 'search')}
                 data-cy='filters-search'
               />
@@ -53,7 +53,7 @@ export function ProgrammesFilters({
               <SelectFilter
                 onChange={(e) => handleFilterChange(e, 'status')}
                 label='Status'
-                value={filter.status || null}
+                value={filter.status}
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -95,7 +95,7 @@ export function ProgrammesFilters({
               <SelectFilter
                 onChange={(e) => handleFilterChange(e, 'sector')}
                 label='Sector'
-                value={filter.sector || null}
+                value={filter.sector}
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -123,7 +123,7 @@ export function ProgrammesFilters({
                     ...filter,
                     numberOfHouseholds: {
                       ...filter.numberOfHouseholds,
-                      min: e.target.value || undefined,
+                      min: e.target.value,
                     },
                   })
                 }
@@ -139,7 +139,7 @@ export function ProgrammesFilters({
                     ...filter,
                     numberOfHouseholds: {
                       ...filter.numberOfHouseholds,
-                      max: e.target.value || undefined,
+                      max: e.target.value,
                     },
                   })
                 }
@@ -156,7 +156,7 @@ export function ProgrammesFilters({
                     ...filter,
                     budget: {
                       ...filter.budget,
-                      min: e.target.value || undefined,
+                      min: e.target.value,
                     },
                   })
                 }
@@ -171,7 +171,7 @@ export function ProgrammesFilters({
                     ...filter,
                     budget: {
                       ...filter.budget,
-                      max: e.target.value || undefined,
+                      max: e.target.value,
                     },
                   })
                 }

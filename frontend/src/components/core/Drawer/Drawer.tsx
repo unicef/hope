@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/react-hooks';
 import styled from 'styled-components';
 import {
   Box,
@@ -13,14 +12,14 @@ import DrawerMaterial from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import { gql } from 'apollo-boost';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import packageJson from '../../../../package.json';
 import { theme as themeObj } from '../../../theme';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
+import { useFrontendVersion } from '../../../hooks/useFrontendVersion';
+import { useBackendVersion } from '../../../hooks/useBackendVersion';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 
@@ -133,12 +132,6 @@ interface Props {
   dataCy: string;
 }
 
-const GET_BACKEND_VERSION = gql`
-  {
-    backendVersion @client
-  }
-`;
-
 export function Drawer({
   open,
   handleDrawerClose,
@@ -148,9 +141,8 @@ export function Drawer({
   const classes = useStyles({});
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
-  const { data } = useQuery(GET_BACKEND_VERSION, { fetchPolicy: 'cache-only' });
-  const backendVersion = data?.backendVersion;
-  const frontendVersion = packageJson.version;
+  const backendVersion = useBackendVersion();
+  const frontendVersion = useFrontendVersion();
   useEffect(() => {
     if (
       !showMismatchedDialog &&

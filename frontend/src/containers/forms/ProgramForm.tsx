@@ -95,12 +95,18 @@ export const ProgramForm = ({
       .required(t('Sector is required'))
       .min(2, t('Too short'))
       .max(50, t('Too long')),
-    budget: Yup.number().min(0).max(99999999, t('Number is too big')),
+    budget: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    description: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
-    populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
+    description: Yup.string()
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
+    populationGoal: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,7 +168,7 @@ export const ProgramForm = ({
           {({ submitForm, values }) => (
             <>
               <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title' disableTypography>
+                <DialogTitle disableTypography>
                   <Typography variant='h6'>{title}</Typography>
                 </DialogTitle>
               </DialogTitleWrapper>

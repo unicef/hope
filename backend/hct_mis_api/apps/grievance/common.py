@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -7,22 +7,30 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
+    from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.household.models import Individual
+    from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+
 logger = logging.getLogger(__name__)
 
 
-def _get_min_max_score(golden_records) -> Tuple[float, float]:
+def _get_min_max_score(golden_records: List[Dict[str, Any]]) -> Tuple[float, float]:
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)
 
 
 def create_grievance_ticket_with_details(
-    main_individual,
-    possible_duplicate,
-    business_area,
-    possible_duplicates=None,
-    registration_data_import=None,
-    is_multiple_duplicates_version=False,
+    main_individual: "Individual",
+    possible_duplicate: "Individual",
+    business_area: "BusinessArea",
+    possible_duplicates: Optional[List["Individual"]] = None,
+    registration_data_import: Optional["RegistrationDataImport"] = None,
+    is_multiple_duplicates_version: bool = False,
 ) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
@@ -79,7 +87,10 @@ def create_grievance_ticket_with_details(
 
 
 def create_needs_adjudication_tickets(
-    individuals_queryset, results_key, business_area, registration_data_import=None
+    individuals_queryset: "QuerySet[Individual]",
+    results_key: str,
+    business_area: "BusinessArea",
+    registration_data_import: Optional["RegistrationDataImport"] = None,
 ) -> Optional[List[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.household.models import Individual
 
@@ -87,8 +98,9 @@ def create_needs_adjudication_tickets(
         return None
 
     ticket_details_to_create = []
+    linked_tickets = []
+
     for possible_duplicate in individuals_queryset:
-        linked_tickets = []
         possible_duplicates = []
 
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:

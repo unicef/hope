@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.http import Http404
+from django.http import Http404, HttpRequest
 from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
@@ -36,7 +36,7 @@ class HOPEAPIView(APIView):
     permission = Grant.API_READ_ONLY
     log_http_methods = ["POST", "PUT", "DELETE"]
 
-    def dispatch(self, request, *args, **kwargs) -> HttpResponseBase:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         ret = super().dispatch(request, *args, **kwargs)
         if request.method.upper() in self.log_http_methods and (ret.status_code < 300 or ret.status_code > 400):
             if request.auth:
@@ -50,7 +50,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc) -> Any:
+    def handle_exception(self, exc: Exception) -> Any:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))

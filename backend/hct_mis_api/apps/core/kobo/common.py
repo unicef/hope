@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -8,7 +8,7 @@ from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKN
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 
-def reduce_asset(asset: Dict, *args, **kwargs) -> Dict:
+def reduce_asset(asset: Dict, *args: Any, **kwargs: Any) -> Dict:
     """
     Takes from asset only values that are needed by our frontend.
 
@@ -60,7 +60,7 @@ def get_field_name(field_name: str) -> str:
         return field_name
 
 
-def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> List:
+def reduce_assets_list(assets: list, deployed: bool = True, *args: Any, **kwarg: Any) -> List:
     if deployed:
         return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]
@@ -102,7 +102,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
                 reduced_submission = rename_dict_keys(individual_data, get_field_name)
                 for field_name in fields:
                     fields[field_name] = str(reduced_submission.get(field_name))
-                hash_key = sha256(";".join(fields.values()).encode()).hexdigest()
+                hash_key = sha256(";".join(fields.values()).encode()).hexdigest()  # type: ignore # TODO: bug?
                 seen_hash_keys.append(hash_key)
                 total_individuals_count += 1
                 if (
@@ -114,7 +114,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data: Union[List, Dict], business_area) -> Optional[Union[List, Dict]]:
+def filter_by_owner(data: Union[List, Dict], business_area: BusinessArea) -> Optional[Union[List, Dict]]:
     kobo_username = business_area.kobo_username
     if isinstance(data, list):
         return [element for element in data if element["owner__username"] == kobo_username]

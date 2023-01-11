@@ -1,10 +1,10 @@
-# Country Office
+# HOPE Modules
 
 ### [Login](login.md)
 
 ### [Registration Data Import](registration-data-import/)
 
-### [Population](population-management/)
+### [Population Management](population-management/)
 
 ### [Targeting](targeting/)
 
@@ -13,6 +13,3 @@
 ### Payment Verification
 
 ### Grievance & Feedback
-
-
-

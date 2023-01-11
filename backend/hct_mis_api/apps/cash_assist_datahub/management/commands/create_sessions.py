@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from django.core.management import BaseCommand
@@ -11,7 +12,7 @@ from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         business_areas = BusinessArea.objects.all()
         some_business_area = business_areas.order_by("?").first()
 
