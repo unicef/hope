@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
@@ -267,20 +267,12 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
 
     @property
     def has_xlsx_cash_plan_payment_verification_file(self) -> bool:
-        if all(
+        return all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
                 getattr(self, "xlsx_cashplan_payment_verification_file", None),
             ]
-        ):
-            return True
-        return False
-
-    @property
-    def xlsx_cash_plan_payment_verification_file_link(self) -> Optional[str]:
-        if self.has_xlsx_cash_plan_payment_verification_file:
-            return self.xlsx_cashplan_payment_verification_file.file.url
-        return None
+        )
 
     @property
     def xlsx_cash_plan_payment_verification_file_was_downloaded(self) -> bool:
