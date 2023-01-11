@@ -147,6 +147,7 @@ class KoboTemplateValidator:
         "admin1_h_c",
         "admin2_h_c",
         "disability_i_c",
+        "preferred_language_i_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
         BLANK,

@@ -186,6 +186,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
     role = graphene.String()
+    preferred_language = graphene.String()
     documents = graphene.List(IndividualDocumentObjectType)
     documents_to_remove = graphene.List(graphene.ID)
     documents_to_edit = graphene.List(EditIndividualDocumentObjectType)
@@ -225,6 +226,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
     role = graphene.String(required=True)
+    preferred_language = graphene.String()
     documents = graphene.List(IndividualDocumentObjectType)
     identities = graphene.List(IndividualIdentityObjectType)
     payment_channels = graphene.List(BankTransferObjectType)
@@ -774,7 +776,9 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
     identities = individual_data.pop("identities", [])
     identities_to_remove_encoded = individual_data.pop("identities_to_remove", [])
     identities_to_remove = [
-        identity_data["value"] for identity_data in identities_to_remove_encoded if is_approved(identity_data)
+        decode_id_string(identity_data["value"])
+        for identity_data in identities_to_remove_encoded
+        if is_approved(identity_data)
     ]
     identities_to_edit = individual_data.pop("identities_to_edit", [])
 

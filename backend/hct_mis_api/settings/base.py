@@ -629,6 +629,7 @@ if SENTRY_DSN:
         send_default_pii=True,
         ignore_errors=[
             "django.core.exceptions.ValidationError",
+            "django.core.exceptions.PermissionDenied",
             "django.http.Http404",
         ]
     )

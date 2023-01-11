@@ -10958,6 +10958,18 @@
             "deprecationReason": null
           },
           {
+            "name": "preferredLanguage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecords",
             "description": null,
             "args": [
@@ -37106,6 +37118,18 @@
             "deprecationReason": null
           },
           {
+            "name": "preferredLanguage",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "misUnicefId",
             "description": null,
             "args": [],
@@ -44424,6 +44448,16 @@
             "defaultValue": null
           },
           {
+            "name": "preferredLanguage",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "documents",
             "description": null,
             "type": {
@@ -45344,6 +45378,16 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "preferredLanguage",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null
           },
