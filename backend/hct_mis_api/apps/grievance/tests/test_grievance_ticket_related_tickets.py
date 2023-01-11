@@ -22,7 +22,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class TestGrievanceTicketRelatedTickets(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -80,14 +80,12 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
 
         cls.grievance_tickets = GrievanceTicketFactory.create_batch(5)
 
-    def test_should_return_distinct_related_tickets(self):
+    def test_should_return_distinct_related_tickets(self) -> None:
         ticket1 = GrievanceTicketFactory.create()
         ticket2 = GrievanceTicketFactory.create()
 
         ticket1.linked_tickets.set(self.grievance_tickets)
-        ticket2.linked_tickets.set([ticket for ticket in self.grievance_tickets] + [ticket1])
+        ticket2.linked_tickets.set(list(self.grievance_tickets) + [ticket1])
 
-        ticket1_related_tickets_count = len([ticket for ticket in ticket1.related_tickets])
-        ticket2_related_tickets_count = len([ticket for ticket in ticket2.related_tickets])
-        self.assertEqual(ticket1_related_tickets_count, 6)
-        self.assertEqual(ticket2_related_tickets_count, 6)
+        self.assertEqual(ticket1.linked_tickets.count(), 6)
+        self.assertEqual(ticket2.linked_tickets.count(), 6)

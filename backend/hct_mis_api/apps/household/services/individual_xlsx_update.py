@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Optional
+from typing import IO, Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.forms.models import modelform_factory
 
 import openpyxl
+from xlwt import Row
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -27,7 +28,7 @@ class IndividualXlsxUpdate:
     STATUS_NO_MATCH = "NO_MATCH"
     STATUS_MULTIPLE_MATCH = "MULTIPLE_MATCH"
 
-    def __init__(self, xlsx_update_file) -> None:
+    def __init__(self, xlsx_update_file: IO) -> None:
         our_attributes = FieldFactory.from_scopes([Scope.GLOBAL, Scope.INDIVIDUAL_XLSX_UPDATE])
         self.xlsx_update_file = xlsx_update_file
         self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in our_attributes}
@@ -70,7 +71,7 @@ class IndividualXlsxUpdate:
         Individual.objects.bulk_update(individuals, columns)
 
     @staticmethod
-    def _column_name_by_attr(attr) -> Optional[str]:
+    def _column_name_by_attr(attr: Dict) -> Optional[str]:
         if attr.get("associated_with") == _INDIVIDUAL:
             return f"individual__{attr.get('name')}"
         if attr.get("associated_with") == _HOUSEHOLD:
@@ -101,10 +102,10 @@ class IndividualXlsxUpdate:
 
         return queryset
 
-    def _row_report_data(self, row) -> Any:
+    def _row_report_data(self, row: Row) -> Any:
         return row[0].row
 
-    def _get_matching_report_for_single_row(self, row) -> Any:
+    def _get_matching_report_for_single_row(self, row: Row) -> Any:
         # TODO: refactor the output of this function
         q_object = Q()
         for match_col in self.xlsx_match_columns:
@@ -119,7 +120,7 @@ class IndividualXlsxUpdate:
             return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (self._row_report_data(row), individuals)
         return IndividualXlsxUpdate.STATUS_UNIQUE, (self._row_report_data(row), individuals[0])
 
-    def _update_single_individual(self, row, individual) -> Individual:
+    def _update_single_individual(self, row: Row, individual: Individual) -> Individual:
         old_individual = copy_model_object(individual)
 
         updated = {}
@@ -129,7 +130,7 @@ class IndividualXlsxUpdate:
             name = self.attr_by_column_index[cell.col_idx]["name"]
             updated[name] = cell.value
 
-        IndividualForm = modelform_factory(Individual, fields=updated.keys())
+        IndividualForm = modelform_factory(Individual, fields=list(updated.keys()))
         form = IndividualForm(instance=individual, data=updated)
 
         for field in form.fields.values():

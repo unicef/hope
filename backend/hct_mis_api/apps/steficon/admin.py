@@ -2,7 +2,8 @@ import csv
 import json
 import logging
 from io import StringIO
-from typing import Dict, List, Optional
+from typing import Any, Collection, Dict, List, Optional, Tuple, Type, Union
+from uuid import UUID
 
 from django import forms
 from django.conf import settings
@@ -12,7 +13,8 @@ from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.http import HttpResponse, HttpResponseRedirect
+from django.forms import Form, ModelForm
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -49,7 +51,15 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
 
-    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id") -> None:
+    def __init__(
+        self,
+        model: Type,
+        admin_site: str,
+        attrs: Optional[Collection[Any]] = None,
+        choices: Tuple = (),
+        using: Optional[Any] = None,
+        pk_field: str = "id",
+    ) -> None:
         self.model = model
         self.pk_field = pk_field
         self.admin_site = admin_site
@@ -60,29 +70,29 @@ class AutocompleteWidget(forms.Widget):
     def get_url(self) -> str:
         return reverse("admin:autocomplete")
 
-    def get_context(self, name, value, attrs) -> Dict:
-        context = {}
-        context["widget"] = {
-            "query_string": "",
-            "lookup_kwarg": "term",
-            "url": self.get_url(),
-            "target_opts": {
-                "app_label": self.model._meta.app_label,
-                "model_name": self.model._meta.model_name,
-                "target_field": self.pk_field,
-            },
-            "name": name,
-            "media": self.media,
-            "is_hidden": self.is_hidden,
-            "required": self.is_required,
-            "value": self.format_value(value),
-            "attrs": self.build_attrs(self.attrs, attrs),
-            "template_name": self.template_name,
+    def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
+        return {
+            "widget": {
+                "query_string": "",
+                "lookup_kwarg": "term",
+                "url": self.get_url(),
+                "target_opts": {
+                    "app_label": self.model._meta.app_label,
+                    "model_name": self.model._meta.model_name,
+                    "target_field": self.pk_field,
+                },
+                "name": name,
+                "media": self.media,
+                "is_hidden": self.is_hidden,
+                "required": self.is_required,
+                "value": self.format_value(value),
+                "attrs": self.build_attrs(self.attrs, attrs),
+                "template_name": self.template_name,
+            }
         }
-        return context
 
     @property
-    def media(self):
+    def media(self) -> forms.Media:  # type: ignore # FIXME: Signature of "media" incompatible with supertype "Widget"
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
         i18n_file: List = (
@@ -118,8 +128,8 @@ class AutocompleteWidget(forms.Widget):
 
 class TestRuleMixin:
     @button()
-    def test(self, request, pk):
-        rule: Rule = self.get_object(request, pk)
+    def test(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
+        rule: Rule = self.get_object(request, str(pk))
         context = self.get_common_context(
             request,
             pk,
@@ -265,7 +275,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         ),
     ]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -276,7 +286,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             )
         )
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
         if db_field.name == "flags":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -285,35 +295,39 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def check_sync_permission(self, request, obj=None):
+    def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
-    def get_ignored_linked_objects(self, request):
+    def get_ignored_linked_objects(self, request: HttpRequest) -> List[str]:
         return ["history"]
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
+    def get_form(
+        self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
+    ) -> Type["ModelForm[Any]"]:
         return super().get_form(request, obj, change, **kwargs)
 
-    def stable(self, obj):
+    def stable(self, obj: Any) -> Optional[str]:
         try:
             url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
             return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
         except (RuleCommit.DoesNotExist, AttributeError):
-            pass
+            return None
 
-    def delete_view(self, request, object_id, extra_context=None):
+    def delete_view(
+        self, request: HttpRequest, object_id: str, extra_context: Optional[Any] = None
+    ) -> Union[HttpResponse, HttpResponse]:
         return super().delete_view(request, object_id, extra_context)
 
-    def render_delete_form(self, request, context):
+    def render_delete_form(self, request: HttpRequest, context: Dict) -> Form:
         return super().render_delete_form(request, context)
 
-    def _get_csv_config(self, form) -> Dict:
+    def _get_csv_config(self, form: Form) -> Dict:
         return dict(
             quoting=int(form.cleaned_data["quoting"]),
             delimiter=form.cleaned_data["delimiter"],
@@ -322,7 +336,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         )
 
     @button(visible=lambda o, r: "/change/" in r.path)
-    def process_file(self, request, pk):
+    def process_file(self, request: HttpRequest, pk: UUID) -> HttpResponse:
         context = self.get_common_context(
             request,
             pk,
@@ -331,7 +345,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Optional[Rule] = self.get_object(request, pk)
+            rule: Optional[Rule] = self.get_object(request, str(pk))
             form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)
@@ -397,7 +411,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
     @button(visible=lambda btn: "/changelog/" not in btn.request.path)
-    def changelog(self, request, pk):
+    def changelog(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
@@ -405,11 +419,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     # @button(visible=lambda btn: "/change/" in btn.request.path)
 
     @view(pattern=r"<int:pk>/rule_do_revert/<int:state>/")
-    def do_revert(self, request, pk, state):
+    def do_revert(self, request: HttpRequest, pk: UUID, state: bool) -> None:
         pass
 
     @view(pattern=r"<int:pk>/revert/<int:state>/")
-    def revert(self, request, pk, state):
+    def revert(self, request: HttpRequest, pk: UUID, state: bool) -> Union[TemplateResponse, HttpResponseRedirect]:
         try:
             context = self.get_common_context(
                 request,
@@ -435,7 +449,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return HttpResponseRedirect(reverse("admin:index"))
 
     @button(visible=lambda btn: "/change/" in btn.request.path)
-    def diff(self, request, pk):
+    def diff(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
         try:
             context = self.get_common_context(request, pk, action="Code history")
             state_pk = request.GET.get("state_pk")
@@ -464,22 +478,28 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    def change_view(self, request, object_id, form_url="", extra_context=None):
+    def change_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None
+    ) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 
-    def _changeform_view(self, request, object_id, form_url, extra_context):
+    def _changeform_view(
+        self, request: HttpRequest, object_id: Optional[str], form_url: str = "", extra_context: Optional[Any] = None
+    ) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None
         return super()._changeform_view(request, object_id, form_url, extra_context)
 
     @atomic()
-    def save_model(self, request, obj, form, change):
+    def save_model(
+        self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Optional[Any] = None
+    ) -> None:
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
 
-    def _get_data(self, record) -> str:
+    def _get_data(self, record: Any) -> str:
         roles = RuleCommit.objects.filter(rule=record)
         collector = ForeignKeysCollector(None)
         objs = []

@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import date
 from decimal import Decimal
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -27,7 +27,6 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -35,6 +34,7 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
 BLANK = ""
 IDP = "IDP"
@@ -455,7 +455,7 @@ class Household(
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         from hct_mis_api.apps.targeting.models import (
             HouseholdSelection,
             TargetPopulation,
@@ -471,7 +471,7 @@ class Household(
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag=None) -> None:
+    def withdraw(self, tag: Optional[Any] = None) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         user_fields = self.user_fields or {}
@@ -484,12 +484,12 @@ class Household(
         self.withdrawn_date = None
         self.save()
 
-    def set_sys_field(self, key, value) -> None:
+    def set_sys_field(self, key: str, value: Any) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key) -> Any:
+    def get_sys_field(self, key: str) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
@@ -578,7 +578,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(SoftDeletableModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
@@ -623,38 +623,21 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
         self.status = self.STATUS_VALID
 
 
-class Agency(models.Model):
-    type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
-    label = models.CharField(
-        max_length=100,
-    )
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
-
-    class Meta:
-        verbose_name_plural = "Agencies"
-        constraints = [
-            UniqueConstraint(
-                fields=["type", "country"],
-                name="unique_type_and_country",
-            )
-        ]
-
-    def __str__(self) -> str:
-        return f"{self.label} in {self.country}"
-
-
 class IndividualIdentity(models.Model):
-    agency = models.ForeignKey("Agency", related_name="individual_identities", on_delete=models.CASCADE)
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
     )
+    partner = models.ForeignKey(
+        "account.Partner", related_name="individual_identities", null=True, on_delete=models.PROTECT
+    )
+    country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Individual Identities"
 
     def __str__(self) -> str:
-        return f"{self.agency} {self.individual} {self.number}"
+        return f"{self.partner} {self.individual} {self.number}"
 
 
 class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
@@ -748,8 +731,12 @@ class Individual(
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
+
     phone_no = PhoneNumberField(blank=True, db_index=True)
+    phone_no_valid = models.BooleanField(default=False, db_index=True)
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
+    phone_no_alternative_valid = models.BooleanField(default=False, db_index=True)
+
     relationship = models.CharField(
         max_length=255,
         blank=True,
@@ -824,14 +811,6 @@ class Individual(
     vector_column = SearchVectorField(null=True)
 
     @property
-    def phone_no_valid(self) -> bool:
-        return is_right_phone_number_format(self.phone_no)
-
-    @property
-    def phone_no_alternative_valid(self) -> bool:
-        return is_right_phone_number_format(self.phone_no_alternative)
-
-    @property
     def age(self) -> int:
         return relativedelta(date.today(), self.birth_date).years
 
@@ -888,7 +867,7 @@ class Individual(
         self.withdrawn_date = None
         self.save()
 
-    def mark_as_duplicate(self, original_individual=None) -> None:
+    def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
         self.documents.update(status=Document.STATUS_INVALID)
@@ -903,17 +882,19 @@ class Individual(
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
 
-    def set_sys_field(self, key, value) -> None:
+    def set_sys_field(self, key: str, value: Any) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key) -> Any:
+    def get_sys_field(self, key: str) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
 
-    def recalculate_data(self) -> None:
+    def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
+        update_fields = ["disability"]
+
         disability_fields = (
             "seeing_disability",
             "hearing_disability",
@@ -927,7 +908,11 @@ class Individual(
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
-        self.save(update_fields=["disability"])
+
+        if save:
+            self.save(update_fields=update_fields)
+
+        return self, update_fields
 
     def count_all_roles(self) -> int:
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
@@ -956,6 +941,10 @@ class Individual(
         if not self.household:
             return False
         return self.household.head_of_household.id == self.id
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        recalculate_phone_numbers_validity(self, Individual)
+        super().save(*args, **kwargs)
 
 
 class EntitlementCard(TimeStampedUUIDModel):
@@ -1002,7 +991,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:

@@ -1,10 +1,5 @@
-from typing import Any
-
-from django.contrib import admin, messages
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils.safestring import mark_safe
+from typing import Any, Optional
+from uuid import UUID
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
@@ -13,6 +8,12 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from django.contrib import admin, messages
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
@@ -62,10 +63,10 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "service_provider",
     )
 
-    def cash_plan_name(self, obj):
+    def cash_plan_name(self, obj: Any) -> str:
         return obj.cash_plan.name
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
@@ -117,13 +118,13 @@ class CashPlanPaymentVerificationAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     raw_id_fields = ("cash_plan",)
 
     @button()
-    def verifications(self, request, pk):
+    def verifications(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         list_url = reverse("admin:payment_paymentverification_changelist")
         url = f"{list_url}?cash_plan_payment_verification__exact={pk}"
         return HttpResponseRedirect(url)
 
     @button()
-    def execute_sync_rapid_pro(self, request):
+    def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:
         if request.method == "POST":
             from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
                 CheckRapidProVerificationTask,
@@ -145,8 +146,9 @@ class CashPlanPaymentVerificationAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 "Successfully executed",
                 template="admin_extra_buttons/confirm.html",
             )
+        return None
 
-    def activate(self, request, pk):
+    def activate(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         return confirm_action(
             self,
             request,
@@ -171,13 +173,13 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_record", "cash_plan_payment_verification")
 
-    def cash_plan_name(self, obj):
+    def cash_plan_name(self, obj: Any) -> str:
         return obj.cash_plan_payment_verification.cash_plan.name
 
-    def household(self, obj):
+    def household(self, obj: Any) -> str:
         return obj.payment_record.household.unicef_id
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)

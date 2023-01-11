@@ -1,5 +1,5 @@
 import abc
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from django.db.models import Q, QuerySet
 
@@ -10,12 +10,15 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import CashPlan
+
 
 class Sampling:
-    def __init__(self, input_data, cash_plan, payment_records: QuerySet):
+    def __init__(self, input_data: Dict, cash_plan: "CashPlan", payment_records: QuerySet) -> None:
         self.input_data = input_data
         self.cash_plan = cash_plan
-        self.payment_records: Optional[QuerySet] = payment_records
+        self.payment_records: QuerySet = payment_records
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
@@ -34,7 +37,7 @@ class Sampling:
         cash_plan_verification.excluded_admin_areas_filter = sampling.excluded_admin_areas
         cash_plan_verification.sample_size = sampling.sample_size
 
-        self.payment_records = sampling.payment_records
+        self.payment_records = sampling.payment_records  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Optional[_QuerySet[Any, Any]]", variable has type "_QuerySet[Any, Any]")
 
         if sampling.sampling_type == CashPlanPaymentVerification.SAMPLING_RANDOM:
             self.payment_records = self.payment_records.order_by("?")[: sampling.sample_size]
@@ -49,17 +52,14 @@ class Sampling:
         return payment_record_count, sampling.sample_size
 
     def _get_sampling(self) -> "BaseSampling":
-        sampling_type = self.input_data.get("sampling")
+        sampling_type = self.input_data["sampling"]
         if sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            arguments = self.input_data.get("full_list_arguments")
-            return FullListSampling(arguments, sampling_type)
-        else:
-            arguments = self.input_data.get("random_sampling_arguments")
-            return RandomSampling(arguments, sampling_type)
+            return FullListSampling(self.input_data.get("full_list_arguments", {}), sampling_type)
+        return RandomSampling(self.input_data.get("random_sampling_arguments", {}), sampling_type)
 
 
 class BaseSampling(abc.ABC):
-    def __init__(self, arguments, sampling_type: str):
+    def __init__(self, arguments: Dict, sampling_type: str) -> None:
         self.sampling_type = sampling_type
         self.arguments = arguments
         self.confidence_interval = self.arguments.get("confidence_interval")
@@ -75,15 +75,15 @@ class BaseSampling(abc.ABC):
         if self.sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             return sample_count
         else:
-            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
+            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)  # type: ignore # FIXME: args 2 and 3 are opt, func def required non-opt
 
     @abc.abstractmethod
-    def sampling(self, payment_records: QuerySet):
+    def sampling(self, payment_records: QuerySet) -> None:
         pass
 
 
 class RandomSampling(BaseSampling):
-    def sampling(self, payment_records: QuerySet):
+    def sampling(self, payment_records: QuerySet) -> None:
         if self.sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=self.sex)
 
@@ -102,7 +102,7 @@ class RandomSampling(BaseSampling):
 
 
 class FullListSampling(BaseSampling):
-    def sampling(self, payment_records: QuerySet):
+    def sampling(self, payment_records: QuerySet) -> None:
         self.payment_records = payment_records.filter(
             ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
         )

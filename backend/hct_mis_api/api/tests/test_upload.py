@@ -26,16 +26,16 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 
 class UploadRDITests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = {"default", "registration_datahub"}
     user_permissions = [Grant.API_RDI_UPLOAD]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
         ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
 
-    def test_upload_single_household(self):
+    def test_upload_single_household(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
@@ -84,7 +84,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertEqual(data["households"], 1)
         self.assertEqual(data["individuals"], 2)
 
-    def test_upload_external_collector(self):
+    def test_upload_external_collector(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": COLLECT_TYPE_FULL,
@@ -134,7 +134,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertEqual(data["households"], 1)
         self.assertEqual(data["individuals"], 2)
 
-    def test_upload_with_documents(self):
+    def test_upload_with_documents(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
@@ -190,7 +190,7 @@ class UploadRDITests(HOPEApiTestCase):
 
         self.assertTrue(hoh.documents.exists())
 
-    def test_upload_with_document_photo(self):
+    def test_upload_with_document_photo(self) -> None:
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
 
@@ -250,7 +250,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertEqual(data["households"], 1)
         self.assertEqual(data["individuals"], 2)
 
-    def test_upload_with_multiple_households(self):
+    def test_upload_with_multiple_households(self) -> None:
         image = Path(__file__).parent / "logo.png"
         base64_encoded_data = base64.b64encode(image.read_bytes())
 
@@ -389,7 +389,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertEqual(data["households"], 3)
         self.assertEqual(data["individuals"], 8)
 
-    def test_upload_error_too_many_hoh(self):
+    def test_upload_error_too_many_hoh(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
@@ -430,7 +430,7 @@ class UploadRDITests(HOPEApiTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
 
-    def test_upload_error_missing_primary(self):
+    def test_upload_error_missing_primary(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",
@@ -517,7 +517,7 @@ class UploadRDITests(HOPEApiTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
 
-    def test_upload_multiple_errors(self):
+    def test_upload_multiple_errors(self) -> None:
         data = {
             "name": "aaaa",
             "collect_individual_data": "FULL",

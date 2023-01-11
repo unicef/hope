@@ -1,5 +1,7 @@
 import datetime
 import random
+from argparse import ArgumentParser
+from typing import Any, List
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -30,7 +32,7 @@ class Command(BaseCommand):
 
     help = "Generate fake file for RDI"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--households",
             dest="households_count",
@@ -41,7 +43,7 @@ class Command(BaseCommand):
             help="Creates provided amount of program objects.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         wb = TemplateFileGenerator.get_template_file()
         households_ws = wb["Households"]
         individuals_ws = wb["Individuals"]
@@ -54,7 +56,7 @@ class Command(BaseCommand):
 
         for number in range(1, options["households_count"] + 1):
             print(f"household: {number}")
-            single_household_data = []
+            single_household_data: List = []
             for cell in households_ws[1]:
                 header = cell.value or ""
                 if header in ("admin1_h_c", "admin2_h_c"):
@@ -112,7 +114,7 @@ class Command(BaseCommand):
                 single_household_data.append(value)
 
             for i in range(1, 5):
-                single_individual_data = []
+                single_individual_data: List = []
 
                 name = faker.name()
                 name_list = name.split(" ")

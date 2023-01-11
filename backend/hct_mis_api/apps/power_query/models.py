@@ -2,6 +2,7 @@ import itertools
 import logging
 import pickle
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from uuid import UUID
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -37,7 +38,7 @@ mimetype_map = {
 }
 
 
-def validate_queryargs(value) -> None:
+def validate_queryargs(value: Any) -> None:
     try:
         if not isinstance(value, dict):
             raise ValidationError("QueryArgs must be a dict")
@@ -71,7 +72,13 @@ class Parametrizer(NaturalKeyModel, models.Model):
         product = list(itertools.product(*self.value.values()))
         return [dict(zip(self.value.keys(), e)) for e in product]
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if not self.code:
             self.code = slugify(self.name)
         super().save(force_insert, force_update, using, update_fields)
@@ -107,22 +114,28 @@ class Query(NaturalKeyModel, models.Model):
         verbose_name_plural = "Power Queries"
         ordering = ("name",)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
         self.error = None
         super().save(force_insert, force_update, using, update_fields)
 
-    def _invoke(self, query_id, arguments) -> Dict:
+    def _invoke(self, query_id: UUID, arguments: List) -> Dict:
         query = Query.objects.get(id=query_id)
         result = query.run(persist=False, arguments=arguments)
         return result
 
-    def update_results(self, results) -> None:
+    def update_results(self, results: Any) -> None:
         self.info["last_run_results"] = results
         self.save()
 
-    def execute_matrix(self, persist=True, **kwargs) -> Dict[str, str]:
+    def execute_matrix(self, persist: bool = True, **kwargs: Any) -> Dict[str, str]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
         else:
@@ -141,7 +154,7 @@ class Query(NaturalKeyModel, models.Model):
             self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist=False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
+    def run(self, persist: bool = False, arguments: Optional[Dict] = None) -> Tuple["Dataset", Dict]:
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
@@ -168,7 +181,7 @@ class Query(NaturalKeyModel, models.Model):
                 }
                 dataset, __ = Dataset.objects.update_or_create(
                     query=self,
-                    hash=dict_hash({"query": self.pk, **arguments}),
+                    hash=dict_hash({"query": self.pk, **(arguments if arguments else {})}),
                     defaults={
                         "info": info,
                         "last_run": timezone.now(),
@@ -213,13 +226,13 @@ class Dataset(NaturalKeyModel, models.Model):
 
 class Formatter(NaturalKeyModel, models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
+    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))  # type: ignore # internal mypy error
     code = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:  # TODO: name is a nullable charfield?
         return self.name or ""
 
-    def render(self, context) -> str:
+    def render(self, context: Dict) -> str:
         if self.content_type == "xls":
             dt = to_dataset(context["dataset"].data)
             return dt.export("xls")
@@ -250,12 +263,18 @@ class Report(NaturalKeyModel, models.Model):
 
     last_run = models.DateTimeField(null=True, blank=True)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[Any] = None,
+        update_fields: Optional[Any] = None,
+    ) -> None:
         if not self.document_title:
             self.document_title = self.name
         super().save(force_insert, force_update, using, update_fields)
 
-    def execute(self, run_query=False) -> List:
+    def execute(self, run_query: bool = False) -> List:
         # TODO: refactor that
         query: Query = self.query
         result: List = []
@@ -265,8 +284,11 @@ class Report(NaturalKeyModel, models.Model):
             if not dataset.size:
                 continue
             try:
-                context = {**dataset.arguments, **(pickle.loads(dataset.extra) or {})}
-                title = self.document_title % context
+                context = dataset.arguments
+                if dataset.extra:
+                    context.update(pickle.loads(dataset.extra) or {})
+
+                title = (self.document_title % context) if self.document_title else self.document_title
                 output = self.formatter.render({"dataset": dataset, "report": self, "title": title, "context": context})
                 res, __ = ReportDocument.objects.update_or_create(
                     report=self,
@@ -306,7 +328,7 @@ class ReportDocument(models.Model):
     output = models.BinaryField(null=True, blank=True)
     arguments = models.JSONField(default=dict)
     limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
-    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
+    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))  # type: ignore # internal mypy error
 
     objects = ReportDocumentManager()
 

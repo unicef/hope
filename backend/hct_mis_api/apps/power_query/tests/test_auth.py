@@ -16,14 +16,15 @@ from .fixtures import (
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQuery(TestCase):
-    databases = ["default"]
+    databases = {"default"}
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
 
-        cls.ba1 = BusinessAreaFactory()
-        cls.ba2 = BusinessAreaFactory()
+        # code should be unique but the test depends on both BAs having the same, empty code
+        cls.ba1 = BusinessAreaFactory(code="")
+        cls.ba2 = BusinessAreaFactory(code="")
         cls.hh1 = create_household({"business_area": cls.ba1})
         cls.hh2 = create_household({"business_area": cls.ba2})
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
@@ -39,7 +40,7 @@ class TestPowerQuery(TestCase):
         cls.report1: Report = ReportFactory(formatter=cls.formatter, query=cls.query1)
         cls.report1.execute()
 
-    def test_access_granted(self):
+    def test_access_granted(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:document", args=[self.report1.pk, self.report1.documents.first().pk])
             self.client.login(username=self.user1.username, password="password")
@@ -47,7 +48,7 @@ class TestPowerQuery(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
 
-    def test_access_forbidden(self):
+    def test_access_forbidden(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:document", args=[self.report1.pk, self.report1.documents.first().pk])
             self.client.login(username=self.user2.username, password="password")

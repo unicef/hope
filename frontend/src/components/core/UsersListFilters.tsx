@@ -28,7 +28,7 @@ export function UsersListFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            value={filter.search || ''}
+            value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
           />
         </Grid>
@@ -36,7 +36,7 @@ export function UsersListFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'partner')}
             label={t('Partner')}
-            value={filter.partner || ''}
+            value={filter.partner}
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -54,7 +54,7 @@ export function UsersListFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'roles')}
             label={t('Role')}
-            value={filter.roles || ''}
+            value={filter.roles}
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -72,7 +72,7 @@ export function UsersListFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
-            value={filter.status || ''}
+            value={filter.status}
           >
             <MenuItem value=''>
               <em>{t('None')}</em>

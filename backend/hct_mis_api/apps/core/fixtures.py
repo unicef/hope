@@ -16,6 +16,7 @@ def create_afghanistan() -> BusinessArea:
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
+            "kobo_token": "XXX",
         },
     )
 

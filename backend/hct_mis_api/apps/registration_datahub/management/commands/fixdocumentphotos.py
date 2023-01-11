@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import BaseCommand
 from django.db.models import F
 
@@ -31,6 +33,6 @@ def fix_document_photos() -> None:
 class Command(BaseCommand):
     help = "Fix document photos in existing data"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         fix_document_photos()
         self.stdout.write("Documents photos fixed")
