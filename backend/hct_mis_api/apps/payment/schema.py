@@ -9,11 +9,10 @@ from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
-    DjangoPermissionFilterFastConnectionField,
+    DjangoPermissionFilterConnectionField,
     DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
-    DjangoPermissionFilterConnectionField,
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
