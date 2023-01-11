@@ -665,9 +665,11 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     @classmethod
     def get_close_function(cls, category: int, issue_type: int) -> Optional[Callable]:
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
-        if isinstance(function_or_nested_issue_types, dict) and issue_type:
-            return function_or_nested_issue_types.get(issue_type)
-        return function_or_nested_issue_types
+        return (
+            function_or_nested_issue_types
+            if not isinstance(function_or_nested_issue_types, dict)
+            else function_or_nested_issue_types.get(issue_type)
+        )
 
     @classmethod
     @is_authenticated
