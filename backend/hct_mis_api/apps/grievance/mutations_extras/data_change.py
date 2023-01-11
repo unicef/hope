@@ -303,9 +303,9 @@ def update_data_change_extras(
 ) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
-        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
+        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL:
-        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)  # type: ignore # FIXME: bug? Returning list but treating as single obj later
+        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
     return grievance_ticket
@@ -490,7 +490,7 @@ def save_individual_data_update_extras(
 
 def update_individual_data_update_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
-) -> List[GrievanceTicket]:
+) -> GrievanceTicket:
     ticket_details = grievance_ticket.individual_data_update_ticket_details
 
     individual_data_update_extras = extras.get("individual_data_update_issue_type_extras")
@@ -655,7 +655,7 @@ def save_add_individual_extras(
 
 def update_add_individual_extras(
     root: Any, info: Any, input: Dict, grievance_ticket: GrievanceTicket, extras: Dict, **kwargs: Any
-) -> List[GrievanceTicket]:
+) -> GrievanceTicket:
     ticket_details = grievance_ticket.add_individual_ticket_details
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
