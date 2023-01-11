@@ -22,6 +22,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     BLANK,
@@ -251,6 +252,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=3, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
