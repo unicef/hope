@@ -6,7 +6,7 @@ backend:
   image: #from-pipeline
   replicaCount: 2
   config:
-    POSTGRES_SSL: true
+    POSTGRES_SSL: "true"
     STORAGE_AZURE_ACCOUNT_NAME: saunihopetrn
     EMAIL_HOST: extmail01.unicef.org
     EMAIL_USE_TLS: "false"
