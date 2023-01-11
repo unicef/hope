@@ -17,7 +17,6 @@ class ImportPaymentRecordsForm(forms.ModelForm):
     class Meta:
         model = CashPlan
         exclude = (
-            "business_area",
             "ca_id",
             "ca_hash_id",
             "id",
@@ -28,4 +27,5 @@ class ImportPaymentRecordsForm(forms.ModelForm):
             "total_delivered_quantity",
             "total_undelivered_quantity",
             "exchange_rate",
+            "session",
         )

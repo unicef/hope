@@ -5,7 +5,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -38,7 +38,7 @@ class LogEntryNode(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    all_log_entries = DjangoPermissionFilterConnectionField(
+    all_log_entries = DjangoPermissionFilterFastConnectionField(
         LogEntryNode,
         filterset_class=LogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
