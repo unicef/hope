@@ -35,6 +35,7 @@ input AddIndividualDataObjectType {
   whoAnswersPhone: String
   whoAnswersAltPhone: String
   role: String!
+  preferredLanguage: String
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
   paymentChannels: [BankTransferObjectType]
@@ -1480,6 +1481,7 @@ type ImportedIndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  preferredLanguage: String
   misUnicefId: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
@@ -1644,6 +1646,7 @@ type IndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  preferredLanguage: String
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -1748,6 +1751,7 @@ input IndividualUpdateDataObjectType {
   whoAnswersPhone: String
   whoAnswersAltPhone: String
   role: String
+  preferredLanguage: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
   documentsToEdit: [EditIndividualDocumentObjectType]
