@@ -1,11 +1,12 @@
 import csv
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
@@ -13,6 +14,9 @@ from .config import config
 from .interpreters import Interpreter, mapping
 from .models import Rule
 from .widget import ContentTypeChoiceField, PythonEditor
+
+if TYPE_CHECKING:
+    from django.db.models.fields import _ChoicesCallable
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +108,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
         initial: Optional[Any] = None,
         help_text: str = "",
         to_field_name: Optional[str] = None,
-        limit_choices_to: Optional[int] = None,
+        limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ) -> None:
         from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -119,7 +123,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             initial=initial,
             help_text=help_text,
             to_field_name=to_field_name,
-            limit_choices_to=limit_choices_to,  # type: ignore # FIXME
+            limit_choices_to=limit_choices_to,
             **kwargs,
         )
 
