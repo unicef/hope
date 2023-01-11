@@ -77,7 +77,7 @@ export const IdentitiesToRemoveTable = ({
           {identitiesToRemove?.map((row, index) => {
             const identity = previousIdentities[row.value];
             return (
-              <TableRow key={`${identity.label}-${identity.country}`}>
+              <TableRow key={`${identity.number}-${identity.country}`}>
                 <TableCell align='left'>
                   {isEdit ? (
                     <Checkbox
