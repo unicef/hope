@@ -1,8 +1,18 @@
 from typing import Tuple, Type
 
+from django.db.models import (
+    Case,
+    F,
+    Func,
+    OuterRef,
+    Prefetch,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
+
 import graphene
-from django.db.models import Case, When
-from django.db.models import Prefetch, Sum, Value, Subquery, OuterRef, Func, F
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -10,7 +20,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
     hopePermissionClass,
@@ -449,7 +459,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoPermissionFilterConnectionField(
+    all_households = DjangoPermissionFilterFastConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
@@ -457,7 +467,7 @@ class Query(graphene.ObjectType):
         ),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoPermissionFilterConnectionField(
+    all_individuals = DjangoPermissionFilterFastConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(

@@ -10,6 +10,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -168,7 +169,7 @@ class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
     cash_plan_payment_verification = relay.Node.Field(CashPlanPaymentVerificationNode)
-    all_payment_records = DjangoPermissionFilterConnectionField(
+    all_payment_records = DjangoPermissionFilterFastConnectionField(
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
         permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
@@ -242,7 +243,7 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
+    all_payment_verification_log_entries = DjangoPermissionFilterFastConnectionField(
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),

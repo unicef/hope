@@ -22,6 +22,9 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
+    CreateCashPlanReconciliationService,
+)
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -80,6 +83,22 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         form.is_valid()
         print("****************************************************************************************************")
         print(form.cleaned_data)
+        cleaned_data = form.cleaned_data
+        column_mapping = {
+            CreateCashPlanReconciliationService.COLUMN_PAYMENT_ID: "Payment ID",
+            CreateCashPlanReconciliationService.COLUMN_PAYMENT_STATUS: "Reconciliation status",
+            CreateCashPlanReconciliationService.COLUMN_DELIVERED_AMOUNT: "Delivered Amount",
+            CreateCashPlanReconciliationService.COLUMN_ENTITLEMENT_QUANTITY: "Entitlement Quantity",
+        }
+        service = CreateCashPlanReconciliationService(
+            cleaned_data.pop("business_area"),
+            cleaned_data.pop("reconciliation_file"),
+            column_mapping,
+            cleaned_data,
+            cleaned_data.pop("currency"),
+            cleaned_data.pop("delivery_type"),
+        )
+        service.parse_xlsx()
         context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
 

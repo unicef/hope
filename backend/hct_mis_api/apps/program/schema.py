@@ -1,6 +1,5 @@
 from typing import Tuple, Type
 
-import graphene
 from django.db.models import (
     Case,
     Count,
@@ -11,6 +10,8 @@ from django.db.models import (
     Value,
     When,
 )
+
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -18,12 +19,14 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.cache_keys import PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY
+from hct_mis_api.apps.core.cache_keys import (
+    PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY,
+)
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -31,8 +34,8 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
-    to_choice_object,
     save_data_in_cache,
+    to_choice_object,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
@@ -107,7 +110,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoPermissionFilterConnectionField(
+    all_programs = DjangoPermissionFilterFastConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
@@ -130,7 +133,7 @@ class Query(graphene.ObjectType):
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
-    all_cash_plans = DjangoPermissionFilterConnectionField(
+    all_cash_plans = DjangoPermissionFilterFastConnectionField(
         CashPlanNode,
         filterset_class=CashPlanFilter,
         permission_classes=(

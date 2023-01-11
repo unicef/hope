@@ -51,6 +51,5 @@ class TestEdopomogaCreation(APITestCase):
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
 
-
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)
