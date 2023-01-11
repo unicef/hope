@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
@@ -45,11 +46,11 @@ class CashPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)
 
-    def verification_status(self, obj):
+    def verification_status(self, obj: CashPlan) -> bool:
         return obj.cash_plan_payment_verification_summary.status
 
     @button()
-    def payments(self, request, pk):
+    def payments(self, request: HttpRequest, pk: str) -> HttpResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/cashplan/payments.html", context)

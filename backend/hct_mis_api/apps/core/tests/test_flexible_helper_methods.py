@@ -1,3 +1,5 @@
+from typing import Dict, List, Optional, Union
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -10,14 +12,14 @@ from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 
 class TestFlexibleHelperMethods(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.importer = FlexibleAttributeImporter()
         wb = xlrd.open_workbook(filename=f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls")
         cls.survey_sheet = wb.sheet_by_name("survey")
         cls.choices_sheet = wb.sheet_by_name("choices")
         cls.importer._reset_model_fields_variables()
 
-    def test_get_model_fields(self):
+    def test_get_model_fields(self) -> None:
         args = ("attribute", "group", "choice", "Not Correct Arg")
         expected_values = (
             [
@@ -67,7 +69,7 @@ class TestFlexibleHelperMethods(TestCase):
             returned_value = self.importer._get_model_fields(arg)
             self.assertEqual(returned_value, expected_value)
 
-    def test_assign_field_values_attribute(self):
+    def test_assign_field_values_attribute(self) -> None:
         """
         type: integer
         name: dairy_h_f
@@ -127,7 +129,7 @@ class TestFlexibleHelperMethods(TestCase):
             61,
         )
 
-    def test_assign_field_values_group(self):
+    def test_assign_field_values_group(self) -> None:
         """
         name: consent
         english label: Consent
@@ -162,7 +164,7 @@ class TestFlexibleHelperMethods(TestCase):
             61,
         )
 
-    def test_assign_field_values_choice(self):
+    def test_assign_field_values_choice(self) -> None:
         """
         list_name: yes_no
         name: 1
@@ -217,7 +219,7 @@ class TestFlexibleHelperMethods(TestCase):
             1,
         )
 
-    def test_set_can_add_flag(self):
+    def test_set_can_add_flag(self) -> None:
         cases_to_test = [
             {
                 "row": [
@@ -346,7 +348,7 @@ class TestFlexibleHelperMethods(TestCase):
             result = self.importer._can_add_row(case["row"])
             self.assertEqual(case["expected"], result)
 
-    def test_get_list_of_field_choices(self):
+    def test_get_list_of_field_choices(self) -> None:
         result = self.importer._get_list_of_field_choices(self.survey_sheet)
         expected = {
             "sex",
@@ -373,8 +375,8 @@ class TestFlexibleHelperMethods(TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_get_field_choice_name(self):
-        cases_to_test = [
+    def test_get_field_choice_name(self) -> None:
+        cases_to_test: List[Dict[str, Union[List, Optional[str]]]] = [
             {
                 "row": [
                     Cell(

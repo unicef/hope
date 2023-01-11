@@ -18,7 +18,7 @@ from hct_mis_api.apps.account.fixtures import (
 
 
 class HOPEPermissionTest(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUpTestData()
         user = UserFactory()
         self.business_area = BusinessAreaFactory(name="Afghanistan")
@@ -35,7 +35,7 @@ class HOPEPermissionTest(TestCase):
         )
         self.token.valid_for.set([self.business_area])
 
-    def test_permissions(self):
+    def test_permissions(self) -> None:
         p = HOPEPermission()
 
         assert p.has_permission(
@@ -45,12 +45,12 @@ class HOPEPermissionTest(TestCase):
 
 
 class HOPEAuthenticationTest(HOPEApiTestCase):
-    def test_auth_success(self):
+    def test_auth_success(self) -> None:
         p = HOPEAuthentication()
         request = MagicMock(META={"HTTP_AUTHORIZATION": f"Token {self.token.key}"})
         p.authenticate(request)
 
-    def test_auth_fails(self):
+    def test_auth_fails(self) -> None:
         p = HOPEAuthentication()
         request = MagicMock(META={"HTTP_AUTHORIZATION": "Token 123"})
         with self.assertRaises(AuthenticationFailed):
@@ -61,16 +61,16 @@ class ViewAuthView(HOPEApiTestCase):
     user_permissions = [Grant.API_RDI_UPLOAD]
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         super().setUpTestData()
 
-    def test_no_auth(self):
+    def test_no_auth(self) -> None:
         self.client.logout()
         url = reverse("api:rdi-upload", args=[self.business_area.slug])
         response = self.client.post(url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, str(response.json()))
 
-    def test_no_perm(self):
+    def test_no_perm(self) -> None:
         url = reverse("api:rdi-create", args=[self.business_area.slug])
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         response = self.client.post(url, {}, format="json")

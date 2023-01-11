@@ -26,7 +26,7 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute="*/20"),
     },
     "recalculate_population_fields_task": {
-        "task": "hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task",
+        "task": "hct_mis_api.apps.household.celery_tasks.interval_recalculate_population_fields_task",
         "schedule": crontab(hour="*/24"),
     },
     "extract_records_task": {

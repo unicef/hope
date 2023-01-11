@@ -20,12 +20,21 @@ interface HouseholdFiltersProps {
   programs: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
 }
-export function HouseholdFilters({
+
+const orderOptions = [
+  { name: 'Household Id: ascending', value: 'unicef_id' },
+  { name: 'Household Id: descending', value: '-unicef_id' },
+  { name: 'Status: ascending', value: 'status_label' },
+  { name: 'Status: descending', value: '-status_label' },
+  { name: 'Household Size: ascending', value: 'size' },
+  { name: 'Household Size: descending', value: '-size' },
+];
+export const HouseholdFilters = ({
   onFilterChange,
   filter,
   programs,
   choicesData,
-}: HouseholdFiltersProps): React.ReactElement {
+}: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -35,7 +44,7 @@ export function HouseholdFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            value={filter.text || ''}
+            value={filter.text}
             onChange={(e) => handleFilterChange(e, 'text')}
             data-cy='filters-search'
           />
@@ -44,7 +53,7 @@ export function HouseholdFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
-            value={filter.program || ''}
+            value={filter.program}
             icon={<FlashOnIcon />}
           >
             <MenuItem value=''>
@@ -61,7 +70,7 @@ export function HouseholdFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Residence Status')}
-            value={filter.residenceStatus || ''}
+            value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
             SelectDisplayProps={{
               'data-cy': 'filters-residence-status',
@@ -70,9 +79,9 @@ export function HouseholdFilters({
               'data-cy': 'filters-residence-status-options',
             }}
           >
-            {choicesData.residenceStatusChoices.map((program) => (
-              <MenuItem key={program.value} value={program.value}>
-                {program.name}
+            {choicesData.residenceStatusChoices?.map((status) => (
+              <MenuItem key={status.value} value={status.value}>
+                {status.name}
               </MenuItem>
             ))}
           </SelectFilter>
@@ -85,7 +94,6 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='minFilter'
             topLabel={t('Household Size')}
             value={filter.householdSize.min}
             placeholder={t('From')}
@@ -95,7 +103,7 @@ export function HouseholdFilters({
                 ...filter,
                 householdSize: {
                   ...filter.householdSize,
-                  min: e.target.value || undefined,
+                  min: e.target.value,
                 },
               })
             }
@@ -103,7 +111,6 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <NumberTextField
-            id='maxFilter'
             value={filter.householdSize.max}
             placeholder={t('To')}
             icon={<GroupIcon />}
@@ -112,13 +119,29 @@ export function HouseholdFilters({
                 ...filter,
                 householdSize: {
                   ...filter.householdSize,
-                  max: e.target.value || undefined,
+                  max: e.target.value,
                 },
               })
             }
           />
         </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'orderBy')}
+            label={t('Sort by')}
+            value={filter.orderBy}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {orderOptions.map((order) => (
+              <MenuItem key={order.value} value={order.value}>
+                {order.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
+        </Grid>
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

@@ -31,7 +31,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -169,11 +169,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     def get_documents_query(self, documents: List[Document]) -> QuerySet[Document]:
         return Document.objects.filter(id__in=[document.id for document in documents])
 
-    def refresh_all_documents(self):
+    def refresh_all_documents(self) -> None:
         for document in self.all_documents:
             document.refresh_from_db()
 
-    def test_hard_documents_deduplication(self):
+    def test_hard_documents_deduplication(self) -> None:
         DeduplicateTask.hard_deduplicate_documents(
             self.get_documents_query([self.document2, self.document3, self.document4])
         )
@@ -187,7 +187,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(ticket_details.possible_duplicates.count(), 2)
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
 
-    def test_hard_documents_deduplication_for_initially_valid(self):
+    def test_hard_documents_deduplication_for_initially_valid(self) -> None:
         DeduplicateTask.hard_deduplicate_documents(
             self.get_documents_query(
                 [
@@ -199,7 +199,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
-    def test_should_create_one_ticket(self):
+    def test_should_create_one_ticket(self) -> None:
         DeduplicateTask.hard_deduplicate_documents(
             self.get_documents_query([self.document2, self.document3, self.document4])
         )
@@ -208,7 +208,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
 
-    def test_hard_documents_deduplication_number_of_queries(self):
+    def test_hard_documents_deduplication_number_of_queries(self) -> None:
         documents1 = self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         documents2 = self.get_documents_query(
             [self.document2, self.document3, self.document4, self.document5, self.document7, self.document8]
@@ -235,7 +235,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             # 9. Transaction savepoint release
             self.assertEqual(first_dedup_query_count, 9, "Should only use 9 queries")
 
-    def test_ticket_created_correctly(self):
+    def test_ticket_created_correctly(self) -> None:
         DeduplicateTask.hard_deduplicate_documents(
             self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         )

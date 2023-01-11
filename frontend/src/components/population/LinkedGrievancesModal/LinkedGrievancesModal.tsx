@@ -1,4 +1,16 @@
-import { Box, Button, DialogActions, DialogContent, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -6,7 +18,10 @@ import styled from 'styled-components';
 import { Dialog } from '../../../containers/dialogs/Dialog';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor, reduceChoices } from '../../../utils/utils';
+import {
+  grievanceTicketStatusToColor,
+  choicesToDict,
+} from '../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdNode,
@@ -45,15 +60,13 @@ interface LinkedGrievancesModalProps {
 export const LinkedGrievancesModal = ({
   household,
   businessArea,
-  grievancesChoices
+  grievancesChoices,
 }: LinkedGrievancesModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const history = useHistory();
   const { t } = useTranslation();
 
-  const {
-    data: grievances
-  } = useAllGrievanceTicketQuery({
+  const { data: grievances } = useAllGrievanceTicketQuery({
     variables: { businessArea, household: household.unicefId },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
@@ -61,21 +74,18 @@ export const LinkedGrievancesModal = ({
 
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(grievancesChoices.grievanceTicketStatusChoices);
+  } = choicesToDict(grievancesChoices.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(grievancesChoices.grievanceTicketCategoryChoices);
+  } = choicesToDict(grievancesChoices.grievanceTicketCategoryChoices);
 
   const renderRow = (row): React.ReactElement => {
-
     return (
       <ClickableTableRow
         hover
         onClick={() =>
-          history.push(
-            `/${businessArea}/grievance-and-feedback/${row.id}`,
-          )
+          history.push(`/${businessArea}/grievance-and-feedback/${row.id}`)
         }
         key={row.id}
       >
@@ -95,48 +105,54 @@ export const LinkedGrievancesModal = ({
     );
   };
 
-  const allGrievances = grievances ? grievances.allGrievanceTicket.edges : []
+  const allGrievances = grievances ? grievances.allGrievanceTicket.edges : [];
 
-  const renderGrievances = ():
-    Array<React.ReactElement> => {
-    return allGrievances.length ? (
-      allGrievances.map((el) => (
-        <span key={el.node.id}>
-          <ContentLink href={`/${businessArea}/grievance-and-feedback/${el.node.id}`}>
-            {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${statusChoices[el.node.status]}`}
-          </ContentLink> <br />
-        </span>
-      ))
-    ) : (
-      [<span>-</span>]
-    );
+  const renderGrievances = (): Array<React.ReactElement> => {
+    return allGrievances.length
+      ? allGrievances.map((el) => (
+          <span key={el.node.id}>
+            <ContentLink
+              href={`/${businessArea}/grievance-and-feedback/${el.node.id}`}
+            >
+              {`${el.node.unicefId} - ${categoryChoices[el.node.category]} - ${
+                statusChoices[el.node.status]
+              }`}
+            </ContentLink>{' '}
+            <br />
+          </span>
+        ))
+      : [<span>-</span>];
   };
 
   const renderLink = (): React.ReactElement => {
     if (allGrievances.length === 0) {
-      return <LabelizedField label={t('Linked Grievances')} value={<span>-</span>} />;
+      return (
+        <LabelizedField label={t('Linked Grievances')} value={<span>-</span>} />
+      );
     }
     return (
       <>
-        <LabelizedField label={t('Linked Grievances')} value={renderGrievances().slice(0, 3)} />
-        {allGrievances.length > 3 && <StyledLink
-          onClick={(e) => {
-            e.stopPropagation();
-            setDialogOpen(true);
-          }}
-        >
-          See More
-        </StyledLink>}
+        <LabelizedField
+          label={t('Linked Grievances')}
+          value={renderGrievances().slice(0, 3)}
+        />
+        {allGrievances.length > 3 && (
+          <StyledLink
+            onClick={(e) => {
+              e.stopPropagation();
+              setDialogOpen(true);
+            }}
+          >
+            See More
+          </StyledLink>
+        )}
       </>
     );
   };
 
   const renderRows = (): React.ReactElement => {
-
     return (
-      <>
-        {allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}
-      </>
+      <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
     );
   };
 
@@ -151,9 +167,7 @@ export const LinkedGrievancesModal = ({
         maxWidth='lg'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Linked Grievances')}
-          </DialogTitle>
+          <DialogTitle>{t('Linked Grievances')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mt={2} mb={6}>

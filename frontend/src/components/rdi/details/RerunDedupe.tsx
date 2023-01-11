@@ -51,9 +51,7 @@ export function RerunDedupe({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Rerun Deduplication')}
-          </DialogTitle>
+          <DialogTitle>{t('Rerun Deduplication')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>

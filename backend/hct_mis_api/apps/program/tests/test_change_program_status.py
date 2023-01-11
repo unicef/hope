@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -25,7 +27,7 @@ class TestChangeProgramStatus(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -69,7 +71,9 @@ class TestChangeProgramStatus(APITestCase):
             ),
         ]
     )
-    def test_status_change(self, _, permissions, initial_status, target_status):
+    def test_status_change(
+        self, _: Any, permissions: List[Permissions], initial_status: str, target_status: str
+    ) -> None:
         program = ProgramFactory.create(
             status=initial_status,
             business_area=self.business_area,

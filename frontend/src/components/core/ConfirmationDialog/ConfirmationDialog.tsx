@@ -14,7 +14,7 @@ import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapp
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
   title?: string;
-  content?: string;
+  content?: string | React.ReactElement;
   continueText?: string;
   extraContent?: string;
   disabled?: boolean;
@@ -41,9 +41,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   return (
     <Dialog fullWidth scroll='paper' open={open}>
       <DialogTitleWrapper>
-        <DialogTitle id='scroll-dialog-title'>
-          {title || t('Confirmation')}
-        </DialogTitle>
+        <DialogTitle>{title || t('Confirmation')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
         {extraContent ? (
@@ -51,7 +49,11 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             {extraContent}
           </Typography>
         ) : null}
-        <Typography variant='body2'>{content}</Typography>
+        {typeof content !== 'string' ? (
+          content
+        ) : (
+          <Typography variant='body2'>{content}</Typography>
+        )}
       </DialogContent>
       <DialogFooter>
         <DialogActions>

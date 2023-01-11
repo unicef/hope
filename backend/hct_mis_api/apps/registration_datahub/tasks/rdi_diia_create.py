@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -45,6 +46,10 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
+if TYPE_CHECKING:
+    from uuid import UUID
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,7 +75,9 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name") -> RegistrationDataImport:
+    def create_rdi(
+        self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name"
+    ) -> RegistrationDataImport:
 
         number_of_individuals = 0
         number_of_households = 0
@@ -106,7 +113,12 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id, diia_hh_ids=None, diia_hh_count=None) -> None:
+    def execute(
+        self,
+        registration_data_import_id: "UUID",
+        diia_hh_ids: Optional[List["UUID"]] = None,
+        diia_hh_count: Optional[int] = None,
+    ) -> None:
         if diia_hh_ids and diia_hh_count:
             raise ValueError("You can't set two args diia_hh_ids and diia_hh_count")
 
@@ -234,7 +246,7 @@ class RdiDiiaCreateTask:
                 DiiaIndividual.objects.bulk_update(individuals_to_update_list, ["imported_individual"], 1000)
 
                 if diia_household.vpo_doc and not pass_hh_and_individuals_tax_id_error:
-                    self._add_vpo_document(head_of_household, diia_household)
+                    self._add_vpo_document(head_of_household, diia_household)  # type: ignore # FIXME: Argument 1 to "_add_vpo_document" of "RdiDiiaCreateTask" has incompatible type "Optional[ImportedIndividual]"; expected "ImportedIndividual"
 
                 if not pass_hh_and_individuals_tax_id_error:
                     ImportedDocument.objects.bulk_create(self.documents)
@@ -280,7 +292,7 @@ class RdiDiiaCreateTask:
                 registration_data_import_datahub=registration_data_import_data_hub
             )
 
-    def _add_bank_account(self, individual, individual_obj) -> None:
+    def _add_bank_account(self, individual: ImportedIndividual, individual_obj: ImportedIndividual) -> None:
         self.bank_accounts.append(
             ImportedBankAccountInfo(
                 individual=individual_obj,
@@ -289,7 +301,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_vpo_document(self, head_of_household, household) -> None:
+    def _add_vpo_document(self, head_of_household: ImportedIndividual, household: ImportedHousehold) -> None:
         vpo_doc_date = dateutil.parser.parse(household.vpo_doc_date)
 
         self.documents.append(
@@ -303,7 +315,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_birth_document(self, individual, individual_obj) -> None:
+    def _add_birth_document(self, individual: ImportedIndividual, individual_obj: ImportedIndividual) -> None:
         self.documents.append(
             ImportedDocument(
                 country=Country("UA"),
@@ -313,7 +325,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_hh_doc(self, data) -> None:
+    def _add_hh_doc(self, data: Dict) -> None:
         doc_type = self.national_passport_document_type if data.get("type") == "passport" else self.other_document_type
 
         self.documents.append(
@@ -326,7 +338,7 @@ class RdiDiiaCreateTask:
             )
         )
 
-    def _add_tax_id_document(self, tax_id, individual_obj) -> None:
+    def _add_tax_id_document(self, tax_id: "UUID", individual_obj: ImportedIndividual) -> None:
         self.documents.append(
             ImportedDocument(
                 country=Country("UA"),
@@ -353,7 +365,7 @@ class RdiDiiaCreateTask:
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 
-    def tax_id_exists(self, tax_id) -> bool:
+    def tax_id_exists(self, tax_id: "UUID") -> bool:
         return (
             ImportedDocument.objects.filter(document_number=tax_id, type=self.imported_doc_type_for_tax_id).exists()
             or Document.objects.filter(document_number=tax_id, type=self.doc_type_for_tax_id).exists()

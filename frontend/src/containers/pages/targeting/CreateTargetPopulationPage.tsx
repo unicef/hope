@@ -50,7 +50,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     loading: loadingPrograms,
   } = useAllProgramsForChoicesQuery({
     variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
 
   if (loadingPrograms) return <LoadingComponent />;
@@ -115,7 +115,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setFieldValue }) => (
         <Form>
           <CreateTargetPopulationHeader
             handleSubmit={submitForm}
@@ -128,6 +128,8 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             allPrograms={allProgramsData}
             loading={loadingPrograms}
             program={values.program}
+            setFieldValue={setFieldValue}
+            values={values}
           />
           {values.program ? (
             <FieldArray

@@ -80,7 +80,7 @@ export const IdentitiesTable = ({
         <TableBody>
           {identities?.map((row, index) => {
             return (
-              <TableRow key={`${row.value.agency}-${row.value.agency}`}>
+              <TableRow key={`${row.value.partner}-${row.value.partner}`}>
                 <TableCell align='left'>
                   {isEdit ? (
                     <Checkbox
@@ -103,7 +103,7 @@ export const IdentitiesTable = ({
                   )}
                 </TableCell>
                 <TableCell align='left'>
-                  {identityTypeDict[row.value.agency]}
+                  {identityTypeDict[row.value.partner]}
                 </TableCell>
                 <TableCell align='left'>
                   {countriesDict[row.value.country]}

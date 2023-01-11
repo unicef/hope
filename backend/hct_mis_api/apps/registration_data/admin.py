@@ -1,12 +1,13 @@
 import logging
 from typing import Any, Optional
+from uuid import UUID
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q, QuerySet
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -18,7 +19,7 @@ from adminfilters.filters import ChoicesFieldComboFilter
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -26,7 +27,7 @@ from hct_mis_api.apps.registration_datahub import models as datahub_models
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
-from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -57,7 +58,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         ("business_area__name", "business area"),
     )
 
-    def get_queryset(self, request) -> QuerySet:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area")
 
     @link(
@@ -65,7 +66,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         # permission=lambda r, o: r.user.is_superuser,
         # visible=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
-    def hub(self, button) -> Optional[str]:
+    def hub(self, button: button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
             return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
@@ -78,8 +79,8 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=lambda r, o: r.user.is_superuser,
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
-    def rerun_rdi(self, request, pk) -> None:
-        obj = self.get_object(request, pk)
+    def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
+        obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
                 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -100,7 +101,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
             celery_task.delay(
                 registration_data_import_id=str(rdi_datahub_obj.id),
                 import_data_id=str(rdi_datahub_obj.import_data.id),
-                business_area=str(business_area.id),
+                business_area_id=str(business_area.id),
             )
 
             self.message_user(request, "RDI task has started")
@@ -113,7 +114,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=lambda r, o: r.user.is_superuser,
         enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
-    def rerun_merge_rdi(self, request, pk) -> None:
+    def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
         try:
             merge_registration_data_import_task.delay(registration_data_import_id=pk)
 
@@ -126,7 +127,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=is_root,
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request, pk) -> Any:  # TODO: typing
+    def delete_rdi(self, request: HttpRequest, pk: UUID) -> Any:  # TODO: typing
         try:
             if request.method == "POST":
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
@@ -141,12 +142,15 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     rdi_datahub.delete()
                     rdi.delete()
                     # remove elastic search records linked to individuals
-                    remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
+                    business_area_slug = rdi_datahub.business_area_slug
+                    remove_elasticsearch_documents_by_matching_ids(
+                        datahub_individuals_ids, get_imported_individual_doc(business_area_slug)
+                    )
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,
+                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",
@@ -169,14 +173,14 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
 
     @staticmethod
-    def delete_merged_rdi_visible(o, r) -> bool:
+    def delete_merged_rdi_visible(o: Any, r: Any) -> bool:
         is_correct_status = o.status == RegistrationDataImport.MERGED
         is_not_used_in_targeting = HouseholdSelection.objects.filter(household__registration_data_import=o).count() == 0
         is_not_used_by_payment_record = PaymentRecord.objects.filter(household__registration_data_import=o).count() == 0
         return is_correct_status and is_not_used_in_targeting and is_not_used_by_payment_record
 
     @staticmethod
-    def generate_query_for_all_grievances_tickets(rdi) -> Q:
+    def generate_query_for_all_grievances_tickets(rdi: RegistrationDataImport) -> Q:
         details_related_names = [
             "referral_ticket_details__household",
             "negative_feedback_ticket_details__household",
@@ -203,7 +207,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=is_root,
         visible=lambda o, r: RegistrationDataImportAdmin.delete_merged_rdi_visible(o, r),
     )
-    def delete_merged_rdi(self, request, pk) -> Optional[HttpResponse]:
+    def delete_merged_rdi(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         try:
             if request.method == "POST":
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
@@ -224,13 +228,18 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     ).filter(business_area=rdi.business_area).delete()
                     rdi.delete()
                     # remove elastic search records linked to individuals
-                    remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
-                    remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
+                    business_area_slug = rdi.business_area.slug
+                    remove_elasticsearch_documents_by_matching_ids(
+                        datahub_individuals_ids, get_imported_individual_doc(business_area_slug)
+                    )
+                    remove_elasticsearch_documents_by_matching_ids(
+                        individuals_ids, get_individual_doc(business_area_slug)
+                    )
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,
+                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",
@@ -254,6 +263,6 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
             return None
 
     @button()
-    def households(self, request, pk) -> HttpResponseRedirect:
+    def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")

@@ -13,7 +13,7 @@ from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class Session(AbstractSession):
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.business_area} / {self.timestamp}"
 
 
@@ -87,7 +87,7 @@ class Individual(SessionModel):
     class Meta:
         unique_together = ("session", "mis_id")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.family_name or ""
 
 
@@ -103,7 +103,7 @@ class TargetPopulation(SessionModel):
     class Meta:
         unique_together = ("session", "mis_id")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -246,7 +246,7 @@ class FundsCommitment(models.Model):
     ca_sync_flag = models.BooleanField(blank=True, null=True, default=False)
     ca_sync_date = models.DateTimeField(blank=True, null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.funds_commitment_number
 
 

@@ -2,7 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,10 +33,10 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, file_path=None) -> None:
+    def __init__(self, file_path: Optional[str] = None) -> None:
         self.file_path = file_path
 
-        self.VALUES_PATHS = {
+        self.VALUES_PATHS: Dict[str, Any] = {
             "data_id": "DATAID",
             "version_num": "VERSIONNUM",
             "first_name": "FIRST_NAME",
@@ -69,11 +69,11 @@ class LoadSanctionListXMLTask:
         return None
 
     @staticmethod
-    def _get_designation(individual_tag: ET.Element, *args, **kwargs) -> Union[str, None]:
+    def _get_designation(individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Union[str, None]:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, ET.Element):
-            designations = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
+            designations: List[str] = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
             return " ".join(designations)
         return ""
 
@@ -81,8 +81,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualDateOfBirth]:
         date_of_birth_tags = individual_tag.findall("INDIVIDUAL_DATE_OF_BIRTH")
         dates_of_birth = set()
@@ -97,7 +97,7 @@ class LoadSanctionListXMLTask:
                     # this XML file is so weird that the date of birth
                     # can be placed in the NOTE tag
                     note_tag = date_of_birth_tag.find("NOTE")
-                    value = None
+                    value: Optional[str] = None
                     if isinstance(date_tag, ET.Element) and date_tag.text:
                         value = date_tag.text
                     elif isinstance(year_tag, ET.Element) and year_tag.text:
@@ -105,7 +105,7 @@ class LoadSanctionListXMLTask:
                     elif isinstance(note_tag, ET.Element) and note_tag.text:
                         value = note_tag.text
                     try:
-                        parsed_date = dateutil.parser.parse(value, default=default_datetime)
+                        parsed_date = dateutil.parser.parse(value, default=default_datetime)  # type: ignore # FIXME: Argument 1 to "parse" has incompatible type "Optional[str]"; expected "Union[bytes, str, IO[str], IO[Any]]"
                         dates_of_birth.add(
                             SanctionListIndividualDateOfBirth(
                                 individual=self._get_individual_from_db_or_file(individual),
@@ -115,14 +115,14 @@ class LoadSanctionListXMLTask:
                     except Exception:
                         pass
                 elif type_of_date == "BETWEEN":
-                    from_year = date_of_birth_tag.find("FROM_YEAR").text
-                    to_year = date_of_birth_tag.find("TO_YEAR").text
+                    from_year: Optional[str] = date_of_birth_tag.find("FROM_YEAR").text
+                    to_year: Optional[str] = date_of_birth_tag.find("TO_YEAR").text
                     years = {
                         SanctionListIndividualDateOfBirth(
                             individual=self._get_individual_from_db_or_file(individual),
                             date=date(year=year, month=1, day=1),
                         )
-                        for year in range(int(from_year), int(to_year) + 1)
+                        for year in range(int(from_year), int(to_year) + 1)  # type: ignore # FIXME: Argument 1 to "int" has incompatible type "Union[str, None, Any]"; expected "Union[str, bytes, array[Any], mmap, _CData, PickleBuffer, SupportsInt, SupportsIndex, SupportsTrunc]"
                     }
                     dates_of_birth.update(years)
 
@@ -132,8 +132,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualAliasName]:
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
@@ -156,7 +156,7 @@ class LoadSanctionListXMLTask:
         return aliases
 
     @staticmethod
-    def _get_country_field(individual_tag: ET.Element, path: str, *args, **kwargs) -> Union[str, None, set]:
+    def _get_country_field(individual_tag: ET.Element, path: str, *args: Any, **kwargs: Any) -> Union[str, None, set]:
         tags = individual_tag.findall(path)
 
         countries = set()
@@ -174,8 +174,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualCountries]:
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
@@ -189,7 +189,7 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: ET.Element, *args, **kwargs) -> Optional[str]:
+    def _get_country_of_birth(self, individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Optional[str]:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
@@ -201,8 +201,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualNationalities]:
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
@@ -220,8 +220,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: ET.Element,
         individual: SanctionListIndividual,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> set[SanctionListIndividualDocument]:
         document_tags = individual_tag.findall("INDIVIDUAL_DOCUMENT")
         documents = set()
@@ -331,9 +331,7 @@ class LoadSanctionListXMLTask:
             )
         }
 
-    def _get_individuals_to_update(
-        self, individuals_from_file: Iterable[SanctionListIndividual]
-    ) -> set[SanctionListIndividual]:
+    def _get_individuals_to_update(self, individuals_from_file: Iterable) -> Set[SanctionListIndividual]:
         individuals_to_update = set()
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         for individual in individuals_from_file:
@@ -367,7 +365,7 @@ class LoadSanctionListXMLTask:
         return {i.reference_number for i in individuals_from_file}
 
     @staticmethod
-    def _cast_field_value_to_correct_type(model, field_name: str, value: Any):
+    def _cast_field_value_to_correct_type(model: Any, field_name: str, value: Any) -> Any:
         field = model._meta.get_field(field_name)
         # silencing lxml warning
         with open(os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):
@@ -410,7 +408,7 @@ class LoadSanctionListXMLTask:
 
         for individual_tag in root.findall(self.INDIVIDUAL_TAG_PATH):
             individual_data_dict = self._get_individual_data(individual_tag)
-            individual = individual_data_dict.get("individual")
+            individual = individual_data_dict["individual"]
             individual.full_name = (
                 (
                     f"{individual.first_name} "
@@ -423,11 +421,11 @@ class LoadSanctionListXMLTask:
             )
             individuals_from_file.add(individual)
 
-            documents_from_file.update(individual_data_dict.get("documents"))
-            nationalities_from_file.update(individual_data_dict.get("nationalities"))
-            countries_from_file.update(individual_data_dict.get("countries"))
-            aliases_from_file.update(individual_data_dict.get("alias_names"))
-            dob_from_file.update(individual_data_dict.get("birth_dates"))
+            documents_from_file.update(individual_data_dict["documents"])
+            nationalities_from_file.update(individual_data_dict["nationalities"])
+            countries_from_file.update(individual_data_dict["countries"])
+            aliases_from_file.update(individual_data_dict["alias_names"])
+            dob_from_file.update(individual_data_dict["birth_dates"])
 
         # SanctionListIndividual
         individuals_to_check_against_sanction_list = []

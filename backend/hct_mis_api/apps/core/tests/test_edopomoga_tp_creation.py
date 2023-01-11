@@ -20,7 +20,7 @@ class TestEdopomogaCreation(APITestCase):
     databases = ("default", "registration_datahub")
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
@@ -44,12 +44,13 @@ class TestEdopomogaCreation(APITestCase):
             file=File(BytesIO(content.read_bytes()), name="edopomoga_sample.csv"),
         )
 
-    def test_edopomoga_tp_creation(self):
+    def test_edopomoga_tp_creation(self) -> None:
         create_target_population_inner = create_target_population_task.__wrapped__
-        create_target_population_inner(self.storage_file.id, "test_edopomoga")
+        create_target_population_inner(self.storage_file.id, self.program.id, "test_edopomoga")
 
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
+        self.assertEqual(TargetPopulation.objects.count(), 1)
 
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)
