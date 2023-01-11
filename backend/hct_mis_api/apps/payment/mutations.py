@@ -1,7 +1,7 @@
 import logging
-import math
 from decimal import Decimal
-from typing import IO, Any, Dict, Optional
+from io import BytesIO
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -402,12 +402,10 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         root: Any,
         info: Any,
         payment_verification_id: str,
-        received_amount: Optional[int],
-        received: Optional[int],
+        received_amount: Decimal,
+        received: bool,
         **kwargs: Any,
     ) -> "UpdatePaymentVerificationReceivedAndReceivedAmount":
-        if received_amount is not None and math.isnan(received_amount):
-            received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
@@ -433,16 +431,11 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if received is None and received_amount is not None:
             log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
-            logger.error(
-                "If received_amount is 0, you should set received to NO",
-            )
-            raise GraphQLError(
-                "If received_amount is 0, you should set received to NO",
-            )
+            log_and_raise("If received_amount is 0, you should set received to NO")
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)  # type: ignore # FIXME
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()
@@ -456,23 +449,22 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore # FIXME
+        return UpdatePaymentVerificationReceivedAndReceivedAmount(payment_verification)
 
 
-# TODO: what about typing [0] on XlsxErrorNode
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[0]  # type: ignore # FIXME
+    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> graphene.String:
+        return parent.sheet
 
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[1]  # type: ignore # FIXME
+    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> graphene.String:
+        return parent.coordinates
 
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[2]  # type: ignore # FIXME
+    def resolve_message(parent: "XlsxErrorNode", info: Any) -> graphene.String:
+        return parent.message
 
 
 class ExportXlsxCashPlanVerification(PermissionMutation):
@@ -514,7 +506,9 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, file: IO, cash_plan_verification_id: str) -> "ImportXlsxCashPlanVerification":
+    def mutate(
+        cls, root: Any, info: Any, file: BytesIO, cash_plan_verification_id: str
+    ) -> "ImportXlsxCashPlanVerification":
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
 
