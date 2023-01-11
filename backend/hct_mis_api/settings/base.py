@@ -632,7 +632,7 @@ if SENTRY_DSN:
             "PermissionDenied",
             "Http404",
             "AuthCanceled",
-        ]
+        ],
     )
     ignore_logger("graphql.execution.utils")
 
