@@ -25,7 +25,9 @@ def get_number_of_samples(payment_records_sample_count: int, confidence_interval
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
+def from_received_to_status(
+    received: bool, received_amount: Union[Decimal, float], delivered_amount: Union[Decimal, float]
+) -> str:
     received_amount_dec = float_to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
