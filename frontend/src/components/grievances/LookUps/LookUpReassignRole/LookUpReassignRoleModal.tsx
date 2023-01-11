@@ -105,7 +105,7 @@ export const LookUpReassignRoleModal = ({
         const multipleRolesVariables = {
           grievanceTicketId: id,
           householdId: household.id,
-          newIndividualId: values.selectedIndividual.id,
+          newIndividualId: values.selectedIndividual?.id,
           individualId: individual.id,
           role: values.role,
         };
@@ -113,7 +113,7 @@ export const LookUpReassignRoleModal = ({
         const singleRoleVariables = {
           grievanceTicketId: id,
           householdId: household.id,
-          individualId: values.selectedIndividual.id,
+          individualId: values.selectedIndividual?.id,
           role: values.role,
         };
 
