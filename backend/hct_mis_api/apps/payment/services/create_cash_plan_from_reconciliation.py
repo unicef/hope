@@ -1,18 +1,23 @@
 import uuid
 from datetime import datetime
 
+from django.db import transaction
+
 import openpyxl
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerificationSummary,
+    PaymentRecord,
+)
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 ValidationError = Exception
 
 
-class CreateCashPlanFromReconciliationService:
+class CreateCashPlanReconciliationService:
     COLUMN_PAYMENT_ID = "PAYMENT_ID"
     COLUMN_PAYMENT_STATUS = "PAYMENT_STATUS"
     COLUMN_DELIVERED_AMOUNT = "DELIVERED_AMOUNT"
@@ -25,53 +30,65 @@ class CreateCashPlanFromReconciliationService:
     )
 
     def __init__(
-        self, business_area_slug, reconciliation_xlsx_file, column_mapping, cash_plan_form_data, currency, delivery_type
+        self, business_area, reconciliation_xlsx_file, column_mapping, cash_plan_form_data, currency, delivery_type
     ):
-        self.business_area = BusinessArea.objects.get(slug=business_area_slug)
+        self.business_area = business_area
         self.reconciliation_xlsx_file = reconciliation_xlsx_file
         self.column_mapping = column_mapping
         self.currency = currency
         self.delivery_type = delivery_type
         self.column_index_mapping = {}
         self.cash_plan_form_data = cash_plan_form_data
+        self.total_person_covered = 0
+        self.total_delivered_amount = 0
+        self.total_entitlement_amount = 0
 
+    @transaction.atomic
     def parse_xlsx(self):
         wb = openpyxl.load_workbook(self.reconciliation_xlsx_file)
         ws = wb.active
         rows = ws.rows
+        next(rows)
         header = [cell.value for cell in next(rows)]
         self._parse_header(header)
         self.cash_plan = self._create_cash_plan()
-        for row in rows:
+        print(ws.max_row)
+        for index, row in enumerate(rows):
             row_values = [cell.value for cell in row]
-            self._parse_row(row_values)
+            if all([value is None for value in row_values]):
+                break
+            self._parse_row(row_values, index)
+        self._add_cashplan_info()
 
-    def _parse_header(self, header: tuple):
+    def _parse_header(self, header: list):
         for column, xlsx_column in self.column_mapping.items():
             if xlsx_column not in header:
-                raise ValidationError(f"Column {column} not found in the header")
+                raise ValidationError(f"Column {xlsx_column} not found in the header")
             if column not in self.ALL_COLUMNS:
                 raise ValidationError(f"Column {column} is not a valid column")
 
             self.column_index_mapping[column] = header.index(xlsx_column)
 
     def _parse_row(self, row: tuple, index):
+        self.total_person_covered += 1
         delivered_amount = row[self.column_index_mapping[self.COLUMN_DELIVERED_AMOUNT]]
-        status = row[self.column_index_mapping[self.COLUMN_PAYMENT_STATUS]]
+        entitlement_amount = row[self.column_index_mapping[self.COLUMN_ENTITLEMENT_QUANTITY]]
+        status = (
+            PaymentRecord.STATUS_SUCCESS
+            if row[self.column_index_mapping[self.COLUMN_PAYMENT_STATUS]] == 1
+            else PaymentRecord.STATUS_FAILED
+        )
         payment_id = row[self.column_index_mapping[self.COLUMN_PAYMENT_ID]]
-        target_population_id, unicef_id = payment_id.split("/")
-        household = Household.objects.get(unicef_id=unicef_id)
+        target_population_id, household_id = payment_id.split(" - ")
+        household = Household.objects.get(id=household_id)
         target_population = TargetPopulation.objects.get(id=target_population_id)
-        currency = row[self.column_index_mapping[self.COLUMN_CURRENCY]]
-        # delivery method
-        # distribution_modality
-        # target_population_cash_assist_id
-        # delivery_type
-        # delivery_date
+        currency = self.currency
+        self.total_delivered_amount += delivered_amount
+        self.total_entitlement_amount += entitlement_amount
 
         payment_record_id = self.cash_plan.ca_id + "-" + str(index + 1).zfill(5)
         payment_record = PaymentRecord.objects.create(
-            busines_area=self.business_area,
+            business_area=self.business_area,
             status=status,
             ca_id=payment_record_id,
             ca_hash_id=uuid.uuid4(),
@@ -83,13 +100,15 @@ class CreateCashPlanFromReconciliationService:
             target_population=target_population,
             target_population_cash_assist_id="",
             currency=currency,
-            entitlement_quantity=delivered_amount,
+            entitlement_quantity=entitlement_amount,
             delivered_quantity=delivered_amount,
             service_provider=self.cash_plan.service_provider,
+            status_date=self.cash_plan.status_date,
+            delivery_type=self.delivery_type,
         )
         payment_record.save()
 
-    def _create_cash_plan(self):
+    def _create_cash_plan(self) -> CashPlan:
         current_year = str(datetime.now().year)[-2:]
         last_cash_plan = (
             CashPlan.objects.filter(business_area=self.business_area, ca_id__startswith=f"HOPE-{current_year}-")
@@ -98,9 +117,19 @@ class CreateCashPlanFromReconciliationService:
         )
         last_cash_plan_index = int(last_cash_plan.ca_id.split("-")[-1]) if last_cash_plan else 0
         new_cash_plan_index_with_padding = str(last_cash_plan_index + 1).zfill(4)
-        CashPlan.objects.create(
+        return CashPlan.objects.create(
             **self.cash_plan_form_data,
             business_area=self.business_area,
-            ca_id=f"HOPE-{current_year}-{new_cash_plan_index_with_padding}",
+            ca_id=f"CHSP-HOPE-{current_year}-{new_cash_plan_index_with_padding}",
             ca_hash_id=uuid.uuid4(),
+            total_persons_covered=0,
+            total_persons_covered_revised=0,
         )
+
+    def _add_cashplan_info(self):
+        self.cash_plan.total_persons_covered = self.total_person_covered
+        self.cash_plan.total_persons_covered_revised = self.total_person_covered
+        self.cash_plan.total_entitled_quantity = self.total_entitlement_amount
+        self.cash_plan.total_delivered_quantity = self.total_delivered_amount
+        CashPlanPaymentVerificationSummary.objects.create(cash_plan=self.cash_plan)
+        self.cash_plan.save()

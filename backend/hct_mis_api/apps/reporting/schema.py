@@ -11,7 +11,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -51,7 +51,7 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     report = relay.Node.Field(ReportNode)
-    all_reports = DjangoPermissionFilterConnectionField(
+    all_reports = DjangoPermissionFilterFastConnectionField(
         ReportNode,
         filterset_class=ReportFilter,
         permission_classes=(

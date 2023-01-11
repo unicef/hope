@@ -1,24 +1,23 @@
 from collections import defaultdict
 
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.db.transaction import atomic
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import StorageFileFactory
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.household.fixtures import (
-    DocumentTypeFactory,
-    DocumentFactory,
     BankAccountInfoFactory,
-)
-from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
     create_household,
 )
-from hct_mis_api.apps.household.management.commands.detect_paid_households import find_paid_households
-from hct_mis_api.apps.household.models import Household, Document
+from hct_mis_api.apps.household.management.commands.detect_paid_households import (
+    find_paid_households,
+)
+from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
