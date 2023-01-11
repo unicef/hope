@@ -11,9 +11,6 @@ from django.db.models import (
     Value,
     When,
 )
-
-import graphene
-from graphene import relay
 from django.db.models.functions import Coalesce
 
 import graphene
