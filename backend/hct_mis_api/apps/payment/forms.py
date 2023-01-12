@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.admin.widgets import AdminDateWidget, AdminSplitDateTime
+from django.contrib.admin.widgets import AdminSplitDateTime
 
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
