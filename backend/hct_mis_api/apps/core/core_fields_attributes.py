@@ -1781,7 +1781,7 @@ class FieldFactory(list):
     def to_dict_by(self, attr: str) -> Dict:
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
-    def apply_business_area(self, business_area_slug: str) -> "FieldFactory":
+    def apply_business_area(self, business_area_slug: Optional[str] = None) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
             choices = field.get("_choices")
