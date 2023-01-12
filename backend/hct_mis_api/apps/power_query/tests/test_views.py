@@ -53,7 +53,7 @@ class TestPowerQueryViews(TestCase):
             headers = {
                 "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
             }
-            response = self.client.get(url, **headers)
+            response = self.client.get(url, **headers)  # type: ignore # FIXME: Argument 2 to "get" of "Client" has incompatible type "**Dict[str, str]"; expected "bool"
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, b">Report2<")
 
@@ -97,7 +97,7 @@ class TestPowerQueryBasicAuth(TestCase):
         headers = {
             "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
         }
-        response = self.client.get(url, **headers)
+        response = self.client.get(url, **headers)  # type: ignore # FIXME: Argument 2 to "get" of "Client" has incompatible type "**Dict[str, str]"; expected "bool"
         self.assertEqual(response.status_code, 200)
 
 

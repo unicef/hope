@@ -75,7 +75,9 @@ class RdiDiiaCreateTask:
 
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
-    def create_rdi(self, imported_by: ImportedIndividual, rdi_name: str = "rdi_name") -> RegistrationDataImport:
+    def create_rdi(
+        self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name"
+    ) -> RegistrationDataImport:
 
         number_of_individuals = 0
         number_of_households = 0
@@ -171,7 +173,7 @@ class RdiDiiaCreateTask:
 
                 individuals_to_create_list = []
                 individuals_to_update_list = []
-                head_of_household = None
+                head_of_household: ImportedIndividual
                 self.bank_accounts = []
                 self.documents = []
                 individual_count += all_individuals.count()
@@ -185,7 +187,6 @@ class RdiDiiaCreateTask:
                         pass_hh_and_individuals_tax_id_error = True
                         individuals_to_create_list = []
                         individuals_to_update_list = []
-                        head_of_household = None
                         individual_count -= all_individuals.count()
                         self.bank_accounts = []
                         self.documents = []

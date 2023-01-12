@@ -1,48 +1,40 @@
 import os
-from typing import Any, Dict
+import unittest
+from typing import Any, Dict, List
 
 from django.conf import settings
-from django.db import connections
-from django.test.runner import ParallelTestSuite
+from django.test.runner import ParallelTestSuite, partition_suite_by_case
 
 import xmlrunner
-from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl.connections import connections as es_connections
 from snapshottest.django import TestRunner
 
-_worker_id = 0
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 
 
-def _elastic_search_init_worker(counter: Any) -> None:
-    global _worker_id
+def elastic_search_partition_suite_by_case(suite: Any) -> List:
+    """Ensure to run all elastic search without parallel"""
+    groups = []
+    other_tests = []
+    suite_class = type(suite)
+    es_group = []
+    for test in suite:
+        if not isinstance(test, BaseElasticSearchTestCase):
+            other_tests.append(test)
+            continue
+        if isinstance(test, unittest.TestCase):
+            es_group.append(test)
 
-    with counter.get_lock():
-        counter.value += 1
-        _worker_id = counter.value
-
-    for alias in connections:
-        connection = connections[alias]
-        settings_dict = connection.creation.get_test_db_clone_settings(_worker_id)
-        # connection.settings_dict must be updated in place for changes to be
-        # reflected in django.db.connections. If the following line assigned
-        # connection.settings_dict = settings_dict, new threads would connect
-        # to the default database instead of the appropriate clone.
-        connection.settings_dict.update(settings_dict)
-        connection.close()
-
-    # Initialize the elasticsearch connection for the current worker
-    worker_connection_postfix = f"default_worker_{_worker_id}"
-    es_connections.create_connection(alias=worker_connection_postfix, **settings.ELASTICSEARCH_DSL["default"])
-
-    # Update index names and connections
-    for doc in registry.get_documents():
-        doc._index._name += f"_{_worker_id}"
-        # Use the worker-specific connection
-        doc._index._using = worker_connection_postfix
+    groups.append(suite_class(es_group))
+    groups.extend(partition_suite_by_case(suite_class(other_tests)))
+    return groups
 
 
 class MisParallelTestSuite(ParallelTestSuite):
-    init_worker = _elastic_search_init_worker
+    def __init__(self, suite: Any, processes: Any, failfast: bool = False) -> None:
+        self.processes = processes
+        self.failfast = failfast
+        super().__init__(suite, processes, failfast)
+        self.subsuites = elastic_search_partition_suite_by_case(suite)
 
 
 class PostgresTestRunner(TestRunner):
@@ -78,7 +70,6 @@ class PostgresTestRunner(TestRunner):
             "verbosity": verbosity,
             "descriptions": getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
             "failfast": self.failfast,
-            "resultclass": self.get_resultclass(),  # type: ignore
             "output": output,
         }
 
@@ -90,5 +81,5 @@ class PostgresTestRunner(TestRunner):
             runner_kwargs["output"].close()
         return results
 
-    def setup_databases(self, **kwargs: Any) -> Any:
+    def setup_databases(self, **kwargs: Dict) -> Any:
         return super().setup_databases(**kwargs)

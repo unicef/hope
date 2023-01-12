@@ -82,15 +82,8 @@ export const AllGrievanceTicket = gql`
             id
           }
           unicefId
-          existingTickets {
-            id
-          }
           relatedTickets {
             id
-            status
-            category
-            issueType
-            unicefId
           }
           priority
           urgency

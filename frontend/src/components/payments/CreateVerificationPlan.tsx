@@ -223,9 +223,7 @@ export function CreateVerificationPlan({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Create Verification Plan')}
-              </DialogTitle>
+              <DialogTitle>{t('Create Verification Plan')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>

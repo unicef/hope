@@ -24,13 +24,14 @@ export function TargetPopulationsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const [filter, setFilter] = useState({
+    name: '',
+    status: '',
+    program: '',
     numIndividuals: {
       min: undefined,
       max: undefined,
     },
     createdAtRange: { min: undefined, max: undefined },
-    name: '',
-    status: '',
   });
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);

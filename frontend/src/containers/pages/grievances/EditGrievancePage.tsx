@@ -21,8 +21,8 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { Title } from '../../../components/core/Title';
 import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
 import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
+import { LookUpLinkedTickets } from '../../../components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import {
   dataChangeComponentDict,
@@ -50,9 +50,9 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import {
+  choicesToDict,
   isInvalid,
   isPermissionDeniedError,
-  reduceChoices,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 import {
@@ -122,7 +122,7 @@ export const EditGrievancePage = (): React.ReactElement => {
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
@@ -514,7 +514,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                       <BoxWithBorders>
                         <Grid item xs={6}>
                           <Box py={3}>
-                            <LookUpRelatedTickets
+                            <LookUpLinkedTickets
                               values={values}
                               onValueChange={setFieldValue}
                             />

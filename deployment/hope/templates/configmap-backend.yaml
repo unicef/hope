@@ -15,8 +15,8 @@ data:
   REDIS_INSTANCE: hope-main-redis-master
   FLOWER_BROKER_API: redis://hope-main-redis-master:6379/0
 {{- range $key, $value :=  .Values.backend.config }}
-  {{ if eq $value "" }}
-  {{ else }}
-  {{ $key }}: {{ $value }}
+  {{- if eq $value "" }}
+  {{- else }}
+  {{ $key }}: {{ $value | quote }}
   {{- end }}
 {{- end }}

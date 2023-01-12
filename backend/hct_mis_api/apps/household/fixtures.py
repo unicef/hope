@@ -163,7 +163,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n:03d}")
+    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n%1000:03d}")
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
@@ -199,6 +199,16 @@ class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
         django_get_or_create = ("document_number", "type", "country")
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+
+
+class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)
@@ -310,12 +320,12 @@ def create_household_for_fixtures(
 
 
 def create_household_and_individuals(
-    household_data: Optional[Dict] = None, individuals_data: Optional[Dict] = None, imported: bool = False
+    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
 ) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
     household: Household = HouseholdFactory.build(**household_data)

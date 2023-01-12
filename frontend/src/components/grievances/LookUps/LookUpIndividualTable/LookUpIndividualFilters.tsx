@@ -77,7 +77,7 @@ export function LookUpIndividualFilters({
                 ...filter,
                 lastRegistrationDate: {
                   ...filter.lastRegistrationDate,
-                  min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  min: date ? moment(date).format('YYYY-MM-DD') : undefined,
                 },
               })
             }
@@ -92,7 +92,7 @@ export function LookUpIndividualFilters({
                 ...filter,
                 lastRegistrationDate: {
                   ...filter.lastRegistrationDate,
-                  max: date ? moment(date).format('YYYY-MM-DD') : null,
+                  max: date ? moment(date).format('YYYY-MM-DD') : undefined,
                 },
               })
             }
@@ -131,7 +131,7 @@ export function LookUpIndividualFilters({
         <Grid item xs={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
-            value={filter.sex || ''}
+            value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
             SelectDisplayProps={{
@@ -154,7 +154,7 @@ export function LookUpIndividualFilters({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={filter.household}
+                  checked={Boolean(filter.household)}
                   color='primary'
                   onChange={(e) => {
                     if (e.target.checked) {

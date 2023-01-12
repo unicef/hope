@@ -34,7 +34,7 @@ class MockSuperUser:
 
 
 class MockResponse:
-    def __init__(self, status_code: str, data: Dict) -> None:
+    def __init__(self, status_code: Any, data: Dict) -> None:
         self.status_code = status_code
         self.data: Dict = data
 
@@ -54,8 +54,7 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.maxDiff = None
-        cls.client = Client()  # type: ignore # TODO: expression has type "django.test.client.Client", variable has type "graphene.test.Client"
+        cls.client: Client = Client()  # type: ignore # FIXME: Incompatible types in assignment (expression has type "django.test.client.Client", variable has type "graphene.test.Client")
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
@@ -120,7 +119,7 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self) -> None:
         request = self.prepare_request("kobo-template-valid.xlsx")
-        request.session = "session"  # type: ignore # TODO: expression has type "str", variable has type "SessionBase"
+        request.session = "session"  # type: ignore # FIXME: expression has type "str", variable has type "SessionBase"
         messages = FallbackStorage(request)
         request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)
@@ -146,7 +145,7 @@ class TestKoboErrorHandling(APITestCase):
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
     def test_connection_retry_when_500(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
-        error_500_response = MockResponse(500, "test_error")
+        error_500_response = MockResponse(500, {"msg": "test_error"})
         mock_create_template_from_file = raise_as_func(requests.exceptions.HTTPError(response=error_500_response))
         empty_template = self.generate_empty_template()
         with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
@@ -164,7 +163,7 @@ class TestKoboErrorHandling(APITestCase):
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_400(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
-        error_400_response = MockResponse(400, "test_error")
+        error_400_response = MockResponse(400, {"msg": "test_error"})
         mock_create_template_from_file = raise_as_func(requests.exceptions.HTTPError(response=error_400_response))
         empty_template = self.generate_empty_template()
         with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):

@@ -30,17 +30,18 @@ const Container = styled(Paper)`
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
+    search: '',
     startDate: undefined,
     endDate: undefined,
     status: [],
     sector: [],
     numberOfHouseholds: {
-      min: undefined,
-      max: undefined,
+      min: '',
+      max: '',
     },
     budget: {
-      min: undefined,
-      max: undefined,
+      min: '',
+      max: '',
     },
   });
   const debouncedFilter = useDebounce(filter, 500);
@@ -55,7 +56,7 @@ export function ProgramsPage(): React.ReactElement {
 
   if (choicesLoading) return <LoadingComponent />;
 
-  if (permissions === null) return null;
+  if (permissions === null || !choicesData) return null;
 
   if (
     !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)

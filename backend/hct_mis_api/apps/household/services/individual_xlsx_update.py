@@ -130,7 +130,7 @@ class IndividualXlsxUpdate:
             name = self.attr_by_column_index[cell.col_idx]["name"]
             updated[name] = cell.value
 
-        IndividualForm = modelform_factory(Individual, fields=updated.keys())
+        IndividualForm = modelform_factory(Individual, fields=list(updated.keys()))
         form = IndividualForm(instance=individual, data=updated)
 
         for field in form.fields.values():

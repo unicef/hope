@@ -19,7 +19,7 @@ from adminfilters.filters import ChoicesFieldComboFilter
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -27,7 +27,7 @@ from hct_mis_api.apps.registration_datahub import models as datahub_models
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
-from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -80,7 +80,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
                 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -101,7 +101,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
             celery_task.delay(
                 registration_data_import_id=str(rdi_datahub_obj.id),
                 import_data_id=str(rdi_datahub_obj.import_data.id),
-                business_area=str(business_area.id),
+                business_area_id=str(business_area.id),
             )
 
             self.message_user(request, "RDI task has started")
@@ -142,12 +142,15 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     rdi_datahub.delete()
                     rdi.delete()
                     # remove elastic search records linked to individuals
-                    remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
+                    business_area_slug = rdi_datahub.business_area_slug
+                    remove_elasticsearch_documents_by_matching_ids(
+                        datahub_individuals_ids, get_imported_individual_doc(business_area_slug)
+                    )
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,
+                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",
@@ -225,13 +228,18 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     ).filter(business_area=rdi.business_area).delete()
                     rdi.delete()
                     # remove elastic search records linked to individuals
-                    remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
-                    remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
+                    business_area_slug = rdi.business_area.slug
+                    remove_elasticsearch_documents_by_matching_ids(
+                        datahub_individuals_ids, get_imported_individual_doc(business_area_slug)
+                    )
+                    remove_elasticsearch_documents_by_matching_ids(
+                        individuals_ids, get_individual_doc(business_area_slug)
+                    )
                     self.message_user(request, "RDI Deleted")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
                         content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                        object_id=None,
+                        object_id=None,  # type: ignore # Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                         object_repr=f"Removed RDI {rdi_name} id: {pk}",
                         action_flag=DELETION,
                         change_message="RDI removed",

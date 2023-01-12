@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Sequence, Tuple
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -43,7 +43,7 @@ class GrievanceOrderingFilter(OrderingFilter):
             qs = super().filter(qs, value)
             qs = (
                 qs.annotate(linked=Count("linked_tickets"))
-                .annotate(linked_related=Count("linked_tickets_related"))
+                .annotate(linked_related=Count("linked_tickets"))
                 .annotate(total_linked=F("linked") + F("linked_related"))
                 .annotate(
                     household_unicef_id_count=Window(
@@ -62,7 +62,7 @@ class GrievanceOrderingFilter(OrderingFilter):
 
 
 class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
-    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = (
+    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH: Tuple = (
         "search",
         "created_at_range",
         "assigned_to",
@@ -82,7 +82,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
         return execute_es_query(grievance_es_query_dict)
 
-    def prepare_filters(self, allowed_fields: List[str]) -> Dict:
+    def prepare_filters(self, allowed_fields: Sequence[str]) -> Dict:
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):
@@ -241,7 +241,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-    def permissions_filter(self, qs: QuerySet, name: str, value: List[Permissions]) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
@@ -372,7 +372,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
         return queryset
 
     def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
+        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)  # type: ignore # FIXME: Argument 4 to "permissions_filter" of "GrievanceTicketFilter" has incompatible type "str"; expected "List[Permissions]"
 
 
 class TicketNoteFilter(FilterSet):

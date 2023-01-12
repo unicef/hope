@@ -130,14 +130,14 @@ export function TargetCriteriaForm({
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
-      allFieldsAttributes: data.allFieldsAttributes
-        .filter(associatedWith('Individual'))
+      allFieldsAttributes: data?.allFieldsAttributes
+        ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     };
     setIndividualData(filteredIndividualData);
 
     const filteredHouseholdData = {
-      allFieldsAttributes: data.allFieldsAttributes.filter(
+      allFieldsAttributes: data?.allFieldsAttributes?.filter(
         associatedWith('Household'),
       ),
     };
@@ -147,7 +147,7 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
-    const filterNull = (filter): boolean => filter.value === null;
+    const filterNullOrNoSelections = (filter): boolean => filter.value === null || (filter?.fieldAttribute?.type === "SELECT_MANY" && filter.value && filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
       filter.value?.hasOwnProperty('from') &&
@@ -155,7 +155,7 @@ export function TargetCriteriaForm({
       !filter.value.from &&
       !filter.value.to;
 
-    const hasFiltersNullValues = Boolean(filters.filter(filterNull).length);
+    const hasFiltersNullValues = Boolean(filters.filter(filterNullOrNoSelections).length);
 
     const hasFiltersEmptyFromToValues = Boolean(
       filters.filter(filterEmptyFromTo).length,
@@ -166,7 +166,7 @@ export function TargetCriteriaForm({
 
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
-        const hasNulls = block.individualBlockFilters.some(filterNull);
+        const hasNulls = block.individualBlockFilters.some(filterNullOrNoSelections);
         const hasFromToError = block.individualBlockFilters.some(
           filterEmptyFromTo,
         );
@@ -224,7 +224,7 @@ export function TargetCriteriaForm({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title' disableTypography>
+              <DialogTitle disableTypography>
                 <Typography variant='h6'>{t('Add Filter')}</Typography>
               </DialogTitle>
             </DialogTitleWrapper>

@@ -4,7 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -594,7 +594,7 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def _get_business_areas_or_programs(
-        cls, report: DashboardReport, valid_payment_records: List[PaymentRecord]
+        cls, report: DashboardReport, valid_payment_records: Iterable[PaymentRecord]
     ) -> Tuple[Any, str]:
         if cls._is_report_global(report):
             business_area_code_path = "code"
@@ -821,7 +821,7 @@ class GenerateDashboardReportService:
             ),
         },
     }
-    ROW_CONTENT_METHODS: Dict[str, Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]]] = {
+    ROW_CONTENT_METHODS: Dict = {
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
             GenerateDashboardReportContentHelpers.format_beneficiaries_row,
@@ -904,9 +904,7 @@ class GenerateDashboardReportService:
 
     def _add_rows(self, active_sheet: "Worksheet", report_type: str) -> int:
         is_hq_report = self.hq_or_country == self.HQ
-        get_row_methods: Tuple[Callable[[DashboardReport]], Callable[[Dict, bool, Any]]] = self.ROW_CONTENT_METHODS[
-            report_type
-        ]
+        get_row_methods: Tuple[Callable, Callable] = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)
@@ -928,7 +926,7 @@ class GenerateDashboardReportService:
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
             sheet_title = self._report_type_to_str(report_type)
-            active_sheet = self.wb.create_sheet(sheet_title, -1)
+            active_sheet = self.wb.create_sheet(sheet_title, -1)  # type: ignore # Argument 2 to "create_sheet" of "Workbook" has incompatible type "int"; expected "None"
             number_of_columns = self._add_headers(active_sheet, report_type)
             number_of_rows = self._add_rows(active_sheet, report_type)
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)

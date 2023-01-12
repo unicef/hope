@@ -1,5 +1,4 @@
-from typing import Dict
-from uuid import UUID
+from typing import Dict, Optional
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -24,7 +23,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.utils.profiling import profiling
 
 
-def get_individual(tax_id: str, business_area_code: str) -> Document:
+def get_individual(tax_id: str, business_area_code: Optional[str]) -> Document:
     documents = (
         Document.objects.all()
         if not business_area_code
@@ -49,7 +48,7 @@ def get_individual(tax_id: str, business_area_code: str) -> Document:
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id: UUID, business_area_code: str) -> ImportedHousehold:
+def get_household(registration_id: str, business_area_code: Optional[str]) -> ImportedHousehold:
     kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
     households = (
         Household.objects.all()
@@ -82,7 +81,9 @@ def get_household(registration_id: UUID, business_area_code: str) -> ImportedHou
     raise Exception("Household with given registration_id not found")
 
 
-def get_household_or_individual(tax_id: str, registration_id: UUID, business_area_code: str) -> Dict:
+def get_household_or_individual(
+    tax_id: Optional[str], registration_id: Optional[str], business_area_code: Optional[str]
+) -> Dict:
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
 
@@ -106,7 +107,7 @@ class HouseholdStatusView(APIView):
 
         tax_id = query_params.get("tax_id", None)
         registration_id = query_params.get("registration_id", None)
-        business_area_code = query_params.get("business_area_code", None)
+        business_area_code: Optional[str] = query_params.get("business_area_code")
 
         try:
             data = get_household_or_individual(tax_id, registration_id, business_area_code)

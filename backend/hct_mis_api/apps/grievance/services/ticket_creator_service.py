@@ -1,5 +1,5 @@
 import abc
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -10,7 +10,11 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_and_get_object, decode_id_string
+from hct_mis_api.apps.core.utils import (
+    decode_and_get_object,
+    decode_id_string,
+    decode_id_string_required,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -72,7 +76,7 @@ class InvalidCategoryError(Exception):
 
 class TicketDetailsCreatorFactory:
     @staticmethod
-    def get_for_category(category: int) -> TicketDetailsCreator:
+    def get_for_category(category: Optional[int]) -> TicketDetailsCreator:
         if category == GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION:
             return PaymentVerificationTicketDetailsCreator()
         if category == GrievanceTicket.CATEGORY_DATA_CHANGE:
@@ -93,7 +97,7 @@ class TicketCreatorService:
     def create(self, user: AbstractUser, business_area: BusinessArea, input_data: Dict) -> List[GrievanceTicket]:
         documents = input_data.pop("documentation", None)
         extras = input_data.pop("extras", {})
-        linked_tickets = [decode_id_string(encoded_id) for encoded_id in input_data.pop("linked_tickets", [])]
+        linked_tickets = [decode_id_string_required(encoded_id) for encoded_id in input_data.pop("linked_tickets", [])]
         linked_feedback_id = input_data.pop("linked_feedback_id", None)
 
         grievance_ticket = self._create_ticket(business_area, input_data, user)

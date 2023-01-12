@@ -1,6 +1,5 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
-from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -14,6 +13,7 @@ from hct_mis_api.apps.household.models import (
     MALE,
     NON_BENEFICIARY,
     Household,
+    Individual,
 )
 
 
@@ -23,14 +23,22 @@ def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
     return household.individuals.aggregate(**kwargs)
 
 
-@transaction.atomic
-def recalculate_data(household: Household) -> None:
+def recalculate_data(household: Household, save: bool = True) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
     if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
-        return
+        return household, []
+
+    individuals_to_update = []
+    individuals_fields_to_update = []
+
     for individual in household.individuals.all().select_for_update():
-        individual.recalculate_data()
+        _individual, _fields_to_update = individual.recalculate_data(save=False)
+        individuals_to_update.append(_individual)
+        individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
+
+    Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
+
     date_6_years_ago = timezone.now() - relativedelta(years=+6)
     date_12_years_ago = timezone.now() - relativedelta(years=+12)
     date_18_years_ago = timezone.now() - relativedelta(years=+18)
@@ -40,7 +48,7 @@ def recalculate_data(household: Household) -> None:
     active_beneficiary = Q(withdrawn=False, duplicate=False)
     female_beneficiary = Q(Q(sex=FEMALE) & active_beneficiary & is_beneficiary)
     male_beneficiary = Q(Q(sex=MALE) & active_beneficiary & is_beneficiary)
-    disabled_disability = Q(disability=DISABLED)
+    disabled_disability = Q(disability=DISABLED) & active_beneficiary & is_beneficiary
     female_disability_beneficiary = Q(disabled_disability & female_beneficiary)
     male_disability_beneficiary = Q(disabled_disability & male_beneficiary)
 
@@ -50,9 +58,9 @@ def recalculate_data(household: Household) -> None:
     from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
     from_60_years = Q(birth_date__lte=date_60_years_ago)
 
-    children_count = Q(birth_date__gt=date_18_years_ago)
+    children_count = Q(birth_date__gt=date_18_years_ago) & active_beneficiary & is_beneficiary
     female_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
-    male_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
+    male_children_count = Q(birth_date__gt=date_18_years_ago) & male_beneficiary
 
     children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
     female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
@@ -167,4 +175,8 @@ def recalculate_data(household: Household) -> None:
         if household.head_of_household.sex == FEMALE:
             household.fchild_hoh = True
         household.child_hoh = True
-    household.save(update_fields=updated_fields)
+
+    if save:
+        household.save(update_fields=updated_fields)
+
+    return household, updated_fields

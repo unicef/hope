@@ -52,7 +52,7 @@ class HUBAdminMixin(HOPEModelAdminBase):
                 LogEntry.objects.log_action(
                     user_id=request.user.pk,
                     content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                    object_id=None,
+                    object_id=None,  # type: ignore # FIXME: Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
                     object_repr=f"TRUNCATE TABLE {self.model._meta.verbose_name}",
                     action_flag=DELETION,
                     change_message="truncate table",
@@ -96,7 +96,7 @@ class HouseholdAdmin(HUBAdminMixin):
 
     @button()
     def see_hope_record(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         hh = households.Household.objects.get(id=obj.mis_id)
         url = reverse("admin:household_individual_change", args=[hh.pk])
         return HttpResponseRedirect(url)
@@ -208,16 +208,16 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
-    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> TemplateResponse:  # type: ignore
+    def reset_sync_date(self, request: HttpRequest, pk: UUID) -> Optional[TemplateResponse]:
         if request.method == "POST":
             try:
                 with atomic():
-                    obj = self.get_object(request, pk)
+                    obj = self.get_object(request, str(pk))
                     # Programs
-                    hub_program_ids = Program.objects.filter(session=obj.id).values_list("mis_id", flat=True)
+                    hub_program_ids = list(Program.objects.filter(session=obj.id).values_list("mis_id", flat=True))
                     programs.Program.objects.filter(id__in=hub_program_ids).update(last_sync_at=None)
                     # Documents
-                    hub_document_ids = Document.objects.filter(session=obj.id).values_list("mis_id", flat=True)
+                    hub_document_ids = list(Document.objects.filter(session=obj.id).values_list("mis_id", flat=True))
                     households.Document.objects.filter(id__in=hub_document_ids).update(last_sync_at=None)
                     # HH / Ind
                     for hub_tp in TargetPopulation.objects.filter(session=obj.id):
@@ -230,9 +230,6 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             except Exception as e:
                 logger.exception(e)
                 self.message_user(request, str(e), messages.ERROR)
-            # for m in [hope_models.Household, hope_models.Individual]:
-            #     hh = hope_models.Household.objects.filter(id__in=Household.)
-            #     m.objects(request).update(last_sync_at=None)
         else:
             return confirm_action(
                 self,
@@ -241,6 +238,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
                 "Continuing will reset last_sync_date of any" " object linked to this Session.",
                 "Successfully executed",
             )
+        return None
 
 
 @admin.register(TargetPopulationEntry)

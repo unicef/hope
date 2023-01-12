@@ -5,7 +5,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useLazyInterval } from '../../../hooks/useInterval';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -14,17 +13,20 @@ import {
 } from '../../../__generated__/graphql';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 
-export function TargetPopulationDetailsPage(): React.ReactElement {
+export const TargetPopulationDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error, refetch } = useTargetPopulationQuery({
+  const {
+    data,
+    loading,
+    error,
+    startPolling,
+    stopPolling,
+  } = useTargetPopulationQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const [
-    startPollingTargetPopulation,
-    stopPollingTargetPopulation,
-  ] = useLazyInterval(() => refetch(), 3000);
+
   const buildStatus = data?.targetPopulation?.buildStatus;
   useEffect(() => {
     if (
@@ -33,13 +35,12 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
         TargetPopulationBuildStatus.Pending,
       ].includes(buildStatus)
     ) {
-      startPollingTargetPopulation();
+      startPolling(3000);
     } else {
-      stopPollingTargetPopulation();
+      stopPolling();
     }
-    return stopPollingTargetPopulation;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildStatus]);
+    return stopPolling;
+  }, [buildStatus, startPolling, stopPolling]);
 
   if (loading && !data) return <LoadingComponent />;
 
@@ -49,16 +50,17 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
 
   const { targetPopulation } = data;
 
+  const canDuplicate =
+    hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
+    Boolean(targetPopulation.targetingCriteria);
+
   return (
     <>
       <TargetPopulationPageHeader
         targetPopulation={targetPopulation}
         canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.TARGETING_REMOVE, permissions)}
-        canDuplicate={hasPermissions(
-          PERMISSIONS.TARGETING_DUPLICATE,
-          permissions,
-        )}
+        canDuplicate={canDuplicate}
         canLock={hasPermissions(PERMISSIONS.TARGETING_LOCK, permissions)}
         canUnlock={hasPermissions(PERMISSIONS.TARGETING_UNLOCK, permissions)}
         canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
@@ -71,4 +73,4 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
       />
     </>
   );
-}
+};
