@@ -31,6 +31,7 @@ class GrievanceTicketFilter(FilterSet):
                 "unicef_id",
                 "phone_no",
                 "phone_no_alternative",
+                "preferred_language",
             ),
             "household": ("unicef_id",),
         },
@@ -40,6 +41,7 @@ class GrievanceTicketFilter(FilterSet):
                 "unicef_id",
                 "phone_no",
                 "phone_no_alternative",
+                "preferred_language",
             ),
             "household": ("unicef_id",),
         },
@@ -49,6 +51,7 @@ class GrievanceTicketFilter(FilterSet):
                 "unicef_id",
                 "phone_no",
                 "phone_no_alternative",
+                "preferred_language",
             ),
         },
         "add_individual_ticket_details": {"household": ("unicef_id",)},
@@ -58,6 +61,7 @@ class GrievanceTicketFilter(FilterSet):
                 "unicef_id",
                 "phone_no",
                 "phone_no_alternative",
+                "preferred_language",
             )
         },
         "needs_adjudication_ticket_details": {
@@ -66,6 +70,7 @@ class GrievanceTicketFilter(FilterSet):
                 "unicef_id",
                 "phone_no",
                 "phone_no_alternative",
+                "preferred_language",
             )
         },
     }
@@ -96,6 +101,7 @@ class GrievanceTicketFilter(FilterSet):
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
     household = CharFilter(field_name="household_unicef_id")
+    preferred_language = CharFilter(method="preferred_language_filter")
 
     class Meta:
         fields = {
@@ -120,6 +126,15 @@ class GrievanceTicketFilter(FilterSet):
             "issue_type",
         )
     )
+
+    def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        q_obj = Q()
+        for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            for field, lookups in ticket_fields.items():
+                for lookup in lookups:
+                    if lookup == "preferred_language":
+                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}": value})
+        return qs.filter(q_obj)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         values = value.split(" ")
