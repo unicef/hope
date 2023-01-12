@@ -219,3 +219,7 @@ class Languages:
     @classmethod
     def is_valid(cls, code: str) -> bool:
         return any(code in (language.alpha2, language.alpha3) for language in LANGUAGES)
+
+    @classmethod
+    def filter_by_name(cls, name: str) -> List[Language]:
+        return [language for language in LANGUAGES if name.lower() in language.english.lower()]
