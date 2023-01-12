@@ -15,8 +15,7 @@ from .utils import basicauth
 
 @login_required()
 def report_list(request: HttpRequest) -> HttpResponse:
-    reports: [Report] = Report.objects.all()
-    return render(request, "power_query/list.html", {"reports": reports})
+    return render(request, "power_query/list.html", {"reports": Report.objects.all()})
 
 
 @login_required()
