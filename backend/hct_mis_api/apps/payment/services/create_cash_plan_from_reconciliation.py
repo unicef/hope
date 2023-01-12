@@ -83,7 +83,7 @@ class CreateCashPlanReconciliationService:
         status = (
             PaymentRecord.STATUS_SUCCESS
             if row[self.column_index_mapping[self.COLUMN_PAYMENT_STATUS]] == 1
-            else PaymentRecord.STATUS_FAILED
+            else PaymentRecord.STATUS_ERROR
         )
         payment_id = row[self.column_index_mapping[self.COLUMN_PAYMENT_ID]]
         target_population_id, household_id = payment_id.split(" - ")
