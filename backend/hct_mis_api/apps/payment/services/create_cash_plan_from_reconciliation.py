@@ -116,6 +116,9 @@ class CreateCashPlanReconciliationService:
         payment_record.save()
 
     def _create_cash_plan(self) -> CashPlan:
+        cp = CashPlan.objects.filter(business_area=self.business_area, name=self.cash_plan_form_data.get('name'))
+        if cp.exists():
+            return cp.first()
         current_year = str(datetime.now().year)[-2:]
         last_cash_plan = (
             CashPlan.objects.filter(business_area=self.business_area, ca_id__startswith=f"HOPE-CSH-{current_year}-")
