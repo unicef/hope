@@ -145,6 +145,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         all individuals of a household thats part of the population or only
         the relevant ones (collectors etc.)""",
     )
+    program_population = models.ManyToManyField(
+        to="household.Household", related_name="programs", blank=True, through="program.ProgramToHouseholdThrough"
+    )
 
     @property
     def total_number_of_households(self) -> QuerySet:
@@ -307,4 +310,20 @@ class CashPlan(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name = "Cash Plan"
+        ordering = ["created_at"]
+
+
+class ProgramToHouseholdThrough(TimeStampedUUIDModel):
+    household = models.ForeignKey(
+        "household.Household", on_delete=models.CASCADE, related_name="program_to_household_through"
+    )
+    program = models.ForeignKey(
+        "program.Program", on_delete=models.CASCADE, related_name="program_to_household_through"
+    )
+    eligible = models.BooleanField(default=False)
+    vulnerability_score = models.DecimalField(decimal_places=2, max_digits=12, null=True)
+
+    class Meta:
+        verbose_name = "Program to Household"
+        unique_together = ("program", "household")
         ordering = ["created_at"]
