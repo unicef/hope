@@ -75,7 +75,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         )
 
     @button()
-    def import_payment_records(self, request) -> Any:
+    def import_payment_records(self, request: HttpRequest) -> Any:
         if request.method == "GET":
             form = ImportPaymentRecordsForm()
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
@@ -83,8 +83,6 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         # print(request.POST)
         form = ImportPaymentRecordsForm(request.POST, request.FILES)
         form.is_valid()
-        print("****************************************************************************************************")
-        print(form.cleaned_data)
         cleaned_data = form.cleaned_data
         column_mapping = {
             CreateCashPlanReconciliationService.COLUMN_PAYMENT_ID: "Payment ID",

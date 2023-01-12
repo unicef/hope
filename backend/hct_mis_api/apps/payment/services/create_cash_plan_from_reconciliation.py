@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import IO
 
 from django.db import transaction
 
@@ -30,8 +31,14 @@ class CreateCashPlanReconciliationService:
     )
 
     def __init__(
-        self, business_area, reconciliation_xlsx_file, column_mapping, cash_plan_form_data, currency, delivery_type
-    ):
+        self,
+        business_area: BusinessArea,
+        reconciliation_xlsx_file: IO,
+        column_mapping: dict,
+        cash_plan_form_data: dict,
+        currency: str,
+        delivery_type: str,
+    ) -> None:
         self.business_area = business_area
         self.reconciliation_xlsx_file = reconciliation_xlsx_file
         self.column_mapping = column_mapping
@@ -44,7 +51,7 @@ class CreateCashPlanReconciliationService:
         self.total_entitlement_amount = 0
 
     @transaction.atomic
-    def parse_xlsx(self):
+    def parse_xlsx(self) -> None:
         wb = openpyxl.load_workbook(self.reconciliation_xlsx_file)
         ws = wb.active
         rows = ws.rows
@@ -60,7 +67,7 @@ class CreateCashPlanReconciliationService:
             self._parse_row(row_values, index)
         self._add_cashplan_info()
 
-    def _parse_header(self, header: list):
+    def _parse_header(self, header: list) -> None:
         for column, xlsx_column in self.column_mapping.items():
             if xlsx_column not in header:
                 raise ValidationError(f"Column {xlsx_column} not found in the header")
@@ -69,7 +76,7 @@ class CreateCashPlanReconciliationService:
 
             self.column_index_mapping[column] = header.index(xlsx_column)
 
-    def _parse_row(self, row: tuple, index):
+    def _parse_row(self, row: tuple, index: int) -> None:
         self.total_person_covered += 1
         delivered_amount = row[self.column_index_mapping[self.COLUMN_DELIVERED_AMOUNT]]
         entitlement_amount = row[self.column_index_mapping[self.COLUMN_ENTITLEMENT_QUANTITY]]
@@ -126,7 +133,7 @@ class CreateCashPlanReconciliationService:
             total_persons_covered_revised=0,
         )
 
-    def _add_cashplan_info(self):
+    def _add_cashplan_info(self) -> None:
         self.cash_plan.total_persons_covered = self.total_person_covered
         self.cash_plan.total_persons_covered_revised = self.total_person_covered
         self.cash_plan.total_entitled_quantity = self.total_entitlement_amount
