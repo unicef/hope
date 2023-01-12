@@ -218,7 +218,7 @@ class PullFromDatahubTask:
                 logger.exception(e)
             household_ids.append(payment_record.household_id)
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
-                payment_record.household.programs.add(payment_record.cash_plan.program)
+                payment_record.household.programs_old.add(payment_record.cash_plan.program)
         handle_total_cash_in_specific_households(household_ids)
 
     def copy_service_providers(self, session: "AbstractSession") -> None:

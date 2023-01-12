@@ -88,8 +88,8 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             status=PaymentRecord.STATUS_SUCCESS,
         )
 
-        cls.household.programs.add(cls.program1)
-        cls.household.programs.add(cls.program2)
+        cls.household.programs_old.add(cls.program1)
+        cls.household.programs_old.add(cls.program2)
 
     @parameterized.expand(
         [

@@ -90,7 +90,7 @@ class TestDiscardVerificationMutation(APITestCase):
                 {"registration_data_import": registration_data_import},
             )
 
-            household.programs.add(program)
+            household.programs_old.add(program)
 
             payment_record = PaymentRecordFactory(
                 cash_plan=cash_plan,

@@ -70,13 +70,13 @@ ALL_HOUSEHOLD_QUERY_MAX = """
     """
 ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
     query AllHouseholds($programs:[ID]){
-      allHouseholds(programs: $programs, businessArea: "afghanistan") {
+      allHouseholds(oldPrograms: $programs, businessArea: "afghanistan") {
         edges {
           node {
             size
             countryOrigin
             address
-            programs {
+            oldPrograms {
               edges {
                 node {
                   name
@@ -125,9 +125,9 @@ class TestHouseholdQuery(APITestCase):
                 {"size": family_size, "address": "Lorem Ipsum", "country_origin": country_origin},
             )
             if index % 2:
-                household.programs.add(cls.program_one)
+                household.programs_old.add(cls.program_one)
             else:
-                household.programs.add(cls.program_two)
+                household.programs_old.add(cls.program_two)
 
             cls.households.append(household)
 

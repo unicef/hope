@@ -30,7 +30,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals($programs: [ID]) {
-      allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
+      allIndividuals(oldPrograms: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
         edges {
           node {
             givenName
@@ -38,7 +38,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             phoneNo
             birthDate
             household {
-              programs {
+              oldPrograms {
                 edges {
                   node {
                     name
@@ -82,8 +82,8 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
         household_one.registration_data_import.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
-        household_one.programs.add(program_one)
-        household_two.programs.add(cls.program_two)
+        household_one.programs_old.add(program_one)
+        household_two.programs_old.add(cls.program_two)
 
         cls.individuals_to_create = [
             {

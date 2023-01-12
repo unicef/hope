@@ -152,7 +152,7 @@ class Command(BaseCommand):
                 for individual in individuals:
                     DocumentFactory(individual=individual)
 
-                household.programs.add(program)
+                household.programs_old.add(program)
                 if household.admin_area:
                     program.admin_areas.add(household.admin_area)
 

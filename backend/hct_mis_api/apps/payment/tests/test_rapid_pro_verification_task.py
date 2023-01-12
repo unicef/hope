@@ -118,7 +118,7 @@ class TestRapidProVerificationTask(TestCase):
             )
             cls.individuals.extend(individuals)
 
-            household.programs.add(program)
+            household.programs_old.add(program)
 
             payment_record = PaymentRecordFactory(
                 cash_plan=cash_plan,

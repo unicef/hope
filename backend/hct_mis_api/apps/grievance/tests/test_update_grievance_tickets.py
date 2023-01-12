@@ -105,7 +105,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example")
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
+        household_one.programs_old.add(program_one)
 
         cls.individuals_to_create = [
             {

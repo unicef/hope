@@ -76,7 +76,7 @@ class TestPhoneNumberVerification(TestCase):
             )
             cls.individuals.append(individuals[0])
 
-            household.programs.add(program)
+            household.programs_old.add(program)
 
             payment_record = PaymentRecordFactory(
                 cash_plan=cash_plan,
@@ -130,7 +130,7 @@ class TestPhoneNumberVerification(TestCase):
             )
             cls.other_individuals.append(other_individuals[0])
 
-            other_household.programs.add(program)
+            other_household.programs_old.add(program)
 
             other_payment_record = PaymentRecordFactory(
                 cash_plan=other_cash_plan,

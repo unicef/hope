@@ -65,7 +65,7 @@ class HouseholdAdmin(
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
-    filter_horizontal = ("representatives", "programs")
+    filter_horizontal = ("representatives", "programs_old")
     raw_id_fields = (
         "admin_area",
         "business_area",

@@ -331,7 +331,7 @@ class Household(
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
             "registration_data_import",
-            "programs",
+            "programs_old",
             "returnee",
             "flex_fields",
             "first_registration_date",
@@ -410,7 +410,7 @@ class Household(
         null=True,
         on_delete=models.CASCADE,
     )
-    programs = models.ManyToManyField(
+    programs_old = models.ManyToManyField(
         "program.Program",
         related_name="households",
         blank=True,

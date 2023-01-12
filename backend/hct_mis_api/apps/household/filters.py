@@ -95,7 +95,7 @@ class HouseholdFilter(FilterSet):
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
             "target_populations": ["exact"],
-            "programs": ["exact"],
+            "programs_old": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
         }
