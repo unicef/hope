@@ -170,7 +170,7 @@ class TestListQueryMessage(APITestCase):
             request_string=self.QUERY_RECIPIENTS,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
-                "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                "messageId": encode_id_base64(Message.objects.values("id")[0]["id"], "Message"),
                 **variables,
             },
         )

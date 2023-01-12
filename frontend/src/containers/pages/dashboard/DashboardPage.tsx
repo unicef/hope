@@ -20,7 +20,7 @@ export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
-    administrativeArea: undefined,
+    administrativeArea: '',
   });
   const { data, loading } = useDashboardYearsChoiceDataQuery({
     variables: { businessArea },

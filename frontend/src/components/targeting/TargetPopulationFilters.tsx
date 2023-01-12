@@ -36,7 +36,7 @@ export function TargetPopulationFilters({
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
-            value={filter.name || ''}
+            value={filter.name}
             onChange={(e) => handleFilterChange(e, 'name')}
             data-cy='filters-search'
             fullWidth
@@ -45,6 +45,7 @@ export function TargetPopulationFilters({
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
+            value={filter.status}
             label={t('Status')}
             icon={<Person />}
             fullWidth
@@ -53,7 +54,7 @@ export function TargetPopulationFilters({
             {Object.values(TargetPopulationStatus)
               .sort()
               .map((key) => (
-                <MenuItem value={key}>
+                <MenuItem key={key} value={key}>
                   {targetPopulationStatusMapping(key)}
                 </MenuItem>
               ))}
@@ -63,7 +64,7 @@ export function TargetPopulationFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
-            value={filter.program || ''}
+            value={filter.program}
             icon={<FlashOnIcon />}
             fullWidth
           >
@@ -89,7 +90,7 @@ export function TargetPopulationFilters({
                   ...filter,
                   numIndividuals: {
                     ...filter.numIndividuals,
-                    min: e.target.value || undefined,
+                    min: e.target.value,
                   },
                 })
               }
@@ -106,7 +107,7 @@ export function TargetPopulationFilters({
                   ...filter,
                   numIndividuals: {
                     ...filter.numIndividuals,
-                    max: e.target.value || undefined,
+                    max: e.target.value,
                   },
                 })
               }

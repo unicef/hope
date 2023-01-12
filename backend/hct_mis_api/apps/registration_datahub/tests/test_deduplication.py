@@ -259,19 +259,13 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_status=UNIQUE
         )
 
-        self.assertEqual(duplicate_in_golden_record.count(), 5)
-        self.assertEqual(unique_in_golden_record.count(), 1)
-        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
+        self.assertEqual(duplicate_in_golden_record.count(), 4)
+        self.assertEqual(unique_in_golden_record.count(), 3)
+        self.assertEqual(needs_adjudication_in_golden_record.count(), 0)
 
-        expected_duplicates_gr = (
-            "Tessta Testowski",
-            "Tessta Testowski",
-            "Test Example",
-            "Test Testowski",
-            "Test Testowski",
-        )
+        expected_duplicates_gr = ("Tessta Testowski", "Tessta Testowski", "Test Testowski", "Test Testowski")
 
-        expected_uniques_gr = ("Tesa Testowski",)
+        expected_uniques_gr = ("Tesa Testowski", "Tescik Testowski", "Test Example")
 
         self.assertEqual(
             tuple(duplicate_in_golden_record.values_list("full_name", flat=True)),

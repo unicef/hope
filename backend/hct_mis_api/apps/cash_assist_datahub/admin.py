@@ -66,11 +66,12 @@ class SessionAdmin(HOPEModelAdminBase):
     exclude = ("traceback",)
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
 
-    def run_time(self, obj: "AbstractSession") -> Optional["timedelta"]:  # type: ignore
+    def run_time(self, obj: "AbstractSession") -> Optional["timedelta"]:
         if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
             elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
                 return elapsed
+        return None
 
     @button(permission="account.can_debug")
     def pull(self, request: "HttpRequest") -> None:
@@ -89,7 +90,7 @@ class SessionAdmin(HOPEModelAdminBase):
             self.message_user(request, msg, messages.ERROR)
 
     @button()
-    def simulate_import(self, request: "HttpRequest", pk: "UUID") -> Optional[TemplateResponse]:  # type: ignore
+    def simulate_import(self, request: "HttpRequest", pk: "UUID") -> Optional[TemplateResponse]:
         context = self.get_common_context(request, pk, title="Test Import")
         session: Session = context["original"]
         if request.method == "POST":
@@ -127,14 +128,17 @@ class SessionAdmin(HOPEModelAdminBase):
                 "Successfully executed",
             )
 
+        return None
+
     @link(html_attrs={"target": "_new"}, permission="account.can_debug")
-    def view_error_on_sentry(self, button: button) -> Optional[Union[str, bool]]:  # type: ignore
+    def view_error_on_sentry(self, button: button) -> Optional[Union[str, bool]]:
         if "original" in button.context:
             obj = button.context["original"]
             if obj.sentry_id:
                 return f"{settings.SENTRY_URL}?query={obj.sentry_id}"
 
         button.visible = False
+        return None
 
     @button(visible=lambda btn: btn.original.traceback, permission="account.can_debug")
     def view_error(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
@@ -236,13 +240,15 @@ class CashPlanAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
 
     @link()
-    def payment_records(self, button: button) -> Optional[Union[str, bool]]:  # type: ignore
+    def payment_records(self, button: button) -> Optional[Union[str, bool]]:
         if "original" in button.context:
             obj = button.context["original"]
             url = reverse("admin:cash_assist_datahub_paymentrecord_changelist")
             return f"{url}?cash_plan_ca_id|iexact={obj.cash_plan_id}"
         else:
             button.visible = False
+
+        return None
 
 
 @admin.register(PaymentRecord)
@@ -289,7 +295,7 @@ class PaymentRecordAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             instance = model.objects.filter(**{rk: getattr(payment_record, field_name)}).first()
             details = None
             if instance:
-                details = reverse(admin_urlname(model._meta, "change"), args=[instance.pk])
+                details = reverse(admin_urlname(model._meta, "change"), args=[instance.pk])  # type: ignore # str vs SafeString?
             ctx["data"][model] = {"instance": instance, "details": details, "meta": model._meta}
 
         return TemplateResponse(request, "admin/cash_assist_datahub/payment_record/inspect.html", ctx)

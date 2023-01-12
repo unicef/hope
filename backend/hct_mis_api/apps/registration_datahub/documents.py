@@ -161,7 +161,7 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         )
 
 
-def get_imported_individual_doc(business_area_slug: str) -> Optional[Type[Document]]:
+def get_imported_individual_doc(business_area_slug: str) -> Type[Document]:
     return {
         "afghanistan": ImportedIndividualDocumentAfghanistan,
         "ukraine": ImportedIndividualDocumentUkraine,

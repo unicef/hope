@@ -178,7 +178,7 @@ class TestReportingMutation(APITestCase):
             variables={
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
-                    "reportId": encode_id_base64(self.report.id, Report),
+                    "reportId": encode_id_base64(self.report.id, "Report"),
                 }
             },
         )
@@ -193,7 +193,7 @@ class TestReportingMutation(APITestCase):
             variables={
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
-                    "reportId": encode_id_base64(self.report.id, Report),
+                    "reportId": encode_id_base64(self.report.id, "Report"),
                 }
             },
         )
@@ -206,7 +206,7 @@ class TestReportingMutation(APITestCase):
             variables={
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
-                    "reportId": encode_id_base64(self.report.id, Report),
+                    "reportId": encode_id_base64(self.report.id, "Report"),
                 }
             },
         )

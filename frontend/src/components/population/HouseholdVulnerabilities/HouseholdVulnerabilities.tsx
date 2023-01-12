@@ -39,7 +39,7 @@ export function HouseholdVulnerabilities({
     '*',
   );
 
-  const fields = Object.entries(household.flexFields || {}).map(
+  const fields = Object.entries(household?.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (

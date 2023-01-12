@@ -48,8 +48,9 @@ class CommandForm(forms.Form):
     no_input = forms.BooleanField(label="No input", required=False)
 
 
-def trigger_error(request: HttpRequest) -> None:
+def trigger_error(request: HttpRequest) -> HttpResponse:
     division_by_zero = 1 / 0  # noqa: F841
+    return HttpResponse(division_by_zero)
 
 
 @login_required
@@ -67,7 +68,7 @@ def hope_redirect(request: HttpRequest) -> HttpResponse:
     caid = request.GET.get("caid")
     sourceid = request.GET.get("sourceid")
     programid = request.GET.get("programid")
-    hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)
+    hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)  # type: ignore # FIXME: all opt, required non-opt
     return redirect(hope_redirect.url())
 
 

@@ -61,7 +61,7 @@
   "Reassign Role": "Reassign Role",
   "Role Reassigned": "Role Reassigned",
   "Reassign To Unique Individual": "Reassign To Unique Individual",
-  "Look up Related Ticket": "Look up Related Ticket",
+  "Look up Linked Ticket": "Look up Linked Ticket",
   "Ticket ID": "Ticket ID",
   "FSP": "FSP",
   "Individual Data": "Individual Data",
@@ -363,7 +363,7 @@
   "Enter Target Population Name": "Enter Target Population Name",
   "Select Field": "Select Field",
   "Programme Change": "Programme Change",
-  "Are you sure you want to change the programme ?": "Are you sure you want to change the programme ?",
+  "Are you sure you want to change the programme?": "Are you sure you want to change the programme?",
   "Changing the programme will result in deleting your current Targeting Criteria.": "Changing the programme will result in deleting your current Targeting Criteria.",
   "Female Children": "Female Children",
   "Female Adults": "Female Adults",
@@ -684,5 +684,6 @@
   "Are you sure you want to send this message?": "Are you sure you want to send this message?",
   "Survey will be sent to all households selected": "Survey will be sent to all households selected",
   "You have selected households as the recipients group": "You have selected households as the recipients group",
-  "New message": "New message"
+  "New message": "New message",
+  "Sort by": "Sort by"
 }

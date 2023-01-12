@@ -26,6 +26,7 @@ from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_tas
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
+from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -35,10 +36,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
-from hct_mis_api.apps.targeting.schema import (
-    TargetingCriteriaObjectType,
-    TargetPopulationNode,
-)
+from hct_mis_api.apps.targeting.schema import TargetPopulationNode
 from hct_mis_api.apps.targeting.validators import (
     FinalizeTargetPopulationValidator,
     LockTargetPopulationValidator,
@@ -47,7 +45,6 @@ from hct_mis_api.apps.targeting.validators import (
     TargetValidator,
     UnlockTargetPopulationValidator,
 )
-from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -72,7 +69,7 @@ class ValidatedMutation(PermissionMutation):
     object_validators: List = []
     permissions: Optional[Any] = None
 
-    model_class: Optional[Type] = None
+    model_class: Type
 
     @classmethod
     @is_authenticated
@@ -157,7 +154,6 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
         if program.status != Program.ACTIVE:
-            logger.error("Only Active program can be assigned to Targeting")
             raise ValidationError("Only Active program can be assigned to Targeting")
 
         targeting_criteria_input = input.get("targeting_criteria")
@@ -194,7 +190,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
         input = kwargs.get("input")
         id = input.get("id")
-        target_population = cls.get_object(id)
+        target_population = cls.get_object_required(id)
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
         old_target_population = cls.get_object(id)
 
@@ -255,7 +251,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     def rebuild_tp(
-        cls, should_rebuild_list: List, should_rebuild_stats: bool, target_population: TargetPopulation
+        cls, should_rebuild_list: bool, should_rebuild_stats: bool, target_population: TargetPopulation
     ) -> None:
         rebuild_list = target_population.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
@@ -279,26 +275,25 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if not target_population.is_locked() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
-            logger.error(
-                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
-            )
             raise ValidationError(
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
             )
         if target_population.is_locked() and name:
-            logger.error("Name can't be changed when Target Population is in Locked status")
             raise ValidationError("Name can't be changed when Target Population is in Locked status")
         if target_population.is_finalized():
-            logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
         if targeting_criteria_input and not target_population.is_open():
             raise ValidationError("Locked Target Population can't be changed")
 
     @classmethod
-    def get_object(cls, id: str) -> Optional[TargetPopulation]:
+    def get_object_required(cls, id: str) -> TargetPopulation:
+        return get_object_or_404(TargetPopulation, id=decode_id_string(id))
+
+    @classmethod
+    def get_object(cls, id: Optional[str]) -> Optional[TargetPopulation]:
         if id is None:
             return None
-        return get_object_or_404(TargetPopulation, id=decode_id_string(id))
+        return cls.get_object_required(id)
 
 
 class LockTargetPopulationMutation(ValidatedMutation):
@@ -317,7 +312,6 @@ class LockTargetPopulationMutation(ValidatedMutation):
         user = info.context.user
         target_population = kwargs.get("model_object")
         if target_population.status != TargetPopulation.STATUS_OPEN:
-            logger.error("You can only lock open target population")
             raise ValidationError("You can only lock open target population")
         old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_LOCKED
@@ -535,7 +529,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
-                log_and_raise("This steficon rule is not enabled or is deprecated")
+                raise ValidationError("This steficon rule is not enabled or is deprecated.")
             target_population.steficon_rule = steficon_rule_commit
             target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()

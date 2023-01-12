@@ -20,5 +20,8 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField(default=False)),
                 ('date', models.DateField(auto_now=True)),
             ],
+            options={
+                'ordering': ('date',),
+            },
         ),
     ]

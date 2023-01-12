@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -845,7 +846,6 @@ class SimpleApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         approve_status = graphene.Boolean(required=True)
-        reason_hh_id = graphene.String(required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -857,7 +857,6 @@ class SimpleApproveMutation(PermissionMutation):
         info: Any,
         grievance_ticket_id: Optional[str],
         approve_status: int,
-        reason_hh_id: Optional[str] = None,
         **kwargs: Any,
     ) -> "SimpleApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
@@ -888,21 +887,59 @@ class SimpleApproveMutation(PermissionMutation):
             )
 
         ticket_details = grievance_ticket.ticket_details
+        ticket_details.approve_status = approve_status
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
 
-        if grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
-            reason_hh_obj = None
-            reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
-            if reason_hh_id:
-                # validate reason HH id
-                reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
-                if reason_hh_obj.withdrawn:
-                    raise GraphQLError(
-                        f"The original household ({reason_hh_obj.unicef_id}) hasn't to be in withdrawn status"
-                    )
+        return cls(grievance_ticket=grievance_ticket)
 
-            # update reason_household value
-            ticket_details.reason_household = reason_hh_obj  # set HH or None
 
+class DeleteHouseholdApproveMutation(PermissionMutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        approve_status = graphene.Boolean(required=True)
+        reason_hh_id = graphene.String(required=False)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_id: Optional[str],
+        approve_status: int,
+        reason_hh_id: Optional[str] = None,
+        **kwargs: Any,
+    ) -> "DeleteHouseholdApproveMutation":
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        )
+
+        ticket_details = grievance_ticket.ticket_details
+
+        reason_hh_obj = None
+        reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
+        if reason_hh_id:
+            # validate reason HH id
+            reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
+            if reason_hh_obj.withdrawn:
+                raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
+
+        # update reason_household value
+        ticket_details.reason_household = reason_hh_obj  # set HH or None
         ticket_details.approve_status = approve_status
         ticket_details.save()
         grievance_ticket.refresh_from_db()
@@ -1109,7 +1146,7 @@ class Mutations(graphene.ObjectType):
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = SimpleApproveMutation.Field()
     approve_delete_individual = SimpleApproveMutation.Field()
-    approve_delete_household = SimpleApproveMutation.Field()
+    approve_delete_household = DeleteHouseholdApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()

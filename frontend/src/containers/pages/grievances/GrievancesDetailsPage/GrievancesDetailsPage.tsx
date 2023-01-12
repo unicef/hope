@@ -93,10 +93,7 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
           canApprovePaymentVerification={canApprovePaymentVerification}
         />
         <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
-        <GrievancesSidebar
-          ticket={ticket}
-          canViewHouseholdDetails={canViewHouseholdDetails}
-        />
+        <GrievancesSidebar ticket={ticket} />
       </Grid>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={ticket.id} />

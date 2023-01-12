@@ -1,9 +1,11 @@
 import { Box, Grid, MenuItem } from '@material-ui/core';
+import { AccountBalance } from '@material-ui/icons';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccountBalance } from '@material-ui/icons';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GrievanceSearchTypes,
@@ -17,11 +19,9 @@ import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { FieldLabel } from '../../core/FieldLabel';
+import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
-import { NumberTextField } from '../../core/NumberTextField';
 
 interface GrievancesFiltersProps {
   onFilterChange;

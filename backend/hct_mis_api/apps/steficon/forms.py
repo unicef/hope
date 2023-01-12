@@ -1,11 +1,12 @@
 import csv
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
@@ -13,6 +14,9 @@ from .config import config
 from .interpreters import Interpreter, mapping
 from .models import Rule
 from .widget import ContentTypeChoiceField, PythonEditor
+
+if TYPE_CHECKING:
+    from django.db.models.fields import _ChoicesCallable
 
 logger = logging.getLogger(__name__)
 
@@ -67,31 +71,30 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
         try:
             return self.cleaned_data["results"].split(",")
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     filename = forms.CharField(label="Output filename")
-    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # TODO: 'data' is an internal field
-    fields = forms.CharField(widget=HiddenInput)  # type: ignore # TODO: 'fields' is an internal field
+    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # FIXME: 'data' is an internal field
+    fields = forms.CharField(widget=HiddenInput)  # type: ignore # FIXME: 'fields' is an internal field
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
-            # TODO: fields is CharField but used as dict?
-            self.fields[fname].widget = HiddenInput()  # type: ignore
+            self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
 
     def clean_fields(self) -> Optional[List]:
         try:
             return self.cleaned_data["fields"].split(",")
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
     def clean_data(self) -> Optional[Dict]:
         try:
             return json.loads(self.cleaned_data["data"])
         except Exception as e:
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
 
 class TPModelChoiceField(forms.ModelChoiceField):
@@ -105,7 +108,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
         initial: Optional[Any] = None,
         help_text: str = "",
         to_field_name: Optional[str] = None,
-        limit_choices_to: Optional[int] = None,
+        limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ) -> None:
         from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -147,21 +150,23 @@ class RuleTestForm(forms.Form):
             media = media + field.widget.media
         return media
 
-    def clean_raw_data(self) -> Optional[Dict]:  # type: ignore
+    def clean_raw_data(self) -> Optional[Dict]:
         original = self.cleaned_data["raw_data"]
         if original:
             try:
                 return json.loads(original)
             except Exception as e:
-                raise ValidationError(e)
+                raise ValidationError(str(e))
+        return None
 
-    def clean_file(self) -> Optional[Dict]:  # type: ignore
+    def clean_file(self) -> Optional[Dict]:
         original = self.cleaned_data["file"]
         if original:
             try:
                 return json.loads(original.read())
             except Exception as e:
-                raise ValidationError(e)
+                raise ValidationError(str(e))
+        return None
 
     def clean(self) -> None:
         selection = self.cleaned_data["opt"]

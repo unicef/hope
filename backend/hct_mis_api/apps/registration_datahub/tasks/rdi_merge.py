@@ -1,6 +1,5 @@
 import logging
 from typing import Dict, List, Tuple
-from uuid import UUID
 
 from django.db import transaction
 from django.forms import model_to_dict
@@ -276,7 +275,7 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _update_individuals_and_households(self, individual_ids: List[UUID]) -> None:
+    def _update_individuals_and_households(self, individual_ids: List[str]) -> None:
         # update mis_unicef_id for ImportedIndividual
         individual_qs = Individual.objects.filter(id__in=individual_ids)
         for individual in individual_qs:
@@ -288,7 +287,7 @@ class RdiMergeTask:
                 imported_individual.household.mis_unicef_id = individual.household.unicef_id
                 imported_individual.household.save()
 
-    def execute(self, registration_data_import_id: UUID) -> None:
+    def execute(self, registration_data_import_id: str) -> None:
         individual_ids = []
         try:
             with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
