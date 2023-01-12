@@ -102,7 +102,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     selectedHousehold: selectedHousehold || null,
     selectedIndividual: selectedIndividual || null,
     selectedPaymentRecords: [],
-    selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
+    selectedLinkedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
     priority: 3,

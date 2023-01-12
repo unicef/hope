@@ -41,7 +41,7 @@ export const FeedbackFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'issueType')}
             label={t('Issue Type')}
@@ -58,7 +58,7 @@ export const FeedbackFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
             name='createdBy'
@@ -66,7 +66,7 @@ export const FeedbackFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+        <Grid container item xs={6} spacing={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <DatePickerFilter
               topLabel={t('Creation Date')}

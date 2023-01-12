@@ -1,1 +1,5 @@
 venv
+test_times.txt
+./generated
+./test-results
+./lint-results

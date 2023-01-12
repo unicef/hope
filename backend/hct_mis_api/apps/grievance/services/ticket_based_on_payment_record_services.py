@@ -1,7 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Type
 
 from django.core.exceptions import ValidationError
-from django.db.models import Model
 
 from hct_mis_api.apps.core.utils import (
     decode_and_get_object,
@@ -13,7 +12,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 def create_tickets_based_on_payment_records_service(
-    grievance_ticket: GrievanceTicket, details: Dict, model: Model
+    grievance_ticket: GrievanceTicket, details: Dict, model: Type
 ) -> List[GrievanceTicket]:
     individual_encoded_id = details.get("individual")
     individual = decode_and_get_object(individual_encoded_id, Individual)

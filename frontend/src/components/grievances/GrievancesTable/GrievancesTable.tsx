@@ -1,8 +1,8 @@
 import { Box, Button } from '@material-ui/core';
+import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import get from 'lodash/get';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
@@ -15,7 +15,7 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
-import { decodeIdString, reduceChoices } from '../../../utils/utils';
+import { choicesToDict, decodeIdString } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -26,9 +26,9 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
+import { BulkAssignModal } from './BulkAssignModal';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
-import { BulkAssignModal } from './BulkAssignModal';
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -96,11 +96,11 @@ export const GrievancesTable = ({
 
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;

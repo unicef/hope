@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -11,7 +11,7 @@ from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.account.models import AbstractUser, User
 
 
 class LogEntry(models.Model):
@@ -66,7 +66,7 @@ class LogEntry(models.Model):
 def log_create(
     mapping: Dict,
     business_area_field: Any,
-    user: Optional["User"] = None,
+    user: Optional[Union["AbstractUser", "User"]] = None,
     old_object: Optional[Any] = None,
     new_object: Optional[Any] = None,
 ) -> LogEntry:

@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form, ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -53,7 +53,7 @@ class AutocompleteWidget(forms.Widget):
 
     def __init__(
         self,
-        model: Model,
+        model: Type,
         admin_site: str,
         attrs: Optional[Collection[Any]] = None,
         choices: Tuple = (),
@@ -66,6 +66,41 @@ class AutocompleteWidget(forms.Widget):
         self.db = using
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
+
+    class Media:
+        extra = "" if settings.DEBUG else ".min"
+        i18n_name = SELECT2_TRANSLATIONS.get(get_language())
+        i18n_file: List = (
+            [
+                "admin/js/vendor/select2/i18n/{}.js".format(
+                    i18n_name,
+                )
+            ]
+            if i18n_name
+            else []
+        )
+        js = (
+            tuple(
+                [
+                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
+                ]
+                + i18n_file
+                + [
+                    "admin/js/jquery.init.js",
+                    "admin/js/autocomplete.js",
+                    "adminfilters/adminfilters{}.js".format(extra),
+                ]
+            ),
+        )
+        css = (
+            {
+                "screen": (
+                    "admin/css/vendor/select2/select2{}.css".format(extra),
+                    "adminfilters/adminfilters.css",
+                ),
+            },
+        )
 
     def get_url(self) -> str:
         return reverse("admin:autocomplete")
@@ -91,45 +126,11 @@ class AutocompleteWidget(forms.Widget):
             }
         }
 
-    @property
-    def media(self) -> forms.Media:  # type: ignore
-        extra = "" if settings.DEBUG else ".min"
-        i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file: List = (
-            [
-                "admin/js/vendor/select2/i18n/{}.js".format(
-                    i18n_name,
-                )
-            ]
-            if i18n_name
-            else []
-        )
-        return forms.Media(
-            js=tuple(
-                [
-                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
-                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
-                ]
-                + i18n_file
-                + [
-                    "admin/js/jquery.init.js",
-                    "admin/js/autocomplete.js",
-                    "adminfilters/adminfilters{}.js".format(extra),
-                ]
-            ),
-            css={
-                "screen": (
-                    "admin/css/vendor/select2/select2{}.css".format(extra),
-                    "adminfilters/adminfilters.css",
-                ),
-            },
-        )
-
 
 class TestRuleMixin:
     @button()
     def test(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        rule: Rule = self.get_object(request, pk)
+        rule: Rule = self.get_object(request, str(pk))
         context = self.get_common_context(
             request,
             pk,
@@ -345,7 +346,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             state_opts=RuleCommit._meta,
         )
         if request.method == "POST":
-            rule: Optional[Rule] = self.get_object(request, pk)
+            rule: Optional[Rule] = self.get_object(request, str(pk))
             form: forms.Form
             if request.POST["step"] == "1":
                 form = RuleFileProcessForm(request.POST, request.FILES)

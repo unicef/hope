@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 import graphene
 from graphene import relay
-from graphene_django import DjangoConnectionField, DjangoObjectType
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.account.permissions import (
@@ -15,7 +16,7 @@ from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
 from hct_mis_api.apps.household.schema import HouseholdNode
-from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
+from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
 if TYPE_CHECKING:
@@ -26,15 +27,17 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
-def get_field_by_name(field_name: str) -> Optional[Any]:
-    field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name").get(field_name)
+def get_field_by_name(field_name: str) -> Dict:
+    field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")[field_name]
     choices = field.get("choices")
     if choices and callable(choices):
-        field["choices"] = choices()  # type: ignore
+        field["choices"] = choices()
     return field
 
 
-def filter_choices(field: Dict, args: List) -> Dict:
+def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
+    if not field:
+        return None
     choices = field.get("choices")
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))
@@ -48,12 +51,12 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Dict:
+    def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
             field_attribute = get_field_by_name(parent.field_name)
-            return filter_choices(field_attribute, parent.arguments)
+            return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -66,12 +69,12 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Union[Dict, FlexibleAttribute]:
+    def resolve_field_attribute(parent, info: Any) -> Any:
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
-        else:
-            field_attribute = get_field_by_name(parent.field_name)
-            return filter_choices(field_attribute, parent.arguments)
+
+        field_attribute = get_field_by_name(parent.field_name)
+        return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
@@ -122,7 +125,8 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
 
     total_family_size = graphene.Int(source="total_family_size")
     targeting_criteria = TargetingCriteriaRuleFilterNode()
-    householdList = DjangoConnectionField(HouseholdNode)
+    household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
+    households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
 
     class Meta:
         model = target_models.TargetPopulation

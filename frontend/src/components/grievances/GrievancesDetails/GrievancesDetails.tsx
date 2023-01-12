@@ -7,8 +7,8 @@ import {
 } from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
+  choicesToDict,
   grievanceTicketStatusToColor,
-  reduceChoices,
   renderUserName,
 } from '../../../utils/utils';
 import {
@@ -42,14 +42,14 @@ export const GrievancesDetails = ({
   const { t } = useTranslation();
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices

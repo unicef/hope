@@ -1,12 +1,10 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import register
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import QuerySet
@@ -82,11 +80,11 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore
+        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore # FIXME
 
     @button()
     def datasets(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponseRedirect]:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             url = reverse("admin:power_query_dataset_changelist")
             return HttpResponseRedirect(f"{url}?query__exact={obj.pk}")
@@ -97,7 +95,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button(visible=settings.DEBUG)
     def run(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         ctx = self.get_common_context(request, pk, title="Run results")
-        if not (query := self.get_object(request, pk)):
+        if not (query := self.get_object(request, str(pk))):
             raise Exception("Query not found")
         results = query.execute_matrix(persist=True)
         self.message_user(request, "Done", messages.SUCCESS)
@@ -114,7 +112,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Query not found")
         try:
             context = self.get_common_context(request, pk, title="Results")
@@ -172,7 +170,7 @@ class DatasetAdmin(HOPEModelAdminBase):
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def preview(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponse]:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         try:
             context = self.get_common_context(request, pk, title="Results")
             context["dataset"] = to_dataset(obj.data)
@@ -253,20 +251,20 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     search_fields = ("name",)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore
+        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore # FIXME
 
-    def get_changeform_initial_data(self, request: HttpRequest) -> Dict[str, Union[AbstractBaseUser, AnonymousUser]]:  # type: ignore
-        kwargs = {"owner": request.user}
+    def get_changeform_initial_data(self, request: HttpRequest) -> Dict:
+        kwargs: Dict = {"owner": request.user}
         if "q" in request.GET:
             q = Query.objects.get(pk=request.GET["q"])
             kwargs["query"] = q
-            kwargs["name"] = f"Report for {q.name}"  # type: ignore
-            kwargs["notify_to"] = [request.user]  # type: ignore
+            kwargs["name"] = f"Report for {q.name}"
+            kwargs["notify_to"] = [request.user]
         return kwargs
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Report not found")
         try:
             result = obj.execute(run_query=True)
@@ -304,7 +302,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
     def refresh(self, request: HttpRequest, pk: "UUID") -> None:
-        if not (obj := self.get_object(request, pk)):
+        if not (obj := self.get_object(request, str(pk))):
             raise Exception("Parametrizer not found")
         obj.refresh()
 
@@ -313,6 +311,7 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("title", "content_type", "arguments", "size")
     list_filter = (("report", AutoCompleteFilter),)
+    filter_horizontal = ("limit_access_to",)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
 
     def size(self, obj: ReportDocument) -> int:
@@ -320,5 +319,10 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     @button()
     def view(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("power_query:report", args=[pk])
+        if not (obj := self.get_object(request, str(pk))):
+            raise Exception("Report document not found")
+        url = reverse("power_query:document", args=[obj.report.pk, pk])
         return HttpResponseRedirect(url)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False

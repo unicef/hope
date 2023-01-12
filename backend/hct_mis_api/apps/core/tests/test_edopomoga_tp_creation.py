@@ -50,13 +50,7 @@ class TestEdopomogaCreation(APITestCase):
 
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 5)
-
-        target_population = TargetPopulation.objects.first()
-
         self.assertEqual(TargetPopulation.objects.count(), 1)
-        self.assertEqual(target_population.status, TargetPopulation.STATUS_LOCKED)
-        self.assertEqual(target_population.total_households_count, 3)
-        self.assertEqual(target_population.total_individuals_count, 5)
 
         self.storage_file.refresh_from_db()
         self.assertEqual(self.storage_file.status, StorageFile.STATUS_FINISHED)

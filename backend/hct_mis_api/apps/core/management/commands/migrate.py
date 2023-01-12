@@ -2,7 +2,7 @@ import time
 from argparse import ArgumentParser
 from collections import OrderedDict
 from importlib import import_module
-from typing import Any, List, Optional, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -95,7 +95,7 @@ class Command(BaseCommand):
         # Hook for backends needing any database preparation
         connection.prepare_database()
         # Work out which apps have migrations and which do not
-        executor = MigrationExecutor(connection, self.migration_progress_callback)
+        executor = MigrationExecutor(connection, self.migration_progress_callback)  # type: ignore # Argument 2 to "MigrationExecutor" has incompatible type "Callable[[str, Optional[str], Optional[bool]], None]"; expected "Optional[_ProgressCallbackT]"
 
         # Raise an error if any migrations are applied before their dependencies.
         executor.loader.check_consistent_history(connection)
@@ -315,7 +315,7 @@ class Command(BaseCommand):
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
                 self.stdout.write(self.style.SUCCESS(" DONE" + elapsed))
 
-    def sync_apps(self, connection: Any, app_labels: str) -> None:  # TODO connection
+    def sync_apps(self, connection: Any, app_labels: Iterable[str]) -> None:  # TODO connection
         """Run the old syncdb-style operation on a list of app_labels."""
         with connection.cursor() as cursor:
             tables = connection.introspection.table_names(cursor)
@@ -382,5 +382,5 @@ class Command(BaseCommand):
             is_error = True
         if action:
             action = " -> " + action
-        truncated = Truncator(action)
+        truncated = Truncator(action)  # type: ignore # FIXME: Argument 1 to "Truncator" has incompatible type "Optional[str]"; expected "Union[Model, str]"
         return prefix + operation.describe() + truncated.chars(40), is_error
