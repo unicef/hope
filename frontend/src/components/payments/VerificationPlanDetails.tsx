@@ -12,6 +12,7 @@ import {
 } from '../../utils/utils';
 import {
   CashPlanPaymentVerificationStatus,
+  CashPlanPaymentVerificationVerificationChannel,
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
   useExportXlsxCashPlanVerificationMutation,
@@ -108,11 +109,21 @@ export const VerificationPlanDetails = ({
     PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
     permissions,
   );
+  const xlsxFileDownloadedOrImported =
+    verificationPlan.xlsxFileWasDownloaded ||
+    verificationPlan.xlsxFileImported ||
+    verificationPlan.verificationChannel !==
+      CashPlanPaymentVerificationVerificationChannel.Xlsx;
+
+  const xlsxFileDownloadedAndImported =
+    (verificationPlan.xlsxFileWasDownloaded &&
+      verificationPlan.xlsxFileImported) ||
+    verificationPlan.verificationChannel !==
+      CashPlanPaymentVerificationVerificationChannel.Xlsx;
 
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
-
   return (
     <Container>
       <Grid container>
@@ -226,17 +237,14 @@ export const VerificationPlanDetails = ({
                     )}
                   </>
                 )}
-                {canFinish &&
-                  verificationPlan.xlsxFileWasDownloaded &&
-                  verificationPlan.xlsxFileImported && (
-                    <FinishVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
-                      cashPlanId={cashPlan.id}
-                    />
-                  )}
+                {canFinish && xlsxFileDownloadedAndImported && (
+                  <FinishVerificationPlan
+                    cashPlanVerificationId={verificationPlan.id}
+                    cashPlanId={cashPlan.id}
+                  />
+                )}
                 {canDiscard &&
-                  ((verificationPlan.xlsxFileWasDownloaded ||
-                    verificationPlan.xlsxFileImported) &&
+                  (xlsxFileDownloadedOrImported &&
                   verificationPlan.status ===
                     CashPlanPaymentVerificationStatus.Active ? (
                     <Box p={2}>

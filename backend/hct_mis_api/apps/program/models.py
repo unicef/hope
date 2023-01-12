@@ -168,6 +168,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.name
 
 
+# q-> print all columns in table postgres
+
+
 class CashPlan(TimeStampedUUIDModel):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
     DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
