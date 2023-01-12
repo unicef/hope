@@ -22,7 +22,7 @@ from hct_mis_api.apps.account.models import (
 )
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
 )
@@ -137,7 +137,7 @@ class JSONLazyString(graphene.Scalar):
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserNode)
-    all_users = DjangoPermissionFilterConnectionField(
+    all_users = DjangoPermissionFilterFastConnectionField(
         UserNode,
         filterset_class=UsersFilter,
         permission_classes=(
