@@ -25,8 +25,13 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       }
     });
 
-  // eslint-disable-next-line no-console
-  if (networkError) console.error(`[Network error]: ${networkError}`);
+  if (networkError)
+    // eslint-disable-next-line no-console
+    console.error(
+      `[Network error]: ${networkError}`,
+      networkError,
+      graphQLErrors,
+    );
 });
 function findValidationErrors(
   data,

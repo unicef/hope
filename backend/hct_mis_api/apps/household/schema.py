@@ -231,6 +231,11 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
     payment_channels = graphene.List(BankAccountInfoNode)
+    preferred_language = graphene.String()
+
+    @staticmethod
+    def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
+        return parent.preferred_language or None
 
     @staticmethod
     def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
