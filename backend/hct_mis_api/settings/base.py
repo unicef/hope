@@ -630,6 +630,8 @@ if SENTRY_DSN:
     )
     ignore_logger("graphql.execution.utils")
     ignore_logger("django.core.exceptions.ValidationError")
+    ignore_logger("django.core.exceptions.PermissionDenied")
+
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 

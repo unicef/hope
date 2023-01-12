@@ -215,6 +215,11 @@ export const IndividualBioData = ({
             {relationshipChoicesDict[individual?.relationship]}
           </LabelizedField>
         </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Preferred language')}>
+            {individual?.preferredLanguage}
+          </LabelizedField>
+        </Grid>
         {mappedRoles}
         <Grid item xs={12}>
           <BorderBox />

@@ -26,6 +26,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
@@ -805,6 +806,7 @@ class Individual(
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=3, choices=Languages.get_tuple(), null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
