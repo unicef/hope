@@ -107,6 +107,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @staticmethod
     def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "household", None)
 
@@ -126,6 +127,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_admin2(grievance_ticket: GrievanceTicket, info: Any) -> Area:
         return grievance_ticket.admin2
 
+    @staticmethod
     def resolve_linked_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._linked_tickets
 
