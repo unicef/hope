@@ -93,7 +93,7 @@ class CreateCashPlanReconciliationService:
         self.total_delivered_amount += delivered_amount
         self.total_entitlement_amount += entitlement_amount
 
-        payment_record_id = self.cash_plan.ca_id + "-" + str(index + 1).zfill(5)
+        payment_record_id = self.cash_plan.ca_id + "-" + str(index + 1).zfill(7)
         payment_record = PaymentRecord.objects.create(
             business_area=self.business_area,
             status=status,
@@ -123,7 +123,7 @@ class CreateCashPlanReconciliationService:
             .first()
         )
         last_cash_plan_index = int(last_cash_plan.ca_id.split("-")[-1]) if last_cash_plan else 0
-        new_cash_plan_index_with_padding = str(last_cash_plan_index + 1).zfill(4)
+        new_cash_plan_index_with_padding = str(last_cash_plan_index + 1).zfill(6)
         return CashPlan.objects.create(
             **self.cash_plan_form_data,
             business_area=self.business_area,

@@ -78,13 +78,14 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
 
     @button()
     def import_payment_records(self, request: HttpRequest) -> Any:
+        tilte = "Import Payment Records"
         if request.method == "GET":
             form = ImportPaymentRecordsForm()
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+            context = self.get_common_context(request, title=tilte, form=form)
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
         # print(request.POST)
         form = ImportPaymentRecordsForm(request.POST, request.FILES)
-        context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+        context = self.get_common_context(request, title=tilte, form=form)
         if not form.is_valid():
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
         cleaned_data = form.cleaned_data
