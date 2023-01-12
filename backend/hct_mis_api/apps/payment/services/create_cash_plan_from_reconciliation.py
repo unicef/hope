@@ -118,7 +118,7 @@ class CreateCashPlanReconciliationService:
     def _create_cash_plan(self) -> CashPlan:
         current_year = str(datetime.now().year)[-2:]
         last_cash_plan = (
-            CashPlan.objects.filter(business_area=self.business_area, ca_id__startswith=f"HOPE-{current_year}-")
+            CashPlan.objects.filter(business_area=self.business_area, ca_id__startswith=f"HOPE-CSH-{current_year}-")
             .order_by("-ca_id")
             .first()
         )
