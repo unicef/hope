@@ -17,6 +17,7 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -30,6 +31,7 @@ from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation impo
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
@@ -82,7 +84,9 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
         # print(request.POST)
         form = ImportPaymentRecordsForm(request.POST, request.FILES)
-        form.is_valid()
+        context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+        if not form.is_valid():
+            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
         cleaned_data = form.cleaned_data
         column_mapping = {
             CreateCashPlanReconciliationService.COLUMN_PAYMENT_ID: "Payment ID",
@@ -98,9 +102,17 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
             cleaned_data.pop("currency"),
             cleaned_data.pop("delivery_type"),
         )
-        service.parse_xlsx()
-        context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
-        return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
+        try:
+            service.parse_xlsx()
+        except TargetPopulation.DoesNotExist as e:
+            self.message_user(request, str(e), level=messages.ERROR)
+            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
+        except Household.DoesNotExist as e:
+            self.message_user(request, str(e), level=messages.ERROR)
+            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
+
+        self.message_user(request, "Payment Records Imported", level=messages.SUCCESS)
+        return HttpResponseRedirect(reverse("admin:payment_paymentrecord_changelist"))
 
 
 @admin.register(CashPlanPaymentVerification)
