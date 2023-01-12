@@ -32,9 +32,11 @@ def select_individual(
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individual: Individual) -> None:
-    sibling_tickets = GrievanceTicket.objects.filter(
-        registration_data_import_id=grievance_ticket.registration_data_import.id
-    )
+    rdi = grievance_ticket.registration_data_import
+    if not rdi:
+        return
+
+    sibling_tickets = GrievanceTicket.objects.filter(registration_data_import_id=rdi.id)
 
     for ticket in sibling_tickets:
         ticket_details = ticket.ticket_details
