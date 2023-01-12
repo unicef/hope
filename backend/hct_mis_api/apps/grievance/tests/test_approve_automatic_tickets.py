@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List
+from typing import Any, Dict, List
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -262,27 +262,36 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             },
         )
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_approve_needs_adjudication_allows_multiple_selected_individuals(
-        self, _: Any, permissions: List[Permissions]
-    ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals_without_permission(self) -> None:
+        self.create_user_role_with_permissions(self.user, [], self.business_area)
 
-        self.snapshot_graphql_request(
+        grievance_ticket_id = self.id_to_base64(self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode")
+        response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
+
+        self.assertIn("Permission Denied", response["errors"][0]["message"])
+
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+        )
+
+        grievance_ticket_id = self.id_to_base64(self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode")
+        response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
+
+        response_data = response["data"]["approveNeedsAdjudication"]["grievanceTicket"]
+        selected_individuals = response_data["needsAdjudicationTicketDetails"]["selectedIndividuals"]
+        selected_individuals_ids = list(map(lambda d: d["id"], selected_individuals))
+
+        self.assertEqual(grievance_ticket_id, response_data["id"])
+        self.assertIn(self.id_to_base64(self.individuals[0].id, "IndividualNode"), selected_individuals_ids)
+        self.assertIn(self.id_to_base64(self.individuals[1].id, "IndividualNode"), selected_individuals_ids)
+
+    def approve_multiple_needs_adjudication_ticket(self, grievance_ticket_id: str) -> Dict:
+        return self.graphql_request(
             request_string=self.APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION,
             context={"user": self.user},
             variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
+                "grievanceTicketId": grievance_ticket_id,
                 "selectedIndividualIds": [
                     self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                     self.id_to_base64(self.individuals[1].id, "IndividualNode"),

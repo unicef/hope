@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from redis.exceptions import LockError
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
@@ -24,13 +23,11 @@ if TYPE_CHECKING:
 
     from django.db.models import QuerySet, _QuerySet
 
-    from hct_mis_api.apps.core.models import BusinessArea
-
 
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(datahub_rdi_id: "UUID", e: BaseException) -> None:
+def handle_rdi_exception(datahub_rdi_id: str, e: BaseException) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -44,28 +41,24 @@ def handle_rdi_exception(datahub_rdi_id: "UUID", e: BaseException) -> None:
 
 
 @contextmanager
-def locked_cache(key: Union[int, str]) -> Any:
-    try:
-        # ``blocking_timeout`` indicates the maximum amount of time in seconds to
-        # spend trying to acquire the lock.
-        # ``timeout`` indicates a maximum life for the lock.
-        # some procedures here can take a few seconds
-        # 30s to try acquiring the lock should be enough
-        with cache.lock(key, blocking_timeout=30, timeout=60 * 60 * 24) as lock:
-            yield
-    except LockError as e:
-        logger.exception(f"Couldn't lock cache for key '{key}'. Failed with: {e}")
+def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
+    if cache.get(key):
+        logger.info(f"Task with key {key} is already running")
+        yield False
     else:
-        if lock.locked():
-            lock.release()
+        try:
+            logger.info(f"Task with key {key} running")
+            cache.set(key, True, timeout=timeout)
+            yield True
+        finally:
+            cache.delete(key)
+            logger.info(f"Task with key {key} finished")
 
 
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_xlsx_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area: "BusinessArea"
-) -> None:
+def registration_xlsx_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -73,14 +66,14 @@ def registration_xlsx_import_task(
         )
 
         with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
             RdiXlsxCreateTask().execute(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
-                business_area_id=business_area,
+                business_area_id=business_area_id,
             )
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -91,15 +84,11 @@ def registration_xlsx_import_task(
 
         handle_rdi_exception(registration_data_import_id, e)
 
-        raise
-
 
 @app.task
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_task(
-    registration_data_import_id: "UUID", import_data_id: "UUID", business_area: "BusinessArea"
-) -> None:
+def registration_kobo_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -107,15 +96,15 @@ def registration_kobo_import_task(
         )
 
         with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
 
             RdiKoboCreateTask().execute(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
-                business_area_id=business_area,
+                business_area_id=business_area_id,
             )
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -125,8 +114,6 @@ def registration_kobo_import_task(
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
-
-        raise
 
 
 @app.task
@@ -157,8 +144,7 @@ def registration_kobo_import_hourly_task() -> None:
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
             )
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
         raise
 
 
@@ -190,19 +176,20 @@ def registration_xlsx_import_hourly_task() -> None:
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
             )
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
         raise
 
 
 @app.task
 @log_start_and_end
 @sentry_tags
-def merge_registration_data_import_task(registration_data_import_id: "UUID") -> None:
+def merge_registration_data_import_task(registration_data_import_id: str) -> bool:
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
-    with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}"):
+    with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}") as locked:
+        if not locked:
+            return True
         try:
             from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
                 RdiMergeTask,
@@ -221,12 +208,13 @@ def merge_registration_data_import_task(registration_data_import_id: "UUID") -> 
     logger.info(
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
     )
+    return True
 
 
 @app.task(queue="priority")
 @log_start_and_end
 @sentry_tags
-def rdi_deduplication_task(registration_data_import_id: "UUID") -> None:
+def rdi_deduplication_task(registration_data_import_id: str) -> None:
 
     try:
         from hct_mis_api.apps.registration_datahub.models import (
@@ -243,11 +231,7 @@ def rdi_deduplication_task(registration_data_import_id: "UUID") -> None:
 
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
-        logger.exception(e)
-
         handle_rdi_exception(registration_data_import_id, e)
-
-        raise
 
 
 @app.task
@@ -264,7 +248,6 @@ def pull_kobo_submissions_task(import_data_id: "UUID") -> Dict:
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
     except Exception as e:
-        logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         RegistrationDataImport.objects.filter(
@@ -287,10 +270,7 @@ def validate_xlsx_import_task(import_data_id: "UUID") -> Dict:
     try:
         return ValidateXlsxImport().execute(import_data)
     except Exception as e:
-        logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        RegistrationDataImport.objects.filter(
+        ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
         raise
@@ -306,8 +286,8 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
 
     try:
         FlexRegistrationService().process_records(rdi_id, records_ids)
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("Process Flex Records Task error")
 
 
 @app.task
@@ -343,7 +323,9 @@ def automate_rdi_creation_task(
     )
 
     try:
-        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as locked:
+            if not locked:
+                return []
             output = []
             service = FlexRegistrationService()
 
@@ -374,8 +356,8 @@ def automate_rdi_creation_task(
                     merge_registration_data_import_task.delay(rdi.id)
 
             return output
-    except Exception as e:
-        logger.exception(e)
+
+    except Exception:
         raise
 
 
@@ -408,7 +390,9 @@ def automate_registration_diia_import_task(
         RdiDiiaCreateTask,
     )
 
-    with locked_cache(key="automate_rdi_diia_creation_task"):
+    with locked_cache(key="automate_rdi_diia_creation_task") as locked:
+        if not locked:
+            return []
         try:
             with configure_scope() as scope:
                 scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
@@ -435,7 +419,9 @@ def registration_diia_import_task(
         RdiDiiaCreateTask,
     )
 
-    with locked_cache(key="registration_diia_import_task"):
+    with locked_cache(key="registration_diia_import_task") as locked:
+        if not locked:
+            return []
         try:
             with configure_scope() as scope:
                 scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
@@ -454,8 +440,10 @@ def registration_diia_import_task(
 @app.task
 @log_start_and_end
 @sentry_tags
-def deduplicate_documents() -> None:
-    with locked_cache(key="deduplicate_documents"):
+def deduplicate_documents() -> bool:
+    with locked_cache(key="deduplicate_documents") as locked:
+        if not locked:
+            return True
         grouped_rdi = (
             Document.objects.filter(status=Document.STATUS_PENDING)
             .values("individual__registration_data_import")
@@ -479,3 +467,4 @@ def deduplicate_documents() -> None:
             DeduplicateTask.hard_deduplicate_documents(
                 documents_query,
             )
+    return True

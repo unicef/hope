@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
@@ -14,7 +14,6 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
-    IndividualDocument,
     IndividualDocumentAfghanistan,
     IndividualDocumentOthers,
     IndividualDocumentUkraine,
@@ -27,9 +26,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs
-
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +55,7 @@ class CheckAgainstSanctionListPreMergeTask:
             {"match": {"birth_date": {"query": dob.date, "boost": 1}}} for dob in individual.dates_of_birth.all()
         ]
 
-        queries = [
+        queries: List = [
             {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
         ]
         queries.extend(document_queries)
@@ -82,15 +78,15 @@ class CheckAgainstSanctionListPreMergeTask:
     @transaction.atomic
     def execute(
         cls,
-        individuals: "QuerySet[SanctionListIndividual]" = None,  # type: ignore
+        individuals: Optional[Iterable[SanctionListIndividual]] = None,
         registration_data_import: Optional[RegistrationDataImport] = None,
     ) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        documents: Tuple[Type[IndividualDocument]] = (
-            (  # type: ignore # TODO: look into this typing
+        documents: Tuple = (
+            (
                 IndividualDocumentAfghanistan,
                 IndividualDocumentUkraine,
                 IndividualDocumentOthers,

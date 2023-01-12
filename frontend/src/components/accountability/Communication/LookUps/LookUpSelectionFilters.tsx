@@ -7,7 +7,7 @@ import {
   ProgramNode,
 } from '../../../../__generated__/graphql';
 import { LookUpHouseholdFilters } from '../../../grievances/LookUps/LookUpHouseholdTable/LookUpHouseholdFilters';
-import { RegistrationFilters } from '../../../rdi/RegistrationFilter';
+import { RegistrationFilters } from '../../../rdi/RegistrationFilters';
 import { TargetPopulationFilters } from '../../../targeting/TargetPopulationFilters';
 
 interface LookUpSelectionFiltersProps {

@@ -24,7 +24,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
               lockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  householdList {
+                  householdList(orderBy: "size") {
                     totalCount
                     edges {
                       node {
@@ -45,11 +45,19 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -63,6 +71,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
+        tp.households.set(cls.households)
         cls.target_population_draft = tp
 
         tp = TargetPopulation(
@@ -107,7 +116,6 @@ class TestApproveTargetPopulationMutation(APITestCase):
     )
     def test_approve_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -137,7 +145,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
               unlockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  households {
+                  households(orderBy: "size") {
                     totalCount
                   }
                 }
@@ -242,7 +250,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
               finalizeTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  householdList{
+                  householdList(orderBy: "size") {
                     edges{
                       node{
                         size
@@ -250,7 +258,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                       }
                     }
                   }
-                  households {
+                  households(orderBy: "size") {
                     totalCount
                     edges {
                       node {
@@ -352,7 +360,6 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def test_finalize_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},

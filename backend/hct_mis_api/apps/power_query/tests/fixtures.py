@@ -112,8 +112,7 @@ class user_grant_permission:
 
     def start(self) -> None:
         """Activate a patch, returning any created mock."""
-        result = self.__enter__()  # type: ignore
-        return result
+        self.__enter__()
 
     def stop(self) -> None:
         """Stop an active patch."""
@@ -153,7 +152,7 @@ class user_grant_office_permission(object):
                 user=self.user, group=self.group, business_area=self.office
             )
 
-    def __exit__(self, e_typ: Any, e_val: Any, trcbak: Any) -> None:
+    def __exit__(self, e_typ: Any = None, e_val: Any = None, trcbak: Any = None) -> None:
         if all((e_typ, e_val, trcbak)):
             raise e_typ(e_val) from e_val
         if self.group:
@@ -166,5 +165,4 @@ class user_grant_office_permission(object):
 
     def stop(self) -> None:
         """Stop an active patch."""
-        # TODO: __exit__ needs arguments
-        return self.__exit__()  # type: ignore
+        return self.__exit__()

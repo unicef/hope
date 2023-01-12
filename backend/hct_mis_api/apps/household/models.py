@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import date
 from decimal import Decimal
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -578,7 +578,7 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label}"
 
 
-class Document(SoftDeletableModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
@@ -778,11 +778,13 @@ class Individual(
         max_length=50,
         default=UNIQUE,
         choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
     )
     deduplication_batch_status = models.CharField(
         max_length=50,
         default=UNIQUE_IN_BATCH,
         choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
     )
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
@@ -890,7 +892,9 @@ class Individual(
             return self.user_fields["sys"][key]
         return None
 
-    def recalculate_data(self) -> None:
+    def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
+        update_fields = ["disability"]
+
         disability_fields = (
             "seeing_disability",
             "hearing_disability",
@@ -904,7 +908,11 @@ class Individual(
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
-        self.save(update_fields=["disability"])
+
+        if save:
+            self.save(update_fields=update_fields)
+
+        return self, update_fields
 
     def count_all_roles(self) -> int:
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()

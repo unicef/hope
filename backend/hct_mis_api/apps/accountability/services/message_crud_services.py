@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -59,7 +58,7 @@ class MessageCrudServices:
         return message
 
     @classmethod
-    def _get_households(cls, input_data: dict) -> Optional[QuerySet[Household]]:
+    def _get_households(cls, input_data: dict) -> QuerySet[Household]:
         if household_ids := [decode_id_string(household) for household in input_data.get("households", [])]:
             return Household.objects.filter(id__in=household_ids)
         elif target_population_id := input_data.get("target_population"):
@@ -69,4 +68,4 @@ class MessageCrudServices:
                 registration_data_import__status=RegistrationDataImport.MERGED,
                 registration_data_import_id=decode_id_string(registration_data_import_id),
             )
-        return None
+        return Household.objects.none()

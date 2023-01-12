@@ -16,7 +16,7 @@ export const validationSchema = Yup.object().shape({
   selectedPaymentRecords: Yup.array()
     .of(Yup.string())
     .nullable(),
-  selectedRelatedTickets: Yup.array()
+  selectedLinkedTickets: Yup.array()
     .of(Yup.string())
     .nullable(),
 });

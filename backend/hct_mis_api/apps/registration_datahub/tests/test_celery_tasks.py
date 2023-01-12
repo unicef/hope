@@ -24,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 )
 
 
-def create_record(registration: RegistrationDataImport, status: str) -> Record:
+def create_record(registration: int, status: str) -> Record:
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
     fields = {

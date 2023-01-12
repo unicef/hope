@@ -1,6 +1,6 @@
 import abc
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from django.db.models import QuerySet
 
@@ -13,7 +13,7 @@ from ..models import Message
 
 
 class BaseSampling(abc.ABC):
-    def __init__(self, arguments: dict):
+    def __init__(self, arguments: Any):
         self.confidence_interval = arguments.get("confidence_interval")
         self.margin_of_error = arguments.get("margin_of_error")
         self.sex = arguments.get("sex")

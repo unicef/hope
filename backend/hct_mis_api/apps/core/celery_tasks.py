@@ -5,7 +5,6 @@ import tempfile
 from datetime import datetime
 from functools import wraps
 from typing import Any, Callable
-from uuid import UUID
 
 from django.db import transaction
 from django.utils import timezone
@@ -16,6 +15,7 @@ from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields impo
     KoboRetriableError,
 )
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_NONE,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_TAX_ID,
     MALE,
@@ -98,8 +98,9 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: 
 
 @app.task
 @sentry_tags
-def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: str) -> None:
+def create_target_population_task(storage_id: str, program_id: str, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
+    file_path = None
     program = Program.objects.get(id=program_id)
 
     try:
@@ -117,13 +118,12 @@ def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: s
             first_registration_date = timezone.now()
             last_registration_date = first_registration_date
 
-            family_ids = set()
+            families = {}
             individuals, documents, bank_infos = [], [], []
 
             storage_obj.status = StorageFile.STATUS_PROCESSING
             storage_obj.save(update_fields=["status"])
             rows_count = 0
-            file_path = None
 
             # TODO fix to use Azure storage override AzureStorageFile open method
             with storage_obj.file.open("rb") as original_file, tempfile.NamedTemporaryFile(delete=False) as tmp:
@@ -151,8 +151,8 @@ def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: s
                         "last_registration_date": last_registration_date,
                         "sex": MALE,
                     }
-                    if family_id in family_ids:
-                        individual = Individual(**individual_data, household=Household.objects.get(family_id=family_id))
+                    if family_id in families:
+                        individual = Individual(**individual_data, household_id=families.get(family_id))
                         individuals.append(individual)
                     else:
                         individual = Individual.objects.create(**individual_data)
@@ -167,12 +167,13 @@ def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: s
                             size=1,
                             family_id=family_id,
                             storage_obj=storage_obj,
+                            collect_individual_data=COLLECT_TYPE_NONE,
                         )
 
                         individual.household = household
-                        individual.save()
+                        individual.save(update_fields=("household",))
 
-                        family_ids.add(family_id)
+                        families[family_id] = household.id
 
                     passport = Document(
                         document_number=passport_id,
@@ -208,11 +209,11 @@ def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: s
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
-            households = Household.objects.filter(family_id__in=list(family_ids)).only("id")
-            if len(family_ids) != rows_count:
+            households = Household.objects.filter(family_id__in=list(families.keys())).only("id")
+            if len(families) != rows_count:
                 for household in households:
                     household.size = Individual.objects.filter(household=household).count()
-                Household.objects.bulk_update(households, ["size"])
+                Household.objects.bulk_update(households, ("size",))
 
             households.update(withdrawn=True, withdrawn_date=timezone.now())
             Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
@@ -227,11 +228,11 @@ def create_target_population_task(storage_id: UUID, program_id: UUID, tp_name: s
                 storage_file=storage_obj,
             )
             target_population.households.set(households)
-            target_population = refresh_stats(target_population)
+            refresh_stats(target_population)
             target_population.save()
+
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
-
     except Exception:
         storage_obj.status = StorageFile.STATUS_FAILED
         storage_obj.save(update_fields=["status"])

@@ -51,7 +51,7 @@ export const DashboardFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
-            value={filter.program || ''}
+            value={filter.program}
             icon={<FlashOnIcon />}
           >
             <MenuItem value=''>

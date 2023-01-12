@@ -5,12 +5,11 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from typing import Any, Callable, Dict, List, Type
+from typing import Any, Dict, List, Type
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
 
 from jinja2 import Environment
@@ -32,21 +31,10 @@ class Interpreter:
             return True
         except Exception as e:
             logger.exception(e)
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
     def get_result(self) -> Any:
         return config.RESULT()
-
-
-class PythonFunction(Interpreter):
-    label = "internal"
-
-    @cached_property
-    def code(self) -> str:
-        return import_string(self.init_string)
-
-    def execute(self, **context: Dict) -> Callable:
-        return self.code(**context)  # type: ignore
 
 
 def call_rule(rule_id: UUID, context: Dict) -> Any:
@@ -153,14 +141,9 @@ class PythonExec(Interpreter):
             raise ValidationError(mark_safe(msg))
 
 
-def get_env(**options: Dict) -> Environment:
+def get_env(**options: Any) -> Environment:
     env = Environment(**options)
-    env.filters.update(
-        {
-            "adults": engine.adults
-            # 'url': reverse,
-        }
-    )
+    env.filters.update({"adults": engine.adults})
     return env
 
 

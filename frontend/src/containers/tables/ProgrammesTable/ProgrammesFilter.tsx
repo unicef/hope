@@ -23,76 +23,74 @@ export function ProgrammesFilters({
 
   return (
     <Grid container alignItems='center' spacing={3}>
-      <Grid item xs={12}>
-        <Grid container alignItems='center' spacing={3}>
-          <Grid item>
-            <SearchTextField
-              label='Search'
-              value={filter.search || ''}
-              onChange={(e) => handleFilterChange(e, 'search')}
-              data-cy='filters-search'
-            />
-          </Grid>
-          <Grid item>
-            <SelectFilter
-              onChange={(e) => handleFilterChange(e, 'status')}
-              label='Status'
-              value={filter.status || null}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.programStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </SelectFilter>
-          </Grid>
-          <Grid item>
-            <DatePickerFilter
-              label='Start Date'
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  startDate: date ? moment(date).format('YYYY-MM-DD') : null,
-                })
-              }
-              value={filter.startDate}
-            />
-          </Grid>
-          <Grid item>
-            <DatePickerFilter
-              label='End Date'
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  endDate: date ? moment(date).format('YYYY-MM-DD') : null,
-                })
-              }
-              value={filter.endDate}
-            />
-          </Grid>
-          <Grid item>
-            <SelectFilter
-              onChange={(e) => handleFilterChange(e, 'sector')}
-              label='Sector'
-              value={filter.sector || null}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.programSectorChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </SelectFilter>
-          </Grid>
+      <Grid container alignItems='center' spacing={3}>
+        <Grid item>
+          <SearchTextField
+            label='Search'
+            value={filter.search}
+            onChange={(e) => handleFilterChange(e, 'search')}
+            data-cy='filters-search'
+          />
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'status')}
+            label='Status'
+            value={filter.status}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.programStatusChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <DatePickerFilter
+            label='Start Date'
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                startDate: date ? moment(date).format('YYYY-MM-DD') : null,
+              })
+            }
+            value={filter.startDate}
+          />
+        </Grid>
+        <Grid item>
+          <DatePickerFilter
+            label='End Date'
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                endDate: date ? moment(date).format('YYYY-MM-DD') : null,
+              })
+            }
+            value={filter.endDate}
+          />
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'sector')}
+            label='Sector'
+            value={filter.sector}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.programSectorChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
       </Grid>
       <Grid item xs={12}>
@@ -107,7 +105,7 @@ export function ProgrammesFilters({
                   ...filter,
                   numberOfHouseholds: {
                     ...filter.numberOfHouseholds,
-                    min: e.target.value || undefined,
+                    min: e.target.value,
                   },
                 })
               }
@@ -123,7 +121,7 @@ export function ProgrammesFilters({
                   ...filter,
                   numberOfHouseholds: {
                     ...filter.numberOfHouseholds,
-                    max: e.target.value || undefined,
+                    max: e.target.value,
                   },
                 })
               }
@@ -140,7 +138,7 @@ export function ProgrammesFilters({
                   ...filter,
                   budget: {
                     ...filter.budget,
-                    min: e.target.value || undefined,
+                    min: e.target.value,
                   },
                 })
               }
@@ -155,7 +153,7 @@ export function ProgrammesFilters({
                   ...filter,
                   budget: {
                     ...filter.budget,
-                    max: e.target.value || undefined,
+                    max: e.target.value,
                   },
                 })
               }

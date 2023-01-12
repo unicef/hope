@@ -38,7 +38,7 @@ def get_related(user: "User", field: Any) -> Dict[str, Any]:
 @register.filter()
 def get_admin_link(record: Any) -> str:
     opts = record._meta
-    url_name = admin_urlname(opts, "change")
+    url_name = admin_urlname(opts, "change")  # type: ignore # str vs SafeString
     return reverse(url_name, args=[record.pk])
 
 

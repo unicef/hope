@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react';
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { AutoLogout } from './components/core/AutoLogout';
@@ -9,6 +8,7 @@ import { LoginPage } from './containers/pages/core/LoginPage';
 import { ProfilePage } from './containers/pages/core/ProfilePage';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { Providers } from './providers';
+import { SentryRoute } from './components/core/SentryRoute';
 
 export const App: React.FC = () => {
   return (
@@ -16,45 +16,27 @@ export const App: React.FC = () => {
       <AutoLogout />
       <Router>
         <Switch>
-          <Route path='/login'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/login');
+          <SentryRoute path='/login'>
+            <LoginPage />
+          </SentryRoute>
+          <SentryRoute path='/sentry-check'>
+            <button
+              type='button'
+              onClick={() => {
+                throw new Error('Am I working?');
               }}
             >
-              <LoginPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/sentry-check'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/sentry-check/');
-              }}
-            >
-              <button
-                type='button'
-                onClick={() => {
-                  throw new Error('Am I working?');
-                }}
-              >
-                Throw new error
-              </button>
-            </Sentry.ErrorBoundary>
-          </Route>
+              Throw new error
+            </button>
+          </SentryRoute>
           <ProtectedRoute
             path='/sanction-list'
             component={SanctionList}
             location={window.location}
           />
-          <Route path='/accounts/profile/'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/accounts/profile/');
-              }}
-            >
-              <ProfilePage />
-            </Sentry.ErrorBoundary>
-          </Route>
+          <SentryRoute path='/accounts/profile/'>
+            <ProfilePage />
+          </SentryRoute>
           <Route path='/:businessArea/'>
             <HomeRouter />
           </Route>

@@ -99,9 +99,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Select File to Import')}
-          </DialogTitle>
+          <DialogTitle>{t('Select File to Import')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <FormControl variant='outlined' margin='dense'>

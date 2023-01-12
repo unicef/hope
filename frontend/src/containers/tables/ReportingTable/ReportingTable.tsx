@@ -1,6 +1,6 @@
 import React from 'react';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { reduceChoices } from '../../../utils/utils';
+import { choicesToDict } from '../../../utils/utils';
 import {
   AllReportsQueryVariables,
   MeQuery,
@@ -34,10 +34,10 @@ export const ReportingTable = ({
   };
   const typeChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.reportTypesChoices);
+  } = choicesToDict(choicesData.reportTypesChoices);
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.reportStatusChoices);
+  } = choicesToDict(choicesData.reportStatusChoices);
 
   return (
     <TableWrapper>

@@ -34,6 +34,7 @@ export function StatusBox({
   statusNameMapping,
 }: Props): React.ReactElement {
   const underscoreRemoveRegex = /_/g;
+  if (!status) return <>-</>;
   return (
     <StatusContainer>
       <StatusBoxContainer

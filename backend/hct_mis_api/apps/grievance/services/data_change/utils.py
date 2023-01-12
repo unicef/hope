@@ -4,12 +4,11 @@ import string
 import urllib.parse
 from typing import Any, Dict, List, Optional, Union
 
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -37,7 +36,6 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +122,7 @@ def handle_add_document(document: Dict, individual: Individual) -> Document:
         document_number=number, type=document_type, country=country
     ).exists()
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
+        raise ValidationError(f"Document with number {number} of type {type_name} already exists")
 
     return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
@@ -150,7 +148,7 @@ def handle_edit_document(document_data: Dict) -> Document:
         .exists()
     )
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
+        raise ValidationError(f"Document with number {number} of type {type_name} already exists")
 
     document = get_object_or_404(Document.objects.select_for_update(), id=document_id)
 
@@ -197,7 +195,7 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
 
     identity_already_exists = IndividualIdentity.objects.filter(number=number, partner=partner).exists()
     if identity_already_exists:
-        log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
+        raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
     return IndividualIdentity(number=number, individual=individual, partner=partner, country=country)
 
@@ -217,7 +215,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
         IndividualIdentity.objects.exclude(pk=identity.id).filter(number=number, partner=partner).exists()
     )
     if identity_already_exists:
-        log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
+        raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
     identity.number = number
     identity.partner = partner
@@ -314,7 +312,7 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     }
 
     for pc in payment_channels:
-        handler = handlers.get(pc.get("type"))
+        handler = handlers.get(pc.get("type"))  # type: ignore # FIXME: Argument 1 to "get" of "dict" has incompatible type "Optional[Any]"; expected "str"
         items.append(handler(pc))
     return items
 
@@ -349,7 +347,7 @@ def generate_filename() -> str:
     return f"{file_name}-{timezone.now()}"
 
 
-def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Optional[str]:
+def handle_photo(photo: Optional[Union[InMemoryUploadedFile, str]], photoraw: Optional[str]) -> Optional[str]:
     if isinstance(photo, InMemoryUploadedFile):
         return default_storage.save(f"{generate_filename()}.jpg", photo)
     elif isinstance(photo, str):
