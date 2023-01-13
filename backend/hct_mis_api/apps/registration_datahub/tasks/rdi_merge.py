@@ -134,7 +134,7 @@ class RdiMergeTask:
         "disability_certificate_picture",
     )
 
-    def merge_admin_area(
+    def merge_admin_areas(
         self,
         imported_household: ImportedHousehold,
         household: Household,
@@ -155,6 +155,9 @@ class RdiMergeTask:
                     setattr(household, admin_key, admin_area)
                 else:
                     logger.exception(f"Provided {admin_key} {admin_value} does not exist")
+
+        if household.admin_area:
+            household.set_admin_areas(save=False)
 
     def _prepare_households(
         self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
@@ -182,7 +185,7 @@ class RdiMergeTask:
                 registration_data_import=obj_hct,
                 business_area=obj_hct.business_area,
             )
-            self.merge_admin_area(imported_household, household)
+            self.merge_admin_areas(imported_household, household)
             households_dict[imported_household.id] = household
 
         return households_dict

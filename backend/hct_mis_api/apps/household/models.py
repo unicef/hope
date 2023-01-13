@@ -504,10 +504,15 @@ class Household(
             return self.user_fields["sys"][key]
         return None
 
-    def set_admin_area(self, new_admin_area: Area) -> None:
+    def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
+        """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]
 
-        self.admin_area = new_admin_area
+        if not new_admin_area:
+            new_admin_area = self.admin_area
+        else:
+            self.admin_area = new_admin_area
+
         for admin in admins:
             setattr(self, admin, None)
 
@@ -517,7 +522,8 @@ class Household(
             setattr(self, f"admin{admin_level}", new_admin_area)
             new_admin_area = new_admin_area.parent
 
-        self.save(update_fields=["admin_area"] + admins)
+        if save:
+            self.save(update_fields=["admin_area"] + admins)
 
     @property
     def sanction_list_possible_match(self) -> bool:
