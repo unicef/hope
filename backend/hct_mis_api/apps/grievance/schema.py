@@ -12,7 +12,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -389,7 +389,7 @@ class ChartGrievanceTicketsNode(ChartDatasetNode):
 
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
-    all_grievance_ticket = DjangoPermissionFilterConnectionField(
+    all_grievance_ticket = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=GrievanceTicketFilter,
         permission_classes=(
@@ -401,7 +401,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
         ),
     )
-    existing_grievance_tickets = DjangoPermissionFilterConnectionField(
+    existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
         permission_classes=(
@@ -413,7 +413,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
         ),
     )
-    all_ticket_notes = DjangoPermissionFilterConnectionField(
+    all_ticket_notes = DjangoPermissionFilterFastConnectionField(
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
     )
