@@ -169,6 +169,7 @@ class TestGrievanceQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.maxDiff = None
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -325,12 +326,12 @@ class TestGrievanceQuery(APITestCase):
     @parameterized.expand(
         [
             (
-                "category_positive_feedback",
-                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            ),
-            (
                 "category_negative_feedback",
                 GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            ),
+            (
+                "category_positive_feedback",
+                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
             ),
         ]
     )

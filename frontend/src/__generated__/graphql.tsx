@@ -5557,9 +5557,11 @@ export type SurveyNode = Node & {
   fullListArguments: Scalars['JSONString'],
   randomSamplingArguments: Scalars['JSONString'],
   sampleSize: Scalars['Int'],
+  flowId?: Maybe<Scalars['String']>,
   successfulRapidProCalls: Array<Scalars['JSONString']>,
   sampleFilePath?: Maybe<Scalars['String']>,
   hasValidSampleFile?: Maybe<Scalars['Boolean']>,
+  rapidProUrl?: Maybe<Scalars['String']>,
 };
 
 
@@ -11016,7 +11018,7 @@ export type SurveyQuery = (
   { __typename?: 'Query' }
   & { survey: Maybe<(
     { __typename?: 'SurveyNode' }
-    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body' | 'sampleFilePath' | 'hasValidSampleFile'>
+    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body' | 'rapidProUrl' | 'sampleFilePath' | 'hasValidSampleFile'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
@@ -21641,6 +21643,7 @@ export const SurveyDocument = gql`
     }
     body
     title
+    rapidProUrl
     sampleFilePath
     hasValidSampleFile
   }
@@ -25294,9 +25297,11 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   fullListArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  flowId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   successfulRapidProCalls?: Resolver<Array<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleFilePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  rapidProUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type SurveyNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SurveyNodeConnection'] = ResolversParentTypes['SurveyNodeConnection']> = {

@@ -232,6 +232,7 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
     random_sampling_arguments = models.JSONField(default=dict)
     sample_size = models.PositiveIntegerField(default=0)
 
+    flow_id = models.CharField(max_length=255, blank=True, null=True)
     successful_rapid_pro_calls = ArrayField(models.JSONField(), default=list)
 
     class Meta:

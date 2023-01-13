@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_admin2 1'] = {
@@ -77,7 +78,27 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_assigned_to_incor
     }
 }
 
-snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_category_0_category_positive_feedback 1'] = {
+snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_category_0_category_negative_feedback 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'admin': 'City Example',
+                        'category': 5,
+                        'consent': True,
+                        'createdAt': '2020-07-12T00:00:00+00:00',
+                        'description': 'Just random description',
+                        'language': 'English',
+                        'status': 4
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_category_1_category_positive_feedback 1'] = {
     'data': {
         'allGrievanceTicket': {
             'edges': [
@@ -101,26 +122,6 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_category_0_catego
                         'description': 'Just random description',
                         'language': 'Polish, English',
                         'status': 3
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_category_1_category_negative_feedback 1'] = {
-    'data': {
-        'allGrievanceTicket': {
-            'edges': [
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 5,
-                        'consent': True,
-                        'createdAt': '2020-07-12T00:00:00+00:00',
-                        'description': 'Just random description',
-                        'language': 'English',
-                        'status': 4
                     }
                 }
             ]
