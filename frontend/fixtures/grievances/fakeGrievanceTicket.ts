@@ -91,7 +91,7 @@ export const fakeGrievanceTicket = {
         pCode: 'AF0617',
         __typename: 'AreaNode',
       },
-      programs: {
+      programsOld: {
         edges: [
           {
             node: {
@@ -349,7 +349,7 @@ export const fakeGrievanceTicket = {
                 pCode: 'AF0617',
                 __typename: 'AreaNode',
               },
-              programs: {
+              programsOld: {
                 edges: [
                   {
                     node: {
@@ -438,7 +438,7 @@ export const fakeGrievanceTicket = {
                 pCode: 'AF0617',
                 __typename: 'AreaNode',
               },
-              programs: {
+              programsOld: {
                 edges: [
                   {
                     node: {
@@ -461,7 +461,7 @@ export const fakeGrievanceTicket = {
         },
       ],
     },
-    programs: {
+    programsOld: {
       edges: [
         {
           node: {

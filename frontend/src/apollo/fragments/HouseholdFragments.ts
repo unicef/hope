@@ -104,7 +104,7 @@ export const householdDetailed = gql`
         }
       }
     }
-    programs {
+    programsOld {
       edges {
         node {
           id

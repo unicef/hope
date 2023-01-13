@@ -32,7 +32,7 @@ export const AllIndividualsForPopulationTable = gql`
       age: $age
       orderBy: $orderBy
       search: $search
-      programs: $programs
+      programsOld: $programs
       status: $status
       lastRegistrationDate: $lastRegistrationDate
       household_Id: $householdId

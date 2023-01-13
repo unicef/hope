@@ -24,7 +24,7 @@ export function LookUpIndividualTableRow({
 }: LookUpIndividualTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const renderPrograms = (): string => {
-    const programNames = individual?.household?.programs?.edges?.map(
+    const programNames = individual?.household?.programsOld?.edges?.map(
       (edge) => edge.node.name,
     );
     return programNames?.length ? programNames.join(', ') : '-';

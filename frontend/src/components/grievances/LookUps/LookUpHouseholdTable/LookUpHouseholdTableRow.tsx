@@ -26,7 +26,7 @@ export function LookUpHouseholdTableRow({
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const renderPrograms = (): string => {
-    const programNames = household.programs?.edges?.map(
+    const programNames = household.programsOld?.edges?.map(
       (edge) => edge.node.name,
     );
     return programNames?.length ? programNames.join(', ') : '-';

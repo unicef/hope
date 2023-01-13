@@ -1234,7 +1234,7 @@ export type HouseholdNode = Node & {
   maleChildrenDisabledCount?: Maybe<Scalars['Int']>,
   femaleChildrenDisabledCount?: Maybe<Scalars['Int']>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
-  programs: ProgramNodeConnection,
+  programsOld: ProgramNodeConnection,
   returnee?: Maybe<Scalars['Boolean']>,
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
   firstRegistrationDate: Scalars['DateTime'],
@@ -1270,6 +1270,7 @@ export type HouseholdNode = Node & {
   referralTicketDetails: TicketReferralDetailsNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals?: Maybe<IndividualNodeConnection>,
+  programs: ProgramNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelectionNode>,
   adminAreaTitle?: Maybe<Scalars['String']>,
@@ -1294,7 +1295,7 @@ export type HouseholdNodeRepresentativesArgs = {
 };
 
 
-export type HouseholdNodeProgramsArgs = {
+export type HouseholdNodeProgramsOldArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -1400,7 +1401,7 @@ export type HouseholdNodeIndividualsArgs = {
   household_AdminArea?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   age?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programsOld?: Maybe<Array<Maybe<Scalars['ID']>>>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
@@ -1408,6 +1409,16 @@ export type HouseholdNodeIndividualsArgs = {
   excludedId?: Maybe<Scalars['String']>,
   flags?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type HouseholdNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -3235,6 +3246,7 @@ export type ProgramNode = Node & {
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  programPopulation: HouseholdNodeConnection,
   households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
@@ -3253,6 +3265,15 @@ export type ProgramNodeAdminAreasArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeProgramPopulationArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -3927,7 +3948,7 @@ export type QueryAllHouseholdsArgs = {
   size_Gte?: Maybe<Scalars['Int']>,
   adminArea?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programsOld?: Maybe<Array<Maybe<Scalars['ID']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   size?: Maybe<Scalars['String']>,
@@ -3959,7 +3980,7 @@ export type QueryAllIndividualsArgs = {
   household_AdminArea?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   age?: Maybe<Scalars['String']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programsOld?: Maybe<Array<Maybe<Scalars['ID']>>>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
@@ -5952,7 +5973,7 @@ export type HouseholdDetailedFragment = (
         & IndividualMinimalFragment
       )> }
     )>> }
-  )>, programs: (
+  )>, programsOld: (
     { __typename?: 'ProgramNodeConnection' }
     & { edges: Array<Maybe<(
       { __typename?: 'ProgramNodeEdge' }
@@ -6030,7 +6051,7 @@ export type IndividualMinimalFragment = (
     )>, admin2: Maybe<(
       { __typename?: 'AreaNode' }
       & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
-    )>, programs: (
+    )>, programsOld: (
       { __typename?: 'ProgramNodeConnection' }
       & { edges: Array<Maybe<(
         { __typename?: 'ProgramNodeEdge' }
@@ -8671,7 +8692,7 @@ export type AllHouseholdsQuery = (
         ), admin2: Maybe<(
           { __typename?: 'AreaNode' }
           & Pick<AreaNode, 'id' | 'name'>
-        )>, programs: (
+        )>, programsOld: (
           { __typename?: 'ProgramNodeConnection' }
           & { edges: Array<Maybe<(
             { __typename?: 'ProgramNodeEdge' }
@@ -8774,7 +8795,7 @@ export type AllIndividualsQuery = (
           & { admin2: Maybe<(
             { __typename?: 'AreaNode' }
             & Pick<AreaNode, 'id' | 'name'>
-          )>, programs: (
+          )>, programsOld: (
             { __typename?: 'ProgramNodeConnection' }
             & { edges: Array<Maybe<(
               { __typename?: 'ProgramNodeEdge' }
@@ -9792,7 +9813,7 @@ export const IndividualMinimalFragmentDoc = gql`
       level
       pCode
     }
-    programs {
+    programsOld {
       edges {
         node {
           id
@@ -9852,7 +9873,7 @@ export const HouseholdDetailedFragmentDoc = gql`
       }
     }
   }
-  programs {
+  programsOld {
     edges {
       node {
         id
@@ -16332,7 +16353,7 @@ export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
     query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programsOld: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -16362,7 +16383,7 @@ export const AllHouseholdsDocument = gql`
         totalCashReceived
         currency
         lastRegistrationDate
-        programs {
+        programsOld {
           edges {
             node {
               id
@@ -16434,7 +16455,7 @@ export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHousehold
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
     query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programsOld: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -16528,7 +16549,7 @@ export type AllHouseholdsForPopulationTableLazyQueryHookResult = ReturnType<type
 export type AllHouseholdsForPopulationTableQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>;
 export const AllIndividualsDocument = gql`
     query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programsOld: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
     totalCount
     pageInfo {
       startCursor
@@ -16551,7 +16572,7 @@ export const AllIndividualsDocument = gql`
             id
             name
           }
-          programs {
+          programsOld {
             edges {
               node {
                 id
@@ -16663,7 +16684,7 @@ export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividu
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllIndividualsForPopulationTableDocument = gql`
     query AllIndividualsForPopulationTable($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programsOld: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
     totalCount
     pageInfo {
       startCursor
@@ -20465,7 +20486,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   maleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
+  programsOld?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsOldArgs>,
   returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -20501,6 +20522,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeReferralTicketDetailsArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, HouseholdNodeIndividualsArgs>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>,
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -21214,6 +21236,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  programPopulation?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeProgramPopulationArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,

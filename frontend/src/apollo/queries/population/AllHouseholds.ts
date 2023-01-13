@@ -26,7 +26,7 @@ export const AllHouseholds = gql`
       businessArea: $businessArea
       size: $familySize
       orderBy: $orderBy
-      programs: $programs
+      programsOld: $programs
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       adminArea: $adminArea
       search: $search
