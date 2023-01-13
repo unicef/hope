@@ -205,7 +205,7 @@ class FlexRegistrationService:
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
-        household.set_admin_area()
+        household.set_admin_areas()
 
         household.kobo_asset_id = record.source_id
         household.save(

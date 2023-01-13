@@ -178,7 +178,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
         except AttributeError:
             return None
 
-    def set_admin_area(self) -> None:
+    def set_admin_areas(self) -> None:
         admins = {
             "admin1": self.admin1,
             "admin2": self.admin2,

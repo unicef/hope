@@ -12,7 +12,7 @@ def migrate_household_admin_area() -> None:
         print(f"Processing page {page_number}/{queryset_count/10000}")
         page = paginator.page(page_number)
         for household in page.object_list:
-            household.set_admin_area(household.admin_area)
+            household.set_admin_areas()
 
 
 def migrate_imported_household_admin_area() -> None:
@@ -35,4 +35,4 @@ def migrate_imported_household_admin_area() -> None:
 
             to_update.append(imported_household)
 
-        ImportedHousehold.objects.bulk_create(to_update, ["admin_area", "admin_area_title"])
+        ImportedHousehold.objects.bulk_update(to_update, ["admin_area", "admin_area_title"])
