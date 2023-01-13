@@ -1,5 +1,7 @@
 from typing import Any, Optional
 
+from django.conf import settings
+
 import graphene
 from graphene_django import DjangoObjectType
 
@@ -108,6 +110,7 @@ class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
 
     sample_file_path = graphene.String()
     has_valid_sample_file = graphene.Boolean()
+    rapid_pro_url = graphene.String()
 
     class Meta:
         model = Survey
@@ -125,6 +128,12 @@ class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_has_valid_sample_file(survey: Survey, info: Any) -> bool:
         return survey.has_valid_sample_file()
+
+    @staticmethod
+    def resolve_rapid_pro_url(survey: Survey, info: Any) -> Optional[str]:
+        if not survey.flow_id:
+            return None
+        return f"{settings.RAPID_PRO_URL}/flow/results/{survey.flow_id}/"
 
 
 class RecipientNode(BaseNodePermissionMixin, DjangoObjectType):

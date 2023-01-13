@@ -24,6 +24,7 @@ class TestCreateSurvey(APITestCase):
             firstName
             lastName
           }
+          rapidProUrl
         }
       }
     }
