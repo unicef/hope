@@ -22,7 +22,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
     hopePermissionClass,
@@ -471,7 +471,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoPermissionFilterConnectionField(
+    all_households = DjangoPermissionFilterFastConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
@@ -479,7 +479,7 @@ class Query(graphene.ObjectType):
         ),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoPermissionFilterConnectionField(
+    all_individuals = DjangoPermissionFilterFastConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(
