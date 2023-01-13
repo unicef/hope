@@ -228,7 +228,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
   ): CreateSurveyAccountabilityMutationVariables => {
     return {
       input: {
-        title: values.title,
+        title: flowsData?.availableFlows.find((el) => values.title === el.id)
+          .name,
         body: values.body,
         category: values.category,
         targetPopulation: values.targetPopulation,

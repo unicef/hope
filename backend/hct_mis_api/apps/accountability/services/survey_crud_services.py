@@ -41,6 +41,9 @@ class SurveyCrudServices:
         survey.number_of_recipients = result.number_of_recipients
         survey.recipients.set(result.households)
 
+        if "flow" in input_data:
+            survey.flow_id = input_data["flow"]
+
         if not result.households:
             raise Exception("There are no selected recipients.")
 

@@ -3179,9 +3179,11 @@ type SurveyNode implements Node {
   fullListArguments: JSONString!
   randomSamplingArguments: JSONString!
   sampleSize: Int!
+  flowId: String
   successfulRapidProCalls: [JSONString!]!
   sampleFilePath: String
   hasValidSampleFile: Boolean
+  rapidProUrl: String
 }
 
 type SurveyNodeConnection {
