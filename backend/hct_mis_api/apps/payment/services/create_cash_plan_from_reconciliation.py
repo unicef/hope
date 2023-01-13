@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import IO
+from io import BytesIO
+from typing import Dict, List
 
 from django.db import transaction
 
@@ -33,9 +34,9 @@ class CreateCashPlanReconciliationService:
     def __init__(
         self,
         business_area: BusinessArea,
-        reconciliation_xlsx_file: IO,
-        column_mapping: dict,
-        cash_plan_form_data: dict,
+        reconciliation_xlsx_file: BytesIO,
+        column_mapping: Dict,
+        cash_plan_form_data: Dict,
         currency: str,
         delivery_type: str,
     ) -> None:
@@ -67,7 +68,7 @@ class CreateCashPlanReconciliationService:
             self._parse_row(row_values, index)
         self._add_cashplan_info()
 
-    def _parse_header(self, header: list) -> None:
+    def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
             if xlsx_column not in header:
                 raise ValidationError(f"Column {xlsx_column} not found in the header")
@@ -76,7 +77,7 @@ class CreateCashPlanReconciliationService:
 
             self.column_index_mapping[column] = header.index(xlsx_column)
 
-    def _parse_row(self, row: tuple, index: int) -> None:
+    def _parse_row(self, row: List, index: int) -> None:
         self.total_person_covered += 1
         delivered_amount = row[self.column_index_mapping[self.COLUMN_DELIVERED_AMOUNT]]
         entitlement_amount = row[self.column_index_mapping[self.COLUMN_ENTITLEMENT_QUANTITY]]
