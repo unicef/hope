@@ -21,6 +21,8 @@ SYSTEM_PARAMETRIZER: Dict[str, Dict[str, Any]] = {
 
 
 def create_defaults() -> None:
+    if User.objects.filter(is_superuser=True).first() is None:
+        return
     from hct_mis_api.apps.power_query.models import Formatter, Parametrizer
 
     fmt_html, __ = Formatter.objects.get_or_create(
