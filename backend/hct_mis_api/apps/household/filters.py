@@ -174,7 +174,7 @@ class IndividualFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
-    programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
+    programs_old = ModelMultipleChoiceFilter(field_name="household__programs_old", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(

@@ -30,7 +30,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals($programs: [ID]) {
-      allIndividuals(oldPrograms: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
+      allIndividuals(programsOld: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
         edges {
           node {
             givenName
@@ -38,7 +38,7 @@ class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
             phoneNo
             birthDate
             household {
-              oldPrograms {
+              programsOld {
                 edges {
                   node {
                     name

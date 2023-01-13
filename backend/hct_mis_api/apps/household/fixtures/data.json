@@ -73,7 +73,7 @@
     "row_id": 4,
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": []
+    "programs_old": []
   }
 },
 {
@@ -150,7 +150,7 @@
     "row_id": 3,
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": []
+    "programs_old": []
   }
 },
 {

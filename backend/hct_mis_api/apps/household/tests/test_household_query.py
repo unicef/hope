@@ -70,13 +70,13 @@ ALL_HOUSEHOLD_QUERY_MAX = """
     """
 ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
     query AllHouseholds($programs:[ID]){
-      allHouseholds(oldPrograms: $programs, businessArea: "afghanistan") {
+      allHouseholds(programsOld: $programs, businessArea: "afghanistan") {
         edges {
           node {
             size
             countryOrigin
             address
-            oldPrograms {
+            programsOld {
               edges {
                 node {
                   name

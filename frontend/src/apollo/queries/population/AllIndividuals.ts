@@ -65,7 +65,7 @@ export const AllIndividuals = gql`
               id
               name
             }
-            oldPrograms {
+            programsOld {
               edges {
                 node {
                   id

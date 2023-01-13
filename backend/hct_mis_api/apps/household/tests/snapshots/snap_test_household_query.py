@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permission 1'] = {
@@ -14,7 +15,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                     'node': {
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
-                        'programs': {
+                        'programsOld': {
                             'edges': [
                                 {
                                     'node': {
@@ -30,7 +31,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                     'node': {
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
-                        'programs': {
+                        'programsOld': {
                             'edges': [
                                 {
                                     'node': {
@@ -46,7 +47,7 @@ snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permiss
                     'node': {
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
-                        'programs': {
+                        'programsOld': {
                             'edges': [
                                 {
                                     'node': {

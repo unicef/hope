@@ -64,7 +64,7 @@ export const AllHouseholds = gql`
           totalCashReceived
           currency
           lastRegistrationDate
-          oldPrograms {
+          programsOld {
             edges {
               node {
                 id

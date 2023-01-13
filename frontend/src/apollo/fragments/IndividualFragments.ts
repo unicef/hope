@@ -62,7 +62,7 @@ export const individualMinimal = gql`
         level
         pCode
       }
-      oldPrograms {
+      programsOld {
         edges {
           node {
             id

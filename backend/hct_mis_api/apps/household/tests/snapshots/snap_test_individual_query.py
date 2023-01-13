@@ -17,7 +17,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                         'familyName': 'Butler',
                         'givenName': 'Benjamin',
                         'household': {
-                            'programs': {
+                            'programsOld': {
                                 'edges': [
                                     {
                                         'node': {
@@ -36,7 +36,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                         'familyName': 'Franklin',
                         'givenName': 'Jenna',
                         'household': {
-                            'programs': {
+                            'programsOld': {
                                 'edges': [
                                     {
                                         'node': {
@@ -55,7 +55,7 @@ snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permissi
                         'familyName': 'Perry',
                         'givenName': 'Timothy',
                         'household': {
-                            'programs': {
+                            'programsOld': {
                                 'edges': [
                                     {
                                         'node': {
