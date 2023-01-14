@@ -14,8 +14,11 @@ from django.forms import modelform_factory
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import build_arg_dict_from_dict, build_arg_dict_from_dict_if_exists, \
-    build_flex_arg_dict_from_list_if_exists
+from hct_mis_api.apps.core.utils import (
+    build_arg_dict_from_dict,
+    build_arg_dict_from_dict_if_exists,
+    build_flex_arg_dict_from_list_if_exists,
+)
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -56,7 +59,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(abc.ABC):
-
     @atomic("default")
     @atomic("registration_datahub")
     def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
@@ -95,12 +97,12 @@ class BaseRegistrationService(abc.ABC):
 
     @abc.abstractmethod
     def create_household_for_rdi_household(self, record: Record, rdi_datahub: RegistrationDataImportDatahub) -> None:
-        return NotImplemented
+        raise NotImplementedError
 
     def process_records(
-            self,
-            rdi_id: "UUID",
-            records_ids: Iterable,
+        self,
+        rdi_id: "UUID",
+        records_ids: Iterable,
     ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
@@ -108,9 +110,9 @@ class BaseRegistrationService(abc.ABC):
 
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
-                .exclude(status=Record.STATUS_IMPORTED)
-                .exclude(ignored=True)
-                .values_list("id", flat=True)
+            .exclude(status=Record.STATUS_IMPORTED)
+            .exclude(ignored=True)
+            .values_list("id", flat=True)
         )
         imported_records_ids = []
         try:
@@ -205,7 +207,7 @@ class FlexRegistrationService(BaseRegistrationService):
     }
 
     def create_household_for_rdi_household(
-            self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
@@ -273,15 +275,14 @@ class FlexRegistrationService(BaseRegistrationService):
             if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
                 ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
             elif (
-                    ImportedIndividualRoleInHousehold.objects.filter(household=household,
-                                                                     role=ROLE_ALTERNATE).count() == 0
+                ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0
             ):
                 ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
             else:
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-            self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
+        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
     ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
@@ -301,10 +302,10 @@ class FlexRegistrationService(BaseRegistrationService):
         return household_data
 
     def _prepare_individual_data(
-            self,
-            individual_dict: Dict,
-            household: ImportedHousehold,
-            registration_data_import: RegistrationDataImportDatahub,
+        self,
+        individual_dict: Dict,
+        household: ImportedHousehold,
+        registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, FlexRegistrationService.INDIVIDUAL_MAPPING_DICT),
@@ -352,8 +353,8 @@ class FlexRegistrationService(BaseRegistrationService):
         documents = []
 
         for document_type_string, (
-                document_number_field_name,
-                picture_field_name,
+            document_number_field_name,
+            picture_field_name,
         ) in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
             document_number = individual_dict.get(document_number_field_name)
             certificate_picture = individual_dict.get(picture_field_name, "")
@@ -389,7 +390,7 @@ class FlexRegistrationService(BaseRegistrationService):
         return certificate_picture
 
     def _prepare_bank_account_info(
-            self, individual_dict: Dict, individual: ImportedIndividual
+        self, individual_dict: Dict, individual: ImportedIndividual
     ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return None
@@ -420,16 +421,9 @@ class FlexRegistrationService(BaseRegistrationService):
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
-    HOUSEHOLD_MAPPING_DICT = {
-        "admin1": "admin2_h_c",
-        "admin2": "admin3_h_c",
-        "address": "address_h_c"
-    }
+    HOUSEHOLD_MAPPING_DICT = {"admin1": "admin2_h_c", "admin2": "admin3_h_c", "address": "address_h_c"}
 
-    HOUSEHOLD_FLEX_FIELDS = [
-        "admin4_h_c",
-        "moh_center_of_reference"
-    ]
+    HOUSEHOLD_FLEX_FIELDS = ["admin4_h_c", "moh_center_of_reference"]
 
     INDIVIDUAL_MAPPING_DICT = {
         "full_name": "full_name_i_c",
@@ -446,11 +440,11 @@ class SriLankaRegistrationService(BaseRegistrationService):
         "branch_or_branch_code",
         "who_answers_this_phone",
         "confirm_alternate_collector_phone_number",
-        "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi"
+        "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi",
     ]
 
     def _prepare_household_data(
-            self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
 
         return {
@@ -469,7 +463,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             ),
         }
 
-    def _prepare_individual_data(self, head_of_household_info, **kwargs):
+    def _prepare_individual_data(self, head_of_household_info: Dict, **kwargs: Any) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(
                 head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_MAPPING_DICT
@@ -477,7 +471,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             flex_fields=build_flex_arg_dict_from_list_if_exists(
                 head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
             ),
-            **kwargs
+            **kwargs,
         )
 
         if relationship := individual_data.get("relationship"):
@@ -488,7 +482,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return individual_data
 
     def create_household_for_rdi_household(
-            self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         record_data_dict = record.fields
 
@@ -517,41 +511,38 @@ class SriLankaRegistrationService(BaseRegistrationService):
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
-            preferred_language=preferred_language_of_contact
+            preferred_language=preferred_language_of_contact,
         )
 
         head_of_household = ImportedIndividual.objects.create(
-            **base_individual_data_dict,
-            **self._prepare_individual_data(head_of_household_dict),
-            relationship=HEAD
+            **base_individual_data_dict, **self._prepare_individual_data(head_of_household_dict), relationship=HEAD
         )
 
         bank_name = collector_dict.pop("bank_description")
         bank_account_number = collector_dict.pop("bank_name")
 
         primary_collector = ImportedIndividual.objects.create(
-            **base_individual_data_dict,
-            **self._prepare_individual_data(collector_dict)
+            **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
         )
 
         ImportedIndividualRoleInHousehold.objects.create(
-            household=household,
-            individual=primary_collector,
-            role=ROLE_PRIMARY
+            household=household, individual=primary_collector, role=ROLE_PRIMARY
         )
 
         ImportedBankAccountInfo.objects.create(
-            bank_name=bank_name,
-            bank_account_number=bank_account_number,
-            individual=primary_collector
+            bank_name=bank_name, bank_account_number=bank_account_number, individual=primary_collector
         )
 
         individuals_to_create = []
         for individual_data_dict in individuals_list:
-            individuals_to_create.append(ImportedIndividual(**{
-                **self._prepare_individual_data(individual_data_dict),
-                **base_individual_data_dict,
-            }))
+            individuals_to_create.append(
+                ImportedIndividual(
+                    **{
+                        **self._prepare_individual_data(individual_data_dict),
+                        **base_individual_data_dict,
+                    }
+                )
+            )
 
         ImportedIndividual.objects.bulk_create(individuals_to_create)
 
