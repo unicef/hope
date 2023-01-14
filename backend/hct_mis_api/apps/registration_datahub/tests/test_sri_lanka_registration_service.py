@@ -7,11 +7,11 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    ImportedBankAccountInfo,
     Record,
 )
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
@@ -129,8 +129,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
 
         self.assertEqual(
-            ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields,
-            {"has_nic_number_i_c": "n"}
+            ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
         )
 
         self.assertEqual(
@@ -141,5 +140,5 @@ class TestUkrainianRegistrationService(TestCase):
                 "who_answers_this_phone": "alternate collector",
                 "confirm_alternate_collector_phone_number": "+94788908046",
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
-            }
+            },
         )
