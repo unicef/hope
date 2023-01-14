@@ -9,6 +9,9 @@ from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
+    ImportedIndividual,
+    ImportedIndividualRoleInHousehold,
+    ImportedBankAccountInfo,
     Record,
 )
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
@@ -24,7 +27,7 @@ class TestUkrainianRegistrationService(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUp(self) -> None:
+    def setUp(cls) -> None:
         ImportedDocumentType.objects.create(
             type=IDENTIFICATION_TYPE_TAX_ID,
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -108,8 +111,9 @@ class TestUkrainianRegistrationService(TestCase):
                 },
             ),
         ]
-        self.records = Record.objects.bulk_create(records)
-        self.user = UserFactory.create()
+
+        cls.records = Record.objects.bulk_create(records)
+        cls.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
         service = SriLankaRegistrationService()
@@ -119,4 +123,23 @@ class TestUkrainianRegistrationService(TestCase):
 
         self.records[0].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
+
         self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
+
+        self.assertEqual(
+            ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields,
+            {"has_nic_number_i_c": "n"}
+        )
+
+        self.assertEqual(
+            ImportedIndividual.objects.filter(full_name="Dome").first().flex_fields,
+            {
+                "confirm_nic_number": "123456789V",
+                "branch_or_branch_code": "7472_002",
+                "who_answers_this_phone": "alternate collector",
+                "confirm_alternate_collector_phone_number": "+94788908046",
+                "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
+            }
+        )

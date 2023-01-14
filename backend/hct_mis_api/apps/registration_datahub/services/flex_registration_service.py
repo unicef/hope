@@ -59,10 +59,12 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(abc.ABC):
+    BUSINESS_AREA_SLUG = ""
+
     @atomic("default")
     @atomic("registration_datahub")
     def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
-        business_area = BusinessArea.objects.get(slug="ukraine")
+        business_area = BusinessArea.objects.get(slug=self.BUSINESS_AREA_SLUG)
         number_of_individuals = 0
         number_of_households = 0
 
@@ -177,6 +179,8 @@ class BaseRegistrationService(abc.ABC):
 
 
 class FlexRegistrationService(BaseRegistrationService):
+    BUSINESS_AREA_SLUG = "ukraine"
+
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
@@ -421,6 +425,8 @@ class FlexRegistrationService(BaseRegistrationService):
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
+    BUSINESS_AREA_SLUG = "sri-lanka"
+
     HOUSEHOLD_MAPPING_DICT = {"admin1": "admin2_h_c", "admin2": "admin3_h_c", "address": "address_h_c"}
 
     HOUSEHOLD_FLEX_FIELDS = ["admin4_h_c", "moh_center_of_reference"]
