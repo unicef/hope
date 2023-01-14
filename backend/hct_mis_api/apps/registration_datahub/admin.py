@@ -30,7 +30,7 @@ from requests.auth import HTTPBasicAuth
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
     process_flex_records_task,
-    process_sri_lanka_flex_records_task
+    process_sri_lanka_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     DiiaHousehold,
@@ -50,7 +50,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
-    SriLankaRegistrationService
+    SriLankaRegistrationService,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
