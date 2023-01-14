@@ -347,6 +347,14 @@ def build_arg_dict_from_dict(data_dict: Dict, mapping_dict: Dict) -> Dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
+def build_arg_dict_from_dict_if_exists(data_dict: Dict, mapping_dict: Dict) -> Dict:
+    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict.keys()}
+
+
+def build_flex_arg_dict_from_list_if_exists(data_dict: Dict, flex_list: List) -> Dict:
+    return {key: data_dict[key] for key in flex_list if key in data_dict.keys()}
+
+
 class CustomOrderingFilter(OrderingFilter):
     def filter(self, qs: "QuerySet", value: Any) -> "QuerySet":
         from django.db.models.functions import Lower
