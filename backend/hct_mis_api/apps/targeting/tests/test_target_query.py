@@ -9,10 +9,9 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
+    TargetPopulation, TargetPopulationTargetingCriteria,
 )
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
@@ -116,8 +115,8 @@ class TestTargetPopulationQuery(APITestCase):
         cls.target_population_size_1_approved.save()
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
-        targeting_criteria = TargetingCriteria()
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetPopulationTargetingCriteria:
+        targeting_criteria = TargetPopulationTargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()

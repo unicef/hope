@@ -11,10 +11,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
+    TargetPopulation, TargetPopulationTargetingCriteria,
 )
 
 MUTATION_QUERY = """
@@ -183,9 +182,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.target_populations = [cls.draft_target_population, cls.approved_target_population]
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetPopulationTargetingCriteria:
         # TODO: this function is copy-pasted in many places
-        targeting_criteria = TargetingCriteria()
+        targeting_criteria = TargetPopulationTargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()

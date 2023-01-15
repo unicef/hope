@@ -10,10 +10,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
+    TargetPopulation, TargetPopulationTargetingCriteria,
 )
 
 
@@ -73,8 +72,8 @@ class TestCopyTargetPopulationMutation(APITestCase):
         cls.empty_target_population_1.save()
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
-        targeting_criteria = TargetingCriteria()
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetPopulationTargetingCriteria:
+        targeting_criteria = TargetPopulationTargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()

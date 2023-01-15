@@ -12,10 +12,9 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
+    TargetPopulation, TargetPopulationTargetingCriteria,
 )
 
 
@@ -68,7 +67,7 @@ class TargetingCriteriaRuleFactory(factory.DjangoModelFactory):
 
 class TargetingCriteriaFactory(factory.DjangoModelFactory):
     class Meta:
-        model = TargetingCriteria
+        model = TargetPopulationTargetingCriteria
 
 
 class TargetPopulationFactory(factory.DjangoModelFactory):

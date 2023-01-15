@@ -1,9 +1,8 @@
 import datetime
 from typing import Any, Dict, List
 
-from django.core.management import call_command
-
 from dateutil.relativedelta import relativedelta
+from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -15,19 +14,18 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation,
+    TargetPopulation, TargetPopulationTargetingCriteria,
 )
 
 
 class TestTargetingCriteriaQuery(APITestCase):
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
-        targeting_criteria = TargetingCriteria()
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetPopulationTargetingCriteria:
+        targeting_criteria = TargetPopulationTargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
@@ -52,7 +50,7 @@ class TestTargetingCriteriaQuery(APITestCase):
         assert Household.objects.all().distinct().count() == 2
 
     @classmethod
-    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
+    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetPopulationTargetingCriteria:
         criteria = cls.get_targeting_criteria_for_rule(*args, **kwargs)
         TargetPopulation(
             name="tp",
@@ -134,8 +132,8 @@ class TestTargetingCriteriaQuery(APITestCase):
 
 class TestTargetingCriteriaIndividualRules(APITestCase):
     @staticmethod
-    def get_targeting_criteria_for_filters(filters: List[Dict]) -> TargetingCriteria:
-        targeting_criteria = TargetingCriteria()
+    def get_targeting_criteria_for_filters(filters: List[Dict]) -> TargetPopulationTargetingCriteria:
+        targeting_criteria = TargetPopulationTargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()

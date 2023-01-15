@@ -167,7 +167,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         on_delete=models.SET_NULL,
     )
     targeting_criteria = models.OneToOneField(
-        "TargetingCriteria",
+        "TargetPopulationTargetingCriteria",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
@@ -323,9 +323,16 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     (against Golden Record) or for a final list (against the approved candidate
     list).
     """
-
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
+
+
+class TargetPopulationTargetingCriteria(TargetingCriteria):
+    """
+    Proxy Model for TargetingCriteria supports only TargetPopulation
+    """
+    class Meta:
+        proxy = True
 
     def get_excluded_household_ids(self) -> List["UUID"]:
         return self.target_population.excluded_household_ids

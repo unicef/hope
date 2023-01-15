@@ -6,14 +6,13 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRule,
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetingIndividualRuleFilterBlockBase,
-    TargetPopulation,
+    TargetPopulation, TargetPopulationTargetingCriteria,
 )
 
 
@@ -41,7 +40,7 @@ class TestIndividualBlockFilter(TestCase):
     def test_all_individuals_are_female(self) -> None:
         queryset = Household.objects.all()
         tp = TargetPopulation()
-        tc = TargetingCriteria()
+        tc = TargetPopulationTargetingCriteria()
         tc.target_population = tp
         tc.save()
         tcr = TargetingCriteriaRule()

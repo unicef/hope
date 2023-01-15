@@ -111,7 +111,7 @@ class TargetingCriteriaNode(DjangoObjectType):
         return self.rules.all()
 
     class Meta:
-        model = target_models.TargetingCriteria
+        model = target_models.TargetPopulationTargetingCriteria
 
 
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
