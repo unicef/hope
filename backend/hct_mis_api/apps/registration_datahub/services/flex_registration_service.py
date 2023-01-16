@@ -526,6 +526,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         bank_name = collector_dict.pop("bank_description")
         bank_account_number = collector_dict.pop("bank_name")
+        national_id = collector_dict.pop("national_id_no_i_c")
 
         primary_collector = ImportedIndividual.objects.create(
             **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
@@ -535,9 +536,18 @@ class SriLankaRegistrationService(BaseRegistrationService):
             household=household, individual=primary_collector, role=ROLE_PRIMARY
         )
 
-        ImportedBankAccountInfo.objects.create(
-            bank_name=bank_name, bank_account_number=bank_account_number, individual=primary_collector
-        )
+        if bank_name and bank_account_number:
+            ImportedBankAccountInfo.objects.create(
+                bank_name=bank_name, bank_account_number=bank_account_number, individual=primary_collector
+            )
+
+        if national_id:
+            ImportedDocument.objects.create(
+                document_number=national_id,
+                individual=primary_collector,
+                type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID),
+                country=Country(code="LK"),
+            )
 
         individuals_to_create = []
         for individual_data_dict in individuals_list:

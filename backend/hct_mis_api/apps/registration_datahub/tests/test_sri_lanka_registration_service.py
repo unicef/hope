@@ -5,9 +5,10 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
+    ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
@@ -29,8 +30,8 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_TAX_ID,
-            label=IDENTIFICATION_TYPE_TAX_ID,
+            type=IDENTIFICATION_TYPE_NATIONAL_ID,
+            label=IDENTIFICATION_TYPE_NATIONAL_ID,
         )
 
         BusinessArea.objects.create(
@@ -127,6 +128,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 1)
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
+        self.assertEqual(ImportedDocument.objects.count(), 1)
 
         self.assertEqual(
             ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
