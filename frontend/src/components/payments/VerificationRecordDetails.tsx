@@ -58,7 +58,7 @@ export function VerificationRecordDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label={t('REGISTRATION GROUP')}>
+            <LabelizedField label={t('Household')}>
               <BlackLink
                 to={`/${businessArea}/population/household/${paymentVerification.paymentRecord.household.id}`}
               >

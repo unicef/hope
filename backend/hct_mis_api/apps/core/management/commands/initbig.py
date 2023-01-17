@@ -119,7 +119,7 @@ def create_payment_records(business_area_names: List) -> None:
                 )
 
 
-def create_user_roles_in_business_areas(user: Any, business_areas: List) -> None:
+def create_user_roles_in_business_areas(user: Any, business_areas: List[Any]) -> None:
     role = Role.objects.get(name="Role with all permissions")
     for area in business_areas:
         UserRole.objects.get_or_create(user=user, role=role, business_area=BusinessArea.objects.get(name=area))
@@ -234,7 +234,7 @@ class Command(BaseCommand):
         )
 
         all_bas = small_business_areas_with_locales + [ukraine]
-        create_user_roles_in_business_areas(user, (a.area for a in all_bas))
+        create_user_roles_in_business_areas(user, [a.area for a in all_bas])
 
         elapsed_print("Creating programs")
         for business_area in BusinessArea.objects.filter(name__in=[area.area for area in all_bas]):

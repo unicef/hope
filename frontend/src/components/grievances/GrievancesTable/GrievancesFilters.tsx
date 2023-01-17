@@ -13,6 +13,7 @@ import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -174,6 +175,12 @@ export function GrievancesFilters({
           <RdiAutocomplete
             onFilterChange={onFilterChange}
             name='registrationDataImport'
+          />
+        </Grid>
+        <Grid item>
+          <LanguageAutocomplete
+            onFilterChange={onFilterChange}
+            name='preferredLanguage'
           />
         </Grid>
       </Grid>
