@@ -81,7 +81,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
             form = ImportPaymentRecordsForm()
             context = self.get_common_context(request, title=tilte, form=form)
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
-        # print(request.POST)
+
         form = ImportPaymentRecordsForm(request.POST, request.FILES)
         context = self.get_common_context(request, title=tilte, form=form)
         if not form.is_valid():
