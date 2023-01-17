@@ -35,7 +35,7 @@ WORKDIR /code/
 
 EXPOSE 8000
 
-RUN curl -o /code/psql-cert.crt -L https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem
+RUN curl -o /code/psql-cert.crt -L https://www.digicert.com/CACerts/BaltimoreCyberTrustRoot.crt.pem
 
 ADD ./docker-entrypoint.sh /bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
