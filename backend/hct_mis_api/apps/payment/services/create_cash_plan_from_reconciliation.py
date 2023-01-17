@@ -50,6 +50,7 @@ class CreateCashPlanReconciliationService:
         cash_plan_form_data: dict,
         currency: str,
         delivery_type: str,
+        delivery_date: str,
     ) -> None:
         self.business_area = business_area
         self.reconciliation_xlsx_file = reconciliation_xlsx_file
@@ -58,6 +59,7 @@ class CreateCashPlanReconciliationService:
         self.delivery_type = delivery_type
         self.column_index_mapping = {}
         self.cash_plan_form_data = cash_plan_form_data
+        self.delivery_date = delivery_date
         self.total_person_covered = 0
         self.total_delivered_amount = 0
         self.total_entitlement_amount = 0
@@ -125,6 +127,7 @@ class CreateCashPlanReconciliationService:
             service_provider=self.cash_plan.service_provider,
             status_date=self.cash_plan.status_date,
             delivery_type=self.delivery_type,
+            delivery_date=self.delivery_date,
         )
         payment_record.save()
 
@@ -179,6 +182,8 @@ class CreateCashPlanReconciliationService:
             business_area=self.business_area,
             file=self.reconciliation_xlsx_file,
         )
+        program_id = self.cash_plan_form_data.pop("program").pk
+        service_provider_id = self.cash_plan_form_data.pop("service_provider").pk
 
         create_cash_plan_reconciliation_xlsx.delay(
             str(reconciliation_xlsx_file.pk),
@@ -186,16 +191,18 @@ class CreateCashPlanReconciliationService:
             self.cash_plan_form_data,
             self.currency,
             self.delivery_type,
-            str(user.id),
+            str(self.delivery_date),
+            str(program_id),
+            str(service_provider_id),
         )
 
-    def send_email(self, user: "User", error_msg: Optional[str] = None) -> None:
+    def send_email(self, user: "User", file_name: str, error_msg: Optional[str] = None) -> None:
         msg = "Celery task Importing Payment Records finished."
 
         if error_msg:
-            msg = msg + f"\n {error_msg}"
+            msg = msg + f"\n{error_msg}"
         else:
-            msg = msg + f"\n CashPlan ID: {self.cash_plan.ca_id}"
+            msg = msg + f"\nCashPlan ID: {self.cash_plan.ca_id}. File name: {file_name}"
 
         context = {
             "first_name": user.first_name,
