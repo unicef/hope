@@ -6,6 +6,7 @@ backend:
   image: #from-pipeline
   replicaCount: 1
   config:
+    POSTGRES_SSL: "true"
     STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
     EMAIL_HOST: "extmail01.unicef.org"
     EMAIL_USE_TLS: "false"
