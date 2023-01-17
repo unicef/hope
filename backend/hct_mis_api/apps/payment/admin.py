@@ -76,14 +76,14 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
 
     @button()
     def import_payment_records(self, request: HttpRequest) -> Any:
-        tilte = "Import Payment Records"
+        title = "Import Payment Records"
         if request.method == "GET":
             form = ImportPaymentRecordsForm()
-            context = self.get_common_context(request, title=tilte, form=form)
+            context = self.get_common_context(request, title=title, form=form)
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
 
         form = ImportPaymentRecordsForm(request.POST, request.FILES)
-        context = self.get_common_context(request, title=tilte, form=form)
+        context = self.get_common_context(request, title=title, form=form)
         if not form.is_valid():
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
         cleaned_data = form.cleaned_data
@@ -100,17 +100,17 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
             cleaned_data,
             cleaned_data.pop("currency"),
             cleaned_data.pop("delivery_type"),
+            cleaned_data.pop("delivery_date"),
         )
 
         service.create_celery_task(request.user)
 
         self.message_user(
             request,
-            "Celery task created and Payment Records will imported soon. We will send an email after finishing import",
+            "Background task created and Payment Records will imported soon. We will send an email after finishing import",
             level=messages.SUCCESS,
         )
 
-        self.message_user(request, "Payment Records Imported", level=messages.SUCCESS)
         return HttpResponseRedirect(reverse("admin:payment_paymentrecord_changelist"))
 
 
