@@ -71,7 +71,7 @@ spec:
         - name: scripts
           mountPath: /etc/profile.d/
         - name: uwsgi-config
-          mountPath: /srv/src/kpi/uwsgi.ini
+          mountPath: /srv/src/kpi/docker/uwsgi.ini
           subPath: uwsgi.ini
         {{- if .Values.kpi.livenessProbe.enabled }}
         livenessProbe:
