@@ -199,7 +199,6 @@ class FlexRegistrationService(BaseRegistrationService):
         "admin1": "admin1_h_c",
         "admin2": "admin2_h_c",
         "size": "size_h_c",
-        # "where_are_you_now": "",
     }
     DOCUMENT_MAPPING_TYPE_DICT = {
         IDENTIFICATION_TYPE_NATIONAL_ID: ("national_id_no_i_c_1", "national_id_picture"),
@@ -452,7 +451,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
-
         return {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
             "flex_registrations_record": record,
