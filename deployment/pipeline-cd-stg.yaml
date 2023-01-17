@@ -64,7 +64,6 @@ stages:
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
-                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 postgresql.externalDatabase.password=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.externalDatabase.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\

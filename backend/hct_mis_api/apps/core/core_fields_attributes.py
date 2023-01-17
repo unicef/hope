@@ -36,6 +36,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
@@ -1703,6 +1704,20 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "debit_card_number_i_c",
         "scope": [Scope.XLSX],
+    },
+    {
+        "id": "ac967a61-dfdd-4fff-8b33-388681f87c40",
+        "type": TYPE_SELECT_ONE,
+        "name": "preferred_language",
+        "lookup": "preferred_language",
+        "required": False,
+        "label": {"English(EN)": "Preferred language"},
+        "hint": "",
+        "_choices": lambda *args, **kwargs: Languages.get_choices(),
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "preferred_language_i_c",
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
     },
 ]
 

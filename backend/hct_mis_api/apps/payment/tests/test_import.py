@@ -128,15 +128,14 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(
-            import_service.errors,
+        error = import_service.errors[0]
+        self.assertListEqual(
+            [error.sheet, error.coordinates, error.message],
             [
-                (
-                    "Payment Verifications",
-                    f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                    "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
-                    "[None, 'YES', 'NO']",
-                )
+                "Payment Verifications",
+                f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+                "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
+                "[None, 'YES', 'NO']",
             ],
         )
 
@@ -162,14 +161,13 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(
-            import_service.errors,
+        error = import_service.errors[0]
+        self.assertListEqual(
+            [error.sheet, error.coordinates, error.message],
             [
-                (
-                    "Payment Verifications",
-                    "A2",
-                    f"This payment record id {wrong_uuid} is not in Cash Plan Payment Record Verification",
-                )
+                "Payment Verifications",
+                "A2",
+                f"This payment record id {wrong_uuid} is not in Cash Plan Payment Record Verification",
             ],
         )
 
@@ -181,14 +179,13 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(
-            import_service.errors,
+        error = import_service.errors[0]
+        self.assertListEqual(
+            [error.sheet, error.coordinates, error.message],
             [
-                (
-                    "Payment Verifications",
-                    f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3",
-                    "Wrong type off cell number expected, text given.",
-                )
+                "Payment Verifications",
+                f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}3",
+                "Wrong type off cell number expected, text given.",
             ],
         )
 
@@ -201,14 +198,13 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(
-            import_service.errors,
+        error = import_service.errors[0]
+        self.assertListEqual(
+            [error.sheet, error.coordinates, error.message],
             [
-                (
-                    "Payment Verifications",
-                    f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                    "If received_amount(10.00) is not 0, you should set received to YES",
-                )
+                "Payment Verifications",
+                f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+                "If received_amount(10.00) is not 0, you should set received to YES",
             ],
         )
 
@@ -221,14 +217,13 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
-        self.assertEqual(
-            import_service.errors,
+        error = import_service.errors[0]
+        self.assertListEqual(
+            [error.sheet, error.coordinates, error.message],
             [
-                (
-                    "Payment Verifications",
-                    f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                    "If received_amount is 0, you should set received to NO",
-                )
+                "Payment Verifications",
+                f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+                "If received_amount is 0, you should set received to NO",
             ],
         )
 

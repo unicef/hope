@@ -79,6 +79,7 @@ export type AddIndividualDataObjectType = {
   whoAnswersPhone?: Maybe<Scalars['String']>,
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
   role: Scalars['String'],
+  preferredLanguage?: Maybe<Scalars['String']>,
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
@@ -2003,6 +2004,7 @@ export type ImportedIndividualNode = Node & {
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
@@ -2198,6 +2200,7 @@ export type IndividualNode = Node & {
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -2431,6 +2434,7 @@ export type IndividualUpdateDataObjectType = {
   whoAnswersPhone?: Maybe<Scalars['String']>,
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   documentsToEdit?: Maybe<Array<Maybe<EditIndividualDocumentObjectType>>>,
@@ -2520,6 +2524,26 @@ export type LabelNode = {
    __typename?: 'LabelNode',
   language?: Maybe<Scalars['String']>,
   label?: Maybe<Scalars['String']>,
+};
+
+export type LanguageObject = {
+   __typename?: 'LanguageObject',
+  english?: Maybe<Scalars['String']>,
+  alpha2?: Maybe<Scalars['String']>,
+  alpha3?: Maybe<Scalars['String']>,
+};
+
+export type LanguageObjectConnection = {
+   __typename?: 'LanguageObjectConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<LanguageObjectEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+};
+
+export type LanguageObjectEdge = {
+   __typename?: 'LanguageObjectEdge',
+  node?: Maybe<LanguageObject>,
+  cursor: Scalars['String'],
 };
 
 export type LockTargetPopulationMutation = {
@@ -3377,6 +3401,7 @@ export type Query = {
   koboProject?: Maybe<KoboAssetObject>,
   allKoboProjects?: Maybe<KoboAssetObjectConnection>,
   cashAssistUrlPrefix?: Maybe<Scalars['String']>,
+  allLanguages?: Maybe<LanguageObjectConnection>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
@@ -3550,6 +3575,7 @@ export type QueryAllGrievanceTicketArgs = {
   scoreMin?: Maybe<Scalars['String']>,
   scoreMax?: Maybe<Scalars['String']>,
   household?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3756,6 +3782,15 @@ export type QueryKoboProjectArgs = {
 export type QueryAllKoboProjectsArgs = {
   businessAreaSlug: Scalars['String'],
   onlyDeployed?: Maybe<Scalars['Boolean']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryAllLanguagesArgs = {
+  name?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -6010,7 +6045,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6169,7 +6204,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
+  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'preferredLanguage'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -7673,7 +7708,8 @@ export type AllGrievanceTicketQueryVariables = {
   cashPlan?: Maybe<Scalars['String']>,
   scoreMin?: Maybe<Scalars['String']>,
   scoreMax?: Maybe<Scalars['String']>,
-  household?: Maybe<Scalars['String']>
+  household?: Maybe<Scalars['String']>,
+  preferredLanguage?: Maybe<Scalars['String']>
 };
 
 
@@ -9484,6 +9520,27 @@ export type GlobalAreaChartsQuery = (
   )> }
 );
 
+export type LanguageAutocompleteQueryVariables = {
+  first?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type LanguageAutocompleteQuery = (
+  { __typename?: 'Query' }
+  & { allLanguages: Maybe<(
+    { __typename?: 'LanguageObjectConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'LanguageObjectEdge' }
+      & Pick<LanguageObjectEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'LanguageObject' }
+        & Pick<LanguageObject, 'english' | 'alpha2'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type RdiAutocompleteQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -9920,6 +9977,7 @@ export const IndividualDetailedFragmentDoc = gql`
     bankName
     bankAccountNumber
   }
+  preferredLanguage
 }
     ${IndividualMinimalFragmentDoc}`;
 export const PaymentRecordDetailsFragmentDoc = gql`
@@ -10181,6 +10239,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   phoneNoAlternative
   phoneNoValid
   phoneNoAlternativeValid
+  preferredLanguage
 }
     ${ImportedIndividualMinimalFragmentDoc}`;
 export const TargetPopulationMinimalFragmentDoc = gql`
@@ -14226,8 +14285,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $preferredLanguage: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, preferredLanguage: $preferredLanguage) {
     totalCount
     pageInfo {
       startCursor
@@ -14315,6 +14374,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      scoreMin: // value for 'scoreMin'
  *      scoreMax: // value for 'scoreMax'
  *      household: // value for 'household'
+ *      preferredLanguage: // value for 'preferredLanguage'
  *   },
  * });
  */
@@ -18517,6 +18577,63 @@ export function useGlobalAreaChartsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
 export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
 export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
+export const LanguageAutocompleteDocument = gql`
+    query LanguageAutocomplete($first: Int, $name: String) {
+  allLanguages(first: $first, name: $name) {
+    edges {
+      cursor
+      node {
+        english
+        alpha2
+      }
+    }
+  }
+}
+    `;
+export type LanguageAutocompleteComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>, 'query'>;
+
+    export const LanguageAutocompleteComponent = (props: LanguageAutocompleteComponentProps) => (
+      <ApolloReactComponents.Query<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables> query={LanguageAutocompleteDocument} {...props} />
+    );
+    
+export type LanguageAutocompleteProps<TChildProps = {}> = ApolloReactHoc.DataProps<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables> & TChildProps;
+export function withLanguageAutocomplete<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LanguageAutocompleteQuery,
+  LanguageAutocompleteQueryVariables,
+  LanguageAutocompleteProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables, LanguageAutocompleteProps<TChildProps>>(LanguageAutocompleteDocument, {
+      alias: 'languageAutocomplete',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLanguageAutocompleteQuery__
+ *
+ * To run a query within a React component, call `useLanguageAutocompleteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLanguageAutocompleteQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLanguageAutocompleteQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useLanguageAutocompleteQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>) {
+        return ApolloReactHooks.useQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, baseOptions);
+      }
+export function useLanguageAutocompleteLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, baseOptions);
+        }
+export type LanguageAutocompleteQueryHookResult = ReturnType<typeof useLanguageAutocompleteQuery>;
+export type LanguageAutocompleteLazyQueryHookResult = ReturnType<typeof useLanguageAutocompleteLazyQuery>;
+export type LanguageAutocompleteQueryResult = ApolloReactCommon.QueryResult<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>;
 export const RdiAutocompleteDocument = gql`
     query RdiAutocomplete($businessArea: String, $first: Int, $orderBy: String, $name: String) {
   allRegistrationDataImports(businessArea: $businessArea, first: $first, orderBy: $orderBy, name_Startswith: $name) {
@@ -19186,6 +19303,9 @@ export type ResolversTypes = {
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
+  LanguageObjectConnection: ResolverTypeWrapper<LanguageObjectConnection>,
+  LanguageObjectEdge: ResolverTypeWrapper<LanguageObjectEdge>,
+  LanguageObject: ResolverTypeWrapper<LanguageObject>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -19560,6 +19680,9 @@ export type ResolversParentTypes = {
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
+  LanguageObjectConnection: LanguageObjectConnection,
+  LanguageObjectEdge: LanguageObjectEdge,
+  LanguageObject: LanguageObject,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -20607,6 +20730,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
@@ -20719,6 +20843,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
@@ -20829,6 +20954,23 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
   language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type LanguageObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObject'] = ResolversParentTypes['LanguageObject']> = {
+  english?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  alpha2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  alpha3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type LanguageObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObjectConnection'] = ResolversParentTypes['LanguageObjectConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['LanguageObjectEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type LanguageObjectEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObjectEdge'] = ResolversParentTypes['LanguageObjectEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['LanguageObject']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type LockTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['LockTargetPopulationMutation'] = ResolversParentTypes['LockTargetPopulationMutation']> = {
@@ -21154,6 +21296,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
   allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
   cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  allLanguages?: Resolver<Maybe<ResolversTypes['LanguageObjectConnection']>, ParentType, ContextType, QueryAllLanguagesArgs>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
@@ -22304,6 +22447,9 @@ export type Resolvers<ContextType = any> = {
   KoboErrorNode?: KoboErrorNodeResolvers<ContextType>,
   KoboImportDataNode?: KoboImportDataNodeResolvers<ContextType>,
   LabelNode?: LabelNodeResolvers<ContextType>,
+  LanguageObject?: LanguageObjectResolvers<ContextType>,
+  LanguageObjectConnection?: LanguageObjectConnectionResolvers<ContextType>,
+  LanguageObjectEdge?: LanguageObjectEdgeResolvers<ContextType>,
   LockTargetPopulationMutation?: LockTargetPopulationMutationResolvers<ContextType>,
   LogEntryNode?: LogEntryNodeResolvers<ContextType>,
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,

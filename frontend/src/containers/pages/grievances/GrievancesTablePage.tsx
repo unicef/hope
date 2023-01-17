@@ -36,6 +36,7 @@ export function GrievancesTablePage(): React.ReactElement {
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
+    preferredLanguage: '',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {
