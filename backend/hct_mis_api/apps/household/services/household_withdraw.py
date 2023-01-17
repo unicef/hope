@@ -15,14 +15,14 @@ class HouseholdWithdraw:
     def withdraw(self, tag: Optional[Any] = None) -> None:
         self.household.withdraw(tag)
 
-        for individual in self.household.individuals.select_for_update().filter(duplicate=False):
+        for individual in self.household.individuals.select_for_update().filter(duplicate=False).order_by("pk"):
             individual.withdraw()
 
     @transaction.atomic
     def unwithdraw(self) -> None:
         self.household.unwithdraw()
 
-        for individual in self.household.individuals.select_for_update().filter(duplicate=False):
+        for individual in self.household.individuals.select_for_update().filter(duplicate=False).order_by("pk"):
             individual.unwithdraw()
 
     def change_tickets_status(self, tickets: Iterable) -> None:

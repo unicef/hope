@@ -713,7 +713,9 @@ def close_add_individual_grievance_ticket(grievance_ticket: GrievanceTicket, inf
         individual.save()
         if relationship_to_head_of_household == HEAD:
             household.head_of_household = individual
-            household_individuals = evaluate_qs(household.individuals.exclude(id=individual.id).select_for_update())
+            household_individuals = evaluate_qs(
+                household.individuals.exclude(id=individual.id).select_for_update().order_by("pk")
+            )
             household_individuals.update(relationship=RELATIONSHIP_UNKNOWN)
             household.save(update_fields=["head_of_household"])
         household.size += 1

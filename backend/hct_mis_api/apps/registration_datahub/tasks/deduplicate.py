@@ -586,7 +586,9 @@ class DeduplicateTask:
         wait_until_es_healthy()
         cls.set_thresholds(registration_data_import.business_area)
         individuals = evaluate_qs(
-            Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
+            Individual.objects.filter(registration_data_import=registration_data_import)
+            .select_for_update()
+            .order_by("pk")
         )
 
         (
@@ -613,7 +615,7 @@ class DeduplicateTask:
         wait_until_es_healthy()
         cls.set_thresholds(business_area)
 
-        evaluate_qs(individuals.select_for_update())
+        evaluate_qs(individuals.select_for_update().order_by("pk"))
 
         to_bulk_update_results = []
         for individual in individuals:
@@ -840,6 +842,7 @@ class DeduplicateTask:
             new_documents.exclude(status=Document.STATUS_VALID)
             .select_related("individual")
             .select_for_update(of=("self", "individual"))
+            .order_by("pk")
         )
         documents_numbers = [x.document_number for x in documents_to_dedup]
         new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]

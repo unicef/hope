@@ -37,7 +37,8 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
                     Household.objects.filter(pk__in=households_ids)
                     .only("id", "collect_individual_data")
                     .prefetch_related("individuals")
-                    .select_for_update(of=("self",))
+                    .select_for_update(of=("self",), skip_locked=True)
+                    .order_by("pk")
                 ):
                     scope.set_tag("business_area", hh.business_area)
                     household, updated_fields = recalculate_data(hh, save=False)
