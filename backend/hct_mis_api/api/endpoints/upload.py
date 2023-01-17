@@ -245,5 +245,5 @@ class UploadRDIView(HOPEAPIBusinessAreaView):
         if serializer.is_valid():
             info = serializer.save(user=request.user)
             return Response(info, status=status.HTTP_201_CREATED)
-        errors = humanize_errors(serializer.errors)  # type: ignore # FIXME
+        errors = humanize_errors(serializer.errors)
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
