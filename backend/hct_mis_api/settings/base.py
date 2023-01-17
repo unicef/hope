@@ -836,3 +836,8 @@ MARKDOWNIFY = {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
     }
 }
+
+SHELL_PLUS_DONT_LOAD = [
+    "mis_datahub.Individual",
+    "mis_datahub.Household",
+]
