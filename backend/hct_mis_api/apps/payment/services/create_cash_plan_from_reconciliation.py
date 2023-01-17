@@ -1,19 +1,29 @@
+import logging
 import uuid
 from datetime import datetime
-from typing import IO
+from typing import IO, TYPE_CHECKING, Optional
 
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
+from django.template.loader import render_to_string
 
 import openpyxl
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerificationSummary,
     PaymentRecord,
 )
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+
+logger = logging.getLogger(__name__)
 
 ValidationError = Exception
 
@@ -140,3 +150,47 @@ class CreateCashPlanReconciliationService:
         self.cash_plan.total_delivered_quantity = self.total_delivered_amount
         CashPlanPaymentVerificationSummary.objects.create(cash_plan=self.cash_plan)
         self.cash_plan.save()
+
+    def create_celery_task(self, user: "User") -> None:
+        reconciliation_xlsx_file = StorageFile.objects.create(
+            created_by=user,
+            business_area=self.business_area,
+            file=self.reconciliation_xlsx_file,
+        )
+
+        create_cash_plan_reconciliation_xlsx.delay(
+            str(reconciliation_xlsx_file.pk),
+            self.column_mapping,
+            self.cash_plan_form_data,
+            self.currency,
+            self.delivery_type,
+            str(user.id),
+        )
+
+    def send_email(self, user: "User", error_msg: Optional[str] = None) -> None:
+        msg = "Celery task Importing Payment Records finished."
+
+        if error_msg:
+            msg = msg + f"\n {error_msg}"
+        else:
+            msg = msg + f"\n CashPlan ID: {self.cash_plan.ca_id}"
+
+        context = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "message": msg,
+        }
+        text_body = render_to_string("admin/payment/payment_record/import_payment_records_email.txt", context=context)
+        html_body = render_to_string("admin/payment/payment_record/import_payment_records_email.html", context=context)
+
+        email = EmailMultiAlternatives(
+            subject="Importing Payment Records finished",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[context["email"]],
+            body=text_body,
+        )
+        email.attach_alternative(html_body, "text/html")
+        result = email.send()
+        if not result:
+            logger.error(f"Email couldn't be send to {context['email']}")
