@@ -93,14 +93,10 @@ class TestUkrainianRegistrationService(TestCase):
             }
         ]
 
-        defaults = {
-            "registration": 1,
-            "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
-        }
-
         records = [
             Record(
-                **defaults,
+                registration=1,
+                timestamp=timezone.make_aware(datetime.datetime(2022, 4, 1)),
                 source_id=1,
                 fields={
                     "children-info": children_info,
