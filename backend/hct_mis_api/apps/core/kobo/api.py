@@ -2,7 +2,7 @@ import logging
 import time
 import typing
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -106,14 +106,12 @@ class KoboAPI:
     def _post_request(
         self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
     ) -> requests.Response:
-        response = self._client.post(url=url, data=data, files=files)
-        return response
+        return self._client.post(url=url, data=data, files=files)
 
     def _patch_request(
         self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
     ) -> requests.Response:
-        response = self._client.patch(url=url, data=data, files=files)
-        return response
+        return self._client.patch(url=url, data=data, files=files)
 
     def create_template_from_file(
         self, bytes_io_file: Optional[typing.IO], xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
@@ -164,14 +162,14 @@ class KoboAPI:
         log_and_raise("Fetching import data took too long", error_type=RetryError)
         return None
 
-    def get_all_projects_data(self) -> Union[List, Dict, None]:
+    def get_all_projects_data(self) -> List:
         if not self.business_area:
             logger.error("Business area is not provided")
             raise ValueError("Business area is not provided")
         projects_url = self._get_url("assets")
 
-        response_dict = self._handle_paginated_results(projects_url)
-        return filter_by_owner(response_dict, self.business_area)
+        results = self._handle_paginated_results(projects_url)
+        return filter_by_owner(results, self.business_area)
 
     def get_single_project_data(self, uid: str) -> Dict:
         projects_url = self._get_url(f"assets/{uid}")
@@ -187,8 +185,7 @@ class KoboAPI:
             additional_query_params=additional_query_params,
         )
 
-        response_dict = self._handle_paginated_results(submissions_url)
-        return response_dict
+        return self._handle_paginated_results(submissions_url)
 
     def get_attached_file(self, url: str) -> BytesIO:
         response = self._client.get(url=url)
@@ -197,5 +194,4 @@ class KoboAPI:
         except requests.exceptions.HTTPError as e:
             logger.exception(e)
             raise
-        file = BytesIO(response.content)
-        return file
+        return BytesIO(response.content)

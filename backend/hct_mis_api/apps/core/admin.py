@@ -1,7 +1,7 @@
 import csv
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -15,7 +15,6 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
-from django.db.models import Aggregate, CharField
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -121,19 +120,6 @@ class BusinessofficeFilter(SimpleListFilter):
         elif self.value() == "1":
             return queryset.exclude(parent_id__isnull=True)
         return queryset
-
-
-class GroupConcat(Aggregate):
-    function = "GROUP_CONCAT"
-    template = "%(function)s(%(distinct)s%(expressions)s)"
-
-    def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
-        super().__init__(
-            expression,
-            distinct="DISTINCT " if distinct else "",  # type: ignore # FIXME: Argument "distinct" to "__init__" of "Aggregate" has incompatible type "str"; expected "bool"
-            output_field=CharField(),
-            **extra,
-        )
 
 
 @admin.register(BusinessArea)
@@ -582,10 +568,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
-        has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False  # type: ignore # intentional
+        has_add_permission: Callable = self.has_add_permission
+        self.has_add_permission: Callable = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission  # type: ignore # intentional
+        self.has_add_permission = has_add_permission
 
         return template_response
 
