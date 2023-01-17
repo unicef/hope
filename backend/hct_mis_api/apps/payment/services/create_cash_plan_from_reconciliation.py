@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import IO, TYPE_CHECKING, Optional
 
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.template.loader import render_to_string
 
 import openpyxl
 
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
@@ -76,6 +78,7 @@ class CreateCashPlanReconciliationService:
                 break
             self._parse_row(row_values, index)
         self._add_cashplan_info()
+        self._update_exchange_rates()
 
     def _parse_header(self, header: list) -> None:
         for column, xlsx_column in self.column_mapping.items():
@@ -150,6 +153,25 @@ class CreateCashPlanReconciliationService:
         self.cash_plan.total_delivered_quantity = self.total_delivered_amount
         CashPlanPaymentVerificationSummary.objects.create(cash_plan=self.cash_plan)
         self.cash_plan.save()
+
+    def _update_exchange_rates(self) -> None:
+        exchange_rates_client = ExchangeRates()
+        payment_records_qs = PaymentRecord.objects.filter(cash_plan=self.cash_plan)
+        for payment_record in payment_records_qs:
+            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
+                payment_record.currency, payment_record.cash_plan.dispersion_date
+            )
+
+            if exchange_rate is None:
+                logger.info(f"exchange_rate not found for {payment_record.ca_id}")
+                continue
+            else:
+                exchange_rate = Decimal(exchange_rate)
+            payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity / exchange_rate).quantize(
+                Decimal(".01")
+            )
+
+        PaymentRecord.objects.bulk_update(payment_records_qs, ["delivered_quantity_usd"], 1000)
 
     def create_celery_task(self, user: "User") -> None:
         reconciliation_xlsx_file = StorageFile.objects.create(
