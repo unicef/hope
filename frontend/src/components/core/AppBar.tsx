@@ -5,7 +5,7 @@ import TextsmsIcon from '@material-ui/icons/Textsms';
 import Toolbar from '@material-ui/core/Toolbar';
 import MenuIcon from '@material-ui/icons/Menu';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
 import { UserProfileMenu } from '../../containers/UserProfileMenu';
@@ -66,6 +66,8 @@ const StyledLink = styled.a`
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
+  const [filters, setFilters] = useState({ program: '' });
+
   if (meLoading) {
     return null;
   }
@@ -89,7 +91,10 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
             <BusinessAreaSelect />
           </BusinessAreaContainer>
           <BusinessAreaContainer>
-            <GlobalProgramAutocomplete />
+            <GlobalProgramAutocomplete
+              onFilterChange={setFilters}
+              name='program'
+            />
           </BusinessAreaContainer>
         </Box>
         <Box display='flex' justifyContent='flex-end'>

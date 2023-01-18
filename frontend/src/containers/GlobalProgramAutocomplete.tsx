@@ -2,6 +2,7 @@ import { TextField } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
+import { useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,16 +15,17 @@ const StyledAutocomplete = styled(Autocomplete)`
     width: ${({ theme }) => theme.spacing(58)}px;
     color: #e3e6e7;
   }
-
   .MuiAutocomplete-inputRoot {
     background-color: #465861;
     margin-bottom: 3px;
     color: #e3e6e7;
-    border-bottom-width: 0;
     border-radius: 4px;
     height: 42px;
+    padding: 0 10px;
   }
-
+  .MuiAutocomplete-inputRoot:hover {
+    background-color: #1d2c32;
+  }
   .MuiFormLabel-root {
     color: #e3e6e7;
   }
@@ -38,20 +40,19 @@ export const GlobalProgramAutocomplete = ({
   onFilterChange,
   name,
   value,
-  label,
 }: {
   disabled?;
   fullWidth?: boolean;
-  onFilterChange?;
+  onFilterChange;
   name?;
   value?;
-  label?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
+  const history = useHistory();
 
   const [loadData, { data, loading }] = useAllProgramsForChoicesLazyQuery({
     variables: {
@@ -73,6 +74,9 @@ export const GlobalProgramAutocomplete = ({
       ...filters,
       [name]: selectedValue?.node?.id || undefined,
     }));
+    if (selectedValue?.node?.id) {
+      history.push(`/${businessArea}/${selectedValue?.node?.id}`);
+    }
   };
   return (
     <StyledAutocomplete
@@ -99,7 +103,7 @@ export const GlobalProgramAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label || t('Programme')}
+          placeholder={t('Programme')}
           variant='outlined'
           margin='dense'
           value={inputValue}
