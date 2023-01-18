@@ -42,6 +42,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
 
@@ -222,13 +223,21 @@ class RdiMergeTask:
         for imported_individual in imported_individuals:
             values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
 
-            if not values.get("phone_no_valid"):
-                values["phone_no_valid"] = False
-            if not values.get("phone_no_alternative_valid"):
-                values["phone_no_alternative_valid"] = False
-
             imported_individual_household = imported_individual.household
             household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
+
+            phone_no = values.get("phone_no")
+            phone_no_valid = values.get("phone_no_valid")
+
+            if phone_no_valid is None:
+                values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
+
+            phone_no_alternative = values.get("phone_no_alternative")
+            phone_no_alternative_valid = values.get("phone_no_alternative_valid")
+
+            if phone_no_alternative_valid is None:
+                values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
+
             individual = Individual(
                 **values,
                 household=household,

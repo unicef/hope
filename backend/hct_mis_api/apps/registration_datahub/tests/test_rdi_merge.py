@@ -122,6 +122,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "phone_no": "+41 (0) 78 927 2696",
+                "phone_no_alternative": "+41 (0) 78 927 2696",
+                "phone_no_valid": None,
+                "phone_no_alternative_valid": None,
             },
         ]
 
@@ -177,6 +181,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "size": 8,
         }
         self.assertEqual(household_data, expected)
+
+        individual_with__phone_data = Individual.objects.filter(given_name="Bob").first()
+
+        self.assertEqual(individual_with__phone_data.phone_no_valid, True)
+        self.assertEqual(individual_with__phone_data.phone_no_alternative_valid, True)
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation_for_collect_data_partial(self) -> None:
