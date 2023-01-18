@@ -80,8 +80,6 @@ class PaymentPlan(TimeStampedUUIDModel):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
-        IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
-        IN_REVIEW = "IN_REVIEW", "In Review"
         APPROVED = "APPROVED", "Approved"
         ONGOING = "ONGOING", "Ongoing"
         RECONCILED = "RECONCILED", "Reconciled"

@@ -336,20 +336,3 @@ class HouseholdProgramPopulationThrough(TimeStampedUUIDModel):
         verbose_name = "Program to Household"
         unique_together = ("program", "household")
         ordering = ["created_at"]
-
-
-# Some abstract model may be used here
-# class IndividualProgramPopulationThrough(TimeStampedUUIDModel):
-#     individual = models.ForeignKey(
-#         "household.Individual", on_delete=models.CASCADE, related_name="program_to_individual_through"
-#     )
-#     program = models.ForeignKey(
-#         "program.Program", on_delete=models.CASCADE, related_name="program_to_individual_through"
-#     )
-#     eligible = models.BooleanField(default=False)
-#     vulnerability_score = models.DecimalField(decimal_places=2, max_digits=12, null=True)
-
-#     class Meta:
-#         verbose_name = "Program to Individual"
-#         unique_together = ("program", "individual")
-#         ordering = ["created_at"]
