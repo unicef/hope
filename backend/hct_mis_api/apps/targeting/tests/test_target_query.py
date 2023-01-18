@@ -11,7 +11,8 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 

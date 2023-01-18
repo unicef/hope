@@ -1,15 +1,14 @@
 from decimal import Decimal
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Q
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from django_fsm import FSMField
 from multiselectfield import MultiSelectField
 
-from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import FileTemp
@@ -18,7 +17,8 @@ from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, UnicefIdentifiedModel
 
-from django_fsm import FSMField, transition
+if TYPE_CHECKING:
+    from uuid import UUID
 
 
 class PaymentCycle(TimeStampedUUIDModel):
@@ -387,7 +387,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         verbose_name=_("XLSX Template"),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
 
@@ -408,7 +408,7 @@ class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
     file = models.FileField(blank=True, null=True, editable=False)
     status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False, db_index=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.template.name} ({self.status})"
 
 
@@ -453,7 +453,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         help_text=_("Select the columns to include in the report"),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({len(self.columns)})"
 
 

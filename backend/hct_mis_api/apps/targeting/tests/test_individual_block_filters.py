@@ -12,7 +12,8 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetingIndividualRuleFilterBlockBase,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 
 
