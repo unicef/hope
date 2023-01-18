@@ -145,9 +145,18 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         all individuals of a household thats part of the population or only
         the relevant ones (collectors etc.)""",
     )
-    program_population = models.ManyToManyField(
-        to="household.Household", related_name="programs", blank=True, through="program.ProgramPopulationThrough"
+    household_program_population = models.ManyToManyField(
+        to="household.Household",
+        related_name="programs",
+        blank=True,
+        through="program.HouseholdProgramPopulationThrough",
     )
+    # individual_program_population = models.ManyToManyField(
+    #     to="household.Individual",
+    #     related_name="programs",
+    #     blank=True,
+    #     through="program.IndividualProgramPopulationThrough",
+    # )
 
     @property
     def total_number_of_households(self) -> QuerySet:
@@ -313,7 +322,7 @@ class CashPlan(TimeStampedUUIDModel):
         ordering = ["created_at"]
 
 
-class ProgramPopulationThrough(TimeStampedUUIDModel):
+class HouseholdProgramPopulationThrough(TimeStampedUUIDModel):
     household = models.ForeignKey(
         "household.Household", on_delete=models.CASCADE, related_name="program_to_household_through"
     )
@@ -327,3 +336,20 @@ class ProgramPopulationThrough(TimeStampedUUIDModel):
         verbose_name = "Program to Household"
         unique_together = ("program", "household")
         ordering = ["created_at"]
+
+
+# Some abstract model may be used here
+# class IndividualProgramPopulationThrough(TimeStampedUUIDModel):
+#     individual = models.ForeignKey(
+#         "household.Individual", on_delete=models.CASCADE, related_name="program_to_individual_through"
+#     )
+#     program = models.ForeignKey(
+#         "program.Program", on_delete=models.CASCADE, related_name="program_to_individual_through"
+#     )
+#     eligible = models.BooleanField(default=False)
+#     vulnerability_score = models.DecimalField(decimal_places=2, max_digits=12, null=True)
+
+#     class Meta:
+#         verbose_name = "Program to Individual"
+#         unique_together = ("program", "individual")
+#         ordering = ["created_at"]

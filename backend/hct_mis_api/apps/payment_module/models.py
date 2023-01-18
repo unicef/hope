@@ -67,11 +67,11 @@ class PaymentPlan(TimeStampedUUIDModel):
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
-        LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
-        ACCEPTED = "ACCEPTED", "Accepted"
+        APPROVED = "APPROVED", "Approved"
+        ONGOING = "ONGOING", "Ongoing"
         RECONCILED = "RECONCILED", "Reconciled"
 
     class BackgroundActionStatus(models.TextChoices):
@@ -235,6 +235,18 @@ class PaymentPlanTargetingCriteria(TargetingCriteria):
         return map_unicef_ids_to_households_unicef_ids(self.payment_plan.excluded_ids)
 
 
+class PaymentInstructionTargetingCriteria(TargetingCriteria):
+    """
+    Proxy model for TargetingCriteria to be used in PaymentInstruction
+    """
+
+    class Meta:
+        proxy = True
+
+    def get_excluded_household_ids(self) -> List["UUID"]:
+        return map_unicef_ids_to_households_unicef_ids(self.payment_instruction.excluded_ids)
+
+
 class PaymentInstruction(TimeStampedUUIDModel):
     DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
     DELIVERY_TYPE_CASH = "Cash"
@@ -276,6 +288,13 @@ class PaymentInstruction(TimeStampedUUIDModel):
     )
     delivery_mechanism = models.CharField(max_length=255, choices=DELIVERY_TYPE_CHOICE, db_index=True, null=True)
     status = FSMField(default=Status.PENDING, protected=False, db_index=True)
+    targeting_criteria = models.OneToOneField(
+        "PaymentInstructionTargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="payment_plan",
+    )
 
 
 class PaymentList(TimeStampedUUIDModel):
@@ -289,6 +308,7 @@ class Payment(TimeStampedUUIDModel, UnicefIdentifiedModel):
     class EntitlementType(models.TextChoices):
         CASH = "RULE_ENGINE", _("Rule Engine")
         XLSX = "XLSX", _("XLSX")
+
     payment_plan = models.ForeignKey("payment_module.PaymentPlan", on_delete=models.CASCADE, related_name="payments")
     payment_list = models.ForeignKey("payment_module.PaymentList", on_delete=models.CASCADE, related_name="payments")
     payment_instruction = models.ForeignKey(
