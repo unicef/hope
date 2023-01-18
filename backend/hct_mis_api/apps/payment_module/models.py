@@ -41,7 +41,19 @@ class PaymentCycle(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.00"))],
         default="0.00",
     )
+    total_entitled_quantity_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        default="0.00",
+    )
     total_delivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        default="0.00",
+    )
+    total_delivered_quantity_usd = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.00"))],
