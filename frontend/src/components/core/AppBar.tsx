@@ -11,6 +11,7 @@ import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
 import { UserProfileMenu } from '../../containers/UserProfileMenu';
 import { MiśTheme } from '../../theme';
 import { useCachedMe } from '../../hooks/useCachedMe';
+import { GlobalProgramAutocomplete } from '../../containers/GlobalProgramAutocomplete';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
@@ -83,9 +84,14 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
         >
           <MenuIcon />
         </IconButton>
-        <BusinessAreaContainer data-cy='business-area-container'>
-          <BusinessAreaSelect />
-        </BusinessAreaContainer>
+        <Box display='flex' alignItems='center'>
+          <BusinessAreaContainer data-cy='business-area-container'>
+            <BusinessAreaSelect />
+          </BusinessAreaContainer>
+          <BusinessAreaContainer>
+            <GlobalProgramAutocomplete />
+          </BusinessAreaContainer>
+        </Box>
         <Box display='flex' justifyContent='flex-end'>
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
             <StyledLink
