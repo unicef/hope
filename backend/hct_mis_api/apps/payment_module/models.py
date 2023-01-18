@@ -1,10 +1,12 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional, Any
 
+from django import forms
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from django_fsm import FSMField
 from multiselectfield import MultiSelectField
@@ -16,6 +18,8 @@ from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -489,3 +493,38 @@ class Authorization(TimeStampedUUIDModel):
     authorization_process = models.ForeignKey(
         AuthorizationProcess, on_delete=models.CASCADE, related_name="authorizations"
     )
+
+
+class ChoiceArrayFieldDM(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        defaults = {
+            "form_class": forms.TypedMultipleChoiceField,
+            "choices": self.base_field.choices,
+            "coerce": self.base_field.to_python,
+            "widget": forms.SelectMultiple,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
+
+
+class FspDeliveryMechanism(TimeStampedUUIDModel):
+    financial_service_provider = models.ForeignKey(
+        FinancialServiceProvider, on_delete=models.CASCADE, related_name="fsp_delivery_mechanisms"
+    )
+    delivery_mechanism = models.CharField(
+        max_length=255, choices=PaymentInstruction.DELIVERY_TYPE_CHOICE, db_index=True, null=True
+    )
+
+    global_core_fields = ChoiceArrayFieldDM(
+        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
+        default=list,
+    )
+    payment_channel_fields = ChoiceArrayFieldDM(
+        models.CharField(
+            max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
+        ),
+        default=list,
+    )
+
+    class Meta:
+        unique_together = ("financial_service_provider", "delivery_mechanism")
