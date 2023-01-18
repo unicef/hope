@@ -1,25 +1,24 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, List, Optional, Any
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from django import forms
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from django_fsm import FSMField
 from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, UnicefIdentifiedModel
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
-
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -519,12 +518,7 @@ class FspDeliveryMechanism(TimeStampedUUIDModel):
         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
         default=list,
     )
-    payment_channel_fields = ChoiceArrayFieldDM(
-        models.CharField(
-            max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
-        ),
-        default=list,
-    )
+    # flex fields
 
     class Meta:
         unique_together = ("financial_service_provider", "delivery_mechanism")
