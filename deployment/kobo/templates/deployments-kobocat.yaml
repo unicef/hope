@@ -63,7 +63,7 @@ spec:
         - name: static-volume
           mountPath: /srv/static
         - name: uwsgi-config
-          mountPath: /srv/src/kobocat/docker/kobocat.ini
+          mountPath: /srv/src/kobocat/docker/uwsgi.ini
           subPath: uwsgi.ini
         - name: scripts
           mountPath: /etc/profile.d/
