@@ -293,7 +293,7 @@ class PaymentInstruction(TimeStampedUUIDModel):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="payment_plan",
+        related_name="payment_instruction",
     )
 
 
@@ -380,7 +380,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         default=dict,
     )
     fsp_xlsx_template = models.ForeignKey(
-        "payment.FinancialServiceProviderXlsxTemplate",
+        "payment_module.FinancialServiceProviderXlsxTemplate",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -401,7 +401,7 @@ class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
         (FAILED, _("Failed")),
     )
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
+        "payment_module.FinancialServiceProvider",
         on_delete=models.CASCADE,
         verbose_name=_("Financial Service Provider"),
     )
@@ -459,7 +459,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
 class AuthorizationProcess(TimeStampedUUIDModel):
     payment_instruction = models.ForeignKey(
-        "payment.PaymentInstruction",
+        "payment_module.PaymentInstruction",
         on_delete=models.CASCADE,
         related_name="authorization_processes",
     )
