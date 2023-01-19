@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
+from django.templatetags.static import static
 
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
@@ -30,3 +31,6 @@ class ImportPaymentRecordsForm(forms.ModelForm):
             "exchange_rate",
             "session",
         )
+
+    class Media:
+        js = (static("admin/js/core.js"),)
