@@ -32,7 +32,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   .MuiIconButton-label {
     color: #e3e6e7;
   }
-  &.Mui-focused .MuiOutlinedInput-notchedOutline {
+  .MuiOutlinedInput-notchedOutline {
     border: none;
   }
 `;
