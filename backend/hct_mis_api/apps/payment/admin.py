@@ -17,7 +17,6 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -31,7 +30,6 @@ from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation impo
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
@@ -78,14 +76,14 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
 
     @button()
     def import_payment_records(self, request: HttpRequest) -> Any:
-        tilte = "Import Payment Records"
+        title = "Import Payment Records"
         if request.method == "GET":
             form = ImportPaymentRecordsForm()
-            context = self.get_common_context(request, title=tilte, form=form)
+            context = self.get_common_context(request, title=title, form=form)
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
-        # print(request.POST)
+
         form = ImportPaymentRecordsForm(request.POST, request.FILES)
-        context = self.get_common_context(request, title=tilte, form=form)
+        context = self.get_common_context(request, title=title, form=form)
         if not form.is_valid():
             return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
         cleaned_data = form.cleaned_data
@@ -102,17 +100,17 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
             cleaned_data,
             cleaned_data.pop("currency"),
             cleaned_data.pop("delivery_type"),
+            cleaned_data.pop("delivery_date"),
         )
-        try:
-            service.parse_xlsx()
-        except TargetPopulation.DoesNotExist as e:
-            self.message_user(request, str(e), level=messages.ERROR)
-            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
-        except Household.DoesNotExist as e:
-            self.message_user(request, str(e), level=messages.ERROR)
-            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
 
-        self.message_user(request, "Payment Records Imported", level=messages.SUCCESS)
+        service.create_celery_task(request.user)
+
+        self.message_user(
+            request,
+            "Background task created and Payment Records will imported soon. We will send an email after finishing import",
+            level=messages.SUCCESS,
+        )
+
         return HttpResponseRedirect(reverse("admin:payment_paymentrecord_changelist"))
 
 
