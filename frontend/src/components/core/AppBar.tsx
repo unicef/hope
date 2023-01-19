@@ -66,6 +66,7 @@ const StyledLink = styled.a`
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filters, setFilters] = useState({ program: '' });
 
   if (meLoading) {
