@@ -151,12 +151,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         blank=True,
         through="program.HouseholdProgramPopulationThrough",
     )
-    # individual_program_population = models.ManyToManyField(
-    #     to="household.Individual",
-    #     related_name="programs",
-    #     blank=True,
-    #     through="program.IndividualProgramPopulationThrough",
-    # )
 
     @property
     def total_number_of_households(self) -> QuerySet:
