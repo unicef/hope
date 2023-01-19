@@ -2,6 +2,7 @@ trigger: none
 pr:
   - master
   - develop
+  - feature/hope2.0
 resources:
   - repo: self
 
