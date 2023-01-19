@@ -229,13 +229,6 @@ class PaymentPlan(TimeStampedUUIDModel):
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     excluded_ids = models.TextField(blank=True)
-    targeting_criteria = models.OneToOneField(
-        "PaymentPlanTargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="payment_plan",
-    )
 
 
 class PaymentPlanTargetingCriteria(TargetingCriteria):
