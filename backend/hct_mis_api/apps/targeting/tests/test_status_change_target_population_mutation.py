@@ -13,7 +13,8 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 
 

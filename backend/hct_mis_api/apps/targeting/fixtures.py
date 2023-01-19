@@ -14,7 +14,8 @@ from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 
 

@@ -323,6 +323,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     (against Golden Record) or for a final list (against the approved candidate
     list).
     """
+
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
@@ -331,6 +332,7 @@ class TargetPopulationTargetingCriteria(TargetingCriteria):
     """
     Proxy Model for TargetingCriteria supports only TargetPopulation
     """
+
     class Meta:
         proxy = True
 
