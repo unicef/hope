@@ -219,6 +219,7 @@ class PaymentPlan(TimeStampedUUIDModel):
     imported_file_date = models.DateTimeField(blank=True, null=True)
     imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    # TODO: steficon -> rule_engine
     steficon_rule_commit = models.ForeignKey(
         RuleCommit,
         null=True,

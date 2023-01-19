@@ -151,6 +151,14 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         blank=True,
         through="program.HouseholdProgramPopulationThrough",
     )
+    rule_engine_rule_commit = models.ForeignKey(
+        to="steficon.RuleCommit",
+        related_name="programs",
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+        blank=True,
+        null=True,
+    )
 
     @property
     def total_number_of_households(self) -> QuerySet:

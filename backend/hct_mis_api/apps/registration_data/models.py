@@ -112,6 +112,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         blank=True,
         related_name="registration_data_imports",
     )
+    
+    # TODO: criteria
+    
 
     def __str__(self) -> str:
         return self.name
