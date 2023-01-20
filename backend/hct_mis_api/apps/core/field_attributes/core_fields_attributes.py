@@ -32,6 +32,21 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _HOUSEHOLD,
+    _INDIVIDUAL,
+    TYPE_BOOL,
+    TYPE_DATE,
+    TYPE_GEOPOINT,
+    TYPE_ID,
+    TYPE_IMAGE,
+    TYPE_INTEGER,
+    TYPE_LIST_OF_IDS,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
@@ -51,21 +66,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    TYPE_BOOL,
-    TYPE_DATE,
-    TYPE_GEOPOINT,
-    TYPE_ID,
-    TYPE_IMAGE,
-    TYPE_INTEGER,
-    TYPE_LIST_OF_IDS,
-    TYPE_SELECT_MANY,
-    TYPE_SELECT_ONE,
-    TYPE_STRING,
-    Scope,
-)
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime
-from typing import Dict, Union, Type, Tuple
+from typing import Dict, Tuple, Type, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 

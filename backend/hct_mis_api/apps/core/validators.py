@@ -3,9 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    FieldFactory,
-)
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_BOOL,
     TYPE_DATE,

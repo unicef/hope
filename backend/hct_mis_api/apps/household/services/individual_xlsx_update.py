@@ -13,10 +13,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     Scope,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-)
+from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.household.models import Individual
 
 

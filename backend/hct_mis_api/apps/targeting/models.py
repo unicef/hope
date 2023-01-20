@@ -16,10 +16,14 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    Scope,
+)
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+from hct_mis_api.apps.targeting.criteria.models import TargetingCriteria
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
     TargetingCriteriaRuleQueryingBase,
@@ -30,7 +34,6 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-from hct_mis_api.apps.targeting.criteria.models import TargetingCriteria
 
 if TYPE_CHECKING:
     from uuid import UUID
