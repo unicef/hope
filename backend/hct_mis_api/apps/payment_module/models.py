@@ -139,7 +139,7 @@ class PaymentPlan(TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
-    plan_type = models.CharField(max_length=20, choices=PaymentPlanType.choices)
+    plan_type = models.CharField(max_length=20, choices=PaymentPlanType.choices, default=PaymentPlanType.HOUSEHOLD)
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -257,7 +257,7 @@ class PaymentPlan(TimeStampedUUIDModel):
         blank=True,
     )
     rule_engine_applied_date = models.DateTimeField(blank=True, null=True)
-    excluded_ids = models.ArrayField(models.CharField(max_length=255), blank=True, default=list)
+    excluded_ids = ArrayField(models.CharField(max_length=255), blank=True, default=list)
 
     # TODO: total number of payments
     # and reconciled
