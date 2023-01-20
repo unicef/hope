@@ -115,6 +115,12 @@ class PaymentPlan(TimeStampedUUIDModel):
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
 
+    payment_cycle = models.ForeignKey(
+        "payment_module.PaymentCycle",
+        on_delete=models.CASCADE,
+        related_name="payment_plans",
+    )
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
