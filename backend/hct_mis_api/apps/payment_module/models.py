@@ -257,6 +257,13 @@ class PaymentPlan(TimeStampedUUIDModel):
     excluded_ids = models.ArrayField(models.CharField(max_length=255), blank=True, default=list)
 
     # TODO: total number of payments
+    # and reconciled
+
+    delivered_fully = models.PositiveIntegerField(default=0)
+    delivered_partially = models.PositiveIntegerField(default=0)
+    not_delivered = models.PositiveIntegerField(default=0)
+    failed = models.PositiveIntegerField(default=0)
+    pending = models.PositiveIntegerField(default=0)
 
 
 class PaymentPlanTargetingCriteria(TargetingCriteria):
@@ -337,6 +344,9 @@ class PaymentInstruction(TimeStampedUUIDModel):
     total = models.PositiveBigIntegerField(default=0)
     correct = models.PositiveBigIntegerField(default=0)
     missing = models.PositiveBigIntegerField(default=0)
+
+    total_entitled_quantity = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    total_entitled_quantity_usd = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
     class Meta:
         unique_together = ("fsp", "delivery_mechanism")
