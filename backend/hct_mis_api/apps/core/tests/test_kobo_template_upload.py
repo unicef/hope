@@ -7,8 +7,9 @@ from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.contrib.sessions.backends.base import SessionBase
 from django.core.handlers.wsgi import WSGIRequest
-from django.test import Client, RequestFactory
+from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 
@@ -54,7 +55,6 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.client: Client = Client()  # type: ignore # FIXME: Incompatible types in assignment (expression has type "django.test.client.Client", variable has type "graphene.test.Client")
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
@@ -120,7 +120,7 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self) -> None:
         request = self.prepare_request("kobo-template-valid.xlsx")
-        request.session = "session"  # type: ignore # FIXME: expression has type "str", variable has type "SessionBase"
+        request.session = SessionBase()
         messages = FallbackStorage(request)
         request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)
