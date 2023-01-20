@@ -158,6 +158,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         blank=True,
         null=True,
     )
+    organization = models.ForeignKey(
+        to="account.Partner",
+        related_name="programs",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
     @property
     def total_number_of_households(self) -> QuerySet:
