@@ -155,7 +155,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         to="steficon.RuleCommit",
         related_name="programs",
         on_delete=models.PROTECT,
-        related_name="payment_plans",
         blank=True,
         null=True,
     )
