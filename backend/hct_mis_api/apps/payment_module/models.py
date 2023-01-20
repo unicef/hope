@@ -27,6 +27,8 @@ if TYPE_CHECKING:
 class PaymentCycle(TimeStampedUUIDModel):
     class Status(models.TextChoices):
         NEW = "NEW", "New"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        COMPLETED = "COMPLETED", "Completed"
 
     title = models.CharField(max_length=255)
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE, related_name="payment_cycles")
