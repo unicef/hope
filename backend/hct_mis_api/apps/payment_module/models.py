@@ -70,11 +70,11 @@ class PaymentCycle(TimeStampedUUIDModel):
     )
 
     @property
-    def total_undelivered_quantity(self):
+    def total_undelivered_quantity(self) -> int:
         return self.total_entitled_quantity - self.total_delivered_quantity
 
     @property
-    def total_undelivered_quantity_usd(self):
+    def total_undelivered_quantity_usd(self) -> int:
         return self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
 
 
@@ -350,6 +350,10 @@ class PaymentInstruction(TimeStampedUUIDModel):
 
     total_entitled_quantity = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_entitled_quantity_usd = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+
+    exported_reconciliation_zip_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
 
     class Meta:
         unique_together = ("fsp", "delivery_mechanism")
