@@ -1,10 +1,9 @@
 from typing import Dict, List, Union
 
 
-def humanize_errors(errors: List) -> Union[Dict, List]:
-    # TODO: refactor
+def humanize_errors(errors: Dict) -> Dict:
     try:
-        households = errors.pop("households")  # type: ignore
+        households = errors.pop("households", [])
         errs = {}
         if len(households) == 1 and isinstance(households[0], str):
             hh_info = households
@@ -24,7 +23,7 @@ def humanize_errors(errors: List) -> Union[Dict, List]:
                     hh_info.append({f"Household #{i}": [h]})
         if hh_info:
             errs["households"] = hh_info
-        errs.update(**errors)  # type: ignore
+        errs.update(**errors)
         return errs
     except (ValueError, AttributeError):
         return errors
