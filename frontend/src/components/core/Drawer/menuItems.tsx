@@ -17,6 +17,7 @@ import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
+import { ListAlt } from '@material-ui/icons';
 
 export const menuItems = [
   {
@@ -56,6 +57,13 @@ export const menuItems = [
         permissionModule: 'INDIVIDUALS',
       },
     ],
+  },
+  {
+    name: 'Enrollment',
+    href: '/enrollment',
+    selectedRegexp: /^\/enrollment.*$/,
+    icon: <ListAlt />,
+    // permissions: [PERMISSIONS.ENROLLMENT_VIEW_LIST]
   },
   {
     name: 'Programme Management',

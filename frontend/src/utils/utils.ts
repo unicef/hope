@@ -58,6 +58,22 @@ export function programStatusToColor(
       return theme.hctPalette.orange;
   }
 }
+export function enrollmentStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'LOCKED':
+      return theme.hctPalette.orange;
+    case 'OPEN':
+      return theme.hctPalette.gray;
+    case 'ENROLLED':
+      return theme.hctPalette.green;
+    default:
+      return theme.hctPalette.orange;
+  }
+}
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
