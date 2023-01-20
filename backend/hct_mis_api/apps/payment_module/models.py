@@ -108,6 +108,10 @@ class PaymentPlan(TimeStampedUUIDModel):
         XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
 
+    class PaymentPlanType(models.TextChoices):
+        HOUSEHOLD = "HOUSEHOLD", "Household"
+        INDIVIDUAL = "INDIVIDUAL", "Individual"
+
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
@@ -132,6 +136,7 @@ class PaymentPlan(TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
+    plan_type = models.CharField(max_length=20, choices=PaymentPlanType.choices)
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -234,10 +239,13 @@ class PaymentPlan(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.00"))],
         default="0.00",
     )
-    imported_file_date = models.DateTimeField(blank=True, null=True)
-    imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    # TODO: steficon -> rule_engine
+    imported_entitlement_file_date = models.DateTimeField(blank=True, null=True)
+    imported_entitlement_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    exported_entitlement_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
     rule_engine_rule_commit = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -246,7 +254,9 @@ class PaymentPlan(TimeStampedUUIDModel):
         blank=True,
     )
     rule_engine_applied_date = models.DateTimeField(blank=True, null=True)
-    excluded_ids = models.TextField(blank=True)
+    excluded_ids = models.ArrayField(models.CharField(max_length=255), blank=True, default=list)
+
+    # TODO: total number of payments
 
 
 class PaymentPlanTargetingCriteria(TargetingCriteria):
