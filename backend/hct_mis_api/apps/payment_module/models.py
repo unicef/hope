@@ -315,6 +315,8 @@ class PaymentInstruction(TimeStampedUUIDModel):
 
     class Status(models.TextChoices):
         PENDING = "PENDING", _("Pending")
+        AUTHORIZED = "AUTHORIZED", _("Authorized")
+        RELEASED = "RELEASED", _("Released")
 
     payment_plan = models.ForeignKey(
         "payment_module.PaymentPlan", on_delete=models.CASCADE, related_name="payment_instructions"
@@ -331,6 +333,13 @@ class PaymentInstruction(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         related_name="payment_instruction",
     )
+
+    total = models.PositiveBigIntegerField(default=0)
+    correct = models.PositiveBigIntegerField(default=0)
+    missing = models.PositiveBigIntegerField(default=0)
+
+    class Meta:
+        unique_together = ("fsp", "delivery_mechanism")
 
 
 class PaymentList(TimeStampedUUIDModel):
@@ -503,13 +512,17 @@ class AuthorizationProcess(TimeStampedUUIDModel):
 
 class Authorization(TimeStampedUUIDModel):
     AUTHORIZATION = "AUTHORIZATION"
-    REJECT = "REJECT"
+    RELEASE = "RELEASE"
+    REJECT_AUTH = "REJECT_AUTH"
+    REJECT_RELEASE = "REJECT_RELEASE"
     TYPE_CHOICES = (
         (AUTHORIZATION, "Authorization"),
-        (REJECT, "Reject"),
+        (RELEASE, "Release"),
+        (REJECT_AUTH, "Reject Authorization"),
+        (REJECT_RELEASE, "Reject Release"),
     )
 
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=REJECT, verbose_name=_("Approval type"))
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=REJECT_AUTH, verbose_name=_("Approval type"))
     comment = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     authorization_process = models.ForeignKey(
