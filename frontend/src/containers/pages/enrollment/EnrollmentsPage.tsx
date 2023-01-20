@@ -12,7 +12,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 
-export const EnrollmentsPage(): React.ReactElement {
+export const EnrollmentsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -31,15 +31,12 @@ export const EnrollmentsPage(): React.ReactElement {
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
 
-
   if (permissions === null) return null;
 
   const canCreate = hasPermissions(PERMISSIONS.ENROLLMENT_CREATE, permissions);
 
   if (!hasPermissions(PERMISSIONS.ENROLLMENT_VIEW_LIST, permissions))
     return <PermissionDenied />;
-
-
 
   return (
     <>
@@ -66,10 +63,7 @@ export const EnrollmentsPage(): React.ReactElement {
           )}
         </>
       </PageHeader>
-      <EnrollmentsFilters
-        filter={filter}
-        onFilterChange={setFilter}
-      />
+      <EnrollmentsFilters filter={filter} onFilterChange={setFilter} />
       <EnrollmentsTable
         filter={debouncedFilter}
         canViewDetails={hasPermissions(
@@ -79,4 +73,4 @@ export const EnrollmentsPage(): React.ReactElement {
       />
     </>
   );
-}
+};

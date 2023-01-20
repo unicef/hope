@@ -90,6 +90,9 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute exact path='/:businessArea/enrollment'>
             <EnrollmentsPage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/enrollment/:id'>
+            <EnrollmentDetailsPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/target-population/create'>
             <CreateTargetPopulationPage />
           </SentryRoute>

@@ -74,6 +74,23 @@ export function enrollmentStatusToColor(
   }
 }
 
+export function enrollmentBuildStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  //TODO: add Status from backend
+  const colorsMap = {
+    [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
+    [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
+    [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
+    [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
 export function maritalStatusToColor(
   theme: typeof themeObj,
   status: string,
