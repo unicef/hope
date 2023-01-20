@@ -11,6 +11,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
+from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
@@ -112,8 +113,13 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         blank=True,
         related_name="registration_data_imports",
     )
-
-    # TODO: criteria
+    program_criteria = models.ForeignKey(
+        "ProgramCriteria",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="registration_data_imports",
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -145,3 +151,12 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     def can_be_merged(self) -> bool:
         return self.status in [self.IN_REVIEW, self.MERGE_ERROR]
+
+
+class ProgramCriteria(TargetingCriteria):
+    class Meta:
+        proxy = True
+
+    def get_excluded_household_ids(self) -> Any:
+        # TODO
+        return super().get_excluded_household_ids()
