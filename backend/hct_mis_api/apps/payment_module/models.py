@@ -530,7 +530,7 @@ class Authorization(TimeStampedUUIDModel):
     )
 
 
-class ChoiceArrayFieldDM(ArrayField):
+class ChoiceArrayFieldDeliveryMechanism(ArrayField):
     def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
         defaults = {
             "form_class": forms.TypedMultipleChoiceField,
@@ -550,11 +550,12 @@ class FspDeliveryMechanism(TimeStampedUUIDModel):
         max_length=255, choices=PaymentInstruction.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
 
-    global_core_fields = ChoiceArrayFieldDM(
+    global_core_fields = ChoiceArrayFieldDeliveryMechanism(
         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
         default=list,
     )
-    # flex fields
+    # TODO: flex fields
+    # TODO: payment plan scope fields
 
     class Meta:
         unique_together = ("financial_service_provider", "delivery_mechanism")
