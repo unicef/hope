@@ -400,6 +400,14 @@ class Payment(TimeStampedUUIDModel, UnicefIdentifiedModel):
         default="0.00",
     )
 
+    collector = models.ForeignKey(
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="collected_payments",
+        null=True,
+        blank=True,
+    )
+
 
 class FinancialServiceProvider(TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
