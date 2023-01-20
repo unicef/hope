@@ -12,7 +12,7 @@ from django_fsm import FSMField
 from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
@@ -119,6 +119,8 @@ class PaymentPlan(TimeStampedUUIDModel):
         "payment_module.PaymentCycle",
         on_delete=models.CASCADE,
         related_name="payment_plans",
+        null=True,
+        blank=True,
     )
 
     created_by = models.ForeignKey(

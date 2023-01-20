@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaQueryingBase),
+            bases=(models.Model, hct_mis_api.apps.targeting.services.targeting_service.TargetingCriteriaQueryingBase),
         ),
         migrations.CreateModel(
             name='TargetingCriteriaRule',

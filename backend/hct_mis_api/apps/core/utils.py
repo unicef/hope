@@ -221,7 +221,7 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
 
 
 def get_combined_attributes() -> Dict:
-    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -471,7 +471,7 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
 
     from django.conf import settings
 
-    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
 
     with open(csv_file, newline="") as csv_file_ptr:  # type: ignore # FIXME: No overload variant of "open" matches argument types "BytesIO", "str"
         reader = csv.reader(csv_file_ptr)

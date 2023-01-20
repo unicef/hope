@@ -24,10 +24,12 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.core_fields_attributes import (
-    FILTERABLE_TYPES,
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     Scope,
+)
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    FILTERABLE_TYPES,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.kobo.api import KoboAPI

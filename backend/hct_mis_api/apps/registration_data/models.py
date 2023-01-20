@@ -11,7 +11,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
-from hct_mis_api.apps.targeting.models import TargetingCriteria
+from hct_mis_api.apps.targeting.criteria.models import TargetingCriteria
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
