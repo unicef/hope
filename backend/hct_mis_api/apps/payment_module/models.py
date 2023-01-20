@@ -64,6 +64,14 @@ class PaymentCycle(TimeStampedUUIDModel):
         default="0.00",
     )
 
+    @property
+    def total_undelivered_quantity(self):
+        return self.total_entitled_quantity - self.total_delivered_quantity
+
+    @property
+    def total_undelivered_quantity_usd(self):
+        return self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
+
 
 class PaymentPlan(TimeStampedUUIDModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(

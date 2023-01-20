@@ -145,12 +145,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         all individuals of a household thats part of the population or only
         the relevant ones (collectors etc.)""",
     )
+
     household_program_population = models.ManyToManyField(
         to="household.Household",
         related_name="programs",
         blank=True,
         through="program.HouseholdProgramPopulationThrough",
     )
+    household_program_population_size = models.PositiveIntegerField(default=0)
+    eligible_household_program_population_size = models.PositiveIntegerField(default=0)
+
     rule_engine_rule_commit = models.ForeignKey(
         to="steficon.RuleCommit",
         related_name="programs",
