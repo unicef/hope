@@ -2,16 +2,11 @@ import { Grid, Typography } from '@material-ui/core';
 import { Title } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  enrollmentStatusToColor,
-  renderUserName,
-  targetPopulationStatusMapping,
-} from '../../../utils/utils';
+import { renderUserName } from '../../../utils/utils';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
-import { StatusBox } from '../../core/StatusBox';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
 interface EnrollmentDetailsProps {

@@ -1,38 +1,24 @@
-import { Box, Button, Tooltip } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   TargetPopulationQuery,
   useUnlockTpMutation,
 } from '../../../__generated__/graphql';
-import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
-
-const IconContainer = styled.span`
-  button {
-    color: #949494;
-    min-width: 40px;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
+import { DuplicateEnrollment } from './DuplicateEnrollment';
+import { FinalizeEnrollment } from './FinalizeEnrollment';
 
 export interface LockedEnrollmentHeaderButtonsProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   canUnlock: boolean;
   canDuplicate: boolean;
-  canSend: boolean;
 }
 
 export const LockedEnrollmentHeaderButtons = ({
   targetPopulation,
-  canSend,
   canDuplicate,
   canUnlock,
 }: LockedEnrollmentHeaderButtonsProps): React.ReactElement => {
@@ -45,11 +31,9 @@ export const LockedEnrollmentHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
-        <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
-            <FileCopy />
-          </Button>
-        </IconContainer>
+        <IconButton onClick={() => setOpenDuplicate(true)}>
+          <FileCopy />
+        </IconButton>
       )}
       {canUnlock && (
         <Box m={2}>
@@ -61,44 +45,21 @@ export const LockedEnrollmentHeaderButtons = ({
               mutate({
                 variables: { id: targetPopulation.id },
               }).then(() => {
-                showMessage('Target Population Unlocked');
+                showMessage('Enrollment Unlocked');
               });
             }}
-            data-cy='button-target-population-unlocked'
+            data-cy='button-enrollment-unlocked'
           >
             Unlock
           </LoadingButton>
         </Box>
       )}
-      {canSend && (
-        <Box m={2}>
-          <Tooltip
-            title={
-              targetPopulation.program.status !== 'ACTIVE'
-                ? t('Assigned programme is not ACTIVE')
-                : t('Send to Cash Assist')
-            }
-          >
-            <span>
-              <Button
-                variant='contained'
-                color='primary'
-                disabled={targetPopulation.program.status !== 'ACTIVE'}
-                onClick={() => setOpenFinalize(true)}
-                data-cy='button-target-population-send-to-cash-assist'
-              >
-                {t('Send to Cash Assist')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Box>
-      )}
-      <DuplicateTargetPopulation
+      <DuplicateEnrollment
         open={openDuplicate}
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      <FinalizeTargetPopulation
+      <FinalizeEnrollment
         open={openFinalize}
         setOpen={setOpenFinalize}
         targetPopulationId={targetPopulation.id}

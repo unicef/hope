@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Button, IconButton } from '@material-ui/core';
 import {
-  EditRounded,
   Delete,
+  EditRounded,
   FileCopy,
   RefreshRounded,
 } from '@material-ui/icons';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   TargetPopulationQuery,
   useRebuildTpMutation,
 } from '../../../__generated__/graphql';
-import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
-import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { DeleteEnrollment } from './DeleteEnrollment';
+import { DuplicateEnrollment } from './DuplicateEnrollment';
+import { LockEnrollment } from './LockEnrollment';
 
 export interface OpenEnrollmentHeaderButtonsProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -97,17 +97,17 @@ export const OpenEnrollmentHeaderButtons = ({
           </Button>
         </Box>
       )}
-      <DuplicateTargetPopulation
+      <DuplicateEnrollment
         open={openDuplicate}
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      <DeleteTargetPopulation
+      <DeleteEnrollment
         open={openDelete}
         setOpen={setOpenDelete}
         targetPopulationId={targetPopulation.id}
       />
-      <LockTargetPopulationDialog
+      <LockEnrollment
         open={openApprove}
         setOpen={setOpenApprove}
         targetPopulationId={targetPopulation.id}

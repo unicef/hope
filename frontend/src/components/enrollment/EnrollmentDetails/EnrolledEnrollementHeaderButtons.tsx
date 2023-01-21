@@ -1,8 +1,8 @@
 import { Box, IconButton } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
-import { DuplicateTargetPopulation } from '../../../containers/dialogs/targetPopulation/DuplicateTargetPopulation';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import { DuplicateEnrollment } from './DuplicateEnrollment';
 
 export interface EnrolledEnrollementHeaderButtonsProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -24,7 +24,7 @@ export const EnrolledEnrollementHeaderButtons = ({
           <FileCopy />
         </IconButton>
       )}
-      <DuplicateTargetPopulation
+      <DuplicateEnrollment
         open={openDuplicate}
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
