@@ -1,13 +1,9 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import { Group, Person } from '@material-ui/icons';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { Group } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { targetPopulationStatusMapping } from '../../../utils/utils';
-import {
-  ProgramNode,
-  TargetPopulationStatus,
-} from '../../../__generated__/graphql';
+import { TargetPopulationStatus } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';

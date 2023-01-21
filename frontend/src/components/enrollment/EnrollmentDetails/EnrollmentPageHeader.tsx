@@ -1,9 +1,9 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { StatusBox } from '../../../components/core/StatusBox';
+import { BreadCrumbsItem } from '../../core/BreadCrumbs';
+import { PageHeader } from '../../core/PageHeader';
+import { StatusBox } from '../../core/StatusBox';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { enrollmentBuildStatusToColor } from '../../../utils/utils';
 import {

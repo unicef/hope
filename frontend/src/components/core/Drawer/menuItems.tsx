@@ -1,23 +1,23 @@
+import { ListAlt } from '@material-ui/icons';
 import Assignment from '@material-ui/icons/Assignment';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
-import NewReleases from '@material-ui/icons/NewReleases';
+import InfoIcon from '@material-ui/icons/Info';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import NewReleases from '@material-ui/icons/NewReleases';
 import PaymentIcon from '@material-ui/icons/Payment';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
 import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
-import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
-import { ListAlt } from '@material-ui/icons';
 
 export const menuItems = [
   {

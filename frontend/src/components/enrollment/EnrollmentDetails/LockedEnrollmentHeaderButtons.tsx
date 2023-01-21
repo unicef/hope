@@ -2,7 +2,7 @@ import { Box, IconButton } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingButton } from '../../core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   TargetPopulationQuery,
@@ -45,7 +45,7 @@ export const LockedEnrollmentHeaderButtons = ({
               mutate({
                 variables: { id: targetPopulation.id },
               }).then(() => {
-                showMessage('Enrollment Unlocked');
+                showMessage(t('Enrollment Unlocked'));
               });
             }}
             data-cy='button-enrollment-unlocked'

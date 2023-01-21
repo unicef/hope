@@ -635,5 +635,7 @@
   "Send to Payment Module": "Send to Payment Module",
   "Excluded Enrollment Entries (Households or Individuals)": "Excluded Enrollment Entries (Households or Individuals)",
   "Enrollment is building": "Enrollment is building",
-  "Enrollment is processing, the list of households will be available when the process is finished": "Enrollment is processing, the list of households will be available when the process is finished"
+  "Enrollment is processing, the list of households will be available when the process is finished": "Enrollment is processing, the list of households will be available when the process is finished",
+  "Enrollment Criteria": "Enrollment Criteria",
+  "Enrollment Unlocked": "Enrollment Unlocked"
 }

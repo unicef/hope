@@ -5,13 +5,13 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
 import {
-  TargetPopulationQuery,
   TargetPopulationBuildStatus,
+  TargetPopulationQuery,
 } from '../../../__generated__/graphql';
 import { PaperContainer } from '../../targeting/PaperContainer';
 import { Results } from '../../targeting/Results';
-import { TargetingCriteria } from '../../targeting/TargetingCriteria';
-import { TargetingHouseholds } from '../../targeting/TargetingHouseholds';
+import { EnrollmentCriteria } from './EnrollmentCriteria/EnrollmentCriteria';
+import { EnrollmentHouseholdTable } from './EnrollmentHouseholdTable';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -34,7 +34,7 @@ export const EnrollmentCore = ({
   return (
     <>
       {targetPopulation.targetingCriteria ? (
-        <TargetingCriteria
+        <EnrollmentCriteria
           rules={targetPopulation.targetingCriteria?.rules || []}
           targetPopulation={targetPopulation}
         />
@@ -63,7 +63,7 @@ export const EnrollmentCore = ({
       <Results targetPopulation={targetPopulation} />
 
       {targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
-        <TargetingHouseholds
+        <EnrollmentHouseholdTable
           id={id}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,

@@ -11,6 +11,7 @@ import { MiśTheme } from '../theme';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { EnrollmentDetailsPage } from './pages/enrollment/EnrollmentDetailsPage';
 import { EnrollmentsPage } from './pages/enrollment/EnrollmentsPage';
 import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
