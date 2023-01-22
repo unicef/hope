@@ -79,13 +79,11 @@ export const DuplicateEnrollment = ({
         {({ submitForm }) => (
           <>
             <DialogTitleWrapper>
-              <DialogTitle>Duplicate Target Population?</DialogTitle>
+              <DialogTitle>Duplicate Enrollment</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
-                {t(
-                  'Please use a unique name for the copy of this Target Population.',
-                )}
+                {t('Please use a unique name for the copy of this Enrollment.')}
                 <br /> <strong>{t('Note')}</strong>:{' '}
                 {t(
                   'This duplicate will copy the Enrollment Criteria and update to the latest results from the system.',

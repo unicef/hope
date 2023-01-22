@@ -637,5 +637,7 @@
   "Enrollment is building": "Enrollment is building",
   "Enrollment is processing, the list of households will be available when the process is finished": "Enrollment is processing, the list of households will be available when the process is finished",
   "Enrollment Criteria": "Enrollment Criteria",
-  "Enrollment Unlocked": "Enrollment Unlocked"
+  "Enrollment Unlocked": "Enrollment Unlocked",
+  "Please use a unique name for the copy of this Enrollment.": "Please use a unique name for the copy of this Enrollment.",
+  "Enter Enrollment Name": "Enter Enrollment Name"
 }
