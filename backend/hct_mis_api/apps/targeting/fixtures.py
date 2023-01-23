@@ -7,14 +7,18 @@ import factory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    Scope,
+)
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 
 

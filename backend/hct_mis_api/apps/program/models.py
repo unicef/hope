@@ -145,8 +145,29 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         all individuals of a household thats part of the population or only
         the relevant ones (collectors etc.)""",
     )
-    program_population = models.ManyToManyField(
-        to="household.Household", related_name="programs", blank=True, through="program.ProgramPopulationThrough"
+
+    household_program_population = models.ManyToManyField(
+        to="household.Household",
+        related_name="programs",
+        blank=True,
+        through="program.HouseholdProgramPopulationThrough",
+    )
+    household_program_population_size = models.PositiveIntegerField(default=0)
+    eligible_household_program_population_size = models.PositiveIntegerField(default=0)
+
+    rule_engine_rule_commit = models.ForeignKey(
+        to="steficon.RuleCommit",
+        related_name="programs",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+    )
+    organization = models.ForeignKey(
+        to="account.Partner",
+        related_name="programs",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
 
     @property
@@ -313,7 +334,7 @@ class CashPlan(TimeStampedUUIDModel):
         ordering = ["created_at"]
 
 
-class ProgramPopulationThrough(TimeStampedUUIDModel):
+class HouseholdProgramPopulationThrough(TimeStampedUUIDModel):
     household = models.ForeignKey(
         "household.Household", on_delete=models.CASCADE, related_name="program_to_household_through"
     )

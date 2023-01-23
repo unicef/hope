@@ -99,6 +99,7 @@ class BusinessArea(TimeStampedUUIDModel):
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
+    is_using_payment_module = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -397,7 +398,7 @@ class FileTemp(TimeStampedModel):
 
     object_id = models.CharField(max_length=120, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     file = models.FileField()
     was_downloaded = models.BooleanField(default=False)

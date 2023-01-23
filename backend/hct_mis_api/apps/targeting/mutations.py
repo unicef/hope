@@ -1,11 +1,12 @@
 import logging
 from typing import Any, Dict, List, Optional, Type
 
-import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 
 from hct_mis_api.apps.account.permissions import (
     PermissionMutation,
@@ -32,7 +33,8 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 from hct_mis_api.apps.targeting.schema import TargetPopulationNode
 from hct_mis_api.apps.targeting.validators import (
@@ -45,6 +47,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+
 from .celery_tasks import (
     target_population_apply_steficon,
     target_population_full_rebuild,
@@ -112,7 +115,9 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     exclusion_reason = graphene.String()
 
 
-def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetPopulationTargetingCriteria:
+def from_input_to_targeting_criteria(
+    targeting_criteria_input: Dict, program: Program
+) -> TargetPopulationTargetingCriteria:
     targeting_criteria = TargetPopulationTargetingCriteria()
     targeting_criteria.save()
     for rule_input in targeting_criteria_input.get("rules"):
@@ -445,7 +450,9 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             return cls(validation_errors=e.message_dict)
 
     @classmethod
-    def copy_target_criteria(cls, targeting_criteria: TargetPopulationTargetingCriteria) -> TargetPopulationTargetingCriteria:
+    def copy_target_criteria(
+        cls, targeting_criteria: TargetPopulationTargetingCriteria
+    ) -> TargetPopulationTargetingCriteria:
         targeting_criteria_copy = TargetPopulationTargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():

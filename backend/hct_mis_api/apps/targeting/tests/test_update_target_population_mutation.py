@@ -13,7 +13,8 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation, TargetPopulationTargetingCriteria,
+    TargetPopulation,
+    TargetPopulationTargetingCriteria,
 )
 
 MUTATION_QUERY = """
