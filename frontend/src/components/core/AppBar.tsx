@@ -5,12 +5,13 @@ import TextsmsIcon from '@material-ui/icons/Textsms';
 import Toolbar from '@material-ui/core/Toolbar';
 import MenuIcon from '@material-ui/icons/Menu';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
 import { UserProfileMenu } from '../../containers/UserProfileMenu';
 import { MiśTheme } from '../../theme';
 import { useCachedMe } from '../../hooks/useCachedMe';
+import { GlobalProgramAutocomplete } from '../../containers/GlobalProgramAutocomplete';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
@@ -65,6 +66,9 @@ const StyledLink = styled.a`
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [filters, setFilters] = useState({ program: '' });
+
   if (meLoading) {
     return null;
   }
@@ -83,9 +87,17 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
         >
           <MenuIcon />
         </IconButton>
-        <BusinessAreaContainer data-cy='business-area-container'>
-          <BusinessAreaSelect />
-        </BusinessAreaContainer>
+        <Box display='flex' alignItems='center'>
+          <BusinessAreaContainer data-cy='business-area-container'>
+            <BusinessAreaSelect />
+          </BusinessAreaContainer>
+          <BusinessAreaContainer>
+            <GlobalProgramAutocomplete
+              onFilterChange={setFilters}
+              name='program'
+            />
+          </BusinessAreaContainer>
+        </Box>
         <Box display='flex' justifyContent='flex-end'>
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
             <StyledLink

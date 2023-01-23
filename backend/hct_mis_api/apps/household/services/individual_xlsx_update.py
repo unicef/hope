@@ -9,12 +9,11 @@ from xlwt import Row
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.core_fields_attributes import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     Scope,
 )
+from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.household.models import Individual
 
 

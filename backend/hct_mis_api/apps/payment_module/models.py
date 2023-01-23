@@ -1,7 +1,9 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, List, Optional
 
+from django import forms
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -11,6 +13,10 @@ from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    FieldFactory,
+    Scope,
+)
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -21,10 +27,13 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class PaymentCycle(TimeStampedUUIDModel):
+class PaymentCycle(UnicefIdentifiedModel, TimeStampedUUIDModel):
     class Status(models.TextChoices):
         NEW = "NEW", "New"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        COMPLETED = "COMPLETED", "Completed"
 
+    title = models.CharField(max_length=255)
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE, related_name="payment_cycles")
     start_date = models.DateField()
     end_date = models.DateField()
@@ -41,12 +50,32 @@ class PaymentCycle(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.00"))],
         default="0.00",
     )
+    total_entitled_quantity_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        default="0.00",
+    )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.00"))],
         default="0.00",
     )
+    total_delivered_quantity_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        default="0.00",
+    )
+
+    @property
+    def total_undelivered_quantity(self) -> int:
+        return self.total_entitled_quantity - self.total_delivered_quantity
+
+    @property
+    def total_undelivered_quantity_usd(self) -> int:
+        return self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
 
 
 class PaymentPlan(TimeStampedUUIDModel):
@@ -67,11 +96,9 @@ class PaymentPlan(TimeStampedUUIDModel):
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
-        LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
-        IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
-        IN_REVIEW = "IN_REVIEW", "In Review"
-        ACCEPTED = "ACCEPTED", "Accepted"
+        APPROVED = "APPROVED", "Approved"
+        ONGOING = "ONGOING", "Ongoing"
         RECONCILED = "RECONCILED", "Reconciled"
 
     class BackgroundActionStatus(models.TextChoices):
@@ -83,6 +110,10 @@ class PaymentPlan(TimeStampedUUIDModel):
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
         XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+
+    class PaymentPlanType(models.TextChoices):
+        HOUSEHOLD = "HOUSEHOLD", "Household"
+        INDIVIDUAL = "INDIVIDUAL", "Individual"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -100,6 +131,15 @@ class PaymentPlan(TimeStampedUUIDModel):
         AUTHORIZE = "AUTHORIZE", "Authorize"
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
+
+    payment_cycle = models.ForeignKey(
+        "payment_module.PaymentCycle",
+        on_delete=models.CASCADE,
+        related_name="payment_plans",
+        null=True,
+        blank=True,
+    )
+    plan_type = models.CharField(max_length=20, choices=PaymentPlanType.choices, default=PaymentPlanType.HOUSEHOLD)
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -202,25 +242,31 @@ class PaymentPlan(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.00"))],
         default="0.00",
     )
-    imported_file_date = models.DateTimeField(blank=True, null=True)
-    imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    steficon_rule_commit = models.ForeignKey(
+    imported_entitlement_file_date = models.DateTimeField(blank=True, null=True)
+    imported_entitlement_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    exported_entitlement_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    rule_engine_rule_commit = models.ForeignKey(
         RuleCommit,
         null=True,
         on_delete=models.PROTECT,
         related_name="payment_plans",
         blank=True,
     )
-    steficon_applied_date = models.DateTimeField(blank=True, null=True)
-    excluded_ids = models.TextField(blank=True)
-    targeting_criteria = models.OneToOneField(
-        "PaymentPlanTargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="payment_plan",
-    )
+    rule_engine_applied_date = models.DateTimeField(blank=True, null=True)
+    excluded_ids = ArrayField(models.CharField(max_length=255), blank=True, default=list)
+
+    # TODO: total number of payments
+    # and reconciled
+
+    delivered_fully = models.PositiveIntegerField(default=0)
+    delivered_partially = models.PositiveIntegerField(default=0)
+    not_delivered = models.PositiveIntegerField(default=0)
+    failed = models.PositiveIntegerField(default=0)
+    pending = models.PositiveIntegerField(default=0)
 
 
 class PaymentPlanTargetingCriteria(TargetingCriteria):
@@ -235,7 +281,19 @@ class PaymentPlanTargetingCriteria(TargetingCriteria):
         return map_unicef_ids_to_households_unicef_ids(self.payment_plan.excluded_ids)
 
 
-class PaymentInstruction(TimeStampedUUIDModel):
+class PaymentInstructionTargetingCriteria(TargetingCriteria):
+    """
+    Proxy model for TargetingCriteria to be used in PaymentInstruction
+    """
+
+    class Meta:
+        proxy = True
+
+    def get_excluded_household_ids(self) -> List["UUID"]:
+        return map_unicef_ids_to_households_unicef_ids(self.payment_instruction.excluded_ids)
+
+
+class PaymentInstruction(UnicefIdentifiedModel, TimeStampedUUIDModel):
     DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
     DELIVERY_TYPE_CASH = "Cash"
     DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
@@ -267,6 +325,8 @@ class PaymentInstruction(TimeStampedUUIDModel):
 
     class Status(models.TextChoices):
         PENDING = "PENDING", _("Pending")
+        AUTHORIZED = "AUTHORIZED", _("Authorized")
+        RELEASED = "RELEASED", _("Released")
 
     payment_plan = models.ForeignKey(
         "payment_module.PaymentPlan", on_delete=models.CASCADE, related_name="payment_instructions"
@@ -276,6 +336,27 @@ class PaymentInstruction(TimeStampedUUIDModel):
     )
     delivery_mechanism = models.CharField(max_length=255, choices=DELIVERY_TYPE_CHOICE, db_index=True, null=True)
     status = FSMField(default=Status.PENDING, protected=False, db_index=True)
+    targeting_criteria = models.OneToOneField(
+        "PaymentInstructionTargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="payment_instruction",
+    )
+
+    total = models.PositiveBigIntegerField(default=0)
+    correct = models.PositiveBigIntegerField(default=0)
+    missing = models.PositiveBigIntegerField(default=0)
+
+    total_entitled_quantity = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    total_entitled_quantity_usd = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+
+    exported_reconciliation_zip_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+
+    class Meta:
+        unique_together = ("fsp", "delivery_mechanism")
 
 
 class PaymentList(TimeStampedUUIDModel):
@@ -323,6 +404,14 @@ class Payment(TimeStampedUUIDModel, UnicefIdentifiedModel):
         default="0.00",
     )
 
+    collector = models.ForeignKey(
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="collected_payments",
+        null=True,
+        blank=True,
+    )
+
 
 class FinancialServiceProvider(TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
@@ -361,7 +450,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         default=dict,
     )
     fsp_xlsx_template = models.ForeignKey(
-        "payment.FinancialServiceProviderXlsxTemplate",
+        "payment_module.FinancialServiceProviderXlsxTemplate",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -382,7 +471,7 @@ class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
         (FAILED, _("Failed")),
     )
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
+        "payment_module.FinancialServiceProvider",
         on_delete=models.CASCADE,
         verbose_name=_("Financial Service Provider"),
     )
@@ -440,7 +529,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
 class AuthorizationProcess(TimeStampedUUIDModel):
     payment_instruction = models.ForeignKey(
-        "payment.PaymentInstruction",
+        "payment_module.PaymentInstruction",
         on_delete=models.CASCADE,
         related_name="authorization_processes",
     )
@@ -448,15 +537,50 @@ class AuthorizationProcess(TimeStampedUUIDModel):
 
 class Authorization(TimeStampedUUIDModel):
     AUTHORIZATION = "AUTHORIZATION"
-    REJECT = "REJECT"
+    RELEASE = "RELEASE"
+    REJECT_AUTH = "REJECT_AUTH"
+    REJECT_RELEASE = "REJECT_RELEASE"
     TYPE_CHOICES = (
         (AUTHORIZATION, "Authorization"),
-        (REJECT, "Reject"),
+        (RELEASE, "Release"),
+        (REJECT_AUTH, "Reject Authorization"),
+        (REJECT_RELEASE, "Reject Release"),
     )
 
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=REJECT, verbose_name=_("Approval type"))
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=REJECT_AUTH, verbose_name=_("Approval type"))
     comment = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     authorization_process = models.ForeignKey(
         AuthorizationProcess, on_delete=models.CASCADE, related_name="authorizations"
     )
+
+
+class ChoiceArrayFieldDeliveryMechanism(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        defaults = {
+            "form_class": forms.TypedMultipleChoiceField,
+            "choices": self.base_field.choices,
+            "coerce": self.base_field.to_python,
+            "widget": forms.SelectMultiple,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
+
+
+class FspDeliveryMechanism(TimeStampedUUIDModel):
+    financial_service_provider = models.ForeignKey(
+        FinancialServiceProvider, on_delete=models.CASCADE, related_name="fsp_delivery_mechanisms"
+    )
+    delivery_mechanism = models.CharField(
+        max_length=255, choices=PaymentInstruction.DELIVERY_TYPE_CHOICE, db_index=True, null=True
+    )
+
+    global_core_fields = ChoiceArrayFieldDeliveryMechanism(
+        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
+        default=list,
+    )
+    # TODO: flex fields
+    # TODO: payment plan scope fields
+
+    class Meta:
+        unique_together = ("financial_service_provider", "delivery_mechanism")

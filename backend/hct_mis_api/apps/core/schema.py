@@ -24,12 +24,12 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.core_fields_attributes import (
-    FILTERABLE_TYPES,
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     Scope,
 )
-from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
@@ -255,7 +255,7 @@ def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[st
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-            business_area_slug  # type: ignore # FIXME: Argument 1 to "apply_business_area" of "FieldFactory" has incompatible type "Optional[str]"; expected "str"
+            business_area_slug
         )
 
 

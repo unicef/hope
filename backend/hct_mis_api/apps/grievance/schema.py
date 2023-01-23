@@ -16,9 +16,13 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    TYPE_IMAGE,
+    FieldFactory,
+    Scope,
+)
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
 from hct_mis_api.apps.core.utils import (

@@ -42,6 +42,7 @@ USER_STATUS_CHOICES = (
 USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
+# TODO: rename to organization
 class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
     is_un = models.BooleanField(verbose_name="U.N.", default=False)

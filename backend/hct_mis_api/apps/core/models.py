@@ -99,6 +99,7 @@ class BusinessArea(TimeStampedUUIDModel):
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
+    is_using_payment_module = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")

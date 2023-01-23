@@ -402,7 +402,7 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> No
 
 
 def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
-    from hct_mis_api.apps.core.core_fields_attributes import (
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,
         TYPE_SELECT_ONE,
@@ -684,7 +684,7 @@ def log_and_withdraw_household_if_needed(
 
 
 def save_images(flex_fields: Dict, associated_with: str) -> None:
-    from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import TYPE_IMAGE
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
