@@ -293,7 +293,7 @@ class PaymentInstructionTargetingCriteria(TargetingCriteria):
         return map_unicef_ids_to_households_unicef_ids(self.payment_instruction.excluded_ids)
 
 
-class PaymentInstruction(TimeStampedUUIDModel):
+class PaymentInstruction(UnicefIdentifiedModel, TimeStampedUUIDModel):
     DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
     DELIVERY_TYPE_CASH = "Cash"
     DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
