@@ -28,6 +28,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -307,6 +308,10 @@ class Household(
             "size",
             "address",
             "admin_area",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
             "representatives",
             "geopoint",
             "female_age_group_0_5_count",
@@ -366,6 +371,10 @@ class Household(
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
+    admin1 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin2 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin3 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -495,31 +504,26 @@ class Household(
             return self.user_fields["sys"][key]
         return None
 
-    @property
-    def admin_area_title(self) -> Optional[str]:
-        if not self.admin_area:
-            return None
-        return self.admin_area.name
+    def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
+        """Propagates admin1,2,3,4 based on admin_area parents"""
+        admins = ["admin1", "admin2", "admin3", "admin4"]
 
-    @property
-    def admin1(self) -> Any:
-        if self.admin_area is None:
-            return None
-        if self.admin_area.area_type.area_level == 0:
-            return None
-        current_admin = self.admin_area
-        while current_admin.area_type.area_level != 1:
-            current_admin = current_admin.parent
-        return current_admin
+        if not new_admin_area:
+            new_admin_area = self.admin_area
+        else:
+            self.admin_area = new_admin_area
 
-    @property
-    def admin2(self) -> Any:
-        if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
-            return None
-        current_admin = self.admin_area
-        while current_admin.area_type.area_level != 2:
-            current_admin = current_admin.parent
-        return current_admin
+        for admin in admins:
+            setattr(self, admin, None)
+
+        new_admin_area_level = new_admin_area.area_type.area_level
+
+        for admin_level in reversed(range(1, new_admin_area_level + 1)):
+            setattr(self, f"admin{admin_level}", new_admin_area)
+            new_admin_area = new_admin_area.parent
+
+        if save:
+            self.save(update_fields=["admin_area"] + admins)
 
     @property
     def sanction_list_possible_match(self) -> bool:
