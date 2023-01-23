@@ -219,8 +219,8 @@ class TestDataSendTpToDatahub(TestCase):
         self.household.refresh_from_db()
         expected_household_dict = {
             "address": self.household.address,
-            "admin1": str(self.household.admin1),
-            "admin2": str(self.household.admin2),
+            "admin1": self.household.admin1,
+            "admin2": self.household.admin2,
             "country": "POL",
             "form_number": None,
             "household_size": 1,
