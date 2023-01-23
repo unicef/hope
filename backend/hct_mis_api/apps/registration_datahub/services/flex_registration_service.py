@@ -14,7 +14,6 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -71,6 +70,8 @@ class FlexRegistrationService:
         "residence_status": "residence_status_h_c",
         "admin1": "admin1_h_c",
         "admin2": "admin2_h_c",
+        "admin3": "admin3_h_c",
+        "admin4": "admin4_h_c",
         "size": "size_h_c",
         # "where_are_you_now": "",
     }
@@ -203,21 +204,22 @@ class FlexRegistrationService:
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
-        household: ImportedHousehold = self._create_object_and_validate(household_data, ImportedHousehold)
-        admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
-        admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
-        if admin_area1:
-            household.admin1_title = admin_area1.name
-        if admin_area2:
-            household.admin2_title = admin_area2.name
+        household = self._create_object_and_validate(household_data, ImportedHousehold)
+        household.set_admin_areas()
+
         household.kobo_asset_id = record.source_id
         household.save(
             update_fields=(
+                "admin_area",
+                "admin_area_title",
                 "admin1_title",
                 "admin2_title",
+                "admin3_title",
+                "admin4_title",
                 "kobo_asset_id",
             )
         )
+
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
