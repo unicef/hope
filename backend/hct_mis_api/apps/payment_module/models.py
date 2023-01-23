@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class PaymentCycle(TimeStampedUUIDModel):
+class PaymentCycle(UnicefIdentifiedModel, TimeStampedUUIDModel):
     class Status(models.TextChoices):
         NEW = "NEW", "New"
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
