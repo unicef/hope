@@ -64,7 +64,7 @@ class BaseRegistrationService(abc.ABC):
     @atomic("default")
     @atomic("registration_datahub")
     def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
-        business_area = BusinessArea.objects.get(slug=self.BUSINESS_AREA_SLUG)
+        business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
 
@@ -224,21 +224,22 @@ class FlexRegistrationService(BaseRegistrationService):
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
-        household: ImportedHousehold = self._create_object_and_validate(household_data, ImportedHousehold)
-        admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
-        admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
-        if admin_area1:
-            household.admin1_title = admin_area1.name
-        if admin_area2:
-            household.admin2_title = admin_area2.name
+        household = self._create_object_and_validate(household_data, ImportedHousehold)
+        household.set_admin_areas()
+
         household.kobo_asset_id = record.source_id
         household.save(
             update_fields=(
+                "admin_area",
+                "admin_area_title",
                 "admin1_title",
                 "admin2_title",
+                "admin3_title",
+                "admin4_title",
                 "kobo_asset_id",
             )
         )
+
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
@@ -283,6 +284,7 @@ class FlexRegistrationService(BaseRegistrationService):
                 ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
             else:
                 raise ValidationError("There should be only two collectors!")
+
 
     def _prepare_household_data(
         self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
