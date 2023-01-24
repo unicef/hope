@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
@@ -422,7 +421,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            log_and_raise("Grievance Ticket in status Closed is not editable")
+            raise ValidationError("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
@@ -463,9 +462,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             ticket_details = grievance_ticket.ticket_details
 
             if ticket_details.household and ticket_details.household != household:
-                raise GraphQLError("Cannot change household")
+                raise ValidationError("Cannot change household")
             if ticket_details.individual and ticket_details.individual != individual:
-                raise GraphQLError("Cannot change individual")
+                raise ValidationError("Cannot change individual")
 
             if household:
                 ticket_details.household = household
@@ -709,7 +708,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
-            raise GraphQLError("New status is incorrect")
+            raise ValidationError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             ticket_details = grievance_ticket.ticket_details
             if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
