@@ -49,9 +49,7 @@ class TestUkrainianRegistrationService(TestCase):
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
-        area_type = geo_models.AreaType.objects.create(
-            country=country
-        )
+        area_type = geo_models.AreaType.objects.create(country=country)
 
         base_dict = {"lft": 100, "rght": 100, "tree_id": 100, "level": 1}
 
@@ -59,7 +57,7 @@ class TestUkrainianRegistrationService(TestCase):
             geo_models.Area(name="SriLanka admin1", p_code="LK", area_type=area_type, **base_dict),
             geo_models.Area(name="SriLanka admin2", p_code="LK71", area_type=area_type, **base_dict),
             geo_models.Area(name="SriLanka admin3", p_code="LK7163", area_type=area_type, **base_dict),
-            geo_models.Area(name="SriLanka admin4", p_code="LK7163105", area_type=area_type, **base_dict)
+            geo_models.Area(name="SriLanka admin4", p_code="LK7163105", area_type=area_type, **base_dict),
         ]
         geo_models.Area.objects.bulk_create(areas)
 

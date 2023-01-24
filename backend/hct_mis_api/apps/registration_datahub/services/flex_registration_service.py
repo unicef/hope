@@ -19,7 +19,6 @@ from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
-from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -285,7 +284,6 @@ class FlexRegistrationService(BaseRegistrationService):
             else:
                 raise ValidationError("There should be only two collectors!")
 
-
     def _prepare_household_data(
         self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
     ) -> Dict:
@@ -432,7 +430,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         "admin2": "admin2_h_c",
         "admin3": "admin3_h_c",
         "admin4": "admin4_h_c",
-        "address": "address_h_c"
+        "address": "address_h_c",
     }
 
     INDIVIDUAL_MAPPING_DICT = {
@@ -468,9 +466,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "collect_individual_data": YES,
             "size": 0,
             "admin1": "LK",
-            "flex_fields": {
-                "moh_center_of_reference": localization_dict.get("moh_center_of_reference")
-            }
+            "flex_fields": {"moh_center_of_reference": localization_dict.get("moh_center_of_reference")},
         }
 
     def _prepare_individual_data(self, head_of_household_info: Dict, **kwargs: Any) -> Dict:
