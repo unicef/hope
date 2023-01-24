@@ -15622,6 +15622,30 @@
             "deprecationReason": null
           },
           {
+            "name": "koboToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "koboUrl",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "rapidProHost",
             "description": null,
             "args": [],
@@ -33847,6 +33871,30 @@
             "deprecationReason": null
           },
           {
+            "name": "koboToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "koboUrl",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "rapidProHost",
             "description": null,
             "args": [],
@@ -42326,6 +42374,33 @@
             "deprecationReason": null
           },
           {
+            "name": "revertMarkPaymentRecordAsFailed",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentRecordId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "RevertMarkAsFailedMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "updatePaymentVerificationReceivedAndReceivedAmount",
             "description": null,
             "args": [
@@ -46817,6 +46892,29 @@
       {
         "kind": "OBJECT",
         "name": "MarkPaymentRecordAsFailedMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentRecord",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentRecordNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "RevertMarkAsFailedMutation",
         "description": null,
         "fields": [
           {
