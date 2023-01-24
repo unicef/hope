@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -46,6 +47,22 @@ class TestUkrainianRegistrationService(TestCase):
             },
         )
 
+        country = geo_models.Country.objects.create(name="Sri Lanka")
+
+        area_type = geo_models.AreaType.objects.create(
+            country=country
+        )
+
+        base_dict = {"lft": 100, "rght": 100, "tree_id": 100, "level": 1}
+
+        areas = [
+            geo_models.Area(name="SriLanka admin1", p_code="LK", area_type=area_type, **base_dict),
+            geo_models.Area(name="SriLanka admin2", p_code="LK71", area_type=area_type, **base_dict),
+            geo_models.Area(name="SriLanka admin3", p_code="LK7163", area_type=area_type, **base_dict),
+            geo_models.Area(name="SriLanka admin4", p_code="LK7163105", area_type=area_type, **base_dict)
+        ]
+        geo_models.Area.objects.bulk_create(areas)
+
         children_info = [
             {
                 "gender_i_c": "male",
@@ -57,7 +74,7 @@ class TestUkrainianRegistrationService(TestCase):
 
         caretaker_info = [
             {
-                "gender_i_c": "female",
+                "gender_i_c": "   female",
                 "full_name_i_c": "Alexis",
                 "birth_date_i_c": "1989-01-04",
                 "has_nic_number_i_c": "n",
@@ -125,6 +142,16 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
         self.assertEqual(ImportedDocument.objects.count(), 1)
+
+        imported_household = ImportedHousehold.objects.first()
+        self.assertEqual(imported_household.admin1, "LK")
+        self.assertEqual(imported_household.admin1_title, "SriLanka admin1")
+        self.assertEqual(imported_household.admin2, "LK71")
+        self.assertEqual(imported_household.admin2_title, "SriLanka admin2")
+        self.assertEqual(imported_household.admin3, "LK7163")
+        self.assertEqual(imported_household.admin3_title, "SriLanka admin3")
+        self.assertEqual(imported_household.admin4, "LK7163105")
+        self.assertEqual(imported_household.admin4_title, "SriLanka admin4")
 
         self.assertEqual(
             ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
