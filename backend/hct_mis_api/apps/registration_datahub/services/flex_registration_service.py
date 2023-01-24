@@ -64,7 +64,7 @@ class BaseRegistrationService(abc.ABC):
     @atomic("default")
     @atomic("registration_datahub")
     def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
-        business_area = BusinessArea.objects.get(slug="ukraine")
+        business_area = BusinessArea.objects.get(slug=self.BUSINESS_AREA_SLUG)
         number_of_individuals = 0
         number_of_households = 0
 
@@ -428,9 +428,12 @@ class FlexRegistrationService(BaseRegistrationService):
 class SriLankaRegistrationService(BaseRegistrationService):
     BUSINESS_AREA_SLUG = "sri-lanka"
 
-    HOUSEHOLD_MAPPING_DICT = {"admin1": "admin2_h_c", "admin2": "admin3_h_c", "address": "address_h_c"}
-
-    HOUSEHOLD_FLEX_FIELDS = ["admin4_h_c", "moh_center_of_reference"]
+    HOUSEHOLD_MAPPING_DICT = {
+        "admin2": "admin2_h_c",
+        "admin3": "admin3_h_c",
+        "admin4": "admin4_h_c",
+        "address": "address_h_c"
+    }
 
     INDIVIDUAL_MAPPING_DICT = {
         "full_name": "full_name_i_c",
@@ -464,9 +467,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "consent": True,
             "collect_individual_data": YES,
             "size": 0,
-            "flex_fields": build_flex_arg_dict_from_list_if_exists(
-                localization_dict, SriLankaRegistrationService.HOUSEHOLD_FLEX_FIELDS
-            ),
+            "admin1": "LK",
+            "flex_fields": {
+                "moh_center_of_reference": localization_dict.get("moh_center_of_reference")
+            }
         }
 
     def _prepare_individual_data(self, head_of_household_info: Dict, **kwargs: Any) -> Dict:
@@ -482,7 +486,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         if relationship := individual_data.get("relationship"):
             individual_data["relationship"] = relationship.upper()
-        if sex := individual_data.get("sex"):
+        if sex := individual_data.get("sex").strip():
             individual_data["sex"] = sex.upper()
 
         return individual_data
@@ -501,16 +505,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         household_data = self._prepare_household_data(localization_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
-
-        admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
-        admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
-
-        if admin_area1:
-            household.admin1_title = admin_area1.name
-        if admin_area2:
-            household.admin2_title = admin_area2.name
-
-        household.save(update_fields=("admin1_title", "admin2_title"))
 
         base_individual_data_dict = dict(
             household=household,
@@ -562,5 +556,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         ImportedIndividual.objects.bulk_create(individuals_to_create)
 
+        household.set_admin_areas()
         household.head_of_household = head_of_household
-        household.save(update_fields=["head_of_household"])
+        household.save()
