@@ -22,8 +22,9 @@ class TestPowerQuery(TestCase):
     def setUpTestData(cls) -> None:
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
 
-        cls.ba1 = BusinessAreaFactory()
-        cls.ba2 = BusinessAreaFactory()
+        # code should be unique but the test depends on both BAs having the same, empty code
+        cls.ba1 = BusinessAreaFactory(code="")
+        cls.ba2 = BusinessAreaFactory(code="")
         cls.hh1 = create_household({"business_area": cls.ba1})
         cls.hh2 = create_household({"business_area": cls.ba2})
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)

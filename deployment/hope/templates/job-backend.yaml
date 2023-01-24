@@ -27,7 +27,7 @@ spec:
           - secretRef:
               name: {{ include "hope.fullname" . }}-job-backend
           - configMapRef:
-              name: {{ include "hope.fullname" . }}-backend
+              name: {{ include "hope.fullname" . }}-job-backend
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
       restartPolicy: Never

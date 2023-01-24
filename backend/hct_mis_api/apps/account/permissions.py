@@ -273,7 +273,7 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
 
-class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
+class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
         type: Type,
@@ -346,6 +346,10 @@ class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
             filtering_args=self.filtering_args,
             permission_classes=self.permission_classes,
         )
+
+
+class DjangoPermissionFilterConnectionField(DjangoPermissionFilterFastConnectionField):
+    use_cached_count = False
 
 
 class BaseMutationPermissionMixin:

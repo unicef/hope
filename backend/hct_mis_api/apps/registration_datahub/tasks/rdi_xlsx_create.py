@@ -549,7 +549,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.row_id = row[0].row
 
                 if sheet_title == "households":
-                    obj_to_create = self._assign_admin_areas_titles(obj_to_create)
+                    obj_to_create.set_admin_areas()
                     self.households[household_id] = obj_to_create
                 else:
                     if household_id is None:

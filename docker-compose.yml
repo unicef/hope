@@ -111,7 +111,7 @@ services:
       - redis
 
   db:
-    image: johniak/postgis:11-alpine
+    image: kartoza/postgis:14-3
     volumes:
       - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d

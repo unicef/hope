@@ -32,9 +32,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             id=xlsx_kobo_template_id
         ).first()
         if not xlsx_kobo_template_object:
-            self._save_message_status_template_id(
-                xlsx_kobo_template_object, "Uploaded file is not found on the server", XLSXKoboTemplate.UNSUCCESSFUL  # type: ignore # FIXME: Argument 1 to "_save_message_status_template_id" of "UploadNewKoboTemplateAndUpdateFlexFieldsTask" has incompatible type "Optional[XLSXKoboTemplate]"; expected "XLSXKoboTemplate"
-            )
+            # Record not found, we can stop here
             return
 
         last_valid_template = XLSXKoboTemplate.objects.latest_valid()
@@ -59,10 +57,9 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                     xlsx_kobo_template_object, error_message, XLSXKoboTemplate.UNSUCCESSFUL, asset_uid
                 )
                 return
-            else:
-                flex_fields_task = FlexibleAttributeImporter()
-                flex_fields_task.import_xls(xlsx_kobo_template_object.file)
 
+            flex_fields_task = FlexibleAttributeImporter()
+            flex_fields_task.import_xls(xlsx_kobo_template_object.file)
             self._save_message_status_template_id(xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid)
         except requests.exceptions.RequestException as e:
             logger.exception("Import template to Kobo Exception")
