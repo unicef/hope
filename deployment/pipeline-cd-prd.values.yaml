@@ -50,21 +50,21 @@ ingress:
 postgresql:
   enabled: false
   externalDatabase:
-    host: pgsql-10-reserved-hctmis-prd.postgres.database.azure.com
-    user: hctappprdusr@pgsql-10-reserved-hctmis-prd
+    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+    user: hctappprdusr
     password: #secret-variables: POSTGRES_PASSWORD
     db: prd_hctmis_appdb
 registrationdatahubpostgresql:
   enabled: false
   externalDatabase:
-    host: pgsql-10-reserved-hctmis-prd.postgres.database.azure.com
-    user: reghubprdusr@pgsql-10-reserved-hctmis-prd
+    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+    user: reghubprdusr
     password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
     db: prd_registration_datahubdb
 cashassistdatahubpostgresql:
   enabled: false
   externalDatabase:
-    host: pgsql-10-reserved-hctmis-prd.postgres.database.azure.com
-    user: cahubprdusr@pgsql-10-reserved-hctmis-prd
+    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+    user: cahubprdusr
     password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
     db: prd_cashassist_datahubdb
