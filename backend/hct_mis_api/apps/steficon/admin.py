@@ -67,6 +67,41 @@ class AutocompleteWidget(forms.Widget):
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
 
+    class Media:
+        extra = "" if settings.DEBUG else ".min"
+        i18n_name = SELECT2_TRANSLATIONS.get(get_language())
+        i18n_file: List = (
+            [
+                "admin/js/vendor/select2/i18n/{}.js".format(
+                    i18n_name,
+                )
+            ]
+            if i18n_name
+            else []
+        )
+        js = (
+            tuple(
+                [
+                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
+                ]
+                + i18n_file
+                + [
+                    "admin/js/jquery.init.js",
+                    "admin/js/autocomplete.js",
+                    "adminfilters/adminfilters{}.js".format(extra),
+                ]
+            ),
+        )
+        css = (
+            {
+                "screen": (
+                    "admin/css/vendor/select2/select2{}.css".format(extra),
+                    "adminfilters/adminfilters.css",
+                ),
+            },
+        )
+
     def get_url(self) -> str:
         return reverse("admin:autocomplete")
 
@@ -90,40 +125,6 @@ class AutocompleteWidget(forms.Widget):
                 "template_name": self.template_name,
             }
         }
-
-    @property
-    def media(self) -> forms.Media:  # type: ignore # FIXME: Signature of "media" incompatible with supertype "Widget"
-        extra = "" if settings.DEBUG else ".min"
-        i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file: List = (
-            [
-                "admin/js/vendor/select2/i18n/{}.js".format(
-                    i18n_name,
-                )
-            ]
-            if i18n_name
-            else []
-        )
-        return forms.Media(
-            js=tuple(
-                [
-                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
-                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
-                ]
-                + i18n_file
-                + [
-                    "admin/js/jquery.init.js",
-                    "admin/js/autocomplete.js",
-                    "adminfilters/adminfilters{}.js".format(extra),
-                ]
-            ),
-            css={
-                "screen": (
-                    "admin/css/vendor/select2/select2{}.css".format(extra),
-                    "adminfilters/adminfilters.css",
-                ),
-            },
-        )
 
 
 class TestRuleMixin:

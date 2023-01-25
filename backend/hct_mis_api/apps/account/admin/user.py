@@ -156,7 +156,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, KoboAccessMixin, LinkedObjectsMi
         kobo_pk = user.custom_fields.get("kobo_pk", None)
         kobo_username = user.custom_fields.get("kobo_username", None)
         if kobo_pk:
-            to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # FIXME: Incompatible types in assignment (expression has type "List[Model]", variable has type "List[str]")
+            to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # this is somehow intentional
         return to_delete, model_count, perms_needed, protected
 
     @button()

@@ -921,7 +921,7 @@ class DeduplicateTask:
             prepared_ticket = cls.prepare_grievance_ticket_documents_deduplication(
                 main_individual=ticket_data["original"].individual,
                 business_area=ticket_data["original"].individual.business_area,
-                registration_data_import=registration_data_import,  # type: ignore # FIXME: Argument "registration_data_import" to "prepare_grievance_ticket_documents_deduplication" of "DeduplicateTask" has incompatible type "Optional[RegistrationDataImport]"; expected "RegistrationDataImport"
+                registration_data_import=registration_data_import,
                 possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
                 possible_duplicates_through_dict=possible_duplicates_through_dict,
             )
@@ -943,7 +943,7 @@ class DeduplicateTask:
         main_individual: Individual,
         possible_duplicates_individuals: List[Individual],
         business_area: BusinessArea,
-        registration_data_import: RegistrationDataImport,
+        registration_data_import: Optional[RegistrationDataImport],
         possible_duplicates_through_dict: Dict,
     ) -> Optional[NamedTuple]:
         from hct_mis_api.apps.grievance.models import (

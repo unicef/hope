@@ -30,7 +30,7 @@ def get_bookmarks(request: Any) -> List:
                     elif len(parts) == 3:
                         args = parts[0], "viewlink", parts[1], parts[0]
                     elif len(parts) == 4:
-                        args = parts.reverse()  # type: ignore # FIXME: parts.reverse() does not return anything
+                        parts.reverse()
                     if args:
                         quick_links.append(format_html('<li><a target="{}" class="{}" href="{}">{}</a></li>', *args))
             except ValueError:
