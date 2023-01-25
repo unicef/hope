@@ -16,6 +16,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
     TargetPopulationTargetingCriteria,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 MUTATION_QUERY = """
 mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopulationInput!) {
@@ -160,6 +161,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 2, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
+        program = ProgramFactory(name="program", business_area=cls.business_area)
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             targeting_criteria=cls.get_targeting_criteria_for_rule(
@@ -167,6 +169,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             ),
             created_by=cls.user,
             business_area=cls.business_area,
+            program=program,
         )
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
@@ -177,6 +180,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             status="LOCKED",
             created_by=cls.user,
             business_area=cls.business_area,
+            program=program,
         )
         cls.approved_target_population.save()
         cls.approved_target_population.households.set(Household.objects.all())
