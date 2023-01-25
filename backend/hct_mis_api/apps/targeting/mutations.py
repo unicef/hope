@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
     PermissionRelayMutation,
     Permissions,
 )
+from hct_mis_api.apps.utils.targeting import TargetingCriteriaProxy
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core import utils
 from hct_mis_api.apps.core.models import BusinessArea
@@ -30,8 +31,6 @@ from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetPopulation,
     TargetPopulationTargetingCriteria,
@@ -118,25 +117,11 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
 def from_input_to_targeting_criteria(
     targeting_criteria_input: Dict, program: Program
 ) -> TargetPopulationTargetingCriteria:
-    targeting_criteria = TargetPopulationTargetingCriteria()
-    targeting_criteria.save()
-    for rule_input in targeting_criteria_input.get("rules"):
-        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
-        rule.save()
-        for filter_input in rule_input.get("filters", []):
-            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
-            rule_filter.save()
-        for block_input in rule_input.get("individuals_filters_blocks", []):
-            block = TargetingIndividualRuleFilterBlock(
-                targeting_criteria_rule=rule, target_only_hoh=not program.individual_data_needed
-            )
-            block.save()
-            for individual_block_filters_input in block_input.get("individual_block_filters"):
-                individual_block_filters = TargetingIndividualBlockRuleFilter(
-                    individuals_filters_block=block, **individual_block_filters_input
-                )
-                individual_block_filters.save()
-    return targeting_criteria
+    return TargetingCriteriaProxy.from_dict(
+        data=targeting_criteria_input,
+        type=TargetPopulationTargetingCriteria,
+        target_only_hoh=not program.individual_data_needed,
+    )
 
 
 class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutationMixin):
