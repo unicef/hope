@@ -130,7 +130,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "relationship": "HEAD",
             "birth_date": date(1963, 2, 3),
             "marital_status": "MARRIED",
-            "preferred_language": "pl",
+            "preferred_language": "pl-pl",
         }
         matching_individuals = ImportedIndividual.objects.filter(**individual_data)
 

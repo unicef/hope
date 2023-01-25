@@ -274,6 +274,8 @@ export type BusinessAreaNode = Node & {
   regionCode: Scalars['String'],
   regionName: Scalars['String'],
   koboUsername?: Maybe<Scalars['String']>,
+  koboToken?: Maybe<Scalars['String']>,
+  koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
@@ -1204,6 +1206,10 @@ export type HouseholdNode = Node & {
   size?: Maybe<Scalars['Int']>,
   address: Scalars['String'],
   adminArea?: Maybe<AreaNode>,
+  admin1?: Maybe<AreaNode>,
+  admin2?: Maybe<AreaNode>,
+  admin3?: Maybe<AreaNode>,
+  admin4?: Maybe<AreaNode>,
   representatives: IndividualNodeConnection,
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
@@ -1272,13 +1278,11 @@ export type HouseholdNode = Node & {
   individuals?: Maybe<IndividualNodeConnection>,
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelectionNode>,
-  adminAreaTitle?: Maybe<Scalars['String']>,
   selection?: Maybe<HouseholdSelectionNode>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
   sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
-  admin1?: Maybe<AreaNode>,
-  admin2?: Maybe<AreaNode>,
+  adminAreaTitle?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
   programsWithDeliveredQuantity?: Maybe<Array<Maybe<ProgramsWithDeliveredQuantityNode>>>,
   activeIndividualsCount?: Maybe<Scalars['Int']>,
@@ -1809,10 +1813,16 @@ export type ImportedHouseholdNode = Node & {
   size: Scalars['Int'],
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
+  adminArea: Scalars['String'],
+  adminAreaTitle: Scalars['String'],
   admin1: Scalars['String'],
   admin1Title: Scalars['String'],
   admin2: Scalars['String'],
   admin2Title: Scalars['String'],
+  admin3: Scalars['String'],
+  admin3Title: Scalars['String'],
+  admin4: Scalars['String'],
+  admin4Title: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
@@ -2529,8 +2539,7 @@ export type LabelNode = {
 export type LanguageObject = {
    __typename?: 'LanguageObject',
   english?: Maybe<Scalars['String']>,
-  alpha2?: Maybe<Scalars['String']>,
-  alpha3?: Maybe<Scalars['String']>,
+  code?: Maybe<Scalars['String']>,
 };
 
 export type LanguageObjectConnection = {
@@ -3790,7 +3799,7 @@ export type QueryAllKoboProjectsArgs = {
 
 
 export type QueryAllLanguagesArgs = {
-  name?: Maybe<Scalars['String']>,
+  code?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5535,6 +5544,8 @@ export type UserBusinessAreaNode = Node & {
   regionCode: Scalars['String'],
   regionName: Scalars['String'],
   koboUsername?: Maybe<Scalars['String']>,
+  koboToken?: Maybe<Scalars['String']>,
+  koboUrl?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
@@ -9522,7 +9533,7 @@ export type GlobalAreaChartsQuery = (
 
 export type LanguageAutocompleteQueryVariables = {
   first?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>
+  code?: Maybe<Scalars['String']>
 };
 
 
@@ -9535,7 +9546,7 @@ export type LanguageAutocompleteQuery = (
       & Pick<LanguageObjectEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'LanguageObject' }
-        & Pick<LanguageObject, 'english' | 'alpha2'>
+        & Pick<LanguageObject, 'english' | 'code'>
       )> }
     )>> }
   )> }
@@ -18578,13 +18589,13 @@ export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaCha
 export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
 export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
 export const LanguageAutocompleteDocument = gql`
-    query LanguageAutocomplete($first: Int, $name: String) {
-  allLanguages(first: $first, name: $name) {
+    query LanguageAutocomplete($first: Int, $code: String) {
+  allLanguages(first: $first, code: $code) {
     edges {
       cursor
       node {
         english
-        alpha2
+        code
       }
     }
   }
@@ -18621,7 +18632,7 @@ export function withLanguageAutocomplete<TProps, TChildProps = {}>(operationOpti
  * const { data, loading, error } = useLanguageAutocompleteQuery({
  *   variables: {
  *      first: // value for 'first'
- *      name: // value for 'name'
+ *      code: // value for 'code'
  *   },
  * });
  */
@@ -19945,6 +19956,8 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -20435,6 +20448,10 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  admin3?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  admin4?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -20503,13 +20520,11 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>,
-  adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programsWithDeliveredQuantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramsWithDeliveredQuantityNode']>>>, ParentType, ContextType>,
   activeIndividualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -20600,10 +20615,16 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  adminArea?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adminAreaTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin3?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin3Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin4?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin4Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -20958,8 +20979,7 @@ export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type LanguageObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObject'] = ResolversParentTypes['LanguageObject']> = {
   english?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  alpha2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  alpha3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type LanguageObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObjectConnection'] = ResolversParentTypes['LanguageObjectConnection']> = {
@@ -22225,6 +22245,8 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
