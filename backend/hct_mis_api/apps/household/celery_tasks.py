@@ -87,7 +87,7 @@ def interval_recalculate_population_fields_task() -> None:
         .distinct()
     )
 
-    recalculate_population_fields_task.delay(households_ids=list(households))
+    recalculate_population_fields_task.delay(household_ids=list(households))
 
 
 @app.task()
