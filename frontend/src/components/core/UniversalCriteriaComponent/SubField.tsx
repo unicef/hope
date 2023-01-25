@@ -1,29 +1,21 @@
+import { Grid } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { FormikAutocomplete } from '../../../shared/Formik/FormikAutocomplete';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../../shared/Formik/FormikDecimalField';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 
-const FlexWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-const InlineField = styled.div`
-  width: 48%;
-`;
-
 export const SubField = ({ field, index, baseName }): React.ReactElement => {
   const { t } = useTranslation();
   switch (field.fieldAttribute.type) {
     case 'DECIMAL':
       return (
-        <FlexWrapper>
-          <InlineField>
+        <Grid container spacing={3}>
+          <Grid item xs={4}>
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
@@ -31,8 +23,8 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               fullWidth
               component={FormikDecimalField}
             />
-          </InlineField>
-          <InlineField>
+          </Grid>
+          <Grid item xs={4}>
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
@@ -40,13 +32,13 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               fullWidth
               component={FormikDecimalField}
             />
-          </InlineField>
-        </FlexWrapper>
+          </Grid>
+        </Grid>
       );
     case 'DATE':
       return (
-        <FlexWrapper>
-          <InlineField>
+        <Grid container spacing={3}>
+          <Grid item xs={4}>
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
@@ -54,8 +46,8 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               component={FormikDateField}
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
             />
-          </InlineField>
-          <InlineField>
+          </Grid>
+          <Grid item xs={4}>
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
@@ -63,13 +55,13 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               component={FormikDateField}
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
             />
-          </InlineField>
-        </FlexWrapper>
+          </Grid>
+        </Grid>
       );
     case 'INTEGER':
       return (
-        <FlexWrapper>
-          <InlineField>
+        <Grid container spacing={3}>
+          <Grid item xs={4}>
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
@@ -79,8 +71,8 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               fullWidth
               component={FormikTextField}
             />
-          </InlineField>
-          <InlineField>
+          </Grid>
+          <Grid item xs={4}>
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
@@ -90,8 +82,8 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               fullWidth
               component={FormikTextField}
             />
-          </InlineField>
-        </FlexWrapper>
+          </Grid>
+        </Grid>
       );
     case 'SELECT_ONE':
       return field.fieldName.includes('admin') ? (

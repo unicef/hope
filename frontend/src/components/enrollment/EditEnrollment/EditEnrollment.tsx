@@ -1,25 +1,26 @@
 import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import {
-  getFullNodeFromEdgesById,
+  associatedWith,
   handleValidationErrors,
+  isNot,
 } from '../../../utils/utils';
 import {
-  ProgramStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
-  useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../core/LoadingComponent';
+import { UniversalCriteriaPaperComponent } from '../../core/UniversalCriteriaComponent/UniversalCriteriaPaperComponent';
 import { Exclusions } from '../../targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../../targeting/PaperContainer';
-import { EnrollmentCriteria } from '../EnrollmentDetails/EnrollmentCriteria/EnrollmentCriteria';
 import { EditEnrollmentHeader } from './EditEnrollmentHeader';
 
 interface EditEnrollmentProps {
@@ -30,6 +31,8 @@ export const EditEnrollment = ({
   targetPopulation,
 }: EditEnrollmentProps): React.ReactElement => {
   const { t } = useTranslation();
+  const [individualData, setIndividualData] = useState(null);
+  const [householdData, setHouseholdData] = useState(null);
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
@@ -38,13 +41,30 @@ export const EditEnrollment = ({
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
   };
-  const [mutate, { loading }] = useUpdateTpMutation();
+  const [mutate, { loading: loadingUpdateTP }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const { data: allProgramsData } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'cache-and-network',
-  });
+
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+  );
+  useEffect(() => {
+    if (loading) return;
+    const filteredIndividualData = {
+      allFieldsAttributes: data?.allFieldsAttributes
+        ?.filter(associatedWith('Individual'))
+        .filter(isNot('IMAGE')),
+    };
+    setIndividualData(filteredIndividualData);
+
+    const filteredHouseholdData = {
+      allFieldsAttributes: data?.allFieldsAttributes?.filter(
+        associatedWith('Household'),
+      ),
+    };
+    setHouseholdData(filteredHouseholdData);
+  }, [data, loading]);
+  if (!individualData || !householdData) return <LoadingComponent />;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria } = values;
@@ -111,12 +131,6 @@ export const EditEnrollment = ({
     }
   };
 
-  const selectedProgram = (values): void =>
-    getFullNodeFromEdgesById(
-      allProgramsData?.allPrograms?.edges,
-      values.program,
-    );
-
   return (
     <Formik
       initialValues={initialValues}
@@ -130,7 +144,7 @@ export const EditEnrollment = ({
             <EditEnrollmentHeader
               handleSubmit={submitForm}
               values={values}
-              loading={loading}
+              loading={loadingUpdateTP}
               businessArea={businessArea}
               targetPopulation={targetPopulation}
             />
@@ -138,11 +152,13 @@ export const EditEnrollment = ({
             <FieldArray
               name='targetingCriteria'
               render={(arrayHelpers) => (
-                <EnrollmentCriteria
-                  helpers={arrayHelpers}
-                  rules={values.targetingCriteria}
-                  selectedProgram={selectedProgram(values)}
+                <UniversalCriteriaPaperComponent
+                  title='Enrollment Criteria'
                   isEdit
+                  arrayHelpers={arrayHelpers}
+                  rules={values.targetingCriteria}
+                  householdFieldsChoices={householdData.allFieldsAttributes}
+                  individualFieldsChoices={individualData.allFieldsAttributes}
                 />
               )}
             />

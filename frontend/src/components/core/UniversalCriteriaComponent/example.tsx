@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
+import { associatedWith, isNot } from '../../../utils/utils';
+import { LoadingComponent } from '../LoadingComponent';
 import { UniversalCriteriaPaperComponent } from './UniversalCriteriaPaperComponent';
 import { UniversalCriteriaPlainComponent } from './UniversalCriteriaPlainComponent';
 
@@ -19,8 +21,6 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-const associatedWith = (type) => (item) => item.associatedWith === type;
-const isNot = (type) => (item) => item.type !== type;
 export function Example(): React.ReactElement {
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
@@ -44,7 +44,7 @@ export function Example(): React.ReactElement {
     };
     setHouseholdData(filteredHouseholdData);
   }, [data, loading]);
-  if (!individualData || !householdData) return <div>Loading</div>;
+  if (!individualData || !householdData) return <LoadingComponent />;
   const initialValues = {
     name: '',
     someWeirdNameForCriteria: [],
