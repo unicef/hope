@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
+from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -223,14 +224,30 @@ class KoboAssetObject(graphene.ObjectType):
     xls_link = String()
 
 
-class KoboAssetObjectConnection(Connection):
+class ObjectConnection(Connection):
     total_count = graphene.Int()
 
     def resolve_total_count(self, info: Any, **kwargs: Any) -> int:
         return len(self.iterable)
 
     class Meta:
+        abstract = True
+
+
+class KoboAssetObjectConnection(ObjectConnection):
+    class Meta:
         node = KoboAssetObject
+
+
+class LanguageObject(graphene.ObjectType):
+    english = String()
+    alpha2 = String()
+    alpha3 = String()
+
+
+class LanguageObjectConnection(ObjectConnection):
+    class Meta:
+        node = LanguageObject
 
 
 def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[str] = None) -> Generator:
@@ -298,6 +315,9 @@ class Query(graphene.ObjectType):
         description="All Kobo projects/assets.",
     )
     cash_assist_url_prefix = graphene.String()
+    all_languages = ConnectionField(
+        LanguageObjectConnection, name=graphene.String(required=False), description="All available languages"
+    )
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -355,3 +375,6 @@ class Query(graphene.ObjectType):
 
     def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
+
+    def resolve_all_languages(self, info: Any, name: str, **kwargs: Any) -> List[Language]:
+        return Languages.filter_by_name(name)

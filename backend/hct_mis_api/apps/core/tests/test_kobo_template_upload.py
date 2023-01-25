@@ -50,7 +50,7 @@ def raise_as_func(exception: BaseException) -> Callable:
 
 
 class TestKoboTemplateUpload(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -109,6 +109,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: tax_id_issuer_i_c - Field is missing",
                 "Field: bank_name_i_c - Field is missing",
                 "Field: bank_account_number_i_c - Field is missing",
+                "Field: preferred_language_i_c - Field is missing",
             ]
         }
         self.assertEqual(form.errors, expected_errors)

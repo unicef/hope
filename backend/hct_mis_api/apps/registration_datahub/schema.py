@@ -158,6 +158,11 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     import_id = graphene.String()
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
+    preferred_language = graphene.String()
+
+    @staticmethod
+    def resolve_preferred_language(parent: ImportedIndividual, info: Any) -> Optional[str]:
+        return parent.preferred_language or None
 
     def resolve_role(parent, info: Any) -> str:
         role = parent.households_and_roles.first()

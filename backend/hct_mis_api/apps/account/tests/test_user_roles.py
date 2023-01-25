@@ -77,4 +77,5 @@ class UserRolesTest(TestCase):
         self.assertEqual(len(formset.errors), 2)
 
         errors: List[ErrorList] = formset.errors
-        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", errors[0]["role"])  # type: ignore # FIXME: No overload variant of "__getitem__" of "UserList" matches argument type "str"
+        role = errors[0]["role"]  # type: ignore # mypy doesn't see that you can call __getitem__ with str on ErrorList
+        self.assertIn(f"{self.role_1.name} is incompatible with {self.role_2.name}.", role)

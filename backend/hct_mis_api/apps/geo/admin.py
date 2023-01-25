@@ -1,6 +1,16 @@
 import csv
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Tuple,
+    Type,
+    Union,
+)
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
@@ -32,8 +42,10 @@ class ActiveRecordFilter(ListFilter):
     title = "Active"
     parameter_name = "active"
 
-    def __init__(self, request: "HttpRequest", params: List[str], model: Model, model_admin: ModelAdmin) -> None:
-        super().__init__(request, params, model, model_admin)  # type: ignore # FIXME
+    def __init__(
+        self, request: "HttpRequest", params: Dict[str, str], model: Type[Model], model_admin: ModelAdmin
+    ) -> None:
+        super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
             if p in params:
                 value = params.pop(p)
@@ -87,7 +99,6 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
                 )
             },
         ),
-        # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
