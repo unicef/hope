@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {FieldAttributeNode, ImportedIndividualFieldsQuery} from '../../../__generated__/graphql';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { FieldChooser } from './FieldChooser';
 import { SubField } from './SubField';
 

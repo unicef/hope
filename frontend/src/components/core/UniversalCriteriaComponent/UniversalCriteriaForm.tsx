@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -26,9 +26,9 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../../utils/targetingUtils';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { UniversalCriteriaFilter } from './UniversalCriteriaFilter';
 import { UniversalCriteriaFilterBlocks } from './UniversalCriteriaFilterBlocks';
-import { FieldAttributeNode } from '../../../__generated__/graphql';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -120,9 +120,7 @@ export function UniversalCriteriaForm({
 }: UniversalCriteriaFormProps): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { loading } = useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);

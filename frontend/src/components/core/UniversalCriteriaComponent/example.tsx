@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
-import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { FieldArray, Form, Formik } from 'formik';
 import { Paper } from '@material-ui/core';
+import { FieldArray, Form, Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { UniversalCriteriaPlainComponent } from './UniversalCriteriaPlainComponent';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import { UniversalCriteriaPaperComponent } from './UniversalCriteriaPaperComponent';
+import { UniversalCriteriaPlainComponent } from './UniversalCriteriaPlainComponent';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -61,7 +60,7 @@ export function Example(): React.ReactElement {
               console.log('XD');
             }}
           >
-            {({ values, submitForm }) => {
+            {({ values }) => {
               console.log('values', values);
               return (
                 <Form style={{ width: '100%' }}>
@@ -94,7 +93,7 @@ export function Example(): React.ReactElement {
           console.log('XD');
         }}
       >
-        {({ values, submitForm }) => {
+        {({ values }) => {
           console.log('values', values);
           return (
             <Form style={{ width: '100%' }}>
@@ -103,7 +102,7 @@ export function Example(): React.ReactElement {
                 render={(arrayHelpers) => (
                   <UniversalCriteriaPaperComponent
                     title='Example Paper Criteria'
-                    isEdit
+                    isEdit={false}
                     arrayHelpers={arrayHelpers}
                     rules={values.someWeirdNameForCriteria}
                     householdFieldsChoices={householdData.allFieldsAttributes}

@@ -1,5 +1,5 @@
 import React from 'react';
-import {FieldAttributeNode, ImportedIndividualFieldsQuery} from '../../../__generated__/graphql';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { FieldChooser } from './FieldChooser';
 import { SubField } from './SubField';
 

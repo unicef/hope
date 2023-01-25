@@ -1,20 +1,8 @@
+import { Box, Button } from '@material-ui/core';
 import React from 'react';
-import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
-import { FieldAttributeNode } from '../../../__generated__/graphql';
-import { Button } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-
-const PlainComponentWrapper = styled.div`
-display: flex;
-flex-direction: column;
-  width: 100%;
-`
-const ButtonWrapper = styled.div`
-  display: flex;
-  align-items: end;
-  justify-content: end;
-`
+import { FieldAttributeNode } from '../../../__generated__/graphql';
+import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
 
 interface UniversalCriteriaPlainComponentProps {
   rules?;
@@ -28,22 +16,27 @@ interface UniversalCriteriaPlainComponentProps {
 export const UniversalCriteriaPlainComponent = (
   props: UniversalCriteriaPlainComponentProps,
 ): React.ReactElement => {
+  const { isEdit, rules } = props;
   const [isOpen, setOpen] = React.useState(false);
   const { t } = useTranslation();
   return (
-    <PlainComponentWrapper>
-      {props.isEdit && (
+    <Box display='flex' flexDirection='column'>
+      {isEdit && (
         <>
-          {!!props.rules.length && (
-              <ButtonWrapper>
-            <Button
-              variant='outlined'
-              color='primary'
-              onClick={() => setOpen(true)}
+          {!!rules.length && (
+            <Box
+              display='flex'
+              alignItems='flex-end'
+              justify-content='flex-end'
             >
-              {t('Add')} &apos;Or&apos; {t('Filter')}
-            </Button>
-            </ButtonWrapper>
+              <Button
+                variant='outlined'
+                color='primary'
+                onClick={() => setOpen(true)}
+              >
+                {t('Add')} &apos;Or&apos; {t('Filter')}
+              </Button>
+            </Box>
           )}
         </>
       )}
@@ -52,6 +45,6 @@ export const UniversalCriteriaPlainComponent = (
         isAddDialogOpen={isOpen}
         onAddDialogClose={() => setOpen(false)}
       />
-    </PlainComponentWrapper>
+    </Box>
   );
 };
