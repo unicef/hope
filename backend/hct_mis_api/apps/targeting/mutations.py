@@ -13,7 +13,6 @@ from hct_mis_api.apps.account.permissions import (
     PermissionRelayMutation,
     Permissions,
 )
-from hct_mis_api.apps.utils.targeting import TargetingCriteriaProxy
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core import utils
 from hct_mis_api.apps.core.models import BusinessArea
@@ -46,6 +45,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.utils.targeting import TargetingCriteriaProxy
 
 from .celery_tasks import (
     target_population_apply_steficon,
@@ -94,7 +94,6 @@ class ValidatedMutation(PermissionMutation):
 
 
 class UpdateTargetPopulationInput(graphene.InputObjectType):
-
     id = graphene.ID(required=True)
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
