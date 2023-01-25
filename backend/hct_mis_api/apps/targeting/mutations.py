@@ -227,8 +227,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if targeting_criteria_input:
             should_rebuild_list = True
             TargetingCriteriaInputValidator.validate(targeting_criteria_input)
-            tp_program: Optional[Program] = target_population.program
-            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, tp_program)
+            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, target_population.program)
             if target_population.status == TargetPopulation.STATUS_OPEN:
                 if target_population.targeting_criteria:
                     target_population.targeting_criteria.delete()
