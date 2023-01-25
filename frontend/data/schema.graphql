@@ -157,6 +157,8 @@ type BusinessAreaNode implements Node {
   regionCode: String!
   regionName: String!
   koboUsername: String
+  koboToken: String
+  koboUrl: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
@@ -1924,6 +1926,7 @@ type Mutations {
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
+  revertMarkPaymentRecordAsFailed(paymentRecordId: ID!): RevertMarkAsFailedMutation
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
@@ -2542,6 +2545,10 @@ type RestartCreateReport {
 input RestartCreateReportInput {
   reportId: ID!
   businessAreaSlug: String!
+}
+
+type RevertMarkAsFailedMutation {
+  paymentRecord: PaymentRecordNode
 }
 
 type RoleNode {
@@ -3430,6 +3437,8 @@ type UserBusinessAreaNode implements Node {
   regionCode: String!
   regionName: String!
   koboUsername: String
+  koboToken: String
+  koboUrl: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
