@@ -2,7 +2,8 @@ import logging
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import IO, TYPE_CHECKING, Optional
+from io import BytesIO
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -23,6 +24,8 @@ from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
+
     from hct_mis_api.apps.account.models import User
 
 logger = logging.getLogger(__name__)
@@ -45,9 +48,9 @@ class CreateCashPlanReconciliationService:
     def __init__(
         self,
         business_area: BusinessArea,
-        reconciliation_xlsx_file: IO,
-        column_mapping: dict,
-        cash_plan_form_data: dict,
+        reconciliation_xlsx_file: BytesIO,
+        column_mapping: Dict,
+        cash_plan_form_data: Dict,
         currency: str,
         delivery_type: str,
         delivery_date: str,
@@ -82,7 +85,7 @@ class CreateCashPlanReconciliationService:
         self._add_cashplan_info()
         self._update_exchange_rates()
 
-    def _parse_header(self, header: list) -> None:
+    def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
             if xlsx_column not in header:
                 raise ValidationError(f"Column {xlsx_column} not found in the header")
@@ -91,7 +94,7 @@ class CreateCashPlanReconciliationService:
 
             self.column_index_mapping[column] = header.index(xlsx_column)
 
-    def _parse_row(self, row: tuple, index: int) -> None:
+    def _parse_row(self, row: List, index: int) -> None:
         self.total_person_covered += 1
         delivered_amount = row[self.column_index_mapping[self.COLUMN_DELIVERED_AMOUNT]]
         entitlement_amount = row[self.column_index_mapping[self.COLUMN_ENTITLEMENT_QUANTITY]]
@@ -176,7 +179,7 @@ class CreateCashPlanReconciliationService:
 
         PaymentRecord.objects.bulk_update(payment_records_qs, ["delivered_quantity_usd"], 1000)
 
-    def create_celery_task(self, user: "User") -> None:
+    def create_celery_task(self, user: Union["AbstractBaseUser", "AnonymousUser"]) -> None:
         reconciliation_xlsx_file = StorageFile.objects.create(
             created_by=user,
             business_area=self.business_area,

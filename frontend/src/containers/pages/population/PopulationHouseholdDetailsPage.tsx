@@ -76,14 +76,28 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  const { data: grievancesChoices } = useGrievancesChoiceDataQuery();
+  const {
+    data: grievancesChoices,
+    loading: grievancesChoicesLoading,
+  } = useGrievancesChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
+  if (
+    loading ||
+    choicesLoading ||
+    flexFieldsDataLoading ||
+    grievancesChoicesLoading
+  )
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
+  if (
+    !data ||
+    !choicesData ||
+    !grievancesChoices ||
+    !flexFieldsData ||
+    permissions === null
+  )
     return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

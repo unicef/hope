@@ -1,7 +1,7 @@
 # Create your models here.
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from django.db import models
 from django.http import HttpRequest
@@ -46,7 +46,9 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Optional[Tuple[int, dict[str, int]]]:  # type: ignore # FIXME: Signature of "delete" incompatible with supertype "Model"
+    def delete(
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -55,9 +57,9 @@ class SoftDeletableModelWithDate(models.Model):
             self.is_removed = True
             self.removed_date = timezone.now()
             self.save(using=using)
-        else:
-            return super().delete(using=using, *args, **kwargs)
-        return None
+            return 1, {self._meta.label: 1}
+
+        return super().delete(using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):
@@ -197,9 +199,9 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(  # type: ignore # FIXME: Signature of "delete" incompatible with supertype "Model"
-        self, using: Optional[str] = None, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Optional[Tuple[int, dict[str, int]]]:
+    def delete(
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -207,9 +209,9 @@ class SoftDeletableDefaultManagerModel(models.Model):
         if soft:
             self.is_removed = True
             self.save(using=using)
-        else:
-            return super().delete(using=using, *args, **kwargs)
-        return None
+            return 1, {self._meta.label: 1}
+
+        return super().delete(using=using, *args, **kwargs)
 
 
 class ConcurrencyModel(models.Model):

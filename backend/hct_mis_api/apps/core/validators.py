@@ -147,6 +147,7 @@ class KoboTemplateValidator:
         "admin1_h_c",
         "admin2_h_c",
         "disability_i_c",
+        "preferred_language_i_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
         BLANK,
@@ -242,7 +243,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: Dict) -> Optional[List]:
+    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: List) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 
@@ -304,7 +305,7 @@ class KoboTemplateValidator:
             if field_type_error:
                 validation_errors.append(field_type_error)
 
-            field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)  # type: ignore # FIXME: Argument 3 to "_check_field_choices" of "KoboTemplateValidator" has incompatible type "List[Any]"; expected "Dict[Any, Any]"
+            field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)
             if field_choices_errors:
                 validation_errors.extend(field_choices_errors)
 

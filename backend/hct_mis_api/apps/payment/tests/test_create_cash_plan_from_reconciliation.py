@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -19,7 +21,7 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
             CreateCashPlanReconciliationService.COLUMN_DELIVERED_AMOUNT: "Delivered Amount",
             CreateCashPlanReconciliationService.COLUMN_ENTITLEMENT_QUANTITY: "Entitlement Quantity",
         }
-        header_row = ("Payment ID", "Reconciliation status", "Delivered Amount", "Entitlement Quantity")
+        header_row = ["Payment ID", "Reconciliation status", "Delivered Amount", "Entitlement Quantity"]
         column_index_mapping = {
             CreateCashPlanReconciliationService.COLUMN_PAYMENT_ID: 0,
             CreateCashPlanReconciliationService.COLUMN_PAYMENT_STATUS: 1,
@@ -27,7 +29,7 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
             CreateCashPlanReconciliationService.COLUMN_ENTITLEMENT_QUANTITY: 3,
         }
         service = CreateCashPlanReconciliationService(
-            self.business_area, None, column_mapping, None, "HRVN", PaymentRecord.DELIVERY_TYPES_IN_CASH, None
+            self.business_area, BytesIO(), column_mapping, {}, "HRVN", PaymentRecord.DELIVERY_TYPE_CASH, ""
         )
         service._parse_header(header_row)
 
@@ -40,9 +42,9 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
             CreateCashPlanReconciliationService.COLUMN_DELIVERED_AMOUNT: "amount",
             CreateCashPlanReconciliationService.COLUMN_ENTITLEMENT_QUANTITY: "NOT_A_COLUMN",
         }
-        header_row = ("id", "status", "amount", "Entitlement Quantity")
+        header_row = ["id", "status", "amount", "Entitlement Quantity"]
         service = CreateCashPlanReconciliationService(
-            self.business_area, None, column_mapping, None, "HRVN", PaymentRecord.DELIVERY_TYPES_IN_CASH, None
+            self.business_area, BytesIO(), column_mapping, {}, "HRVN", PaymentRecord.DELIVERY_TYPE_CASH, ""
         )
         with self.assertRaises(ValidationError):
             service._parse_header(header_row)
@@ -54,9 +56,9 @@ class TestCreateCashPlanFromReconciliation(APITestCase):
             CreateCashPlanReconciliationService.COLUMN_DELIVERED_AMOUNT: "amount",
             "NOT_A_COLUMN": "Entitlement Quantity",
         }
-        header_row = ("id", "status", "amount", "Entitlement Quantity")
+        header_row = ["id", "status", "amount", "Entitlement Quantity"]
         service = CreateCashPlanReconciliationService(
-            self.business_area.slug, None, column_mapping, None, "HRVN", PaymentRecord.DELIVERY_TYPES_IN_CASH, None
+            self.business_area, BytesIO(), column_mapping, {}, "HRVN", PaymentRecord.DELIVERY_TYPE_CASH, ""
         )
         with self.assertRaises(ValidationError):
             service._parse_header(header_row)
