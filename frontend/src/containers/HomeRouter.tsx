@@ -11,6 +11,10 @@ import { MiśTheme } from '../theme';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { CreateEnrollmentPage } from './pages/enrollment/CreateEnrollmentPage';
+import { EditEnrollmentPage } from './pages/enrollment/EditEnrollmentPage';
+import { EnrollmentDetailsPage } from './pages/enrollment/EnrollmentDetailsPage';
+import { EnrollmentsPage } from './pages/enrollment/EnrollmentsPage';
 import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
@@ -85,6 +89,18 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute exact path='/:businessArea/target-population'>
             <TargetPopulationsPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/enrollment'>
+            <EnrollmentsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/enrollment/create'>
+            <CreateEnrollmentPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/enrollment/edit-enrollment/:id'>
+            <EditEnrollmentPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/enrollment/:id'>
+            <EnrollmentDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/target-population/create'>
             <CreateTargetPopulationPage />
