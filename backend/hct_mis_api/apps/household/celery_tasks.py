@@ -63,13 +63,14 @@ def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = Non
         .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
         .order_by("pk")
     )
-    paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
+    if queryset:
+        paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
 
-    for page_number in paginator.page_range:
-        page = paginator.page(page_number)
-        recalculate_population_fields_chunk_task.delay(
-            households_ids=list(page.object_list.values_list("pk", flat=True))
-        )
+        for page_number in paginator.page_range:
+            page = paginator.page(page_number)
+            recalculate_population_fields_chunk_task.delay(
+                households_ids=list(page.object_list.values_list("pk", flat=True))
+            )
 
 
 @app.task()
