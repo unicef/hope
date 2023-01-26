@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '../../../utils/targetingUtils';
 import { FieldAttributeNode } from '../../../__generated__/graphql';
-import { UniversalTargetingCriteriaBlockFilter } from './UniversalTargetingCriteriaBlockFilter';
+import { UniversalCriteriaBlockFilter } from './UniversalCriteriaBlockFilter';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -100,7 +100,7 @@ export function UniversalCriteriaFilterBlocks({
                 return (
                   <Fragment key={blockIndex + index.toString()}>
                     <FilterWrapper>
-                      <UniversalTargetingCriteriaBlockFilter
+                      <UniversalCriteriaBlockFilter
                         blockIndex={blockIndex}
                         index={index}
                         fieldsChoices={fieldsChoices}

@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { UniversalCriteria } from './UniversalCriteria';
 import { UniversalCriteriaForm } from './UniversalCriteriaForm';
+import {UniversalCriteriaComponentDisabled} from "./UniversalCriteriaComponentDisabled";
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -66,6 +67,7 @@ interface UniversalCriteriaProps {
   householdFieldsChoices: FieldAttributeNode[];
   isAddDialogOpen?: boolean;
   onAddDialogClose?: () => void;
+  disabled?: boolean;
 }
 
 export const UniversalCriteriaComponent = ({
@@ -77,6 +79,7 @@ export const UniversalCriteriaComponent = ({
   householdFieldsChoices,
   isAddDialogOpen,
   onAddDialogClose,
+  disabled,
 }: UniversalCriteriaProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
@@ -121,6 +124,14 @@ export const UniversalCriteriaComponent = ({
     }
     return closeModal();
   };
+
+  const addCriteriaButton = disabled?(UniversalCriteriaComponentDisabled):(<AddCriteria
+    onClick={() => setOpen(true)}
+    data-cy='button-universal-add-criteria'
+  >
+    <AddCircleOutline />
+    <p>{t('Add Filter')}</p>
+  </AddCriteria>)
   return (
     <>
       <UniversalCriteriaForm
@@ -158,15 +169,7 @@ export const UniversalCriteriaComponent = ({
               </Fragment>
             );
           })
-        ) : (
-          <AddCriteria
-            onClick={() => setOpen(true)}
-            data-cy='button-universal-add-criteria'
-          >
-            <AddCircleOutline />
-            <p>{t('Add Filter')}</p>
-          </AddCriteria>
-        )}
+        ) : addCriteriaButton}
       </ContentWrapper>
     </>
   );

@@ -3,7 +3,7 @@ import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { FieldChooser } from './FieldChooser';
 import { SubField } from './SubField';
 
-export function UniversalTargetingCriteriaBlockFilter({
+export function UniversalCriteriaBlockFilter({
   blockIndex,
   index,
   fieldsChoices,
