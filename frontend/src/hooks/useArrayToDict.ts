@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import get from 'lodash/get';
 import isFunction from 'lodash/isFunction';
 
@@ -41,12 +41,6 @@ export function useArrayToDict<T>(
     previousValue[key] = value;
     return previousValue;
   };
-  const [dict, setDict] = useState(() => array?.reduce(reduceCallback, {}));
-  useEffect(() => {
-    if (array) {
-      setDict(array.reduce(reduceCallback, {}));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [array]);
-  return dict;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => array?.reduce(reduceCallback, {}), [array]);
 }

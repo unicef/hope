@@ -124,6 +124,8 @@ export function EnrollmentCriteriaForm({
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
