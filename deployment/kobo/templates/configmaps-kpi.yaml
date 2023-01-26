@@ -60,6 +60,7 @@ data:
   KOBOCAT_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.kobocat.subdomain .Values.ingress.host }}"
   ENKETO_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.enketo.subdomain .Values.ingress.host }}"
 
+  KOBOFORM_SERVER_PROTOCOL: "https"
   KOBOFORM_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kpi"
   KOBOCAT_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kobocat"
   ENKETO_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-enketo"
