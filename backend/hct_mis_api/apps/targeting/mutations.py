@@ -29,10 +29,6 @@ from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
     TargetPopulation,
     TargetPopulationTargetingCriteria,
 )
@@ -47,6 +43,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.utils.targeting import TargetingCriteriaProxy
 
 from .celery_tasks import (
     target_population_apply_steficon,
@@ -95,7 +92,6 @@ class ValidatedMutation(PermissionMutation):
 
 
 class UpdateTargetPopulationInput(graphene.InputObjectType):
-
     id = graphene.ID(required=True)
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
@@ -118,25 +114,11 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
 def from_input_to_targeting_criteria(
     targeting_criteria_input: Dict, program: Program
 ) -> TargetPopulationTargetingCriteria:
-    targeting_criteria = TargetPopulationTargetingCriteria()
-    targeting_criteria.save()
-    for rule_input in targeting_criteria_input.get("rules"):
-        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
-        rule.save()
-        for filter_input in rule_input.get("filters", []):
-            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
-            rule_filter.save()
-        for block_input in rule_input.get("individuals_filters_blocks", []):
-            block = TargetingIndividualRuleFilterBlock(
-                targeting_criteria_rule=rule, target_only_hoh=not program.individual_data_needed
-            )
-            block.save()
-            for individual_block_filters_input in block_input.get("individual_block_filters"):
-                individual_block_filters = TargetingIndividualBlockRuleFilter(
-                    individuals_filters_block=block, **individual_block_filters_input
-                )
-                individual_block_filters.save()
-    return targeting_criteria
+    return TargetingCriteriaProxy.from_dict(
+        data=targeting_criteria_input,
+        criteria_type=TargetPopulationTargetingCriteria,
+        target_only_hoh=not program.individual_data_needed,
+    )
 
 
 class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutationMixin):
@@ -435,7 +417,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_population_copy.full_clean()
             target_population_copy.save()
             if target_population.targeting_criteria:
-                target_population_copy.targeting_criteria = cls.copy_target_criteria(
+                target_population_copy.targeting_criteria = TargetingCriteriaProxy.copy(
                     target_population.targeting_criteria
                 )
             target_population_copy.full_clean()
@@ -448,31 +430,6 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         except ValidationError as e:
             logger.exception(e)
             return cls(validation_errors=e.message_dict)
-
-    @classmethod
-    def copy_target_criteria(
-        cls, targeting_criteria: TargetPopulationTargetingCriteria
-    ) -> TargetPopulationTargetingCriteria:
-        targeting_criteria_copy = TargetPopulationTargetingCriteria()
-        targeting_criteria_copy.save()
-        for rule in targeting_criteria.rules.all():
-            rule_copy = TargetingCriteriaRule(targeting_criteria=targeting_criteria_copy)
-            rule_copy.save()
-            for hh_filter in rule.filters.all():
-                hh_filter.pk = None
-                hh_filter.targeting_criteria_rule = rule_copy
-                hh_filter.save()
-            for ind_filter_block in rule.individuals_filters_blocks.all():
-                ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
-                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
-                )
-                ind_filter_block_copy.save()
-                for ind_filter in ind_filter_block.individual_block_filters.all():
-                    ind_filter.pk = None
-                    ind_filter.individuals_filters_block = ind_filter_block_copy
-                    ind_filter.save()
-
-        return targeting_criteria_copy
 
 
 class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
