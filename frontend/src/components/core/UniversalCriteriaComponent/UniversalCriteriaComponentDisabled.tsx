@@ -1,28 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Typography, Paper } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-
-const PaperContainer = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(4)}px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: ${({ theme }) => theme.spacing(4)}px 0;
-`;
 
 const IconWrapper = styled.div`
   display: flex;
@@ -49,23 +28,14 @@ const AddCriteria = styled.div`
 export function UniversalCriteriaComponentDisabled(): React.ReactElement {
   const { t } = useTranslation();
   return (
-    <div>
-      <PaperContainer>
-        <Title>
-          <Typography variant='h6'>{t('Targeting UniversalCriteria')}</Typography>
-        </Title>
-        <ContentWrapper>
-          <AddCriteria
-            onClick={() => null}
-            data-cy='button-target-population-disabled-add-criteria'
-          >
-            <IconWrapper>
-              <AddCircleOutline />
-              <p>{t('Add Filter')}</p>
-            </IconWrapper>
-          </AddCriteria>
-        </ContentWrapper>
-      </PaperContainer>
-    </div>
+    <AddCriteria
+      onClick={() => null}
+      data-cy='button-target-population-disabled-add-criteria'
+    >
+      <IconWrapper>
+        <AddCircleOutline />
+        <p>{t('Add Filter')}</p>
+      </IconWrapper>
+    </AddCriteria>
   );
 }

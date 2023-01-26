@@ -9,7 +9,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
 import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
-import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { TargetPopulationProgramme } from '../../../components/targeting/TargetPopulationProgramme';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -131,24 +130,21 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
             setFieldValue={setFieldValue}
             values={values}
           />
-          {values.program ? (
-            <FieldArray
-              name='criterias'
-              render={(arrayHelpers) => (
-                <TargetingCriteria
-                  helpers={arrayHelpers}
-                  rules={values.criterias}
-                  selectedProgram={getFullNodeFromEdgesById(
-                    allProgramsData?.allPrograms?.edges,
-                    values.program,
-                  )}
-                  isEdit
-                />
-              )}
-            />
-          ) : (
-            <TargetingCriteriaDisabled />
-          )}
+          <FieldArray
+            name='criterias'
+            render={(arrayHelpers) => (
+              <TargetingCriteria
+                helpers={arrayHelpers}
+                rules={values.criterias}
+                disabled={!values.program}
+                selectedProgram={getFullNodeFromEdgesById(
+                  allProgramsData?.allPrograms?.edges,
+                  values.program,
+                )}
+                isEdit
+              />
+            )}
+          />
           <Exclusions />
           <PaperContainer>
             <Typography variant='h6'>

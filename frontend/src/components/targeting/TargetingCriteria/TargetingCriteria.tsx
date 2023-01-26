@@ -11,6 +11,7 @@ interface TargetingCriteriaProps {
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
   selectedProgram?;
   isEdit?: boolean;
+  disabled?: boolean;
 }
 const associatedWith = (type) => (item) => item.associatedWith === type;
 const isNot = (type) => (item) => item.type !== type;
@@ -20,6 +21,7 @@ export function TargetingCriteria({
   targetPopulation,
   selectedProgram,
   isEdit,
+  disabled,
 }: TargetingCriteriaProps): React.ReactElement {
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
@@ -50,6 +52,7 @@ export function TargetingCriteria({
         isEdit={isEdit}
         arrayHelpers={helpers}
         rules={rules}
+        disabled={disabled}
         individualDataNeeded={selectedProgram?.individualDataNeeded}
         householdFieldsChoices={householdData?.allFieldsAttributes || []}
         individualFieldsChoices={individualData?.allFieldsAttributes || []}

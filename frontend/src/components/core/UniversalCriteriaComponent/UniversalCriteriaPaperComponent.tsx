@@ -33,6 +33,7 @@ interface UniversalCriteriaPaperComponentProps {
   individualFieldsChoices: FieldAttributeNode[];
   householdFieldsChoices: FieldAttributeNode[];
   title: string;
+  disabled?: boolean;
 }
 
 export const UniversalCriteriaPaperComponent = (

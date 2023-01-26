@@ -148,7 +148,7 @@ export const UniversalCriteriaComponent = ({
   };
 
   const addCriteriaButton = disabled ? (
-    UniversalCriteriaComponentDisabled
+    <UniversalCriteriaComponentDisabled/>
   ) : (
     <AddCriteria
       onClick={() => setOpen(true)}
