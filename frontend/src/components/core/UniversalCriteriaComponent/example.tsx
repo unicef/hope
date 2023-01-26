@@ -45,7 +45,6 @@ export function Example(): React.ReactElement {
     };
     setHouseholdData(filteredHouseholdData);
   }, [data, loading]);
-  if (!individualData || !householdData) return <div>Loading</div>;
   const initialValues = {
     name: '',
     someWeirdNameForCriteria: [],
@@ -73,10 +72,10 @@ export function Example(): React.ReactElement {
                         arrayHelpers={arrayHelpers}
                         rules={values.someWeirdNameForCriteria}
                         householdFieldsChoices={
-                          householdData.allFieldsAttributes
+                          householdData?.allFieldsAttributes || []
                         }
                         individualFieldsChoices={
-                          individualData.allFieldsAttributes
+                          individualData?.allFieldsAttributes || []
                         }
                       />
                     )}
@@ -106,8 +105,12 @@ export function Example(): React.ReactElement {
                     isEdit
                     arrayHelpers={arrayHelpers}
                     rules={values.someWeirdNameForCriteria}
-                    householdFieldsChoices={householdData.allFieldsAttributes}
-                    individualFieldsChoices={individualData.allFieldsAttributes}
+                    householdFieldsChoices={
+                      householdData?.allFieldsAttributes || []
+                    }
+                    individualFieldsChoices={
+                      individualData?.allFieldsAttributes || []
+                    }
                   />
                 )}
               />

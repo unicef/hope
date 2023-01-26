@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { UniversalCriteria } from './UniversalCriteria';
 import { UniversalCriteriaForm } from './UniversalCriteriaForm';
-import {UniversalCriteriaComponent} from "./UniversalCriteriaComponent";
+import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -82,7 +82,9 @@ interface UniversalCriteriaPaperComponent {
   title: string;
 }
 
-export const UniversalCriteriaPaperComponent = (props: UniversalCriteriaPaperComponent): React.ReactElement => {
+export const UniversalCriteriaPaperComponent = (
+  props: UniversalCriteriaPaperComponent,
+): React.ReactElement => {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
 
@@ -104,9 +106,12 @@ export const UniversalCriteriaPaperComponent = (props: UniversalCriteriaPaperCom
               )}
             </>
           )}
-
         </Title>
-        <UniversalCriteriaComponent {...props}/>
+        <UniversalCriteriaComponent
+          {...props}
+          isAddDialogOpen={isOpen}
+          onAddDialogClose={() => setOpen(false)}
+        />
       </PaperContainer>
     </div>
   );
