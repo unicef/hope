@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { UniversalCriteriaComponent } from './UniversalCriteriaComponent';
-import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { FieldArray, Form, Formik } from 'formik';
+/* eslint-disable */
 import { Paper } from '@material-ui/core';
+import { FieldArray, Form, Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { UniversalCriteriaPlainComponent } from './UniversalCriteriaPlainComponent';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
+import { associatedWith, isNot } from '../../../utils/utils';
 import { UniversalCriteriaPaperComponent } from './UniversalCriteriaPaperComponent';
+import { UniversalCriteriaPlainComponent } from './UniversalCriteriaPlainComponent';
 
 export const ContentWrapper = styled.div`
   display: flex;
@@ -20,8 +21,6 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-const associatedWith = (type) => (item) => item.associatedWith === type;
-const isNot = (type) => (item) => item.type !== type;
 export function Example(): React.ReactElement {
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
@@ -60,7 +59,7 @@ export function Example(): React.ReactElement {
               console.log('XD');
             }}
           >
-            {({ values, submitForm }) => {
+            {({ values }) => {
               console.log('values', values);
               return (
                 <Form style={{ width: '100%' }}>
@@ -93,7 +92,7 @@ export function Example(): React.ReactElement {
           console.log('XD');
         }}
       >
-        {({ values, submitForm }) => {
+        {({ values }) => {
           console.log('values', values);
           return (
             <Form style={{ width: '100%' }}>

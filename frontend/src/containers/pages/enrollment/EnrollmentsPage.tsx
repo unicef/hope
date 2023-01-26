@@ -19,7 +19,7 @@ export const EnrollmentsPage = (): React.ReactElement => {
   const [filter, setFilter] = useState({
     name: '',
     status: '',
-    numHouseholds: {
+    size: {
       min: undefined,
       max: undefined,
     },

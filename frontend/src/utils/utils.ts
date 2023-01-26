@@ -635,3 +635,6 @@ export async function clearCache(apolloClient = null): Promise<void> {
   localStorage.clear();
   await localForage.clear();
 }
+
+export const associatedWith = (type) => (item) => item.associatedWith === type;
+export const isNot = (type) => (item) => item.type !== type;
