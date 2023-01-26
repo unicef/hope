@@ -1,31 +1,31 @@
 import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { UniversalCriteriaPaperComponent } from '../../../components/core/UniversalCriteriaComponent/UniversalCriteriaPaperComponent';
 import { CreateEnrollmentHeader } from '../../../components/enrollment/CreateEnrollment/CreateEnrollmentHeader';
-import { EnrollmentCriteria } from '../../../components/enrollment/EnrollmentDetails/EnrollmentCriteria/EnrollmentCriteria';
 import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../../../components/targeting/PaperContainer';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import {
-  getFullNodeFromEdgesById,
+  associatedWith,
   handleValidationErrors,
+  isNot,
 } from '../../../utils/utils';
-import {
-  ProgramStatus,
-  useAllProgramsForChoicesQuery,
-  useCreateTpMutation,
-} from '../../../__generated__/graphql';
+import { useCreateTpMutation } from '../../../__generated__/graphql';
 
 export const CreateEnrollmentPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const [individualData, setIndividualData] = useState(null);
+  const [householdData, setHouseholdData] = useState(null);
   const initialValues = {
     name: '',
     criterias: [],
@@ -33,20 +33,31 @@ export const CreateEnrollmentPage = (): React.ReactElement => {
     excludedIds: '',
     exclusionReason: '',
   };
-  const [mutate, { loading }] = useCreateTpMutation();
+  const [mutate, { loading: loadingCreateTp }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'network-only',
-  });
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+  );
+  useEffect(() => {
+    if (loading) return;
+    const filteredIndividualData = {
+      allFieldsAttributes: data?.allFieldsAttributes
+        ?.filter(associatedWith('Individual'))
+        .filter(isNot('IMAGE')),
+    };
+    setIndividualData(filteredIndividualData);
 
-  if (loadingPrograms) return <LoadingComponent />;
+    const filteredHouseholdData = {
+      allFieldsAttributes: data?.allFieldsAttributes?.filter(
+        associatedWith('Household'),
+      ),
+    };
+    setHouseholdData(filteredHouseholdData);
+  }, [data, loading]);
+  if (!individualData || !householdData) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
@@ -112,7 +123,7 @@ export const CreateEnrollmentPage = (): React.ReactElement => {
         <Form>
           <CreateEnrollmentHeader
             handleSubmit={submitForm}
-            loading={loading}
+            loading={loadingCreateTp}
             values={values}
             businessArea={businessArea}
             permissions={permissions}
@@ -120,14 +131,13 @@ export const CreateEnrollmentPage = (): React.ReactElement => {
           <FieldArray
             name='criterias'
             render={(arrayHelpers) => (
-              <EnrollmentCriteria
-                helpers={arrayHelpers}
-                rules={values.criterias}
-                selectedProgram={getFullNodeFromEdgesById(
-                  allProgramsData?.allPrograms?.edges,
-                  values.program,
-                )}
+              <UniversalCriteriaPaperComponent
+                title='Enrollment Criteria'
                 isEdit
+                arrayHelpers={arrayHelpers}
+                rules={values.criterias}
+                householdFieldsChoices={householdData.allFieldsAttributes}
+                individualFieldsChoices={individualData.allFieldsAttributes}
               />
             )}
           />

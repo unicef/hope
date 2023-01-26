@@ -9,25 +9,26 @@ import {
 } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogDescription } from '../../../../containers/dialogs/DialogDescription';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { useCachedImportedIndividualFieldsQuery } from '../../../../hooks/useCachedImportedIndividualFields';
+import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
+import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../../hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
-} from '../../../../utils/targetingUtils';
-import { EnrollmentCriteriaFilter } from './EnrollmentCriteriaFilter';
-import { EnrollmentCriteriaFilterBlocks } from './EnrollmentCriteriaFilterBlocks';
+} from '../../../utils/targetingUtils';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
+import { UniversalCriteriaFilter } from './UniversalCriteriaFilter';
+import { UniversalCriteriaFilterBlocks } from './UniversalCriteriaFilterBlocks';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -98,51 +99,32 @@ class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
   }
 }
 
-interface EnrollmentCriteriaFormProps {
+interface UniversalCriteriaFormProps {
   criteria?;
   addCriteria: (values) => void;
   open: boolean;
   onClose: () => void;
   shouldShowWarningForIndividualFilter?: boolean;
+  individualFieldsChoices: FieldAttributeNode[];
+  householdFieldsChoices: FieldAttributeNode[];
 }
 
-const associatedWith = (type) => (item) => item.associatedWith === type;
-const isNot = (type) => (item) => item.type !== type;
-
-export function EnrollmentCriteriaForm({
+export function UniversalCriteriaForm({
   criteria,
   addCriteria,
   open,
   onClose,
   shouldShowWarningForIndividualFilter,
-}: EnrollmentCriteriaFormProps): React.ReactElement {
+  individualFieldsChoices,
+  householdFieldsChoices,
+}: UniversalCriteriaFormProps): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { loading } = useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
-  const [individualData, setIndividualData] = useState(null);
-  const [householdData, setHouseholdData] = useState(null);
-  useEffect(() => {
-    if (loading) return;
-    const filteredIndividualData = {
-      allFieldsAttributes: data?.allFieldsAttributes
-        ?.filter(associatedWith('Individual'))
-        .filter(isNot('IMAGE')),
-    };
-    setIndividualData(filteredIndividualData);
-
-    const filteredHouseholdData = {
-      allFieldsAttributes: data?.allFieldsAttributes?.filter(
-        associatedWith('Household'),
-      ),
-    };
-    setHouseholdData(filteredHouseholdData);
-  }, [data, loading]);
   const validate = ({
     filters,
     individualsFiltersBlocks,
@@ -263,11 +245,11 @@ export function EnrollmentCriteriaForm({
                   >
                     {values.filters.map((each, index) => {
                       return (
-                        <EnrollmentCriteriaFilter
+                        <UniversalCriteriaFilter
                           //eslint-disable-next-line
                           key={index}
                           index={index}
-                          data={householdData}
+                          fieldsChoices={householdFieldsChoices}
                           each={each}
                           onChange={(e, object) => {
                             if (object) {
@@ -321,11 +303,11 @@ export function EnrollmentCriteriaForm({
                   >
                     {values.individualsFiltersBlocks.map((each, index) => {
                       return (
-                        <EnrollmentCriteriaFilterBlocks
+                        <UniversalCriteriaFilterBlocks
                           //eslint-disable-next-line
                           key={index}
                           blockIndex={index}
-                          data={individualData}
+                          fieldsChoices={individualFieldsChoices}
                           values={values}
                           onDelete={() => arrayHelpers.remove(index)}
                         />

@@ -3,9 +3,9 @@ import { Delete, Edit } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import GreaterThanEqual from '../../../../assets/GreaterThanEqual.svg';
-import LessThanEqual from '../../../../assets/LessThanEqual.svg';
-import { TargetingCriteriaRuleObjectType } from '../../../../__generated__/graphql';
+import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
+import LessThanEqual from '../../../assets/LessThanEqual.svg';
+import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
 
 const CriteriaElement = styled.div`
   width: auto;
@@ -163,7 +163,7 @@ interface CriteriaProps {
   alternative?: boolean;
 }
 
-export function Criteria({
+export function UniversalCriteria({
   rules,
   removeFunction = () => null,
   editFunction = () => null,

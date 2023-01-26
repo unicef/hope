@@ -13,15 +13,16 @@ interface Option {
 
 export function CriteriaAutocomplete({
   field,
+  choices,
   ...otherProps
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
   useEffect(() => {
     const optionValue =
-      otherProps.choices.find((choice) => choice.name === field.value) || null;
+      choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
-  }, [field.value, otherProps.choices]);
+  }, [field.value, choices]);
 
   const isInvalid =
     get(otherProps.form.errors, field.name) &&
@@ -37,7 +38,7 @@ export function CriteriaAutocomplete({
       onClose={() => {
         setOpen(false);
       }}
-      options={otherProps.choices}
+      options={choices}
       value={newValue}
       getOptionLabel={(option) => {
         if (option) {

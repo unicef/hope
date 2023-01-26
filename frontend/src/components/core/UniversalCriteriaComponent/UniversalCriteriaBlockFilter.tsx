@@ -1,19 +1,19 @@
 import React from 'react';
-import { SubField } from '../../components/targeting/SubField';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FieldChooser } from '../../components/targeting/FieldChooser';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
+import { FieldChooser } from './FieldChooser';
+import { SubField } from './SubField';
 
-export function TargetCriteriaBlockFilter({
+export function UniversalCriteriaBlockFilter({
   blockIndex,
   index,
-  data,
+  fieldsChoices,
   each,
   onChange,
   onDelete,
 }: {
   blockIndex: number;
   index: number;
-  data: ImportedIndividualFieldsQuery;
+  fieldsChoices: FieldAttributeNode[];
   each;
   onChange: (e, object) => void;
   onDelete: () => void;
@@ -22,7 +22,7 @@ export function TargetCriteriaBlockFilter({
     <div>
       <FieldChooser
         index={index}
-        choices={data.allFieldsAttributes}
+        choices={fieldsChoices}
         fieldName={each.fieldName}
         onChange={onChange}
         onDelete={onDelete}

@@ -4,9 +4,9 @@ import { FieldArray } from 'formik';
 import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { chooseFieldType, clearField } from '../../../../utils/targetingUtils';
-import { ImportedIndividualFieldsQuery } from '../../../../__generated__/graphql';
-import { EnrollmentCriteriaBlockFilter } from './EnrolllmentCriteriaBlockFilter';
+import { chooseFieldType, clearField } from '../../../utils/targetingUtils';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
+import { UniversalCriteriaBlockFilter } from './UniversalCriteriaBlockFilter';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -68,14 +68,14 @@ const FilterWrapper = styled.div`
   padding: ${({ theme }) => theme.spacing(3)}px
     ${({ theme }) => theme.spacing(5)}px;
 `;
-export function EnrollmentCriteriaFilterBlocks({
+export function UniversalCriteriaFilterBlocks({
   blockIndex,
-  data,
+  fieldsChoices,
   values,
   onDelete,
 }: {
   blockIndex: number;
-  data: ImportedIndividualFieldsQuery;
+  fieldsChoices: FieldAttributeNode[];
   values;
   onDelete: () => void;
 }): React.ReactElement {
@@ -100,10 +100,10 @@ export function EnrollmentCriteriaFilterBlocks({
                 return (
                   <Fragment key={blockIndex + index.toString()}>
                     <FilterWrapper>
-                      <EnrollmentCriteriaBlockFilter
+                      <UniversalCriteriaBlockFilter
                         blockIndex={blockIndex}
                         index={index}
-                        data={data}
+                        fieldsChoices={fieldsChoices}
                         each={each}
                         onChange={(e, object) => {
                           if (object) {

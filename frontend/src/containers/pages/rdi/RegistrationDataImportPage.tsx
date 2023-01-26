@@ -8,6 +8,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { RegistrationFilters } from '../../../components/rdi/RegistrationFilters';
+import {Example} from "../../../components/core/UniversalCriteriaComponent/example";
 
 export function RegistrationDataImportPage(): React.ReactElement {
   const permissions = usePermissions();
@@ -34,6 +35,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
   );
   return (
     <div>
+      <Example />
       {toolbar}
       <RegistrationFilters onFilterChange={setFilter} filter={filter} />
       <RegistrationDataImportTable

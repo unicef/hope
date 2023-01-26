@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ImportedIndividualFieldsQuery } from '../../../../__generated__/graphql';
+import { FieldAttributeNode } from '../../../__generated__/graphql';
 import { FieldChooser } from './FieldChooser';
 import { SubField } from './SubField';
 
@@ -30,16 +30,16 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
-export function EnrollmentCriteriaFilter({
+export function UniversalCriteriaFilter({
   index,
-  data,
+  fieldsChoices,
   each,
   onChange,
   values,
   onClick,
 }: {
   index: number;
-  data: ImportedIndividualFieldsQuery;
+  fieldsChoices: FieldAttributeNode[];
   each;
   onChange: (e, object) => void;
   values;
@@ -51,7 +51,7 @@ export function EnrollmentCriteriaFilter({
     <div>
       <FieldChooser
         index={index}
-        choices={data.allFieldsAttributes}
+        choices={fieldsChoices}
         fieldName={each.fieldName}
         onChange={onChange}
         showDelete
@@ -59,7 +59,7 @@ export function EnrollmentCriteriaFilter({
         baseName={`filters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy='autocomplete-enrollment-criteria-values'>
+        <div data-cy='autocomplete-universal-criteria-values'>
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
         </div>
       )}
