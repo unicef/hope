@@ -5,6 +5,8 @@ from typing import Any
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
     generate_real_cash_plans,
@@ -67,3 +69,38 @@ class Command(BaseCommand):
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
+
+        email_list = [
+            "jan.romaniak@tivix.com",
+            "jakub.krasnowski@tivix.com",
+            "bartosz.wozniak@tivix.com",
+            "pavlo.mokiichuk@tivix.com",
+            "kamil.swiechowski@tivix.com",
+            "karolina.sliwinska@tivix.com",
+            "katarzyna.lanecka@tivix.com",
+            "konrad.marzec@tivix.com",
+            "maciej.szewczyk@tivix.com",
+            "marek.biczysko@tivix.com",
+            "patryk.dabrowski@tivix.com",
+            "gerba@unicef.org",
+            "ddinicola@unicef.org",
+            "sapostolico@unicef.org",
+            "ntrncic@unicef.org",
+            "aafaour@unicef.org",
+            "aboncenne@unicef.org",
+            "asrugano@unicef.org",
+            "gkeriri@unicef.org",
+            "jbassette@unicef.org",
+            "jyablonski@unicef.org",
+            "nmkuzi@unicef.org",
+            "swaheed@unicef.org",
+        ]
+        for email in email_list:
+            user = User.objects.create_superuser(email, email, "password")
+            UserRole.objects.create(
+                user=user,
+                role=Role.objects.get(name="Role with all permissions"),
+                business_area=BusinessArea.objects.get(slug="afghanistan"),
+            )
+            user.set_unusable_password()
+            user.save()
