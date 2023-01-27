@@ -328,10 +328,13 @@ class PaymentInstruction(UnicefIdentifiedModel, TimeStampedUUIDModel):
     payment_plan = models.ForeignKey(
         "payment_module.PaymentPlan", on_delete=models.CASCADE, related_name="payment_instructions"
     )
-    fsp = models.ForeignKey(
-        "payment_module.FinancialServiceProvider", on_delete=models.CASCADE, related_name="payment_instructions"
+    fsp_delivery_mechanism = models.ForeignKey(
+        "payment_module.FspDeliveryMechanism",
+        on_delete=models.CASCADE,
+        related_name="payment_instructions",
+        null=True,
+        blank=True,
     )
-    delivery_mechanism = models.CharField(max_length=255, choices=DELIVERY_TYPE_CHOICE, db_index=True, null=True)
     status = FSMField(default=Status.PENDING, protected=False, db_index=True)
     targeting_criteria = models.OneToOneField(
         "PaymentInstructionTargetingCriteria",
@@ -351,9 +354,6 @@ class PaymentInstruction(UnicefIdentifiedModel, TimeStampedUUIDModel):
     exported_reconciliation_zip_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
-
-    class Meta:
-        unique_together = ("fsp", "delivery_mechanism")
 
 
 class PaymentList(TimeStampedUUIDModel):
