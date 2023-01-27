@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import Dict
 
 from django.contrib.auth import get_user_model
 
@@ -69,6 +70,62 @@ def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
         if files_qs:
             inf = files_qs.delete()
             logger.info(f"Removed old XlsxCashPlanPaymentVerificationFile: {inf}")
+
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def create_cash_plan_reconciliation_xlsx(
+    reconciliation_xlsx_file_id: str,
+    column_mapping: Dict,
+    cash_plan_form_data: Dict,
+    currency: str,
+    delivery_type: str,
+    delivery_date: str,
+    program_id: str,
+    service_provider_id: str,
+) -> None:
+    try:
+        from hct_mis_api.apps.core.models import StorageFile
+        from hct_mis_api.apps.payment.models import ServiceProvider
+        from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
+            CreateCashPlanReconciliationService,
+        )
+        from hct_mis_api.apps.program.models import Program
+
+        reconciliation_xlsx_obj = StorageFile.objects.get(id=reconciliation_xlsx_file_id)
+        business_area = reconciliation_xlsx_obj.business_area
+
+        with configure_scope() as scope:
+            scope.set_tag("business_area", business_area)
+
+            cash_plan_form_data["program"] = Program.objects.get(id=program_id)
+            cash_plan_form_data["service_provider"] = ServiceProvider.objects.get(id=service_provider_id)
+
+            service = CreateCashPlanReconciliationService(
+                business_area,
+                reconciliation_xlsx_obj.file,
+                column_mapping,
+                cash_plan_form_data,
+                currency,
+                delivery_type,
+                delivery_date,
+            )
+
+            try:
+                service.parse_xlsx()
+                error_msg = None
+            except Exception as e:
+                error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
+
+            service.send_email(reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg)
+            # remove file every time
+            reconciliation_xlsx_obj.file.delete()
+            reconciliation_xlsx_obj.delete()
 
     except Exception as e:
         logger.exception(e)

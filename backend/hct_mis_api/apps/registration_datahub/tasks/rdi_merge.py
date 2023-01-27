@@ -228,6 +228,12 @@ class RdiMergeTask:
         identities_to_create = []
         for imported_individual in imported_individuals:
             values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
+
+            if not values.get("phone_no_valid"):
+                values["phone_no_valid"] = False
+            if not values.get("phone_no_alternative_valid"):
+                values["phone_no_alternative_valid"] = False
+
             imported_individual_household = imported_individual.household
             household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
 
