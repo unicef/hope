@@ -63,7 +63,7 @@ def recalculate_population_fields_task(household_ids: Optional[List[str]] = None
         .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
         .order_by("pk")
     )
-    if queryset.count() > 0:
+    if queryset.exists():
         paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
 
         for page_number in paginator.page_range:
