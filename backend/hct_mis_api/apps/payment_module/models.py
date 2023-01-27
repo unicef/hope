@@ -375,6 +375,7 @@ class Payment(TimeStampedUUIDModel, UnicefIdentifiedModel):
     )
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE, related_name="payments")
     entitlement_type = models.CharField(max_length=50, choices=EntitlementType.choices, db_index=True)
+    delivery_date = models.DateField(null=True, blank=True)
 
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
@@ -408,6 +409,8 @@ class Payment(TimeStampedUUIDModel, UnicefIdentifiedModel):
         null=True,
         blank=True,
     )
+
+    # TODO: status, status_date
 
 
 class FinancialServiceProvider(TimeStampedUUIDModel):
