@@ -3,16 +3,16 @@ from typing import Any
 
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
+
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 from hct_mis_api.apps.household.documents import (
     IndividualDocumentAfghanistan,
+    IndividualDocumentOthers,
     IndividualDocumentUkraine,
-    IndividualDocumentOthers
 )
 from hct_mis_api.apps.household.models import Individual
-
 
 BATCH_SIZE = 1000
 
