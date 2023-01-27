@@ -420,6 +420,13 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         (COMMUNICATION_CHANNEL_XLSX, "XLSX"),
     )
 
+    business_area = models.ForeignKey(
+        "core.BusinessArea",
+        related_name="financial_service_providers",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
