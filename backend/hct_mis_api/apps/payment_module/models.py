@@ -155,11 +155,6 @@ class PaymentPlan(TimeStampedUUIDModel):
         null=True,
         choices=BackgroundActionStatus.choices,
     )
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
-        related_name="payment_plans",
-    )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()
     dispersion_end_date = models.DateField()
