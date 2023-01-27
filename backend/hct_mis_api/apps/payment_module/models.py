@@ -263,6 +263,8 @@ class PaymentPlan(TimeStampedUUIDModel):
     failed = models.PositiveIntegerField(default=0)
     pending = models.PositiveIntegerField(default=0)
 
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
+
 
 class PaymentPlanTargetingCriteria(TargetingCriteria):
     """
