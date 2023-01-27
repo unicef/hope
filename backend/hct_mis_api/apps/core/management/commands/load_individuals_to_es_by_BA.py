@@ -18,7 +18,7 @@ BATCH_SIZE = 1000
 
 
 class Command(BaseCommand):
-    help = "Re-index elasticsearch documents for given index and business_area"
+    help = "Load elasticsearch documents (individuals) for given business_area"
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("business_area", type=str)
