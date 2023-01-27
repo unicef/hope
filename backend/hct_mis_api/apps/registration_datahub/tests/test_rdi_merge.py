@@ -101,6 +101,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "birth_date": "2005-10-10",  # age 16
                 "sex": "FEMALE",
                 "registration_data_import": cls.rdi_hub,
+                "phone_no": "+41 (0) 78 927 2696",
+                "phone_no_alternative": "+41 (0) 78 927 2696",
+                "phone_no_valid": None,
+                "phone_no_alternative_valid": None,
                 "household": imported_household,
             },
             {
@@ -111,6 +115,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "birth_date": "1996-11-29",  # age 25
                 "sex": "FEMALE",
                 "registration_data_import": cls.rdi_hub,
+                "phone_no_valid": None,
+                "phone_no_alternative_valid": None,
                 "household": imported_household,
             },
             {
@@ -143,6 +149,15 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(1, households.count())
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
+
+        individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
+        individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
+
+        self.assertEqual(individual_with_valid_phone_data.phone_no_valid, True)
+        self.assertEqual(individual_with_valid_phone_data.phone_no_alternative_valid, True)
+
+        self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
+        self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
 
         household_data = model_to_dict(
             households[0],
