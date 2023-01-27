@@ -150,6 +150,27 @@ export function paymentRecordStatusToColor(
       return theme.palette.error.main;
   }
 }
+
+export function paymentCycleStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentCycleStatus.Open]: theme.hctPalette.gray,
+    [PaymentCycleStatus.Locked]: theme.hctPalette.orange,
+    [PaymentCycleStatus.LockedFsp]: theme.hctPalette.orange,
+    [PaymentCycleStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentCycleStatus.InAuthorization]: theme.hctPalette.darkerBlue,
+    [PaymentCycleStatus.InReview]: theme.hctPalette.blue,
+    [PaymentCycleStatus.Accepted]: theme.hctPalette.green,
+    [PaymentCycleStatus.Reconciled]: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
 export function paymentVerificationStatusToColor(
   theme: typeof themeObj,
   status: string,

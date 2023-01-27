@@ -150,6 +150,12 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/programs/:id'>
             <ProgramDetailsPage />
           </SentryRoute>
+          <SentryRoute
+            exact
+            path='/:businessArea/payment-module/payment-cycles'
+          >
+            <PaymentCyclesPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/payment-records/:id'>
             <PaymentRecordDetailsPage />
           </SentryRoute>

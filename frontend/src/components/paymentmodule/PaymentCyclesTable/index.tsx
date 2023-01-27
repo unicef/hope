@@ -1,0 +1,1 @@
+export { PaymentCyclesTable } from './PaymentCyclesTable';
