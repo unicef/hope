@@ -96,7 +96,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
-        node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
+        node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")  # type: ignore # FIXME
 
         payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
