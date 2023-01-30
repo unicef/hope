@@ -228,7 +228,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(exchange_rate),
+                    exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else 1,
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 self.payments_to_save.append(payment)
