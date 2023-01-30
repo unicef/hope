@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 from parameterized import parameterized
 
@@ -40,7 +40,7 @@ class TestIndividualFlagQuery(BaseElasticSearchTestCase, APITestCase):
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        individuals_to_create = [
+        individuals_to_create: List[Dict] = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",

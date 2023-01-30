@@ -29,7 +29,7 @@ class APITestCase(SnapshotTestTestCase):
         from hct_mis_api.schema import schema
 
         super().setUp()
-        self.client = Client(schema)
+        self.client: Client = Client(schema)
 
         seed_in_env = os.getenv("RANDOM_SEED")
         self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
@@ -86,11 +86,11 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user: Optional["User"] = None, files: Optional[List] = None) -> WSGIRequest:
+    def generate_context(self, user: Optional["User"] = None, files: Optional[Dict] = None) -> WSGIRequest:
         request = RequestFactory()
         context_value = request.get("/api/graphql/")
         context_value.user = user or AnonymousUser()
-        self.__set_context_files(context_value, files)
+        self.__set_context_files(context_value, files or {})
         return context_value
 
     @classmethod

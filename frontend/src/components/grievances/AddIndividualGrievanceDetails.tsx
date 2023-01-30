@@ -12,6 +12,7 @@ import {
 } from '../../__generated__/graphql';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
@@ -28,6 +29,9 @@ export function AddIndividualGrievanceDetails({
   const confirm = useConfirmation();
   const { showMessage } = useSnackbar();
   if (loading) {
+    return <LoadingComponent />;
+  }
+  if (!data) {
     return null;
   }
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(

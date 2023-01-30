@@ -70,7 +70,6 @@ class PostgresTestRunner(TestRunner):
             "verbosity": verbosity,
             "descriptions": getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
             "failfast": self.failfast,
-            "resultclass": self.get_resultclass(),  # type: ignore
             "output": output,
         }
 

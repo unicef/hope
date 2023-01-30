@@ -10,7 +10,6 @@ from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.template import Template
 from django.urls import reverse
 
 from admin_extra_buttons.decorators import button
@@ -132,7 +131,7 @@ class APITokenAdmin(SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request: HttpRequest, obj: Any, template: Template) -> None:
+    def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
         try:
             send_mail(
                 f"HOPE API Token {obj} infos",
@@ -146,7 +145,7 @@ class APITokenAdmin(SmartModelAdmin):
 
     @button()
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
 
     def changeform_view(
@@ -160,7 +159,7 @@ class APITokenAdmin(SmartModelAdmin):
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:
             self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
-            return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))
+            return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))  # type: ignore # str vs SafeString
 
     def log_addition(self, request: HttpRequest, object: Any, message: str) -> LogEntry:
         return super().log_addition(request, object, message)

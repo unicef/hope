@@ -88,9 +88,10 @@ class Rule(models.Model):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:  # type: ignore
+    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> Tuple[int, Dict[str, int]]:
         self.enabled = False
         self.save()
+        return 1, {self._meta.label: 1}
 
     def get_changes(self) -> Tuple[Dict, List]:
         prev = self.latest_commit

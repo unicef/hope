@@ -147,6 +147,7 @@ class KoboTemplateValidator:
         "admin1_h_c",
         "admin2_h_c",
         "disability_i_c",
+        "preferred_language_i_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
         BLANK,
@@ -210,7 +211,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_db(cls) -> Dict:
-        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
+        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area()
         return {
             core_field_data["xlsx_field"]: {
                 "type": core_field_data["type"],
@@ -242,7 +243,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: Dict) -> Optional[List]:
+    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: List) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 

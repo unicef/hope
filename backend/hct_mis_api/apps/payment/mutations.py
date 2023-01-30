@@ -1,10 +1,8 @@
 import logging
-import math
 from base64 import b64decode
 from decimal import Decimal
 from typing import IO, TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
@@ -445,12 +443,10 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         root: Any,
         info: Any,
         payment_verification_id: str,
-        received_amount: Optional[int],
-        received: Optional[int],
+        received_amount: Decimal,
+        received: bool,
         **kwargs: Any,
     ) -> "UpdatePaymentVerificationReceivedAndReceivedAmount":
-        if math.isnan(received_amount):
-            received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
@@ -476,12 +472,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if received is None and received_amount is not None:
             log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
-            logger.error(
-                "If received_amount is 0, you should set received to NO",
-            )
-            raise GraphQLError(
-                "If received_amount is 0, you should set received to NO",
-            )
+            log_and_raise("If received_amount is 0, you should set received to NO")
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
@@ -502,20 +493,19 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         return UpdatePaymentVerificationReceivedAndReceivedAmount(payment_verification)
 
 
-# TODO: what about typing [0] on XlsxErrorNode
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[0]  # type: ignore
+    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> graphene.String:
+        return parent.sheet
 
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[1]  # type: ignore
+    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> graphene.String:
+        return parent.coordinates
 
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[2]  # type: ignore
+    def resolve_message(parent: "XlsxErrorNode", info: Any) -> graphene.String:
+        return parent.message
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -598,15 +588,31 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
         **kwargs: Any,
     ) -> "MarkPaymentRecordAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
-
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
+        mark_as_failed(payment_record)
+        return cls(payment_record)
 
-        try:
-            mark_as_failed(payment_record)
-        except ValidationError as e:
-            log_and_raise(e.message, e)
 
-        return MarkPaymentRecordAsFailedMutation(payment_record)
+class RevertMarkAsFailedMutation(PermissionMutation):
+    payment_record = graphene.Field(PaymentRecordNode)
+
+    class Arguments:
+        payment_record_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_record_id: str,
+        **kwargs: Any,
+    ) -> "RevertMarkAsFailedMutation":
+        payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
+        revert_mark_as_failed(payment_record)
+        return cls(payment_record)
 
 
 class CreateFinancialServiceProviderMutation(PermissionMutation):
@@ -1117,6 +1123,7 @@ class Mutations(graphene.ObjectType):
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
+    revert_mark_payment_record_as_failed = RevertMarkAsFailedMutation.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )

@@ -57,7 +57,7 @@ class TestSettingTypesForCalculateFields(TestCase):
         if validation_error is not None:
             self.assertRaisesMessage(
                 ValidationError,
-                validation_error,
+                str(validation_error),
                 self.load_xls_file,
                 file_name,
             )

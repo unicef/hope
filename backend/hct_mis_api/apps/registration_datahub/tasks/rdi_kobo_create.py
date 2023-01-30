@@ -1,8 +1,6 @@
 import json
-import numbers
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union
-from uuid import UUID
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -120,9 +118,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _handle_decimal_field(self, value: Any, is_flex_field: bool) -> Any:
         if not is_flex_field:
             return value
-        if isinstance(value, numbers.Number):
-            return float(value)
-        return value
+        return float(value)
 
     def _cast_and_assign(
         self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]
@@ -152,7 +148,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities: List[Dict]) -> None:
+    def _handle_documents_and_identities(self, documents_and_identities: List) -> None:
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -212,7 +208,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: "UUID", import_data_id: "UUID", business_area_id: "UUID") -> None:
+    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
@@ -333,7 +329,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             household_obj.first_registration_date = registration_date
             household_obj.last_registration_date = registration_date
             household_obj.registration_data_import = registration_data_import
-            household_obj = self._assign_admin_areas_titles(household_obj)
+            household_obj.set_admin_areas()
             households_to_create.append(household_obj)
 
             for ind in current_individuals:
@@ -367,6 +363,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if not self.business_area.postpone_deduplication:
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
-    def _handle_exception(self, assigned_to: ImportedIndividual, field_name: str, e: BaseException) -> None:
+    def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:
         logger.warning(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e

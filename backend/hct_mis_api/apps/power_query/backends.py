@@ -1,10 +1,13 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any, Union
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
 
 from ..account.models import User
 from .models import Report, ReportDocument
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 
 
 class PowerQueryBackend(ModelBackend):
@@ -24,7 +27,9 @@ class PowerQueryBackend(ModelBackend):
             )
         return getattr(user_obj, key)
 
-    def has_perm(self, user_obj: User, perm, obj=None):  # type: ignore
+    def has_perm(self, user_obj: Union["AbstractBaseUser", "AnonymousUser"], perm: Any, obj: Any = None) -> bool:
+        if not isinstance(user_obj, User):
+            return False
         if isinstance(obj, Report):
             if obj.owner == user_obj:
                 return True
@@ -36,4 +41,4 @@ class PowerQueryBackend(ModelBackend):
             if "business_area" in obj.arguments:
                 ba = obj.arguments["business_area"]
                 return user_obj.is_active and perm in self.get_office_permissions(user_obj, ba)
-        return None
+        return False
