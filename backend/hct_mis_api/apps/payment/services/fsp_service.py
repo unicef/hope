@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.shortcuts import get_object_or_404
 
@@ -32,7 +32,7 @@ class FSPService:
         return fsp
 
     @staticmethod
-    def update(fsp_id: str, inputs: Dict) -> FinancialServiceProvider:
+    def update(fsp_id: Optional[Any], inputs: Dict) -> FinancialServiceProvider:
         fsp_xlsx_template_id = decode_id_string(inputs["fsp_xlsx_template_id"])
 
         fsp = get_object_or_404(FinancialServiceProvider, id=fsp_id)

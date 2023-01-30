@@ -1,7 +1,8 @@
+import io
 import logging
 from base64 import b64decode
 from decimal import Decimal
-from typing import IO, TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -548,7 +549,7 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, file: IO, payment_verification_plan_id: str
+        cls, root: Any, info: Any, file: io.BytesIO, payment_verification_plan_id: str
     ) -> "ImportXlsxPaymentVerificationPlanFile":
         id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
@@ -701,7 +702,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, input.get("business_area_slug"))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, input["business_area_slug"])
 
         payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user)
 
@@ -989,7 +990,9 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, file: IO, payment_plan_id: str) -> "ImportXLSXPaymentPlanPaymentListMutation":
+    def mutate(
+        cls, root: Any, info: Any, file: io.BytesIO, payment_plan_id: str
+    ) -> "ImportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
@@ -1034,7 +1037,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, file: IO, payment_plan_id: str
+        cls, root: Any, info: Any, file: io.BytesIO, payment_plan_id: str
     ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 

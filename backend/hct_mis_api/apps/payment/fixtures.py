@@ -758,7 +758,7 @@ def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
-    tp = TargetPopulation.objects.first()
+    tp: TargetPopulation = TargetPopulation.objects.all()[0]
 
     pp = PaymentPlan.objects.update_or_create(
         unicef_id="PP-0060-22-11223344",

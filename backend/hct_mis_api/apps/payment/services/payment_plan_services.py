@@ -66,14 +66,17 @@ class PaymentPlanService:
         }
         return approval_count_map.get(self.get_approval_type_by_action())
 
-    def get_approval_type_by_action(self) -> Optional[str]:
+    def get_approval_type_by_action(self) -> str:
+        if not self.action:
+            raise ValueError("Action cannot be None")
+
         actions_to_approval_type_map = {
             PaymentPlan.Action.APPROVE.value: Approval.APPROVAL,
             PaymentPlan.Action.AUTHORIZE.value: Approval.AUTHORIZATION,
             PaymentPlan.Action.REVIEW.value: Approval.FINANCE_REVIEW,
             PaymentPlan.Action.REJECT.value: Approval.REJECT,
         }
-        return actions_to_approval_type_map.get(self.action)
+        return actions_to_approval_type_map[self.action]
 
     def execute_update_status_action(self, input_data: Dict, user: "User") -> PaymentPlan:
         """Get function from get_action_function and execute it
@@ -200,7 +203,7 @@ class PaymentPlanService:
                 PaymentPlan.Status.IN_REVIEW,
             ],
         }
-        if self.payment_plan.status not in action_to_statuses_map.get(self.action, []):
+        if self.action and self.payment_plan.status not in action_to_statuses_map[self.action]:
             raise GraphQLError(
                 f"Not possible to create {self.action} for Payment Plan within status {self.payment_plan.status}"
             )
