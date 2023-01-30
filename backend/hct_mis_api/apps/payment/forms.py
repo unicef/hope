@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
 from django.templatetags.static import static
 
-from hct_mis_api.apps.payment.models import PaymentRecord, CashPlan
+from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord
 
 
 class ImportPaymentRecordsForm(forms.ModelForm):

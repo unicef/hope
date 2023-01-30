@@ -1,9 +1,7 @@
 import copy
 import logging
 from functools import reduce
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
-
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from typing import Any, Dict, Iterable, List, Optional
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,

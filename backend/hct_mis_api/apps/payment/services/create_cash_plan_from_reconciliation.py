@@ -17,10 +17,10 @@ from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
 from hct_mis_api.apps.payment.models import (
-    PaymentVerificationSummary,
+    CashPlan,
     PaymentRecord,
+    PaymentVerificationSummary,
 )
-from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
