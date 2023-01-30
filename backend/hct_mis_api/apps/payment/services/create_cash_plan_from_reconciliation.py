@@ -1,20 +1,34 @@
+import logging
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from io import BytesIO
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
+from django.template.loader import render_to_string
 
 import openpyxl
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerificationSummary,
     PaymentRecord,
 )
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
+
+    from hct_mis_api.apps.account.models import User
+
+logger = logging.getLogger(__name__)
 
 ValidationError = Exception
 
@@ -39,6 +53,7 @@ class CreateCashPlanReconciliationService:
         cash_plan_form_data: Dict,
         currency: str,
         delivery_type: str,
+        delivery_date: str,
     ) -> None:
         self.business_area = business_area
         self.reconciliation_xlsx_file = reconciliation_xlsx_file
@@ -47,6 +62,7 @@ class CreateCashPlanReconciliationService:
         self.delivery_type = delivery_type
         self.column_index_mapping = {}
         self.cash_plan_form_data = cash_plan_form_data
+        self.delivery_date = delivery_date
         self.total_person_covered = 0
         self.total_delivered_amount = 0
         self.total_entitlement_amount = 0
@@ -67,6 +83,7 @@ class CreateCashPlanReconciliationService:
                 break
             self._parse_row(row_values, index)
         self._add_cashplan_info()
+        self._update_exchange_rates()
 
     def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
@@ -113,6 +130,7 @@ class CreateCashPlanReconciliationService:
             service_provider=self.cash_plan.service_provider,
             status_date=self.cash_plan.status_date,
             delivery_type=self.delivery_type,
+            delivery_date=self.delivery_date,
         )
         payment_record.save()
 
@@ -141,3 +159,70 @@ class CreateCashPlanReconciliationService:
         self.cash_plan.total_delivered_quantity = self.total_delivered_amount
         CashPlanPaymentVerificationSummary.objects.create(cash_plan=self.cash_plan)
         self.cash_plan.save()
+
+    def _update_exchange_rates(self) -> None:
+        exchange_rates_client = ExchangeRates()
+        payment_records_qs = PaymentRecord.objects.filter(cash_plan=self.cash_plan)
+        for payment_record in payment_records_qs:
+            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
+                payment_record.currency, payment_record.cash_plan.dispersion_date
+            )
+
+            if exchange_rate is None:
+                logger.info(f"exchange_rate not found for {payment_record.ca_id}")
+                continue
+            else:
+                exchange_rate = Decimal(exchange_rate)
+            payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity / exchange_rate).quantize(
+                Decimal(".01")
+            )
+
+        PaymentRecord.objects.bulk_update(payment_records_qs, ["delivered_quantity_usd"], 1000)
+
+    def create_celery_task(self, user: Union["AbstractBaseUser", "AnonymousUser"]) -> None:
+        reconciliation_xlsx_file = StorageFile.objects.create(
+            created_by=user,
+            business_area=self.business_area,
+            file=self.reconciliation_xlsx_file,
+        )
+        program_id = self.cash_plan_form_data.pop("program").pk
+        service_provider_id = self.cash_plan_form_data.pop("service_provider").pk
+
+        create_cash_plan_reconciliation_xlsx.delay(
+            str(reconciliation_xlsx_file.pk),
+            self.column_mapping,
+            self.cash_plan_form_data,
+            self.currency,
+            self.delivery_type,
+            str(self.delivery_date),
+            str(program_id),
+            str(service_provider_id),
+        )
+
+    def send_email(self, user: "User", file_name: str, error_msg: Optional[str] = None) -> None:
+        msg = "Celery task Importing Payment Records finished."
+
+        if error_msg:
+            msg = msg + f"\n{error_msg}"
+        else:
+            msg = msg + f"\nCashPlan ID: {self.cash_plan.ca_id}. File name: {file_name}"
+
+        context = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "message": msg,
+        }
+        text_body = render_to_string("admin/payment/payment_record/import_payment_records_email.txt", context=context)
+        html_body = render_to_string("admin/payment/payment_record/import_payment_records_email.html", context=context)
+
+        email = EmailMultiAlternatives(
+            subject="Importing Payment Records finished",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[context["email"]],
+            body=text_body,
+        )
+        email.attach_alternative(html_body, "text/html")
+        result = email.send()
+        if not result:
+            logger.error(f"Email couldn't be send to {context['email']}")

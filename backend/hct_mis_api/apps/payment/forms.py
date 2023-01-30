@@ -13,6 +13,7 @@ class ImportPaymentRecordsForm(forms.ModelForm):
     start_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)
     end_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)
     dispersion_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)
+    delivery_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)
     status_date = forms.SplitDateTimeField(widget=AdminSplitDateTime)
 
     class Meta:
