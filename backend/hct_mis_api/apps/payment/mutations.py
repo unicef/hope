@@ -500,13 +500,13 @@ class XlsxErrorNode(graphene.ObjectType):
     message = graphene.String()
 
     def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent.sheet
+        return parent[0]
 
     def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent.coordinates
+        return parent[1]
 
     def resolve_message(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent.message
+        return parent[2]
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
