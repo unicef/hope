@@ -25,6 +25,7 @@ def create_afghanistan(
             "authorization_number_required": authorization_number_required,
             "finance_review_number_required": finance_review_number_required,
             "is_payment_plan_applicable": is_payment_plan_applicable,
+            "kobo_token": "XXX",
         },
     )
 

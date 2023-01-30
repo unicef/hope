@@ -1,5 +1,6 @@
-import typing
 from decimal import Decimal
+import typing
+from typing import Optional
 
 import openpyxl
 from graphql import GraphQLError
@@ -16,10 +17,16 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
 )
 
 
+class XlsxError:
+    def __init__(self, sheet: str, coordinates: Optional[str], message: str) -> None:
+        self.sheet, self.coordinates, self.message = sheet, coordinates, message
+
+
 class XlsxVerificationImportService(XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
     def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: typing.IO) -> None:
+
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
@@ -78,7 +85,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         accepted_headers = XlsxVerificationExportService.HEADERS
         if len(headers_row) != len(accepted_headers):
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     None,
                     f"Different count of headers. Acceptable headers count in file version "
@@ -89,7 +96,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         for header in headers_row:
             if column >= len(accepted_headers):
                 self.errors.append(
-                    (
+                    XlsxError(
                         "Payment Verifications",
                         header.coordinate,
                         f"Unexpected header {header.value}",
@@ -97,7 +104,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                 )
             elif header.value != accepted_headers[column]:
                 self.errors.append(
-                    (
+                    XlsxError(
                         "Payment Verifications",
                         header.coordinate,
                         f"Unexpected header {header.value} expected {accepted_headers[column]}",
@@ -116,7 +123,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                     XlsxVerificationImportService.COLUMNS_TYPES[column]
                 ]
                 self.errors.append(
-                    (
+                    XlsxError(
                         "Payment Verifications",
                         cell.coordinate,
                         f"Wrong type off cell {readable_cell_error} "
@@ -129,7 +136,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         cell = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX]
         if cell.value not in self.payment_record_ids:
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     cell.coordinate,
                     f"This payment record id {cell.value} is not in Cash Plan Payment Record Verification",
@@ -141,7 +148,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         cell = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX]
         if cell.value not in valid_received:
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     cell.coordinate,
                     f"The received of this payment verification is not correct: "
@@ -163,7 +170,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         received = received_cell.value
         if received is None and received_amount is not None and received_amount == 0:
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
                     f"You can't set received_amount {received_amount} and not set received to NO",
@@ -171,7 +178,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
         elif received is None and received_amount is not None:
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
                     f"You can't set received_amount {received_amount} and not set received to YES",
@@ -179,7 +186,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
         elif received_amount == 0 and received != "NO":
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
                     "If received_amount is 0, you should set received to NO",
@@ -187,7 +194,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
         elif received_amount is not None and received_amount != 0 and received != "YES":
             self.errors.append(
-                (
+                XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
                     f"If received_amount({received_amount}) is not 0, you should set received to YES",

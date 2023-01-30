@@ -78,7 +78,9 @@ class DeduplicateTask:
     thresholds: Optional[Thresholds] = None
 
     @classmethod
-    def _prepare_query_dict(cls, individual: Individual, fields: Dict, min_score: Union[int, float]) -> Dict[str, Any]:
+    def _prepare_query_dict(
+        cls, individual: Union[Individual, ImportedIndividual], fields: Dict, min_score: Union[int, float]
+    ) -> Dict[str, Any]:
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -88,16 +90,19 @@ class DeduplicateTask:
             "middle_name": {"boost": 1},
             "admin1": {"boost": 1},
             "admin2": {"boost": 1},
-            # household - not used right now
+            # household - not used right now, repopulate ES Individuals, ImportedIndividuals in order to use HH fields
         }
         queries_list = []
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
         documents_queries = cls._prepare_documents_queries_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
-        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)  # noqa: F841
         queries_list.extend(names_queries)
         queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)
+
+        if "household" in fields_meta:
+            household_queries = cls._prepare_household_query(fields.get("household", {}))
+            queries_list.extend(household_queries)
 
         for field_name, field_value in fields.items():
             if field_value is None:
@@ -144,12 +149,6 @@ class DeduplicateTask:
         return cls._prepare_queries_for_names(given_name, family_name, full_name)
 
     @classmethod
-    def _prepare_households_and_roles_queries_from_fields(cls, fields: Dict) -> List[Dict[Any, Any]]:
-        households_and_roles = fields.pop("households_and_roles", [])
-        households_and_roles_queries = cls._prepare_households_and_roles_queries(households_and_roles)
-        return households_and_roles_queries
-
-    @classmethod
     def _prepare_identities_queries_from_fields(cls, fields: Dict) -> List[Dict]:
         identities = fields.pop("identities", [])
         identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
@@ -163,7 +162,7 @@ class DeduplicateTask:
 
     @staticmethod
     def _prepare_fields(
-        individual: Union[Individual, ImportedIndividual], fields_names: Tuple[str], dict_fields: Dict[str, Any]
+        individual: Union[Individual, ImportedIndividual], fields_names: Tuple[str, ...], dict_fields: Dict[str, Any]
     ) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
@@ -173,42 +172,21 @@ class DeduplicateTask:
         return fields
 
     @classmethod
-    def _prepare_households_and_roles_queries(
-        cls, households_and_roles: List[Dict]
-    ) -> List[Dict[str, Dict[str, object]]]:
-        """
-        Not needed
-        Not working
-        """
-        queries = []
-        for item in households_and_roles:
-            role = item.get("role")
-            individual_id = str(item.get("individual", {}).get("id"))
-            if role and individual_id:
-                queries.extend(
-                    [
-                        {
-                            "bool": {
-                                "must": [
-                                    {"match": {"households_and_role.role": {"query": role}}},
-                                    {"match": {"households_and_role.individual": {"query": individual_id}}},
-                                ],
-                                "boost": 2,
-                            }
-                        }
-                    ]
-                )
-
-        return queries
-
-    @classmethod
     def _prepare_household_query(cls, household_data: Dict) -> List[Dict[str, Dict[Any, Dict[str, Any]]]]:
+        """
+        Not used right now,
+        in order to use HH fields:
+        - repopulate ES Individuals, ImportedIndividuals
+        - uncomment fields in IndividualDocument, ImportedIndividualDocument
+        """
+
         queries = []
         important_fields = (
             "address",
             "country",
             "country_origin",
         )
+
         for key, data in household_data.items():
             if not data or key not in important_fields:
                 continue
@@ -342,7 +320,7 @@ class DeduplicateTask:
     def _get_duplicates_tuple(
         cls,
         query_dict: Dict,
-        duplicate_score: int,
+        duplicate_score: float,
         document: Type[IndividualDocument],
         individual: Union[Individual, ImportedIndividual],
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
@@ -398,7 +376,7 @@ class DeduplicateTask:
     def deduplicate_single_imported_individual(
         cls, individual: Individual
     ) -> Tuple[List, List, List, List, Dict[str, Any]]:
-        fields_names = (
+        fields_names: Tuple[str, ...] = (
             "given_name",
             "full_name",
             "middle_name",
@@ -409,10 +387,10 @@ class DeduplicateTask:
             "sex",
             "birth_date",
         )
-        dict_fields = {
+        dict_fields: Dict[str, Tuple[str, ...]] = {
             "documents": ("document_number", "type.type", "country"),
             "identities": ("document_number", "partner.name"),
-            "household": (
+            "household": (  # NOT USED
                 "residence_status",
                 "country_origin",
                 "size",
@@ -448,17 +426,15 @@ class DeduplicateTask:
                 "currency",
                 "unhcr_id",
             ),
-            "households_and_roles": ("role", "individual.id"),
         }
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
-        # query_dict = cls._prepare_query_dict(individual, fields, config.DEDUPLICATION_BATCH_MIN_SCORE, only_in_rdi,)
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
         )
-        # noinspection PyTypeChecker
+
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
         ]
@@ -487,7 +463,7 @@ class DeduplicateTask:
         dict_fields = {
             "documents": ("document_number", "type.type", "country"),
             "identities": ("number", "partner.name"),
-            "household": (
+            "household": (  # NOT USED
                 "residence_status",
                 "country_origin",
                 "size",
@@ -524,7 +500,6 @@ class DeduplicateTask:
                 "currency",
                 "unhcr_id",
             ),
-            "households_and_roles": ("role", "individual.id"),
         }
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
@@ -684,9 +659,9 @@ class DeduplicateTask:
             registration_data_import=registration_data_import_datahub
         )
 
+        wait_until_es_healthy()
         populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
 
-        wait_until_es_healthy()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
             (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
@@ -944,7 +919,7 @@ class DeduplicateTask:
         main_individual: Individual,
         possible_duplicates_individuals: List[Individual],
         business_area: BusinessArea,
-        registration_data_import: RegistrationDataImport,
+        registration_data_import: Optional[RegistrationDataImport],
         possible_duplicates_through_dict: Dict,
     ) -> Optional[NamedTuple]:
         from hct_mis_api.apps.grievance.models import (

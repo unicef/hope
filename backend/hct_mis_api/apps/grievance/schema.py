@@ -12,7 +12,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -108,6 +108,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @staticmethod
     def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "household", None)
 
@@ -127,6 +128,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_admin2(grievance_ticket: GrievanceTicket, info: Any) -> Area:
         return grievance_ticket.admin2
 
+    @staticmethod
     def resolve_linked_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._linked_tickets
 
@@ -173,7 +175,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore
+        individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -232,7 +234,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore
+        individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -390,7 +392,7 @@ class ChartGrievanceTicketsNode(ChartDatasetNode):
 
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
-    all_grievance_ticket = DjangoPermissionFilterConnectionField(
+    all_grievance_ticket = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=GrievanceTicketFilter,
         permission_classes=(
@@ -402,7 +404,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
         ),
     )
-    existing_grievance_tickets = DjangoPermissionFilterConnectionField(
+    existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
         permission_classes=(
@@ -414,7 +416,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
         ),
     )
-    all_ticket_notes = DjangoPermissionFilterConnectionField(
+    all_ticket_notes = DjangoPermissionFilterFastConnectionField(
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
     )
@@ -462,7 +464,12 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
-        fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
+        business_area_slug = info.context.headers.get("Business-Area")
+        fields = (
+            FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
+            .associated_with_individual()
+            .apply_business_area(business_area_slug)
+        )
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
         )

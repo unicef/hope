@@ -32,6 +32,7 @@ from graphql_relay.connection.arrayconnection import connection_from_list_slice
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -132,7 +133,7 @@ class RapidProFlow(graphene.ObjectType):
     modified_on = graphene.DateTime()
 
     def resolve_id(parent, info: Any) -> str:
-        return parent["uuid"]  # type: ignore
+        return parent["uuid"]  # type: ignore # FIXME
 
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -800,7 +801,7 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
+    all_payment_verification_log_entries = DjangoPermissionFilterFastConnectionField(
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
