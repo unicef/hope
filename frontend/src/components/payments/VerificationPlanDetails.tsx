@@ -109,17 +109,12 @@ export const VerificationPlanDetails = ({
     PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
     permissions,
   );
+
+  //TODO: add type from graphql
   const xlsxFileDownloadedOrImported =
     verificationPlan.xlsxFileWasDownloaded ||
     verificationPlan.xlsxFileImported ||
-    verificationPlan.verificationChannel !==
-      CashPlanPaymentVerificationVerificationChannel.Xlsx;
-
-  const xlsxFileDownloadedAndImported =
-    (verificationPlan.xlsxFileWasDownloaded &&
-      verificationPlan.xlsxFileImported) ||
-    verificationPlan.verificationChannel !==
-      CashPlanPaymentVerificationVerificationChannel.Xlsx;
+    verificationPlan.verificationChannel !== 'XLSX';
 
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
