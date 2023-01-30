@@ -75,7 +75,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             PaymentFactory(parent=cls.payment_plan, household=household, excluded=False, assigned_payment_channel=None)
 
         cls.user = UserFactory()
-        cls.payment_plan = PaymentPlan.objects.all().last()
+        cls.payment_plan = PaymentPlan.objects.all()[-1]
 
         # set Lock status
         cls.payment_plan.status_lock()
