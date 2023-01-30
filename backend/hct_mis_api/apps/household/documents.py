@@ -47,38 +47,38 @@ class IndividualDocument(Document):
     household = fields.ObjectField(
         properties={
             "unicef_id": fields.TextField(),
-            "residence_status": fields.KeywordField(similarity="boolean"),
-            "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
-            "size": fields.IntegerField(),
-            "address": fields.TextField(),
-            "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
-            "female_age_group_0_5_count": fields.IntegerField(),
-            "female_age_group_6_11_count": fields.IntegerField(),
-            "female_age_group_12_17_count": fields.IntegerField(),
-            "female_age_group_18_59_count": fields.IntegerField(),
-            "female_age_group_60_count": fields.IntegerField(),
-            "pregnant_count": fields.IntegerField(),
-            "male_age_group_0_5_count": fields.IntegerField(),
-            "male_age_group_6_11_count": fields.IntegerField(),
-            "male_age_group_12_17_count": fields.IntegerField(),
-            "male_age_group_18_59_count": fields.IntegerField(),
-            "male_age_group_60_count": fields.IntegerField(),
-            "female_age_group_0_5_disabled_count": fields.IntegerField(),
-            "female_age_group_6_11_disabled_count": fields.IntegerField(),
-            "female_age_group_12_17_disabled_count": fields.IntegerField(),
-            "female_age_group_18_59_disabled_count": fields.IntegerField(),
-            "female_age_group_60_disabled_count": fields.IntegerField(),
-            "male_age_group_0_5_disabled_count": fields.IntegerField(),
-            "male_age_group_6_11_disabled_count": fields.IntegerField(),
-            "male_age_group_12_17_disabled_count": fields.IntegerField(),
-            "male_age_group_18_59_disabled_count": fields.IntegerField(),
-            "male_age_group_60_disabled_count": fields.IntegerField(),
-            "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
-            "returnee": fields.BooleanField(),
-            "registration_method": fields.KeywordField(similarity="boolean"),
-            "collect_individual_data": fields.KeywordField(similarity="boolean"),
-            "currency": fields.KeywordField(similarity="boolean"),
-            "unhcr_id": fields.KeywordField(similarity="boolean"),
+            # "residence_status": fields.KeywordField(similarity="boolean"),
+            # "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
+            # "size": fields.IntegerField(),
+            # "address": fields.TextField(),
+            # "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
+            # "female_age_group_0_5_count": fields.IntegerField(),
+            # "female_age_group_6_11_count": fields.IntegerField(),
+            # "female_age_group_12_17_count": fields.IntegerField(),
+            # "female_age_group_18_59_count": fields.IntegerField(),
+            # "female_age_group_60_count": fields.IntegerField(),
+            # "pregnant_count": fields.IntegerField(),
+            # "male_age_group_0_5_count": fields.IntegerField(),
+            # "male_age_group_6_11_count": fields.IntegerField(),
+            # "male_age_group_12_17_count": fields.IntegerField(),
+            # "male_age_group_18_59_count": fields.IntegerField(),
+            # "male_age_group_60_count": fields.IntegerField(),
+            # "female_age_group_0_5_disabled_count": fields.IntegerField(),
+            # "female_age_group_6_11_disabled_count": fields.IntegerField(),
+            # "female_age_group_12_17_disabled_count": fields.IntegerField(),
+            # "female_age_group_18_59_disabled_count": fields.IntegerField(),
+            # "female_age_group_60_disabled_count": fields.IntegerField(),
+            # "male_age_group_0_5_disabled_count": fields.IntegerField(),
+            # "male_age_group_6_11_disabled_count": fields.IntegerField(),
+            # "male_age_group_12_17_disabled_count": fields.IntegerField(),
+            # "male_age_group_18_59_disabled_count": fields.IntegerField(),
+            # "male_age_group_60_disabled_count": fields.IntegerField(),
+            # "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
+            # "returnee": fields.BooleanField(),
+            # "registration_method": fields.KeywordField(similarity="boolean"),
+            # "collect_individual_data": fields.KeywordField(similarity="boolean"),
+            # "currency": fields.KeywordField(similarity="boolean"),
+            # "unhcr_id": fields.KeywordField(similarity="boolean"),
         }
     )
     documents = fields.ObjectField(
@@ -91,13 +91,7 @@ class IndividualDocument(Document):
     identities = fields.ObjectField(
         properties={
             "number": fields.KeywordField(similarity="boolean"),
-            "partner": fields.KeywordField(attr="partnner.name", similarity="boolean"),
-        }
-    )
-    households_and_roles = fields.ObjectField(
-        properties={
-            "role": fields.KeywordField(similarity="boolean"),
-            "individual": fields.KeywordField(attr="individual.id", similarity="boolean"),
+            "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
         }
     )
 
@@ -137,15 +131,17 @@ class IndividualDocument(Document):
             "updated_at",
         ]
 
-        related_models = [Household, Document, IndividualIdentity, IndividualRoleInHousehold]
+        related_models = [Household, Document, IndividualIdentity]
 
     def get_instances_from_related(
         self, related_instance: RelatedInstanceType
-    ) -> Union[Individual, QuerySet[Individual]]:
-        if isinstance(related_instance, (Document, IndividualIdentity, IndividualRoleInHousehold)):
+    ) -> Optional[Union[Individual, QuerySet[Individual]]]:
+        if isinstance(related_instance, (Document, IndividualIdentity)):
             return related_instance.individual
         if isinstance(related_instance, Household):
             return related_instance.individuals.all()
+
+        return None
 
 
 @registry.register_document
