@@ -53,6 +53,7 @@ show_error_codes = true
 exclude = [
   "migrations",
   "venv",
+  "snapshots",
 ]
 
 strict = true

@@ -611,7 +611,7 @@ class RevertMarkAsFailedMutation(PermissionMutation):
     ) -> "RevertMarkAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
-        revert_mark_as_failed(payment_record)
+        payment_record.revert_mark_as_failed()
         return cls(payment_record)
 
 
