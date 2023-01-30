@@ -56,10 +56,10 @@ class Sampling:
     def _get_sampling(self) -> "BaseSampling":
         sampling_type = self.input_data.get("sampling")
         if sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
-            arguments = self.input_data.get("full_list_arguments")
+            arguments = self.input_data["full_list_arguments"]
             return FullListSampling(arguments, sampling_type)
         else:
-            arguments = self.input_data.get("random_sampling_arguments")
+            arguments = self.input_data["random_sampling_arguments"]
             return RandomSampling(arguments, sampling_type)
 
 

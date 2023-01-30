@@ -42,9 +42,8 @@ def download_payment_verification_plan(  # type: ignore
             xlsx_file = payment_verification_plan.get_xlsx_verification_file
             xlsx_file.was_downloaded = True
             xlsx_file.save()
-        return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)
-    else:
-        log_and_raise(f"File not found. PaymentVerificationPlan ID: {verification_id}")
+        return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)  # type: ignore # FIXME
+    log_and_raise(f"File not found. PaymentVerificationPlan ID: {verification_id}")
 
 
 @login_required
@@ -63,6 +62,6 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
         raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK or ACCEPTED.")
 
     if payment_plan.has_export_file:
-        return redirect(payment_plan.payment_list_export_file_link)
+        return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
 
     log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id_str}")
