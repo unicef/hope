@@ -1,5 +1,5 @@
 import abc
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 
 from django.db.models import Q, QuerySet
 
@@ -20,15 +20,15 @@ class Sampling:
     ) -> None:
         self.input_data = input_data
         self.payment_plan = payment_plan
-        self.payment_records: Optional[QuerySet] = payment_records
+        self.payment_records: QuerySet = payment_records
 
     def process_sampling(
         self, payment_verification_plan: PaymentVerificationPlan
-    ) -> Tuple[PaymentVerificationPlan, Optional[QuerySet]]:
+    ) -> Tuple[PaymentVerificationPlan, QuerySet]:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
-        sampling: Union["FullListSampling", "RandomSampling"] = self._get_sampling()
+        sampling: BaseSampling = self._get_sampling()
         sampling.sampling(self.payment_records)
 
         payment_verification_plan.sampling = sampling.sampling_type
@@ -54,7 +54,7 @@ class Sampling:
         return payment_record_count, sampling.sample_size
 
     def _get_sampling(self) -> "BaseSampling":
-        sampling_type = self.input_data.get("sampling")
+        sampling_type: str = self.input_data.get("sampling", "")
         if sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             arguments = self.input_data["full_list_arguments"]
             return FullListSampling(arguments, sampling_type)

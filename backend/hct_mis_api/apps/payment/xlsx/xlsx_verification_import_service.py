@@ -1,4 +1,4 @@
-import typing
+import io
 from decimal import Decimal
 from typing import Optional
 
@@ -25,8 +25,7 @@ class XlsxError:
 class XlsxVerificationImportService(XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
-    def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: typing.IO) -> None:
-
+    def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: io.BytesIO) -> None:
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
