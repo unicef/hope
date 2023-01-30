@@ -15,6 +15,7 @@ import {
   CashPlanVerificationSamplingChoicesQuery,
   PaymentPlanQuery,
   PaymentVerificationPlanStatus,
+  PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
   useInvalidPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
@@ -110,11 +111,11 @@ export const VerificationPlanDetails = ({
     permissions,
   );
 
-  //TODO: add type from graphql
   const xlsxFileDownloadedOrImported =
     verificationPlan.xlsxFileWasDownloaded ||
     verificationPlan.xlsxFileImported ||
-    verificationPlan.verificationChannel !== 'XLSX';
+    verificationPlan.verificationChannel !==
+      PaymentVerificationPlanVerificationChannel.Xlsx;
 
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
