@@ -1,5 +1,5 @@
-from decimal import Decimal
 import typing
+from decimal import Decimal
 from typing import Optional
 
 import openpyxl

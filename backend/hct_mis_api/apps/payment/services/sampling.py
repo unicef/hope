@@ -1,5 +1,5 @@
 import abc
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from django.db.models import Q, QuerySet
 
@@ -11,7 +11,7 @@ from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.payment.models import CashPlan, PaymentPlan
+    from hct_mis_api.apps.payment.models import CashPlan, PaymentPlan, PaymentRecord
 
 
 class Sampling:
