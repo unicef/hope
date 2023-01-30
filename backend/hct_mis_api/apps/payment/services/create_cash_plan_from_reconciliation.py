@@ -158,7 +158,7 @@ class CreateCashPlanReconciliationService:
         self.cash_plan.total_entitled_quantity = self.total_entitlement_amount
         self.cash_plan.total_delivered_quantity = self.total_delivered_amount
         PaymentVerificationSummary.objects.create(
-            cash_plan=self.cash_plan
+            payment_plan_obj=self.cash_plan
         )  # previously CashPlanPaymentVerificationSummary
         self.cash_plan.save()
 
