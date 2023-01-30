@@ -1077,6 +1077,12 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         self.status = self.STATUS_FORCE_FAILED
         self.status_date = timezone.now()
 
+    def revert_mark_as_failed(self) -> None:
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment record marked as force failed can be reverted")
+        self.status = self.STATUS_SUCCESS
+        self.status_date = timezone.now()
+
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     parent = models.ForeignKey(

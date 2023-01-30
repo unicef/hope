@@ -153,7 +153,7 @@ class HouseholdAdmin(
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         # NOTE: this code is should be optimized in the future and it is not
         # intended to be used in bulk
-        hh = self.get_object(request, pk)
+        hh = self.get_object(request, str(pk))
         warnings: List[List] = []
         primary = None
         head = None

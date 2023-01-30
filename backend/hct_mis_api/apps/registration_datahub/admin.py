@@ -30,6 +30,7 @@ from requests.auth import HTTPBasicAuth
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
     process_flex_records_task,
+    process_sri_lanka_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     DiiaHousehold,
@@ -49,6 +50,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
+    SriLankaRegistrationService,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
@@ -253,14 +255,14 @@ class RemeberDataForm(forms.Form):
     remember = forms.BooleanField(label="Remember me", required=False)
 
     def get_signed_cookie(self, request: HttpRequest) -> Any:
-        signer = Signer(request.user.password)
+        signer = Signer(str(request.user.password))
         return signer.sign_object(self.cleaned_data)
 
     @classmethod
     def get_saved_config(cls, request: HttpRequest) -> Dict:
         try:
-            signer = Signer(request.user.password)
-            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            signer = Signer(str(request.user.password))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
             return obj
         except BadSignature:
             return {}
@@ -372,7 +374,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     change_form_template = "registration_datahub/admin/record/change_form.html"
     # change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi", "create_sr_lanka_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
@@ -390,6 +392,21 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             rdi = service.create_rdi(request.user, f"ukraine rdi {timezone.now()}")
 
             process_flex_records_task.delay(rdi.id, list(records_ids))
+            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+            self.message_user(
+                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
+            )
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
+
+    @admin.action(description="Create Sri-Lanka RDI")
+    def create_sr_lanka_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
+        sri_lanka_service = SriLankaRegistrationService()
+        try:
+            records_ids = queryset.values_list("id", flat=True)
+            rdi = sri_lanka_service.create_rdi(request.user, f"sri-lanka rdi {timezone.now()}")
+
+            process_sri_lanka_flex_records_task.delay(rdi.id, list(records_ids))
             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
             self.message_user(
                 request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS

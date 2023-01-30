@@ -8,7 +8,6 @@ from typing import (
     Generator,
     List,
     Optional,
-    Tuple,
     Type,
     Union,
 )
@@ -29,6 +28,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
+from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -37,10 +37,7 @@ from hct_mis_api.apps.core.models import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from django.db.models.query import QuerySet
-
 
 logger = logging.getLogger(__name__)
 
@@ -73,14 +70,13 @@ class FlexibleAttributeNode(DjangoObjectType):
     choices = graphene.List(FlexibleAttributeChoiceNode)
     associated_with = graphene.Int()
 
-    def resolve_choices(self, info: Any) -> "QuerySet":
-        return self.choices.all()
+    @staticmethod
+    def resolve_choices(parent: FlexibleAttribute, info: Any) -> "QuerySet":
+        return parent.choices.all()
 
-    def resolve_associated_with(self, info: Any) -> str:
-        # TODO: need some stubs for graphene-django?
-        associated_number: int = int(self.associated_with)  # type: ignore
-        choice: Tuple[int, str] = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[associated_number]
-        return str(choice[1])
+    @staticmethod
+    def resolve_associated_with(parent: FlexibleAttribute, info: Any) -> str:
+        return parent.get_associated_with_display()
 
     class Meta:
         model = FlexibleAttribute
@@ -100,10 +96,7 @@ class LabelNode(graphene.ObjectType):
 
 
 def resolve_label(parent: Dict) -> List[Dict[str, Any]]:
-    labels = []
-    for k, v in parent.items():
-        labels.append({"language": k, "label": v})
-    return labels
+    return [{"language": k, "label": v} for k, v in parent.items()]
 
 
 class CoreFieldChoiceObject(graphene.ObjectType):
@@ -125,14 +118,14 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: str, root: Any, info: Any, **args: Any) -> Callable:
+def _custom_dict_or_attr_resolver(attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any) -> Any:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options: Dict, attrs: str) -> List:
+def sort_by_attr(options: Iterable, attrs: str) -> List:
     def key_extractor(el: Any) -> Any:
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
@@ -169,21 +162,19 @@ class FieldAttributeNode(graphene.ObjectType):
         return choices.order_by("name").all()
 
     def resolve_is_flex_field(self, info: Any) -> bool:
-        if isinstance(self, FlexibleAttribute):
-            return True
-        return False
+        return isinstance(self, FlexibleAttribute)
 
     def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info: Any) -> Any:
-        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
-    def resolve_associated_with(self, info: Any) -> Union:
+    def resolve_associated_with(self, info: Any) -> Any:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
-        if resolved == 0:  # type: ignore
+        if resolved == 0:
             return "Household"
-        elif resolved == 1:  # type: ignore
+        elif resolved == 1:
             return "Individual"
         else:
             return resolved
@@ -201,11 +192,13 @@ class GroupAttributeNode(DjangoObjectType):
         model = FlexibleAttributeGroup
         fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
-    def resolve_label_en(self, info: Any) -> Any:
-        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]  # type: ignore
+    @staticmethod
+    def resolve_label_en(parent: FlexibleAttributeGroup, info: Any) -> Any:
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
-    def resolve_flex_attributes(self, info: Any) -> "QuerySet":
-        return self.flex_attributes.all()
+    @staticmethod
+    def resolve_flex_attributes(parent: FlexibleAttributeGroup, info: Any) -> "QuerySet":
+        return parent.flex_attributes.all()
 
 
 class KoboAssetObject(graphene.ObjectType):
@@ -220,17 +213,35 @@ class KoboAssetObject(graphene.ObjectType):
     xls_link = String()
 
 
-class KoboAssetObjectConnection(Connection):
+class ObjectConnection(Connection):
     total_count = graphene.Int()
 
     def resolve_total_count(self, info: Any, **kwargs: Any) -> int:
         return len(self.iterable)
 
     class Meta:
+        abstract = True
+
+
+class KoboAssetObjectConnection(ObjectConnection):
+    class Meta:
         node = KoboAssetObject
 
 
-def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[str] = None) -> Generator:
+class LanguageObject(graphene.ObjectType):
+    english = String()
+    alpha2 = String()
+    alpha3 = String()
+
+
+class LanguageObjectConnection(ObjectConnection):
+    class Meta:
+        node = LanguageObject
+
+
+def get_fields_attr_generators(
+    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None
+) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
@@ -239,30 +250,30 @@ def get_fields_attr_generators(flex_field: bool, business_area_slug: Optional[st
         )
 
 
-def resolve_assets(business_area_slug: str, uid: Optional[str] = None, *args: Any, **kwargs: Any) -> Tuple:
-    method: Iterable
-    return_method: Callable
-    method, return_method = (
-        (  # type: ignore # TODO: refactor that
-            KoboAPI(business_area_slug).get_single_project_data(uid),
-            reduce_asset,
-        )
-        if uid is not None
-        else (
-            KoboAPI(business_area_slug).get_all_projects_data(),
-            reduce_assets_list,
-        )
-    )
+def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
-        assets = method
-    except ObjectDoesNotExist:
+        assets = KoboAPI(business_area_slug).get_single_project_data(uid)
+    except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
-        raise GraphQLError("Provided business area does not exist.")
+        raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:
         logger.exception(error)
-        raise GraphQLError(str(error))
+        raise GraphQLError(str(error)) from error
 
-    return return_method(assets, **{"only_deployed": kwargs.get("only_deployed", False)})
+    return reduce_asset(assets)
+
+
+def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
+    try:
+        assets = KoboAPI(business_area_slug).get_all_projects_data()
+    except ObjectDoesNotExist as e:
+        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        raise GraphQLError("Provided business area does not exist.") from e
+    except AttributeError as error:
+        logger.exception(error)
+        raise GraphQLError(str(error)) from error
+
+    return reduce_assets_list(assets, only_deployed=only_deployed)
 
 
 class Query(graphene.ObjectType):
@@ -295,6 +306,9 @@ class Query(graphene.ObjectType):
         description="All Kobo projects/assets.",
     )
     cash_assist_url_prefix = graphene.String()
+    all_languages = ConnectionField(
+        LanguageObjectConnection, name=graphene.String(required=False), description="All available languages"
+    )
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -311,7 +325,7 @@ class Query(graphene.ObjectType):
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
                 name = field.name
-                associated_with = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[field.associated_with][1]
+                associated_with = field.get_associated_with_display()
             else:
                 name = field["name"]
                 associated_with = field["associated_with"]
@@ -341,14 +355,17 @@ class Query(graphene.ObjectType):
             "label.English(EN)",
         )
 
-    def resolve_kobo_project(self, info: Any, uid: "UUID", business_area_slug: str, **kwargs: Any) -> Tuple:
-        return resolve_assets(business_area_slug=business_area_slug, uid=uid)
+    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Dict:
+        return resolve_asset(business_area_slug=business_area_slug, uid=uid)
 
-    def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> Tuple:
-        return resolve_assets(
+    def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> List:
+        return resolve_assets_list(
             business_area_slug=business_area_slug,
             only_deployed=kwargs.get("only_deployed", False),
         )
 
     def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
+
+    def resolve_all_languages(self, info: Any, name: str, **kwargs: Any) -> List[Language]:
+        return Languages.filter_by_name(name)

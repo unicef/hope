@@ -32,15 +32,15 @@ class ExchangeRateClientAPI(ExchangeRateClient):
 
     def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
         self.api_key = api_key or os.getenv("EXCHANGE_RATES_API_KEY")
-        self.api_url = api_url or os.getenv(
-            "EXCHANGE_RATES_API_URL", "https://uniapis.unicef.org/biapi/v1/exchangerates"
+        self.api_url: str = (
+            api_url or os.getenv("EXCHANGE_RATES_API_URL") or "https://uniapis.unicef.org/biapi/v1/exchangerates"
         )
 
         if self.api_key is None:
             raise ValueError("Missing Ocp Apim Subscription Key")
 
         self._client = session()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=None)
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 

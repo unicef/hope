@@ -64,6 +64,12 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     admin1 = ""
     admin2 = ""
+    admin3 = ""
+    admin4 = ""
+    admin1_title = ""
+    admin2_title = ""
+    admin3_title = ""
+    admin4_title = ""
     geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
@@ -141,12 +147,12 @@ def create_imported_household(
 
 
 def create_imported_household_and_individuals(
-    household_data: Optional[Dict] = None, individuals_data: Optional[Dict] = None
+    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None
 ) -> Tuple[ImportedHousehold, List[ImportedIndividual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     household: ImportedHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
     individuals: List[ImportedIndividual] = [
         ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data

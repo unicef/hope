@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -19,13 +19,12 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
-    DocumentType,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def age_to_birth_date_range_query(field_name: str, age_min: int, age_max: int) -> Q:
+def age_to_birth_date_range_query(field_name: str, age_min: Optional[int], age_max: Optional[int]) -> Q:
     query_dict = {}
     current_date = dt.date.today()
     if age_min is not None:
@@ -96,7 +95,7 @@ def get_other_document_number_query(_: Any, args: Any) -> Q:
     return get_documents_number_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_number_query(document_type: DocumentType, number: str) -> Q:
+def get_documents_number_query(document_type: str, number: str) -> Q:
     return Q(documents__type__type=document_type, documents__document_number=number)
 
 
@@ -128,7 +127,7 @@ def get_other_issuer_query(_: Any, args: Any) -> Q:
     return get_documents_issuer_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_issuer_query(document_type: DocumentType, country_alpha3: str) -> Q:
+def get_documents_issuer_query(document_type: str, country_alpha3: str) -> Q:
     return Q(documents__type__type=document_type, documents__type__country__iso_code3=country_alpha3)
 
 
@@ -185,14 +184,6 @@ def country_query(comparison_method: str, args: Any) -> Q:
 
 def country_origin_query(comparison_method: str, args: Any) -> Q:
     return country_generic_query(comparison_method, args, "country_origin")
-
-
-def admin_area1_query(comparison_method: str, args: Any) -> Q:
-    from django.db.models import Q
-
-    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__area_type__area_level=1)) | Q(
-        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__area_type__area_level=1)
-    )
 
 
 def registration_data_import_query(comparison_method: str, args: Any) -> Q:

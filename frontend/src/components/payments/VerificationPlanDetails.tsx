@@ -109,11 +109,21 @@ export const VerificationPlanDetails = ({
     PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
     permissions,
   );
+  const xlsxFileDownloadedOrImported =
+    verificationPlan.xlsxFileWasDownloaded ||
+    verificationPlan.xlsxFileImported ||
+    verificationPlan.verificationChannel !==
+      CashPlanPaymentVerificationVerificationChannel.Xlsx;
+
+  const xlsxFileDownloadedAndImported =
+    (verificationPlan.xlsxFileWasDownloaded &&
+      verificationPlan.xlsxFileImported) ||
+    verificationPlan.verificationChannel !==
+      CashPlanPaymentVerificationVerificationChannel.Xlsx;
 
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
-
   return (
     <Container>
       <Grid container>
@@ -236,8 +246,7 @@ export const VerificationPlanDetails = ({
                     />
                   )}
                 {canDiscard &&
-                  ((verificationPlan.xlsxFileWasDownloaded ||
-                    verificationPlan.xlsxFileImported) &&
+                  (xlsxFileDownloadedOrImported &&
                   verificationPlan.status ===
                     PaymentVerificationPlanStatus.Active ? (
                     <Box p={2}>

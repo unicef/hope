@@ -1,6 +1,6 @@
 import datetime
 import logging
-from uuid import UUID
+from typing import Dict
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -45,7 +45,7 @@ def get_sync_run_rapid_pro_task() -> None:
 
 @app.task
 @log_start_and_end
-def fsp_generate_xlsx_report_task(fsp_id: UUID) -> None:
+def fsp_generate_xlsx_report_task(fsp_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import FinancialServiceProvider
         from hct_mis_api.apps.payment.services.generate_fsp_xlsx_service import (
@@ -63,7 +63,7 @@ def fsp_generate_xlsx_report_task(fsp_id: UUID) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_verification_plan_xlsx(payment_verification_plan_id: UUID, user_id: UUID) -> None:
+def create_payment_verification_plan_xlsx(payment_verification_plan_id: str, user_id: str) -> None:
     try:
         user = get_user_model().objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
@@ -108,7 +108,7 @@ def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx(payment_plan_id: UUID, user_id: UUID) -> None:
+def create_payment_plan_payment_list_xlsx(payment_plan_id: str, user_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
@@ -147,7 +147,7 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id: UUID, user_id: UUID) 
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: UUID, user_id: UUID) -> None:
+def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: str, user_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
@@ -186,7 +186,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: UUID, user_id
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx(payment_plan_id: UUID) -> None:
+def import_payment_plan_payment_list_from_xlsx(payment_plan_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
@@ -226,7 +226,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id: UUID) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: UUID, user_id: UUID, file_pk: str) -> None:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: str, user_id: str, file_pk: str) -> None:
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -262,7 +262,63 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: UUID, us
 @app.task
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_steficon(payment_plan_id: UUID, steficon_rule_id: UUID) -> None:
+def create_cash_plan_reconciliation_xlsx(
+    reconciliation_xlsx_file_id: str,
+    column_mapping: Dict,
+    cash_plan_form_data: Dict,
+    currency: str,
+    delivery_type: str,
+    delivery_date: str,
+    program_id: str,
+    service_provider_id: str,
+) -> None:
+    try:
+        from hct_mis_api.apps.core.models import StorageFile
+        from hct_mis_api.apps.payment.models import ServiceProvider
+        from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
+            CreateCashPlanReconciliationService,
+        )
+        from hct_mis_api.apps.program.models import Program
+
+        reconciliation_xlsx_obj = StorageFile.objects.get(id=reconciliation_xlsx_file_id)
+        business_area = reconciliation_xlsx_obj.business_area
+
+        with configure_scope() as scope:
+            scope.set_tag("business_area", business_area)
+
+            cash_plan_form_data["program"] = Program.objects.get(id=program_id)
+            cash_plan_form_data["service_provider"] = ServiceProvider.objects.get(id=service_provider_id)
+
+            service = CreateCashPlanReconciliationService(
+                business_area,
+                reconciliation_xlsx_obj.file,
+                column_mapping,
+                cash_plan_form_data,
+                currency,
+                delivery_type,
+                delivery_date,
+            )
+
+            try:
+                service.parse_xlsx()
+                error_msg = None
+            except Exception as e:
+                error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
+
+            service.send_email(reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg)
+            # remove file every time
+            reconciliation_xlsx_obj.file.delete()
+            reconciliation_xlsx_obj.delete()
+
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def payment_plan_apply_steficon(payment_plan_id: str, steficon_rule_id: str) -> None:
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 

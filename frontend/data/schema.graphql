@@ -57,6 +57,7 @@ input AddIndividualDataObjectType {
   whoAnswersPhone: String
   whoAnswersAltPhone: String
   role: String!
+  preferredLanguage: String
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
   paymentChannels: [BankTransferObjectType]
@@ -225,6 +226,8 @@ type BusinessAreaNode implements Node {
   regionCode: String!
   regionName: String!
   koboUsername: String
+  koboToken: String
+  koboUrl: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
@@ -607,6 +610,10 @@ type DeduplicationResultNode {
   proximityToScore: Float
   location: String
   age: Int
+}
+
+type DeleteHouseholdApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 type DeletePaymentPlanMutation {
@@ -1129,6 +1136,10 @@ type HouseholdNode implements Node {
   size: Int
   address: String!
   adminArea: AreaNode
+  admin1: AreaNode
+  admin2: AreaNode
+  admin3: AreaNode
+  admin4: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
@@ -1198,13 +1209,11 @@ type HouseholdNode implements Node {
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelectionNode!]!
-  adminAreaTitle: String
   selection: HouseholdSelectionNode
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
-  admin1: AreaNode
-  admin2: AreaNode
+  adminAreaTitle: String
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
   activeIndividualsCount: Int
@@ -1584,10 +1593,16 @@ type ImportedHouseholdNode implements Node {
   size: Int!
   address: String!
   country: String
+  adminArea: String!
+  adminAreaTitle: String!
   admin1: String!
   admin1Title: String!
   admin2: String!
   admin2Title: String!
+  admin3: String!
+  admin3Title: String!
+  admin4: String!
+  admin4Title: String!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
@@ -1764,6 +1779,7 @@ type ImportedIndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  preferredLanguage: String
   misUnicefId: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
@@ -1928,6 +1944,7 @@ type IndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  preferredLanguage: String
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2034,6 +2051,7 @@ input IndividualUpdateDataObjectType {
   whoAnswersPhone: String
   whoAnswersAltPhone: String
   role: String
+  preferredLanguage: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
   documentsToEdit: [EditIndividualDocumentObjectType]
@@ -2118,6 +2136,23 @@ type LabelNode {
   label: String
 }
 
+type LanguageObject {
+  english: String
+  alpha2: String
+  alpha3: String
+}
+
+type LanguageObjectConnection {
+  pageInfo: PageInfo!
+  edges: [LanguageObjectEdge]!
+  totalCount: Int
+}
+
+type LanguageObjectEdge {
+  node: LanguageObject
+  cursor: String!
+}
+
 type LockTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
@@ -2171,10 +2206,10 @@ type Mutations {
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
-  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
-  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
-  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
-  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): SimpleApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, reasonHhId: String, version: BigInt): DeleteHouseholdApproveMutation
+  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
@@ -2193,6 +2228,7 @@ type Mutations {
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
+  revertMarkPaymentRecordAsFailed(paymentRecordId: ID!): RevertMarkAsFailedMutation
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   actionPaymentPlanMutation(input: ActionPaymentPlanInput!): ActionPaymentPlanMutation
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
@@ -2957,7 +2993,7 @@ type Query {
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, preferredLanguage: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
@@ -3013,6 +3049,7 @@ type Query {
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   cashAssistUrlPrefix: String
+  allLanguages(name: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
@@ -3293,6 +3330,10 @@ type RestartCreateReport {
 input RestartCreateReportInput {
   reportId: ID!
   businessAreaSlug: String!
+}
+
+type RevertMarkAsFailedMutation {
+  paymentRecord: PaymentRecordNode
 }
 
 type RoleNode {
@@ -4209,6 +4250,8 @@ type UserBusinessAreaNode implements Node {
   regionCode: String!
   regionName: String!
   koboUsername: String
+  koboToken: String
+  koboUrl: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!

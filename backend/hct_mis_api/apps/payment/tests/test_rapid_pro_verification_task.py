@@ -145,7 +145,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs([uuid.uuid4()])
+            mapped_dict = api.get_mapped_flow_runs([str(uuid.uuid4())])
             self.assertEqual(
                 mapped_dict,
                 [],
@@ -161,7 +161,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])  # type: ignore
+            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
             self.assertEqual(
                 mapped_dict,
                 [
