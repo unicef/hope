@@ -36,8 +36,8 @@ from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
-    wait_until_es_healthy,
     remove_elasticsearch_documents_by_matching_ids,
+    wait_until_es_healthy,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 

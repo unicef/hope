@@ -5,10 +5,12 @@ from django.core.management import BaseCommand
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import (
     ImportedIndividualDocumentAfghanistan,
-    ImportedIndividualDocumentUkraine,
     ImportedIndividualDocumentOthers,
+    ImportedIndividualDocumentUkraine,
 )
-from hct_mis_api.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
+)
 
 
 class Command(BaseCommand):
