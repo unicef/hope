@@ -1,8 +1,8 @@
 import datetime
 from typing import Any
+from unittest.mock import patch
 
 from django.test import TestCase
-from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
