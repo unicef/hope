@@ -3,12 +3,12 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
@@ -421,7 +421,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            log_and_raise("Grievance Ticket in status Closed is not editable")
+            raise ValidationError("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
@@ -462,9 +462,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             ticket_details = grievance_ticket.ticket_details
 
             if ticket_details.household and ticket_details.household != household:
-                raise GraphQLError("Cannot change household")
+                raise ValidationError("Cannot change household")
             if ticket_details.individual and ticket_details.individual != individual:
-                raise GraphQLError("Cannot change individual")
+                raise ValidationError("Cannot change individual")
 
             if household:
                 ticket_details.household = household
@@ -664,11 +664,11 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     @classmethod
     def get_close_function(cls, category: int, issue_type: int) -> Optional[Callable]:
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
-        if isinstance(function_or_nested_issue_types, dict) and issue_type:
-            return function_or_nested_issue_types.get(issue_type)
-        return function_or_nested_issue_types  # type: ignore
-        # TODO: what if there's no issue type and function_or_nested_issue_types is a dict?
-        # it would return a dict instead of a callable
+        return (
+            function_or_nested_issue_types
+            if not isinstance(function_or_nested_issue_types, dict)
+            else function_or_nested_issue_types.get(issue_type)
+        )
 
     @classmethod
     @is_authenticated
@@ -708,7 +708,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
-            raise GraphQLError("New status is incorrect")
+            raise ValidationError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             ticket_details = grievance_ticket.ticket_details
             if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
@@ -969,7 +969,6 @@ class SimpleApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         approve_status = graphene.Boolean(required=True)
-        reason_hh_id = graphene.String(required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -981,7 +980,6 @@ class SimpleApproveMutation(PermissionMutation):
         info: Any,
         grievance_ticket_id: Optional[str],
         approve_status: int,
-        reason_hh_id: Optional[str] = None,
         **kwargs: Any,
     ) -> "SimpleApproveMutation":
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
@@ -1012,21 +1010,59 @@ class SimpleApproveMutation(PermissionMutation):
             )
 
         ticket_details = grievance_ticket.ticket_details
+        ticket_details.approve_status = approve_status
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
 
-        if grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
-            reason_hh_obj = None
-            reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
-            if reason_hh_id:
-                # validate reason HH id
-                reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
-                if reason_hh_obj.withdrawn:
-                    raise GraphQLError(
-                        f"The original household ({reason_hh_obj.unicef_id}) hasn't to be in withdrawn status"
-                    )
+        return cls(grievance_ticket=grievance_ticket)
 
-            # update reason_household value
-            ticket_details.reason_household = reason_hh_obj  # set HH or None
 
+class DeleteHouseholdApproveMutation(PermissionMutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        approve_status = graphene.Boolean(required=True)
+        reason_hh_id = graphene.String(required=False)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_id: Optional[str],
+        approve_status: int,
+        reason_hh_id: Optional[str] = None,
+        **kwargs: Any,
+    ) -> "DeleteHouseholdApproveMutation":
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        )
+
+        ticket_details = grievance_ticket.ticket_details
+
+        reason_hh_obj = None
+        reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
+        if reason_hh_id:
+            # validate reason HH id
+            reason_hh_obj = get_object_or_404(Household, unicef_id=reason_hh_id)
+            if reason_hh_obj.withdrawn:
+                raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
+
+        # update reason_household value
+        ticket_details.reason_household = reason_hh_obj  # set HH or None
         ticket_details.approve_status = approve_status
         ticket_details.save()
         grievance_ticket.refresh_from_db()
@@ -1235,7 +1271,7 @@ class Mutations(graphene.ObjectType):
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = SimpleApproveMutation.Field()
     approve_delete_individual = SimpleApproveMutation.Field()
-    approve_delete_household = SimpleApproveMutation.Field()
+    approve_delete_household = DeleteHouseholdApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()

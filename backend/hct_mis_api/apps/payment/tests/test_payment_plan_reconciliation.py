@@ -678,7 +678,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                             "message"
                         ]
                         == f"Payment {payment.unicef_id}: Delivered quantity 666 is not equal Entitlement quantity 500.00"
-                    )
+                    ), import_mutation_response
 
             # update xls, delivered_quantity == entitlement_quantity
             sheet.cell(

@@ -32,6 +32,7 @@ from graphql_relay.connection.arrayconnection import connection_from_list_slice
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -132,7 +133,7 @@ class RapidProFlow(graphene.ObjectType):
     modified_on = graphene.DateTime()
 
     def resolve_id(parent, info: Any) -> str:
-        return parent["uuid"]  # type: ignore
+        return parent["uuid"]  # type: ignore # FIXME
 
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -402,10 +403,10 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
         return self  # DeliveryMechanismNode uses the same model
 
     def resolve_volume(self, info: Any) -> Optional[_decimal.Decimal]:  # non-usd
-        return _calculate_volume(self, "entitlement_quantity")
+        return _calculate_volume(self, "entitlement_quantity")  # type: ignore
 
     def resolve_volume_usd(self, info: Any) -> Optional[_decimal.Decimal]:
-        return _calculate_volume(self, "entitlement_quantity_usd")
+        return _calculate_volume(self, "entitlement_quantity_usd")  # type: ignore
 
     class Meta:
         model = DeliveryMechanismPerPaymentPlan
@@ -441,7 +442,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     verification_plans = DjangoPermissionFilterConnectionField(
-        "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",
+        "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",  # type: ignore
         filterset_class=PaymentVerificationPlanFilter,
     )
     payment_verification_summary = graphene.Field(
@@ -800,7 +801,7 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
+    all_payment_verification_log_entries = DjangoPermissionFilterFastConnectionField(
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
@@ -886,7 +887,7 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
-        node_name, obj_id = b64decode(input.get("cash_or_payment_plan_id")).decode().split(":")
+        node_name, obj_id = b64decode(input["cash_or_payment_plan_id"]).decode().split(":")
         payment_plan_object: Union["PaymentPlan", "CashPlan"] = get_object_or_404(  # type: ignore
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
         )
@@ -909,7 +910,7 @@ class Query(graphene.ObjectType):
             payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
         payment_records = get_payment_records(
-            payment_plan_object, payment_verification_plan, input.get("verification_channel")
+            payment_plan_object, payment_verification_plan, input["verification_channel"]
         )
         if not payment_records:
             return {

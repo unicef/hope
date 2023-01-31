@@ -43,7 +43,7 @@ class JSONWidgetMixin:
 
 class LastSyncDateResetMixin:
     @button()
-    def reset_sync_date(self, request: HttpRequest) -> HttpResponse:  # type: ignore
+    def reset_sync_date(self, request: HttpRequest) -> Optional[HttpResponse]:
         if request.method == "POST":
             self.get_queryset(request).update(last_sync_at=None)
         else:
@@ -55,9 +55,10 @@ class LastSyncDateResetMixin:
                 "Successfully executed",
                 title="aaaaa",
             )
+        return None
 
     @button(label="reset sync date")
-    def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> HttpResponse:  # type: ignore
+    def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if request.method == "POST":
             self.get_queryset(request).filter(id=pk).update(last_sync_at=None)
         else:
@@ -68,6 +69,7 @@ class LastSyncDateResetMixin:
                 "Continuing will reset last_sync_date field.",
                 "Successfully executed",
             )
+        return None
 
 
 class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPermMixin, AdminFiltersMixin):

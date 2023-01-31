@@ -105,6 +105,7 @@ export function UniversalTable<T, K>({
       page={page}
       itemsCount={data[queriedObjectName].totalCount}
       handleChangePage={(event, newPage) => {
+        if (!edges.length) return;
         const variables = {
           first: undefined,
           last: undefined,

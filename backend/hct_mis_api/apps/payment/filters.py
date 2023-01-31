@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Any, Dict, List
+from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -72,7 +72,7 @@ class PaymentRecordFilter(FilterSet):
     )
 
     def individual_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
-        if is_valid_uuid(value):
+        if is_valid_uuid(str(value)):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
 
@@ -392,7 +392,7 @@ class PaymentFilter(FilterSet):
         return super().filter_queryset(queryset)
 
 
-def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwargs: Dict) -> ExtendedQuerySetSequence:
+def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwargs: Any) -> ExtendedQuerySetSequence:
     business_area = kwargs.get("business_area")
     program = kwargs.get("program")
     service_provider = kwargs.get("service_provider")

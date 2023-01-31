@@ -2,7 +2,6 @@ import enum
 import logging
 from time import sleep
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from uuid import UUID
 
 from django.db.models import Model
 
@@ -25,25 +24,25 @@ def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> No
     doc().update(qs, parallel=parallel)
 
 
-def _create(models: List[Model]) -> None:
+def _create(models: Optional[List[Model]]) -> None:
     for index in registry.get_indices(models):
         index.create()
 
 
-def _populate(models: List[Model], options: Dict) -> None:
+def _populate(models: Optional[List[Model]], options: Dict) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
 
 
-def _delete(models: List[Model]) -> bool:
+def _delete(models: Optional[List[Model]]) -> bool:
     for index in registry.get_indices(models):
         index.delete(ignore=404)
     return True
 
 
-def _rebuild(models: List[Model], options: Dict) -> None:
+def _rebuild(models: Optional[List[Model]], options: Dict) -> None:
     if not _delete(models):
         return
 
@@ -61,14 +60,7 @@ def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
 
 
-def remove_document_by_matching_ids(id_list: List["UUID"]) -> None:
-    query_dict = {"query": {"terms": {"id": id_list}}}
-    search = Search(index="individuals")
-    search.update_from_dict(query_dict)
-    search.delete()
-
-
-def remove_elasticsearch_documents_by_matching_ids(id_list: List["UUID"], document: "Document") -> None:
+def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Document") -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index=document.Index.name)
     search.update_from_dict(query_dict)

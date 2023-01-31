@@ -1077,6 +1077,12 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         self.status = self.STATUS_FORCE_FAILED
         self.status_date = timezone.now()
 
+    def revert_mark_as_failed(self) -> None:
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment record marked as force failed can be reverted")
+        self.status = self.STATUS_SUCCESS
+        self.status_date = timezone.now()
+
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     parent = models.ForeignKey(
@@ -1180,7 +1186,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     payment_plan_object_id = UUIDField()
-    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
+    payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")  # type: ignore
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
@@ -1272,7 +1278,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
             return None
 
 
-def build_summary(payment_plan: Union["CashPlan", "PaymentPlan"]) -> None:
+def build_summary(payment_plan: Optional[Any]) -> None:
     statuses_count = payment_plan.get_payment_verification_plans.aggregate(
         active=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),

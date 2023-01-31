@@ -49,7 +49,7 @@ class GetCashplanVerificationSampleSizeInput(graphene.InputObjectType):
     cash_or_payment_plan_id = graphene.ID()
     payment_verification_plan_id = graphene.ID()
     sampling = graphene.String(required=True)
-    verification_channel = graphene.String()
+    verification_channel = graphene.String(required=True)
     business_area_slug = graphene.String(required=True)
     full_list_arguments = FullListArguments()
     random_sampling_arguments = RandomSamplingArguments()

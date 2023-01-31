@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Union
+from typing import Dict
 from unittest import TestCase
 from unittest.mock import Mock
 
@@ -32,7 +32,7 @@ class ValidatorTest(TestCase):
     def setUpClass(cls) -> None:
         cls.validator = RDINestedSerializer
 
-    def _run(self, data: Dict) -> Union[Dict, List]:
+    def _run(self, data: Dict) -> Dict:
         serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))
         serializer.is_valid()
         return humanize_errors(json.loads(JsonResponse(serializer.errors).content))

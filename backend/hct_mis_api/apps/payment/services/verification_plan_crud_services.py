@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db.models import QuerySet
@@ -22,7 +22,9 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.payment.models import CashPlan, PaymentPlan
 
 
-def get_payment_records(payment_plan: Union["PaymentPlan", "CashPlan"], verification_channel: str) -> QuerySet:
+def get_payment_records(
+    payment_plan: Union["PaymentPlan", "CashPlan"], verification_channel: Optional[Any]
+) -> QuerySet:
     payment_plan_type = payment_plan.__class__.__name__
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return payment_plan.available_payment_records(
