@@ -1,5 +1,6 @@
 import datetime
 from typing import Any
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -191,7 +192,11 @@ class TestGenerateReportService(TestCase):
             report.save()
 
         report_service = self.GenerateReportService(report)
-        report_service.generate_report()
+        with patch(
+            "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
+        ) as mock_save_wb_file_in_db:
+            report_service.generate_report()
+            assert mock_save_wb_file_in_db.called
         report.refresh_from_db()
         self.assertEqual(report.status, Report.COMPLETED)
         self.assertEqual(report.number_of_records, number_of_records)
