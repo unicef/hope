@@ -16,10 +16,15 @@ context("RDI", () => {
     cy.get("h5").contains("Registration Data Import");
     cy.get("button > span").contains("IMPORT").click({ force: true });
     cy.get("h2").contains("Select File to Import").click();
+    cy.get('[data-cy="import-type-select"]').click();
+    cy.get('[data-cy="excel-menu-item"]').click();
+    cy.get('[data-cy="input-name"]').type(
+      "Test import ".concat(new Date().toISOString())
+    );
     cy.uniqueSeed().then((seed) => {
       const fileName = `rdi_import_1_hh_1_ind_seed_${seed}.xlsx`;
       cy.fixture(fileName, "base64").then((fileContent) => {
-        cy.get('[data-cy="file-input"]').upload({
+        cy.get('[data-cy="file-input"]').attachFile({
           fileContent,
           fileName,
           mimeType:
