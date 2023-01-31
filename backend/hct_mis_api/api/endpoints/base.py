@@ -50,7 +50,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc: BaseException) -> Any:
+    def handle_exception(self, exc: Exception) -> Any:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))

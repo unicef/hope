@@ -1,4 +1,6 @@
-from typing import IO, TYPE_CHECKING, Dict, List, Optional
+import io
+from decimal import Decimal
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from django.db.models import QuerySet
 
@@ -19,7 +21,7 @@ if TYPE_CHECKING:
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     HEADERS = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
 
-    def __init__(self, payment_plan: "PaymentPlan", file: IO) -> None:
+    def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
         self.payment_list: QuerySet["Payment"] = payment_plan.not_excluded_payments
         self.file = file
@@ -166,7 +168,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,
                     currency=self.payment_plan.currency,
-                    exchange_rate=exchange_rate,
+                    exchange_rate=Decimal(exchange_rate),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
 

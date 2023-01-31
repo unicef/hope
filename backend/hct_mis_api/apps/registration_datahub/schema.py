@@ -1,6 +1,6 @@
 import json
 from datetime import date
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 
 from django.db.models import Prefetch, Q
 
@@ -13,7 +13,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -66,11 +66,12 @@ class DeduplicationResultNode(graphene.ObjectType):
     location = graphene.String()
     age = graphene.Int()
 
-    def resolve_age(self, info: Any) -> int:  # type: ignore
+    def resolve_age(self, info: Any) -> Optional[int]:
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()
             return relativedelta(today, parse(date_of_birth)).years
+        return None
 
     def resolve_location(self, info: Any) -> str:
         return self.get("location", "Not provided")
@@ -157,6 +158,11 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     import_id = graphene.String()
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
+    preferred_language = graphene.String()
+
+    @staticmethod
+    def resolve_preferred_language(parent: ImportedIndividual, info: Any) -> Optional[str]:
+        return parent.preferred_language or None
 
     def resolve_role(parent, info: Any) -> str:
         role = parent.households_and_roles.first()
@@ -275,7 +281,7 @@ class ImportedDocumentNode(DjangoObjectType):
     photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info: Any) -> str:
-        return getattr(parent.country, "name", parent.country)
+        return getattr(parent.country, "name", parent.country)  # type: ignore # can't convert String to str
 
     def resolve_photo(parent, info: Any) -> Union[String, None]:
         if parent.photo:
@@ -306,7 +312,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
-    all_imported_households = DjangoPermissionFilterConnectionField(
+    all_imported_households = DjangoPermissionFilterFastConnectionField(
         ImportedHouseholdNode,
         filterset_class=ImportedHouseholdFilter,
         permission_classes=(
@@ -318,7 +324,7 @@ class Query(graphene.ObjectType):
     registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode)
     all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode)
     imported_individual = relay.Node.Field(ImportedIndividualNode)
-    all_imported_individuals = DjangoPermissionFilterConnectionField(
+    all_imported_individuals = DjangoPermissionFilterFastConnectionField(
         ImportedIndividualNode,
         filterset_class=ImportedIndividualFilter,
         permission_classes=(

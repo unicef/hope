@@ -1,7 +1,7 @@
 import csv
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -15,7 +15,6 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
-from django.db.models import Aggregate, CharField
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -121,19 +120,6 @@ class BusinessofficeFilter(SimpleListFilter):
         elif self.value() == "1":
             return queryset.exclude(parent_id__isnull=True)
         return queryset
-
-
-class GroupConcat(Aggregate):
-    function = "GROUP_CONCAT"
-    template = "%(function)s(%(distinct)s%(expressions)s)"
-
-    def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
-        super().__init__(
-            expression,
-            distinct="DISTINCT " if distinct else "",
-            output_field=CharField(),
-            **extra,
-        )
 
 
 @admin.register(BusinessArea)
@@ -244,7 +230,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
 
                 if action:
                     user_data["Action"] = action
-                    matrix.append(user_data)
+                    matrix.append(user_data)  # type: ignore
         return matrix
 
     @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
@@ -492,7 +478,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return super().get_form(request, obj, change, **kwargs)
 
     @button()
-    def download_last_valid_file(self, request: HttpRequest) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:  # type: ignore
+    def download_last_valid_file(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -501,6 +489,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             "There is no valid file to download",
             level=ERROR,
         )
+        return None
 
     @button(
         label="Rerun KOBO Import",
@@ -579,10 +568,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
-        has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False  # type: ignore
+        has_add_permission: Callable = self.has_add_permission
+        self.has_add_permission: Callable = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission  # type: ignore
+        self.has_add_permission = has_add_permission
 
         return template_response
 

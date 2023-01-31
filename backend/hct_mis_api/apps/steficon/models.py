@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -32,7 +32,7 @@ class Rule(models.Model):
         (TYPE_TARGETING, "Targeting"),
     )
 
-    LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
+    LANGUAGES: Sequence[Tuple] = [(a.label.lower(), a.label) for a in interpreters]
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,
@@ -47,7 +47,7 @@ class Rule(models.Model):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)  # type: ignore # FIXME
     security = models.IntegerField(
         choices=(
             (SAFETY_NONE, "Low"),
@@ -88,9 +88,10 @@ class Rule(models.Model):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> None:  # type: ignore
+    def delete(self, using: Optional[Any] = None, keep_parents: Optional[bool] = False) -> Tuple[int, Dict[str, int]]:
         self.enabled = False
         self.save()
+        return 1, {self._meta.label: 1}
 
     def get_changes(self) -> Tuple[Dict, List]:
         prev = self.latest_commit
@@ -207,7 +208,7 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
+    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)  # type: ignore # FIXME
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)

@@ -25,6 +25,7 @@ metadata:
 data:
 {{ (.Files.Glob "files/kobocat/runtime_variables_kobocat.source.bash").AsConfig | indent 2}}
 {{ (.Files.Glob "files/kobocat/wait_for_postgres.bash").AsConfig | indent 2}}
+{{ (.Files.Glob "files/kobocat/sync_static.bash").AsConfig | indent 2}}
 {{ (.Files.Glob "files/kobocat/wait_for_mongo.bash").AsConfig | indent 2}}
 ---
 apiVersion: v1

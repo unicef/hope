@@ -1,6 +1,6 @@
 import logging
 from io import BytesIO
-from uuid import UUID
+from typing import Optional
 
 from django.utils import timezone
 
@@ -27,12 +27,12 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
         xlsx_kobo_template_object.template_id = template_id
         xlsx_kobo_template_object.save()
 
-    def execute(self, xlsx_kobo_template_id: UUID) -> None:
-        xlsx_kobo_template_object = XLSXKoboTemplate.objects.filter(id=xlsx_kobo_template_id).first()
+    def execute(self, xlsx_kobo_template_id: str) -> None:
+        xlsx_kobo_template_object: Optional[XLSXKoboTemplate] = XLSXKoboTemplate.objects.filter(
+            id=xlsx_kobo_template_id
+        ).first()
         if not xlsx_kobo_template_object:
-            self._save_message_status_template_id(
-                xlsx_kobo_template_object, "Uploaded file is not found on the server", XLSXKoboTemplate.UNSUCCESSFUL
-            )
+            # Record not found, we can stop here
             return
 
         last_valid_template = XLSXKoboTemplate.objects.latest_valid()
@@ -57,10 +57,9 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                     xlsx_kobo_template_object, error_message, XLSXKoboTemplate.UNSUCCESSFUL, asset_uid
                 )
                 return
-            else:
-                flex_fields_task = FlexibleAttributeImporter()
-                flex_fields_task.import_xls(xlsx_kobo_template_object.file)
 
+            flex_fields_task = FlexibleAttributeImporter()
+            flex_fields_task.import_xls(xlsx_kobo_template_object.file)
             self._save_message_status_template_id(xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid)
         except requests.exceptions.RequestException as e:
             logger.exception("Import template to Kobo Exception")

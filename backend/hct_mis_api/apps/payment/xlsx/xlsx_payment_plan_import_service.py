@@ -1,4 +1,6 @@
-from typing import IO, TYPE_CHECKING
+import io
+from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -27,7 +29,7 @@ if TYPE_CHECKING:
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "n")
 
-    def __init__(self, payment_plan: PaymentPlan, file: IO) -> None:
+    def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments
         self.file = file
@@ -226,7 +228,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=exchange_rate,
+                    exchange_rate=Decimal(exchange_rate) if exchange_rate is not None else 1,
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 self.payments_to_save.append(payment)

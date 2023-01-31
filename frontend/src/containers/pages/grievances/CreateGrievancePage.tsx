@@ -357,7 +357,6 @@ export function CreateGrievancePage(): React.ReactElement {
                         <Grid item xs={6}>
                           <Field
                             name='admin'
-                            label={t('Administrative Level 2')}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
                           />

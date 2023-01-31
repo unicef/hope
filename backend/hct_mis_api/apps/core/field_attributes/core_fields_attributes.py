@@ -1,10 +1,9 @@
 import copy
 import logging
 from functools import reduce
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
-    admin_area1_query,
     age_to_birth_date_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
@@ -169,8 +168,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
         "type": TYPE_SELECT_ONE,
         "name": "admin1",
-        "lookup": "admin_area__p_code",
-        "get_query": admin_area1_query,
+        "lookup": "admin1__p_code",
         "required": False,
         "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
         "hint": "",
@@ -184,7 +182,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
         "type": TYPE_SELECT_ONE,
         "name": "admin2",
-        "lookup": "admin_area__p_code",
+        "lookup": "admin2__p_code",
         "required": False,
         "label": {"English(EN)": "Household resides in which ${admin2_h_c}?"},
         "hint": "",
@@ -193,6 +191,34 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin2_h_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+    },
+    {
+        "id": "92e425a7-db22-4026-8602-96c51471dfff",
+        "type": TYPE_SELECT_ONE,
+        "name": "admin3",
+        "lookup": "admin3__p_code",
+        "required": False,
+        "label": {"English(EN)": "Household resides in which ${admin3_h_c}?"},
+        "hint": "",
+        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(3, *args, **kwargs),
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "admin3_h_c",
+        "scope": [Scope.GLOBAL, Scope.TARGETING],
+    },
+    {
+        "id": "717620df-b804-4398-b789-e56aa7a3da5e",
+        "type": TYPE_SELECT_ONE,
+        "name": "admin4",
+        "lookup": "admin4__p_code",
+        "required": False,
+        "label": {"English(EN)": "Household resides in which ${admin4_h_c}?"},
+        "hint": "",
+        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(4, *args, **kwargs),
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "admin4_h_c",
+        "scope": [Scope.GLOBAL, Scope.TARGETING],
     },
     {
         "id": "13a9d8b0-f278-47c2-9b1b-b06579b0ab35",
@@ -1637,12 +1663,12 @@ CORE_FIELDS_ATTRIBUTES = [
 
 class FieldFactory(list):
     def __init__(
-        self, fields: Optional[Any] = None, scopes: Optional[list[Scope]] = None, *args: Any, **kwargs: Any
+        self, fields: Optional[Any] = None, scopes: Optional[Iterable[Scope]] = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
         if fields:
             self.extend(fields)
-        self.scopes = scopes or set()
+        self.scopes: Iterable = scopes or set()
         self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     @classmethod
@@ -1670,7 +1696,7 @@ class FieldFactory(list):
             factory.scopes.add(scope)
         return factory
 
-    def filtered_by_types(self, types: list) -> "FieldFactory":
+    def filtered_by_types(self, types: List) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
 
         for item in self:
@@ -1697,7 +1723,7 @@ class FieldFactory(list):
     def to_choices(self) -> List[Any]:
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
-    def apply_business_area(self, business_area_slug: str) -> "FieldFactory":
+    def apply_business_area(self, business_area_slug: Optional[str] = None) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
             choices = field.get("_choices")

@@ -223,7 +223,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         },
     }
 
-    TICKET_DETAILS_NAME_MAPPING = {
+    TICKET_DETAILS_NAME_MAPPING: Dict[int, Union[str, Dict[int, str]]] = {
         CATEGORY_DATA_CHANGE: {
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: "household_data_update_ticket_details",
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: "individual_data_update_ticket_details",
@@ -348,13 +348,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     @property
     def ticket_details(self) -> Any:
-        nested_dict_or_value = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
+        nested_dict_or_value: Union[str, Dict[int, str]] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
         if isinstance(nested_dict_or_value, dict):
-            details_name = nested_dict_or_value.get(self.issue_type)
-        else:
-            details_name = nested_dict_or_value
+            value: Optional[str] = nested_dict_or_value.get(self.issue_type)
+            if value is None:
+                return None
+            return getattr(self, value, None)
 
-        return getattr(self, details_name, None)
+        return getattr(self, nested_dict_or_value, None)
 
     @property
     def status_log(self) -> str:
@@ -381,11 +382,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         verbose_name = "Grievance Ticket"
 
     def clean(self) -> None:
-        # TODO: refactor that
-        issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
-        should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore
-        has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
+        issue_types: Optional[Dict[int, str]] = self.ISSUE_TYPES_CHOICES.get(self.category)
+        has_invalid_issue_type = issue_types and self.issue_type not in issue_types
+        has_issue_type_for_category_without_issue_types = bool(not issue_types and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})

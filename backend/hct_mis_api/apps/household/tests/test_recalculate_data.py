@@ -287,4 +287,4 @@ class TestRecalculateData(TestCase):
         )
 
         interval_recalculate_population_fields_task.delay()
-        recalculate_population_fields_task_mock.assert_called_once_with(households_ids=[self.household.pk])
+        recalculate_population_fields_task_mock.assert_called_once_with(household_ids=[self.household.pk])
