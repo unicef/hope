@@ -10,8 +10,6 @@ from hct_mis_api.apps.registration_datahub.documents import (
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 
-BATCH_SIZE = 1000
-
 
 class Command(BaseCommand):
     help = "Remove ImportedIndividuals from elasticsearch documents"
