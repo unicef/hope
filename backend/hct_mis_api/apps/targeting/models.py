@@ -19,6 +19,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -239,14 +240,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def household_list(self) -> "QuerySet":
-        queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
-            return queryset
+            return self.households.all()
+        params = {
+            "target_population": self,
+        }
         if self.vulnerability_score_max is not None:
-            queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
+            params["vulnerability_score__lte"] = self.vulnerability_score_max
         if self.vulnerability_score_min is not None:
-            queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
-        return queryset.distinct()
+            params["vulnerability_score__gte"] = self.vulnerability_score_min
+        return Household.objects.filter(selections__in=HouseholdSelection.objects.filter(**params))
 
     def get_criteria_string(self) -> str:
         try:
