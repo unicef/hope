@@ -87,7 +87,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           onClick={() => setOpenImport(true)}
           disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
         >
-          {t('Import XLSX')}
+          {t('Upload File')}
         </Button>
       </Box>
       <Dialog
