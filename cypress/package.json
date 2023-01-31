@@ -4,6 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "cypress": "^12.4.1"
+    "copy": "^0.3.2",
+    "cypress": "^12.4.1",
+    "cypress-file-upload": "^5.0.8"
+  },
+  "scripts": {
+    "generate-xlsx-files": "./generate_xlsx_files.js"
   }
 }
