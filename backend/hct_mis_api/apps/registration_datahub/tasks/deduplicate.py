@@ -37,6 +37,7 @@ from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_resu
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
     wait_until_es_healthy,
+    remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -806,6 +807,10 @@ class DeduplicateTask:
             log_create(
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
             )
+
+        remove_elasticsearch_documents_by_matching_ids(
+            list(imported_individuals.values_list("id", flat=True)), get_imported_individual_doc(business_area)
+        )
 
     @classmethod
     @transaction.atomic
