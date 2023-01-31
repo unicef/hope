@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, Iterable
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -40,7 +40,7 @@ def close_system_flagging_ticket(grievance_ticket: "GrievanceTicket", info: Any,
         )
 
 
-def _clear_deduplication_individuals_fields(individuals: List[Individual]) -> None:
+def _clear_deduplication_individuals_fields(individuals: Iterable[Individual]) -> None:
     for individual in individuals:
         individual.deduplication_golden_record_status = UNIQUE
         individual.deduplication_batch_status = UNIQUE_IN_BATCH

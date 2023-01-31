@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -12,7 +12,7 @@ from hct_mis_api.apps.payment.models import (
 
 class CreatePaymentVerifications:
     def __init__(
-        self, payment_verification_plan: PaymentVerificationPlan, payment_records: List[PaymentRecord]
+        self, payment_verification_plan: PaymentVerificationPlan, payment_records: Iterable[PaymentRecord]
     ) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.payment_records = payment_records

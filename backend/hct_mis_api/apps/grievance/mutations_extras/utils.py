@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -180,7 +180,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status: List[Document]) -> Dict[str, Dict]:
+def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import (
@@ -251,18 +251,23 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status: List[IndividualIdentity]) -> Dict[int, Any]:
+def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
     from django.shortcuts import get_object_or_404
 
-    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.core.utils import (
+        decode_id_string,
+        encode_id_base64,
+        encode_id_base64_required,
+    )
     from hct_mis_api.apps.household.models import IndividualIdentity
 
-    previous_identities = {}
+    previous_identities: Dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
-        previous_identities[identity.id] = {
-            "id": identity.id,
+        encoded_identity = encode_id_base64_required(identity.id, "IndividualIdentity")
+        previous_identities[encoded_identity] = {
+            "id": encoded_identity,  # TODO: can be removed maybe
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "partner": identity.partner.name,
@@ -341,8 +346,9 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     }
 
     for pc in payment_channels:
-        handler = handlers.get(pc.get("type"))
-        items.append(handler(pc))
+        if type_ := pc.get("type"):
+            if handler := handlers.get(type_):
+                items.append(handler(pc))
     return items
 
 
@@ -390,12 +396,12 @@ def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) 
                 raise ValidationError(f"You can't provide {not_allowed} in {key}")
 
 
-def remove_parsed_data_fields(data_dict: Dict, fields_list: List[str]) -> None:
+def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> None:
     for field in fields_list:
         data_dict.pop(field, None)
 
 
-def verify_flex_fields(flex_fields_to_verify: List[str], associated_with: str) -> None:
+def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
     from hct_mis_api.apps.core.field_attributes.fields_types import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,

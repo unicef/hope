@@ -47,6 +47,8 @@ class BusinessArea(TimeStampedUUIDModel):
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
+    kobo_token = models.CharField(max_length=255, null=True, blank=True)
+    kobo_url = models.URLField(max_length=255, null=True, blank=True)
     rapid_pro_host = models.URLField(null=True, blank=True)
     rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
     slug = models.CharField(

@@ -61,8 +61,7 @@ class SingleExchangeRate:
     def get_exchange_rate_by_dispersion_date(self, dispersion_date: Optional[datetime]) -> Optional[float]:
         today = timezone.now()
 
-        dispersion_date_is_not_provided = dispersion_date is None
-        if dispersion_date_is_not_provided:
+        if dispersion_date is None:
             return self.x_rate * self.ratio
 
         dispersion_date = datetime.combine(dispersion_date, datetime.min.time())

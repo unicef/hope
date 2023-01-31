@@ -22,7 +22,7 @@ from hct_mis_api.apps.account.models import (
 )
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
 )
@@ -125,9 +125,10 @@ class JSONLazyString(graphene.Scalar):
         return json.dumps(dt, cls=LazyEncoder)
 
     @staticmethod
-    def parse_literal(node: "Node") -> Optional[Dict]:  # type: ignore
+    def parse_literal(node: "Node") -> Optional[Dict]:
         if isinstance(node, graphene.String):
             return json.loads(node.value)
+        return None
 
     @staticmethod
     def parse_value(value: Any) -> Dict:
@@ -136,7 +137,7 @@ class JSONLazyString(graphene.Scalar):
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserNode)
-    all_users = DjangoPermissionFilterConnectionField(
+    all_users = DjangoPermissionFilterFastConnectionField(
         UserNode,
         filterset_class=UsersFilter,
         permission_classes=(

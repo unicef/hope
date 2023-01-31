@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -15,7 +15,6 @@ from django.utils import timezone
 
 from dateutil.parser import parse
 from django_filters import Filter
-from traitlets import Any
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
@@ -26,6 +25,8 @@ def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
             for field_name, field_value in values.items():
                 field_instance = field()
                 if isinstance(field_instance, (DateTimeField, DateField)):
+                    if field_value is None:
+                        continue
                     field_value = parse(field_value, fuzzy=True)
                 clean_data[field_name] = field_instance.clean(field_value)
         return clean_data or None
@@ -185,5 +186,6 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
-
-        return qs.filter(business_area__slug=business_area_slug)
+        if business_area_slug:
+            return qs.filter(business_area__slug=business_area_slug)
+        return qs

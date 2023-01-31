@@ -15,6 +15,7 @@ import {
   CashPlanVerificationSamplingChoicesQuery,
   PaymentPlanQuery,
   PaymentVerificationPlanStatus,
+  PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
   useInvalidPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
@@ -110,10 +111,15 @@ export const VerificationPlanDetails = ({
     permissions,
   );
 
+  const xlsxFileDownloadedOrImported =
+    verificationPlan.xlsxFileWasDownloaded ||
+    verificationPlan.xlsxFileImported ||
+    verificationPlan.verificationChannel !==
+      PaymentVerificationPlanVerificationChannel.Xlsx;
+
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
-
   return (
     <Container>
       <Grid container>
@@ -236,8 +242,7 @@ export const VerificationPlanDetails = ({
                     />
                   )}
                 {canDiscard &&
-                  ((verificationPlan.xlsxFileWasDownloaded ||
-                    verificationPlan.xlsxFileImported) &&
+                  (xlsxFileDownloadedOrImported &&
                   verificationPlan.status ===
                     PaymentVerificationPlanStatus.Active ? (
                     <Box p={2}>

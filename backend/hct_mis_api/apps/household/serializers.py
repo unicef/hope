@@ -28,7 +28,7 @@ def get_household_status(household: Household) -> Tuple[str, datetime]:
     return "imported", household.updated_at
 
 
-def get_individual_info(individual: "Individual", tax_id: str) -> Dict:
+def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict:
     return {
         "role": individual.role,
         "relationship": individual.relationship,

@@ -627,9 +627,15 @@ if SENTRY_DSN:
         release=get_full_version(),
         traces_sample_rate=1.0,
         send_default_pii=True,
+        ignore_errors=[
+            "ValidationError",
+            "PermissionDenied",
+            "Http404",
+            "AuthCanceled",
+        ],
     )
     ignore_logger("graphql.execution.utils")
-    ignore_logger("django.core.exceptions.ValidationError")
+
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -830,3 +836,8 @@ MARKDOWNIFY = {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
     }
 }
+
+SHELL_PLUS_DONT_LOAD = [
+    "mis_datahub.Individual",
+    "mis_datahub.Household",
+]
