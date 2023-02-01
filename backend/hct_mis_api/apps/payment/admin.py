@@ -21,13 +21,11 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -295,14 +293,6 @@ class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
 
 
-@admin.register(PaymentChannel)
-class PaymentChannelAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "delivery_mechanism_display_name")
-
-    def delivery_mechanism_display_name(self, obj: Any) -> str:
-        return obj.delivery_mechanism
-
-
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     list_display = (
@@ -395,8 +385,3 @@ class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
-
-
-@admin.register(DeliveryMechanism)
-class DeliveryMechanismAdmin(HOPEModelAdminBase):
-    pass

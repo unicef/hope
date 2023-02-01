@@ -18,14 +18,12 @@ from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
     ServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
     FinancialServiceProvider,
     GenericPayment,
     PaymentPlan,
@@ -72,7 +70,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(parent=cls.payment_plan, household=household, excluded=False, assigned_payment_channel=None)
+            PaymentFactory(parent=cls.payment_plan, household=household, excluded=False)
 
         cls.user = UserFactory()
         cls.payment_plan = PaymentPlan.objects.all()[0]
@@ -80,12 +78,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         # set Lock status
         cls.payment_plan.status_lock()
         cls.payment_plan.save()
-
-        cls.delivery_mechanism_deposit_to_card, _ = DeliveryMechanism.objects.get_or_create(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_DEPOSIT_TO_CARD,
-        )
-        for ind in Individual.objects.all():
-            PaymentChannelFactory(individual=ind, delivery_mechanism=cls.delivery_mechanism_deposit_to_card)
 
         cls.xlsx_valid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
