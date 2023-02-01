@@ -9,6 +9,8 @@
     "cypress-file-upload": "^5.0.8"
   },
   "scripts": {
-    "generate-xlsx-files": "./generate_xlsx_files.js"
+    "generate-xlsx-files": "./generate_xlsx_files.js",
+    "initdb": "yarn backend ./manage.py initcypress --skip-drop",
+    "init-scenario": "docker-compose exec backend ./manage.py init-e2e-scenario"
   }
 }
