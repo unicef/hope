@@ -1185,6 +1185,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     payment_plan_object_id = UUIDField()
     payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")  # type: ignore
+
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
