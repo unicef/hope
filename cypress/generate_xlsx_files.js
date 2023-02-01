@@ -3,13 +3,13 @@ const { execSync } = require("child_process");
 
 const exec = (command) => {
   execSync(command, {
-    stdio: "inherit"
+    stdio: "inherit",
   });
 };
 
 const args = process.argv.slice(2);
 exec(
-  "docker-compose run --rm backend ./manage.py generate_rdi_xlsx_files " +
+  "docker-compose exec backend ./manage.py generate_rdi_xlsx_files " +
     args.join(" ")
 );
 
