@@ -12,10 +12,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import (
-    Payment,
-    PaymentPlan,
-)
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 
 class TestPaymentPlanModel(TestCase):

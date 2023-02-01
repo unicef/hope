@@ -2,10 +2,9 @@ import io
 import logging
 from base64 import b64decode
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db import transaction
-from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -23,7 +22,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     fsp_generate_xlsx_report_task,
@@ -97,7 +95,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
         node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")  # type: ignore # FIXME
 
-        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
         )
 
@@ -497,14 +495,14 @@ class XlsxErrorNode(graphene.ObjectType):
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[0]  # type: ignore
+    def resolve_sheet(parent: tuple[str], info: Any) -> str:
+        return parent[0]
 
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[1]  # type: ignore
+    def resolve_coordinates(parent: tuple[str], info: Any) -> str:
+        return parent[1]
 
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[2]  # type: ignore
+    def resolve_message(parent: tuple[str], info: Any) -> str:
+        return parent[2]
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -853,11 +851,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
-        collectors_in_target_population = Individual.objects.filter(
-            id__in=payment_plan.not_excluded_payments.values_list("collector", flat=True)
-        )
-
-        collectors_that_can_be_paid = collectors_in_target_population.distinct()
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
