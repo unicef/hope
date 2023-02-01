@@ -95,7 +95,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
         cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
         node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")  # type: ignore # FIXME
 
-        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
             CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
         )
 
