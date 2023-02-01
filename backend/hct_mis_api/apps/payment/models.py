@@ -39,7 +39,10 @@ from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, CORE_FIELDS_ATTRIBUTES
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    FieldFactory,
+)
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
@@ -720,7 +723,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     core_fields = ChoiceArrayFieldDM(
-        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
+        models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
         default=list,
     )
 
