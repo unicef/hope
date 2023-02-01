@@ -27,11 +27,9 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
     PaymentFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
@@ -245,24 +243,8 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         cls.household_1, cls.individual_1 = cls.create_household_and_individual()
         cls.household_1.refresh_from_db()
-
-        cls.delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        )
-        cls.payment_channel_1_cash = PaymentChannelFactory(
-            individual=cls.individual_1,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
         cls.household_2, cls.individual_2 = cls.create_household_and_individual()
-        cls.payment_channel_2_cash = PaymentChannelFactory(
-            individual=cls.individual_2,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
-        cls.payment_channel_3_cash = PaymentChannelFactory(
-            individual=cls.individual_3,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
@@ -388,7 +370,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
             excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
@@ -504,7 +485,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert (
             payment_plan.not_excluded_payments.filter(
                 financial_service_provider__isnull=False,
-                assigned_payment_channel__isnull=False,
                 delivery_type__isnull=False,
             ).count()
             == 1

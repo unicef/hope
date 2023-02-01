@@ -352,7 +352,6 @@ class PaymentFilter(FilterSet):
             "household__size",
             "admin2",
             "collector_id",
-            "assigned_payment_channel",
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",

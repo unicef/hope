@@ -6,7 +6,6 @@ class XlsxPaymentPlanBaseService:
         "household_size",
         "admin_level_2",
         "collector_name",
-        "payment_channel",
         "fsp_name",
         "currency",
         "entitlement_quantity",

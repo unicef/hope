@@ -13,10 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
 )
 
@@ -191,22 +188,3 @@ class TestPaymentModel(TestCase):
                 },
             ],
         )
-
-    def test_manager_annotations__payment_channels(self) -> None:
-        pp1 = PaymentPlanFactory()
-        p1 = PaymentFactory(parent=pp1, excluded=False, assigned_payment_channel=None)
-
-        p1_data = Payment.objects.filter(id=p1.id).values()[0]
-        self.assertEqual(p1_data["has_defined_payment_channel"], False)
-        self.assertEqual(p1_data["has_assigned_payment_channel"], False)
-
-        delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        )
-        pc1 = PaymentChannel.objects.create(individual=p1.collector, delivery_mechanism=delivery_mechanism_cash)
-        p1.assigned_payment_channel = pc1
-        p1.save()
-
-        p1_data = Payment.objects.filter(id=p1.id).values()[0]
-        self.assertEqual(p1_data["has_defined_payment_channel"], True)
-        self.assertEqual(p1_data["has_assigned_payment_channel"], True)
