@@ -99,6 +99,7 @@ context("RDI", () => {
             cy.get("td").contains(householdId).click({ force: true });
 
             // cy.get('[data-cy="label-COLLECT TYPE"]').contains("Full"); // TODO
+            cy.get('[data-cy="label-Household ID"]').contains(householdId);
           });
       });
   });
