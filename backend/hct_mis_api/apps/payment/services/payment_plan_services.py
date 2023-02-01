@@ -158,9 +158,7 @@ class PaymentPlanService:
 
     def unlock_fsp(self) -> Optional[PaymentPlan]:
         self.payment_plan.status_unlock_fsp()
-        self.payment_plan.payment_items.all().update(
-            financial_service_provider=None, assigned_payment_channel=None, delivery_type=None
-        )
+        self.payment_plan.payment_items.all().update(financial_service_provider=None, delivery_type=None)
         self.payment_plan.save()
 
         return self.payment_plan
@@ -435,62 +433,6 @@ class PaymentPlanService:
                         f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
                         f"by FSP '{fsp}'"
                     )
-
                 if not fsp.can_accept_any_volume():
                     raise GraphQLError(f"{fsp} cannot accept any volume")
-
-                payments_for_delivery_mechanism = (
-                    self.payment_plan.not_excluded_payments.filter(
-                        collector__payment_channels__delivery_mechanism__delivery_mechanism=delivery_mechanism
-                    )
-                    .exclude(id__in=[processed_payment.id for processed_payment in processed_payments])
-                    .annotate(
-                        payment_channel=Subquery(
-                            PaymentChannel.objects.filter(
-                                individual=OuterRef("collector"),
-                                delivery_mechanism__delivery_mechanism=delivery_mechanism,
-                            ).values("id")[:1]
-                        )
-                    )
-                    .distinct()
-                    .order_by("unicef_id")
-                )
-
-                total_volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
-                    entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
-                )["entitlement_quantity_usd__sum"]
-
-                if fsp.can_accept_volume(total_volume_for_delivery_mechanism):
-                    processed_payments += list(payments_for_delivery_mechanism)
-                    if update_payments:
-                        payments_for_delivery_mechanism.update(
-                            financial_service_provider=fsp,
-                            assigned_payment_channel=F("payment_channel"),
-                            delivery_type=delivery_mechanism,
-                        )
-
-                else:
-                    # Process part of the volume up to the distribution limit
-                    partial_processed_payments = []
-                    partial_total_volume = Decimal(0.0)
-
-                    for payment in payments_for_delivery_mechanism:
-                        if fsp.distribution_limit < (partial_total_volume + payment.entitlement_quantity_usd):
-                            break
-                        partial_total_volume += payment.entitlement_quantity_usd
-                        partial_processed_payments.append(payment)
-
-                    processed_payments += partial_processed_payments
-                    if update_payments:
-                        for payment in partial_processed_payments:
-                            payment.financial_service_provider = fsp
-                            payment.assigned_payment_channel_id = payment.payment_channel
-                            payment.delivery_type = delivery_mechanism
-                            payment.save()
-
-                if update_dms:
-                    delivery_mechanism_per_payment_plan.financial_service_provider = fsp
-                    delivery_mechanism_per_payment_plan.save()
-
-            if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
-                raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
+                # TODO very simple validation

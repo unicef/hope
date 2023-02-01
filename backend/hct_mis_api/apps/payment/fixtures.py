@@ -34,14 +34,12 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -203,38 +201,6 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     )
     data_transfer_configuration = factory.Faker("json")
     fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
-
-
-class DeliveryMechanismFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DeliveryMechanism
-
-    delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
-    global_core_fields = factory.List(
-        [
-            factory.fuzzy.FuzzyChoice(
-                FieldFactory.from_scope(Scope.GLOBAL).to_choices(),
-                getter=lambda c: c[0],
-            )
-        ]
-    )
-    payment_channel_fields = factory.List(
-        [
-            factory.fuzzy.FuzzyChoice(
-                FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices(),
-                getter=lambda c: c[0],
-            )
-        ]
-    )
-
-
-class PaymentChannelFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = PaymentChannel
-
-    individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.LazyAttribute(lambda o: DeliveryMechanism.objects.first())
-    delivery_data = factory.Faker("json")
 
 
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
@@ -620,9 +586,6 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
-    assigned_payment_channel = factory.LazyAttribute(
-        lambda o: (o.collector.payment_channels.first() or PaymentChannelFactory(individual=o.collector))
-    )
 
 
 class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
@@ -819,21 +782,6 @@ def generate_payment_plan() -> None:
         full_name="Jan Kowalski",
         sex=MALE,
     )[0]
-    delivery_mechanism_transfer, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
-        defaults=dict(
-            global_core_fields=["given_name", "family_name"],
-            payment_channel_fields=["bank_account_number", "bank_name"],
-        ),
-    )
-    delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        defaults=dict(global_core_fields=["given_name", "family_name"], payment_channel_fields=[]),
-    )
-    payment_channel_1 = PaymentChannelFactory(
-        individual=individual_1,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
 
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
     individual_2 = Individual.objects.update_or_create(
@@ -845,10 +793,6 @@ def generate_payment_plan() -> None:
         full_name="Adam Nowak",
         sex=MALE,
     )[0]
-    payment_channel_2 = PaymentChannelFactory(
-        individual=individual_2,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
 
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
@@ -964,7 +908,6 @@ def generate_payment_plan() -> None:
         household=household_1,
         collector=individual_1,
         delivery_type=Payment.DELIVERY_TYPE_CASH,
-        assigned_payment_channel=payment_channel_1,
         financial_service_provider=fsp_1,
         status_date=now,
     )
@@ -979,7 +922,6 @@ def generate_payment_plan() -> None:
         household=household_2,
         collector=individual_2,
         delivery_type=Payment.DELIVERY_TYPE_CASH,
-        assigned_payment_channel=payment_channel_2,
         financial_service_provider=fsp_1,
         status_date=now,
     )

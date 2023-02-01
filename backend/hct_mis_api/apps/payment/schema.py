@@ -81,7 +81,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -387,9 +386,9 @@ def _calculate_volume(
 ) -> Optional[Decimal]:
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
+    # TODO simple volume calculation
     payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-        assigned_payment_channel__delivery_mechanism__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
 
@@ -542,16 +541,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
 
     class Meta:
         model = LogEntry
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
-
-    class Meta:
-        model = PaymentChannel
-        exclude = ("delivery_data",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 

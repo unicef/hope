@@ -716,10 +716,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "collector_name": (payment.collector, "full_name"),
             "fsp_name": (payment.financial_service_provider, "name"),
             "currency": (payment, "currency"),
-            "payment_channel": (
-                getattr(payment.assigned_payment_channel, "delivery_mechanism", None),
-                "delivery_mechanism",
-            ),
             "entitlement_quantity": (payment, "entitlement_quantity"),
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
@@ -886,35 +882,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     def status_send(self, sent_by: "User") -> None:
         self.sent_date = timezone.now()
         self.sent_by = sent_by
-
-
-class PaymentChannel(TimeStampedUUIDModel):
-    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
-    delivery_mechanism = models.ForeignKey(
-        "payment.DeliveryMechanism", on_delete=models.SET_NULL, related_name="payment_channels", null=True
-    )
-    delivery_data = JSONField(default=dict, blank=True)
-    is_fallback = models.BooleanField(default=False)
-
-    @property
-    def all_delivery_data(self) -> Dict:
-        associated_objects = {_INDIVIDUAL: self.individual, _HOUSEHOLD: self.individual.household}
-        global_core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.PAYMENT_CHANNEL]).to_dict_by("name")
-
-        data = {**self.delivery_data}
-        for field_name in self.delivery_mechanism.global_core_fields:
-            associated_object = associated_objects.get(global_core_fields[field_name]["associated_with"])
-            data[field_name] = getattr(associated_object, field_name, None)
-
-        return data
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["individual", "delivery_mechanism"],
-                name="unique individual_delivery_mechanism",
-            ),
-        ]
 
 
 class CashPlan(GenericPaymentPlan):
@@ -1096,7 +1063,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
     payment_verification = GenericRelation(
         "payment.PaymentVerification",
         content_type_field="payment_content_type",
@@ -1504,23 +1470,23 @@ class ChoiceArrayFieldDM(ArrayField):
         return super(ArrayField, self).formfield(**defaults)
 
 
-class DeliveryMechanism(TimeStampedUUIDModel):
-    # TODO MB rdi logic
-    # create imported payment channel instance + show on frontend which ones gonna be created
-    # check all PCH XLS rows and what validate what PCHs can be created based on this data
-    # If CASH can't be created raise validation error
-    # create separate logic for payment channel scoep and fill PCH delivery data
-    delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
-    global_core_fields = ChoiceArrayFieldDM(
-        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
-        default=list,
-    )
-    payment_channel_fields = ChoiceArrayFieldDM(
-        models.CharField(
-            max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
-        ),
-        default=list,
-    )
-
-    def __str__(self) -> str:
-        return self.delivery_mechanism
+# class DeliveryMechanism(TimeStampedUUIDModel):
+#     # TODO MB rdi logic
+#     # create imported payment channel instance + show on frontend which ones gonna be created
+#     # check all PCH XLS rows and what validate what PCHs can be created based on this data
+#     # If CASH can't be created raise validation error
+#     # create separate logic for payment channel scoep and fill PCH delivery data
+#     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
+#     global_core_fields = ChoiceArrayFieldDM(
+#         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
+#         default=list,
+#     )
+#     payment_channel_fields = ChoiceArrayFieldDM(
+#         models.CharField(
+#             max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
+#         ),
+#         default=list,
+#     )
+#
+#     def __str__(self) -> str:
+#         return self.delivery_mechanism

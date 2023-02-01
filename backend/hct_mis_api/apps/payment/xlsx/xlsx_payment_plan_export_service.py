@@ -28,7 +28,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments.select_related(
-            "household", "collector", "financial_service_provider", "assigned_payment_channel"
+            "household", "collector", "financial_service_provider"
         ).order_by("unicef_id")
 
     def _add_payment_row(self, payment: Payment) -> None:
