@@ -24,7 +24,6 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     Payment,
-    PaymentChannel,
     PaymentPlan,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -421,7 +420,6 @@ class PaymentPlanService:
         self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False
     ) -> None:
         processed_payments = []
-
         with transaction.atomic():
             for mapping in dm_to_fsp_mapping:
                 delivery_mechanism_per_payment_plan = mapping["delivery_mechanism_per_payment_plan"]
@@ -435,4 +433,25 @@ class PaymentPlanService:
                     )
                 if not fsp.can_accept_any_volume():
                     raise GraphQLError(f"{fsp} cannot accept any volume")
-                # TODO very simple validation
+
+                payments_for_delivery_mechanism = (
+                    self.payment_plan.not_excluded_payments.exclude(
+                        id__in=[processed_payment.id for processed_payment in processed_payments]
+                    )
+                    .distinct()
+                    .order_by("unicef_id")
+                )
+
+                total_volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
+                    entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+                )["entitlement_quantity_usd__sum"]
+                if fsp.can_accept_volume(total_volume_for_delivery_mechanism):
+                    processed_payments += list(payments_for_delivery_mechanism)
+                    if update_payments:
+                        payments_for_delivery_mechanism.update(
+                            financial_service_provider=fsp,
+                            delivery_type=delivery_mechanism,
+                        )
+                if update_dms:
+                    delivery_mechanism_per_payment_plan.financial_service_provider = fsp
+                    delivery_mechanism_per_payment_plan.save()

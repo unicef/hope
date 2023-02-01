@@ -53,7 +53,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     payment_qs = self.payment_list.filter(financial_service_provider=fsp)
 
                     # get headers
-                    column_list = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
+                    column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
+                    template_column_list = []
                     if fsp.fsp_xlsx_template and fsp.fsp_xlsx_template.columns:
                         template_column_list = fsp.fsp_xlsx_template.columns
                         diff_columns = list(set(template_column_list).difference(set(column_list)))
@@ -61,7 +62,10 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                             msg = f"Please contact admin because we can't export columns: {diff_columns}"
                             logger.error(msg)
                             raise GraphQLError(msg)
-                        column_list = template_column_list
+                        column_list = list(template_column_list)
+
+                    for core_field in fsp.fsp_xlsx_template.core_fields:
+                        column_list.append(core_field)
 
                     # add headers
                     ws_fsp.append(column_list)
@@ -70,8 +74,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     for payment in payment_qs:
                         payment_row = [
                             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
-                            for column_name in column_list
+                            for column_name in template_column_list
                         ]
+                        core_fields_row = [
+                            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
+                            for column_name in fsp.fsp_xlsx_template.core_fields
+                        ]
+                        payment_row.extend(core_fields_row)
                         ws_fsp.append(payment_row)
 
                     self._adjust_column_width_from_col(ws_fsp, max_col=len(column_list))

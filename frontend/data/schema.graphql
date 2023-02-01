@@ -1008,7 +1008,7 @@ input GetCashplanVerificationSampleSizeInput {
   cashOrPaymentPlanId: ID
   paymentVerificationPlanId: ID
   sampling: String!
-  verificationChannel: String
+  verificationChannel: String!
   businessAreaSlug: String!
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
@@ -1951,7 +1951,6 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
-  paymentChannels: [BankAccountInfoNode]
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -1969,6 +1968,7 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -2303,15 +2303,6 @@ type PartnerType {
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
-type PaymentChannelNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  individual: IndividualNode!
-  isFallback: Boolean!
-  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-}
-
 type PaymentConflictDataNode {
   paymentPlanId: String
   paymentPlanUnicefId: String
@@ -2366,12 +2357,10 @@ type PaymentNode implements Node {
   entitlementDate: DateTime
   financialServiceProvider: FinancialServiceProviderNode
   collector: IndividualNode!
-  assignedPaymentChannel: PaymentChannelNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
   paymentPlanSoftConflictedData: [PaymentConflictDataNode]
-  hasPaymentChannel: Boolean
   fullName: String
   targetPopulation: TargetPopulationNode
   verification: PaymentVerificationNode

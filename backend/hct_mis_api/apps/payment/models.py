@@ -39,7 +39,7 @@ from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, CORE_FIELDS_ATTRIBUTES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
@@ -60,6 +60,19 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 logger = logging.getLogger(__name__)
+
+
+class ChoiceArrayFieldDM(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        defaults = {
+            "form_class": forms.TypedMultipleChoiceField,
+            "choices": self.base_field.choices,
+            "coerce": self.base_field.to_python,
+            "widget": forms.SelectMultiple,
+        }
+        defaults.update(kwargs)
+
+        return super(ArrayField, self).formfield(**defaults)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -705,6 +718,22 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         verbose_name=_("Columns"),
         help_text=_("Select the columns to include in the report"),
     )
+
+    core_fields = ChoiceArrayFieldDM(
+        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
+        default=list,
+    )
+
+    @classmethod
+    def get_column_from_core_field(self, payment: "Payment", core_field_name: str):
+        collector = payment.collector
+        household = payment.household
+        core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
+        attr = core_fields_attributes[core_field_name]
+        if attr["associated_with"] == _INDIVIDUAL:
+            return getattr(collector, attr["lookup"])
+        if attr["associated_with"] == _HOUSEHOLD:
+            return getattr(household, attr["lookup"])
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str:
@@ -1455,19 +1484,6 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
-
-
-class ChoiceArrayFieldDM(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
-        defaults = {
-            "form_class": forms.TypedMultipleChoiceField,
-            "choices": self.base_field.choices,
-            "coerce": self.base_field.to_python,
-            "widget": forms.SelectMultiple,
-        }
-        defaults.update(kwargs)
-
-        return super(ArrayField, self).formfield(**defaults)
 
 
 # class DeliveryMechanism(TimeStampedUUIDModel):
