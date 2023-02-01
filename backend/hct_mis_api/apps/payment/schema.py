@@ -304,7 +304,6 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
-    has_payment_channel = graphene.Boolean()
     full_name = graphene.String()
     target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
@@ -326,9 +325,6 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         if self.parent.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
-
-    def resolve_has_payment_channel(self, info: Any) -> bool:
-        return self.collector.payment_channels.exists()
 
     def resolve_payment_plan_hard_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted

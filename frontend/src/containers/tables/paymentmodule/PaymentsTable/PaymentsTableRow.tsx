@@ -102,14 +102,7 @@ export const PaymentsTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
-        {payment.hasPaymentChannel ? (
-          <CheckCircleOutlined />
-        ) : (
-          <ErrorText>
-            <ErrorOutline />
-            {t('Missing')}
-          </ErrorText>
-        )}
+        Missing
       </TableCell>
       <TableCell align='left'>
         {payment.financialServiceProvider
