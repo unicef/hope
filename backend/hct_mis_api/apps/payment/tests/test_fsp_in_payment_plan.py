@@ -19,11 +19,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
-    PaymentPlan,
-)
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (

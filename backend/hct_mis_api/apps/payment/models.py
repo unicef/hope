@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -43,12 +43,9 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     FieldFactory,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    Scope,
-)
+from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -728,15 +725,18 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     @classmethod
-    def get_column_from_core_field(self, payment: "Payment", core_field_name: str):
+    def get_column_from_core_field(cls, payment: "Payment", core_field_name: str) -> Any:
         collector = payment.collector
         household = payment.household
         core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
         attr = core_fields_attributes[core_field_name]
+        lookup = attr["lookup"]
+        lookup = lookup.replace("__", ".")
         if attr["associated_with"] == _INDIVIDUAL:
-            return getattr(collector, attr["lookup"])
+            return nested_getattr(collector, lookup)
         if attr["associated_with"] == _HOUSEHOLD:
-            return getattr(household, attr["lookup"])
+            return nested_getattr(household, lookup)
+        return None
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str:
@@ -1184,7 +1184,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     payment_plan_object_id = UUIDField()
-    payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")  # type: ignore
+    payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey(
+        "payment_plan_content_type", "payment_plan_object_id"
+    )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
