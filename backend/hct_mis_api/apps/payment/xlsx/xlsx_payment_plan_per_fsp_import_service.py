@@ -40,6 +40,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         self.fsp = payment.financial_service_provider
         self.expected_columns = (self.fsp.fsp_xlsx_template and self.fsp.fsp_xlsx_template.columns) or self.HEADERS
+        self.expected_columns.extend(self.fsp.fsp_xlsx_template.core_fields)
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -109,20 +110,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
             delivered_quantity = float_to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:
-
-                if delivered_quantity == payment.entitlement_quantity:
-                    self.is_updated = True
-                else:
-                    # TODO should we allow delivered_quantity == 0
-                    # TODO should we allow and create grievance ticket for these cases
-                    self.errors.append(
-                        (
-                            self.fsp.name,
-                            cell.coordinate,
-                            f"Payment {payment_id}: Delivered quantity {delivered_quantity} is not equal "
-                            f"Entitlement quantity {payment.entitlement_quantity}",
-                        )
-                    )
+                self.is_updated = True
 
     def _validate_rows(self) -> None:
         for row in self.ws_payments.iter_rows(min_row=2):

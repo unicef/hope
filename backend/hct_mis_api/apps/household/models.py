@@ -844,6 +844,16 @@ class Individual(
     def sanction_list_last_check(self) -> Any:
         return cache.get("sanction_list_last_check")
 
+    @property
+    def bank_name(self):
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_name if bank_account_info else None
+
+    @property
+    def bank_account_number(self):
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_account_number if bank_account_info else None
+
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
