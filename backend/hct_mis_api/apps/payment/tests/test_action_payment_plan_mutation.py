@@ -20,7 +20,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

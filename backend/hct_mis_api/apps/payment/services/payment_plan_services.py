@@ -5,7 +5,7 @@ from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
-from django.db.models import F, OuterRef, Q, Subquery, Sum
+from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
