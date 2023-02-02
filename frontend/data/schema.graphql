@@ -859,6 +859,10 @@ type HouseholdNode implements Node {
   size: Int
   address: String!
   adminArea: AreaNode
+  admin1: AreaNode
+  admin2: AreaNode
+  admin3: AreaNode
+  admin4: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
@@ -927,13 +931,11 @@ type HouseholdNode implements Node {
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelectionNode!]!
-  adminAreaTitle: String
   selection: HouseholdSelectionNode
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
-  admin1: AreaNode
-  admin2: AreaNode
+  adminAreaTitle: String
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
   activeIndividualsCount: Int
@@ -1303,10 +1305,16 @@ type ImportedHouseholdNode implements Node {
   size: Int!
   address: String!
   country: String
+  adminArea: String!
+  adminAreaTitle: String!
   admin1: String!
   admin1Title: String!
   admin2: String!
   admin2Title: String!
+  admin3: String!
+  admin3Title: String!
+  admin4: String!
+  admin4Title: String!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
@@ -1840,8 +1848,7 @@ type LabelNode {
 
 type LanguageObject {
   english: String
-  alpha2: String
-  alpha3: String
+  code: String
 }
 
 type LanguageObjectConnection {
@@ -2264,7 +2271,7 @@ type Query {
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   cashAssistUrlPrefix: String
-  allLanguages(name: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
+  allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode

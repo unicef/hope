@@ -1,13 +1,13 @@
 import { gql } from 'apollo-boost';
 
 export const LanguageAutocomplete = gql`
-  query LanguageAutocomplete($first: Int, $name: String) {
-    allLanguages(first: $first, name: $name) {
+  query LanguageAutocomplete($first: Int, $code: String) {
+    allLanguages(first: $first, code: $code) {
       edges {
         cursor
         node {
           english
-          alpha2
+          code
         }
       }
     }
