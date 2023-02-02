@@ -11,6 +11,6 @@
   "scripts": {
     "generate-xlsx-files": "./generate_xlsx_files.js",
     "initdb": "yarn backend ./manage.py initcypress --skip-drop",
-    "init-scenario": "docker-compose exec backend ./manage.py init-e2e-scenario"
+    "init-scenario": "cd ../backend; docker-compose exec backend ./manage.py init-e2e-scenario"
   }
 }
