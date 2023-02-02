@@ -691,9 +691,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
         ("household_size", _("Household Size")),
-        ("admin_level_2", _("Admin Level 2")),
         ("collector_name", _("Collector Name")),
-        ("payment_channel", _("Payment Channel (Delivery mechanism)")),
+        ("payment_channel", _("Payment Channel")),
         ("fsp_name", _("FSP Name")),
         ("currency", _("Currency")),
         ("entitlement_quantity", _("Entitlement Quantity")),
@@ -733,9 +732,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         lookup = attr["lookup"]
         lookup = lookup.replace("__", ".")
         if attr["associated_with"] == _INDIVIDUAL:
-            return nested_getattr(collector, lookup)
+            return nested_getattr(collector, lookup, None)
         if attr["associated_with"] == _HOUSEHOLD:
-            return nested_getattr(household, lookup)
+            return nested_getattr(household, lookup, None)
         return None
 
     @classmethod
@@ -744,8 +743,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "payment_id": (payment, "unicef_id"),
             "household_id": (payment.household, "unicef_id"),
             "household_size": (payment.household, "size"),
-            "admin_level_2": (payment.household.admin2, "title"),
+            "admin_level_2": (payment.household.admin2, "name"),
             "collector_name": (payment.collector, "full_name"),
+            "payment_channel": (payment, "delivery_type"),
             "fsp_name": (payment.financial_service_provider, "name"),
             "currency": (payment, "currency"),
             "entitlement_quantity": (payment, "entitlement_quantity"),
@@ -754,9 +754,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
-
         obj, nested_field = map_obj_name_column[column_name]
-
         return getattr(obj, nested_field, None) or ""
 
     def __str__(self) -> str:
@@ -1185,7 +1183,6 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     payment_plan_object_id = UUIDField()
     payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")  # type: ignore
-
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)

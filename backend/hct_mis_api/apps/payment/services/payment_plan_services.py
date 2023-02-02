@@ -452,6 +452,26 @@ class PaymentPlanService:
                             financial_service_provider=fsp,
                             delivery_type=delivery_mechanism,
                         )
+                else:
+                    # Process part of the volume up to the distribution limit
+                    partial_processed_payments = []
+                    partial_total_volume = Decimal(0.0)
+
+                    for payment in payments_for_delivery_mechanism:
+                        if fsp.distribution_limit < (partial_total_volume + payment.entitlement_quantity_usd):
+                            break
+                        partial_total_volume += payment.entitlement_quantity_usd
+                        partial_processed_payments.append(payment)
+
+                    processed_payments += partial_processed_payments
+                    if update_payments:
+                        for payment in partial_processed_payments:
+                            payment.financial_service_provider = fsp
+                            payment.delivery_type = delivery_mechanism
+                            payment.save()
                 if update_dms:
                     delivery_mechanism_per_payment_plan.financial_service_provider = fsp
                     delivery_mechanism_per_payment_plan.save()
+
+            if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
+                raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
