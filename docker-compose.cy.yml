@@ -13,7 +13,14 @@ volumes:
 
 services:
   cypress:
-    # TODO
+    build:
+      context: ./cypress
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./cypress:/app
+    command: test
+    depends_on:
+      - proxy
 
   proxy:
     image: unicef/hct-mis-proxy
@@ -27,8 +34,20 @@ services:
       - "8082:80"
     depends_on:
       - backend
+      - frontend
     volumes:
       - backend-data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
 
   redis:
     restart: always
@@ -56,7 +75,7 @@ services:
       - ./backend:/code/
       - backend-data:/data
       - ipython_data_local:/root/.ipython
-    command: "dev"
+    command: "cy"
     depends_on:
       - db
       - redis
