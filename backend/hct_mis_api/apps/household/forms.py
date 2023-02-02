@@ -1,8 +1,9 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import HiddenInput
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
@@ -120,3 +121,28 @@ class CreateTargetPopulationForm(forms.Form):
         if read_only:
             self.fields["program"].widget = HiddenInput()
             self.fields["name"].widget = HiddenInput()
+
+
+class CreateTargetPopulationTextForm(forms.Form):
+    action = forms.CharField(widget=forms.HiddenInput)
+    name = forms.CharField()
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), help_text=_("Business area you want"))
+    criteria = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        read_only = kwargs.pop("read_only", False)
+        super().__init__(*args, **kwargs)
+        if "initial" in kwargs:
+            self.fields["business_area"].queryset = BusinessArea.objects.filter()
+
+        if read_only:
+            self.fields["business_area"].widget = HiddenInput()
+            self.fields["name"].widget = HiddenInput()
+            self.fields["criteria"].widget = HiddenInput()
+
+    def clean_criteria(self) -> Optional[List]:
+        print(self.cleaned_data["criteria"])
+        try:
+            return self.cleaned_data["criteria"].split(",")
+        except Exception as e:
+            raise ValidationError(str(e))
