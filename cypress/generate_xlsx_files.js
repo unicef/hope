@@ -9,7 +9,7 @@ const exec = (command) => {
 
 const args = process.argv.slice(2);
 exec(
-  "docker-compose exec backend ./manage.py generate_rdi_xlsx_files " +
+  "cd ../ && docker-compose run --rm backend ./manage.py generate_rdi_xlsx_files " +
     args.join(" ")
 );
 
