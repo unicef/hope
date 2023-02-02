@@ -922,7 +922,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
             payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
             payment_plan_service.validate_fsps_per_delivery_mechanisms(
-                dm_to_fsp_mapping, update_dms=True, update_payments=False
+                dm_to_fsp_mapping, update_dms=True, update_payments=True
             )
 
         return cls(payment_plan=payment_plan)

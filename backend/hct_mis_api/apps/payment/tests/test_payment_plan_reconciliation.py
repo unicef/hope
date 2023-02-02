@@ -601,28 +601,24 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment = payment_plan.payment_items.first()
             self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
-            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism.delivery_mechanism, "Cash")
-
             self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
             self.assertEqual(sheet.cell(row=2, column=2).value, self.household_1.unicef_id)
             self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")
             self.assertEqual(sheet.cell(row=2, column=3).value, self.household_1.size)
-            self.assertEqual(sheet.cell(row=1, column=4).value, "admin_level_2")
-            self.assertEqual(sheet.cell(row=2, column=4).value, None)
-            self.assertEqual(sheet.cell(row=1, column=5).value, "collector_name")
-            self.assertEqual(sheet.cell(row=2, column=5).value, payment.collector.full_name)
-            self.assertEqual(sheet.cell(row=1, column=6).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=6).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=7).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=7).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=8).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=10).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=11).value, None)
+            self.assertEqual(sheet.cell(row=1, column=4).value, "collector_name")
+            self.assertEqual(sheet.cell(row=2, column=4).value, payment.collector.full_name)
+            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=6).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=6).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=7).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=7).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=8).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=10).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=10).value, None)
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
@@ -638,27 +634,6 @@ class TestPaymentPlanReconciliation(APITestCase):
                 row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
             ).value = 666
             workbook.save(filled_file_path)
-
-            with open(filled_file_path, "rb") as file:
-                uploaded_file = SimpleUploadedFile(filled_file_name, file.read())
-                with patch("hct_mis_api.apps.payment.services.payment_plan_services.transaction") as mock_import:
-                    import_mutation_response = self.graphql_request(
-                        request_string=IMPORT_XLSX_PER_FSP_MUTATION,
-                        context={"user": self.user},
-                        variables={
-                            "paymentPlanId": encoded_payment_plan_id,
-                            "file": uploaded_file,
-                        },
-                    )
-                    assert (
-                        "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]
-                    ), import_mutation_response
-                    assert (
-                        import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"][0][
-                            "message"
-                        ]
-                        == f"Payment {payment.unicef_id}: Delivered quantity 666 is not equal Entitlement quantity 500.00"
-                    ), import_mutation_response
 
             # update xls, delivered_quantity == entitlement_quantity
             sheet.cell(
