@@ -6,6 +6,7 @@ from io import BytesIO
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -84,6 +85,8 @@ class CreateCashPlanReconciliationService:
             self._parse_row(row_values, index)
         self._add_cashplan_info()
         self._update_exchange_rates()
+        # clear cached total numbers for dashboard statistics
+        self._clear_django_cache_for_dashboard_totals()
 
     def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
@@ -226,3 +229,14 @@ class CreateCashPlanReconciliationService:
         result = email.send()
         if not result:
             logger.error(f"Email couldn't be send to {context['email']}")
+
+    @staticmethod
+    def _clear_django_cache_for_dashboard_totals() -> None:
+        keys = (
+            "resolve_section_households_reached",
+            "resolve_section_individuals_reached",
+            "resolve_section_child_reached",
+        )
+        all_cache_keys = cache.keys("*")
+        for k in [key for key in all_cache_keys if key.startswith(keys)]:
+            cache.delete(k)
