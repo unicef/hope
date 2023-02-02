@@ -86,7 +86,7 @@ class CreateCashPlanReconciliationService:
         self._add_cashplan_info()
         self._update_exchange_rates()
         # clear cached total numbers for dashboard statistics
-        self._clear_django_cache_for_dashboard_totals()
+        self._clear_cache_for_dashboard_totals()
 
     def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
@@ -231,7 +231,7 @@ class CreateCashPlanReconciliationService:
             logger.error(f"Email couldn't be send to {context['email']}")
 
     @staticmethod
-    def _clear_django_cache_for_dashboard_totals() -> None:
+    def _clear_cache_for_dashboard_totals() -> None:
         keys = (
             "resolve_section_households_reached",
             "resolve_section_individuals_reached",
