@@ -233,7 +233,7 @@ stages:
     dependsOn: [test_backend, test_frontend]
     displayName: E2E-Tests
     jobs:
-      - job: Cypress tests
+      - job: cypress_tests
         pool:
           vmImage: ubuntu-latest
         displayName: "[CYPRESS TEST]"
