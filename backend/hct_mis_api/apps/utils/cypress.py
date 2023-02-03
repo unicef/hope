@@ -6,7 +6,9 @@ from django.core.management import call_command
 @csrf_exempt
 def handle_cypress_command(request):
     data = request.POST
+    print(f"Handling cy command: {data}")
     command = data.get("command")
+
     if not command:
         return HttpResponse("No command provided", status=400)
 
