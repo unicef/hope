@@ -1,15 +1,28 @@
 version: '3.7'
 
-volumes:
-  backend-data:
-  db:
-  db_ca:
-  db_mis:
-  db_erp:
-  db_reg:
-  data_es:
-  data_es_test:
-  ipython_data_local:
+x-django-envs: &django_envs
+  environment:
+    - ENV=dev
+    - SECRET_KEY=31283012-38dasda
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
+    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@mis_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@cash_assist_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@erp_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@registration_datahub_db:5432/postgres
+    - POSTGRES_SSL_MODE=off
+    - EMAIL_HOST=TBD
+    - EMAIL_HOST_USER=TBD
+    - EMAIL_HOST_PASSWORD=TBD
+    - KOBO_KF_URL=https://kobo.humanitarianresponse.info
+    - KOBO_KC_URL=https://kobo.humanitarianresponse.info
+    - KOBO_MASTER_API_TOKEN=token
+    - EXCHANGE_RATES_API_KEY=token
+    - REDIS_INSTANCE=redis:6379
+    - PYTHONUNBUFFERED=1
+    - CYPRESS_TESTING=yes
 
 services:
   cypress:
@@ -17,7 +30,7 @@ services:
       context: ./cypress
       dockerfile: ./Dockerfile
     volumes:
-      - ./cypress:/app
+      - ../cypress:/app
     command: test
     depends_on:
       - proxy
@@ -35,8 +48,6 @@ services:
     depends_on:
       - backend
       - frontend
-    volumes:
-      - backend-data:/data
 
   frontend:
     build:
@@ -45,9 +56,6 @@ services:
       target: dev
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - ./frontend/node_modules:/app/node_modules
 
   redis:
     restart: always
@@ -59,11 +67,7 @@ services:
     stdin_open: true
     entrypoint: docker-entrypoint.sh
     image: unicef/hct-mis-backend
-    env_file:
-      - .env
-    environment:
-      - REDIS_INSTANCE=redis:6379
-      - PYTHONUNBUFFERED=1
+    <<: *django_envs
     build:
       context: ./backend
       dockerfile: ./Dockerfile
@@ -71,10 +75,6 @@ services:
         APP_ENV: DEV
     ports:
       - "8080:8000"
-    volumes:
-      - ./backend:/code/
-      - backend-data:/data
-      - ipython_data_local:/root/.ipython
     command: "cy"
     depends_on:
       - db
@@ -85,13 +85,7 @@ services:
     stdin_open: true
     tty: true
     image: unicef/hct-mis-backend
-    env_file:
-      - .env
-    environment:
-      - REDIS_INSTANCE=redis:6379
-    volumes:
-      - ./backend:/code/
-      - backend-data:/data
+    <<: *django_envs
     restart: always
     command: "celery-worker"
     depends_on:
@@ -108,9 +102,6 @@ services:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
-    volumes:
-      - ./backend:/code/
-      - backend-data:/data
     restart: always
     command: "celery-beat"
     depends_on:
@@ -119,28 +110,11 @@ services:
       - redis
       - elasticsearch
 
-  celery-flower:
-    image: johniak/flower:1.6
-    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
-    environment:
-      - FLOWER_AUTH_PROVIDER=""
-      - FLOWER_DEBUG="1"
-      - FLOWER_ADDRESS=0.0.0.0
-    ports:
-      - "5555:5555"
-    restart: always
-    depends_on:
-      - redis
-
   db:
     image: kartoza/postgis:14-3
-    volumes:
-      - db:/var/lib/postgresql/data
-      - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_MULTIPLE_DATABASES: unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
-    env_file:
-      - .env
+    <<: *django_envs
     ports:
       - "5433:5432"
 
@@ -161,7 +135,6 @@ services:
       memlock:
         soft: -1
         hard: -1
-    volumes:
-      - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
