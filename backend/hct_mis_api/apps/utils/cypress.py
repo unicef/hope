@@ -1,12 +1,13 @@
 import os
+from typing import Dict
 
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.core.management import call_command
 from django.conf import settings
+from django.core.management import call_command
+from django.http import HttpRequest, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
-def cypress_post(data):
+def cypress_post(data: Dict) -> HttpResponse:
     command = data.get("command")
     print(f"Handling cy command: {data}")
 
@@ -32,9 +33,11 @@ def cypress_post(data):
         print(f"Generating xlsx files for household size {household_size} with seed {seed}")
         call_command("generate_rdi_xlsx_files", household_size, "--seed", seed)
 
+    raise ValueError(f"Unknown command: {command}")
+
 
 @csrf_exempt
-def handle_cypress_command(request):
+def handle_cypress_command(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         cypress_post(request.POST)
         return HttpResponse("OK", status=200)
@@ -42,7 +45,7 @@ def handle_cypress_command(request):
 
 
 @csrf_exempt
-def get_cypress_xlsx_file(request, seed):
+def get_cypress_xlsx_file(request: HttpRequest, seed: int) -> HttpResponse:
     if request.method != "GET":
         return HttpResponse("Method not allowed", status=405)
 
