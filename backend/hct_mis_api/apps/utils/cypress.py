@@ -1,13 +1,14 @@
+import os
+
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.management import call_command
+from django.conf import settings
 
 
-@csrf_exempt
-def handle_cypress_command(request):
-    data = request.POST
-    print(f"Handling cy command: {data}")
+def cypress_post(data):
     command = data.get("command")
+    print(f"Handling cy command: {data}")
 
     if not command:
         return HttpResponse("No command provided", status=400)
@@ -31,4 +32,29 @@ def handle_cypress_command(request):
         print(f"Generating xlsx files for household size {household_size} with seed {seed}")
         call_command("generate_rdi_xlsx_files", household_size, "--seed", seed)
 
-    return HttpResponse("OK", status=200)
+
+@csrf_exempt
+def handle_cypress_command(request):
+    if request.method == "POST":
+        cypress_post(request.POST)
+        return HttpResponse("OK", status=200)
+    return HttpResponse("Method not allowed", status=405)
+
+
+@csrf_exempt
+def get_cypress_xlsx_file(request, seed):
+    if request.method != "GET":
+        return HttpResponse("Method not allowed", status=405)
+
+    generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
+    for filename in os.listdir(generated_dir):
+        if str(seed) in filename:
+            filepath = os.path.join(generated_dir, filename)
+            with open(filepath, "rb") as f:
+                response = HttpResponse(
+                    f.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+                response["Content-Disposition"] = f"attachment; filename={filename}"
+                return response
+
+    return HttpResponse("File not found", status=404)
