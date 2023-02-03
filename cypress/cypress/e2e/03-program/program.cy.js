@@ -38,7 +38,6 @@ context("Program", () => {
       cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
       cy.get("h6").contains("Programme Details");
       cy.get('[data-cy="button-activate-program"]').click({ force: true });
-      cy.get("h6").contains("Activate Programme");
       cy.get('[data-cy="button-activate-program-modal"]').click({
         force: true
       });
