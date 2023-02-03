@@ -137,7 +137,7 @@ stages:
               repository: $(Docker.frontend.repository)-stage1
               arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
                        --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest
-                       --target=dev"
+                       --target=dist"
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
