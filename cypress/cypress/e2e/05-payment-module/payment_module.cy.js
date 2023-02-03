@@ -10,7 +10,11 @@ context("Payment", () => {
 
   beforeEach(() => {
     cy.uniqueSeed().then((seed) => {
-      cy.exec(`yarn init-scenario payment_plan --seed ${seed}`);
+      cy.exec(
+        `yarn init-scenario ${
+          Cypress.config().baseUrl
+        } payment_plan --seed ${seed}`
+      );
     });
     cy.visit("/api/unicorn/");
     cy.get('input[name="username"]').type(Cypress.env("username"));
