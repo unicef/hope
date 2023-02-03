@@ -5,7 +5,7 @@ context("Targeting", () => {
 
   beforeEach(() => {
     cy.uniqueSeed().then((seed) => {
-      cy.exec(`yarn run init-scenario targeting --seed ${seed}`);
+      cy.exec(`yarn run init-scenario targeting ${seed}`);
     });
     cy.visit("/api/unicorn/");
     cy.get('input[name="username"]').type(Cypress.env("username"));
