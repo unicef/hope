@@ -14,9 +14,11 @@
             </table>
             {% if request.POST.apply %}
                 <div class="content">
-                    You are going to create a new TargetPopulation
-                    '<strong>{{ form.name.value }}</strong>' with BA {{ ba_name }} 
-                    for criteria<strong>{{ form.criteria.value }}</strong>.
+                    You are going to create a new Target Population
+                    '<strong>{{ form.name.value }}</strong>' within buseness area <strong>{{ ba_name }}</strong> 
+                    for the list of {{total}} households <strong> {% for household  in households  %}
+                        <p>{{household}}</p>
+                    {% endfor %} </strong>.
                 </div>
             {% endif %}
             <div class="submit-row">

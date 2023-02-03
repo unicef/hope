@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional
 
 from django import forms
@@ -143,6 +144,10 @@ class CreateTargetPopulationTextForm(forms.Form):
     def clean_criteria(self) -> Optional[List]:
         print(self.cleaned_data["criteria"])
         try:
-            return self.cleaned_data["criteria"].split(",")
+            households = self.cleaned_data["criteria"]
+            ba = self.cleaned_data["business_area"]
+            return Household.objects.filter(
+                business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", households)
+            )
         except Exception as e:
             raise ValidationError(str(e))

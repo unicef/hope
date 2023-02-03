@@ -17,6 +17,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
 from .models import HouseholdSelection, TargetPopulation
@@ -32,11 +33,13 @@ class TpFromListMixin:
             if form.is_valid():
                 ba = form.cleaned_data["business_area"]
                 context["ba_name"] = ba.name
+                context["households"] = form.cleaned_data["criteria"]
+                context["total"] = form.cleaned_data["criteria"].count()
         elif "confirm" in request.POST:
             form = CreateTargetPopulationTextForm(request.POST)
             if form.is_valid():
-
                 ba = form.cleaned_data["business_area"]
+                population = form.cleaned_data["criteria"]
                 with atomic():
                     tp = TargetPopulation.objects.create(
                         targeting_criteria=None,
@@ -44,13 +47,15 @@ class TpFromListMixin:
                         name=form.cleaned_data["name"],
                         business_area=ba,
                     )
+                    tp.households.set(population)
+                    refresh_stats(tp)
                     tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
         else:
             form = CreateTargetPopulationTextForm(
                 initial={
-                    "action": "create_target_population",
+                    "action": "create_tp_from_list",
                 }
             )
         context["form"] = form
