@@ -228,3 +228,29 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+
+  - stage: e2e_tests
+    dependsOn: [test_backend, test_frontend]
+    displayName: E2E-Tests
+    jobs:
+      - job: Cypress tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CYPRESS TEST]"
+        # TODO: use built images
+        # for now, call docker-compose that sets everything up from scratch
+        # the thing is, we don't build FE image yet
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.cy.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'up --build --exit-code-from cypress'
