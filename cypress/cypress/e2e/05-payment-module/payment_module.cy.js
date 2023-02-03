@@ -1,11 +1,6 @@
 /// <reference types="cypress" />
 
 context("Payment", () => {
-  it("Can create a payment plan", () => {});
-});
-/// <reference types="cypress" />
-
-context("Payment", () => {
   let targetPopulationName = "PaymentPlanTargetPopulation";
   let paymentPlanUnicefId;
   let fspXlsxFilenames;
