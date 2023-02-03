@@ -213,6 +213,8 @@ class Command(BaseCommand):
                 if key == "A":
                     household_ids.append(to_write)
 
+        print("HH", household_ids)
+
         individuals = wb.create_sheet("Individuals")
         for index, (_, (header, _)) in enumerate(individual_header_mapping.items()):
             individuals.cell(row=1, column=index + 1).value = header
