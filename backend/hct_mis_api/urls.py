@@ -25,6 +25,7 @@ from hct_mis_api.apps.core.views import (
     schema,
     trigger_error,
 )
+from hct_mis_api.apps.utils.cypress import handle_cypress_command
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
@@ -95,6 +96,8 @@ if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
 if settings.DEBUG:
     api_patterns.append(path("root/__debug__/", include(debug_toolbar.urls)))
+if settings.CYPRESS_TESTING:
+    api_patterns.append(path("cypress/", handle_cypress_command))
 
 urlpatterns = (
     [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
