@@ -3,7 +3,9 @@
 context("RDI", () => {
   beforeEach(() => {
     cy.uniqueSeed().then((seed) => {
-      cy.exec(`yarn run generate-xlsx-files 1 ${seed}`);
+      cy.exec(
+        `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
+      );
     });
     cy.visit("/api/unicorn/");
     cy.get('input[name="username"]').type(Cypress.env("username"));

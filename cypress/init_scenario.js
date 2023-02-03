@@ -9,8 +9,9 @@ const exec = (command) => {
 
 const args = process.argv.slice(2);
 
-const scenario = args[0];
-const seed = args[1];
+const serverAddress = args[0];
+const scenario = args[1];
+const seed = args[2];
 
-const command = `curl -X POST http://localhost:8082/api/cypress/ --data "command=init-e2e-scenario&scenario=${scenario}&seed=${seed}"`;
+const command = `curl -X POST ${serverAddress}/api/cypress/ --data "command=init-e2e-scenario&scenario=${scenario}&seed=${seed}"`;
 exec(command);
