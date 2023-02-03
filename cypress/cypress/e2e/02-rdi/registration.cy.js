@@ -67,7 +67,7 @@ context("RDI", () => {
 
     return;
     // TODO below is not working
-    // because it doesn't see the RDI after it's merged
+    // because it doesn't see the RDI/ImportedInds/ImportesHhs after it's merged
 
     cy.log("Looking for householdId");
     cy.get('[data-cy="imported-households-row"]')
