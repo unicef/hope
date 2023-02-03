@@ -30,16 +30,19 @@ context("Payment", () => {
     cy.get("span").contains("Payment Module").click();
     cy.get('[data-cy="page-header-container"]').contains("Payment Module");
     cy.get('[data-cy="button-new-payment-plan"]').click({
-      force: true
+      force: true,
     });
     cy.get('[data-cy="page-header-container"]').contains("New Payment Plan");
 
     //fill in the form and save
     cy.get('[data-cy="input-target-population"]').first().click();
     cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
-    cy.get(
-      `[data-cy="select-option-${targetPopulationName}-${uniqueSeed}"]`
-    ).click();
+
+    cy.uniqueSeed().then((seed) => {
+      cy.get(
+        `[data-cy="select-option-${targetPopulationName}-${seed}"]`
+      ).click();
+    });
     cy.get('[data-cy="input-start-date"]').click().type("2022-12-12");
     cy.get('[data-cy="input-end-date"]').click().type("2022-12-23");
     cy.get('[data-cy="input-currency"]').first().click();
@@ -49,13 +52,13 @@ context("Payment", () => {
       .type("2023-12-12");
     cy.get('[data-cy="input-dispersion-end-date"]').click().type("2023-12-23");
     cy.get('[data-cy="button-save-payment-plan"]').click({
-      force: true
+      force: true,
     });
     cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 
     //Payment Plan Details page
     cy.get('[data-cy="page-header-container"]').contains("Payment Plan ID", {
-      timeout: 10000
+      timeout: 10000,
     });
     cy.get('[data-cy="pp-unicef-id"]').then(($el) => {
       paymentPlanUnicefId = $el.text();
@@ -67,16 +70,16 @@ context("Payment", () => {
 
     //Lock plan
     cy.get('[data-cy="button-lock-plan"]').click({
-      force: true
+      force: true,
     });
     cy.get('[data-cy="button-submit"]').click({
-      force: true
+      force: true,
     });
 
     //Entitlements
     cy.get("[data-cy=input-entitlement-formula]").should("exist");
     cy.get("[data-cy=input-entitlement-formula] > .MuiSelect-root").click({
-      force: true
+      force: true,
     });
     cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
     cy.uniqueSeed().then((seed) => {
@@ -90,7 +93,7 @@ context("Payment", () => {
     //Set up FSP
     cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
     cy.get('[data-cy="page-header-container"]').contains("Set up FSP", {
-      timeout: 10000
+      timeout: 10000,
     });
     cy.get(
       '[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]'
@@ -140,7 +143,7 @@ context("Payment", () => {
         fileName: name,
         mimeType:
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        encoding: "base64"
+        encoding: "base64",
       });
     });
     cy.get('[data-cy="button-import-entitlement"').click({ force: true });
@@ -182,7 +185,7 @@ context("Payment", () => {
         fileName: fspFilename,
         mimeType:
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        encoding: "base64"
+        encoding: "base64",
       });
     });
     cy.get('[data-cy="file-input"').click({ force: true });
