@@ -61,7 +61,7 @@ def populate_all_indexes() -> None:
 
 
 def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Document") -> None:
-    query_dict = {"query": {"terms": {"id": id_list}}}
+    query_dict = {"query": {"terms": {"id.keyword": [str(_id) for _id in id_list]}}}
     search = Search(index=document.Index.name)
     search.update_from_dict(query_dict)
     search.delete()
