@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.views import (
     schema,
     trigger_error,
 )
-from hct_mis_api.apps.utils.cypress import handle_cypress_command, get_cypress_xlsx_file
+from hct_mis_api.apps.utils.cypress import get_cypress_xlsx_file, handle_cypress_command
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])

@@ -843,3 +843,8 @@ SHELL_PLUS_DONT_LOAD = [
 ]
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
+
+if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING or not IS_DEV):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("CYPRESS_TESTING can only be used in development env")
