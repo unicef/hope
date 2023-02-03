@@ -42,12 +42,6 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Payment Channel',
-    id: 'assigned_payment_channel',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
     label: 'FSP',
     id: 'financial_service_provider__name',
     numeric: false,
