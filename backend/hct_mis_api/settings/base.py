@@ -841,3 +841,5 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Individual",
     "mis_datahub.Household",
 ]
+
+CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"

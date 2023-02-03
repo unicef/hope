@@ -3,7 +3,7 @@
 context("RDI", () => {
   beforeEach(() => {
     cy.uniqueSeed().then((seed) => {
-      cy.exec(`yarn run generate-xlsx-files 1 --seed ${seed}`);
+      cy.exec(`yarn run generate-xlsx-files 1 ${seed}`);
     });
     cy.visit("/api/unicorn/");
     cy.get('input[name="username"]').type(Cypress.env("username"));
@@ -64,6 +64,9 @@ context("RDI", () => {
     cy.reload();
 
     cy.get("div").contains("MERGED");
+
+    // TODO below is not working
+    // because it doesn't see the RDI after it's merged
     cy.log("Looking for householdId");
     cy.get('[data-cy="imported-households-row"]')
       .find("td:nth-child(2)")
