@@ -11,7 +11,10 @@ case "$1" in
         echo "Waiting for proxy to be ready"
         waitforit -host=proxy -port=80 --timeout 600
 
-        yarn cypress run --headless --config baseUrl=http://proxy
+        yarn cypress run --headless \
+            --config baseUrl=http://proxy \
+            --reporter junit \
+            --reporter-options "mochaFile=cypress/results/results-[hash].xml,toConsole=true"
         ;;
     *)
         exec "$@"
