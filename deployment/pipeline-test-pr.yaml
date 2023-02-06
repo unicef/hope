@@ -254,3 +254,14 @@ stages:
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'up --build --exit-code-from cypress'
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'cypress/cypress/results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
