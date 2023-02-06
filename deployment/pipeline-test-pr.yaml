@@ -69,49 +69,49 @@ stages:
             displayName: "Check imports order"
 
 
-  # - stage: build_and_push
-  #   dependsOn: check_format
-  #   displayName: BUILD and PUSH
-  #   jobs:
-  #     - job: build_push_backend
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[Build]"
-  #       steps:
-  #         - task: Docker@2
-  #           inputs:
-  #             containerRegistry: '$(Docker.registry)'
-  #             command: 'login'
-  #         - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
-  #           displayName: Pull latest for layer caching for this branch
-  #           continueOnError: true # for first build, no cache
-  #         - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
-  #           displayName: Pull latest for layer caching
-  #           continueOnError: true # for first build, no cache
-  #         - task: Docker@2
-  #           displayName: Build
-  #           inputs:
-  #             command: build
-  #             arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest 
-  #                         --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
-  #             dockerfile: $(Docker.backend.filePath)
-  #             repository: $(Docker.backend.repository)
-  #             containerRegistry: $(Docker.registry)
-  #             tags: |
-  #               $(Build.BuildId)
-  #               dev-latest
-  #               $(System.PullRequest.PullRequestId)-latest
-  #         - task: Docker@2
-  #           displayName: Push
-  #           inputs:
-  #             command: push
-  #             dockerfile: $(Docker.backend.filePath)
-  #             repository: $(Docker.backend.repository)
-  #             containerRegistry: $(Docker.registry)
-  #             tags: |
-  #               $(Build.BuildId)
-  #               dev-latest
-  #               $(System.PullRequest.PullRequestId)-latest
+  - stage: build_and_push
+    dependsOn: check_format
+    displayName: BUILD and PUSH
+    jobs:
+      - job: build_push_backend
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[Build]"
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(Docker.registry)'
+              command: 'login'
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
+            displayName: Pull latest for layer caching for this branch
+            continueOnError: true # for first build, no cache
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
+            displayName: Pull latest for layer caching
+            continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build
+            inputs:
+              command: build
+              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest 
+                          --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+                $(System.PullRequest.PullRequestId)-latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+                $(System.PullRequest.PullRequestId)-latest
 
   # - stage: lint_backend
   #   dependsOn: build_and_push
@@ -231,7 +231,7 @@ stages:
 
   - stage: e2e_tests
     # dependsOn: [test_backend, test_frontend]
-    dependsOn: [check_format, test_frontend]
+    dependsOn: [build_and_push, test_frontend]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
@@ -255,6 +255,8 @@ stages:
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'up --build --exit-code-from cypress'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
