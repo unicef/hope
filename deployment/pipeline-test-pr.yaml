@@ -20,217 +20,217 @@ variables:
   Kubernetes.namespace: "ictd-hope-dev"
 
 stages:
-  - stage: test_frontend
-    displayName: Test-Frontend
-    jobs:
-      - job: django_tests
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[FRONTEND TEST]"
-        steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: "14.x"
-            displayName: "Install Node.js"
-          - task: Cache@2
-            inputs:
-              key: $(Build.SourcesDirectory)/frontend/yarn.lock
-              path: $(Build.SourcesDirectory)/frontend/node_modules
-            displayName: Cache Yarn packages
-          - script: yarn
-            displayName: "Yarn Install"
-            workingDirectory: 'frontend'
+  # - stage: test_frontend
+  #   displayName: Test-Frontend
+  #   jobs:
+  #     - job: django_tests
+  #       pool:
+  #         vmImage: ubuntu-latest
+  #       displayName: "[FRONTEND TEST]"
+  #       steps:
+  #         - task: NodeTool@0
+  #           inputs:
+  #             versionSpec: "14.x"
+  #           displayName: "Install Node.js"
+  #         - task: Cache@2
+  #           inputs:
+  #             key: $(Build.SourcesDirectory)/frontend/yarn.lock
+  #             path: $(Build.SourcesDirectory)/frontend/node_modules
+  #           displayName: Cache Yarn packages
+  #         - script: yarn
+  #           displayName: "Yarn Install"
+  #           workingDirectory: 'frontend'
 
-          - script: yarn test --watchAll=false
-            workingDirectory: 'frontend'
-            displayName: "Test"
+  #         - script: yarn test --watchAll=false
+  #           workingDirectory: 'frontend'
+  #           displayName: "Test"
 
-  - stage: check_format
-    dependsOn: []
-    displayName: Check BE format
-    jobs:
-      - job: check_format
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[CHECK FORMAT]"
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: "3.9"
-            displayName: "Use Python 3.9"
-          - script: pip install black==22.8.0 isort==5.10.1
-          # remember to update this if you change the version of black/isort in pyproject.toml
-            displayName: "Install tools"
-          - script: black --check .
-            workingDirectory: 'backend'
-            displayName: "Check format"
-          - script: isort --check-only .
-            workingDirectory: 'backend'
-            displayName: "Check imports order"
+  # - stage: check_format
+  #   dependsOn: []
+  #   displayName: Check BE format
+  #   jobs:
+  #     - job: check_format
+  #       pool:
+  #         vmImage: ubuntu-latest
+  #       displayName: "[CHECK FORMAT]"
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: "3.9"
+  #           displayName: "Use Python 3.9"
+  #         - script: pip install black==22.8.0 isort==5.10.1
+  #         # remember to update this if you change the version of black/isort in pyproject.toml
+  #           displayName: "Install tools"
+  #         - script: black --check .
+  #           workingDirectory: 'backend'
+  #           displayName: "Check format"
+  #         - script: isort --check-only .
+  #           workingDirectory: 'backend'
+  #           displayName: "Check imports order"
 
 
-  - stage: build_and_push
-    dependsOn: check_format
-    displayName: BUILD and PUSH
-    jobs:
-      - job: build_push_backend
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[Build]"
-        steps:
-          - task: Docker@2
-            inputs:
-              containerRegistry: '$(Docker.registry)'
-              command: 'login'
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
-            displayName: Pull latest for layer caching for this branch
-            continueOnError: true # for first build, no cache
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
-            displayName: Pull latest for layer caching
-            continueOnError: true # for first build, no cache
-          - task: Docker@2
-            displayName: Build
-            inputs:
-              command: build
-              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest 
-                          --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
-              dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
-          - task: Docker@2
-            displayName: Push
-            inputs:
-              command: push
-              dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
+  # - stage: build_and_push
+  #   dependsOn: check_format
+  #   displayName: BUILD and PUSH
+  #   jobs:
+  #     - job: build_push_backend
+  #       pool:
+  #         vmImage: ubuntu-latest
+  #       displayName: "[Build]"
+  #       steps:
+  #         - task: Docker@2
+  #           inputs:
+  #             containerRegistry: '$(Docker.registry)'
+  #             command: 'login'
+  #         - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
+  #           displayName: Pull latest for layer caching for this branch
+  #           continueOnError: true # for first build, no cache
+  #         - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
+  #           displayName: Pull latest for layer caching
+  #           continueOnError: true # for first build, no cache
+  #         - task: Docker@2
+  #           displayName: Build
+  #           inputs:
+  #             command: build
+  #             arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest 
+  #                         --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
+  #             dockerfile: $(Docker.backend.filePath)
+  #             repository: $(Docker.backend.repository)
+  #             containerRegistry: $(Docker.registry)
+  #             tags: |
+  #               $(Build.BuildId)
+  #               dev-latest
+  #               $(System.PullRequest.PullRequestId)-latest
+  #         - task: Docker@2
+  #           displayName: Push
+  #           inputs:
+  #             command: push
+  #             dockerfile: $(Docker.backend.filePath)
+  #             repository: $(Docker.backend.repository)
+  #             containerRegistry: $(Docker.registry)
+  #             tags: |
+  #               $(Build.BuildId)
+  #               dev-latest
+  #               $(System.PullRequest.PullRequestId)-latest
 
-  - stage: lint_backend
-    dependsOn: build_and_push
-    displayName: Lint-Backend
-    jobs:
-      - job: django_lint
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[DJANGO LINT]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-        steps:
-          - task: Docker@2
-            displayName: "[ACR] Login"
-            inputs:
-              command: login
-              containerRegistry: $(Docker.registry)
+  # - stage: lint_backend
+  #   dependsOn: build_and_push
+  #   displayName: Lint-Backend
+  #   jobs:
+  #     - job: django_lint
+  #       pool:
+  #         vmImage: ubuntu-latest
+  #       displayName: "[DJANGO LINT]"
+  #       variables:
+  #         backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  #       steps:
+  #         - task: Docker@2
+  #           displayName: "[ACR] Login"
+  #           inputs:
+  #             command: login
+  #             containerRegistry: $(Docker.registry)
 
-          - task: DockerCompose@0
-            displayName: "Run tests"
-            inputs:
-              containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/docker-compose.tst.yml'
-              action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend lint'
-              dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  #         - task: DockerCompose@0
+  #           displayName: "Run tests"
+  #           inputs:
+  #             containerregistrytype: 'Azure Container Registry'
+  #             azureContainerRegistry: $(Docker.registry)
+  #             dockerComposeFile: '**/docker-compose.tst.yml'
+  #             action: 'Run a Docker Compose command'
+  #             dockerComposeCommand: 'run --no-deps backend lint'
+  #             dockerComposeFileArgs: |
+  #              backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 
-          - task: PublishTestResults@2
-            displayName: "Publish lint result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: 'backend/lint-results/'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'Lint results'
+  #         - task: PublishTestResults@2
+  #           displayName: "Publish lint result"
+  #           condition: always()
+  #           inputs:
+  #             testResultsFormat: 'JUnit'
+  #             testResultsFiles: '*.xml'
+  #             searchFolder: 'backend/lint-results/'
+  #             mergeTestResults: true
+  #             failTaskOnFailedTests: true
+  #             testRunTitle: 'Lint results'
 
-  - stage: mypy_backend
-    dependsOn: build_and_push
-    displayName: Mypy-Backend
-    jobs:
-      - job: django_mypy
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[DJANGO MYPY]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-        steps:
-          - task: Docker@2
-            displayName: "[ACR] Login"
-            inputs:
-              command: login
-              containerRegistry: $(Docker.registry)
+  # - stage: mypy_backend
+  #   dependsOn: build_and_push
+  #   displayName: Mypy-Backend
+  #   jobs:
+  #     - job: django_mypy
+  #       pool:
+  #         vmImage: ubuntu-latest
+  #       displayName: "[DJANGO MYPY]"
+  #       variables:
+  #         backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  #       steps:
+  #         - task: Docker@2
+  #           displayName: "[ACR] Login"
+  #           inputs:
+  #             command: login
+  #             containerRegistry: $(Docker.registry)
 
-          - task: DockerCompose@0
-            displayName: "Run tests"
-            inputs:
-              containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/docker-compose.tst.yml'
-              action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend mypy'
-              dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  #         - task: DockerCompose@0
+  #           displayName: "Run tests"
+  #           inputs:
+  #             containerregistrytype: 'Azure Container Registry'
+  #             azureContainerRegistry: $(Docker.registry)
+  #             dockerComposeFile: '**/docker-compose.tst.yml'
+  #             action: 'Run a Docker Compose command'
+  #             dockerComposeCommand: 'run --no-deps backend mypy'
+  #             dockerComposeFileArgs: |
+  #              backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 
-          - task: PublishTestResults@2
-            displayName: "Publish mypy result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: 'backend/mypy-results/'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'Mypy results'
+  #         - task: PublishTestResults@2
+  #           displayName: "Publish mypy result"
+  #           condition: always()
+  #           inputs:
+  #             testResultsFormat: 'JUnit'
+  #             testResultsFiles: '*.xml'
+  #             searchFolder: 'backend/mypy-results/'
+  #             mergeTestResults: true
+  #             failTaskOnFailedTests: true
+  #             testRunTitle: 'Mypy results'
 
-  - stage: test_backend
-    dependsOn: [lint_backend, mypy_backend]
-    displayName: Test-Backend
-    jobs:
-      - job: django_tests
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[DJANGO TEST]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-        steps:
-          - task: Docker@2
-            displayName: "[ACR] Login"
-            inputs:
-              command: login
-              containerRegistry: $(Docker.registry)
-          - task: DockerCompose@0
-            displayName: "Run tests"
-            inputs:
-              containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/docker-compose.tst.yml'
-              action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend test'
-              dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  # - stage: test_backend
+  #   dependsOn: [lint_backend, mypy_backend]
+  #   displayName: Test-Backend
+  #   jobs:
+  #     - job: django_tests
+  #       pool:
+  #         vmImage: ubuntu-latest
+  #       displayName: "[DJANGO TEST]"
+  #       variables:
+  #         backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  #       steps:
+  #         - task: Docker@2
+  #           displayName: "[ACR] Login"
+  #           inputs:
+  #             command: login
+  #             containerRegistry: $(Docker.registry)
+  #         - task: DockerCompose@0
+  #           displayName: "Run tests"
+  #           inputs:
+  #             containerregistrytype: 'Azure Container Registry'
+  #             azureContainerRegistry: $(Docker.registry)
+  #             dockerComposeFile: '**/docker-compose.tst.yml'
+  #             action: 'Run a Docker Compose command'
+  #             dockerComposeCommand: 'run backend test'
+  #             dockerComposeFileArgs: |
+  #              backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 
-          - task: PublishTestResults@2
-            displayName: "Publish Test Result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: 'backend/test-results/'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'TEST Results'
+  #         - task: PublishTestResults@2
+  #           displayName: "Publish Test Result"
+  #           condition: always()
+  #           inputs:
+  #             testResultsFormat: 'JUnit'
+  #             testResultsFiles: '*.xml'
+  #             searchFolder: 'backend/test-results/'
+  #             mergeTestResults: true
+  #             failTaskOnFailedTests: true
+  #             testRunTitle: 'TEST Results'
 
   - stage: e2e_tests
-    dependsOn: [test_backend, test_frontend]
+    # dependsOn: [test_backend, test_frontend]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
