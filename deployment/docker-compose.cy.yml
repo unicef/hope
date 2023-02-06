@@ -1,5 +1,4 @@
 version: '3.7'
-
 x-django-envs: &django_envs
   environment:
     - ENV=dev
@@ -23,15 +22,15 @@ x-django-envs: &django_envs
     - REDIS_INSTANCE=redis:6379
     - PYTHONUNBUFFERED=1
     - CYPRESS_TESTING=yes
+    - DJANGO_ALLOWED_HOSTS=*
 
 services:
   cypress:
     build:
       context: ../cypress
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ../cypress:/app
-      # TODO: pass env with password/username
     command: test
     depends_on:
       - proxy
@@ -43,7 +42,7 @@ services:
       - FRONTEND_HOST=frontend:3000
     build:
       context: ../proxy
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8082:80"
     depends_on:
@@ -53,64 +52,82 @@ services:
   frontend:
     build:
       context: ../frontend
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
       target: dev
     ports:
       - "3000:3000"
+    volumes:
+      - ../frontend:/app
+      - ../frontend/node_modules:/app/node_modules
 
   redis:
-    restart: always
+    restart: unless-stopped
     image: redis:4.0.11-alpine3.8
-    expose:
-      - "6379"
 
   backend:
-    stdin_open: true
-    entrypoint: docker-entrypoint.sh
-    image: unicef/hct-mis-backend
     <<: *django_envs
-    build:
-      context: ../backend
-      dockerfile: ./Dockerfile
-      args:
-        APP_ENV: DEV
-    ports:
-      - "8080:8000"
+    image: ${backend_image}
+    # build:
+    #   context: ../backend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     APP_ENV: DEV
+    entrypoint: /code/docker-entrypoint.sh
     command: "cy"
+    volumes:
+      - ../backend:/code/
     depends_on:
       - db
       - redis
+      - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
+      - registration_datahub_db
       - elasticsearch
+    ports:
+      - "8080:8000"
+
+  cash_assist_datahub_db:
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
+
+  mis_datahub_db:
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
+
+  erp_datahub_db:
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
+
+  registration_datahub_db:
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
+
+  db:
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
 
   celery_worker:
-    stdin_open: true
-    tty: true
-    image: unicef/hct-mis-backend
     <<: *django_envs
-    restart: always
-    command: "celery-worker"
+    image: ${backend_image}
+    # image: unicef/hct-mis-backend
+    restart: unless-stopped
+    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - backend
       - db
+      - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
+      - registration_datahub_db
       - redis
       - elasticsearch
 
-  db:
-    image: kartoza/postgis:14-3
-    volumes:
-      - ../postgres/init:/docker-entrypoint-initdb.d
-    environment:
-      POSTGRES_MULTIPLE_DATABASES: unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
-    <<: *django_envs
-    ports:
-      - "5433:5432"
-
   elasticsearch:
+    <<: *django_envs
     image: unicef/hct-elasticsearch
-    container_name: elasticsearch
     build:
       context: ../elasticsearch
-      dockerfile: Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
@@ -122,6 +139,3 @@ services:
       memlock:
         soft: -1
         hard: -1
-    ports:
-      - 9200:9200
-
