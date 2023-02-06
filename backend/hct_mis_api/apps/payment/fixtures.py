@@ -776,7 +776,7 @@ def generate_reconciled_payment_plan() -> None:
         total_delivered_quantity=999,
     )[0]
     # update status
-    pp.status_reconciled()
+    pp.status_finished()
     pp.save()
 
     fsp_1 = FinancialServiceProviderFactory(

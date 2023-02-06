@@ -33,12 +33,12 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
-  [PaymentPlanStatus.Reconciled]: 'Reconciled',
+  [PaymentPlanStatus.Finished]: 'Finished',
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Steficon Run',
-  [PaymentPlanBackgroundActionStatus.SteficonError]: 'Steficon Error',
+  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatus.SteficonError]: 'Entitlement Formula Error',
   [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
   [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
   [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:

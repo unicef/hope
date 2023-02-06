@@ -3935,7 +3935,7 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  Reconciled = 'RECONCILED'
+  Finished = 'FINISHED'
 }
 
 export enum PaymentRecordDeliveryType {

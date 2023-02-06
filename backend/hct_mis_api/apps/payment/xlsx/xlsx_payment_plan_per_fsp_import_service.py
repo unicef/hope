@@ -1,6 +1,6 @@
 import io
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from django.db.models import QuerySet
 
@@ -11,7 +11,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
 )
-from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 
 if TYPE_CHECKING:
@@ -19,6 +19,9 @@ if TYPE_CHECKING:
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
+    class XlsxPaymentPlanImportPerFspServiceException(Exception):
+        pass
+
     HEADERS = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
@@ -98,6 +101,20 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def _validate_delivered_quantity(self, row: Row) -> None:
+        """
+        It should be possible for a user to upload a file when:
+
+        * Fully Delivered (entitled quantity = delivered quantity) [float]
+        * Partially Delivered (entitled quantity > delivered quantity > 0) [float]
+        * Not Delivered (0 = delivered quantity) [0.0]
+        * Unsuccessful (failed at the delivery processing level) [-1.0]
+        * Pending (no information) [None]
+
+        The validation should not pass when:
+
+        * delivered quantity > entitled quantity
+        """
+
         payment_id = row[self.expected_columns.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
@@ -107,22 +124,20 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         delivered_quantity = cell.value
         if delivered_quantity is not None and delivered_quantity != "":
 
-            delivered_quantity = float_to_decimal(delivered_quantity)
-            if delivered_quantity != payment.delivered_quantity:
+            delivered_quantity = to_decimal(delivered_quantity)
+            if delivered_quantity != payment.delivered_quantity:  # update value
 
-                if delivered_quantity == payment.entitlement_quantity:
-                    self.is_updated = True
-                else:
-                    # TODO should we allow delivered_quantity == 0
-                    # TODO should we allow and create grievance ticket for these cases
+                if delivered_quantity > payment.entitlement_quantity:
                     self.errors.append(
                         (
                             self.fsp.name,
                             cell.coordinate,
-                            f"Payment {payment_id}: Delivered quantity {delivered_quantity} is not equal "
+                            f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
                             f"Entitlement quantity {payment.entitlement_quantity}",
                         )
                     )
+                else:
+                    self.is_updated = True
 
     def _validate_rows(self) -> None:
         for row in self.ws_payments.iter_rows(min_row=2):
@@ -156,13 +171,43 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
 
+    def _get_delivered_quantity_status_and_value(
+        self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
+    ) -> Tuple[str, Optional[Decimal]]:
+        """
+        * Fully Delivered (entitled quantity = delivered quantity) [float]
+        * Partially Delivered (entitled quantity > delivered quantity > 0) [float]
+        * Not Delivered (0 = delivered quantity) [0.0]
+        * Unsuccessful (failed at the delivery processing level) [-1.0]
+        """
+
+        if delivered_quantity < 0:
+            return Payment.STATUS_ERROR, None
+
+        elif delivered_quantity == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED, to_decimal(delivered_quantity)
+
+        elif delivered_quantity < entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL, to_decimal(delivered_quantity)
+
+        elif delivered_quantity == entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS, to_decimal(delivered_quantity)
+
+        else:
+            raise self.XlsxPaymentPlanImportPerFspServiceException(
+                f"Invalid delivered_quantity {delivered_quantity} provided for payment_id {payment_id}"
+            )
+
     def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.expected_columns.index("payment_id")].value
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.expected_columns.index("delivered_quantity")].value
 
         if delivered_quantity is not None and delivered_quantity != "":
-            delivered_quantity = float_to_decimal(delivered_quantity)
+            status, delivered_quantity = self._get_delivered_quantity_status_and_value(
+                delivered_quantity, payment.entitlement_quantity, payment_id
+            )
+
             if delivered_quantity != payment.delivered_quantity:
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
@@ -171,6 +216,5 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     exchange_rate=Decimal(exchange_rate),
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
-
-                payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+                payment.status = status
                 self.payments_to_save.append(payment)

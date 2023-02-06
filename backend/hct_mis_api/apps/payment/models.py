@@ -190,6 +190,8 @@ class GenericPayment(TimeStampedUUIDModel):
     STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
     STATUS_NOT_DISTRIBUTED = "Not Distributed"
     STATUS_FORCE_FAILED = "Force failed"
+    STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
+    STATUS_PENDING = "Pending"
 
     STATUS_CHOICE = (
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
@@ -197,9 +199,11 @@ class GenericPayment(TimeStampedUUIDModel):
         (STATUS_SUCCESS, _("Transaction Successful")),
         (STATUS_ERROR, _("Transaction Erroneous")),
         (STATUS_FORCE_FAILED, _("Force failed")),
+        (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),
+        (STATUS_PENDING, _("Pending")),
     )
 
-    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
+    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -267,16 +271,16 @@ class GenericPayment(TimeStampedUUIDModel):
         max_length=4,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
     )
     delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
@@ -317,9 +321,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
-        RECONCILED = "RECONCILED", "Reconciled"
+        FINISHED = "FINISHED", "Finished"
 
     class BackgroundActionStatus(models.TextChoices):
+        # TODO Hide on frontend
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
@@ -344,6 +349,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         AUTHORIZE = "AUTHORIZE", "Authorize"
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
+        FINISH = "FINISH", "Finish"
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -559,9 +565,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @transition(
         field=status,
         source=Status.ACCEPTED,
-        target=Status.RECONCILED,
+        target=Status.FINISHED,
     )
-    def status_reconciled(self) -> None:
+    def status_finished(self) -> None:
         self.status_date = timezone.now()
         PaymentVerificationSummary.objects.create(
             payment_plan_obj=self,
@@ -654,9 +660,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def is_reconciled(self) -> bool:
-        # TODO what in case of partial reconciliation or active grievance tickets?
+        # TODO what in case of active grievance tickets?
         return (
-            self.not_excluded_payments.filter(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS).count()
+            self.not_excluded_payments.filter(
+                status__in=[GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_DISTRIBUTION_PARTIAL]
+            ).count()
             == self.not_excluded_payments.count()
         )
 
