@@ -27,7 +27,7 @@ x-django-envs: &django_envs
 services:
   cypress:
     build:
-      context: ./cypress
+      context: ../cypress
       dockerfile: ./Dockerfile
     volumes:
       - ../cypress:/app
