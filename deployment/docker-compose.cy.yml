@@ -31,6 +31,7 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - ../cypress:/app
+      # TODO: pass env with password/username
     command: test
     depends_on:
       - proxy
