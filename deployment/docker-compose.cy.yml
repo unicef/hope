@@ -42,7 +42,7 @@ services:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
       - FRONTEND_HOST=host.docker.internal:3000
     build:
-      context: ./proxy
+      context: ../proxy
       dockerfile: ./Dockerfile
     ports:
       - "8082:80"
@@ -52,7 +52,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: ./Dockerfile
       target: dev
     ports:
@@ -70,7 +70,7 @@ services:
     image: unicef/hct-mis-backend
     <<: *django_envs
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: ./Dockerfile
       args:
         APP_ENV: DEV
@@ -123,7 +123,7 @@ services:
     image: unicef/hct-elasticsearch
     container_name: elasticsearch
     build:
-      context: elasticsearch
+      context: ../elasticsearch
       dockerfile: Dockerfile
     environment:
       - node.name=es01
