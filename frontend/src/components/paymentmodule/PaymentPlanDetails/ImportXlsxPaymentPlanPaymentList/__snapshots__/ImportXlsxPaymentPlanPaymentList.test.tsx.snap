@@ -30,7 +30,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
             />
           </svg>
         </span>
-        Import XLSX
+        Upload File
       </span>
       <span
         class="MuiTouchRipple-root"
