@@ -20,53 +20,53 @@ variables:
   Kubernetes.namespace: "ictd-hope-dev"
 
 stages:
-  # - stage: test_frontend
-  #   displayName: Test-Frontend
-  #   jobs:
-  #     - job: django_tests
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[FRONTEND TEST]"
-  #       steps:
-  #         - task: NodeTool@0
-  #           inputs:
-  #             versionSpec: "14.x"
-  #           displayName: "Install Node.js"
-  #         - task: Cache@2
-  #           inputs:
-  #             key: $(Build.SourcesDirectory)/frontend/yarn.lock
-  #             path: $(Build.SourcesDirectory)/frontend/node_modules
-  #           displayName: Cache Yarn packages
-  #         - script: yarn
-  #           displayName: "Yarn Install"
-  #           workingDirectory: 'frontend'
+  - stage: test_frontend
+    displayName: Test-Frontend
+    jobs:
+      - job: django_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[FRONTEND TEST]"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "14.x"
+            displayName: "Install Node.js"
+          - task: Cache@2
+            inputs:
+              key: $(Build.SourcesDirectory)/frontend/yarn.lock
+              path: $(Build.SourcesDirectory)/frontend/node_modules
+            displayName: Cache Yarn packages
+          - script: yarn
+            displayName: "Yarn Install"
+            workingDirectory: 'frontend'
 
-  #         - script: yarn test --watchAll=false
-  #           workingDirectory: 'frontend'
-  #           displayName: "Test"
+          - script: yarn test --watchAll=false
+            workingDirectory: 'frontend'
+            displayName: "Test"
 
-  # - stage: check_format
-  #   dependsOn: []
-  #   displayName: Check BE format
-  #   jobs:
-  #     - job: check_format
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[CHECK FORMAT]"
-  #       steps:
-  #         - task: UsePythonVersion@0
-  #           inputs:
-  #             versionSpec: "3.9"
-  #           displayName: "Use Python 3.9"
-  #         - script: pip install black==22.8.0 isort==5.10.1
-  #         # remember to update this if you change the version of black/isort in pyproject.toml
-  #           displayName: "Install tools"
-  #         - script: black --check .
-  #           workingDirectory: 'backend'
-  #           displayName: "Check format"
-  #         - script: isort --check-only .
-  #           workingDirectory: 'backend'
-  #           displayName: "Check imports order"
+  - stage: check_format
+    dependsOn: []
+    displayName: Check BE format
+    jobs:
+      - job: check_format
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CHECK FORMAT]"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.9"
+            displayName: "Use Python 3.9"
+          - script: pip install black==22.8.0 isort==5.10.1
+          # remember to update this if you change the version of black/isort in pyproject.toml
+            displayName: "Install tools"
+          - script: black --check .
+            workingDirectory: 'backend'
+            displayName: "Check format"
+          - script: isort --check-only .
+            workingDirectory: 'backend'
+            displayName: "Check imports order"
 
 
   # - stage: build_and_push
@@ -231,6 +231,7 @@ stages:
 
   - stage: e2e_tests
     # dependsOn: [test_backend, test_frontend]
+    dependsOn: [check_format, test_frontend]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
