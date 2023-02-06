@@ -36,6 +36,8 @@ export const LockFspPaymentPlan = ({
     () => setLockDialogOpen(false),
   );
 
+  const canLockFsp = paymentPlan.deliveryMechanisms.length > 0;
+
   return (
     <>
       <Box p={2}>
@@ -44,6 +46,7 @@ export const LockFspPaymentPlan = ({
           variant='contained'
           onClick={() => setLockDialogOpen(true)}
           data-cy='button-lock-plan'
+          disabled={!canLockFsp}
         >
           {t('Lock FSP')}
         </Button>

@@ -138,7 +138,7 @@ export const Entitlement = ({
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
           <Grid alignItems='center' container>
-            <Grid item xs={6}>
+            <Grid item xs={11}>
               <FormControl variant='outlined' margin='dense' fullWidth>
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
@@ -265,7 +265,7 @@ export const Entitlement = ({
               <Box>
                 <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
               </Box>
-              {paymentPlan?.importedFileName && (
+              {paymentPlan?.importedFileName ? (
                 <Box alignItems='center' display='flex'>
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
@@ -283,6 +283,12 @@ export const Entitlement = ({
                     ) : null}
                   </GreyTextSmall>
                 </Box>
+              ) : (
+                <GreyTextSmall>
+                  {t(
+                    'Uploaded file should contain entitlement for each household',
+                  )}
+                </GreyTextSmall>
               )}
             </Box>
           </Box>
