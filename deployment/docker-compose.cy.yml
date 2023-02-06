@@ -95,22 +95,6 @@ services:
       - redis
       - elasticsearch
 
-  celery-beat:
-    stdin_open: true
-    tty: true
-    image: unicef/hct-mis-backend
-    env_file:
-      - .env
-    environment:
-      - REDIS_INSTANCE=redis:6379
-    restart: always
-    command: "celery-beat"
-    depends_on:
-      - backend
-      - db
-      - redis
-      - elasticsearch
-
   db:
     image: kartoza/postgis:14-3
     environment:
