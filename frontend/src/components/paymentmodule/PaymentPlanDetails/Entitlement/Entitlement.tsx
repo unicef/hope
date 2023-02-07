@@ -13,6 +13,7 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   PaymentPlanDocument,
@@ -87,10 +88,12 @@ const BoxWithBorderRight = styled(Box)`
 
 interface EntitlementProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
+  permissions: string[];
 }
 
 export const Entitlement = ({
   paymentPlan,
+  permissions,
 }: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -129,6 +132,11 @@ export const Entitlement = ({
     return <LoadingComponent />;
   }
 
+  const canApplySteficonRule = hasPermissions(
+    PERMISSIONS.PAYMENT_MODULE_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+    permissions,
+  );
+
   return (
     <Box m={5}>
       <ContainerColumnWithBorder>
@@ -142,6 +150,7 @@ export const Entitlement = ({
               <FormControl variant='outlined' margin='dense' fullWidth>
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
+                  disabled={!canApplySteficonRule}
                   value={steficonRuleValue}
                   data-cy='input-entitlement-formula'
                   labelWidth={180}
@@ -263,7 +272,10 @@ export const Entitlement = ({
               flexDirection='column'
             >
               <Box>
-                <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
+                <ImportXlsxPaymentPlanPaymentList
+                  permissions={permissions}
+                  paymentPlan={paymentPlan}
+                />
               </Box>
               {paymentPlan?.importedFileName ? (
                 <Box alignItems='center' display='flex'>
