@@ -61,6 +61,8 @@ spec:
         volumeMounts:
         - name: media-volume
           mountPath: /srv/src/kpi/media
+        - mountPath: /srv/src/kobocat/media
+          name: kobocat-media-volume
         - name: static-volume
           mountPath: /srv/static
         - name: scripts
@@ -110,17 +112,22 @@ spec:
         volumeMounts:
         - name: media-volume
           mountPath: /media
+        - mountPath: /srv/src/kobocat/media
+          name: kobocat-media-volume
         - name: static-volume
           mountPath: /static
         - name: nginx-conf
           mountPath: /etc/nginx/conf.d/
         ports:
           - containerPort: 80
-
       volumes:
       - name: media-volume
         persistentVolumeClaim:
           claimName: kpi-media-pvc
+      - name: kobocat-media-volume
+        persistentVolumeClaim:
+          claimName: kobocat-media-pvc
+          readOnly: true
       - name: static-volume
         emptyDir: {}
       - name: uwsgi-config
