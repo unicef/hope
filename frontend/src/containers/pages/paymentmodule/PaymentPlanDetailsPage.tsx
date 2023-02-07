@@ -53,7 +53,9 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         paymentPlan={paymentPlan}
       />
       <AcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayEntitlement && <Entitlement paymentPlan={paymentPlan} />}
+      {shouldDisplayEntitlement && (
+        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+      )}
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
