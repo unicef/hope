@@ -46,7 +46,6 @@ metadata:
     {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
-    appgw.ingress.kubernetes.io/backend-protocol: "https"
 spec:
   {{- if .Values.ingress.tls }}
   tls:
