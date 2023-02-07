@@ -2,10 +2,10 @@ import io
 import logging
 from base64 import b64decode
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -833,26 +833,6 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
 
 
-def create_insufficient_delivery_mechanisms_message(
-    collectors_that_cant_be_paid: QuerySet[Individual], delivery_mechanisms_in_order: List[str]
-) -> str:
-    needed_delivery_mechanisms = list(
-        PaymentChannel.objects.select_related("delivery_mechanism")
-        .filter(
-            individual__in=collectors_that_cant_be_paid,
-        )
-        .exclude(delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
-        .values_list("delivery_mechanism__delivery_mechanism", flat=True)
-        .distinct()
-    )
-    if (
-        GenericPayment.DELIVERY_TYPE_CASH not in delivery_mechanisms_in_order
-        and collectors_that_cant_be_paid.filter(payment_channels__isnull=True).exists()
-    ):
-        needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
-    return f"Delivery mechanisms that may be needed: {', '.join(needed_delivery_mechanisms)}."
-
-
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -884,13 +864,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             query |= Q(payment_channels__isnull=True)
 
         collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
-        collectors_that_cant_be_paid = collectors_in_target_population.exclude(id__in=collectors_that_can_be_paid)
-
-        if collectors_that_cant_be_paid.exists():
-            raise GraphQLError(
-                "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                f"{create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order)}"
-            )
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
