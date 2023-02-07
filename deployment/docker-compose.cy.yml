@@ -67,12 +67,12 @@ services:
 
   backend:
     <<: *django_envs
-    image: ${backend_image}
-    # build:
-    #   context: ../backend
-    #   dockerfile: Dockerfile
-    #   args:
-    #     APP_ENV: DEV
+    # image: ${backend_image}
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      args:
+        APP_ENV: DEV
     entrypoint: /code/docker-entrypoint.sh
     command: "cy"
     volumes:
@@ -110,8 +110,8 @@ services:
 
   celery_worker:
     <<: *django_envs
-    image: ${backend_image}
-    # image: unicef/hct-mis-backend
+    # image: ${backend_image}
+    image: unicef/hct-mis-backend
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
