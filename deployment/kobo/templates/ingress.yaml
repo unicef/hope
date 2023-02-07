@@ -63,11 +63,7 @@ spec:
               service:
                 name: {{ include "kobo.fullname" . }}-enketo
                 port:
-                  {{- if .Values.ingress.tls }}
-                  number: 443
-                  {{- else }}
                   number: 80
-                  {{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
