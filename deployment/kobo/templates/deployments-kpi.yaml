@@ -40,8 +40,6 @@ spec:
       nodeSelector:
         {{- toYaml .Values.kpi.nodeSelector | nindent 8 }}
       {{- end }}
-      
-      {{- if .Values.kpi.affinity }}
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
