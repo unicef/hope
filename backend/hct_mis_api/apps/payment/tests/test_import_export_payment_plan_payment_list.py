@@ -18,13 +18,14 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
     ServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    FinancialServiceProvider,
+    FspXlsxTemplatePerDeliveryMechanism,
     GenericPayment,
     PaymentPlan,
     ServiceProvider,
@@ -150,14 +151,23 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         financial_service_provider1 = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
         )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=financial_service_provider1, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+        )
         financial_service_provider2 = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER]
         )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=financial_service_provider2,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        )
+
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
         )
+
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
@@ -178,10 +188,15 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         with zipfile.ZipFile(self.payment_plan.export_file.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
-            fsp_names = FinancialServiceProvider.objects.filter(id__in=fsp_ids).values_list("name", flat=True)
+            fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
+                financial_service_provider_id__in=fsp_ids,
+            )
             file_list_fsp = [
                 f.replace(".xlsx", "").replace(f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", "")
                 for f in file_list
             ]
-            for fsp_name in fsp_names:
-                self.assertIn(fsp_name, file_list_fsp)
+            for fsp_xlsx_template_per_delivery_mechanism in fsp_xlsx_template_per_delivery_mechanism_list:
+                self.assertIn(
+                    f"{fsp_xlsx_template_per_delivery_mechanism.financial_service_provider.name}_{fsp_xlsx_template_per_delivery_mechanism.delivery_mechanism}",
+                    file_list_fsp,
+                )
