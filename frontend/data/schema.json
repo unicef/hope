@@ -22414,6 +22414,18 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "PARTIALLY_DISTRIBUTED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PENDING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -29238,7 +29250,7 @@
             "deprecationReason": null
           },
           {
-            "name": "RECONCILED",
+            "name": "FINISHED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -32280,6 +32292,18 @@
           },
           {
             "name": "FORCE_FAILED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PARTIALLY_DISTRIBUTED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PENDING",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -41303,9 +41327,13 @@
             "name": "verificationChannel",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null
           },
@@ -56669,6 +56697,12 @@
           },
           {
             "name": "REJECT",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "FINISH",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
