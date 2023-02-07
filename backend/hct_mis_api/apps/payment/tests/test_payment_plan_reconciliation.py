@@ -30,7 +30,8 @@ from hct_mis_api.apps.payment.celery_tasks import (
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     PaymentChannelFactory,
-    PaymentFactory, PaymentPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
