@@ -25,6 +25,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
     PaymentRecord,
@@ -317,6 +318,19 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         return super().save_model(request, obj, form, change)
 
 
+@admin.register(FspXlsxTemplatePerDeliveryMechanism)
+class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
+    list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
+    fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
+
+    def save_model(
+        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+    ) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+
 class FinancialServiceProviderAdminForm(forms.ModelForm):
     @staticmethod
     def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
@@ -354,12 +368,12 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
     search_fields = ("name",)
     list_filter = ("delivery_mechanisms",)
-    autocomplete_fields = ("created_by", "fsp_xlsx_template")
-    list_select_related = ("created_by", "fsp_xlsx_template")
+    autocomplete_fields = ("created_by",)
+    list_select_related = ("created_by",)
     fields = (
         ("name", "vision_vendor_number"),
         ("delivery_mechanisms", "distribution_limit"),
-        ("communication_channel", "fsp_xlsx_template"),
+        ("communication_channel"),
         ("data_transfer_configuration",),
     )
 
