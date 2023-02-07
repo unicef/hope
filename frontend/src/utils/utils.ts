@@ -224,7 +224,7 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.Reconciled]: theme.hctPalette.green,
+    [PaymentPlanStatus.Finished]: theme.hctPalette.green,
   };
   if (status in colorsMap) {
     return colorsMap[status];

@@ -55,7 +55,8 @@ export enum Action {
   Approve = 'APPROVE',
   Authorize = 'AUTHORIZE',
   Review = 'REVIEW',
-  Reject = 'REJECT'
+  Reject = 'REJECT',
+  Finish = 'FINISH'
 }
 
 export type ActionPaymentPlanInput = {
@@ -1443,7 +1444,7 @@ export type GetCashplanVerificationSampleSizeInput = {
   cashOrPaymentPlanId?: Maybe<Scalars['ID']>,
   paymentVerificationPlanId?: Maybe<Scalars['ID']>,
   sampling: Scalars['String'],
-  verificationChannel?: Maybe<Scalars['String']>,
+  verificationChannel: Scalars['String'],
   businessAreaSlug: Scalars['String'],
   fullListArguments?: Maybe<FullListArguments>,
   randomSamplingArguments?: Maybe<RandomSamplingArguments>,
@@ -4035,7 +4036,9 @@ export enum PaymentRecordStatus {
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
-  ForceFailed = 'FORCE_FAILED'
+  ForceFailed = 'FORCE_FAILED',
+  PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
+  Pending = 'PENDING'
 }
 
 export enum PaymentStatus {
@@ -4043,7 +4046,9 @@ export enum PaymentStatus {
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
-  ForceFailed = 'FORCE_FAILED'
+  ForceFailed = 'FORCE_FAILED',
+  PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
+  Pending = 'PENDING'
 }
 
 export type PaymentVerificationLogEntryNode = Node & {

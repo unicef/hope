@@ -324,7 +324,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         FINISHED = "FINISHED", "Finished"
 
     class BackgroundActionStatus(models.TextChoices):
-        # TODO Hide on frontend
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
