@@ -23,7 +23,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     fsp_generate_xlsx_report_task,
@@ -40,11 +39,9 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     GenericPayment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
