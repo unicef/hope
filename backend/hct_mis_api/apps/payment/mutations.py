@@ -855,15 +855,10 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
-        collectors_in_target_population = Individual.objects.filter(
-            id__in=payment_plan.not_excluded_payments.values_list("collector", flat=True)
-        )
 
         query = Q(payment_channels__delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
         if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
             query |= Q(payment_channels__isnull=True)
-
-        collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
@@ -875,17 +870,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 delivery_mechanism_order=index + 1,
                 created_by=info.context.user,
             )
-
-        cash_fallback_payment_collectors = collectors_that_can_be_paid.filter(payment_channels__isnull=True)
-        payment_channels_to_create = []
-
-        cash_delivery_mechanism = DeliveryMechanism.objects.get(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH)
-        for collector in cash_fallback_payment_collectors:
-            payment_channel = PaymentChannel(
-                individual=collector, delivery_mechanism=cash_delivery_mechanism, is_fallback=True, delivery_data={}
-            )
-            payment_channels_to_create.append(payment_channel)
-        PaymentChannel.objects.bulk_create(payment_channels_to_create)
 
         return cls(payment_plan=payment_plan)
 
