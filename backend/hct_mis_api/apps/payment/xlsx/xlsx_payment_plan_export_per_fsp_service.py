@@ -11,8 +11,8 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
-    FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
@@ -32,9 +32,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def export_per_fsp(self, user: "User") -> None:
         # TODO this should be refactored
-        fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
-        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
-        if not fsp_qs:
+        # fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
+        delivery_mechanism_per_payment_plan_list = self.payment_plan.delivery_mechanisms.select_related(
+            "financial_service_provider"
+        )
+
+        # fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+        if not delivery_mechanism_per_payment_plan_list.exists():
             msg = (
                 f"Not possible to generate export file. "
                 f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
@@ -45,18 +49,32 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, mode="w") as zip_file:
-                for fsp in fsp_qs:
+                for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
+                    fsp = delivery_mechanism_per_payment_plan.financial_service_provider
                     wb = openpyxl.Workbook()
                     ws_fsp = wb.active
                     ws_fsp.title = fsp.name
+                    fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
+                        delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
+                        financial_service_provider=fsp,
+                    ).first()
 
+                    if not fsp_xlsx_template_per_delivery_mechanism:
+                        msg = (
+                            f"Not possible to generate export file. "
+                            f"There isn't any FSP XLSX Template assigned to Payment Plan {self.payment_plan.unicef_id} "
+                            f"for FSP {fsp.name} and delivery mechanism {delivery_mechanism_per_payment_plan.delivery_mechanism}."
+                        )
+                        logger.error(msg)
+                        raise GraphQLError(msg)
+                    fsp_xlsx_template = fsp_xlsx_template_per_delivery_mechanism.xlsx_template
                     payment_qs = self.payment_list.filter(financial_service_provider=fsp)
 
                     # get headers
                     column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
                     template_column_list = []
-                    if fsp.fsp_xlsx_template and fsp.fsp_xlsx_template.columns:
-                        template_column_list = fsp.fsp_xlsx_template.columns
+                    if fsp_xlsx_template and fsp_xlsx_template.columns:
+                        template_column_list = fsp_xlsx_template.columns
                         diff_columns = list(set(template_column_list).difference(set(column_list)))
                         if diff_columns:
                             msg = f"Please contact admin because we can't export columns: {diff_columns}"
@@ -64,7 +82,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                             raise GraphQLError(msg)
                         column_list = list(template_column_list)
 
-                    for core_field in fsp.fsp_xlsx_template.core_fields:
+                    for core_field in fsp_xlsx_template.core_fields:
                         column_list.append(core_field)
 
                     # add headers
@@ -78,14 +96,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                         ]
                         core_fields_row = [
                             FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
-                            for column_name in fsp.fsp_xlsx_template.core_fields
+                            for column_name in fsp_xlsx_template.core_fields
                         ]
                         payment_row.extend(core_fields_row)
                         ws_fsp.append(payment_row)
 
                     self._adjust_column_width_from_col(ws_fsp, max_col=len(column_list))
 
-                    filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}.xlsx"
+                    filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}.xlsx"
 
                     with NamedTemporaryFile() as tmp:
                         wb.save(tmp.name)

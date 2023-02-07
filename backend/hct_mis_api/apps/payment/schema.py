@@ -833,9 +833,7 @@ class Query(graphene.ObjectType):
         )
 
         def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
-            print("mechanism", mechanism)
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
-            print("fsps", fsps)
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,

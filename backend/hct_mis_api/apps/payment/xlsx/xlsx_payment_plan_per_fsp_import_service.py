@@ -9,6 +9,7 @@ from xlwt import Row
 
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     Payment,
 )
 from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
@@ -32,15 +33,22 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.fsp: Optional["FinancialServiceProvider"] = None
         self.expected_columns: List[str] = []
         self.is_updated: bool = False
+        self.fsp_xlsx_template_per_delivery_mechanism = None
+
+    @property
+    def xlsx_template(self) -> Optional[FinancialServiceProviderXlsxTemplate]:
+        return self.fsp_xlsx_template_per_delivery_mechanism.xlsx_template
 
     def _set_fsp_expected_columns(self) -> None:
         first_payment_row = self.ws_payments[2]
         payment_id = first_payment_row[self.HEADERS.index("payment_id")].value
         payment = self.payments_dict[payment_id]
-
+        self.fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.get(
+            financial_service_provider=payment.financial_service_provider, delivery_mechanism=payment.delivery_type
+        )
         self.fsp = payment.financial_service_provider
-        self.expected_columns = (self.fsp.fsp_xlsx_template and self.fsp.fsp_xlsx_template.columns) or self.HEADERS
-        self.expected_columns.extend(self.fsp.fsp_xlsx_template.core_fields)
+        self.expected_columns = (self.xlsx_template and self.xlsx_template.columns) or self.HEADERS
+        self.expected_columns.extend(self.xlsx_template.core_fields)  # type: ignore
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
