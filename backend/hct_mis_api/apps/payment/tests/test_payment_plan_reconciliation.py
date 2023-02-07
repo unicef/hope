@@ -27,6 +27,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
 )
 from hct_mis_api.apps.payment.models import (
@@ -356,6 +357,12 @@ class TestPaymentPlanReconciliation(APITestCase):
             name="Santander",
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
             distribution_limit=None,
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
