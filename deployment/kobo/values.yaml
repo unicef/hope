@@ -112,7 +112,20 @@ kpi:
   labels: {}
   annotations: {}
   nodeSeletor: {}
-  affinity: {}
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: component
+            operator: In
+            values:
+            - kobocat
+          - key: app
+            operator: In
+            values:
+            - {{ include "kobo.labels.app" . }}
+        topologyKey: "kubernetes.io/hostname"
 
   ## the number of kpi pods to run
   ##
