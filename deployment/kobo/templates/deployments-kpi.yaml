@@ -43,9 +43,19 @@ spec:
       
       {{- if .Values.kpi.affinity }}
       affinity:
-        {{- toYaml .Values.kpi.affinity | nindent 8 }}
-      {{- end }}
-  
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: component
+                operator: In
+                values:
+                - kobocat
+              - key: app
+                operator: In
+                values:
+                - {{ include "kobo.labels.app" . }}
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: backend
         image: {{ .Values.kpi.image }}
