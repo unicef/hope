@@ -3,7 +3,6 @@ from uuid import UUID
 
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from django.db.transaction import atomic
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -15,56 +14,21 @@ from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFil
 from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
+from .mixins import TargetPopulationFromListMixin
 from .models import HouseholdSelection, TargetPopulation
 from .steficon import SteficonExecutorMixin
 
 
-class TpFromListMixin:
-    @button()
-    def create_tp_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
-        context = self.get_common_context(request, title="Create TargetPopulation")
-        if "apply" in request.POST:
-            form = CreateTargetPopulationTextForm(request.POST, read_only=True)
-            if form.is_valid():
-                ba = form.cleaned_data["business_area"]
-                context["ba_name"] = ba.name
-                context["households"] = form.cleaned_data["criteria"]
-                context["total"] = form.cleaned_data["criteria"].count()
-        elif "confirm" in request.POST:
-            form = CreateTargetPopulationTextForm(request.POST)
-            if form.is_valid():
-                ba = form.cleaned_data["business_area"]
-                population = form.cleaned_data["criteria"]
-                with atomic():
-                    tp = TargetPopulation.objects.create(
-                        targeting_criteria=None,
-                        created_by=request.user,
-                        name=form.cleaned_data["name"],
-                        business_area=ba,
-                    )
-                    tp.households.set(population)
-                    refresh_stats(tp)
-                    tp.save()
-                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
-                return HttpResponseRedirect(url)
-        else:
-            form = CreateTargetPopulationTextForm(
-                initial={
-                    "action": "create_tp_from_list",
-                }
-            )
-        context["form"] = form
-        return TemplateResponse(request, "admin/household/household/create_target_population_from_text.html", context)
-
-
 @admin.register(TargetPopulation)
 class TargetPopulationAdmin(
-    SoftDeletableAdminMixin, SteficonExecutorMixin, TpFromListMixin, LinkedObjectsMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin,
+    SteficonExecutorMixin,
+    TargetPopulationFromListMixin,
+    LinkedObjectsMixin,
+    HOPEModelAdminBase,
 ):
     list_display = (
         "name",

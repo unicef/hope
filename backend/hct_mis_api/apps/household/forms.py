@@ -134,7 +134,7 @@ class CreateTargetPopulationTextForm(forms.Form):
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
         if "initial" in kwargs:
-            self.fields["business_area"].queryset = BusinessArea.objects.filter()
+            self.fields["business_area"].queryset = BusinessArea.objects.all()
 
         if read_only:
             self.fields["business_area"].widget = HiddenInput()
