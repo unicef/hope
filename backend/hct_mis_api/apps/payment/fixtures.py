@@ -36,6 +36,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     GenericPayment,
     Payment,
     PaymentPlan,
@@ -198,7 +199,18 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
         FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
     )
     data_transfer_configuration = factory.Faker("json")
-    fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
+
+
+class FspXlsxTemplatePerDeliveryMechanismFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = FspXlsxTemplatePerDeliveryMechanism
+
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
+    delivery_mechanism = factory.fuzzy.FuzzyChoice(
+        GenericPayment.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
+    )
+    xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
@@ -743,6 +755,7 @@ def generate_reconciled_payment_plan() -> None:
     fsp_1 = FinancialServiceProviderFactory(
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
     )
+    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=pp, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
     )
