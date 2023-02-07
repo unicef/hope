@@ -9,7 +9,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-12 sc-jKJlTe hdnGZH"
+        class="MuiBox-root MuiBox-root-12 sc-kpOJdX iTsSqH"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -89,7 +89,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-jKJlTe hdnGZH"
+        class="MuiBox-root MuiBox-root-1 sc-kpOJdX iTsSqH"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -303,29 +303,6 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     role="button"
                     tabindex="0"
                   >
-                    Payment Channel
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
-                  </span>
-                </th>
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-                  scope="col"
-                >
-                  <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
-                    role="button"
-                    tabindex="0"
-                  >
                     FSP
                     <svg
                       aria-hidden="true"
@@ -425,20 +402,6 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root sc-fjdhpX gzFqeL"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"
-                    />
-                  </svg>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
                   Test FSP 1
                 </td>
                 <td
@@ -488,20 +451,6 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root sc-fjdhpX gzFqeL"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"
-                    />
-                  </svg>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
                   Test FSP 1
                 </td>
                 <td
@@ -522,7 +471,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
-                  colspan="10"
+                  colspan="9"
                 />
               </tr>
             </tbody>
