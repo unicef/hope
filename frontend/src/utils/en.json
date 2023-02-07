@@ -732,5 +732,7 @@
   "Household Id": "Household Id",
   "This household is a duplicate of a household ID": "This household is a duplicate of a household ID",
   "Sort by": "Sort by",
-  "Uploaded file should contain entitlement for each household": "Uploaded file should contain entitlement for each household"
+  "Uploaded file should contain entitlement for each household": "Uploaded file should contain entitlement for each household",
+  "Choose Delivery Mechanism": "Choose Delivery Mechanism",
+  "Assign FSP per Delivery Mechanism": "Assign FSP per Delivery Mechanism"
 }
