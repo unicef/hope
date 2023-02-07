@@ -761,6 +761,34 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return f"{self.name} ({len(self.columns)})"
 
 
+class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="created_fsp_xlsx_template_per_delivery_mechanisms",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    financial_service_provider = models.ForeignKey(
+        "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
+    )
+    delivery_mechanism = models.CharField(
+        max_length=255, verbose_name=_("Delivery Mechanism"), choices=GenericPayment.DELIVERY_TYPE_CHOICE
+    )
+    xlsx_template = models.ForeignKey(
+        "FinancialServiceProviderXlsxTemplate",
+        on_delete=models.CASCADE,
+        related_name="fsp_xlsx_template_per_delivery_mechanisms",
+    )
+
+    class Meta:
+        unique_together = ("financial_service_provider", "delivery_mechanism")
+
+    def __str__(self) -> str:
+        return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
+
+
 class FinancialServiceProvider(TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
     COMMUNICATION_CHANNEL_SFTP = "SFTP"
@@ -798,16 +826,22 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         blank=True,
         default=dict,
     )
-    fsp_xlsx_template = models.ForeignKey(
+    xlsx_templates = models.ManyToManyField(
         "payment.FinancialServiceProviderXlsxTemplate",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_("XLSX Template"),
+        through="FspXlsxTemplatePerDeliveryMechanism",
+        related_name="financial_service_providers",
     )
 
     def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
+
+    def get_xlsx_template(self, delivery_mechanism: str) -> Optional["FinancialServiceProviderXlsxTemplate"]:
+        try:
+            return self.xlsx_templates.get(
+                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=delivery_mechanism
+            )
+        except FinancialServiceProviderXlsxTemplate.DoesNotExist:
+            return None
 
     def can_accept_any_volume(self) -> bool:
         if (

@@ -218,7 +218,7 @@ class FinancialServiceProviderFilter(FilterSet):
             "delivery_mechanisms",
             "distribution_limit",
             "communication_channel",
-            "fsp_xlsx_template",
+            "xlsx_templates",
         )
         model = FinancialServiceProvider
 
