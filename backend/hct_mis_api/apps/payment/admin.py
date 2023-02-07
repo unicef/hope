@@ -7,6 +7,7 @@ from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
@@ -373,9 +374,22 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     fields = (
         ("name", "vision_vendor_number"),
         ("delivery_mechanisms", "distribution_limit"),
-        ("communication_channel"),
+        ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
     )
+
+    readonly_fields = ("fsp_xlsx_templates",)
+
+    def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
+        return format_html(
+            "<br>".join(
+                f"<a href='{reverse('admin:%s_%s_change' % (template._meta.app_label, template._meta.model_name), args=[template.id])}'>{template}</a>"
+                for template in obj.fsp_xlsx_template_per_delivery_mechanisms.all()
+            )
+        )
+
+    fsp_xlsx_templates.short_description = "FSP XLSX Templates"
+    fsp_xlsx_templates.allow_tags = True
 
     def save_model(self, request: HttpRequest, obj: FinancialServiceProvider, form: "Form", change: bool) -> None:
         if not change:
