@@ -5,7 +5,6 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -496,14 +495,14 @@ class XlsxErrorNode(graphene.ObjectType):
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[0]  # type: ignore
+    def resolve_sheet(parent: tuple[str], info: Any) -> str:
+        return parent[0]
 
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[1]  # type: ignore
+    def resolve_coordinates(parent: tuple[str], info: Any) -> str:
+        return parent[1]
 
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[2]  # type: ignore
+    def resolve_message(parent: tuple[str], info: Any) -> str:
+        return parent[2]
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -853,10 +852,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
 
-        query = Q(payment_channels__delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
-        if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
-            query |= Q(payment_channels__isnull=True)
-
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
         for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
@@ -927,7 +922,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
             payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
             payment_plan_service.validate_fsps_per_delivery_mechanisms(
-                dm_to_fsp_mapping, update_dms=True, update_payments=False
+                dm_to_fsp_mapping, update_dms=True, update_payments=True
             )
 
         return cls(payment_plan=payment_plan)

@@ -50,7 +50,6 @@ export const fakeApolloAllPaymentsForTable = [
                   "fullName": "Jan Kowalski",
                   "__typename": "IndividualNode"
                 },
-                "hasPaymentChannel": true,
                 "financialServiceProvider": {
                   "id": "RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=",
                   "name": "Test FSP 1",
@@ -86,7 +85,6 @@ export const fakeApolloAllPaymentsForTable = [
                   "fullName": "Adam Nowak",
                   "__typename": "IndividualNode"
                 },
-                "hasPaymentChannel": true,
                 "financialServiceProvider": {
                   "id": "RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=",
                   "name": "Test FSP 1",

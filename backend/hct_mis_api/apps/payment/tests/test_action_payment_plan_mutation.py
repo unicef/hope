@@ -16,12 +16,11 @@ from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -90,13 +89,6 @@ class TestActionPaymentPlanMutation(APITestCase):
             individuals_data=[{}],
         )
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
-        cls.delivery_mechanism_cash = DeliveryMechanism.objects.get(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
-        )
-        cls.payment_channel_1_cash = PaymentChannelFactory(
-            individual=individuals[0],
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
 
         cls.financial_service_provider = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]

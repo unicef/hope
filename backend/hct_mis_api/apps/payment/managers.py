@@ -1,7 +1,6 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
-    Case,
     Exists,
     F,
     Func,
@@ -11,7 +10,6 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
-    When,
 )
 
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
@@ -94,22 +92,10 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             payment_plan_soft_conflicted_data=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
         )
 
-    def with_payment_channels(self) -> QuerySet:
-        from hct_mis_api.apps.payment.models import PaymentChannel
-
-        return self.select_related("assigned_payment_channel", "collector", "financial_service_provider").annotate(
-            has_defined_payment_channel=Exists(PaymentChannel.objects.filter(individual=OuterRef("collector"))),
-            has_assigned_payment_channel=Case(
-                When(assigned_payment_channel=None, then=Value(False)),
-                default=Value(True),
-                output_field=models.BooleanField(),
-            ),
-        )
-
 
 class PaymentManager(SoftDeletableManager):
     _queryset_class = PaymentQuerySet
     use_for_related_fields = True
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().with_payment_plan_conflicts().with_payment_channels()
+        return super().get_queryset().with_payment_plan_conflicts()
