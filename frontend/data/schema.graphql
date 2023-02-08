@@ -1008,7 +1008,7 @@ input GetCashplanVerificationSampleSizeInput {
   cashOrPaymentPlanId: ID
   paymentVerificationPlanId: ID
   sampling: String!
-  verificationChannel: String
+  verificationChannel: String!
   businessAreaSlug: String!
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
