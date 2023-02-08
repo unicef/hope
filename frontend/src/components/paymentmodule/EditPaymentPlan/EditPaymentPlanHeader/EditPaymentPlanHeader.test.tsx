@@ -10,7 +10,7 @@ describe('components/paymentmodule/EditPaymentPlanHeader', () => {
       <EditPaymentPlanHeader
         handleSubmit={jest.fn()}
         businessArea='afghanistan'
-        permissions={[PERMISSIONS.PAYMENT_MODULE_VIEW_LIST]}
+        permissions={[PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST]}
         paymentPlan={fakeApolloPaymentPlan}
       />,
     );

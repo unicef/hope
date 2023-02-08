@@ -64,7 +64,7 @@ export const DeliveryMechanismRow = ({
         {/* {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
           <Grid item xs={3}>
             {hasPermissions(
-              PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_REMOVE,
+              PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_REMOVE,
               permissions,
             ) ? (
               <IconButton onClick={() => arrayHelpers.remove(index)}>
