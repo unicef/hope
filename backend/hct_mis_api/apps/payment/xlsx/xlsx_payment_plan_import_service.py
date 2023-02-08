@@ -10,10 +10,7 @@ from xlwt import Row
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
