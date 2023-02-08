@@ -1519,25 +1519,3 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
-
-
-# class DeliveryMechanism(TimeStampedUUIDModel):
-#     # TODO MB rdi logic
-#     # create imported payment channel instance + show on frontend which ones gonna be created
-#     # check all PCH XLS rows and what validate what PCHs can be created based on this data
-#     # If CASH can't be created raise validation error
-#     # create separate logic for payment channel scoep and fill PCH delivery data
-#     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
-#     global_core_fields = ChoiceArrayFieldDM(
-#         models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
-#         default=list,
-#     )
-#     payment_channel_fields = ChoiceArrayFieldDM(
-#         models.CharField(
-#             max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
-#         ),
-#         default=list,
-#     )
-#
-#     def __str__(self) -> str:
-#         return self.delivery_mechanism

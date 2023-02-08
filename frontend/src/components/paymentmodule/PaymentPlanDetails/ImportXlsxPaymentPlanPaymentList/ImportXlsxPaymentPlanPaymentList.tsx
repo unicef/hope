@@ -10,6 +10,7 @@ import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
@@ -29,10 +30,12 @@ const Error = styled.div`
 
 interface ImportXlsxPaymentPlanPaymentListProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
+  permissions: string[];
 }
 
 export const ImportXlsxPaymentPlanPaymentList = ({
   paymentPlan,
+  permissions,
 }: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -77,6 +80,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
     }
   };
 
+  const canUploadFile = hasPermissions(
+    PERMISSIONS.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
+    permissions,
+  );
+
   return (
     <>
       <Box key='import'>
@@ -85,9 +93,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           color='primary'
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
-          disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
+          disabled={
+            paymentPlan.status !== PaymentPlanStatus.Locked || !canUploadFile
+          }
         >
-          {t('Import XLSX')}
+          {t('Upload File')}
         </Button>
       </Box>
       <Dialog

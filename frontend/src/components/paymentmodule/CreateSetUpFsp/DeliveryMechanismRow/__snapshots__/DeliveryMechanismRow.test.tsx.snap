@@ -18,11 +18,6 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
             class="MuiBox-root MuiBox-root-2"
           >
             <div
-              class="MuiBox-root MuiBox-root-3"
-            >
-              1
-            </div>
-            <div
               choices="[object Object],[object Object]"
               class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
               label="Delivery Mechanism"
@@ -69,10 +64,10 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
                 </svg>
                 <fieldset
                   aria-hidden="true"
-                  class="PrivateNotchedOutline-root-4 MuiOutlinedInput-notchedOutline"
+                  class="PrivateNotchedOutline-root-3 MuiOutlinedInput-notchedOutline"
                 >
                   <legend
-                    class="PrivateNotchedOutline-legendLabelled-6"
+                    class="PrivateNotchedOutline-legendLabelled-5"
                   >
                     <span>
                       Delivery Mechanism
@@ -84,7 +79,6 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
           </div>
         </div>
       </div>
-      
     </div>
   </div>
 </div>

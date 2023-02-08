@@ -230,8 +230,7 @@ class KoboAssetObjectConnection(ObjectConnection):
 
 class LanguageObject(graphene.ObjectType):
     english = String()
-    alpha2 = String()
-    alpha3 = String()
+    code = String()
 
 
 class LanguageObjectConnection(ObjectConnection):
@@ -307,7 +306,7 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
     all_languages = ConnectionField(
-        LanguageObjectConnection, name=graphene.String(required=False), description="All available languages"
+        LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
@@ -367,5 +366,5 @@ class Query(graphene.ObjectType):
     def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
 
-    def resolve_all_languages(self, info: Any, name: str, **kwargs: Any) -> List[Language]:
-        return Languages.filter_by_name(name)
+    def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
+        return Languages.filter_by_code(code)

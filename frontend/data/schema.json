@@ -3777,7 +3777,7 @@
             "description": null,
             "args": [
               {
-                "name": "name",
+                "name": "code",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -43997,19 +43997,7 @@
             "deprecationReason": null
           },
           {
-            "name": "alpha2",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "alpha3",
+            "name": "code",
             "description": null,
             "args": [],
             "type": {

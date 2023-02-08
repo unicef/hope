@@ -78,7 +78,7 @@ export const SetUpFspCore = ({
   if (deliveryMechanismLoading) return <LoadingComponent />;
 
   const steps = [
-    t('Choose Delivery Mechanism Order'),
+    t('Choose Delivery Mechanism'),
     t('Assign FSP per Delivery Mechanism'),
   ];
 
@@ -126,14 +126,13 @@ export const SetUpFspCore = ({
       showMessage(t('Delivery Mechanisms have been set'));
       handleNextStep();
     } catch (e) {
-      if (
-        e.graphQLErrors.length &&
-        e.graphQLErrors[0]?.message.includes('sufficient')
-      ) {
-        setWarning(e.graphQLErrors[0].message);
-      } else {
-        e.graphQLErrors.map((x) => showMessage(x.message));
-      }
+      // if (
+      //   e.graphQLErrors.length &&
+      //   e.graphQLErrors[0]?.message.includes('sufficient')
+      // ) {
+      //   setWarning(e.graphQLErrors[0].message);
+      // }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -195,7 +194,8 @@ export const SetUpFspCore = ({
                     })}
                   </Stepper>
                 </Box>
-                {warning && <DeliveryMechanismWarning warning={warning} />}
+                {/* // warning not shown in Payment Module 1.0 */}
+                {/* {warning && <DeliveryMechanismWarning warning={warning} />} */}
                 <FieldArray
                   name='deliveryMechanisms'
                   render={(arrayHelpers) => {
@@ -236,7 +236,8 @@ export const SetUpFspCore = ({
                             );
                           },
                         )}
-                        {activeStep === 0 && (
+                        {/* // button not shown in Payment Module 1.0 */}
+                        {/* {activeStep === 0 && (
                           <Grid container>
                             <Grid item xs={12}>
                               <Box pt={3}>
@@ -256,7 +257,7 @@ export const SetUpFspCore = ({
                               </Box>
                             </Grid>
                           </Grid>
-                        )}
+                        )} */}
                       </>
                     );
                   }}
