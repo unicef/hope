@@ -10,7 +10,7 @@ from xlwt import Row
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
@@ -123,7 +123,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return
         entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
         if entitlement_amount is not None and entitlement_amount != "":
-            entitlement_amount = float_to_decimal(entitlement_amount)
+            entitlement_amount = to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 
@@ -155,7 +155,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return
 
         if entitlement_amount is not None and entitlement_amount != "":
-            entitlement_amount = float_to_decimal(entitlement_amount)
+            entitlement_amount = to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 payment.entitlement_quantity = entitlement_amount
                 payment.entitlement_date = timezone.now()

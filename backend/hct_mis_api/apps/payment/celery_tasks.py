@@ -245,7 +245,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: str, use
                     payment_plan.update_money_fields()
 
                     if payment_plan.is_reconciled:
-                        payment_plan.status_reconciled()
+                        payment_plan.status_finished()
 
                     payment_plan.save()
 

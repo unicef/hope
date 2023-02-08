@@ -13,6 +13,7 @@ enum Action {
   AUTHORIZE
   REVIEW
   REJECT
+  FINISH
 }
 
 input ActionPaymentPlanInput {
@@ -2630,7 +2631,7 @@ enum PaymentPlanStatus {
   IN_AUTHORIZATION
   IN_REVIEW
   ACCEPTED
-  RECONCILED
+  FINISHED
 }
 
 enum PaymentRecordDeliveryType {
@@ -2710,6 +2711,8 @@ enum PaymentRecordStatus {
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
   FORCE_FAILED
+  PARTIALLY_DISTRIBUTED
+  PENDING
 }
 
 enum PaymentStatus {
@@ -2718,6 +2721,8 @@ enum PaymentStatus {
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
   FORCE_FAILED
+  PARTIALLY_DISTRIBUTED
+  PENDING
 }
 
 type PaymentVerificationLogEntryNode implements Node {

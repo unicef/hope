@@ -256,7 +256,7 @@ class PaymentPlanService:
                 Payment(
                     parent=payment_plan,
                     business_area=payment_plan.business_area,
-                    status=Payment.STATUS_NOT_DISTRIBUTED,
+                    status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
                     household=household,
                     head_of_household=household.head_of_household,
