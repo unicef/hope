@@ -14,7 +14,7 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
       <MockedProvider addTypename={false} mocks={fakeImportXlsxPpListMutation}>
         <ImportXlsxPaymentPlanPaymentList
           permissions={[
-            PERMISSIONS.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            PERMISSIONS.PM_PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
           ]}
           paymentPlan={fakeApolloPaymentPlan}
         />
