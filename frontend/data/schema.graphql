@@ -1008,7 +1008,7 @@ input GetCashplanVerificationSampleSizeInput {
   cashOrPaymentPlanId: ID
   paymentVerificationPlanId: ID
   sampling: String!
-  verificationChannel: String
+  verificationChannel: String!
   businessAreaSlug: String!
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
@@ -2138,8 +2138,7 @@ type LabelNode {
 
 type LanguageObject {
   english: String
-  alpha2: String
-  alpha3: String
+  code: String
 }
 
 type LanguageObjectConnection {
@@ -3049,7 +3048,7 @@ type Query {
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   cashAssistUrlPrefix: String
-  allLanguages(name: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
+  allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
