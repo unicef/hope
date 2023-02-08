@@ -748,8 +748,6 @@ def save_data_in_cache(
 
 
 def clear_cache_for_dashboard_totals() -> None:
-    # we need skip remove cache for test and because LocMemCache don't have .keys()
-    skip_remove = settings.CACHES.get("default", {}).get("BACKEND", "") == "hct_mis_api.apps.core.memcache.LocMemCache"
     keys = (
         "resolve_section_households_reached",
         "resolve_section_individuals_reached",
@@ -764,7 +762,8 @@ def clear_cache_for_dashboard_totals() -> None:
         "resolve_chart_individuals_with_disability_reached_by_age",
         "resolve_chart_total_transferred_by_month",
     )
-    if not skip_remove:
+    # we need skip remove cache for test and because LocMemCache don't have .keys()
+    if not getattr(settings, "IS_TEST", False):
         all_cache_keys = cache.keys("*")
         for k in [key for key in all_cache_keys if key.startswith(keys)]:
             cache.delete(k)
