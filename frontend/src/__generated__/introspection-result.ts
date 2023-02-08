@@ -105,9 +105,6 @@
             "name": "PaymentNode"
           },
           {
-            "name": "PaymentChannelNode"
-          },
-          {
             "name": "ApprovalProcessNode"
           },
           {

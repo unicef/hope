@@ -5,7 +5,7 @@ from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
-from django.db.models import F, OuterRef, Q, Subquery, Sum
+from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -24,7 +24,6 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     Payment,
-    PaymentChannel,
     PaymentPlan,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -158,9 +157,7 @@ class PaymentPlanService:
 
     def unlock_fsp(self) -> Optional[PaymentPlan]:
         self.payment_plan.status_unlock_fsp()
-        self.payment_plan.payment_items.all().update(
-            financial_service_provider=None, assigned_payment_channel=None, delivery_type=None
-        )
+        self.payment_plan.payment_items.all().update(financial_service_provider=None, delivery_type=None)
         self.payment_plan.save()
 
         return self.payment_plan
@@ -423,7 +420,6 @@ class PaymentPlanService:
         self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False
     ) -> None:
         processed_payments = []
-
         with transaction.atomic():
             for mapping in dm_to_fsp_mapping:
                 delivery_mechanism_per_payment_plan = mapping["delivery_mechanism_per_payment_plan"]
@@ -435,22 +431,12 @@ class PaymentPlanService:
                         f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
                         f"by FSP '{fsp}'"
                     )
-
                 if not fsp.can_accept_any_volume():
                     raise GraphQLError(f"{fsp} cannot accept any volume")
 
                 payments_for_delivery_mechanism = (
-                    self.payment_plan.not_excluded_payments.filter(
-                        collector__payment_channels__delivery_mechanism__delivery_mechanism=delivery_mechanism
-                    )
-                    .exclude(id__in=[processed_payment.id for processed_payment in processed_payments])
-                    .annotate(
-                        payment_channel=Subquery(
-                            PaymentChannel.objects.filter(
-                                individual=OuterRef("collector"),
-                                delivery_mechanism__delivery_mechanism=delivery_mechanism,
-                            ).values("id")[:1]
-                        )
+                    self.payment_plan.not_excluded_payments.exclude(
+                        id__in=[processed_payment.id for processed_payment in processed_payments]
                     )
                     .distinct()
                     .order_by("unicef_id")
@@ -459,16 +445,13 @@ class PaymentPlanService:
                 total_volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
                     entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
                 )["entitlement_quantity_usd__sum"]
-
                 if fsp.can_accept_volume(total_volume_for_delivery_mechanism):
                     processed_payments += list(payments_for_delivery_mechanism)
                     if update_payments:
                         payments_for_delivery_mechanism.update(
                             financial_service_provider=fsp,
-                            assigned_payment_channel=F("payment_channel"),
                             delivery_type=delivery_mechanism,
                         )
-
                 else:
                     # Process part of the volume up to the distribution limit
                     partial_processed_payments = []
@@ -484,10 +467,8 @@ class PaymentPlanService:
                     if update_payments:
                         for payment in partial_processed_payments:
                             payment.financial_service_provider = fsp
-                            payment.assigned_payment_channel_id = payment.payment_channel
                             payment.delivery_type = delivery_mechanism
                             payment.save()
-
                 if update_dms:
                     delivery_mechanism_per_payment_plan.financial_service_provider = fsp
                     delivery_mechanism_per_payment_plan.save()
