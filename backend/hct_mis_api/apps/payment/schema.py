@@ -138,7 +138,7 @@ class RapidProFlow(graphene.ObjectType):
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
-        hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
     )
 
     class Meta:
@@ -148,7 +148,7 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
 
 
 class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
 
     class Meta:
         model = FinancialServiceProviderXlsxReport
@@ -163,7 +163,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
     full_name = graphene.String(source="name")
 
     class Meta:
@@ -220,7 +220,7 @@ class FilteredActionsListNode(graphene.ObjectType):
 
 
 class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     rejected_on = graphene.String()
     actions = graphene.Field(FilteredActionsListNode)
 
@@ -300,7 +300,7 @@ class GenericPaymentNode(graphene.ObjectType):
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
@@ -427,7 +427,7 @@ class FspChoices(graphene.ObjectType):
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
     authorization_number_required = graphene.Int()
     finance_review_number_required = graphene.Int()
@@ -547,7 +547,7 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
 
 
 class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
 
     class Meta:
         model = PaymentChannel
@@ -702,7 +702,7 @@ class Query(graphene.ObjectType):
     all_payments = DjangoPermissionFilterConnectionField(
         PaymentNode,
         filterset_class=PaymentFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
     )
     payment_record = relay.Node.Field(PaymentRecordNode)
     all_payment_records = DjangoPermissionFilterConnectionField(
@@ -812,7 +812,7 @@ class Query(graphene.ObjectType):
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)
