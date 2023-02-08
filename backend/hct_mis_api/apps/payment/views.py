@@ -55,7 +55,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
     payment_plan_id_str = decode_id_string(payment_plan_id)
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
 
-    if not request.user.has_permission(Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area):
+    if not request.user.has_permission(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):

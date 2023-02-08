@@ -13,9 +13,7 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeImportXlsxPpListMutation}>
         <ImportXlsxPaymentPlanPaymentList
-          permissions={[
-            PERMISSIONS.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
-          ]}
+          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_ENTITLEMENTS]}
           paymentPlan={fakeApolloPaymentPlan}
         />
       </MockedProvider>,
