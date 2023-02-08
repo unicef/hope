@@ -81,7 +81,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -305,7 +304,6 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
-    has_payment_channel = graphene.Boolean()
     full_name = graphene.String()
     target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
@@ -327,9 +325,6 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         if self.parent.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
-
-    def resolve_has_payment_channel(self, info: Any) -> bool:
-        return self.collector.payment_channels.exists()
 
     def resolve_payment_plan_hard_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
@@ -387,9 +382,9 @@ def _calculate_volume(
 ) -> Optional[Decimal]:
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
+    # TODO simple volume calculation
     payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-        assigned_payment_channel__delivery_mechanism__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
 
@@ -542,16 +537,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
 
     class Meta:
         model = LogEntry
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
-
-    class Meta:
-        model = PaymentChannel
-        exclude = ("delivery_data",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 

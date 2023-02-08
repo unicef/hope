@@ -7,6 +7,7 @@ from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
 )
 
 
@@ -25,9 +26,6 @@ class TestAllFinancialServiceProviders(APITestCase):
         allFinancialServiceProviders {
             edges {
                 node {
-                    fspXlsxTemplate {
-                        name
-                    }
                     financialserviceproviderxlsxreportSet {
                         edges {
                             node {
@@ -58,13 +56,6 @@ class TestAllFinancialServiceProviders(APITestCase):
                 }
                 communicationChannel
                 distributionLimit
-                fspXlsxTemplate {
-                    name
-                    createdBy {
-                        username
-                        firstName
-                    }
-                }
             }
         }
     }
@@ -88,13 +79,6 @@ class TestAllFinancialServiceProviders(APITestCase):
                 }
                 communicationChannel
                 distributionLimit
-                fspXlsxTemplate {
-                    name
-                    createdBy {
-                        username
-                        firstName
-                    }
-                }
             }
         }
     }
@@ -114,9 +98,13 @@ class TestAllFinancialServiceProviders(APITestCase):
         cls.create_user_role_with_permissions(
             cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)
         )
-        FinancialServiceProviderFactory.create_batch(
-            10, fsp_xlsx_template=FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
-        )
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
+        fsps = FinancialServiceProviderFactory.create_batch(10)
+        for fsp in fsps:
+            FspXlsxTemplatePerDeliveryMechanismFactory(
+                financial_service_provider=fsp,
+                xlsx_template=fsp_xlsx_template,
+            )
 
     def test_fetch_count_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
@@ -131,7 +119,7 @@ class TestAllFinancialServiceProviders(APITestCase):
         )
 
     def test_create_financial_service_provider(self) -> None:
-        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
+        FinancialServiceProviderXlsxTemplateFactory.create()
 
         self.graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
@@ -144,14 +132,13 @@ class TestAllFinancialServiceProviders(APITestCase):
                     "deliveryMechanisms": {"Cash", "Mobile Money"},
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
-                    "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
                 },
             },
         )
 
     def test_update_financial_service_provider(self) -> None:
         fsp = FinancialServiceProviderFactory.create()
-        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
+        FinancialServiceProviderXlsxTemplateFactory.create()
 
         self.graphql_request(
             request_string=self.MUTATION_UPDATE_FSP,
@@ -165,7 +152,6 @@ class TestAllFinancialServiceProviders(APITestCase):
                     "deliveryMechanisms": ["Transfer"],
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
-                    "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
                 },
             },
         )

@@ -1,6 +1,4 @@
 import TableCell from '@material-ui/core/TableCell';
-import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -13,23 +11,6 @@ import {
   renderSomethingOrDash,
 } from '../../../../utils/utils';
 import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
-
-const ErrorText = styled.div`
-  display: flex;
-  align-items: center;
-  text-transform: uppercase;
-  color: #ec2323;
-`;
-
-const ErrorOutline = styled(ErrorOutlineIcon)`
-  color: #e90202;
-  margin-right: 5px;
-`;
-
-const CheckCircleOutlined = styled(CheckCircleOutlinedIcon)`
-  color: #00c853;
-  margin-right: 5px;
-`;
 
 export const StyledLink = styled.div`
   color: #000;
@@ -99,16 +80,6 @@ export const PaymentsTableRow = ({
           </BlackLink>
         ) : (
           payment.collector.fullName
-        )}
-      </TableCell>
-      <TableCell align='left'>
-        {payment.hasPaymentChannel ? (
-          <CheckCircleOutlined />
-        ) : (
-          <ErrorText>
-            <ErrorOutline />
-            {t('Missing')}
-          </ErrorText>
         )}
       </TableCell>
       <TableCell align='left'>
