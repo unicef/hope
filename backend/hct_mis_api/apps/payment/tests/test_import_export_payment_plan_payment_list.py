@@ -30,7 +30,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     ServiceProvider,
 )
-from hct_mis_api.apps.payment.utils import float_to_decimal
+from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     XlsxPaymentPlanExportPerFspService,
 )
@@ -131,8 +131,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        self.assertEqual(float_to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
-        self.assertEqual(float_to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
+        self.assertEqual(to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
+        self.assertEqual(to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
 
     def test_export_payment_plan_payment_list(self) -> None:
         export_service = XlsxPaymentPlanExportService(self.payment_plan)

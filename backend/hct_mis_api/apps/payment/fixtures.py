@@ -555,7 +555,7 @@ class PaymentFactory(factory.DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = GenericPayment.STATUS_NOT_DISTRIBUTED
+    status = GenericPayment.STATUS_PENDING
     status_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
@@ -749,7 +749,7 @@ def generate_reconciled_payment_plan() -> None:
         total_delivered_quantity=999,
     )[0]
     # update status
-    pp.status_reconciled()
+    pp.status_finished()
     pp.save()
 
     fsp_1 = FinancialServiceProviderFactory(

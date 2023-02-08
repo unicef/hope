@@ -1,6 +1,7 @@
 import os
 import tempfile
 from datetime import timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Tuple
 from unittest.mock import patch
 from zipfile import ZipFile
@@ -9,6 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 from openpyxl import load_workbook
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -29,12 +31,16 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
+    PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
     PaymentPlan,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
+    XlsxPaymentPlanImportPerFspService,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
@@ -630,7 +636,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, None)
-            self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
+            self.assertEqual(payment.status, Payment.STATUS_PENDING)
             self.assertEqual(payment_plan.is_reconciled, False)
 
             filled_file_name = "filled.xlsx"
@@ -641,6 +647,27 @@ class TestPaymentPlanReconciliation(APITestCase):
                 row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
             ).value = 666
             workbook.save(filled_file_path)
+
+            with open(filled_file_path, "rb") as file:
+                uploaded_file = SimpleUploadedFile(filled_file_name, file.read())
+                with patch("hct_mis_api.apps.payment.services.payment_plan_services.transaction") as mock_import:
+                    import_mutation_response = self.graphql_request(
+                        request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+                        context={"user": self.user},
+                        variables={
+                            "paymentPlanId": encoded_payment_plan_id,
+                            "file": uploaded_file,
+                        },
+                    )
+                    assert (
+                        "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]
+                    ), import_mutation_response
+                    assert (
+                        import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"][0][
+                            "message"
+                        ]
+                        == f"Payment {payment.unicef_id}: Delivered quantity 666.00 is bigger than Entitlement quantity 500.00"
+                    ), import_mutation_response
 
             # update xls, delivered_quantity == entitlement_quantity
             sheet.cell(
@@ -670,3 +697,29 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.delivered_quantity, 500)
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment_plan.is_reconciled, True)
+
+    @parameterized.expand(
+        [
+            (-1, None, Payment.STATUS_ERROR),
+            (0, Decimal(0), Payment.STATUS_NOT_DISTRIBUTED),
+            (400, Decimal(400), Payment.STATUS_DISTRIBUTION_PARTIAL),
+            (500, Decimal(500), Payment.STATUS_DISTRIBUTION_SUCCESS),
+            (600, None, None),
+        ]
+    )
+    def test_receiving_payment_reconciliations_status(
+        self, delivered_quantity: float, expected_delivered_quantity: Decimal, expected_status: str
+    ) -> None:
+        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(), None)  # type: ignore
+
+        if not expected_status:
+            with self.assertRaisesMessage(
+                service.XlsxPaymentPlanImportPerFspServiceException,
+                "Invalid delivered_quantity 600 provided for payment_id xx",
+            ):
+                service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
+
+        else:
+            status, value = service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
+            self.assertEqual(status, expected_status)
+            self.assertEqual(value, expected_delivered_quantity)

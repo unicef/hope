@@ -7,10 +7,7 @@ from graphql import GraphQLError
 from xlwt import Row
 
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.utils import (
-    float_to_decimal,
-    from_received_yes_no_to_status,
-)
+from hct_mis_api.apps.payment.utils import from_received_yes_no_to_status, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
@@ -220,7 +217,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
         payment_verification.status = from_received_yes_no_to_status(received, received_amount, delivered_amount)
         if received_amount is not None and received_amount != "":
-            payment_verification.received_amount = float_to_decimal(received_amount)
+            payment_verification.received_amount = to_decimal(received_amount)
         else:
             payment_verification.received_amount = None
         self.payment_verifications_to_save.append(payment_verification)
