@@ -60,7 +60,10 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     targetingId: paymentPlanData.paymentPlan.targetPopulation.id,
     startDate: paymentPlanData.paymentPlan.startDate,
     endDate: paymentPlanData.paymentPlan.endDate,
-    currency: paymentPlanData.paymentPlan.currency,
+    currency: {
+      name: paymentPlanData.paymentPlan.currencyName,
+      value: paymentPlanData.paymentPlan.currency,
+    },
     dispersionStartDate: paymentPlanData.paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlanData.paymentPlan.dispersionEndDate,
   };
