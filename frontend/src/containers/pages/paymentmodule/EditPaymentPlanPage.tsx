@@ -106,6 +106,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+    console.log(values);
     try {
       const res = await mutate({
         variables: {
@@ -116,7 +117,9 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
             endDate: values.endDate,
             dispersionStartDate: values.dispersionStartDate,
             dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency,
+            currency: values.currency?.value
+              ? values.currency.value
+              : values.currency,
           },
         },
       });
