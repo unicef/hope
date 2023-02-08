@@ -1244,11 +1244,20 @@ export type FinancialServiceProviderNode = Node & {
   distributionLimit?: Maybe<Scalars['Float']>,
   communicationChannel: FinancialServiceProviderCommunicationChannel,
   dataTransferConfiguration?: Maybe<Scalars['JSONString']>,
-  fspXlsxTemplate?: Maybe<FinancialServiceProviderXlsxTemplateNode>,
+  xlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection,
   financialserviceproviderxlsxreportSet: FinancialServiceProviderXlsxReportNodeConnection,
   deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection,
   paymentSet: PaymentNodeConnection,
   fullName?: Maybe<Scalars['String']>,
+};
+
+
+export type FinancialServiceProviderNodeXlsxTemplatesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1326,7 +1335,6 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   PaymentId = 'PAYMENT_ID',
   HouseholdId = 'HOUSEHOLD_ID',
   HouseholdSize = 'HOUSEHOLD_SIZE',
-  AdminLevel_2 = 'ADMIN_LEVEL_2',
   CollectorName = 'COLLECTOR_NAME',
   PaymentChannel = 'PAYMENT_CHANNEL',
   FspName = 'FSP_NAME',
@@ -1344,11 +1352,12 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   createdBy?: Maybe<UserNode>,
   name: Scalars['String'],
   columns: FinancialServiceProviderXlsxTemplateColumns,
-  financialserviceproviderSet: FinancialServiceProviderNodeConnection,
+  coreFields: Array<Scalars['String']>,
+  financialServiceProviders: FinancialServiceProviderNodeConnection,
 };
 
 
-export type FinancialServiceProviderXlsxTemplateNodeFinancialserviceproviderSetArgs = {
+export type FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -4767,7 +4776,7 @@ export type QueryAllFinancialServiceProvidersArgs = {
   deliveryMechanisms?: Maybe<Array<Maybe<Scalars['String']>>>,
   distributionLimit?: Maybe<Scalars['Float']>,
   communicationChannel?: Maybe<Scalars['String']>,
-  fspXlsxTemplate?: Maybe<Scalars['ID']>,
+  xlsxTemplates?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -10219,7 +10228,7 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -18873,6 +18882,7 @@ export const PaymentDocument = gql`
   payment(id: $id) {
     id
     unicefId
+    distributionModality
     status
     statusDate
     targetPopulation {
@@ -22569,6 +22579,8 @@ export type ResolversTypes = {
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
+  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
+  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
   FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>,
   FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
   FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>,
@@ -22632,8 +22644,6 @@ export type ResolversTypes = {
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
   RoleSubsystem: RoleSubsystem,
-  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
-  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   IndividualDisability: IndividualDisability,
@@ -23014,6 +23024,8 @@ export type ResolversParentTypes = {
   DeliveryMechanismNode: DeliveryMechanismNode,
   FinancialServiceProviderNode: FinancialServiceProviderNode,
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
+  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
+  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
   FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode,
   FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
   FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection,
@@ -23077,8 +23089,6 @@ export type ResolversParentTypes = {
   ProgramNodeEdge: ProgramNodeEdge,
   RoleNode: RoleNode,
   RoleSubsystem: RoleSubsystem,
-  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
-  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: CountAndPercentageNode,
   IndividualDisability: IndividualDisability,
@@ -23932,7 +23942,7 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   distributionLimit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   communicationChannel?: Resolver<ResolversTypes['FinancialServiceProviderCommunicationChannel'], ParentType, ContextType>,
   dataTransferConfiguration?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  fspXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType>,
+  xlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeXlsxTemplatesArgs>,
   financialserviceproviderxlsxreportSet?: Resolver<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs>,
   deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodePaymentSetArgs>,
@@ -23979,7 +23989,8 @@ export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   columns?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateColumns'], ParentType, ContextType>,
-  financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, FinancialServiceProviderXlsxTemplateNodeFinancialserviceproviderSetArgs>,
+  coreFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs>,
 };
 
 export type FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection']> = {
