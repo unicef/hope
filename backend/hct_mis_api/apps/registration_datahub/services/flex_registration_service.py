@@ -425,6 +425,7 @@ class FlexRegistrationService(BaseRegistrationService):
 
 class SriLankaRegistrationService(BaseRegistrationService):
     BUSINESS_AREA_SLUG = "sri-lanka"
+    SRI_LANKA_REGISTRATION_ID = 17
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin2": "admin2_h_c",
@@ -490,6 +491,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
+        if record.registration != self.SRI_LANKA_REGISTRATION_ID:
+            raise ValidationError("Sri-Lanka data is processed only from registration 17!")
+
         record_data_dict = record.fields
 
         localization_dict = record_data_dict.get("localization-info", [])[0]
@@ -555,3 +559,5 @@ class SriLankaRegistrationService(BaseRegistrationService):
         household.set_admin_areas()
         household.head_of_household = head_of_household
         household.save()
+
+        record.mark_as_imported()
