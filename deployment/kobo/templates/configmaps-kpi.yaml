@@ -76,7 +76,7 @@ data:
   KOBOFORM_PUBLIC_SUBDOMAIN: "{{ .Values.kpi.subdomain }}"
   PUBLIC_DOMAIN_NAME: "{{ .Values.ingress.host }}"
 
-  PUBLIC_REQUEST_SCHEME: "{{ .Values.ingress.scheme }}"
+  PUBLIC_REQUEST_SCHEME: https
 
   INTERNAL_DOMAIN_NAME: "{{ include "kobo.fullname" . }}-kpi"
 
