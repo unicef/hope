@@ -1,4 +1,4 @@
-import React  from 'react';
+import React from 'react';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateSetUpFspHeader } from '../../../components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader';
 import { SetUpFspCore } from '../../../components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
@@ -12,7 +12,10 @@ export const SetUpFspPage = (): React.ReactElement => {
 
   if (permissions === null) return null;
   if (
-    !hasPermissions(PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_CREATE, permissions)
+    !hasPermissions(
+      PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_CREATE,
+      permissions,
+    )
   )
     return <PermissionDenied />;
 

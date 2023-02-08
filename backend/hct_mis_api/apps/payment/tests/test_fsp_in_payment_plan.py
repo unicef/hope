@@ -35,7 +35,7 @@ def base_setup(cls: Any) -> None:
     cls.user = UserFactory.create()
     cls.create_user_role_with_permissions(
         cls.user,
-        [Permissions.PAYMENT_MODULE_CREATE, Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+        [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
         BusinessArea.objects.get(slug="afghanistan"),
     )
 
