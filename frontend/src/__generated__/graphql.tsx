@@ -2969,8 +2969,7 @@ export type LabelNode = {
 export type LanguageObject = {
    __typename?: 'LanguageObject',
   english?: Maybe<Scalars['String']>,
-  alpha2?: Maybe<Scalars['String']>,
-  alpha3?: Maybe<Scalars['String']>,
+  code?: Maybe<Scalars['String']>,
 };
 
 export type LanguageObjectConnection = {
@@ -4983,7 +4982,7 @@ export type QueryAllKoboProjectsArgs = {
 
 
 export type QueryAllLanguagesArgs = {
-  name?: Maybe<Scalars['String']>,
+  code?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -11413,7 +11412,7 @@ export type GlobalAreaChartsQuery = (
 
 export type LanguageAutocompleteQueryVariables = {
   first?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>
+  code?: Maybe<Scalars['String']>
 };
 
 
@@ -11426,7 +11425,7 @@ export type LanguageAutocompleteQuery = (
       & Pick<LanguageObjectEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'LanguageObject' }
-        & Pick<LanguageObject, 'english' | 'alpha2'>
+        & Pick<LanguageObject, 'english' | 'code'>
       )> }
     )>> }
   )> }
@@ -21967,13 +21966,13 @@ export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaCha
 export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
 export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
 export const LanguageAutocompleteDocument = gql`
-    query LanguageAutocomplete($first: Int, $name: String) {
-  allLanguages(first: $first, name: $name) {
+    query LanguageAutocomplete($first: Int, $code: String) {
+  allLanguages(first: $first, code: $code) {
     edges {
       cursor
       node {
         english
-        alpha2
+        code
       }
     }
   }
@@ -22010,7 +22009,7 @@ export function withLanguageAutocomplete<TProps, TChildProps = {}>(operationOpti
  * const { data, loading, error } = useLanguageAutocompleteQuery({
  *   variables: {
  *      first: // value for 'first'
- *      name: // value for 'name'
+ *      code: // value for 'code'
  *   },
  * });
  */
@@ -24713,8 +24712,7 @@ export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type LanguageObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObject'] = ResolversParentTypes['LanguageObject']> = {
   english?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  alpha2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  alpha3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type LanguageObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LanguageObjectConnection'] = ResolversParentTypes['LanguageObjectConnection']> = {
