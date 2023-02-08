@@ -35,10 +35,10 @@ def reduce_asset(asset: Dict, *args: Any, **kwargs: Any) -> Dict:
     sector = None
 
     if settings:
-        if settings.get("sector"):
-            sector = settings["sector"].get("label")
-        if settings.get("country"):
-            country = settings["country"].get("label")
+        if sector := settings.get("sector"):
+            sector = sector.get("label")
+        if country := settings.get("country"):
+            country = next(iter(country)).get("label") if isinstance(country, list) else country.get("label")
 
     return {
         "id": asset["uid"],

@@ -110,7 +110,7 @@ class TestUkrainianRegistrationService(TestCase):
 
         records = [
             Record(
-                registration=1,
+                registration=17,
                 timestamp=timezone.make_aware(datetime.datetime(2022, 4, 1)),
                 source_id=1,
                 fields={
@@ -121,6 +121,13 @@ class TestUkrainianRegistrationService(TestCase):
                     "localization-info": localization_info,
                     "prefered_language_of_contact": "ta",
                 },
+            ),
+            Record(
+                registration=17,
+                timestamp=timezone.make_aware(datetime.datetime(2022, 4, 1)),
+                source_id=2,
+                fields={},
+                status=Record.STATUS_IMPORTED,
             ),
         ]
 
@@ -134,7 +141,9 @@ class TestUkrainianRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
 
         self.records[0].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
+        self.assertEqual(
+            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
+        )
 
         self.assertEqual(ImportedHousehold.objects.count(), 1)
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
@@ -165,3 +174,35 @@ class TestUkrainianRegistrationService(TestCase):
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
             },
         )
+
+    def test_import_record_twice(self) -> None:
+        service = SriLankaRegistrationService()
+        rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
+
+        service.process_records(rdi.id, [self.records[0].id])
+        self.records[0].refresh_from_db()
+
+        self.assertEqual(Record.objects.first().status, Record.STATUS_IMPORTED)
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+
+        # Process again, but no new household created
+        service.process_records(rdi.id, [self.records[0].id])
+        self.records[0].refresh_from_db()
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+
+    def test_import_record_not_from_registration_17(self) -> None:
+        record = Record.objects.create(
+            registration=666,
+            timestamp=timezone.make_aware(datetime.datetime(2022, 4, 1)),
+            source_id=2,
+            fields={},
+            status=Record.STATUS_TO_IMPORT,
+        )
+
+        service = SriLankaRegistrationService()
+        rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
+        service.process_records(rdi.id, [record.id])
+
+        record.refresh_from_db()
+        self.assertEqual(record.status, Record.STATUS_ERROR)
+        self.assertEqual(ImportedHousehold.objects.count(), 0)

@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  cypress:
+    build: .
+    volumes:
+      - .:/app
+    command: yarn cypress run
