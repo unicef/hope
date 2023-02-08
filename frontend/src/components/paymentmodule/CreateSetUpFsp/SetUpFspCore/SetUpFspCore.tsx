@@ -1,8 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
-import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +18,6 @@ import {
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../core/LoadingComponent';
-import { DeliveryMechanismWarning } from '../../EditSetUpFsp/DeliveryMechanismWarning';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
 
@@ -64,7 +62,7 @@ export const SetUpFspCore = ({
   const isEdit = location.pathname.indexOf('edit') !== -1;
 
   const [activeStep, setActiveStep] = useState(isEdit ? 1 : 0);
-  const [warning, setWarning] = useState('');
+  // const [warning, setWarning] = useState('');
 
   const [
     chooseDeliveryMechanisms,
@@ -93,7 +91,7 @@ export const SetUpFspCore = ({
   const handleChooseDeliveryMechanisms = async (
     values: FormValues,
   ): Promise<void> => {
-    setWarning('');
+    // setWarning('');
     const mappedDeliveryMechanisms = values.deliveryMechanisms.map(
       (el) => el.deliveryMechanism,
     );
