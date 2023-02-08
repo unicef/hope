@@ -55,7 +55,8 @@ export enum Action {
   Approve = 'APPROVE',
   Authorize = 'AUTHORIZE',
   Review = 'REVIEW',
-  Reject = 'REJECT'
+  Reject = 'REJECT',
+  Finish = 'FINISH'
 }
 
 export type ActionPaymentPlanInput = {
@@ -3913,7 +3914,7 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  Reconciled = 'RECONCILED'
+  Finished = 'FINISHED'
 }
 
 export enum PaymentRecordDeliveryType {
@@ -4013,7 +4014,9 @@ export enum PaymentRecordStatus {
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
-  ForceFailed = 'FORCE_FAILED'
+  ForceFailed = 'FORCE_FAILED',
+  PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
+  Pending = 'PENDING'
 }
 
 export enum PaymentStatus {
@@ -4021,7 +4024,9 @@ export enum PaymentStatus {
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
-  ForceFailed = 'FORCE_FAILED'
+  ForceFailed = 'FORCE_FAILED',
+  PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
+  Pending = 'PENDING'
 }
 
 export type PaymentVerificationLogEntryNode = Node & {

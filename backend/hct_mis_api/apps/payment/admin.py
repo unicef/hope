@@ -339,7 +339,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             ~Q(
                 status__in=[
                     PaymentPlan.Status.OPEN,
-                    PaymentPlan.Status.RECONCILED,
+                    PaymentPlan.Status.FINISHED,
                 ],
             ),
             delivery_mechanisms__financial_service_provider=obj,
