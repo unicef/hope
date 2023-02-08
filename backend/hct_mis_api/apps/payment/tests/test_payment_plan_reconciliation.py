@@ -636,7 +636,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, None)
-            self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
+            self.assertEqual(payment.status, Payment.STATUS_PENDING)
             self.assertEqual(payment_plan.is_reconciled, False)
 
             filled_file_name = "filled.xlsx"
