@@ -9,7 +9,9 @@ describe('components/paymentmodule/CreatePaymentPlanHeader', () => {
       <CreatePaymentPlanHeader
         handleSubmit={() => Promise.resolve()}
         businessArea='afghanistan'
-        permissions={[PERMISSIONS.PAYMENT_MODULE_VIEW_LIST]} loadingCreate={false} />,
+        permissions={[PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST]}
+        loadingCreate={false}
+      />,
     );
     expect(container).toMatchSnapshot();
   });

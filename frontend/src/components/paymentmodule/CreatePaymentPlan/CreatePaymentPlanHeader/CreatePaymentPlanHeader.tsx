@@ -33,7 +33,7 @@ export const CreatePaymentPlanHeader = ({
     <PageHeader
       title={t('New Payment Plan')}
       breadCrumbs={
-        hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions)
+        hasPermissions(PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST, permissions)
           ? breadCrumbsItems
           : null
       }

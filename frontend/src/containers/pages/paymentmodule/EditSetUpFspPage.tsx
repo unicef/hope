@@ -1,4 +1,4 @@
-import React  from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -27,7 +27,10 @@ export const EditSetUpFspPage = (): React.ReactElement => {
 
   if (permissions === null) return null;
   if (
-    !hasPermissions(PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_UPDATE, permissions)
+    !hasPermissions(
+      PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE,
+      permissions,
+    )
   )
     return <PermissionDenied />;
   if (!paymentPlanData) return null;

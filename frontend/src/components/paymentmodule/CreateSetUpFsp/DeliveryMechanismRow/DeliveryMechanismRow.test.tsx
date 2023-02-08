@@ -35,7 +35,7 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
         arrayHelpers={[]}
         deliveryMechanismsChoices={deliveryMechanismsChoices}
         fspsChoices={mappedFsps}
-        permissions={[PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_REMOVE]}
+        permissions={[PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_REMOVE]}
       />,
     );
 
