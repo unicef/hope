@@ -871,7 +871,7 @@ type FinancialServiceProviderNode implements Node {
   distributionLimit: Float
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
-  fspXlsxTemplate: FinancialServiceProviderXlsxTemplateNode
+  xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -921,7 +921,6 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   PAYMENT_ID
   HOUSEHOLD_ID
   HOUSEHOLD_SIZE
-  ADMIN_LEVEL_2
   COLLECTOR_NAME
   PAYMENT_CHANNEL
   FSP_NAME
@@ -938,7 +937,8 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   createdBy: UserNode
   name: String!
   columns: FinancialServiceProviderXlsxTemplateColumns!
-  financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  coreFields: [String!]!
+  financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
 }
 
 type FinancialServiceProviderXlsxTemplateNodeConnection {
@@ -3001,7 +3001,7 @@ type Query {
   financialServiceProviderXlsxReport(id: ID!): FinancialServiceProviderXlsxReportNode
   allFinancialServiceProviderXlsxReports(offset: Int, before: String, after: String, first: Int, last: Int, status: String, orderBy: String): FinancialServiceProviderXlsxReportNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
-  allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, fspXlsxTemplate: ID, orderBy: String): FinancialServiceProviderNodeConnection
+  allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, xlsxTemplates: [ID], orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   allPaymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int, paymentVerificationPlan: ID, status: String, paymentPlanId: String, search: String, businessArea: String!, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
   paymentVerificationPlan(id: ID!): PaymentVerificationPlanNode
