@@ -107,9 +107,9 @@ class TestAllFinancialServiceProviders(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         permissions = [
-            Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS,
-            Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE,
-            Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE,
+            Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS,
+            Permissions.PM_FINANCIAL_SERVICE_PROVIDER_CREATE,
+            Permissions.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE,
         ]
         cls.create_user_role_with_permissions(
             cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)

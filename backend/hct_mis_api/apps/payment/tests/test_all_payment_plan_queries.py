@@ -124,7 +124,7 @@ class TestPaymentPlanQueries(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PAYMENT_MODULE_VIEW_LIST], BusinessArea.objects.get(slug="afghanistan")
+            cls.user, [Permissions.PM_VIEW_LIST], BusinessArea.objects.get(slug="afghanistan")
         )
 
         with freeze_time("2020-10-10"):
