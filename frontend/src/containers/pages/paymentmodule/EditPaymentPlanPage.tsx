@@ -15,7 +15,6 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
-  useCurrencyChoicesQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '../../../__generated__/graphql';
@@ -50,15 +49,9 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     variables: { businessArea, paymentPlanApplicable: true },
   });
 
-  const {
-    data: currencyChoicesData,
-    loading: loadingCurrencyChoices,
-  } = useCurrencyChoicesQuery();
-
-  if (loadingTargetPopulations || loadingCurrencyChoices || loadingPaymentPlan)
+  if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !currencyChoicesData || !paymentPlanData)
-    return null;
+  if (!allTargetPopulationsData || !paymentPlanData) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
@@ -160,10 +153,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters
-            currencyChoicesData={currencyChoicesData.currencyChoices}
-            values={values}
-          />
+          <PaymentPlanParameters values={values} />
         </Form>
       )}
     </Formik>
