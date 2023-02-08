@@ -81,7 +81,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
   };
 
   const canUploadFile = hasPermissions(
-    PERMISSIONS.PM_PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
+    PERMISSIONS.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
     permissions,
   );
 

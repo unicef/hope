@@ -9,7 +9,7 @@ describe('components/paymentmodule/EditFspHeader', () => {
       <EditFspHeader
         handleSubmit={jest.fn()}
         businessArea='afghanistan'
-        permissions={[PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST]}
+        permissions={[PERMISSIONS.PM_VIEW_LIST]}
       />,
     );
     expect(container).toMatchSnapshot();
