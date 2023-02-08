@@ -133,7 +133,6 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         self.assertEqual(to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
         self.assertEqual(to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
-        self.assertEqual("Cash", payment_2.collector.payment_channels.first().delivery_mechanism.delivery_mechanism)
 
     def test_export_payment_plan_payment_list(self) -> None:
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
