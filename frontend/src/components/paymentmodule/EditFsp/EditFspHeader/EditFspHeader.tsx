@@ -30,7 +30,7 @@ export function EditFspHeader({
     <PageHeader
       title={t('Edit FSP')}
       breadCrumbs={
-        hasPermissions(PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST, permissions)
+        hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions)
           ? breadCrumbsItems
           : null
       }

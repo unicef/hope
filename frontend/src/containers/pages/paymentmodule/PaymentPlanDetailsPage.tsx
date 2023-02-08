@@ -32,7 +32,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   if (permissions === null) return null;
   if (!data) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_MODULE_VIEW_DETAILS, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
   const { paymentPlan } = data;
   const shouldDisplayEntitlement =
