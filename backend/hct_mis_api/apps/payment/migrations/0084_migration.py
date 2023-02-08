@@ -4,6 +4,8 @@ from django.db import migrations, models
 import django_fsm
 import hct_mis_api.apps.payment.models
 
+from django.conf import settings
+
 
 class Migration(migrations.Migration):
 
