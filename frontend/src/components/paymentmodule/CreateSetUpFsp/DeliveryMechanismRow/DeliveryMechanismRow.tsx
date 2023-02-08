@@ -33,7 +33,7 @@ export const DeliveryMechanismRow = ({
         <Grid item xs={3}>
           <Grid item xs={12}>
             <Box display='flex' alignItems='center'>
-              <Box mr={4}>{index + 1}</Box>
+              {/* <Box mr={4}>{index + 1}</Box> */}
               {step === 0 && deliveryMechanismsChoices && (
                 <Field
                   name={`deliveryMechanisms[${index}].deliveryMechanism`}
@@ -65,7 +65,7 @@ export const DeliveryMechanismRow = ({
             </Grid>
           </Grid>
         )}
-        {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
+        {/* {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
           <Grid item xs={3}>
             {hasPermissions(
               PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_REMOVE,
@@ -76,7 +76,7 @@ export const DeliveryMechanismRow = ({
               </IconButton>
             ) : null}
           </Grid>
-        )}
+        )} */}
       </Grid>
     </Box>
   );
