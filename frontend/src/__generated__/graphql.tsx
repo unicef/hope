@@ -1443,7 +1443,7 @@ export type GetCashplanVerificationSampleSizeInput = {
   cashOrPaymentPlanId?: Maybe<Scalars['ID']>,
   paymentVerificationPlanId?: Maybe<Scalars['ID']>,
   sampling: Scalars['String'],
-  verificationChannel?: Maybe<Scalars['String']>,
+  verificationChannel: Scalars['String'],
   businessAreaSlug: Scalars['String'],
   fullListArguments?: Maybe<FullListArguments>,
   randomSamplingArguments?: Maybe<RandomSamplingArguments>,
