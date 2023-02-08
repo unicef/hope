@@ -218,7 +218,7 @@ class FinancialServiceProviderFilter(FilterSet):
             "delivery_mechanisms",
             "distribution_limit",
             "communication_channel",
-            "fsp_xlsx_template",
+            "xlsx_templates",
         )
         model = FinancialServiceProvider
 
@@ -352,7 +352,6 @@ class PaymentFilter(FilterSet):
             "household__size",
             "admin2",
             "collector_id",
-            "assigned_payment_channel",
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",

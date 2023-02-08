@@ -69,7 +69,6 @@ export const AllPaymentsForTable = gql`
             id
             fullName
           }
-          hasPaymentChannel
           financialServiceProvider {
             id
             name

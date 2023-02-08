@@ -16,15 +16,10 @@ from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
-    PaymentPlan,
-)
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -53,23 +48,6 @@ def base_setup(cls: Any) -> None:
         },
         individuals_data=[{}],
     )
-    cls.delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-    )
-    cls.delivery_mechanism_voucher, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
-    )
-    cls.delivery_mechanism_transfer, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
-    )
-    cls.payment_channel_1_voucher = PaymentChannelFactory(
-        individual=cls.individuals_1[0],
-        delivery_mechanism=cls.delivery_mechanism_voucher,
-    )
-    cls.payment_channel_1_cash = PaymentChannelFactory(
-        individual=cls.individuals_1[0],
-        delivery_mechanism=cls.delivery_mechanism_cash,
-    )
     IndividualRoleInHouseholdFactory(
         individual=cls.individuals_1[0],
         household=cls.household_1,
@@ -82,14 +60,6 @@ def base_setup(cls: Any) -> None:
             "business_area": cls.business_area,
         },
         individuals_data=[{}],
-    )
-    cls.payment_channel_2_transfer = PaymentChannelFactory(
-        individual=cls.individuals_2[0],
-        delivery_mechanism=cls.delivery_mechanism_transfer,
-    )
-    cls.payment_channel_2_cash = PaymentChannelFactory(
-        individual=cls.individuals_2[0],
-        delivery_mechanism=cls.delivery_mechanism_cash,
     )
     IndividualRoleInHouseholdFactory(
         individual=cls.individuals_2[0],
@@ -108,14 +78,6 @@ def base_setup(cls: Any) -> None:
         individual=cls.individuals_3[0],
         household=cls.household_3,
         role=ROLE_PRIMARY,
-    )
-    cls.payment_channel_3_transfer = PaymentChannelFactory(
-        individual=cls.individuals_3[0],
-        delivery_mechanism=cls.delivery_mechanism_transfer,
-    )
-    cls.payment_channel_3_cash = PaymentChannelFactory(
-        individual=cls.individuals_3[0],
-        delivery_mechanism=cls.delivery_mechanism_cash,
     )
 
 
@@ -489,16 +451,6 @@ class TestFSPAssignment(APITestCase):
 
         for fsp in [self.santander_fsp, self.bank_of_america_fsp, self.bank_of_europe_fsp]:
             fsp.delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_MOBILE_MONEY)
-
-        delivery_mechanism_mobile_money, _ = DeliveryMechanism.objects.get_or_create(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_MOBILE_MONEY,
-        )
-        for individual in [self.individuals_1[0], self.individuals_2[0], self.individuals_3[0]]:
-            PaymentChannelFactory(
-                individual=individual,
-                delivery_mechanism=delivery_mechanism_mobile_money,
-            )
-
         new_program_mutation_variables = dict(
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,
@@ -702,7 +654,6 @@ class TestFSPAssignment(APITestCase):
             excluded=False,
             delivery_type=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
         )
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -736,9 +687,8 @@ class TestFSPAssignment(APITestCase):
         self.payment_plan.refresh_from_db()
         assert self.payment_plan.delivery_mechanisms.filter(financial_service_provider=self.santander_fsp).count() == 1
         payment1.refresh_from_db()
-        assert payment1.financial_service_provider is None
-        assert payment1.assigned_payment_channel is None
-        assert payment1.delivery_type is None
+        assert payment1.financial_service_provider == self.santander_fsp
+        assert payment1.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
 
 
 class TestVolumeByDeliveryMechanism(APITestCase):
@@ -855,7 +805,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             parent=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_2[0],
-            assigned_payment_channel=self.payment_channel_2_cash,
             entitlement_quantity=500,
             entitlement_quantity_usd=100,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
@@ -867,7 +816,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             parent=self.payment_plan,
             financial_service_provider=self.santander_fsp,
             collector=self.individuals_3[0],
-            assigned_payment_channel=self.payment_channel_3_transfer,
             entitlement_quantity=1000,
             entitlement_quantity_usd=200,
             delivery_type=GenericPayment.DELIVERY_TYPE_TRANSFER,
@@ -919,52 +867,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         with self.assertRaisesMessage(
             GraphQLError,
             f"Delivery mechanism 'Voucher' is not supported by FSP '{self.santander_fsp}'",
-        ):
-            PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
-                dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
-            )
-
-    def test_not_all_payments_covered_with_chosen_fsps(self) -> None:
-        PaymentFactory(
-            parent=self.payment_plan,
-            collector=self.individuals_2[0],  # DELIVERY_TYPE_TRANSFER
-            entitlement_quantity=1000000,
-            entitlement_quantity_usd=200000,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
-            household=self.household_2,
-            excluded=False,
-            delivery_type=None,
-            financial_service_provider=None,
-            assigned_payment_channel=None,
-        )
-        PaymentFactory(
-            parent=self.payment_plan,
-            collector=self.individuals_1[0],  # DELIVERY_TYPE_VOUCHER
-            entitlement_quantity=1000000,
-            entitlement_quantity_usd=200000,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
-            household=self.household_1,
-            excluded=False,
-            delivery_type=None,
-            financial_service_provider=None,
-            assigned_payment_channel=None,
-        )
-
-        dm1 = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
-            financial_service_provider=self.santander_fsp,
-            delivery_mechanism_order=1,
-        )
-        dm_to_fsp_mapping = [
-            {
-                "fsp": self.santander_fsp,
-                "delivery_mechanism_per_payment_plan": dm1,
-            }
-        ]
-        with self.assertRaisesMessage(
-            GraphQLError,
-            "Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
         ):
             PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
@@ -1024,7 +926,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             excluded=False,
             delivery_type=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
         )
         payment3 = PaymentFactory(
             parent=self.payment_plan,
@@ -1036,7 +937,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             excluded=False,
             delivery_type=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
         )
         payment1 = PaymentFactory(
             parent=self.payment_plan,
@@ -1048,7 +948,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             excluded=False,
             delivery_type=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
         )
 
         self.santander_fsp.distribution_limit = 501
@@ -1066,12 +965,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             financial_service_provider=self.bank_of_europe_fsp,
             delivery_mechanism_order=2,
         )
-        dm3 = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
-            financial_service_provider=self.bank_of_america_fsp,
-            delivery_mechanism_order=3,
-        )
 
         dm_to_fsp_mapping = [
             {
@@ -1082,10 +975,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
                 "fsp": self.bank_of_europe_fsp,
                 "delivery_mechanism_per_payment_plan": dm2,
             },
-            {
-                "fsp": self.bank_of_america_fsp,
-                "delivery_mechanism_per_payment_plan": dm3,
-            },
         ]
 
         PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
@@ -1093,20 +982,19 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         )
 
         payment2.refresh_from_db()
+        print(payment2.financial_service_provider)
         # santander_fsp has a limited value, so it could take only one transfer payment
         assert payment2.financial_service_provider == self.santander_fsp
-        assert payment2.assigned_payment_channel == self.payment_channel_2_transfer
         assert payment2.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
         payment3.refresh_from_db()
         # second transfer payment is covered by bank_of_europe_fsp
         assert payment3.financial_service_provider == self.bank_of_europe_fsp
-        assert payment3.assigned_payment_channel == self.payment_channel_3_transfer
         assert payment3.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
         payment1.refresh_from_db()
+        print(payment1.financial_service_provider)
         # voucher payment is covered by bank_of_america_fsp
-        assert payment1.financial_service_provider == self.bank_of_america_fsp
-        assert payment1.assigned_payment_channel == self.payment_channel_1_voucher
-        assert payment1.delivery_type == GenericPayment.DELIVERY_TYPE_VOUCHER
+        assert payment1.financial_service_provider == self.bank_of_europe_fsp
+        assert payment1.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
 
     def test_not_all_payments_covered_because_of_fsp_limit(self) -> None:
         PaymentFactory(
@@ -1119,7 +1007,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             excluded=False,
             delivery_type=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
         )
         PaymentFactory(
             parent=self.payment_plan,
@@ -1131,7 +1018,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             excluded=False,
             delivery_type=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
         )
         self.bank_of_europe_fsp.distribution_limit = 1001
         self.bank_of_europe_fsp.save()
