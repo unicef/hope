@@ -133,7 +133,7 @@ export const Entitlement = ({
   }
 
   const canApplySteficonRule = hasPermissions(
-    PERMISSIONS.PM_PAYMENT_MODULE_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+    PERMISSIONS.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
     permissions,
   );
 

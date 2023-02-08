@@ -9,7 +9,7 @@ describe('components/paymentmodule/CreatePaymentPlanHeader', () => {
       <CreatePaymentPlanHeader
         handleSubmit={() => Promise.resolve()}
         businessArea='afghanistan'
-        permissions={[PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST]}
+        permissions={[PERMISSIONS.PM_VIEW_LIST]}
         loadingCreate={false}
       />,
     );

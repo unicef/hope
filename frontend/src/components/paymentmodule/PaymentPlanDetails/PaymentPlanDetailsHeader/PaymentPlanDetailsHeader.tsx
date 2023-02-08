@@ -165,7 +165,7 @@ export const PaymentPlanDetailsHeader = ({
         </Box>
       }
       breadCrumbs={
-        hasPermissions(PERMISSIONS.PM_PAYMENT_MODULE_VIEW_DETAILS, permissions)
+        hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
           ? breadCrumbsItems
           : null
       }

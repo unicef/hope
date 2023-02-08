@@ -31,13 +31,13 @@ export function PaymentModulePage(): React.ReactElement {
   const debouncedPlanFilter = useDebounce(planfilter, 500);
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_MODULE_VIEW_LIST, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   return (
     <>
       <PageHeader title={t('Payment Module')}>
-        {hasPermissions(PERMISSIONS.PM_PAYMENT_MODULE_CREATE, permissions) && (
+        {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
           <Button
             variant='contained'
             color='primary'
@@ -56,7 +56,7 @@ export function PaymentModulePage(): React.ReactElement {
           filter={debouncedPlanFilter}
           businessArea={businessArea}
           canViewDetails={hasPermissions(
-            PERMISSIONS.PM_PAYMENT_MODULE_VIEW_DETAILS,
+            PERMISSIONS.PM_VIEW_DETAILS,
             permissions,
           )}
         />
