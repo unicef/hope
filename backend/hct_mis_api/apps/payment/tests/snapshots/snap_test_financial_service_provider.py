@@ -16,9 +16,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -27,9 +24,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -38,9 +32,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -49,9 +40,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -60,9 +48,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -71,9 +56,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -82,9 +64,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -93,9 +72,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -104,9 +80,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 },
@@ -115,9 +88,6 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
-                        },
-                        'fspXlsxTemplate': {
-                            'name': 'TestName123'
                         }
                     }
                 }

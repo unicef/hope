@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -39,13 +39,13 @@ from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    Scope,
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    FieldFactory,
 )
+from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.steficon.models import RuleCommit
@@ -60,6 +60,19 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 logger = logging.getLogger(__name__)
+
+
+class ChoiceArrayFieldDM(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        defaults = {
+            "form_class": forms.TypedMultipleChoiceField,
+            "choices": self.base_field.choices,
+            "coerce": self.base_field.to_python,
+            "widget": forms.SelectMultiple,
+        }
+        defaults.update(kwargs)
+
+        return super(ArrayField, self).formfield(**defaults)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -678,9 +691,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
         ("household_size", _("Household Size")),
-        ("admin_level_2", _("Admin Level 2")),
         ("collector_name", _("Collector Name")),
-        ("payment_channel", _("Payment Channel (Delivery mechanism)")),
+        ("payment_channel", _("Payment Channel")),
         ("fsp_name", _("FSP Name")),
         ("currency", _("Currency")),
         ("entitlement_quantity", _("Entitlement Quantity")),
@@ -706,33 +718,75 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         help_text=_("Select the columns to include in the report"),
     )
 
+    core_fields = ChoiceArrayFieldDM(
+        models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
+        default=list,
+    )
+
+    @classmethod
+    def get_column_from_core_field(cls, payment: "Payment", core_field_name: str) -> Any:
+        collector = payment.collector
+        household = payment.household
+        core_fields_attributes = FieldFactory(CORE_FIELDS_ATTRIBUTES).to_dict_by("name")
+        attr = core_fields_attributes[core_field_name]
+        lookup = attr["lookup"]
+        lookup = lookup.replace("__", ".")
+        if attr["associated_with"] == _INDIVIDUAL:
+            return nested_getattr(collector, lookup, None)
+        if attr["associated_with"] == _HOUSEHOLD:
+            return nested_getattr(household, lookup, None)
+        return None
+
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str:
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
             "household_id": (payment.household, "unicef_id"),
             "household_size": (payment.household, "size"),
-            "admin_level_2": (payment.household.admin2, "title"),
+            "admin_level_2": (payment.household.admin2, "name"),
             "collector_name": (payment.collector, "full_name"),
+            "payment_channel": (payment, "delivery_type"),
             "fsp_name": (payment.financial_service_provider, "name"),
             "currency": (payment, "currency"),
-            "payment_channel": (
-                getattr(payment.assigned_payment_channel, "delivery_mechanism", None),
-                "delivery_mechanism",
-            ),
             "entitlement_quantity": (payment, "entitlement_quantity"),
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
-
         obj, nested_field = map_obj_name_column[column_name]
-
         return getattr(obj, nested_field, None) or ""
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns)})"
+
+
+class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="created_fsp_xlsx_template_per_delivery_mechanisms",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    financial_service_provider = models.ForeignKey(
+        "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
+    )
+    delivery_mechanism = models.CharField(
+        max_length=255, verbose_name=_("Delivery Mechanism"), choices=GenericPayment.DELIVERY_TYPE_CHOICE
+    )
+    xlsx_template = models.ForeignKey(
+        "FinancialServiceProviderXlsxTemplate",
+        on_delete=models.CASCADE,
+        related_name="fsp_xlsx_template_per_delivery_mechanisms",
+    )
+
+    class Meta:
+        unique_together = ("financial_service_provider", "delivery_mechanism")
+
+    def __str__(self) -> str:
+        return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
 
 
 class FinancialServiceProvider(TimeStampedUUIDModel):
@@ -772,16 +826,22 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         blank=True,
         default=dict,
     )
-    fsp_xlsx_template = models.ForeignKey(
+    xlsx_templates = models.ManyToManyField(
         "payment.FinancialServiceProviderXlsxTemplate",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_("XLSX Template"),
+        through="FspXlsxTemplatePerDeliveryMechanism",
+        related_name="financial_service_providers",
     )
 
     def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
+
+    def get_xlsx_template(self, delivery_mechanism: str) -> Optional["FinancialServiceProviderXlsxTemplate"]:
+        try:
+            return self.xlsx_templates.get(
+                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=delivery_mechanism
+            )
+        except FinancialServiceProviderXlsxTemplate.DoesNotExist:
+            return None
 
     def can_accept_any_volume(self) -> bool:
         if (
@@ -886,35 +946,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     def status_send(self, sent_by: "User") -> None:
         self.sent_date = timezone.now()
         self.sent_by = sent_by
-
-
-class PaymentChannel(TimeStampedUUIDModel):
-    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
-    delivery_mechanism = models.ForeignKey(
-        "payment.DeliveryMechanism", on_delete=models.SET_NULL, related_name="payment_channels", null=True
-    )
-    delivery_data = JSONField(default=dict, blank=True)
-    is_fallback = models.BooleanField(default=False)
-
-    @property
-    def all_delivery_data(self) -> Dict:
-        associated_objects = {_INDIVIDUAL: self.individual, _HOUSEHOLD: self.individual.household}
-        global_core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.PAYMENT_CHANNEL]).to_dict_by("name")
-
-        data = {**self.delivery_data}
-        for field_name in self.delivery_mechanism.global_core_fields:
-            associated_object = associated_objects.get(global_core_fields[field_name]["associated_with"])
-            data[field_name] = getattr(associated_object, field_name, None)
-
-        return data
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["individual", "delivery_mechanism"],
-                name="unique individual_delivery_mechanism",
-            ),
-        ]
 
 
 class CashPlan(GenericPaymentPlan):
@@ -1096,7 +1127,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
     payment_verification = GenericRelation(
         "payment.PaymentVerification",
         content_type_field="payment_content_type",
@@ -1489,38 +1519,3 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
-
-
-class ChoiceArrayFieldDM(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
-        defaults = {
-            "form_class": forms.TypedMultipleChoiceField,
-            "choices": self.base_field.choices,
-            "coerce": self.base_field.to_python,
-            "widget": forms.SelectMultiple,
-        }
-        defaults.update(kwargs)
-
-        return super(ArrayField, self).formfield(**defaults)
-
-
-class DeliveryMechanism(TimeStampedUUIDModel):
-    # TODO MB rdi logic
-    # create imported payment channel instance + show on frontend which ones gonna be created
-    # check all PCH XLS rows and what validate what PCHs can be created based on this data
-    # If CASH can't be created raise validation error
-    # create separate logic for payment channel scoep and fill PCH delivery data
-    delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, unique=True)
-    global_core_fields = ChoiceArrayFieldDM(
-        models.CharField(max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.GLOBAL).to_choices()),
-        default=list,
-    )
-    payment_channel_fields = ChoiceArrayFieldDM(
-        models.CharField(
-            max_length=255, blank=True, choices=FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices()
-        ),
-        default=list,
-    )
-
-    def __str__(self) -> str:
-        return self.delivery_mechanism
