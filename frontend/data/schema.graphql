@@ -1952,7 +1952,6 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
-  paymentChannels: [BankAccountInfoNode]
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -1970,6 +1969,7 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -2139,8 +2139,7 @@ type LabelNode {
 
 type LanguageObject {
   english: String
-  alpha2: String
-  alpha3: String
+  code: String
 }
 
 type LanguageObjectConnection {
@@ -2304,15 +2303,6 @@ type PartnerType {
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
-type PaymentChannelNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  individual: IndividualNode!
-  isFallback: Boolean!
-  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-}
-
 type PaymentConflictDataNode {
   paymentPlanId: String
   paymentPlanUnicefId: String
@@ -2367,12 +2357,10 @@ type PaymentNode implements Node {
   entitlementDate: DateTime
   financialServiceProvider: FinancialServiceProviderNode
   collector: IndividualNode!
-  assignedPaymentChannel: PaymentChannelNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
   paymentPlanSoftConflictedData: [PaymentConflictDataNode]
-  hasPaymentChannel: Boolean
   fullName: String
   targetPopulation: TargetPopulationNode
   verification: PaymentVerificationNode
@@ -3054,7 +3042,7 @@ type Query {
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   cashAssistUrlPrefix: String
-  allLanguages(name: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
+  allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode

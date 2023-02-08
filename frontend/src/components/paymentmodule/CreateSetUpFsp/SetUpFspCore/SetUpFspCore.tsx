@@ -1,8 +1,7 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
-import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +18,6 @@ import {
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../core/LoadingComponent';
-import { DeliveryMechanismWarning } from '../../EditSetUpFsp/DeliveryMechanismWarning';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
 
@@ -64,7 +62,7 @@ export const SetUpFspCore = ({
   const isEdit = location.pathname.indexOf('edit') !== -1;
 
   const [activeStep, setActiveStep] = useState(isEdit ? 1 : 0);
-  const [warning, setWarning] = useState('');
+  // const [warning, setWarning] = useState('');
 
   const [
     chooseDeliveryMechanisms,
@@ -78,7 +76,7 @@ export const SetUpFspCore = ({
   if (deliveryMechanismLoading) return <LoadingComponent />;
 
   const steps = [
-    t('Choose Delivery Mechanism Order'),
+    t('Choose Delivery Mechanism'),
     t('Assign FSP per Delivery Mechanism'),
   ];
 
@@ -93,7 +91,7 @@ export const SetUpFspCore = ({
   const handleChooseDeliveryMechanisms = async (
     values: FormValues,
   ): Promise<void> => {
-    setWarning('');
+    // setWarning('');
     const mappedDeliveryMechanisms = values.deliveryMechanisms.map(
       (el) => el.deliveryMechanism,
     );
@@ -126,14 +124,13 @@ export const SetUpFspCore = ({
       showMessage(t('Delivery Mechanisms have been set'));
       handleNextStep();
     } catch (e) {
-      if (
-        e.graphQLErrors.length &&
-        e.graphQLErrors[0]?.message.includes('sufficient')
-      ) {
-        setWarning(e.graphQLErrors[0].message);
-      } else {
-        e.graphQLErrors.map((x) => showMessage(x.message));
-      }
+      // if (
+      //   e.graphQLErrors.length &&
+      //   e.graphQLErrors[0]?.message.includes('sufficient')
+      // ) {
+      //   setWarning(e.graphQLErrors[0].message);
+      // }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -195,7 +192,8 @@ export const SetUpFspCore = ({
                     })}
                   </Stepper>
                 </Box>
-                {warning && <DeliveryMechanismWarning warning={warning} />}
+                {/* // warning not shown in Payment Module 1.0 */}
+                {/* {warning && <DeliveryMechanismWarning warning={warning} />} */}
                 <FieldArray
                   name='deliveryMechanisms'
                   render={(arrayHelpers) => {
@@ -236,7 +234,8 @@ export const SetUpFspCore = ({
                             );
                           },
                         )}
-                        {activeStep === 0 && (
+                        {/* // button not shown in Payment Module 1.0 */}
+                        {/* {activeStep === 0 && (
                           <Grid container>
                             <Grid item xs={12}>
                               <Box pt={3}>
@@ -256,7 +255,7 @@ export const SetUpFspCore = ({
                               </Box>
                             </Grid>
                           </Grid>
-                        )}
+                        )} */}
                       </>
                     );
                   }}

@@ -29,12 +29,11 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
@@ -251,24 +250,8 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         cls.household_1, cls.individual_1 = cls.create_household_and_individual()
         cls.household_1.refresh_from_db()
-
-        cls.delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        )
-        cls.payment_channel_1_cash = PaymentChannelFactory(
-            individual=cls.individual_1,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
         cls.household_2, cls.individual_2 = cls.create_household_and_individual()
-        cls.payment_channel_2_cash = PaymentChannelFactory(
-            individual=cls.individual_2,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
-        cls.payment_channel_3_cash = PaymentChannelFactory(
-            individual=cls.individual_3,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
@@ -381,6 +364,12 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
             distribution_limit=None,
         )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
+        )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
         payment = PaymentFactory(
@@ -394,7 +383,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
             excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
@@ -510,7 +498,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert (
             payment_plan.not_excluded_payments.filter(
                 financial_service_provider__isnull=False,
-                assigned_payment_channel__isnull=False,
                 delivery_type__isnull=False,
             ).count()
             == 1
@@ -627,28 +614,24 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment = payment_plan.payment_items.first()
             self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
-            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism.delivery_mechanism, "Cash")
-
             self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
             self.assertEqual(sheet.cell(row=2, column=2).value, self.household_1.unicef_id)
             self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")
             self.assertEqual(sheet.cell(row=2, column=3).value, self.household_1.size)
-            self.assertEqual(sheet.cell(row=1, column=4).value, "admin_level_2")
-            self.assertEqual(sheet.cell(row=2, column=4).value, None)
-            self.assertEqual(sheet.cell(row=1, column=5).value, "collector_name")
-            self.assertEqual(sheet.cell(row=2, column=5).value, payment.collector.full_name)
-            self.assertEqual(sheet.cell(row=1, column=6).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=6).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=7).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=7).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=8).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=10).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=11).value, None)
+            self.assertEqual(sheet.cell(row=1, column=4).value, "collector_name")
+            self.assertEqual(sheet.cell(row=2, column=4).value, payment.collector.full_name)
+            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=6).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=6).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=7).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=7).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=8).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=10).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=10).value, None)
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)

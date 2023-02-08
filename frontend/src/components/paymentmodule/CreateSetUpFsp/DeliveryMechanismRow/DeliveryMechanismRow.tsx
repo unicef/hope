@@ -1,11 +1,9 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { Field } from 'formik';
-import { Delete } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 interface DeliveryMechanismRowProps {
   index: number;
@@ -21,10 +19,8 @@ export const DeliveryMechanismRow = ({
   index,
   step,
   values,
-  arrayHelpers,
   deliveryMechanismsChoices,
   fspsChoices,
-  permissions,
 }: DeliveryMechanismRowProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
@@ -33,7 +29,7 @@ export const DeliveryMechanismRow = ({
         <Grid item xs={3}>
           <Grid item xs={12}>
             <Box display='flex' alignItems='center'>
-              <Box mr={4}>{index + 1}</Box>
+              {/* <Box mr={4}>{index + 1}</Box> */}
               {step === 0 && deliveryMechanismsChoices && (
                 <Field
                   name={`deliveryMechanisms[${index}].deliveryMechanism`}
@@ -65,7 +61,7 @@ export const DeliveryMechanismRow = ({
             </Grid>
           </Grid>
         )}
-        {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
+        {/* {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
           <Grid item xs={3}>
             {hasPermissions(
               PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_REMOVE,
@@ -76,7 +72,7 @@ export const DeliveryMechanismRow = ({
               </IconButton>
             ) : null}
           </Grid>
-        )}
+        )} */}
       </Grid>
     </Box>
   );

@@ -14,6 +14,7 @@ interface PaymentPlanParametersProps {
   values;
   currencyChoicesData: CurrencyChoicesQuery['currencyChoices'];
 }
+const tomorrow = new Date().setDate(new Date().getDate() + 1);
 
 export const PaymentPlanParameters = ({
   values,
@@ -83,7 +84,7 @@ export const PaymentPlanParameters = ({
               label={t('Dispersion End Date')}
               component={FormikDateField}
               required
-              minDate={values.dispersionStartDate}
+              minDate={tomorrow}
               disabled={!values.dispersionStartDate}
               initialFocusedDate={values.dispersionStartDate}
               fullWidth

@@ -122,6 +122,8 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
+      validateOnChange
+      validateOnBlur
     >
       {({ submitForm, values }) => (
         <Form>
