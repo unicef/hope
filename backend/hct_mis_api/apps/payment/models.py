@@ -726,6 +726,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     core_fields = ChoiceArrayFieldDM(
         models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
         default=list,
+        blank=True,
     )
 
     @classmethod
