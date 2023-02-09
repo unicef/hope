@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Any, Optional
 
 from django.contrib.postgres.fields import CICharField
+from django.core.cache import cache
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -10,6 +11,8 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Q, QuerySet
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
@@ -146,6 +149,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         the relevant ones (collectors etc.)""",
     )
 
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        cache.delete_pattern(f"count_{self.business_area.slug}_ProgramNodeConnection_*")
+        super().save(*args, **kwargs)
+
     @property
     def total_number_of_households(self) -> QuerySet:
         return (
@@ -168,7 +175,11 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.name
 
 
-# q-> print all columns in table postgres
+@receiver(post_save, sender=Program)
+def clear_program_count_cache_when_created(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
+    if created:
+        business_area_slug = instance.business_area.slug
+        cache.delete_pattern(f"count_{business_area_slug}_ProgramNodeConnection_*")
 
 
 class CashPlan(TimeStampedUUIDModel):

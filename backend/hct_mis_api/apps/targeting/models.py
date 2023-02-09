@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, List, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
+from django.core.cache import cache
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -10,6 +11,8 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField, Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
@@ -437,3 +440,10 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     def get_lookup_prefix(self, associated_with: Any) -> str:
         return ""
+
+
+@receiver(post_save, sender=TargetPopulation)
+def clear_program_count_cache_when_created(sender: Any, instance: TargetPopulation, created: bool, **kwargs: Any) -> None:
+    if created:
+        business_area_slug = instance.business_area.slug
+        cache.delete_pattern(f"count_{business_area_slug}_TargetPopulationNodeConnection_*")
