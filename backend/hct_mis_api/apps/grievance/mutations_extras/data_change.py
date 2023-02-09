@@ -713,7 +713,9 @@ def close_add_individual_grievance_ticket(grievance_ticket: GrievanceTicket, inf
         individual.save()
         if relationship_to_head_of_household == HEAD:
             household.head_of_household = individual
-            household_individuals = evaluate_qs(household.individuals.exclude(id=individual.id).select_for_update())
+            household_individuals = evaluate_qs(
+                household.individuals.exclude(id=individual.id).select_for_update().order_by("pk")
+            )
             household_individuals.update(relationship=RELATIONSHIP_UNKNOWN)
             household.save(update_fields=["head_of_household"])
         household.size += 1
@@ -937,6 +939,10 @@ def close_update_household_grievance_ticket(grievance_ticket: GrievanceTicket, i
 
     new_household = Household.objects.select_for_update().get(id=household.id)
     Household.objects.filter(id=new_household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+
+    if "admin_area" in only_approved_data:
+        new_household.set_admin_areas(only_approved_data["admin_area"])
+
     recalculate_data(new_household)
     log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
