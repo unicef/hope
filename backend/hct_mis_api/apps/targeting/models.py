@@ -443,7 +443,9 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
 
 @receiver(post_save, sender=TargetPopulation)
-def clear_program_count_cache_when_created(sender: Any, instance: TargetPopulation, created: bool, **kwargs: Any) -> None:
+def clear_program_count_cache_when_created(
+    sender: Any, instance: TargetPopulation, created: bool, **kwargs: Any
+) -> None:
     if created:
         business_area_slug = instance.business_area.slug
         cache.delete_pattern(f"count_{business_area_slug}_TargetPopulationNodeConnection_*")
