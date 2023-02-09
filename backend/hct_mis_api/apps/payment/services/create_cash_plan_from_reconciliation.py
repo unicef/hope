@@ -14,6 +14,7 @@ import openpyxl
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
+from hct_mis_api.apps.core.utils import clear_cache_for_dashboard_totals
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
 from hct_mis_api.apps.payment.models import (
@@ -84,6 +85,8 @@ class CreateCashPlanReconciliationService:
             self._parse_row(row_values, index)
         self._add_cashplan_info()
         self._update_exchange_rates()
+        # clear cached total numbers for dashboard statistics
+        clear_cache_for_dashboard_totals()
 
     def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
