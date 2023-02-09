@@ -443,7 +443,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
 
 @receiver(post_save, sender=TargetPopulation)
-def clear_program_count_cache_when_created(
+def clear_target_population_count_cache_when_created(
     sender: Any, instance: TargetPopulation, created: bool, **kwargs: Any
 ) -> None:
     if created:
