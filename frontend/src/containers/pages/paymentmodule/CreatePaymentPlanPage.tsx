@@ -15,7 +15,6 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   useAllTargetPopulationsQuery,
   useCreatePpMutation,
-  useCurrencyChoicesQuery,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
@@ -37,14 +36,8 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
 
-  const {
-    data: currencyChoicesData,
-    loading: loadingCurrencyChoices,
-  } = useCurrencyChoicesQuery();
-
-  if (loadingTargetPopulations || loadingCurrencyChoices)
-    return <LoadingComponent />;
-  if (!allTargetPopulationsData || !currencyChoicesData) return null;
+  if (loadingTargetPopulations) return <LoadingComponent />;
+  if (!allTargetPopulationsData) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
@@ -138,10 +131,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters
-            currencyChoicesData={currencyChoicesData.currencyChoices}
-            values={values}
-          />
+          <PaymentPlanParameters values={values} />
         </Form>
       )}
     </Formik>

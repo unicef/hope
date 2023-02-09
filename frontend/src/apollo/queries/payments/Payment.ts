@@ -1,65 +1,66 @@
 import { gql } from 'apollo-boost';
 
 export const Payment = gql`
-query Payment($id: ID!) {
-  payment(id: $id) {
-    id
-    unicefId
-    status
-    statusDate
-    targetPopulation {
+  query Payment($id: ID!) {
+    payment(id: $id) {
       id
-      name
-    }
-    verification {
-      id
+      unicefId
+      distributionModality
       status
       statusDate
-      receivedAmount
-      isManuallyEditable
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveryDate
-    household {
-      id
-      size
-      status
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-        fullName
-      }
-    }
-    parent {
-      id
-      unicefId
-      program {
+      targetPopulation {
         id
         name
       }
-      verificationPlans {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
+      verification {
+        id
+        status
+        statusDate
+        receivedAmount
+        isManuallyEditable
+      }
+      currency
+      entitlementQuantity
+      deliveredQuantity
+      deliveryDate
+      household {
+        id
+        size
+        status
+        unicefId
+        headOfHousehold {
+          id
+          phoneNo
+          phoneNoAlternative
+          phoneNoValid
+          phoneNoAlternativeValid
+          fullName
+        }
+      }
+      parent {
+        id
+        unicefId
+        program {
+          id
+          name
+        }
+        verificationPlans {
+          edges {
+            node {
+              id
+              status
+              verificationChannel
+            }
           }
         }
       }
-    }
-    deliveredQuantityUsd
-    deliveryType
-    transactionReferenceId
-    serviceProvider {
-      id
-      fullName
+      deliveredQuantityUsd
+      deliveryType
+      transactionReferenceId
+      serviceProvider {
+        id
+        fullName
+      }
     }
   }
-}
 `;
