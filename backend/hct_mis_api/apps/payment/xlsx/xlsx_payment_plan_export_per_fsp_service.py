@@ -99,7 +99,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                             for column_name in fsp_xlsx_template.core_fields
                         ]
                         payment_row.extend(core_fields_row)
-                        ws_fsp.append(payment_row)
+                        ws_fsp.append(list(map(self.right_format_for_xlsx, payment_row)))
 
                     self._adjust_column_width_from_col(ws_fsp, max_col=len(column_list))
 
