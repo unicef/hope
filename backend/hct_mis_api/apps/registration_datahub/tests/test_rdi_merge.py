@@ -138,6 +138,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "birth_date": "1996-11-29",  # age 25
                 "sex": "FEMALE",
                 "registration_data_import": cls.rdi_hub,
+                "phone_no": "wrong-phone",
+                "phone_no_alternative": "definitely-wrong-phone",
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
                 "household": imported_household,
