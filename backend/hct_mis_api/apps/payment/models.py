@@ -763,7 +763,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return getattr(obj, nested_field, None) or ""
 
     def __str__(self) -> str:
-        return f"{self.name} ({len(self.columns)})"
+        return f"{self.name} ({len(self.columns) + len(self.core_fields)})"
 
 
 class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
