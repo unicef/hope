@@ -242,6 +242,8 @@ export const VerificationPlanDetails = ({
                     />
                   )}
                 {canDiscard &&
+                  verificationPlan.verificationChannel ===
+                    PaymentVerificationPlanVerificationChannel.Xlsx &&
                   (xlsxFileDownloadedOrImported &&
                   verificationPlan.status ===
                     PaymentVerificationPlanStatus.Active ? (
@@ -250,13 +252,20 @@ export const VerificationPlanDetails = ({
                         loading={loadingInvalid}
                         color='primary'
                         variant='outlined'
-                        onClick={() =>
-                          mutateInvalid({
-                            variables: {
-                              paymentVerificationPlanId: verificationPlan.id,
-                            },
-                          })
-                        }
+                        onClick={async () => {
+                          try {
+                            await mutateInvalid({
+                              variables: {
+                                paymentVerificationPlanId: verificationPlan.id,
+                              },
+                            });
+                            showMessage(
+                              t('Verification plan marked as invalid.'),
+                            );
+                          } catch (e) {
+                            e.graphQLErrors.map((x) => showMessage(x.message));
+                          }
+                        }}
                       >
                         {t('Mark as Invalid')}
                       </LoadingButton>
