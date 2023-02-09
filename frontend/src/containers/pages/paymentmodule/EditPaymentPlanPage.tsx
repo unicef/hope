@@ -106,7 +106,6 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
-    console.log(values);
     try {
       const res = await mutate({
         variables: {
