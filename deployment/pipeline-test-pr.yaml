@@ -23,7 +23,7 @@ stages:
   - stage: test_frontend
     displayName: Test-Frontend
     jobs:
-      - job: django_tests
+      - job: frontend_tests
         pool:
           vmImage: ubuntu-latest
         displayName: "[FRONTEND TEST]"
@@ -40,7 +40,6 @@ stages:
           - script: yarn
             displayName: "Yarn Install"
             workingDirectory: 'frontend'
-
           - script: yarn test --watchAll=false
             workingDirectory: 'frontend'
             displayName: "Test"
@@ -112,6 +111,94 @@ stages:
                 $(Build.BuildId)
                 dev-latest
                 $(System.PullRequest.PullRequestId)-latest
+
+  - stage: build_and_push_frontend
+    dependsOn: test_frontend
+    displayName: BUILD and PUSH Frontend
+    jobs:
+      - job: build_and_push_frontend
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[Build_Frontend]"
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(Docker.registry)'
+              command: 'login'
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):$(System.PullRequest.PullRequestId)-latest"
+            displayName: Pull latest for layer caching for this branch
+            continueOnError: true # for first build, no cache
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):latest"
+            displayName: Pull latest for layer caching
+            continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build
+            inputs:
+              command: build
+              arguments: "--cache-from=$(Docker.url)/$(Docker.frontend.repository):$(System.PullRequest.PullRequestId)-latest 
+                          --cache-from=$(Docker.url)/$(Docker.frontend.repository):latest"
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+                $(System.PullRequest.PullRequestId)-latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+                $(System.PullRequest.PullRequestId)-latest
+
+  - stage: build_and_push_cypress
+    dependsOn: test_frontend
+    displayName: BUILD and PUSH cypress
+    jobs:
+      - job: build_and_push_cypress
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[Build_Cypress]"
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(Docker.registry)'
+              command: 'login'
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):cypress-$(System.PullRequest.PullRequestId)-latest"
+            displayName: Pull latest for layer caching for this branch
+            continueOnError: true # for first build, no cache
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):cypress-latest"
+            displayName: Pull latest for layer caching
+            continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build
+            inputs:
+              command: build
+              arguments: "--cache-from=$(Docker.url)/$(Docker.frontend.repository):cypress-$(System.PullRequest.PullRequestId)-latest 
+                          --cache-from=$(Docker.url)/$(Docker.frontend.repository):cypress-latest"
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                cypress-$(Build.BuildId)
+                cypress-latest
+                cypress-$(System.PullRequest.PullRequestId)-latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                cypress-$(Build.BuildId)
+                cypress-latest
+                cypress-$(System.PullRequest.PullRequestId)-latest
 
   # - stage: lint_backend
   #   dependsOn: build_and_push
@@ -231,16 +318,13 @@ stages:
 
   - stage: e2e_tests
     # dependsOn: [test_backend, test_frontend]
-    dependsOn: [build_and_push, test_frontend]
+    dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
         pool:
           vmImage: ubuntu-latest
         displayName: "[CYPRESS TEST]"
-        # TODO: use built images
-        # for now, call docker-compose that sets everything up from scratch
-        # the thing is, we don't build FE image yet
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -254,10 +338,17 @@ stages:
               azureContainerRegistry: $(Docker.registry)
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'up --build --exit-code-from cypress'
+              dockerComposeCommand: 'up --build --exit-code-from=cypress'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-
+               frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(Build.BuildId)
+               cypress_image=$(Docker.url)/$(Docker.frontend.repository):cypress-$(Build.BuildId)
+          - script: ls -la
+            condition: always()
+            workingDirectory: 'cypress'
+          - script: ls -la cypress
+            condition: always()
+            workingDirectory: 'cypress'
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()

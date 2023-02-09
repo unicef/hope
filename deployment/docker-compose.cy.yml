@@ -26,13 +26,10 @@ x-django-envs: &django_envs
 
 services:
   cypress:
-    build:
-      context: ../cypress
-      dockerfile: Dockerfile
+    image: ${cypress_image}
+    command: "test"
     volumes:
       - ../cypress:/app
-      - ../cypress/node_modules:/app/node_modules
-    command: test
     depends_on:
       - proxy
 
@@ -40,26 +37,16 @@ services:
     image: unicef/hct-mis-proxy
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=frontend:3000
+      - FRONTEND_HOST=frontend:80
     build:
       context: ../proxy
       dockerfile: Dockerfile
-    ports:
-      - "8082:80"
     depends_on:
       - backend
       - frontend
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-      target: dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - ../frontend:/app
-      - ../frontend/node_modules:/app/node_modules
+    image: ${frontend_image}
 
   redis:
     restart: unless-stopped
@@ -67,16 +54,8 @@ services:
 
   backend:
     <<: *django_envs
-    # image: ${backend_image}
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-      args:
-        APP_ENV: DEV
-    entrypoint: /code/docker-entrypoint.sh
+    image: ${backend_image}
     command: "cy"
-    volumes:
-      - ../backend:/code/
     depends_on:
       - db
       - redis
@@ -85,44 +64,34 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - elasticsearch
-    ports:
-      - "8080:8000"
 
   cash_assist_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
+    image: postgis/postgis:14-3.3-alpine
     <<: *django_envs
 
   mis_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
+    image: postgis/postgis:14-3.3-alpine
     <<: *django_envs
 
   erp_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
+    image: postgis/postgis:14-3.3-alpine
     <<: *django_envs
 
   registration_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
+    image: postgis/postgis:14-3.3-alpine
     <<: *django_envs
 
   db:
-    image: postgis/postgis:11-3.3-alpine
+    image: postgis/postgis:14-3.3-alpine
     <<: *django_envs
 
   celery_worker:
     <<: *django_envs
-    # image: ${backend_image}
-    image: unicef/hct-mis-backend
+    image: ${backend_image}
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - backend
-      - db
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
-      - redis
-      - elasticsearch
 
   elasticsearch:
     <<: *django_envs
