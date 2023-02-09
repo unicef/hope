@@ -1,7 +1,9 @@
+import decimal
 import logging
 import zipfile
+from datetime import datetime
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -45,6 +47,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             logger.error(msg)
             raise GraphQLError(msg)
+
+        def right_format_for_xlsx(value: Any) -> Any:
+            # this function will return something that excel will accept
+            if value is None:
+                return ""
+            if any(isinstance(value, good_type) for good_type in (str, int, float, decimal.Decimal, datetime)):
+                return value
+            return str(value)
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
@@ -99,7 +109,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                             for column_name in fsp_xlsx_template.core_fields
                         ]
                         payment_row.extend(core_fields_row)
-                        ws_fsp.append(payment_row)
+                        ws_fsp.append(list(map(right_format_for_xlsx, payment_row)))
 
                     self._adjust_column_width_from_col(ws_fsp, max_col=len(column_list))
 
