@@ -133,9 +133,9 @@ export function EditVerificationPlan({
     filterAgeMax: paymentVerificationPlanNode.ageFilter?.max || '',
     filterSex: paymentVerificationPlanNode.sexFilter || '',
     excludedAdminAreasFull:
-      paymentVerificationPlanNode.excludedAdminAreasFilter,
+      paymentVerificationPlanNode.excludedAdminAreasFilter || [],
     excludedAdminAreasRandom:
-      paymentVerificationPlanNode.excludedAdminAreasFilter,
+      paymentVerificationPlanNode.excludedAdminAreasFilter || [],
     verificationChannel:
       paymentVerificationPlanNode.verificationChannel || null,
     rapidProFlow: paymentVerificationPlanNode.rapidProFlowId || '',
