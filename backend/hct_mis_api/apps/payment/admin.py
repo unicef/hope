@@ -320,6 +320,15 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
 
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
+
 
 @admin.register(FspXlsxTemplatePerDeliveryMechanism)
 class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
@@ -332,6 +341,15 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
 
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
@@ -358,6 +376,12 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
         return super().clean()
 
 
+class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
+    model = FspXlsxTemplatePerDeliveryMechanism
+    extra = 0
+    readonly_fields = ("created_by",)
+
+
 @admin.register(FinancialServiceProvider)
 class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     form = FinancialServiceProviderAdminForm
@@ -381,6 +405,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
 
     readonly_fields = ("fsp_xlsx_templates",)
+    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
@@ -397,6 +422,15 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
 
 
 @admin.register(FinancialServiceProviderXlsxReport)

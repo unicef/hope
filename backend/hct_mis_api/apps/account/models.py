@@ -115,6 +115,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             for role in self.user_roles.all()
         )
 
+    def can_change_fsp(self) -> bool:
+        return any(
+            self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
     class Meta:
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
