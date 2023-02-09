@@ -1,9 +1,10 @@
 import abc
-from typing import Any, Optional
+from typing import Optional, Union
 
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
 
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.models import Household, Individual
@@ -15,14 +16,12 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 class HopeRedirect(abc.ABC):
     def __init__(
         self,
-        user: User,
-        ent: str,
-        ca_id: str = "",
-        source_id: str = "",
-        program_id: str = "",
+        user: Union[AbstractBaseUser, AnonymousUser],
+        ca_id: Optional[str] = "",
+        source_id: Optional[str] = "",
+        program_id: Optional[str] = "",
     ) -> None:
         self.user = user
-        self.ent = ent
         self.ca_id = ca_id
         self.source_id = source_id.lower()
         self.program_id = program_id.lower()
@@ -148,17 +147,23 @@ class HopeRedirectDefault(HopeRedirect):
         return ""
 
 
-def get_hope_redirect(user: User, ent: Any, ca_id: str = "", source_id: str = "", program_id: str = "") -> HopeRedirect:
+def get_hope_redirect(
+    user: Union[AbstractBaseUser, AnonymousUser],
+    ent: Optional[str] = "",
+    ca_id: Optional[str] = "",
+    source_id: Optional[str] = "",
+    program_id: Optional[str] = "",
+) -> HopeRedirect:
     if ent == "progres_registrationgroup":
-        return HopeRedirectHousehold(user, ent, ca_id, source_id, program_id)
+        return HopeRedirectHousehold(user, ca_id, source_id, program_id)
     if ent == "progres_individual":
-        return HopeRedirectIndividual(user, ent, ca_id, source_id, program_id)
+        return HopeRedirectIndividual(user, ca_id, source_id, program_id)
     if ent == "progres_program":
-        return HopeRedirectProgram(user, ent, ca_id, source_id, program_id)
+        return HopeRedirectProgram(user, ca_id, source_id, program_id)
     if ent == "progres_cashplan":
-        return HopeRedirectCashPlan(user, ent, ca_id, source_id, program_id)
+        return HopeRedirectCashPlan(user, ca_id, source_id, program_id)
     if ent == "progres_payment":
-        return HopeRedirectPayment(user, ent, ca_id, source_id, program_id)
+        return HopeRedirectPayment(user, ca_id, source_id, program_id)
     if ent == "progres_targetpopulation":
-        return HopeRedirectTargetPopulation(user, ent, ca_id, source_id, program_id)
-    return HopeRedirectDefault(user, ent, ca_id, source_id, program_id)
+        return HopeRedirectTargetPopulation(user, ca_id, source_id, program_id)
+    return HopeRedirectDefault(user, ca_id, source_id, program_id)

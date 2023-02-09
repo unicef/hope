@@ -33,7 +33,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "monthly_expenditures_questions/total_expense_h_f": "0",
             "individual_questions": [
                 {
-                    "individual_questions/preferred_language_i_c": "pl",
+                    "individual_questions/preferred_language_i_c": "pl-pl",
                     "individual_questions/role_i_c": "primary",
                     "individual_questions/age": "40",
                     "individual_questions/first_registration_date_i_c": "2020-07-18",

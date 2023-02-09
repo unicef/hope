@@ -135,7 +135,7 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523 # FIXME
+        value = re.sub("{}+".format(re_sep), separator, value)
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -226,7 +226,7 @@ def get_combined_attributes() -> Dict:
     flex_attrs = serialize_flex_attributes()
     return {
         **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
-        .apply_business_area(None)  # type: ignore # TODO: none business area?
+        .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
         **flex_attrs["households"],
@@ -270,7 +270,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
         path.split("."),
         dictionary,
     )
@@ -345,6 +345,14 @@ def build_arg_dict(model_object: "Model", mapping_dict: Dict) -> Dict:
 
 def build_arg_dict_from_dict(data_dict: Dict, mapping_dict: Dict) -> Dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
+
+
+def build_arg_dict_from_dict_if_exists(data_dict: Dict, mapping_dict: Dict) -> Dict:
+    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict.keys()}
+
+
+def build_flex_arg_dict_from_list_if_exists(data_dict: Dict, flex_list: List) -> Dict:
+    return {key: data_dict[key] for key in flex_list if key in data_dict.keys()}
 
 
 class CustomOrderingFilter(OrderingFilter):
@@ -457,7 +465,7 @@ def check_concurrency_version_in_mutation(version: Optional[int], target: Any) -
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file: io.BytesIO) -> None:
+def update_labels_mapping(csv_file: str) -> None:
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
 
@@ -473,7 +481,7 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
 
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
-    with open(csv_file, newline="") as csv_file_ptr:  # type: ignore # FIXME: No overload variant of "open" matches argument types "BytesIO", "str"
+    with open(csv_file, newline="") as csv_file_ptr:
         reader = csv.reader(csv_file_ptr)
         next(reader, None)
         fields_mapping = dict(reader)
