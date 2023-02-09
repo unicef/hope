@@ -12,6 +12,7 @@ if [[ ! -z "${PUBLIC_DOMAIN_NAME}" ]]; then
     export KPI_BROKER_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/1"
     export REDIS_SESSION_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/2"
     export CACHE_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/2"
+    export SERVICE_ACCOUNT_BACKEND_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/6"
     
     # DATABASE
     export DATABASE_URL="${KPI_DATABASE_URL}"

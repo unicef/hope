@@ -42,6 +42,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
 
@@ -134,24 +135,30 @@ class RdiMergeTask:
         "disability_certificate_picture",
     )
 
-    def merge_admin_area(
+    def merge_admin_areas(
         self,
         imported_household: ImportedHousehold,
         household: Household,
     ) -> None:
-        admin1 = imported_household.admin1
-        admin2 = imported_household.admin2
-        try:
-            if admin2:
-                admin_area = Area.objects.filter(p_code=admin2).first()
-                household.admin_area = admin_area
-                return
-            if admin1:
-                admin_area = Area.objects.filter(p_code=admin1).first()
-                household.admin_area = admin_area
-                return
-        except Area.DoesNotExist as e:
-            logger.exception(e)
+
+        admins = {
+            "admin_area": imported_household.admin_area,
+            "admin1": imported_household.admin1,
+            "admin2": imported_household.admin2,
+            "admin3": imported_household.admin3,
+            "admin4": imported_household.admin4,
+        }
+
+        for admin_key, admin_value in admins.items():
+            if admin_value:
+                admin_area = Area.objects.filter(p_code=admin_value).first()
+                if admin_area:
+                    setattr(household, admin_key, admin_area)
+                else:
+                    logger.exception(f"Provided {admin_key} {admin_value} does not exist")
+
+        if household.admin_area:
+            household.set_admin_areas(save=False)
 
     def _prepare_households(
         self, imported_households: List[ImportedHousehold], obj_hct: RegistrationDataImport
@@ -179,7 +186,7 @@ class RdiMergeTask:
                 registration_data_import=obj_hct,
                 business_area=obj_hct.business_area,
             )
-            self.merge_admin_area(imported_household, household)
+            self.merge_admin_areas(imported_household, household)
             households_dict[imported_household.id] = household
 
         return households_dict
@@ -229,6 +236,13 @@ class RdiMergeTask:
 
             imported_individual_household = imported_individual.household
             household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
+
+            phone_no = values.get("phone_no")
+            phone_no_alternative = values.get("phone_no_alternative")
+
+            values["phone_no_valid"] = is_valid_phone_number(str(phone_no))
+            values["phone_no_alternative_valid"] = is_valid_phone_number(str(phone_no_alternative))
+
             individual = Individual(
                 **values,
                 household=household,
