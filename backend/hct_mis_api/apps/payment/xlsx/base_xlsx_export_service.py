@@ -1,5 +1,7 @@
+import decimal
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -115,3 +117,11 @@ class XlsxExportBaseService:
         }
 
         return context
+
+    def right_format_for_xlsx(self, value: Any) -> Any:
+        # this function will return something that excel will accept
+        if value is None:
+            return ""
+        if isinstance(value, (str, int, float, decimal.Decimal, datetime)):
+            return value
+        return str(value)
