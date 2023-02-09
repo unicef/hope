@@ -35,10 +35,12 @@ export const usePaymentPlanAction = (
           {
             query: PaymentPlanDocument,
             variables: { id: paymentPlanId },
+            fetchPolicy: 'network-only',
           },
           {
             query: AllPaymentsForTableDocument,
             variables: { paymentPlanId, businessArea },
+            fetchPolicy: 'network-only',
           },
         ],
       });
