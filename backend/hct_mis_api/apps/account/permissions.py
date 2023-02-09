@@ -95,7 +95,6 @@ class Permissions(Enum):
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
-    PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_UPDATE = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()

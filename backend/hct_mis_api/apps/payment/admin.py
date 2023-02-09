@@ -321,27 +321,35 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         return super().save_model(request, obj, form, change)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.can_change_fsp_template()
+        return request.user.can_change_fsp()
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.can_change_fsp_template()
+        return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
-        return request.user.can_change_fsp_template()
+        return request.user.can_change_fsp()
 
 
-# TODO: remove maybe?
-# @admin.register(FspXlsxTemplatePerDeliveryMechanism)
-# class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
-#     list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
-#     fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
-#
-#     def save_model(
-#         self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
-#     ) -> None:
-#         if not change:
-#             obj.created_by = request.user
-#         return super().save_model(request, obj, form, change)
+@admin.register(FspXlsxTemplatePerDeliveryMechanism)
+class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
+    list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
+    fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
+
+    def save_model(
+        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+    ) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
 
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
