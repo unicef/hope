@@ -14,4 +14,5 @@ class TestCommands(BaseElasticSearchTestCase):
             with mock.patch("sys.stdout", new=StringIO()):
                 call_command("initdemo", "--skip-drop")
         except Exception as e:
+            print("=====eee , ====", e, type(e), dir(e))
             self.fail(e)
