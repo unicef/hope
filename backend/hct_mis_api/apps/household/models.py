@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any, List, Optional, Tuple
 
@@ -564,6 +564,23 @@ class Household(
     def __str__(self) -> str:
         return f"{self.unicef_id}"
 
+    def can_be_erase(self) -> bool:
+        yesterday = timezone.now() - timedelta(days=1)
+        conditions = [
+            self.is_removed,
+            self.withdrawn,
+            self.removed_date >= yesterday,
+            self.withdrawn_date >= yesterday,
+        ]
+        return all(conditions)
+
+    def erase(self) -> None:
+        for individual in self.individuals.all():
+            individual.erase()
+
+        self.flex_fields = {}
+        self.save()
+
 
 class DocumentValidator(TimeStampedUUIDModel):
     type = models.ForeignKey("DocumentType", related_name="validators", on_delete=models.CASCADE)
@@ -584,11 +601,6 @@ class DocumentType(TimeStampedUUIDModel):
 
 
 class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
-    document_number = models.CharField(max_length=255, blank=True)
-    photo = models.ImageField(blank=True)
-    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
-    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -599,6 +611,12 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_NEED_INVESTIGATION, _("Need Investigation")),
         (STATUS_INVALID, _("Invalid")),
     )
+
+    document_number = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
+    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
 
     def clean(self) -> None:
@@ -626,6 +644,12 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
 
     def mark_as_valid(self) -> None:
         self.status = self.STATUS_VALID
+
+    def erase(self) -> None:
+        self.is_removed = True
+        self.photo = ""
+        self.document_number = "GDPR REMOVED"
+        self.save()
 
 
 class IndividualIdentity(models.Model):
@@ -947,6 +971,25 @@ class Individual(
         if not self.household:
             return False
         return self.household.head_of_household.id == self.id
+
+    def erase(self) -> None:
+        for document in self.documents.all():
+            document.erase()
+
+        self.is_removed = True
+        self.removed_date = timezone.now()
+        self.full_name = "GDPR REMOVED"
+        self.given_name = "GDPR REMOVED"
+        self.middle_name = "GDPR REMOVED"
+        self.family_name = "GDPR REMOVED"
+        self.photo = ""
+        self.disability_certificate_picture = ""
+        self.phone_no = ""
+        self.phone_no_valid = False
+        self.phone_no_alternative = ""
+        self.phone_no_alternative_valid = False
+        self.flex_fields = {}
+        self.save()
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, Individual)
