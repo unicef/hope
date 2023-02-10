@@ -209,6 +209,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.expected_columns.index("payment_id")].value
+        if payment_id is None:
+            return  # safety check
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.expected_columns.index("delivered_quantity")].value
 
