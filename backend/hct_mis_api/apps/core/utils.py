@@ -20,6 +20,7 @@ from typing import (
     Union,
 )
 
+from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
@@ -135,7 +136,7 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523 # FIXME
+        value = re.sub("{}+".format(re_sep), separator, value)
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -226,7 +227,7 @@ def get_combined_attributes() -> Dict:
     flex_attrs = serialize_flex_attributes()
     return {
         **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
-        .apply_business_area(None)  # type: ignore # TODO: none business area?
+        .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
         **flex_attrs["households"],
@@ -270,7 +271,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
         path.split("."),
         dictionary,
     )
@@ -345,6 +346,14 @@ def build_arg_dict(model_object: "Model", mapping_dict: Dict) -> Dict:
 
 def build_arg_dict_from_dict(data_dict: Dict, mapping_dict: Dict) -> Dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
+
+
+def build_arg_dict_from_dict_if_exists(data_dict: Dict, mapping_dict: Dict) -> Dict:
+    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict.keys()}
+
+
+def build_flex_arg_dict_from_list_if_exists(data_dict: Dict, flex_list: List) -> Dict:
+    return {key: data_dict[key] for key in flex_list if key in data_dict.keys()}
 
 
 class CustomOrderingFilter(OrderingFilter):
@@ -457,7 +466,7 @@ def check_concurrency_version_in_mutation(version: Optional[int], target: Any) -
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file: io.BytesIO) -> None:
+def update_labels_mapping(csv_file: str) -> None:
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
 
@@ -473,7 +482,7 @@ def update_labels_mapping(csv_file: io.BytesIO) -> None:
 
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
-    with open(csv_file, newline="") as csv_file_ptr:  # type: ignore # FIXME: No overload variant of "open" matches argument types "BytesIO", "str"
+    with open(csv_file, newline="") as csv_file_ptr:
         reader = csv.reader(csv_file_ptr)
         next(reader, None)
         fields_mapping = dict(reader)
@@ -736,3 +745,25 @@ def save_data_in_cache(
             return cache_data
         cache.set(cache_key, cache_data, timeout=timeout)
     return cache_data
+
+
+def clear_cache_for_dashboard_totals() -> None:
+    keys = (
+        "resolve_section_households_reached",
+        "resolve_section_individuals_reached",
+        "resolve_section_child_reached",
+        "resolve_chart_volume_by_delivery_mechanism",
+        "resolve_chart_payment",
+        "resolve_chart_programmes_by_sector",
+        "resolve_section_total_transferred",
+        "resolve_chart_payment_verification",
+        "resolve_table_total_cash_transferred_by_administrative_area",
+        "resolve_chart_individuals_reached_by_age_and_gender",
+        "resolve_chart_individuals_with_disability_reached_by_age",
+        "resolve_chart_total_transferred_by_month",
+    )
+    # we need skip remove cache for test and because LocMemCache don't have .keys()
+    if not getattr(settings, "IS_TEST", False):
+        all_cache_keys = cache.keys("*")
+        for k in [key for key in all_cache_keys if key.startswith(keys)]:
+            cache.delete(k)
