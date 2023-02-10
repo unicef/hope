@@ -126,9 +126,7 @@ class PaymentPlanService:
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
-        if self.payment_plan.has_export_file:
-            self.payment_plan.export_file.delete()
-            self.payment_plan.export_file = None
+        self.payment_plan.remove_export_file()
 
         self.payment_plan.save()
 
