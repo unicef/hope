@@ -175,12 +175,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return self.name
 
 
-@receiver(post_save, sender=Program)
-def clear_program_count_cache_when_created(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
-    if created and instance.business_area:
-        business_area_slug = instance.business_area.slug
-        cache.delete_pattern(f"count_{business_area_slug}_ProgramNodeConnection_*")
-
 
 class CashPlan(TimeStampedUUIDModel):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
