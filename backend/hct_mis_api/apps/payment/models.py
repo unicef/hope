@@ -593,7 +593,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     def status_finished(self) -> None:
         self.status_date = timezone.now()
-        if not self.payment_verification_summary:
+        if not self.payment_verification_summary.exists():
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
@@ -1334,17 +1334,16 @@ def build_summary(payment_plan: Optional[Any]) -> None:
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
     summary = payment_plan.get_payment_verification_summary
-    if summary:
-        if statuses_count["active"] >= 1:
-            summary.mark_as_active()
-        elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
-            summary.mark_as_finished()
-        else:
-            summary.status = PaymentVerificationSummary.STATUS_PENDING
-            summary.completion_date = None
-            summary.activation_date = None
-            summary.mark_as_pending()
-        summary.save()
+    if statuses_count["active"] >= 1:
+        summary.mark_as_active()
+    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
+        summary.mark_as_finished()
+    else:
+        summary.status = PaymentVerificationSummary.STATUS_PENDING
+        summary.completion_date = None
+        summary.activation_date = None
+        summary.mark_as_pending()
+    summary.save()
 
 
 @receiver(

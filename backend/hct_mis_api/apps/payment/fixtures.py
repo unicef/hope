@@ -1,7 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -626,10 +626,13 @@ def create_payment_verification_plan_with_status(
     program: Program,
     target_population: "TargetPopulation",
     status: str,
+    verification_channel: Optional[str] = None,
 ) -> PaymentVerificationPlan:
     payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
     payment_verification_plan.status = status
-    payment_verification_plan.save(update_fields=("status",))
+    if verification_channel:
+        payment_verification_plan.verification_channel = verification_channel
+    payment_verification_plan.save(update_fields=("status", "verification_channel"))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
     for _ in range(5):
         household, _ = create_household(
@@ -654,11 +657,13 @@ def create_payment_verification_plan_with_status(
                 household=household,
             )
 
-        PaymentVerificationFactory(
+        pv = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
             generic_fk_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
+        pv.set_pending()
+        pv.save()
         EntitlementCardFactory(household=household)
     return payment_verification_plan
 
@@ -733,7 +738,7 @@ def generate_reconciled_payment_plan() -> None:
     now = timezone.now()
     tp: TargetPopulation = TargetPopulation.objects.all()[0]
 
-    pp = PaymentPlan.objects.update_or_create(
+    payment_plan = PaymentPlan.objects.update_or_create(
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
         target_population=tp,
@@ -749,21 +754,27 @@ def generate_reconciled_payment_plan() -> None:
         total_delivered_quantity=999,
     )[0]
     # update status
-    pp.status_finished()
-    pp.save()
+    payment_plan.status_finished()
+    payment_plan.save()
 
     fsp_1 = FinancialServiceProviderFactory(
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
     )
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=pp, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+        payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
     )
 
     create_payment_verification_plan_with_status(
-        pp, root, afghanistan, tp.program, tp, PaymentVerificationPlan.STATUS_ACTIVE
+        payment_plan,
+        root,
+        afghanistan,
+        tp.program,
+        tp,
+        PaymentVerificationPlan.STATUS_ACTIVE,
+        PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     )
-    pp.update_population_count_fields()
+    payment_plan.update_population_count_fields()
 
 
 def generate_payment_plan() -> None:
@@ -908,6 +919,9 @@ def generate_payment_plan() -> None:
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
     )
+    # create primary collector role
+    IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
+    IndividualRoleInHouseholdFactory(household=household_2, individual=individual_2, role=ROLE_PRIMARY)
 
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
