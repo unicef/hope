@@ -12,7 +12,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
         class="MuiTypography-root MuiTypography-h6"
       >
         Volume by Delivery Mechanism
-         in USD
       </h6>
        
     </div>
@@ -43,7 +42,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
                 >
-                  0
+                  0 PLN (0 USD)
                 </span>
               </div>
             </div>
@@ -70,7 +69,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
                 >
-                  0
+                  0 PLN (0 USD)
                 </span>
               </div>
             </div>
@@ -97,7 +96,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
                 >
-                  0
+                  0 PLN (0 USD)
                 </span>
               </div>
             </div>
