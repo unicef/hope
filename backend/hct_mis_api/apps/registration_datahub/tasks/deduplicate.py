@@ -513,9 +513,10 @@ class DeduplicateTask:
         ]
 
         if isinstance(individual, ImportedIndividual):
-            document = get_imported_individual_doc(individual.registration_data_import.business_area)
+            business_area_slug = individual.registration_data_import.business_area
         else:
-            document = get_individual_doc(individual.business_area.slug)
+            business_area_slug = individual.business_area.slug
+        document = get_individual_doc(business_area_slug)
 
         return cls._get_duplicates_tuple(
             query_dict,
