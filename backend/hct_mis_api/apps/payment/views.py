@@ -58,8 +58,8 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
     if not request.user.has_permission(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
-    if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):
-        raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK or ACCEPTED.")
+    if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+        raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
 
     if payment_plan.has_export_file:
         return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
