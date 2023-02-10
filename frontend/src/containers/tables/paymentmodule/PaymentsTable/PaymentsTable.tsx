@@ -47,7 +47,8 @@ export const PaymentsTable = ({
             <Typography data-cy='table-title' variant='h6'>
               {t('Payments List')}
             </Typography>
-            {paymentPlan.status === PaymentPlanStatus.Accepted && (
+            {(paymentPlan.status === PaymentPlanStatus.Accepted ||
+              paymentPlan.status === PaymentPlanStatus.Finished) && (
               <ImportXlsxPaymentPlanPaymentListPerFsp
                 paymentPlan={paymentPlan}
               />

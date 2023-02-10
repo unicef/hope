@@ -816,8 +816,8 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
     def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
-        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
-            msg = "You can only export Payment List Per FSP for ACCEPTED Payment Plan"
+        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            msg = "You can only export Payment List Per FSP for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
@@ -992,8 +992,8 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
 
-        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
-            msg = "You can only import for ACCEPTED Payment Plan"
+        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
