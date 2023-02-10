@@ -37,7 +37,8 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
                     Household.objects.filter(pk__in=households_ids)
                     .only("id", "collect_individual_data")
                     .prefetch_related("individuals")
-                    .select_for_update(of=("self",))
+                    .select_for_update(of=("self",), skip_locked=True)
+                    .order_by("pk")
                 ):
                     scope.set_tag("business_area", hh.business_area)
                     household, updated_fields = recalculate_data(hh, save=False)
@@ -50,7 +51,7 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = None) -> None:
+def recalculate_population_fields_task(household_ids: Optional[List[str]] = None) -> None:
     from hct_mis_api.apps.household.models import Household
 
     params = {}
@@ -63,13 +64,14 @@ def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = Non
         .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
         .order_by("pk")
     )
-    paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
+    if queryset.exists():
+        paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
 
-    for page_number in paginator.page_range:
-        page = paginator.page(page_number)
-        recalculate_population_fields_chunk_task.delay(
-            households_ids=list(page.object_list.values_list("pk", flat=True))
-        )
+        for page_number in paginator.page_range:
+            page = paginator.page(page_number)
+            recalculate_population_fields_chunk_task.delay(
+                households_ids=list(page.object_list.values_list("pk", flat=True))
+            )
 
 
 @app.task()
@@ -87,7 +89,7 @@ def interval_recalculate_population_fields_task() -> None:
         .distinct()
     )
 
-    recalculate_population_fields_task.delay(households_ids=list(households))
+    recalculate_population_fields_task.delay(household_ids=list(households))
 
 
 @app.task()

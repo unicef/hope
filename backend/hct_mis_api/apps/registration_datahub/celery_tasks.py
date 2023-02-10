@@ -293,6 +293,20 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
+def process_sri_lanka_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        SriLankaRegistrationService,
+    )
+
+    try:
+        SriLankaRegistrationService().process_records(rdi_id, records_ids)
+    except Exception:
+        logger.exception("Process Flex Records Task for Sri-Lanka caused error")
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
 def extract_records_task(max_records: int = 500) -> None:
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)

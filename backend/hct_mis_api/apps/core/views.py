@@ -68,7 +68,7 @@ def hope_redirect(request: HttpRequest) -> HttpResponse:
     caid = request.GET.get("caid")
     sourceid = request.GET.get("sourceid")
     programid = request.GET.get("programid")
-    hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)  # type: ignore # FIXME: all opt, required non-opt
+    hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)
     return redirect(hope_redirect.url())
 
 

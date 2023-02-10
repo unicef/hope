@@ -64,6 +64,12 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     admin1 = ""
     admin2 = ""
+    admin3 = ""
+    admin4 = ""
+    admin1_title = ""
+    admin2_title = ""
+    admin3_title = ""
+    admin4_title = ""
     geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
