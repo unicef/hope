@@ -35,7 +35,7 @@ export function LanguageAutocomplete({
   const [loadData, { data, loading }] = useLanguageAutocompleteLazyQuery({
     variables: {
       first: 20,
-      name: debouncedInputText,
+      code: debouncedInputText,
     },
   });
   useEffect(() => {
@@ -47,7 +47,7 @@ export function LanguageAutocomplete({
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({
       ...filters,
-      [name]: selectedValue?.node?.alpha2 || undefined,
+      [name]: selectedValue?.node?.code || undefined,
     }));
   };
   return (
