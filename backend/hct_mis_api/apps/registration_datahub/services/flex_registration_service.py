@@ -514,6 +514,32 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         return individual_data
 
+    def _prepare_national_id(
+        self, individual_dict: Dict, imported_individual: ImportedIndividual
+    ) -> Optional[ImportedDocument]:
+        national_id = individual_dict.get("national_id_no_i_c")
+        if not national_id:
+            return None
+        return ImportedDocument.objects.create(
+            document_number=national_id,
+            individual=imported_individual,
+            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID),
+            country=Country(code="LK"),
+        )
+
+    def _prepare_birth_certificate(
+        self, individual_dict: Dict, imported_individual: ImportedIndividual
+    ) -> Optional[ImportedDocument]:
+        national_id = individual_dict.get("chidlren_birth_certificate")
+        if not national_id:
+            return None
+        return ImportedDocument.objects.create(
+            document_number=national_id,
+            individual=imported_individual,
+            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE),
+            country=Country(code="LK"),
+        )
+
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
@@ -545,25 +571,17 @@ class SriLankaRegistrationService(BaseRegistrationService):
         head_of_household = ImportedIndividual.objects.create(
             **base_individual_data_dict, **self._prepare_individual_data(head_of_household_dict), relationship=HEAD
         )
+        self._prepare_national_id(head_of_household_dict, head_of_household)
 
         bank_name = f"{collector_dict.get('bank_description')} [{collector_dict.get('bank_name')} - {collector_dict.get('branch_or_branch_code')}]"  # TODO: check if this is correct
         bank_account_number = collector_dict.get("confirm_bank_account_number")
         if should_use_hoh_as_collector:
             primary_collector = head_of_household
         else:
-            national_id = collector_dict.pop("national_id_no_i_c", None)
-
             primary_collector = ImportedIndividual.objects.create(
                 **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
             )
-
-            if national_id:
-                ImportedDocument.objects.create(
-                    document_number=national_id,
-                    individual=primary_collector,
-                    type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID),
-                    country=Country(code="LK"),
-                )
+            self._prepare_national_id(collector_dict, primary_collector)
 
         ImportedIndividualRoleInHousehold.objects.create(
             household=household, individual=primary_collector, role=ROLE_PRIMARY
@@ -584,6 +602,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
 
         ImportedIndividual.objects.bulk_create(individuals_to_create)
+        for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create):
+            self._prepare_birth_certificate(individual_data_dict, imported_individual)
         household.size = len(individuals_to_create) + 1
         household.head_of_household = head_of_household
         household.save()
