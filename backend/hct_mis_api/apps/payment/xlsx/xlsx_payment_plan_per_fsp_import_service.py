@@ -176,6 +176,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         exchange_rate = self.payment_plan.get_exchange_rate()
 
         for row in self.ws_payments.iter_rows(min_row=2):
+            print("ROW", row)
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
@@ -208,7 +209,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def _import_row(self, row: Row, exchange_rate: float) -> None:
+        print(f"X {self.expected_columns} {self.expected_columns.index('payment_id')}")
+        print(row)
         payment_id = row[self.expected_columns.index("payment_id")].value
+        if payment_id is None:
+            return  # safety check
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.expected_columns.index("delivered_quantity")].value
 
