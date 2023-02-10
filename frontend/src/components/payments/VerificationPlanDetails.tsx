@@ -85,6 +85,8 @@ export const VerificationPlanDetails = ({
 
   const canEditAndActivateAndDelete = verificationPlan.status === 'PENDING';
   const canFinishAndDiscard = verificationPlan.status === 'ACTIVE';
+  const verificationChannelXLSX =
+    verificationPlan.verificationChannel === PaymentVerificationPlanVerificationChannel.Xlsx;
 
   const canEdit =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
@@ -163,7 +165,7 @@ export const VerificationPlanDetails = ({
             )}
             {canFinishAndDiscard && (
               <Box display='flex'>
-                {verificationPlan.verificationChannel === 'XLSX' && (
+                {verificationChannelXLSX && (
                   <>
                     {canExport && (
                       <>
@@ -234,6 +236,7 @@ export const VerificationPlanDetails = ({
                   </>
                 )}
                 {canFinish &&
+                    // TODO: fix here??
                   verificationPlan.xlsxFileWasDownloaded &&
                   verificationPlan.xlsxFileImported && (
                     <FinishVerificationPlan
@@ -242,8 +245,7 @@ export const VerificationPlanDetails = ({
                     />
                   )}
                 {canDiscard &&
-                  verificationPlan.verificationChannel ===
-                    PaymentVerificationPlanVerificationChannel.Xlsx &&
+                  verificationChannelXLSX &&
                   (xlsxFileDownloadedOrImported &&
                   verificationPlan.status ===
                     PaymentVerificationPlanStatus.Active ? (

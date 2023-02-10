@@ -46,7 +46,7 @@ export const CashPlanDetailsSection = ({
     <Grid container>
       <Grid item xs={9}>
         <Title>
-          <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
+          <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
         </Title>
         <Grid container>
           {[
