@@ -68,11 +68,13 @@ class XlsxExportBaseService:
             value = width + 2
             ws.column_dimensions[col_name].width = value
 
-    def _add_col_bgcolor(self, col: Optional[List] = None, hex_code: str = "A0FDB0") -> None:
+    def _add_col_bgcolor(
+        self, col: Optional[List] = None, hex_code: str = "A0FDB0", amount: Optional[int] = None
+    ) -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
             bd = Side(style="thin", color="999999")
-            for y in range(1, self.ws_export_list.max_column + 1):
+            for y in range(1, (self.ws_export_list.max_column if amount is None else amount) + 1):
                 cell = self.ws_export_list.cell(row=y, column=row_index)
                 cell.fill = fill
                 cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)

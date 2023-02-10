@@ -50,7 +50,8 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self._add_col_bgcolor(
             [
                 self.HEADERS.index("entitlement_quantity") + 1,
-            ]
+            ],
+            amount=len(self.payment_list) + 1,
         )
         return self.wb
 
