@@ -150,7 +150,10 @@ export const Entitlement = ({
               <FormControl variant='outlined' margin='dense' fullWidth>
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
-                  disabled={!canApplySteficonRule}
+                  disabled={
+                    !canApplySteficonRule ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
                   value={steficonRuleValue}
                   data-cy='input-entitlement-formula'
                   labelWidth={180}
