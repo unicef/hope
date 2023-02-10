@@ -56,11 +56,10 @@ class PaymentPlanService:
         }
 
     def get_business_area_required_number_by_approval_type(self) -> Optional[int]:
-        business_area = self.payment_plan.business_area
         approval_count_map = {
-            Approval.APPROVAL: business_area.approval_number_required,
-            Approval.AUTHORIZATION: business_area.authorization_number_required,
-            Approval.FINANCE_REVIEW: business_area.finance_review_number_required,
+            Approval.APPROVAL: self.payment_plan.approval_number_required,
+            Approval.AUTHORIZATION: self.payment_plan.authorization_number_required,
+            Approval.FINANCE_REVIEW: self.payment_plan.finance_review_number_required,
             Approval.REJECT: 1,  # be default only one Reject per Acceptance Process object
         }
         return approval_count_map.get(self.get_approval_type_by_action())

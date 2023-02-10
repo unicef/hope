@@ -222,9 +222,6 @@ class TestPaymentPlanReconciliation(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan(
             is_payment_plan_applicable=True,
-            approval_number_required=1,
-            authorization_number_required=1,
-            finance_review_number_required=1,
         )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()

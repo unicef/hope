@@ -458,13 +458,13 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment_verification_plans
 
     def resolve_approval_number_required(self, info: Any) -> graphene.Int:
-        return self.business_area.approval_number_required
+        return self.approval_number_required
 
     def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
-        return self.business_area.authorization_number_required
+        return self.authorization_number_required
 
     def resolve_finance_review_number_required(self, info: Any) -> graphene.Int:
-        return self.business_area.finance_review_number_required
+        return self.finance_review_number_required
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
