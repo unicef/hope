@@ -480,18 +480,18 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if admin4 and Area.objects.filter(p_code=admin4).exists():
             household_data["admin4_title"] = Area.objects.get(p_code=admin4).name
 
-        if admin2:
+        if admin2 and Area.objects.filter(p_code=admin2).exists():
             household_data["admin1"] = Area.objects.get(p_code=admin2).parent.p_code
             household_data["admin1_title"] = Area.objects.get(p_code=admin2).parent.name
 
         if admin4 and Area.objects.filter(p_code=admin4).exists():
-            household_data["admin_area"] = Area.objects.get(p_code=admin4)
-            household_data["admin_area_title"] = Area.objects.get(p_code=admin3).name
+            household_data["admin_area"] = Area.objects.get(p_code=admin4).p_code
+            household_data["admin_area_title"] = Area.objects.get(p_code=admin4).name
         elif admin3 and Area.objects.filter(p_code=admin3).exists():
-            household_data["admin_area"] = Area.objects.get(p_code=admin3)
+            household_data["admin_area"] = Area.objects.get(p_code=admin3).p_code
             household_data["admin_area_title"] = Area.objects.get(p_code=admin3).name
         elif admin2 and Area.objects.filter(p_code=admin2).exists():
-            household_data["admin_area"] = Area.objects.get(p_code=admin2)
+            household_data["admin_area"] = Area.objects.get(p_code=admin2).p_code
             household_data["admin_area_title"] = Area.objects.get(p_code=admin2).name
 
         return household_data
