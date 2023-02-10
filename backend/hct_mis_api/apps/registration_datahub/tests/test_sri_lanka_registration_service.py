@@ -49,17 +49,24 @@ class TestUkrainianRegistrationService(TestCase):
 
         country = geo_models.Country.objects.create(name="Sri Lanka")
 
-        area_type = geo_models.AreaType.objects.create(country=country)
+        area_type1 = geo_models.AreaType.objects.create(country=country, name="admin1")
+        area_type2 = geo_models.AreaType.objects.create(country=country, name="admin2")
+        area_type3 = geo_models.AreaType.objects.create(country=country, name="admin3")
+        area_type4 = geo_models.AreaType.objects.create(country=country, name="admin4")
 
-        base_dict = {"lft": 100, "rght": 100, "tree_id": 100, "level": 1}
-
-        areas = [
-            geo_models.Area(name="SriLanka admin1", p_code="LK", area_type=area_type, **base_dict),
-            geo_models.Area(name="SriLanka admin2", p_code="LK71", area_type=area_type, **base_dict),
-            geo_models.Area(name="SriLanka admin3", p_code="LK7163", area_type=area_type, **base_dict),
-            geo_models.Area(name="SriLanka admin4", p_code="LK7163105", area_type=area_type, **base_dict),
-        ]
-        geo_models.Area.objects.bulk_create(areas)
+        admin1 = geo_models.Area(
+            name="SriLanka admin1",
+            p_code="LK1",
+            area_type=area_type1,
+        )
+        admin1.save()
+        admin2 = geo_models.Area(name="SriLanka admin2", p_code="LK11", area_type=area_type2, parent=admin1)
+        admin2.save()
+        admin3 = geo_models.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
+        admin3.save()
+        admin4 = geo_models.Area(name="SriLanka admin4", p_code="LK1163020", area_type=area_type4, parent=admin3)
+        admin4.save()
+        geo_models.Area.objects.rebuild()
 
         children_info = [
             {
@@ -92,6 +99,7 @@ class TestUkrainianRegistrationService(TestCase):
                 "confirm_nic_number": "123456789V",
                 "national_id_no_i_c": "123456789V",
                 "branch_or_branch_code": "7472_002",
+                "confirm_bank_account_number": "0082785064",
                 "who_answers_this_phone": "alternate collector",
                 "confirm_alternate_collector_phone_number": "+94788908046",
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
@@ -100,9 +108,9 @@ class TestUkrainianRegistrationService(TestCase):
 
         localization_info = [
             {
-                "admin2_h_c": "LK71",
-                "admin3_h_c": "LK7163",
-                "admin4_h_c": "LK7163105",
+                "admin2_h_c": "LK11",
+                "admin3_h_c": "LK1163",
+                "admin4_h_c": "LK1163020",
                 "address_h_c": "Alexis",
                 "moh_center_of_reference": "MOH279",
             }
@@ -151,14 +159,16 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedDocument.objects.count(), 1)
 
         imported_household = ImportedHousehold.objects.first()
-        self.assertEqual(imported_household.admin1, "LK")
+        self.assertEqual(imported_household.admin1, "LK1")
         self.assertEqual(imported_household.admin1_title, "SriLanka admin1")
-        self.assertEqual(imported_household.admin2, "LK71")
+        self.assertEqual(imported_household.admin2, "LK11")
         self.assertEqual(imported_household.admin2_title, "SriLanka admin2")
-        self.assertEqual(imported_household.admin3, "LK7163")
+        self.assertEqual(imported_household.admin3, "LK1163")
         self.assertEqual(imported_household.admin3_title, "SriLanka admin3")
-        self.assertEqual(imported_household.admin4, "LK7163105")
+        self.assertEqual(imported_household.admin4, "LK1163020")
         self.assertEqual(imported_household.admin4_title, "SriLanka admin4")
+        self.assertEqual(imported_household.admin_area, "LK1163020")
+        self.assertEqual(imported_household.admin_area_title, "SriLanka admin4")
 
         self.assertEqual(
             ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
