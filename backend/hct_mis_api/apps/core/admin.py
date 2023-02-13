@@ -151,7 +151,7 @@ class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
             raise forms.ValidationError("Ranges need to start from 0")
 
         for r1, r2 in zip(ranges, ranges[1:]):
-            if not r1[1] or r1[1] > r2[0]:
+            if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
                 raise forms.ValidationError(
                     f"Provided ranges overlaps [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
                 )
@@ -176,7 +176,7 @@ AcceptanceProcessThresholdInlineFormSet = inlineformset_factory(
 class AcceptanceProcessThresholdInline(TabularInline):
     model = AcceptanceProcessThreshold
     extra = 0
-    formset = AcceptanceProcessThresholdInlineFormSet
+    formset = AcceptanceProcessThresholdInlineFormSet  # type: ignore
     ordering = [
         "payments_range_usd",
     ]
