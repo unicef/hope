@@ -690,20 +690,20 @@ class ActionPaymentPlanMutation(PermissionMutation):
     @classmethod
     def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str) -> None:
         action_to_permissions_map = {
-            "LOCK": Permissions.PM_LOCK_AND_UNLOCK,
-            "UNLOCK": Permissions.PM_LOCK_AND_UNLOCK,
-            "LOCK_FSP": Permissions.PM_LOCK_AND_UNLOCK_FSP,
-            "UNLOCK_FSP": Permissions.PM_LOCK_AND_UNLOCK_FSP,
-            "SEND_FOR_APPROVAL": Permissions.PM_SEND_FOR_APPROVAL,
-            "APPROVE": Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-            "AUTHORIZE": Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            "REVIEW": Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            "REJECT": [
+            PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.UNLOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name: Permissions.PM_SEND_FOR_APPROVAL,
+            PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            PaymentPlan.Action.REJECT.name: [
                 Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
                 Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
                 Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             ],
-            "FINISH": Permissions.PM_FINISH,
+            PaymentPlan.Action.FINISH.name: Permissions.PM_FINISH,
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)
 
