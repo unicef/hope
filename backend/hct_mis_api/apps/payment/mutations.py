@@ -78,6 +78,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -671,8 +672,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
 
-        # TODO: maybe will update perms here?
-        cls.has_permission(info, Permissions.PM_VIEW_DETAILS, payment_plan.business_area)
+        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""))
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
@@ -686,6 +686,26 @@ class ActionPaymentPlanMutation(PermissionMutation):
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
+
+    @classmethod
+    def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str) -> None:
+        action_to_permissions_map = {
+            "LOCK": Permissions.PM_LOCK_AND_UNLOCK,
+            "UNLOCK": Permissions.PM_LOCK_AND_UNLOCK,
+            "LOCK_FSP": Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            "UNLOCK_FSP": Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            "SEND_FOR_APPROVAL": Permissions.PM_SEND_FOR_APPROVAL,
+            "APPROVE": Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            "AUTHORIZE": Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            "REVIEW": Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            "REJECT": [
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            ],
+            "FINISH": Permissions.PM_FINISH,
+        }
+        cls.has_permission(info, action_to_permissions_map[action], business_area)
 
 
 class CreatePaymentPlanMutation(PermissionMutation):
