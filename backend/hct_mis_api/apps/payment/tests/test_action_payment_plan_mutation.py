@@ -103,16 +103,27 @@ class TestActionPaymentPlanMutation(APITestCase):
     @parameterized.expand(
         [
             ("without_permission", [], None, ["LOCK"]),
-            ("not_possible_reject", [Permissions.PM_VIEW_DETAILS], None, ["REJECT"]),
+            ("not_possible_reject", [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], None, ["REJECT"]),
             (
                 "lock_approve_authorize_reject",
-                [Permissions.PM_VIEW_DETAILS],
+                [
+                    Permissions.PM_LOCK_AND_UNLOCK,
+                    Permissions.PM_LOCK_AND_UNLOCK_FSP,
+                    Permissions.PM_SEND_FOR_APPROVAL,
+                    Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                    Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                ],
                 None,
                 ["LOCK", "LOCK_FSP", "SEND_FOR_APPROVAL", "APPROVE", "AUTHORIZE", "REJECT"],
             ),
             (
                 "all_steps",
-                [Permissions.PM_VIEW_DETAILS],
+                [
+                    Permissions.PM_SEND_FOR_APPROVAL,
+                    Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                    Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                    Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+                ],
                 "LOCKED_FSP",
                 [
                     "SEND_FOR_APPROVAL",
@@ -125,10 +136,10 @@ class TestActionPaymentPlanMutation(APITestCase):
                     "REVIEW",
                 ],
             ),
-            ("reject_if_accepted", [Permissions.PM_VIEW_DETAILS], "ACCEPTED", ["REJECT"]),
+            ("reject_if_accepted", [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW], "ACCEPTED", ["REJECT"]),
             (
                 "lock_unlock",
-                [Permissions.PM_VIEW_DETAILS],
+                [Permissions.PM_LOCK_AND_UNLOCK],
                 "LOCKED",
                 ["UNLOCK", "LOCK", "UNLOCK"],
             ),
