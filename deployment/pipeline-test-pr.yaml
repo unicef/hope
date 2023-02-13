@@ -12,7 +12,9 @@ variables:
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.registry: "ICTD-HOPE-DEV-ACR"
+  Docker.cypress.filePath: "**/cypress/Dockerfile"
+  Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
+  tag: '$(Build.SourceBranchName)'
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.url: "uniappsakshopedev.azurecr.io"
@@ -79,7 +81,7 @@ stages:
         steps:
           - task: Docker@2
             inputs:
-              containerRegistry: '$(Docker.registry)'
+              containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
           - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
             displayName: Pull latest for layer caching for this branch
@@ -95,7 +97,7 @@ stages:
                           --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
               tags: |
                 $(Build.BuildId)
                 dev-latest
@@ -106,7 +108,7 @@ stages:
               command: push
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
               tags: |
                 $(Build.BuildId)
                 dev-latest
@@ -123,38 +125,32 @@ stages:
         steps:
           - task: Docker@2
             inputs:
-              containerRegistry: '$(Docker.registry)'
+              containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
-          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):$(System.PullRequest.PullRequestId)-latest"
-            displayName: Pull latest for layer caching for this branch
-            continueOnError: true # for first build, no cache
-          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):latest"
-            displayName: Pull latest for layer caching
-            continueOnError: true # for first build, no cache
-          - task: Docker@2
-            displayName: Build
+          - task: Cache@2
+            displayName: Cache task
             inputs:
-              command: build
-              arguments: "--cache-from=$(Docker.url)/$(Docker.frontend.repository):$(System.PullRequest.PullRequestId)-latest 
-                          --cache-from=$(Docker.url)/$(Docker.frontend.repository):latest"
+              key: 'docker | "$(Agent.OS)" | cache'
+              path: $(Pipeline.Workspace)/docker
+              cacheHitVar: CACHE_RESTORED
+          - script: |
+              docker load -i $(Pipeline.Workspace)/docker/cache.tar
+            displayName: Docker restore
+            condition: and(not(canceled()), eq(variables.CACHE_RESTORED, 'true'))
+          - task: Docker@2
+            displayName: Build and Push
+            inputs:
+              command: buildAndPush
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
               tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
-          - task: Docker@2
-            displayName: Push
-            inputs:
-              command: push
-              dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
+                $(tag)
+          - script: |
+              mkdir -p $(Pipeline.Workspace)/docker
+              docker save -o $(Pipeline.Workspace)/docker/cache.tar $(Docker.url)/$(Docker.frontend.repository):$(tag)
+            displayName: Docker save
+            condition: and(not(canceled()), or(failed(), ne(variables.CACHE_RESTORED, 'true')))
 
   - stage: build_and_push_cypress
     dependsOn: test_frontend
@@ -167,7 +163,7 @@ stages:
         steps:
           - task: Docker@2
             inputs:
-              containerRegistry: '$(Docker.registry)'
+              containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
           - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):cypress-latest"
             displayName: Pull latest for layer caching
@@ -177,18 +173,18 @@ stages:
             inputs:
               command: build
               arguments: "--cache-from=$(Docker.url)/$(Docker.frontend.repository):cypress-latest"
-              dockerfile: $(Docker.frontend.filePath)
+              dockerfile: $(Docker.cypress.filePath)
               repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
               tags: |
                 cypress-latest
           - task: Docker@2
             displayName: Push
             inputs:
               command: push
-              dockerfile: $(Docker.frontend.filePath)
+              dockerfile: $(Docker.cypress.filePath)
               repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
               tags: |
                 cypress-latest
 
@@ -322,19 +318,18 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.cy.yml'
-              action: 'Run a specific service'
-              serviceName: 'cypress'
-              detached: false
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run cypress test'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-               frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(Build.BuildId)
+               frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                cypress_image=$(Docker.url)/$(Docker.frontend.repository):cypress-latest
           - script: ls -la
             condition: always()
