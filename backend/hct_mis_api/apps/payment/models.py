@@ -436,7 +436,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_EXPORTING,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+        conditions=[
+            lambda obj: obj.status
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+        ],
     )
     def background_action_status_xlsx_exporting(self) -> None:
         pass
@@ -445,7 +448,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         field=background_action_status,
         source=BackgroundActionStatus.XLSX_EXPORTING,
         target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+        conditions=[
+            lambda obj: obj.status
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+        ],
     )
     def background_action_status_xlsx_export_error(self) -> None:
         pass
@@ -481,7 +487,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+        conditions=[
+            lambda obj: obj.status
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+        ],
     )
     def background_action_status_xlsx_importing_reconciliation(self) -> None:
         pass
@@ -493,7 +502,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         ],
         target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+        conditions=[
+            lambda obj: obj.status
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+        ],
     )
     def background_action_status_xlsx_import_error(self) -> None:
         pass
@@ -578,14 +590,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=Status.ACCEPTED,
+        source=[Status.ACCEPTED, Status.FINISHED],
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
         self.status_date = timezone.now()
-        PaymentVerificationSummary.objects.create(
-            payment_plan_obj=self,
-        )
+        if not self.payment_verification_summary:
+            PaymentVerificationSummary.objects.create(
+                payment_plan_obj=self,
+            )
 
     @property
     def currency_exchange_date(self) -> datetime:
@@ -1350,16 +1363,17 @@ def build_summary(payment_plan: Optional[Any]) -> None:
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
     summary = payment_plan.get_payment_verification_summary
-    if statuses_count["active"] >= 1:
-        summary.mark_as_active()
-    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
-        summary.mark_as_finished()
-    else:
-        summary.status = PaymentVerificationSummary.STATUS_PENDING
-        summary.completion_date = None
-        summary.activation_date = None
-        summary.mark_as_pending()
-    summary.save()
+    if summary:
+        if statuses_count["active"] >= 1:
+            summary.mark_as_active()
+        elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
+            summary.mark_as_finished()
+        else:
+            summary.status = PaymentVerificationSummary.STATUS_PENDING
+            summary.completion_date = None
+            summary.activation_date = None
+            summary.mark_as_pending()
+        summary.save()
 
 
 @receiver(
