@@ -136,9 +136,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "family_name": "Franklin",
                 "relationship": BROTHER_SISTER,
                 "birth_date": "1996-11-29",  # age 25
-                "phone_no": "this-is-not-a-phone-number",
                 "sex": "FEMALE",
                 "registration_data_import": cls.rdi_hub,
+                "phone_no": "wrong-phone",
+                "phone_no_alternative": "definitely-wrong-phone",
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
                 "household": imported_household,
