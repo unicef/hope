@@ -695,7 +695,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @cached_property
     def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
         return self.business_area.acceptance_process_thresholds.filter(
-            payments_range_usd__contains=self.total_entitled_quantity_usd
+            payments_range_usd__contains=int(self.total_entitled_quantity_usd)
         ).first()
 
     @property
