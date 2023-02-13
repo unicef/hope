@@ -219,7 +219,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 delivered_quantity, payment.entitlement_quantity, payment_id
             )
 
-            if delivered_quantity != payment.delivered_quantity:
+            if (delivered_quantity != payment.delivered_quantity) or (status != payment.status):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,
