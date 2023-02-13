@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
@@ -17,18 +16,17 @@ import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
-  useCashPlanQuery,
+  PaymentPlanQuery,
   useFinishPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
 
 export interface FinishVerificationPlanProps {
-  paymentVerificationPlanId: string;
+  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
   cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
-  paymentVerificationPlanId,
+  verificationPlan,
   cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
@@ -36,31 +34,17 @@ export function FinishVerificationPlan({
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useFinishPaymentVerificationPlanMutation();
-  const { id } = useParams();
-  const { data, loading } = useCashPlanQuery({
-    variables: { id },
-  });
-  if (loading) {
-    return <LoadingComponent />;
-  }
-  if (!data) {
-    return null;
-  }
-  const { cashPlan } = data;
-  const verificationPlan = cashPlan?.verificationPlans?.edges?.length
-    ? cashPlan.verificationPlans.edges[0].node
-    : null;
 
   const finish = async (): Promise<void> => {
-    const { errors } = await mutate({
-      variables: { cashPlanVerificationId: paymentVerificationPlanId },
-      refetchQueries,
-    });
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
+    try {
+      await mutate({
+        variables: { paymentVerificationPlanId: verificationPlan.id },
+        refetchQueries,
+      });
+      showMessage(t('Verification plan has been finished'));
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
-    showMessage(t('Verification plan has been finished'));
   };
 
   const beneficiariesPercent = (): string => {
