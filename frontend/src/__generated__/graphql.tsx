@@ -8255,7 +8255,7 @@ export type ExportXlsxPaymentVerificationPlanFileMutation = (
 );
 
 export type FinishPaymentVerificationPlanMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
@@ -13976,8 +13976,8 @@ export type ExportXlsxPaymentVerificationPlanFileMutationHookResult = ReturnType
 export type ExportXlsxPaymentVerificationPlanFileMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPaymentVerificationPlanFileMutation>;
 export type ExportXlsxPaymentVerificationPlanFileMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>;
 export const FinishPaymentVerificationPlanDocument = gql`
-    mutation FinishPaymentVerificationPlan($cashPlanVerificationId: ID!) {
-  finishPaymentVerificationPlan(paymentVerificationPlanId: $cashPlanVerificationId) {
+    mutation FinishPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  finishPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     paymentPlan {
       id
       verificationPlans {
@@ -14029,7 +14029,7 @@ export function withFinishPaymentVerificationPlan<TProps, TChildProps = {}>(oper
  * @example
  * const [finishPaymentVerificationPlanMutation, { data, loading, error }] = useFinishPaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
