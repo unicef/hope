@@ -9,7 +9,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-12 sc-kpOJdX iTsSqH"
+        class="MuiBox-root MuiBox-root-12 sc-eNQAEJ eAIuLz"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -89,7 +89,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-kpOJdX iTsSqH"
+        class="MuiBox-root MuiBox-root-1 sc-eNQAEJ eAIuLz"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -362,6 +362,29 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     </svg>
                   </span>
                 </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    role="button"
+                    tabindex="0"
+                  >
+                    
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody
@@ -412,9 +435,10 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                   data-cy="delivered-quantity-cell"
-                >
-                  -
-                </td>
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                />
               </tr>
               <tr
                 class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
@@ -461,9 +485,10 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                   data-cy="delivered-quantity-cell"
-                >
-                  -
-                </td>
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                />
               </tr>
               <tr
                 class="MuiTableRow-root"
@@ -471,7 +496,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
-                  colspan="9"
+                  colspan="10"
                 />
               </tr>
             </tbody>
