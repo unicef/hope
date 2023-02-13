@@ -64,6 +64,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -876,6 +877,14 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
         new_individual.recalculate_data()
 
     new_individual.refresh_from_db()
+
+    if "phone_no" in only_approved_data:
+        new_individual.phone_no_valid = is_valid_phone_number(str(new_individual.phone_no))
+    if "phone_no_alternative" in only_approved_data:
+        new_individual.phone_no_alternative_valid = is_valid_phone_number(str(new_individual.phone_no_alternative))
+
+    if any(key in only_approved_data for key in ("phone_no", "phone_no_alternative")):
+        new_individual.save(update_fields=["phone_no_valid", "phone_no_alternative_valid"])
 
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
     transaction.on_commit(
