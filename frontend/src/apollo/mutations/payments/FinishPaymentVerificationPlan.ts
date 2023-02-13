@@ -1,9 +1,9 @@
 import { gql } from 'apollo-boost';
 
 export const FINISH_CASH_PLAN_PAYMENT_VERIFICATION = gql`
-  mutation FinishPaymentVerificationPlan($cashPlanVerificationId: ID!) {
+  mutation FinishPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
     finishPaymentVerificationPlan(
-      paymentVerificationPlanId: $cashPlanVerificationId
+      paymentVerificationPlanId: $paymentVerificationPlanId
     ) {
       paymentPlan {
         id
