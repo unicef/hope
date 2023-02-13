@@ -58,4 +58,10 @@ export const headCells: HeadCell<
     id: 'delivered_quantity',
     numeric: false,
   },
+  {
+    disablePadding: false,
+    label: '',
+    id: 'mark',
+    numeric: false,
+  },
 ];
