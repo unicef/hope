@@ -88,7 +88,7 @@ export const PaymentsTableRow = ({
           : '-'}
       </TableCell>
       <TableCell align='left'>
-        {payment.entitlementQuantityUsd >= 0
+        {(payment.entitlementQuantity != null) && (payment.entitlementQuantity >= 0)
           ? `${formatCurrencyWithSymbol(
               payment.entitlementQuantity,
               payment.currency,
@@ -99,7 +99,7 @@ export const PaymentsTableRow = ({
           : '-'}
       </TableCell>
       <TableCell data-cy='delivered-quantity-cell' align='left'>
-        {payment.deliveredQuantity >= 0
+        {(payment.deliveredQuantity != null) && (payment.deliveredQuantity >= 0)
           ? `${formatCurrencyWithSymbol(
               payment.deliveredQuantity,
               payment.currency,
