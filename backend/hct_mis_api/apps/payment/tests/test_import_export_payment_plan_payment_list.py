@@ -31,6 +31,7 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.utils import to_decimal
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
     XlsxPaymentPlanExportPerFspService,
 )
@@ -96,7 +97,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
     def test_import_invalid_file(self) -> None:
         error_msg = [
-            ("Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"),
+            XlsxError(
+                "Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"
+            ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
