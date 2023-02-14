@@ -17,6 +17,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
+from .forms import TargetPopulationForm
 from .mixins import TargetPopulationFromListMixin
 from .models import HouseholdSelection, TargetPopulation
 from .steficon import SteficonExecutorMixin
@@ -30,6 +31,7 @@ class TargetPopulationAdmin(
     LinkedObjectsMixin,
     HOPEModelAdminBase,
 ):
+    form = TargetPopulationForm
     list_display = (
         "name",
         "status",

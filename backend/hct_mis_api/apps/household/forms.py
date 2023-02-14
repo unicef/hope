@@ -10,7 +10,16 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
+
+
+def get_households_from_text(ba: BusinessArea, text: Any) -> Optional[List]:
+    """
+    Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
+    """
+    return Household.objects.filter(
+        withdrawn=False, business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", text)
+    )
 
 
 class UpdateByXlsxStage1Form(forms.Form):
@@ -125,10 +134,13 @@ class CreateTargetPopulationForm(forms.Form):
 
 
 class CreateTargetPopulationTextForm(forms.Form):
-    action = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField()
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), help_text=_("Business area you want"))
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.all(), help_text=_("Chose the correct business area")
+    )
     criteria = forms.CharField(widget=forms.Textarea)
+    action = forms.CharField(widget=forms.HiddenInput)
+    targeting_criteria = forms.ModelChoiceField(widget=forms.HiddenInput, queryset=TargetingCriteria.objects.all())
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         read_only = kwargs.pop("read_only", False)
@@ -140,14 +152,10 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["business_area"].widget = HiddenInput()
             self.fields["name"].widget = HiddenInput()
             self.fields["criteria"].widget = HiddenInput()
+            self.fields["targeting_criteria"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
-        print(self.cleaned_data["criteria"])
         try:
-            households = self.cleaned_data["criteria"]
-            ba = self.cleaned_data["business_area"]
-            return Household.objects.filter(
-                business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", households)
-            )
+            return get_households_from_text(self.cleaned_data["business_area"], self.cleaned_data["criteria"])
         except Exception as e:
             raise ValidationError(str(e))
