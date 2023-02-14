@@ -1,16 +1,17 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllPaymentRecordsQueryVariables,
+  AllPaymentRecordsAndPaymentsQueryVariables,
   HouseholdNode,
-  PaymentRecordNode,
-  useAllPaymentRecordsQuery,
+  PaymentRecordAndPaymentNode,
+  useAllPaymentRecordsAndPaymentsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
+// TODO: rename files
 import { headCells } from './PaymentRecordHouseholdTableHeadCells';
-import { PaymentRecordHouseholdTableRow } from './PaymentRecordHouseholdTableRow';
+import { PaymentRecordAndPaymentHouseholdTableRow } from './PaymentRecordHouseholdTableRow';
 
-interface PaymentRecordTableProps {
+interface PaymentRecordAndPaymentTableProps {
   household?: HouseholdNode;
   openInNewTab?: boolean;
   businessArea: string;
@@ -21,23 +22,26 @@ export function PaymentRecordHouseholdTable({
   openInNewTab = false,
   businessArea,
   canViewPaymentRecordDetails,
-}: PaymentRecordTableProps): ReactElement {
+}: PaymentRecordAndPaymentTableProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables = {
     household: household?.id,
     businessArea,
   };
   return (
-    <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
+    <UniversalTable<
+      PaymentRecordAndPaymentNode,
+      AllPaymentRecordsAndPaymentsQueryVariables
+    >
       title={t('Payment Records')}
       headCells={headCells}
-      query={useAllPaymentRecordsQuery}
-      queriedObjectName='allPaymentRecords'
+      query={useAllPaymentRecordsAndPaymentsQuery}
+      queriedObjectName='allPaymentRecordsAndPayments'
       initialVariables={initialVariables}
       renderRow={(row) => (
-        <PaymentRecordHouseholdTableRow
+        <PaymentRecordAndPaymentHouseholdTableRow
           key={row.id}
-          paymentRecord={row}
+          paymentRecordOrPayment={row}
           openInNewTab={openInNewTab}
           canViewDetails={canViewPaymentRecordDetails}
         />
