@@ -68,6 +68,8 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationPlanFilter,
     cash_plan_and_payment_plan_filter,
     cash_plan_and_payment_plan_ordering,
+    payment_record_and_payment_filter,
+    payment_record_and_payment_ordering,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.managers import ArraySubquery
@@ -601,6 +603,31 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
         return ""
 
 
+class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
+
+    obj_type = graphene.String()
+    id = graphene.String()
+    ca_id = graphene.String(source="unicef_id")
+    status = graphene.String(source="status")
+    full_name = graphene.String(source="full_name")
+    parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
+    entitlement_quantity = graphene.Float(source="entitlement_quantity")
+    delivered_quantity = graphene.Float(source="delivered_quantity")
+    delivered_quantity_usd = graphene.Float(source="delivered_quantity_usd")
+    currency = graphene.String(source="currency")
+    delivery_date = graphene.String(source="delivery_date")
+
+    def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
+        return self.__class__.__name__
+
+    def resolve_id(self, info: Any, **kwargs: Any) -> str:
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+
 class PageInfoNode(graphene.ObjectType):
     start_cursor = graphene.String()
     end_cursor = graphene.String()
@@ -616,6 +643,17 @@ class CashPlanAndPaymentPlanEdges(graphene.ObjectType):
 class PaginatedCashPlanAndPaymentPlanNode(graphene.ObjectType):
     page_info = graphene.Field(PageInfoNode)
     edges = graphene.List(CashPlanAndPaymentPlanEdges)
+    total_count = graphene.Int()
+
+
+class PaymentRecordsAndPaymentsEdges(graphene.ObjectType):
+    cursor = graphene.String()
+    node = graphene.Field(PaymentRecordAndPaymentNode)
+
+
+class PaginatedPaymentRecordsAndPaymentsNode(graphene.ObjectType):
+    page_info = graphene.Field(PageInfoNode)
+    edges = graphene.List(PaymentRecordsAndPaymentsEdges)
     total_count = graphene.Int()
 
 
@@ -694,6 +732,18 @@ class Query(graphene.ObjectType):
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
         permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
+    )
+
+    all_payment_records_and_payments = graphene.Field(
+        PaginatedPaymentRecordsAndPaymentsNode,
+        business_area=graphene.String(required=True),
+        program=graphene.String(),
+        household=graphene.ID(),
+        order_by=graphene.String(),
+        first=graphene.Int(),
+        last=graphene.Int(),
+        before=graphene.String(),
+        after=graphene.String(),
     )
 
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -1228,4 +1278,23 @@ class Query(graphene.ObjectType):
         )
         resp.total_count = len(qs)
 
+        return resp
+
+    def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
+        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+
+        qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
+
+        if order_by_value := kwargs.get("order_by"):
+            qs = payment_record_and_payment_ordering(qs, order_by_value)
+
+        resp = connection_from_list_slice(
+            qs,
+            args=kwargs,
+            connection_type=PaginatedPaymentRecordsAndPaymentsNode,
+            edge_type=PaymentRecordsAndPaymentsEdges,
+            pageinfo_type=PageInfoNode,
+            list_length=len(qs),
+        )
+        resp.total_count = len(qs)
         return resp
