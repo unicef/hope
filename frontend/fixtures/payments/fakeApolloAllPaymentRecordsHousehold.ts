@@ -1,9 +1,9 @@
-import { AllPaymentRecordsDocument } from '../../src/__generated__/graphql';
+import { AllPaymentRecordsAndPaymentsDocument } from '../../src/__generated__/graphql';
 
 export const fakeApolloAllPaymentRecordsHousehold = [
   {
     request: {
-      query: AllPaymentRecordsDocument,
+      query: AllPaymentRecordsAndPaymentsDocument,
       variables: {
         household:
           'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
