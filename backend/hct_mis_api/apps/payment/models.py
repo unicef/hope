@@ -1199,7 +1199,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
 
     @property
     def full_name(self) -> str:
-        return self.unicef_id
+        return self.collector.full_name
 
     objects = PaymentManager()
 
