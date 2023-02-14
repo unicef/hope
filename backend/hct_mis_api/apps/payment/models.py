@@ -595,7 +595,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     def status_finished(self) -> None:
         self.status_date = timezone.now()
-        if not self.payment_verification_summary:
+        if not self.payment_verification_summary.exists():
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
@@ -1159,12 +1159,17 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
             raise ValidationError("Status shouldn't be failed")
         self.status = self.STATUS_FORCE_FAILED
         self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
 
-    def revert_mark_as_failed(self) -> None:
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
         if self.status != self.STATUS_FORCE_FAILED:
             raise ValidationError("Only payment record marked as force failed can be reverted")
         self.status = self.STATUS_SUCCESS
         self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
 
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
@@ -1367,17 +1372,16 @@ def build_summary(payment_plan: Optional[Any]) -> None:
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
     summary = payment_plan.get_payment_verification_summary
-    if summary:
-        if statuses_count["active"] >= 1:
-            summary.mark_as_active()
-        elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
-            summary.mark_as_finished()
-        else:
-            summary.status = PaymentVerificationSummary.STATUS_PENDING
-            summary.completion_date = None
-            summary.activation_date = None
-            summary.mark_as_pending()
-        summary.save()
+    if statuses_count["active"] >= 1:
+        summary.mark_as_active()
+    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
+        summary.mark_as_finished()
+    else:
+        summary.status = PaymentVerificationSummary.STATUS_PENDING
+        summary.completion_date = None
+        summary.activation_date = None
+        summary.mark_as_pending()
+    summary.save()
 
 
 @receiver(

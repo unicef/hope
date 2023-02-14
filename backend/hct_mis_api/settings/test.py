@@ -6,6 +6,7 @@ from .base import *  # noqa: ignore=F403
 # dev overrides
 DEBUG = True
 IS_DEV = True
+IS_TEST = True
 TEMPLATES[0]["OPTIONS"]["debug"] = True
 
 # domains/hosts etc.

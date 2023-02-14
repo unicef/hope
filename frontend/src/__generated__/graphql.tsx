@@ -3321,6 +3321,8 @@ export type MutationsMarkPaymentRecordAsFailedArgs = {
 
 
 export type MutationsRevertMarkPaymentRecordAsFailedArgs = {
+  deliveredQuantity: Scalars['Decimal'],
+  deliveryDate: Scalars['Date'],
   paymentRecordId: Scalars['ID']
 };
 
@@ -8253,7 +8255,7 @@ export type ExportXlsxPaymentVerificationPlanFileMutation = (
 );
 
 export type FinishPaymentVerificationPlanMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
@@ -8344,7 +8346,9 @@ export type MarkPrAsFailedMutation = (
 );
 
 export type RevertMarkPrAsFailedMutationVariables = {
-  paymentRecordId: Scalars['ID']
+  paymentRecordId: Scalars['ID'],
+  deliveredQuantity: Scalars['Decimal'],
+  deliveryDate: Scalars['Date']
 };
 
 
@@ -13972,8 +13976,8 @@ export type ExportXlsxPaymentVerificationPlanFileMutationHookResult = ReturnType
 export type ExportXlsxPaymentVerificationPlanFileMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPaymentVerificationPlanFileMutation>;
 export type ExportXlsxPaymentVerificationPlanFileMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>;
 export const FinishPaymentVerificationPlanDocument = gql`
-    mutation FinishPaymentVerificationPlan($cashPlanVerificationId: ID!) {
-  finishPaymentVerificationPlan(paymentVerificationPlanId: $cashPlanVerificationId) {
+    mutation FinishPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  finishPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     paymentPlan {
       id
       verificationPlans {
@@ -14025,7 +14029,7 @@ export function withFinishPaymentVerificationPlan<TProps, TChildProps = {}>(oper
  * @example
  * const [finishPaymentVerificationPlanMutation, { data, loading, error }] = useFinishPaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
@@ -14206,8 +14210,8 @@ export type MarkPrAsFailedMutationHookResult = ReturnType<typeof useMarkPrAsFail
 export type MarkPrAsFailedMutationResult = ApolloReactCommon.MutationResult<MarkPrAsFailedMutation>;
 export type MarkPrAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
 export const RevertMarkPrAsFailedDocument = gql`
-    mutation revertMarkPRAsFailed($paymentRecordId: ID!) {
-  revertMarkPaymentRecordAsFailed(paymentRecordId: $paymentRecordId) {
+    mutation revertMarkPRAsFailed($paymentRecordId: ID!, $deliveredQuantity: Decimal!, $deliveryDate: Date!) {
+  revertMarkPaymentRecordAsFailed(paymentRecordId: $paymentRecordId, deliveredQuantity: $deliveredQuantity, deliveryDate: $deliveryDate) {
     paymentRecord {
       ...paymentRecordDetails
     }
@@ -14247,6 +14251,8 @@ export function withRevertMarkPrAsFailed<TProps, TChildProps = {}>(operationOpti
  * const [revertMarkPrAsFailedMutation, { data, loading, error }] = useRevertMarkPrAsFailedMutation({
  *   variables: {
  *      paymentRecordId: // value for 'paymentRecordId'
+ *      deliveredQuantity: // value for 'deliveredQuantity'
+ *      deliveryDate: // value for 'deliveryDate'
  *   },
  * });
  */
@@ -24786,7 +24792,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   markPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
-  revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
+  revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
