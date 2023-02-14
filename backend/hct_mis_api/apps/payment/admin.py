@@ -314,8 +314,9 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     def save_model(
         self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
     ) -> None:
-        if "payment_id" not in obj.columns:
-            raise ValidationError("Payment ID must be present in columns")
+        for required_field in ["payment_id", "delivered_quantity"]:
+            if required_field not in obj.columns:
+                raise ValidationError(f"'{required_field}' must be present in columns")
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
