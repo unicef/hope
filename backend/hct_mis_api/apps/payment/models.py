@@ -9,7 +9,8 @@ from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, IntegerRangeField
+from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -34,6 +35,7 @@ from graphql import GraphQLError
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
+from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -702,6 +704,37 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             self.imported_file.file.delete(save=False)
             self.imported_file.delete()
             self.imported_file = None
+
+    @cached_property
+    def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
+        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd or 0)
+
+        return self.business_area.acceptance_process_thresholds.filter(
+            payments_range_usd__contains=NumericRange(
+                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
+            )
+        ).first()
+
+    @property
+    def approval_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.approval_number_required
+
+    @property
+    def authorization_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.authorization_number_required
+
+    @property
+    def finance_review_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.finance_review_number_required
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -1543,3 +1576,29 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
+
+
+class AcceptanceProcessThreshold(TimeStampedUUIDModel):
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.PROTECT, related_name="acceptance_process_thresholds"
+    )
+    payments_range_usd = IntegerRangeField(
+        default=NumericRange(0, None),
+        validators=[
+            RangeMinValueValidator(0),
+        ],
+    )
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_review_number_required = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ("payments_range_usd",)
+
+    def __str__(self) -> str:
+        return (
+            f"{self.payments_range_usd} USD, "
+            f"Approvals: {self.approval_number_required} "
+            f"Authorization: {self.authorization_number_required} "
+            f"Finance Reviews: {self.finance_review_number_required}"
+        )
