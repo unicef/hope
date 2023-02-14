@@ -243,7 +243,63 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               >
                 <a
                   class="sc-bZQynM iXasVI"
-                  href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6NWEyZmE4NWYtNTM4YS00M2VjLWEwZTItMzM4ZTBmZDNlODQ1"
+                  href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6ZWE4ZmU2OTktZGFhOS00NTE2LWE5NTktMzNkMzA3Y2M3ZWZm"
+                >
+                  123-21-PR-00010
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje cjSgDD"
+                    data-cy="status-container"
+                  >
+                    Pending
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Lisa Lewis
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                IRR 4,468
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                IRR 1,308
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                <time
+                  datetime="1638657789000"
+                >
+                  4 Dec 2021
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bZQynM iXasVI"
+                  href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6MzE3ODUxYmYtNDU0YS00NDg4LWIyMzUtMjkzMDg5MTkyYzJj"
                 >
                   123-21-PR-00006
                 </a>
@@ -255,42 +311,105 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
-                    DISTRIBUTION SUCCESSFUL
+                    Distribution Successful
                   </div>
                 </div>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Mr. Miguel Conner
+                Mark Mills
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                Notice hair fall college enough perhaps.
+                LBP 1,787
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                TMT 3,683.40
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                TMT 3,326.00
+                LBP 372
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
                 <time
-                  datetime="1610384753000"
+                  datetime="1623805894000"
                 >
-                  11 Jan 2021
+                  16 Jun 2021
                 </time>
               </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bZQynM iXasVI"
+                  href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6MGVlODMzNzQtZDU1Yi00MzgwLTg1ZGQtNzM3MzE5ZmFjMWM0"
+                >
+                  123-21-PR-00003
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje cjSgDD"
+                    data-cy="status-container"
+                  >
+                    Transaction Successful
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Alisha Delacruz
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                GBP 886.54
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                GBP 273.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                <time
+                  datetime="1647692984000"
+                >
+                  19 Mar 2022
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root"
+              style="height: 54px;"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="7"
+              />
             </tr>
           </tbody>
         </table>
@@ -343,7 +462,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-5 of 5
+            1-4 of 4
           </p>
           <div
             class="MuiTablePagination-actions"
