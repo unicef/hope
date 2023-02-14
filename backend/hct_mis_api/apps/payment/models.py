@@ -790,7 +790,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return None
 
     @classmethod
-    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str:
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float]:
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
             "household_id": (payment.household, "unicef_id"),
@@ -806,6 +806,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
+        if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
+            return float(-1)
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
 
