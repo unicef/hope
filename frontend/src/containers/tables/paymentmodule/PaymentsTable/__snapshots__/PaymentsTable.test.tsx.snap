@@ -15,7 +15,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
           class="MuiTypography-root MuiTypography-h6"
           data-cy="table-title"
         >
-          Payments List
+          Payee List
         </h6>
         <div
           class="MuiBox-root MuiBox-root-13"
@@ -95,7 +95,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
           class="MuiTypography-root MuiTypography-h6"
           data-cy="table-title"
         >
-          Payments List
+          Payee List
         </h6>
         <div
           class="MuiBox-root MuiBox-root-2"
