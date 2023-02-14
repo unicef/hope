@@ -126,6 +126,27 @@ class BusinessofficeFilter(SimpleListFilter):
 
 
 class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
+    @classmethod
+    def validate_ranges(cls, ranges: List[List[Optional[int]]]) -> None:
+        ranges = sorted(ranges)  # sorted by range min value
+
+        if ranges[0][0] != 0:
+            raise forms.ValidationError("Ranges need to start from 0")
+
+        for r1, r2 in zip(ranges, ranges[1:]):
+            if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
+                raise forms.ValidationError(
+                    f"Provided ranges overlaps [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
+                )
+
+            if r1[1] != r2[0]:
+                raise forms.ValidationError(
+                    f"Whole range of [0 , ∞] is not covered, please cover range between [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
+                )
+
+        if ranges[-1][1] is not None:
+            raise forms.ValidationError("Last range should cover ∞ (please leave empty value)")
+
     def clean(self) -> None:
         super().clean()
         ranges = []
@@ -145,24 +166,7 @@ class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
         if not ranges:
             return
 
-        ranges = sorted(ranges)
-
-        if ranges[0][0] != 0:
-            raise forms.ValidationError("Ranges need to start from 0")
-
-        for r1, r2 in zip(ranges, ranges[1:]):
-            if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
-                raise forms.ValidationError(
-                    f"Provided ranges overlaps [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
-                )
-
-            if r1[1] != r2[0]:
-                raise forms.ValidationError(
-                    f"Whole range of [0 , ∞] is not covered, please cover range between [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
-                )
-
-        if ranges[-1][1] is not None:
-            raise forms.ValidationError("Last range should cover ∞ (please leave empty value)")
+        self.validate_ranges(ranges)
 
 
 AcceptanceProcessThresholdInlineFormSet = inlineformset_factory(
