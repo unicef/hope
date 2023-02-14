@@ -420,7 +420,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ordering = ["created_at"]
 
     def __str__(self) -> str:
-        return self.unicef_id
+        return self.unicef_id or ""
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -1028,7 +1028,7 @@ class CashPlan(GenericPaymentPlan):
     )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name or ""
 
     @property
     def payment_records_count(self) -> int:
@@ -1185,7 +1185,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     vision_id = models.CharField(max_length=255, null=True)
 
     def __str__(self) -> str:
-        return self.full_name
+        return self.full_name or ""
 
 
 class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
@@ -1531,7 +1531,7 @@ class Approval(TimeStampedUUIDModel):
         ordering = ("-created_at",)
 
     def __str__(self) -> str:
-        return self.type
+        return self.type or ""
 
     @property
     def info(self) -> str:
