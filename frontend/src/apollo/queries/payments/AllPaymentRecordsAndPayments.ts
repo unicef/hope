@@ -38,6 +38,10 @@ export const AllPaymentRecordsAndPayments = gql`
           deliveredQuantity
           deliveredQuantityUsd
           deliveryDate
+          parent {
+            id
+            programmeName
+          }
         }
       }
       totalCount
