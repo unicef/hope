@@ -1285,6 +1285,9 @@ class Query(graphene.ObjectType):
 
         qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
 
+        if order_by_value := kwargs.get("order_by"):
+            qs = payment_record_and_payment_ordering(qs, order_by_value)
+
         resp = connection_from_list_slice(
             qs,
             args=kwargs,
