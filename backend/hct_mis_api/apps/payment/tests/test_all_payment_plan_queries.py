@@ -13,7 +13,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import ApprovalProcess, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    AcceptanceProcessThreshold,
+    ApprovalProcess,
+    PaymentPlan,
+)
 
 
 class TestPaymentPlanQueries(APITestCase):
@@ -197,6 +201,12 @@ class TestPaymentPlanQueries(APITestCase):
             IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
 
             ApprovalProcess.objects.create(payment_plan=cls.pp)
+            AcceptanceProcessThreshold.objects.create(
+                business_area=BusinessArea.objects.first(),
+                approval_number_required=2,
+                authorization_number_required=2,
+                finance_review_number_required=3,
+            )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
                 cls.pp.update_population_count_fields()
