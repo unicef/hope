@@ -245,9 +245,6 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
-  approvalNumberRequired: Int!
-  authorizationNumberRequired: Int!
-  financeReviewNumberRequired: Int!
   isPaymentPlanApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
@@ -2295,6 +2292,12 @@ type PaginatedCashPlanAndPaymentPlanNode {
   totalCount: Int
 }
 
+type PaginatedPaymentRecordsAndPaymentsNode {
+  pageInfo: PageInfoNode
+  edges: [PaymentRecordsAndPaymentsEdges]
+  totalCount: Int
+}
+
 type PartnerType {
   id: ID!
   name: String!
@@ -2634,6 +2637,20 @@ enum PaymentPlanStatus {
   FINISHED
 }
 
+type PaymentRecordAndPaymentNode {
+  objType: String
+  id: String
+  caId: String
+  status: String
+  fullName: String
+  parent: CashPlanAndPaymentPlanNode
+  entitlementQuantity: Float
+  deliveredQuantity: Float
+  deliveredQuantityUsd: Float
+  currency: String
+  deliveryDate: String
+}
+
 enum PaymentRecordDeliveryType {
   CARDLESS_CASH_WITHDRAWAL
   CASH
@@ -2713,6 +2730,11 @@ enum PaymentRecordStatus {
   FORCE_FAILED
   PARTIALLY_DISTRIBUTED
   PENDING
+}
+
+type PaymentRecordsAndPaymentsEdges {
+  cursor: String
+  node: PaymentRecordAndPaymentNode
 }
 
 enum PaymentStatus {
@@ -3001,6 +3023,7 @@ type Query {
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   allPaymentRecords(offset: Int, before: String, after: String, first: Int, last: Int, parent: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
+  allPaymentRecordsAndPayments(businessArea: String!, program: String, household: ID, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedPaymentRecordsAndPaymentsNode
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
   financialServiceProviderXlsxReport(id: ID!): FinancialServiceProviderXlsxReportNode
@@ -4261,9 +4284,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
-  approvalNumberRequired: Int!
-  authorizationNumberRequired: Int!
-  financeReviewNumberRequired: Int!
   isPaymentPlanApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
