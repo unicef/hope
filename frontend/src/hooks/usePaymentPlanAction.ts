@@ -19,7 +19,6 @@ export const usePaymentPlanAction = (
   onClose?: () => void,
 ): PaymentPlanAction => {
   const [mutate, { loading }] = useActionPpMutation();
-  const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
   const mutatePaymentPlanAction = async (comment?: string): Promise<void> => {
     try {
@@ -37,11 +36,7 @@ export const usePaymentPlanAction = (
             variables: { id: paymentPlanId },
             fetchPolicy: 'network-only',
           },
-          {
-            query: AllPaymentsForTableDocument,
-            variables: { paymentPlanId, businessArea },
-            fetchPolicy: 'network-only',
-          },
+          'AllPaymentsForTable',
         ],
       });
       onSuccess();
