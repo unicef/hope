@@ -245,9 +245,6 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
-  approvalNumberRequired: Int!
-  authorizationNumberRequired: Int!
-  financeReviewNumberRequired: Int!
   isPaymentPlanApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
@@ -4287,9 +4284,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
-  approvalNumberRequired: Int!
-  authorizationNumberRequired: Int!
-  financeReviewNumberRequired: Int!
   isPaymentPlanApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!

@@ -368,9 +368,6 @@ export type BusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
-  approvalNumberRequired: Scalars['Int'],
-  authorizationNumberRequired: Scalars['Int'],
-  financeReviewNumberRequired: Scalars['Int'],
   isPaymentPlanApplicable: Scalars['Boolean'],
   active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
@@ -6836,9 +6833,6 @@ export type UserBusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
-  approvalNumberRequired: Scalars['Int'],
-  authorizationNumberRequired: Scalars['Int'],
-  financeReviewNumberRequired: Scalars['Int'],
   isPaymentPlanApplicable: Scalars['Boolean'],
   active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
@@ -10113,6 +10107,10 @@ export type AllPaymentRecordsAndPaymentsQuery = (
       & { node: Maybe<(
         { __typename?: 'PaymentRecordAndPaymentNode' }
         & Pick<PaymentRecordAndPaymentNode, 'objType' | 'id' | 'fullName' | 'status' | 'caId' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
+        & { parent: Maybe<(
+          { __typename?: 'CashPlanAndPaymentPlanNode' }
+          & Pick<CashPlanAndPaymentPlanNode, 'id' | 'programmeName'>
+        )> }
       )> }
     )>>> }
   )> }
@@ -18544,6 +18542,10 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
         deliveredQuantity
         deliveredQuantityUsd
         deliveryDate
+        parent {
+          id
+          programmeName
+        }
       }
     }
     totalCount
@@ -23685,9 +23687,6 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  financeReviewNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
@@ -26432,9 +26431,6 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  financeReviewNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,

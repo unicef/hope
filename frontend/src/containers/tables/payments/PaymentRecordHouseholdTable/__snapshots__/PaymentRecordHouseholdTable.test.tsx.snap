@@ -243,6 +243,64 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               >
                 <a
                   class="sc-bZQynM iXasVI"
+                  href="/afghanistan/payment-records/UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk"
+                >
+                  RCPT-0060-23-0.000.001
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje cjSgDD"
+                    data-cy="status-container"
+                  >
+                    Pending
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Jan Kowalski
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Test Program
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                USD 0.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                USD 0.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                <time
+                  datetime="690422400000"
+                >
+                  18 Nov 1991
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bZQynM iXasVI"
                   href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6ZWE4ZmU2OTktZGFhOS00NTE2LWE5NTktMzNkMzA3Y2M3ZWZm"
                 >
                   123-21-PR-00010
@@ -269,7 +327,9 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                Where production bill mean.
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -325,7 +385,9 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                Where production bill mean.
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
@@ -381,7 +443,9 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              />
+              >
+                Where production bill mean.
+              </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
