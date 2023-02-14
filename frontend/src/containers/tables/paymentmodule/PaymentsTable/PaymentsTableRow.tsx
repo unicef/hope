@@ -13,7 +13,10 @@ import {
   opacityToHex,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
-import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
+import {
+  AllPaymentsForTableQuery,
+  PaymentStatus,
+} from '../../../../__generated__/graphql';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -76,17 +79,22 @@ export const PaymentsTableRow = ({
   };
 
   const renderDeliveredQuantity = (): React.ReactElement => {
-    const { deliveredQuantity, currency, deliveredQuantityUsd } = payment;
+    const {
+      deliveredQuantity,
+      currency,
+      deliveredQuantityUsd,
+      status,
+    } = payment;
+    if (status === PaymentStatus.TransactionErroneous) {
+      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
+    }
     if (deliveredQuantity === null) {
       return <></>;
     }
-    if (deliveredQuantity < 0) {
-      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
-    }
     return (
       <>
-        `${formatCurrencyWithSymbol(deliveredQuantity, currency)}
-        (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`
+        {`${formatCurrencyWithSymbol(deliveredQuantity, currency)}
+        (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`}
       </>
     );
   };
@@ -162,7 +170,7 @@ export const PaymentsTableRow = ({
       <TableCell data-cy='delivered-quantity-cell' align='left'>
         {renderDeliveredQuantity()}
       </TableCell>
-      <TableCell align='left'>{renderMark()}</TableCell>
+      <TableCell>{renderMark()}</TableCell>
     </ClickableTableRow>
   );
 };

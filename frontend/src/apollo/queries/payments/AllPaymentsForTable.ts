@@ -31,6 +31,7 @@ export const AllPaymentsForTable = gql`
         node {
           id
           unicefId
+          status
           household {
             id
             unicefId
