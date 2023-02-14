@@ -45,7 +45,7 @@ export const PaymentsTable = ({
         <Paper>
           <StyledBox p={6} display='flex' justifyContent='space-between'>
             <Typography data-cy='table-title' variant='h6'>
-              {t('Payments List')}
+              {t('Payee List')}
             </Typography>
             {(paymentPlan.status === PaymentPlanStatus.Accepted ||
               paymentPlan.status === PaymentPlanStatus.Finished) && (
