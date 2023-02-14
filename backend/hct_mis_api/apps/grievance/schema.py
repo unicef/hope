@@ -54,7 +54,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.payment.schema import PaymentRecordNode, PaymentNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
@@ -73,7 +73,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-    payment_record = graphene.Field(PaymentRecordNode)
+    payment_record = graphene.Field(PaymentNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
@@ -118,7 +118,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
-        return getattr(grievance_ticket.ticket_details, "payment_record", None)
+        ticket_details = grievance_ticket.ticket_details
+        if ticket_details.payment_verification:
+            return getattr(ticket_details.payment_verification, "payment_obj", None)
+        return None
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> Optional[str]:

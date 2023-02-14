@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -23,6 +24,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     fsp_generate_xlsx_report_task,
@@ -207,10 +209,40 @@ class FinishPaymentVerificationPlan(PermissionMutation):
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, payment_verification_plan.business_area)
 
-        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            log_and_raise("You can finish only ACTIVE verification")
-        VerificationPlanStatusChangeServices(payment_verification_plan).finish()
         payment_verification_plan.refresh_from_db()
+
+        unsuccessful_payment_verifications = PaymentVerification.objects.filter(
+            payment_verification_plan_id=payment_verification_plan_id,
+            status__in=[
+                PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+                PaymentVerification.STATUS_NOT_RECEIVED
+            ]
+        )
+
+        grievance_tickets_to_create = []
+        payment_verification_tickets_to_create = []
+        for payment_verification in unsuccessful_payment_verifications:
+            ticket = GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                business_area=payment_verification_plan.payment_plan_obj.business_area,
+            )
+
+            ticket_details = TicketPaymentVerificationDetails(
+                ticket=ticket,
+                payment_verification=payment_verification,
+                payment_verification_status=payment_verification_plan.status,
+                new_status=payment_verification.status,
+                new_received_amount=payment_verification.received_amount
+            )
+
+            ticket_details.payment_verifications.add(payment_verification)
+
+            grievance_tickets_to_create.append(ticket)
+            payment_verification_tickets_to_create.append(ticket_details)
+
+        GrievanceTicket.objects.bulk_create(grievance_tickets_to_create)
+        TicketPaymentVerificationDetails.objects.bulk_create(payment_verification_tickets_to_create)
+
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",

@@ -310,6 +310,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     total_persons_covered = graphene.Int()
     service_provider = graphene.Field(FinancialServiceProviderNode)
+    ca_id = graphene.String()
 
     class Meta:
         model = Payment
@@ -350,6 +351,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
+
+    def resolve_ca_id(self, info: Any) -> str:
+        return self.unicef_id
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:
