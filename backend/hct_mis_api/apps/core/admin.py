@@ -136,7 +136,7 @@ class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
         for r1, r2 in zip(ranges, ranges[1:]):
             if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
                 raise forms.ValidationError(
-                    f"Provided ranges overlaps [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
+                    f"Provided ranges overlap [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
                 )
 
             if r1[1] != r2[0]:

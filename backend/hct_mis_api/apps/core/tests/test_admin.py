@@ -12,8 +12,8 @@ class TestAcceptanceProcessThreshold(TestCase):
     @parameterized.expand(
         [
             ([[12, 24]], ValidationError, "Ranges need to start from 0"),
-            ([[0, None], [10, 100]], ValidationError, "Provided ranges overlaps [0, ∞) [10, 100)"),
-            ([[0, 10], [8, 100]], ValidationError, "Provided ranges overlaps [0, 10) [8, 100)"),
+            ([[0, None], [10, 100]], ValidationError, "Provided ranges overlap [0, ∞) [10, 100)"),
+            ([[0, 10], [8, 100]], ValidationError, "Provided ranges overlap [0, 10) [8, 100)"),
             (
                 [[0, 10], [20, 100]],
                 ValidationError,
