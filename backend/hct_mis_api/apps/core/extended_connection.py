@@ -1,5 +1,3 @@
-import hashlib
-import json
 import logging
 from typing import Any, Dict, List, Optional, Union
 
@@ -16,8 +14,6 @@ from graphql_relay.connection.arrayconnection import (
     get_offset_with_default,
     offset_to_cursor,
 )
-
-from hct_mis_api.apps.core.utils import save_data_in_cache
 
 logger = logging.getLogger(__name__)
 
