@@ -85,8 +85,8 @@ export const PaymentsTableRow = ({
     }
     return (
       <>
-        `${formatCurrencyWithSymbol(deliveredQuantity, currency)}
-        (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`
+        {`${formatCurrencyWithSymbol(deliveredQuantity, currency)}
+        (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`}
       </>
     );
   };
