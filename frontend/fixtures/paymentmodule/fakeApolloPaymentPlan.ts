@@ -8,7 +8,7 @@ import {
   FinancialServiceProviderCommunicationChannel,
 } from '../../src/__generated__/graphql';
 
-export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
+export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   id:
     'UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==',
   unicefId: 'PP-0060-22-00000001',
@@ -218,17 +218,19 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
     edges: [
       {
         node: {
-          id: "UGF5bWVudFZlcmlmaWNhdGlvblBsYW5Ob2RlOjk1NTFlZDA4LWY1YzYtNDdmNC05ZmMwLTU1MWU2ZmEzN2UyNA==",
-          unicefId: "PVP-1",
+          id:
+            'UGF5bWVudFZlcmlmaWNhdGlvblBsYW5Ob2RlOjk1NTFlZDA4LWY1YzYtNDdmNC05ZmMwLTU1MWU2ZmEzN2UyNA==',
+          unicefId: 'PVP-1',
           status: PaymentVerificationPlanStatus.Active,
           sampleSize: 44,
           receivedCount: 47,
           notReceivedCount: 0,
           respondedCount: 71,
-          verificationChannel: PaymentVerificationPlanVerificationChannel.Rapidpro,
+          verificationChannel:
+            PaymentVerificationPlanVerificationChannel.Rapidpro,
           sampling: PaymentVerificationPlanSampling.FullList,
           receivedWithProblemsCount: 2,
-          rapidProFlowId: "",
+          rapidProFlowId: '',
           confidenceInterval: null,
           marginOfError: null,
           activationDate: null,
@@ -240,12 +242,12 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
           hasXlsxFile: false,
           xlsxFileWasDownloaded: false,
           xlsxFileImported: false,
-          __typename: "PaymentVerificationPlanNode"
+          __typename: 'PaymentVerificationPlanNode',
         },
-        __typename: "PaymentVerificationPlanNodeEdge"
-      }
+        __typename: 'PaymentVerificationPlanNodeEdge',
+      },
     ],
-    __typename: "PaymentVerificationPlanNodeConnection"
+    __typename: 'PaymentVerificationPlanNodeConnection',
   },
   paymentVerificationSummary: null,
   paymentItems: {
@@ -254,20 +256,32 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
     edges: [
       {
         node: {
-          id: "UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk",
-          __typename: "PaymentNode"
+          id:
+            'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
+          __typename: 'PaymentNode',
         },
-        __typename: "PaymentNodeEdge"
+        __typename: 'PaymentNodeEdge',
       },
       {
         node: {
-          id: "UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk",
-          __typename: "PaymentNode"
+          id:
+            'UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
+          __typename: 'PaymentNode',
         },
-        __typename: "PaymentNodeEdge"
-      }
+        __typename: 'PaymentNodeEdge',
+      },
     ],
-    __typename: "PaymentNodeConnection"
+    __typename: 'PaymentNodeConnection',
+  },
+  reconciliationSummary: {
+    deliveredFully: 100,
+    deliveredPartially: 15,
+    notDelivered: 5,
+    failed: 5,
+    pending: 0,
+    numberOfPayments: 120,
+    reconciled: 120,
+    __typename: 'ReconciliationSummaryNode',
   },
   __typename: 'PaymentPlanNode',
 };
