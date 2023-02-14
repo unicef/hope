@@ -21,9 +21,13 @@ export function CashPlanTableRow({
 }: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const cashPlanPath = `/${businessArea}/cashplans/${cashAndPaymentPlan.id}`;
+  const objectPath =
+    cashAndPaymentPlan.objType === 'PaymentPlan'
+      ? `/${businessArea}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
+      : `/${businessArea}/cashplans/${cashAndPaymentPlan.id}`;
+
   const handleClick = (): void => {
-    history.push(cashPlanPath);
+    history.push(objectPath);
   };
   return (
     <ClickableTableRow
@@ -34,7 +38,7 @@ export function CashPlanTableRow({
       data-cy='cash-plan-table-row'
     >
       <TableCell align='left'>
-        <BlackLink to={cashPlanPath}>
+        <BlackLink to={objectPath}>
           <div
             style={{
               textOverflow: 'ellipsis',
@@ -50,8 +54,12 @@ export function CashPlanTableRow({
           statusToColor={cashPlanStatusToColor}
         />
       </TableCell>
-      <TableCell align='right'>{cashAndPaymentPlan.totalNumberOfHouseholds}</TableCell>
-      <TableCell align='left'>{cashAndPaymentPlan.assistanceMeasurement}</TableCell>
+      <TableCell align='right'>
+        {cashAndPaymentPlan.totalNumberOfHouseholds}
+      </TableCell>
+      <TableCell align='left'>
+        {cashAndPaymentPlan.assistanceMeasurement}
+      </TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
@@ -70,10 +78,13 @@ export function CashPlanTableRow({
       </TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
-          cashAndPaymentPlan?.totalUndeliveredQuantity?.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }),
+          cashAndPaymentPlan?.totalUndeliveredQuantity?.toLocaleString(
+            'en-US',
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            },
+          ),
         )}
       </TableCell>
       <TableCell align='left'>
