@@ -1164,6 +1164,10 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         related_query_name="payment",
     )
 
+    @property
+    def full_name(self) -> str:
+        return self.unicef_id
+
     objects = PaymentManager()
 
     class Meta:
