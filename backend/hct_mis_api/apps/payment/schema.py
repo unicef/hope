@@ -68,6 +68,8 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationPlanFilter,
     cash_plan_and_payment_plan_filter,
     cash_plan_and_payment_plan_ordering,
+    payment_record_and_payment_filter,
+    payment_record_and_payment_ordering,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.managers import ArraySubquery
@@ -1280,6 +1282,9 @@ class Query(graphene.ObjectType):
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
         qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+
+        qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
+
         resp = connection_from_list_slice(
             qs,
             args=kwargs,
