@@ -50,7 +50,7 @@ if TYPE_CHECKING:
 
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("household", "status", "cash_plan_name", "target_population")
+    list_display = ("unicef_id", "household", "status", "cash_plan_name", "target_population")
     list_filter = (
         DepotManager,
         QueryStringFilter,
