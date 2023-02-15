@@ -75,6 +75,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
         "type": TYPE_INTEGER,
         "name": "age",
+        "lookup": "age",
         "label": {"English(EN)": "Age (calculated)"},
         "hint": "",
         "required": False,
@@ -1613,6 +1614,7 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "type": TYPE_LIST_OF_IDS,
         "name": "primary_collector_id",
+        "lookup": "primary_collector_id",
         "required": True,
         "label": {"English(EN)": "List of primary collectors ids, separated by a semicolon"},
         "choices": [],
@@ -1624,6 +1626,7 @@ CORE_FIELDS_ATTRIBUTES = [
     {
         "type": TYPE_LIST_OF_IDS,
         "name": "alternate_collector_id",
+        "lookup": "alternate_collector_id",
         "required": True,
         "label": {"English(EN)": "List of alternate collectors ids, separated by a semicolon"},
         "choices": [],
