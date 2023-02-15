@@ -242,6 +242,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
             Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION,
         ]
         cls.create_user_role_with_permissions(
             cls.user,
