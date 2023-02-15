@@ -211,6 +211,9 @@ class FinishPaymentVerificationPlan(PermissionMutation):
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, payment_verification_plan.business_area)
 
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            log_and_raise("You can finish only ACTIVE verification")
+        VerificationPlanStatusChangeServices(payment_verification_plan).finish()
         payment_verification_plan.refresh_from_db()
 
         create_payment_verification_tickets(payment_verification_plan_id)
