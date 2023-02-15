@@ -1,25 +1,25 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
-import { MarkAsReviewedPaymentPlan } from '../MarkAsReviewedPaymentPlan';
+import { MarkAsReleasedPaymentPlan } from '../MarkAsReleasedPaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
 
 export interface InReviewPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   canReject: boolean;
-  canMarkAsReviewed: boolean;
+  canMarkAsReleased: boolean;
 }
 
 export const InReviewPaymentPlanHeaderButtons = ({
   paymentPlan,
   canReject,
-  canMarkAsReviewed,
+  canMarkAsReleased,
 }: InReviewPaymentPlanHeaderButtonsProps): React.ReactElement => {
   return (
     <Box display='flex' alignItems='center'>
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
-      {canMarkAsReviewed && (
-        <MarkAsReviewedPaymentPlan paymentPlan={paymentPlan} />
+      {canMarkAsReleased && (
+        <MarkAsReleasedPaymentPlan paymentPlan={paymentPlan} />
       )}
     </Box>
   );

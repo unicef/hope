@@ -48,7 +48,7 @@ class PaymentPlanService:
             PaymentPlan.Action.UNLOCK.value: self.unlock,
             PaymentPlan.Action.UNLOCK_FSP.value: self.unlock_fsp,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value: self.send_for_approval,
-            # use the same method for Approve, Authorize, Finance Review and Reject
+            # use the same method for Approve, Authorize, Finance Release and Reject
             PaymentPlan.Action.APPROVE.value: self.acceptance_process,
             PaymentPlan.Action.AUTHORIZE.value: self.acceptance_process,
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
@@ -59,7 +59,7 @@ class PaymentPlanService:
         approval_count_map = {
             Approval.APPROVAL: self.payment_plan.approval_number_required,
             Approval.AUTHORIZATION: self.payment_plan.authorization_number_required,
-            Approval.FINANCE_REVIEW: self.payment_plan.finance_review_number_required,
+            Approval.FINANCE_RELEASE: self.payment_plan.finance_release_number_required,
             Approval.REJECT: 1,  # be default only one Reject per Acceptance Process object
         }
         return approval_count_map.get(self.get_approval_type_by_action())
@@ -71,7 +71,7 @@ class PaymentPlanService:
         actions_to_approval_type_map = {
             PaymentPlan.Action.APPROVE.value: Approval.APPROVAL,
             PaymentPlan.Action.AUTHORIZE.value: Approval.AUTHORIZATION,
-            PaymentPlan.Action.REVIEW.value: Approval.FINANCE_REVIEW,
+            PaymentPlan.Action.REVIEW.value: Approval.FINANCE_RELEASE,
             PaymentPlan.Action.REJECT.value: Approval.REJECT,
         }
         return actions_to_approval_type_map[self.action]
@@ -226,11 +226,11 @@ class PaymentPlanService:
 
             if approval_type == Approval.AUTHORIZATION:
                 self.payment_plan.status_authorize()
-                approval_process.sent_for_finance_review_by = self.user
-                approval_process.sent_for_finance_review_date = timezone.now()
+                approval_process.sent_for_finance_release_by = self.user
+                approval_process.sent_for_finance_release_date = timezone.now()
                 approval_process.save()
 
-            if approval_type == Approval.FINANCE_REVIEW:
+            if approval_type == Approval.FINANCE_RELEASE:
                 self.payment_plan.status_mark_as_reviewed()
                 # remove imported and export files
 

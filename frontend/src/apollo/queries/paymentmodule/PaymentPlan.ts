@@ -61,13 +61,13 @@ export const PAYMENT_PLAN_QUERY = gql`
               email
             }
             sentForAuthorizationDate
-            sentForFinanceReviewBy {
+            sentForFinanceReleaseBy {
               id
               firstName
               lastName
               email
             }
-            sentForFinanceReviewDate
+            sentForFinanceReleaseDate
             actions {
               approval {
                 createdAt
@@ -91,7 +91,7 @@ export const PAYMENT_PLAN_QUERY = gql`
                   email
                 }
               }
-              financeReview {
+              financeRelease {
                 createdAt
                 comment
                 info
@@ -120,7 +120,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       approvalNumberRequired
       authorizationNumberRequired
-      financeReviewNumberRequired
+      financeReleaseNumberRequired
       steficonRule {
         id
         rule {
