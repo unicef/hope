@@ -27,11 +27,11 @@ x-django-envs: &django_envs
 services:
   cypress:
     image: ${cypress_image}
-    command: "test"
-    volumes:
-      - ../cypress:/app
+    command: "ci-test"
     depends_on:
       - proxy
+    volumes:
+      - ../cypress-results:/code/cypress/results
 
   proxy:
     image: unicef/hct-mis-proxy

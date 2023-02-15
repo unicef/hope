@@ -10,7 +10,6 @@
   },
   "scripts": {
     "generate-xlsx-files": "./generate_xlsx_files.js",
-    "init-scenario": "./init_scenario.js",
-    "test": "cypress run --headless --config baseUrl=http://proxy --reporter junit --reporter-options 'mochaFile=cypress/results/results-[hash].xml,toConsole=true'"
+    "init-scenario": "./init_scenario.js"
   }
 }
