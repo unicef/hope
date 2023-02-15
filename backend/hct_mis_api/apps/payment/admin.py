@@ -50,7 +50,13 @@ if TYPE_CHECKING:
 
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("household", "status", "cash_plan_name", "target_population")
+    list_display = (
+        "unicef_id",
+        "household",
+        "status",
+        "cash_plan_name",
+        "target_population",
+    )
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -80,7 +86,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
     )
 
     def cash_plan_name(self, obj: Any) -> str:
-        return obj.parent.name
+        return obj.parent.name or ""
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
@@ -314,8 +320,9 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     def save_model(
         self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
     ) -> None:
-        if "payment_id" not in obj.columns:
-            raise ValidationError("Payment ID must be present in columns")
+        for required_field in ["payment_id", "delivered_quantity"]:
+            if required_field not in obj.columns:
+                raise ValidationError(f"'{required_field}' must be present in columns")
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)

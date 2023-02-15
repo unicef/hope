@@ -313,7 +313,7 @@ export const Entitlement = ({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy='total-entitled-quantity-usd'>
-                USD {paymentPlan.totalEntitledQuantityUsd}
+                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
               </BigValue>
             </LabelizedField>
           </>

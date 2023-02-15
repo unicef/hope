@@ -14,6 +14,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
@@ -29,7 +30,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.payment_plan = payment_plan
         self.payment_list: QuerySet["Payment"] = payment_plan.not_excluded_payments
         self.file = file
-        self.errors: List = []
+        self.errors: List[XlsxError] = []
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids: List = list(self.payments_dict.keys())
         self.payments_to_save: List = []
@@ -66,8 +67,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         if len(headers_row) != len(self.expected_columns):
             self.errors.append(
-                (
-                    self.fsp.name,
+                XlsxError(
+                    str(self.fsp.name),
                     None,
                     f"Provided headers {[header.value for header in headers_row]}"
                     f" do not match expected headers {self.expected_columns}, "
@@ -79,8 +80,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for header, expected_column in zip(headers_row, self.expected_columns):
             if header.value != expected_column:
                 self.errors.append(
-                    (
-                        self.fsp.name,
+                    XlsxError(
+                        str(self.fsp.name),
                         header.coordinate,
                         f"Unexpected header {header.value}, expected {expected_column}, "
                         f"please use exported Template File to import data.",
@@ -91,8 +92,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         cell = row[self.expected_columns.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
-                (
-                    self.fsp.name,
+                XlsxError(
+                    str(self.fsp.name),
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
                 )
@@ -102,8 +103,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         cell = row[self.expected_columns.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
-                (
-                    self.fsp.name,
+                XlsxError(
+                    str(self.fsp.name),
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
                 )
@@ -138,8 +139,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
                 if delivered_quantity > payment.entitlement_quantity:
                     self.errors.append(
-                        (
-                            self.fsp.name,
+                        XlsxError(
+                            str(self.fsp.name),
                             cell.coordinate,
                             f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
                             f"Entitlement quantity {payment.entitlement_quantity}",
@@ -160,8 +161,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
             self.errors.append(
-                (
-                    self.fsp.name,
+                XlsxError(
+                    str(self.fsp.name),
                     None,
                     "There aren't any updates in imported file, please add changes and try again",
                 )
@@ -219,7 +220,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 delivered_quantity, payment.entitlement_quantity, payment_id
             )
 
-            if delivered_quantity != payment.delivered_quantity:
+            if (delivered_quantity != payment.delivered_quantity) or (status != payment.status):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,

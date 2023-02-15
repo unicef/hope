@@ -20,7 +20,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, GenericPayment
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -76,7 +76,13 @@ class TestActionPaymentPlanMutation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.user = UserFactory.create(first_name="Rachel", last_name="Walker")
-        create_afghanistan()  # approve:2, authorize:2, finance_review:3
+        create_afghanistan()
+        AcceptanceProcessThreshold.objects.create(
+            business_area=BusinessArea.objects.first(),
+            approval_number_required=2,
+            authorization_number_required=2,
+            finance_review_number_required=3,
+        )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.payment_plan = PaymentPlanFactory.create(business_area=cls.business_area, program=RealProgramFactory())
