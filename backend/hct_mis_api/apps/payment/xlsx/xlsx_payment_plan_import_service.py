@@ -1,6 +1,6 @@
 import io
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -12,6 +12,7 @@ from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
@@ -27,7 +28,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments
         self.file = file
-        self.errors = []
+        self.errors: List[XlsxError] = []
         self.payments_dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
@@ -61,7 +62,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         accepted_headers = self.HEADERS
         if len(headers_row) != len(accepted_headers):
             self.errors.append(
-                (
+                XlsxError(
                     self.TITLE,
                     None,
                     f"Different count of headers. Acceptable headers are: [{accepted_headers}]",
@@ -71,7 +72,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         for header in headers_row:
             if column >= len(accepted_headers):
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.TITLE,
                         header.coordinate,
                         f"Unexpected header {header.value}",
@@ -79,7 +80,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             elif header.value != accepted_headers[column]:
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.TITLE,
                         header.coordinate,
                         f"Unexpected header {header.value} expected {accepted_headers[column]}",
@@ -96,7 +97,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             if cell.data_type != self.COLUMNS_TYPES[column]:
                 readable_cell_error = self.TYPES_READABLE_MAPPING[self.COLUMNS_TYPES[column]]
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.TITLE,
                         cell.coordinate,
                         f"Wrong type off cell {readable_cell_error} "
@@ -109,7 +110,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         cell = row[self.HEADERS.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
-                (
+                XlsxError(
                     self.TITLE,
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
@@ -130,7 +131,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
             self.errors.append(
-                (
+                XlsxError(
                     self.TITLE,
                     None,
                     "There aren't any updates in imported file, please add changes and try again",
