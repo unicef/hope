@@ -9,6 +9,10 @@ from django.db.models import Q
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketPaymentVerificationDetails,
+)
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     Payment,
@@ -138,3 +142,36 @@ def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
 
 def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
     return ExtendedQuerySetSequence(PaymentPlan.objects.all(), CashPlan.objects.all())
+
+
+def create_payment_verification_tickets(payment_verification_plan_id: str) -> None:
+    invalid_payment_verifications = PaymentVerification.objects.filter(
+        payment_verification_plan_id=payment_verification_plan_id,
+        status__in=[PaymentVerification.STATUS_RECEIVED_WITH_ISSUES, PaymentVerification.STATUS_NOT_RECEIVED],
+    )
+
+    payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
+
+    grievance_tickets_to_create = []
+    payment_verification_tickets_to_create = []
+    for payment_verification in invalid_payment_verifications:
+        ticket = GrievanceTicket(
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+            business_area=payment_verification_plan.payment_plan_obj.business_area,
+        )
+
+        ticket_details = TicketPaymentVerificationDetails(
+            ticket=ticket,
+            payment_verification=payment_verification,
+            payment_verification_status=payment_verification_plan.status,
+            new_status=payment_verification.status,
+            new_received_amount=payment_verification.received_amount,
+        )
+
+        ticket_details.payment_verifications.add(payment_verification)
+
+        grievance_tickets_to_create.append(ticket)
+        payment_verification_tickets_to_create.append(ticket_details)
+
+    GrievanceTicket.objects.bulk_create(grievance_tickets_to_create)
+    TicketPaymentVerificationDetails.objects.bulk_create(payment_verification_tickets_to_create)

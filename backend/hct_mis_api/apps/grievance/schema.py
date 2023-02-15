@@ -54,7 +54,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordNode, PaymentNode
+from hct_mis_api.apps.payment.schema import PaymentNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
