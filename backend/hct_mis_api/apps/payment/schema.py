@@ -434,6 +434,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     has_payment_list_export_file = graphene.Boolean()
+    has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
@@ -488,6 +489,22 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
+
+    def resolve_has_fsp_delivery_mechanism_xlsx_template(self, info: Any) -> bool:
+        if (
+            not self.delivery_mechanisms.exists()
+            or self.delivery_mechanisms.filter(
+                Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
+            ).exists()
+        ):
+            return False
+        else:
+            for dm_per_payment_plan in self.delivery_mechanisms.all():
+                if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
+                    dm_per_payment_plan.delivery_mechanism
+                ):
+                    return False
+            return True
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -883,7 +900,10 @@ class Query(graphene.ObjectType):
         )
 
         def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
-            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            fsps = FinancialServiceProvider.objects.filter(
+                delivery_mechanisms__contains=[mechanism],
+                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism,
+            ).distinct()
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,
