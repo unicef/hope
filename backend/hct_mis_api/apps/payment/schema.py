@@ -136,9 +136,7 @@ class RapidProFlow(graphene.ObjectType):
 
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
-        hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),
-    )
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
