@@ -716,7 +716,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
                 Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
                 Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             ],
-            PaymentPlan.Action.FINISH.name: Permissions.PM_FINISH,
+            PaymentPlan.Action.FINISH.name: [],
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)
 
@@ -1023,7 +1023,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
 
         if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
