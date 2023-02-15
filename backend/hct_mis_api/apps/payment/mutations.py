@@ -626,7 +626,7 @@ class CreateFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
     ) -> "CreateFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
 
         fsp = FSPService.create(inputs, info.context.user)
         # Schedule task to generate downloadable report
@@ -649,7 +649,7 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
     ) -> "EditFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
 
         fsp_id = decode_id_string(financial_service_provider_id)
         fsp = FSPService.update(fsp_id, inputs)

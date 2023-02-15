@@ -28,7 +28,7 @@ export const EditSetUpFspPage = (): React.ReactElement => {
   if (permissions === null) return null;
   if (
     !hasPermissions(
-      PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE,
+      PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP,
       permissions,
     )
   )

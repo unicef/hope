@@ -137,7 +137,7 @@ class RapidProFlow(graphene.ObjectType):
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
-        hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),
     )
 
     class Meta:
@@ -147,7 +147,7 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
 
 
 class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
 
     class Meta:
         model = FinancialServiceProviderXlsxReport
@@ -162,7 +162,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
     full_name = graphene.String(source="name")
 
     class Meta:

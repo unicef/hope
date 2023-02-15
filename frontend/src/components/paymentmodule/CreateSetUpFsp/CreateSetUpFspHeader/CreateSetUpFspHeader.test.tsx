@@ -8,7 +8,7 @@ describe('components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader', () => {
     const { container } = render(
       <CreateSetUpFspHeader
         businessArea='afghanistan'
-        permissions={[PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_CREATE]}
+        permissions={[PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]}
       />,
     );
     expect(container).toMatchSnapshot();
