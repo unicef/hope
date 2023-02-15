@@ -73,6 +73,11 @@ class GrievanceTicketFilter(FilterSet):
                 "preferred_language",
             )
         },
+        "payment_verification_ticket_details": {
+            "payment_verification": (
+                "payment_verification_plan__id",
+            )
+        }
     }
     TICKET_TYPES_WITH_FSP = (
         ("complaint_ticket_details", "payment_record__service_provider"),
