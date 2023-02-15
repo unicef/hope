@@ -20,6 +20,7 @@ variables:
   Docker.url: "uniappsakshopedev.azurecr.io"
   Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
   Kubernetes.namespace: "ictd-hope-dev"
+  DOCKER_BUILDKIT: 1
 
 stages:
   - stage: test_frontend
@@ -83,36 +84,20 @@ stages:
             inputs:
               containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
-            displayName: Pull latest for layer caching for this branch
-            continueOnError: true # for first build, no cache
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
-            displayName: Pull latest for layer caching
-            continueOnError: true # for first build, no cache
-          - task: Docker@2
-            displayName: Build
-            inputs:
-              command: build
-              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest 
-                          --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
-              dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registryConnection)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
-          - task: Docker@2
-            displayName: Push
-            inputs:
-              command: push
-              dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registryConnection)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
+            displayName: Docker Login
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(System.PullRequest.PullRequestId)-latest \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(System.PullRequest.PullRequestId)-latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId) \
+              -t $(Docker.url)/$(Docker.backend.repository):latest \
+              --push \
+              ./backend
+            displayName: Docker build
 
   - stage: build_and_push_frontend
     dependsOn: test_frontend
@@ -138,9 +123,12 @@ stages:
             displayName: Docker restore
             condition: and(not(canceled()), eq(variables.CACHE_RESTORED, 'true'))
           - task: Docker@2
-            displayName: Build and Push
+            displayName: Build
             inputs:
-              command: buildAndPush
+              command: build
+              buildContext: $(Build.SourcesDirectory)/frontend
+              addBaseImageData: false
+              addPipelineData: false
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
               containerRegistry: $(Docker.registryConnection)
@@ -150,7 +138,14 @@ stages:
               mkdir -p $(Pipeline.Workspace)/docker
               docker save -o $(Pipeline.Workspace)/docker/cache.tar $(Docker.url)/$(Docker.frontend.repository):$(tag)
             displayName: Docker save
-            condition: and(not(canceled()), or(failed(), ne(variables.CACHE_RESTORED, 'true')))
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registryConnection)
+              tags: |
+                $(tag)
 
   - stage: build_and_push_cypress
     dependsOn: test_frontend
@@ -319,6 +314,8 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
+          - script: |
+              mkdir -p cypress-results
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
@@ -326,24 +323,22 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.cy.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run cypress test'
+              dockerComposeCommand: 'run cypress ci-test'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
                frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                cypress_image=$(Docker.url)/$(Docker.frontend.repository):cypress-latest
-          - script: ls -la
+          - script: ls -la ./cypress-results
             condition: always()
-            workingDirectory: 'cypress'
-          - script: ls -la cypress
+          - script: ls -la ./cypress
             condition: always()
-            workingDirectory: 'cypress'
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
-              searchFolder: 'cypress/cypress/results/'
+              searchFolder: './cypress-results/'
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'

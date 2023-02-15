@@ -1,14 +1,20 @@
 FROM node:13-alpine as dev
+WORKDIR /code
 
-WORKDIR /code/
-ADD yarn.lock package.json /code/
-RUN yarn install
-ADD . /code/
+FROM node:13-alpine as dist-builder
 
 ARG SENTRY_FRONTEND_DSN
 ENV SENTRY_FRONTEND_DSN=${SENTRY_FRONTEND_DSN}
 
-FROM dev as dist-builder
+WORKDIR /code
+
+COPY package.json yarn.lock /code/
+
+RUN --mount=type=cache,target=/root/.cache,sharing=private \
+    yarn install --frozen-lockfile
+
+COPY . /code/
+
 RUN yarn build
 
 FROM nginx:1.23.3-alpine as dist

@@ -1,6 +1,6 @@
 FROM cypress/included:12.4.1
 
-WORKDIR /app
+WORKDIR /code
 
 RUN apt update && apt install -y \
     curl
