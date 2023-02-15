@@ -9,7 +9,8 @@ from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, IntegerRangeField
+from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -34,6 +35,7 @@ from graphql import GraphQLError
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
+from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -420,7 +422,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ordering = ["created_at"]
 
     def __str__(self) -> str:
-        return self.unicef_id
+        return self.unicef_id or ""
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -593,7 +595,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     def status_finished(self) -> None:
         self.status_date = timezone.now()
-        if not self.payment_verification_summary:
+        if not self.payment_verification_summary.exists():
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
@@ -702,6 +704,37 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             self.imported_file.file.delete(save=False)
             self.imported_file.delete()
             self.imported_file = None
+
+    @cached_property
+    def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
+        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd or 0)
+
+        return self.business_area.acceptance_process_thresholds.filter(
+            payments_range_usd__contains=NumericRange(
+                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
+            )
+        ).first()
+
+    @property
+    def approval_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.approval_number_required
+
+    @property
+    def authorization_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.authorization_number_required
+
+    @property
+    def finance_review_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.finance_review_number_required
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -1028,7 +1061,7 @@ class CashPlan(GenericPaymentPlan):
     )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name or ""
 
     @property
     def payment_records_count(self) -> int:
@@ -1126,12 +1159,17 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
             raise ValidationError("Status shouldn't be failed")
         self.status = self.STATUS_FORCE_FAILED
         self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
 
-    def revert_mark_as_failed(self) -> None:
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
         if self.status != self.STATUS_FORCE_FAILED:
             raise ValidationError("Only payment record marked as force failed can be reverted")
         self.status = self.STATUS_SUCCESS
         self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
 
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
@@ -1159,6 +1197,10 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         related_query_name="payment",
     )
 
+    @property
+    def full_name(self) -> str:
+        return self.collector.full_name
+
     objects = PaymentManager()
 
     class Meta:
@@ -1180,7 +1222,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     vision_id = models.CharField(max_length=255, null=True)
 
     def __str__(self) -> str:
-        return self.full_name
+        return self.full_name or ""
 
 
 class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
@@ -1334,17 +1376,16 @@ def build_summary(payment_plan: Optional[Any]) -> None:
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
     summary = payment_plan.get_payment_verification_summary
-    if summary:
-        if statuses_count["active"] >= 1:
-            summary.mark_as_active()
-        elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
-            summary.mark_as_finished()
-        else:
-            summary.status = PaymentVerificationSummary.STATUS_PENDING
-            summary.completion_date = None
-            summary.activation_date = None
-            summary.mark_as_pending()
-        summary.save()
+    if statuses_count["active"] >= 1:
+        summary.mark_as_active()
+    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
+        summary.mark_as_finished()
+    else:
+        summary.status = PaymentVerificationSummary.STATUS_PENDING
+        summary.completion_date = None
+        summary.activation_date = None
+        summary.mark_as_pending()
+    summary.save()
 
 
 @receiver(
@@ -1527,7 +1568,7 @@ class Approval(TimeStampedUUIDModel):
         ordering = ("-created_at",)
 
     def __str__(self) -> str:
-        return self.type
+        return self.type or ""
 
     @property
     def info(self) -> str:
@@ -1539,3 +1580,29 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
+
+
+class AcceptanceProcessThreshold(TimeStampedUUIDModel):
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.PROTECT, related_name="acceptance_process_thresholds"
+    )
+    payments_range_usd = IntegerRangeField(
+        default=NumericRange(0, None),
+        validators=[
+            RangeMinValueValidator(0),
+        ],
+    )
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_review_number_required = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ("payments_range_usd",)
+
+    def __str__(self) -> str:
+        return (
+            f"{self.payments_range_usd} USD, "
+            f"Approvals: {self.approval_number_required} "
+            f"Authorization: {self.authorization_number_required} "
+            f"Finance Reviews: {self.finance_review_number_required}"
+        )

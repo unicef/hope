@@ -2,15 +2,21 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
+import ErrorOutlineRoundedIcon from '@material-ui/icons/ErrorOutlineRounded';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
+  opacityToHex,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
-import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
+import {
+  AllPaymentsForTableQuery,
+  PaymentStatus,
+} from '../../../../__generated__/graphql';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -18,6 +24,33 @@ export const StyledLink = styled.div`
   cursor: pointer;
   display: flex;
   align-content: center;
+`;
+
+const RoutedBox = styled.div`
+  color: ${({ theme }) => theme.hctPalette.red};
+  background-color: ${({ theme }) =>
+    `${theme.hctPalette.red}${opacityToHex(0.15)}`};
+  border-radius: 16px;
+  font-family: Roboto;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  line-height: 16px;
+  padding: ${({ theme }) => theme.spacing(1)}px;
+  text-align: center;
+  margin-right: 20px;
+`;
+
+const OrangeError = styled(ErrorOutlineRoundedIcon)`
+  color: ${({ theme }) => theme.hctPalette.orange};
+`;
+
+const RedError = styled(ErrorOutlineRoundedIcon)`
+  color: ${({ theme }) => theme.hctPalette.red};
+`;
+
+const GreenCheck = styled(CheckCircleOutlineRoundedIcon)`
+  color: ${({ theme }) => theme.hctPalette.green};
 `;
 
 interface PaymentsTableRowProps {
@@ -43,6 +76,42 @@ export const PaymentsTableRow = ({
   ): void => {
     e.stopPropagation();
     onWarningClick(payment);
+  };
+
+  const renderDeliveredQuantity = (): React.ReactElement => {
+    const {
+      deliveredQuantity,
+      currency,
+      deliveredQuantityUsd,
+      status,
+    } = payment;
+    if (status === PaymentStatus.TransactionErroneous) {
+      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
+    }
+    if (deliveredQuantity === null) {
+      return <></>;
+    }
+    return (
+      <>
+        {`${formatCurrencyWithSymbol(deliveredQuantity, currency)}
+        (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`}
+      </>
+    );
+  };
+
+  const renderMark = (): React.ReactElement => {
+    const { deliveredQuantity, entitlementQuantity } = payment;
+
+    if (deliveredQuantity === null) {
+      return <></>;
+    }
+    if (deliveredQuantity === 0) {
+      return <RedError />;
+    }
+    if (deliveredQuantity === entitlementQuantity) {
+      return <GreenCheck />;
+    }
+    return <OrangeError />;
   };
 
   return (
@@ -88,7 +157,7 @@ export const PaymentsTableRow = ({
           : '-'}
       </TableCell>
       <TableCell align='left'>
-        {payment.entitlementQuantityUsd > 0
+        {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
           ? `${formatCurrencyWithSymbol(
               payment.entitlementQuantity,
               payment.currency,
@@ -99,16 +168,9 @@ export const PaymentsTableRow = ({
           : '-'}
       </TableCell>
       <TableCell data-cy='delivered-quantity-cell' align='left'>
-        {payment.deliveredQuantity > 0
-          ? `${formatCurrencyWithSymbol(
-              payment.deliveredQuantity,
-              payment.currency,
-            )} (${formatCurrencyWithSymbol(
-              payment.deliveredQuantityUsd,
-              'USD',
-            )})`
-          : '-'}
+        {renderDeliveredQuantity()}
       </TableCell>
+      <TableCell>{renderMark()}</TableCell>
     </ClickableTableRow>
   );
 };

@@ -267,7 +267,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <a
                   class="sc-bZQynM iXasVI"
-                  href="/afghanistan/cashplans/UGF5bWVudFBsYW5Ob2RlOmIyNTYzN2VjLWNkYmUtNDEzMC04N2JlLWU1OGIzYzcxMDdkMg=="
+                  href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmIyNTYzN2VjLWNkYmUtNDEzMC04N2JlLWU1OGIzYzcxMDdkMg=="
                 >
                   <div
                     style="text-overflow: ellipsis;"
