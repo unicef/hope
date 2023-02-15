@@ -10,6 +10,7 @@ from xlwt import Row
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.payment.models import PaymentPlan
@@ -23,7 +24,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.payment_plan = payment_plan
         self.payment_list: QuerySet["Payment"] = payment_plan.not_excluded_payments
         self.file = file
-        self.errors: List = []
+        self.errors: List[XlsxError] = []
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids: List = list(self.payments_dict.keys())
         self.payments_to_save: List = []
@@ -44,7 +45,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for required_column in self.required_columns:
             if required_column not in self.xlsx_headers:
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.sheetname,
                         None,
                         f"Provided headers {self.xlsx_headers}"
@@ -58,7 +59,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         cell = row[self.xlsx_headers.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
-                (
+                XlsxError(
                     self.sheetname,
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
@@ -94,7 +95,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
                 if delivered_quantity > payment.entitlement_quantity:
                     self.errors.append(
-                        (
+                        XlsxError(
                             self.sheetname,
                             cell.coordinate,
                             f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
@@ -115,7 +116,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
             self.errors.append(
-                (
+                XlsxError(
                     self.sheetname,
                     None,
                     "There aren't any updates in imported file, please add changes and try again",
