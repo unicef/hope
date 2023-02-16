@@ -49,15 +49,38 @@ export const PaymentPlanDetailsHeader = ({
 
   // TODO: add real values by permissions
 
-  const canRemove = true;
-  const canEdit = true;
-  const canLock = true;
-  const canUnlock = true;
-  const canSendForApproval = true;
-  const canReject = true;
-  const canApprove = true;
-  const canAuthorize = true;
-  const canMarkAsReleased = true;
+  const canRemove = hasPermissions(
+    PERMISSIONS.PM_CREATE,
+    permissions,
+  );
+  const canEdit = hasPermissions(
+    PERMISSIONS.PM_CREATE,
+    permissions,
+  );
+  const canLock = hasPermissions(
+    PERMISSIONS.PM_LOCK_AND_UNLOCK,
+    permissions,
+  );
+  const canUnlock = hasPermissions(
+    PERMISSIONS.PM_LOCK_AND_UNLOCK,
+    permissions,
+  );
+  const canSendForApproval = hasPermissions(
+    PERMISSIONS.PM_SEND_FOR_APPROVAL,
+    permissions,
+  );
+  const canApprove = hasPermissions(
+    PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
+    permissions,
+  );
+  const canAuthorize = hasPermissions(
+    PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+    permissions,
+  );
+  const canMarkAsReleased = hasPermissions(
+    PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+    permissions,
+  );
   const canDownloadXlsx = true;
   const canSendToFsp = false;  // TODO: hide for now
     // paymentPlan.status === PaymentPlanStatus.Accepted &&
@@ -100,7 +123,10 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canReject={canReject}
+          canReject={hasPermissions(
+            PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
+            permissions,
+          )}
           canApprove={canApprove}
         />
       );
@@ -109,7 +135,10 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canReject={canReject}
+          canReject={hasPermissions(
+            PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            permissions,
+          )}
           canAuthorize={canAuthorize}
         />
       );
@@ -118,7 +147,10 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canReject={canReject}
+          canReject={hasPermissions(
+            PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            permissions,
+          )}
           canMarkAsReleased={canMarkAsReleased}
         />
       );
