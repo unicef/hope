@@ -62,6 +62,13 @@ class TestPaymentPlanQueries(APITestCase):
             }
             approvalProcess{
               totalCount
+              edges {
+                node {
+                  approvalNumberRequired
+                  authorizationNumberRequired
+                  financeReleaseNumberRequired
+                }
+              }
             }
             paymentsConflictsCount
           }
@@ -197,12 +204,17 @@ class TestPaymentPlanQueries(APITestCase):
             IndividualFactory(household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20))
             IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
 
-            ApprovalProcess.objects.create(payment_plan=cls.pp)
             AcceptanceProcessThreshold.objects.create(
                 business_area=BusinessArea.objects.first(),
                 approval_number_required=2,
                 authorization_number_required=2,
                 finance_release_number_required=3,
+            )
+            ApprovalProcess.objects.create(
+                payment_plan=cls.pp,
+                approval_number_required=cls.pp.approval_number_required,
+                authorization_number_required=cls.pp.authorization_number_required,
+                finance_release_number_required=cls.pp.finance_release_number_required,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
