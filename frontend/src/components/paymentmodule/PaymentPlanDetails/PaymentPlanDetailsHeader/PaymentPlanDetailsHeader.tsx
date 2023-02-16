@@ -134,6 +134,15 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
+    case 'FINISHED': // TODO: may create another one for that explicitly but good for now
+      buttons = (
+        <AcceptedPaymentPlanHeaderButtons
+          canDownloadXlsx={canDownloadXlsx}
+          canSendToFsp={canSendToFsp}
+          paymentPlan={paymentPlan}
+        />
+      );
+      break;
     default:
       break;
   }
@@ -165,7 +174,7 @@ export const PaymentPlanDetailsHeader = ({
         </Box>
       }
       breadCrumbs={
-        hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS, permissions)
+        hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
           ? breadCrumbsItems
           : null
       }

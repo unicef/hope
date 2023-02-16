@@ -1,6 +1,7 @@
 import os
 import tempfile
 from datetime import timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Tuple
 from unittest.mock import patch
 from zipfile import ZipFile
@@ -9,6 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 from openpyxl import load_workbook
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -27,15 +29,18 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
+    PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
     PaymentPlan,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
+    XlsxPaymentPlanImportPerFspService,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
@@ -217,18 +222,15 @@ class TestPaymentPlanReconciliation(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan(
             is_payment_plan_applicable=True,
-            approval_number_required=1,
-            authorization_number_required=1,
-            finance_review_number_required=1,
         )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.all_necessary_permissions = [
-            Permissions.PAYMENT_MODULE_CREATE,
-            Permissions.PAYMENT_MODULE_VIEW_DETAILS,
-            Permissions.PAYMENT_MODULE_VIEW_LIST,
-            Permissions.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS,
-            Permissions.PAYMENT_MODULE_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+            Permissions.PM_CREATE,
+            Permissions.PM_VIEW_DETAILS,
+            Permissions.PM_VIEW_LIST,
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
             Permissions.PROGRAMME_CREATE,
             Permissions.PROGRAMME_ACTIVATE,
             Permissions.TARGETING_CREATE,
@@ -245,24 +247,8 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         cls.household_1, cls.individual_1 = cls.create_household_and_individual()
         cls.household_1.refresh_from_db()
-
-        cls.delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        )
-        cls.payment_channel_1_cash = PaymentChannelFactory(
-            individual=cls.individual_1,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
         cls.household_2, cls.individual_2 = cls.create_household_and_individual()
-        cls.payment_channel_2_cash = PaymentChannelFactory(
-            individual=cls.individual_2,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
         cls.household_3, cls.individual_3 = cls.create_household_and_individual()
-        cls.payment_channel_3_cash = PaymentChannelFactory(
-            individual=cls.individual_3,
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
@@ -375,6 +361,12 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
             distribution_limit=None,
         )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
+        )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
         payment = PaymentFactory(
@@ -388,7 +380,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
-            assigned_payment_channel=None,
             excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
@@ -504,7 +495,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert (
             payment_plan.not_excluded_payments.filter(
                 financial_service_provider__isnull=False,
-                assigned_payment_channel__isnull=False,
                 delivery_type__isnull=False,
             ).count()
             == 1
@@ -621,33 +611,29 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment = payment_plan.payment_items.first()
             self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
-            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism.delivery_mechanism, "Cash")
-
             self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
             self.assertEqual(sheet.cell(row=2, column=2).value, self.household_1.unicef_id)
             self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")
             self.assertEqual(sheet.cell(row=2, column=3).value, self.household_1.size)
-            self.assertEqual(sheet.cell(row=1, column=4).value, "admin_level_2")
-            self.assertEqual(sheet.cell(row=2, column=4).value, None)
-            self.assertEqual(sheet.cell(row=1, column=5).value, "collector_name")
-            self.assertEqual(sheet.cell(row=2, column=5).value, payment.collector.full_name)
-            self.assertEqual(sheet.cell(row=1, column=6).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=6).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=7).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=7).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=8).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=10).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=11).value, None)
+            self.assertEqual(sheet.cell(row=1, column=4).value, "collector_name")
+            self.assertEqual(sheet.cell(row=2, column=4).value, payment.collector.full_name)
+            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=6).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=6).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=7).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=7).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=8).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=10).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=10).value, None)
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, None)
-            self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
+            self.assertEqual(payment.status, Payment.STATUS_PENDING)
             self.assertEqual(payment_plan.is_reconciled, False)
 
             filled_file_name = "filled.xlsx"
@@ -677,7 +663,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                         import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"][0][
                             "message"
                         ]
-                        == f"Payment {payment.unicef_id}: Delivered quantity 666 is not equal Entitlement quantity 500.00"
+                        == f"Payment {payment.unicef_id}: Delivered quantity 666.00 is bigger than Entitlement quantity 500.00"
                     ), import_mutation_response
 
             # update xls, delivered_quantity == entitlement_quantity
@@ -708,3 +694,29 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.delivered_quantity, 500)
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment_plan.is_reconciled, True)
+
+    @parameterized.expand(
+        [
+            (-1, None, Payment.STATUS_ERROR),
+            (0, Decimal(0), Payment.STATUS_NOT_DISTRIBUTED),
+            (400, Decimal(400), Payment.STATUS_DISTRIBUTION_PARTIAL),
+            (500, Decimal(500), Payment.STATUS_DISTRIBUTION_SUCCESS),
+            (600, None, None),
+        ]
+    )
+    def test_receiving_payment_reconciliations_status(
+        self, delivered_quantity: float, expected_delivered_quantity: Decimal, expected_status: str
+    ) -> None:
+        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(), None)  # type: ignore
+
+        if not expected_status:
+            with self.assertRaisesMessage(
+                service.XlsxPaymentPlanImportPerFspServiceException,
+                "Invalid delivered_quantity 600 provided for payment_id xx",
+            ):
+                service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
+
+        else:
+            status, value = service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
+            self.assertEqual(status, expected_status)
+            self.assertEqual(value, expected_delivered_quantity)

@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.cache_keys import (
 )
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
-from hct_mis_api.apps.core.utils import build_arg_dict
+from hct_mis_api.apps.core.utils import build_arg_dict, clear_cache_for_dashboard_totals
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     PaymentRecord,
@@ -105,6 +105,7 @@ class PullFromDatahubTask:
             "failures": [],
         }
         grouped_session_count = 0
+        remove_dashboard_cache = False
         for group in grouped_session:
             grouped_session_count += 1
             business_area = group.get("business_area")
@@ -118,9 +119,12 @@ class PullFromDatahubTask:
                 try:
                     self.copy_session(session)
                     ret["successes"].append(session.id)
+                    remove_dashboard_cache = True
                 except Exception as e:
                     logger.exception(e)
                     ret["failures"].append(session.id)
+        if remove_dashboard_cache:
+            clear_cache_for_dashboard_totals()
         return ret | {"grouped_session": grouped_session_count}
 
     def clear_cache(self, session: "AbstractSession") -> None:

@@ -16,7 +16,6 @@ import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
-import { Missing } from '../core/Missing';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -64,8 +63,7 @@ export function VerificationPaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              // TODO: add distribution modality
-              value={<Missing />}
+              value={payment.distributionModality}
             />
           </Grid>
         </Grid>

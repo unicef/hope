@@ -33,7 +33,7 @@ class TestPaymentPlanServices(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PAYMENT_MODULE_CREATE], BusinessArea.objects.get(slug="afghanistan")
+            cls.user, [Permissions.PM_CREATE], BusinessArea.objects.get(slug="afghanistan")
         )
 
     def test_delete_open(self) -> None:

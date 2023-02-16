@@ -62,21 +62,25 @@ export const VolumeByDeliveryMechanismSection = ({
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;
 
-  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map((vdm, index) => (
-    <Grid
-      item
-      xs={6}
-      /* eslint-disable-next-line react/no-array-index-key */
-      key={`${vdm.deliveryMechanism.id}-${index}`}
-    >
-      <FieldBorder color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}>
-        <LabelizedField
-          label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name})`}
-          value={vdm.volumeUsd}
-        />
-      </FieldBorder>
-    </Grid>
-  ));
+  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map(
+    (vdm, index) => (
+      <Grid
+        item
+        xs={6}
+        /* eslint-disable-next-line react/no-array-index-key */
+        key={`${vdm.deliveryMechanism.id}-${index}`}
+      >
+        <FieldBorder
+          color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}
+        >
+          <LabelizedField
+            label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name})`}
+            value={`${vdm.volume} ${paymentPlan.currency} (${vdm.volumeUsd} USD)`}
+          />
+        </FieldBorder>
+      </Grid>
+    ),
+  );
 
   const chartLabels = volumeByDeliveryMechanism.map(
     (el) => `${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`,
@@ -96,7 +100,7 @@ export const VolumeByDeliveryMechanismSection = ({
     <Box display='flex' flexDirection='column'>
       <Title>
         <Typography variant='h6'>
-          {t('Volume by Delivery Mechanism')} in USD
+          {t('Volume by Delivery Mechanism')}
         </Typography>{' '}
       </Title>
       <ContentWrapper>

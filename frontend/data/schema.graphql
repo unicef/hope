@@ -13,6 +13,7 @@ enum Action {
   AUTHORIZE
   REVIEW
   REJECT
+  FINISH
 }
 
 input ActionPaymentPlanInput {
@@ -244,9 +245,6 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
-  approvalNumberRequired: Int!
-  authorizationNumberRequired: Int!
-  financeReviewNumberRequired: Int!
   isPaymentPlanApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
@@ -871,7 +869,7 @@ type FinancialServiceProviderNode implements Node {
   distributionLimit: Float
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
-  fspXlsxTemplate: FinancialServiceProviderXlsxTemplateNode
+  xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -921,7 +919,6 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   PAYMENT_ID
   HOUSEHOLD_ID
   HOUSEHOLD_SIZE
-  ADMIN_LEVEL_2
   COLLECTOR_NAME
   PAYMENT_CHANNEL
   FSP_NAME
@@ -938,7 +935,8 @@ type FinancialServiceProviderXlsxTemplateNode implements Node {
   createdBy: UserNode
   name: String!
   columns: FinancialServiceProviderXlsxTemplateColumns!
-  financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  coreFields: [String!]!
+  financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
 }
 
 type FinancialServiceProviderXlsxTemplateNodeConnection {
@@ -1008,7 +1006,7 @@ input GetCashplanVerificationSampleSizeInput {
   cashOrPaymentPlanId: ID
   paymentVerificationPlanId: ID
   sampling: String!
-  verificationChannel: String
+  verificationChannel: String!
   businessAreaSlug: String!
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
@@ -1951,7 +1949,6 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
-  paymentChannels: [BankAccountInfoNode]
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -1969,6 +1966,7 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -2138,8 +2136,7 @@ type LabelNode {
 
 type LanguageObject {
   english: String
-  alpha2: String
-  alpha3: String
+  code: String
 }
 
 type LanguageObjectConnection {
@@ -2228,7 +2225,7 @@ type Mutations {
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
-  revertMarkPaymentRecordAsFailed(paymentRecordId: ID!): RevertMarkAsFailedMutation
+  revertMarkPaymentRecordAsFailed(deliveredQuantity: Decimal!, deliveryDate: Date!, paymentRecordId: ID!): RevertMarkAsFailedMutation
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   actionPaymentPlanMutation(input: ActionPaymentPlanInput!): ActionPaymentPlanMutation
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
@@ -2295,21 +2292,18 @@ type PaginatedCashPlanAndPaymentPlanNode {
   totalCount: Int
 }
 
+type PaginatedPaymentRecordsAndPaymentsNode {
+  pageInfo: PageInfoNode
+  edges: [PaymentRecordsAndPaymentsEdges]
+  totalCount: Int
+}
+
 type PartnerType {
   id: ID!
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
-}
-
-type PaymentChannelNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  individual: IndividualNode!
-  isFallback: Boolean!
-  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
 }
 
 type PaymentConflictDataNode {
@@ -2366,12 +2360,10 @@ type PaymentNode implements Node {
   entitlementDate: DateTime
   financialServiceProvider: FinancialServiceProviderNode
   collector: IndividualNode!
-  assignedPaymentChannel: PaymentChannelNode
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
   paymentPlanSoftConflictedData: [PaymentConflictDataNode]
-  hasPaymentChannel: Boolean
   fullName: String
   targetPopulation: TargetPopulationNode
   verification: PaymentVerificationNode
@@ -2642,7 +2634,21 @@ enum PaymentPlanStatus {
   IN_AUTHORIZATION
   IN_REVIEW
   ACCEPTED
-  RECONCILED
+  FINISHED
+}
+
+type PaymentRecordAndPaymentNode {
+  objType: String
+  id: String
+  caId: String
+  status: String
+  fullName: String
+  parent: CashPlanAndPaymentPlanNode
+  entitlementQuantity: Float
+  deliveredQuantity: Float
+  deliveredQuantityUsd: Float
+  currency: String
+  deliveryDate: String
 }
 
 enum PaymentRecordDeliveryType {
@@ -2722,6 +2728,13 @@ enum PaymentRecordStatus {
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
   FORCE_FAILED
+  PARTIALLY_DISTRIBUTED
+  PENDING
+}
+
+type PaymentRecordsAndPaymentsEdges {
+  cursor: String
+  node: PaymentRecordAndPaymentNode
 }
 
 enum PaymentStatus {
@@ -2730,6 +2743,8 @@ enum PaymentStatus {
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
   FORCE_FAILED
+  PARTIALLY_DISTRIBUTED
+  PENDING
 }
 
 type PaymentVerificationLogEntryNode implements Node {
@@ -3008,12 +3023,13 @@ type Query {
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   allPaymentRecords(offset: Int, before: String, after: String, first: Int, last: Int, parent: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
+  allPaymentRecordsAndPayments(businessArea: String!, program: String, household: ID, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedPaymentRecordsAndPaymentsNode
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
   financialServiceProviderXlsxReport(id: ID!): FinancialServiceProviderXlsxReportNode
   allFinancialServiceProviderXlsxReports(offset: Int, before: String, after: String, first: Int, last: Int, status: String, orderBy: String): FinancialServiceProviderXlsxReportNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
-  allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, fspXlsxTemplate: ID, orderBy: String): FinancialServiceProviderNodeConnection
+  allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, xlsxTemplates: [ID], orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   allPaymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int, paymentVerificationPlan: ID, status: String, paymentPlanId: String, search: String, businessArea: String!, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
   paymentVerificationPlan(id: ID!): PaymentVerificationPlanNode
@@ -3049,7 +3065,7 @@ type Query {
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
   cashAssistUrlPrefix: String
-  allLanguages(name: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
+  allLanguages(code: String, before: String, after: String, first: Int, last: Int): LanguageObjectConnection
   program(id: ID!): ProgramNode
   allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
@@ -4268,9 +4284,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
-  approvalNumberRequired: Int!
-  authorizationNumberRequired: Int!
-  financeReviewNumberRequired: Int!
   isPaymentPlanApplicable: Boolean!
   active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!

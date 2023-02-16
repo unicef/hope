@@ -1,6 +1,6 @@
 import io
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -9,15 +9,10 @@ import openpyxl
 from xlwt import Row
 
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
-    Payment,
-    PaymentChannel,
-    PaymentPlan,
-)
-from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
@@ -33,7 +28,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.not_excluded_payments
         self.file = file
-        self.errors = []
+        self.errors: List[XlsxError] = []
         self.payments_dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
@@ -67,7 +62,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         accepted_headers = self.HEADERS
         if len(headers_row) != len(accepted_headers):
             self.errors.append(
-                (
+                XlsxError(
                     self.TITLE,
                     None,
                     f"Different count of headers. Acceptable headers are: [{accepted_headers}]",
@@ -77,7 +72,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         for header in headers_row:
             if column >= len(accepted_headers):
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.TITLE,
                         header.coordinate,
                         f"Unexpected header {header.value}",
@@ -85,7 +80,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             elif header.value != accepted_headers[column]:
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.TITLE,
                         header.coordinate,
                         f"Unexpected header {header.value} expected {accepted_headers[column]}",
@@ -102,7 +97,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             if cell.data_type != self.COLUMNS_TYPES[column]:
                 readable_cell_error = self.TYPES_READABLE_MAPPING[self.COLUMNS_TYPES[column]]
                 self.errors.append(
-                    (
+                    XlsxError(
                         self.TITLE,
                         cell.coordinate,
                         f"Wrong type off cell {readable_cell_error} "
@@ -115,7 +110,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         cell = row[self.HEADERS.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
-                (
+                XlsxError(
                     self.TITLE,
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
@@ -129,58 +124,14 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return
         entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
         if entitlement_amount is not None and entitlement_amount != "":
-            entitlement_amount = float_to_decimal(entitlement_amount)
+            entitlement_amount = to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
-                self.is_updated = True
-
-    def _validate_payment_channel(self, row: Row) -> None:
-        payment_id = row[self.HEADERS.index("payment_id")].value
-        payment = self.payments_dict.get(payment_id)
-        if payment is None:
-            return
-        payment_channels_value = row[self.HEADERS.index("payment_channel")].value
-        if not payment_channels_value:
-            return
-        payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
-        payment_channel_cell = row[self.HEADERS.index("payment_channel")]
-
-        delivery_type_list = list(map(lambda x: x[0].lower(), GenericPayment.DELIVERY_TYPE_CHOICE))
-
-        for payment_channel in payment_channels_list:
-            if payment_channel.lower() not in delivery_type_list:
-                self.errors.append(
-                    (
-                        self.TITLE,
-                        payment_channel_cell.coordinate,
-                        f"Payment_channel should be one of {[x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]} "
-                        f"but received {payment_channel}",
-                    )
-                )
-            delivery_mechanisms = list(
-                payment.collector.payment_channels.all()
-                .distinct("delivery_mechanism__delivery_mechanism")
-                .values_list("delivery_mechanism__delivery_mechanism", flat=True)
-            )
-            delivery_mechanisms_lower_case = list(map(lambda x: x.lower(), delivery_mechanisms))
-            if (
-                payment.collector.payment_channels.exists()
-                and payment_channel.lower() not in delivery_mechanisms_lower_case
-            ):
-                self.errors.append(
-                    (
-                        self.TITLE,
-                        payment_channel_cell.coordinate,
-                        f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
-                        f"channel(s): {', '.join(delivery_mechanisms)}",
-                    )
-                )
-            if not payment.collector.payment_channels.exists() and payment_channel:
                 self.is_updated = True
 
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
             self.errors.append(
-                (
+                XlsxError(
                     self.TITLE,
                     None,
                     "There aren't any updates in imported file, please add changes and try again",
@@ -194,7 +145,6 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_row_types(row)
             self._validate_payment_id(row)
             self._validate_entitlement(row)
-            self._validate_payment_channel(row)
 
     def _import_row(self, row: Row, exchange_rate: float) -> None:
         payment_id = row[self.HEADERS.index("payment_id")].value
@@ -205,23 +155,8 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         if payment is None:
             return
 
-        if payment_channels_value := row[self.HEADERS.index("payment_channel")].value:
-            payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
-
-            if not payment.collector.payment_channels.exists():
-                for payment_channel in payment_channels_list:
-                    # TODO handle delivery channels other than CASH
-                    # if payment_channel is not None and payment_channel != "":
-                    if payment_channel == GenericPayment.DELIVERY_TYPE_CASH:
-                        cash_delivery_mechanism = DeliveryMechanism.objects.get(
-                            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
-                        )
-                        PaymentChannel.objects.get_or_create(
-                            individual=payment.collector, delivery_mechanism=cash_delivery_mechanism, delivery_data={}
-                        )
-
         if entitlement_amount is not None and entitlement_amount != "":
-            entitlement_amount = float_to_decimal(entitlement_amount)
+            entitlement_amount = to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 payment.entitlement_quantity = entitlement_amount
                 payment.entitlement_date = timezone.now()

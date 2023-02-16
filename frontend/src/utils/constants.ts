@@ -12,10 +12,10 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
   [TargetPopulationStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
   [TargetPopulationStatus.Processing]: 'Processing',
-  [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
-  [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
-  [TargetPopulationStatus.SteficonCompleted]: 'Steficon Completed',
-  [TargetPopulationStatus.SteficonError]: 'Steficon Error',
+  [TargetPopulationStatus.SteficonWait]: 'Entitlement Formula Wait',
+  [TargetPopulationStatus.SteficonRun]: 'Entitlement Formula Run',
+  [TargetPopulationStatus.SteficonCompleted]: 'Entitlement Formula Completed',
+  [TargetPopulationStatus.SteficonError]: 'Entitlement Formula Error',
   [TargetPopulationStatus.Assigned]: 'Assigned',
 };
 
@@ -33,12 +33,13 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
-  [PaymentPlanStatus.Reconciled]: 'Reconciled',
+  [PaymentPlanStatus.Finished]: 'Finished',
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Steficon Run',
-  [PaymentPlanBackgroundActionStatus.SteficonError]: 'Steficon Error',
+  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatus.SteficonError]:
+    'Entitlement Formula Error',
   [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
   [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
   [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
@@ -104,10 +105,9 @@ export const REPORTING_STATES = {
   FAILED: 3,
 };
 
-
 export const COLLECT_TYPES_MAPPING = {
-  "A_": "Unknown",
-  "A_0": "None",
-  "A_1": "Full",
-  "A_2": "Partial",
-}
+  A_: 'Unknown',
+  A_0: 'None',
+  A_1: 'Full',
+  A_2: 'Partial',
+};

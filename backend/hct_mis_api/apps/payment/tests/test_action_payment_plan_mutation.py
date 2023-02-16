@@ -16,12 +16,11 @@ from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
-    PaymentChannelFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment
+from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, GenericPayment
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -77,7 +76,13 @@ class TestActionPaymentPlanMutation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.user = UserFactory.create(first_name="Rachel", last_name="Walker")
-        create_afghanistan()  # approve:2, authorize:2, finance_review:3
+        create_afghanistan()
+        AcceptanceProcessThreshold.objects.create(
+            business_area=BusinessArea.objects.first(),
+            approval_number_required=2,
+            authorization_number_required=2,
+            finance_review_number_required=3,
+        )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.payment_plan = PaymentPlanFactory.create(business_area=cls.business_area, program=RealProgramFactory())
@@ -90,13 +95,6 @@ class TestActionPaymentPlanMutation(APITestCase):
             individuals_data=[{}],
         )
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
-        cls.delivery_mechanism_cash = DeliveryMechanism.objects.get(
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
-        )
-        cls.payment_channel_1_cash = PaymentChannelFactory(
-            individual=individuals[0],
-            delivery_mechanism=cls.delivery_mechanism_cash,
-        )
 
         cls.financial_service_provider = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
@@ -111,16 +109,16 @@ class TestActionPaymentPlanMutation(APITestCase):
     @parameterized.expand(
         [
             ("without_permission", [], None, ["LOCK"]),
-            ("not_possible_reject", [Permissions.PAYMENT_MODULE_VIEW_DETAILS], None, ["REJECT"]),
+            ("not_possible_reject", [Permissions.PM_VIEW_DETAILS], None, ["REJECT"]),
             (
                 "lock_approve_authorize_reject",
-                [Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+                [Permissions.PM_VIEW_DETAILS],
                 None,
                 ["LOCK", "LOCK_FSP", "SEND_FOR_APPROVAL", "APPROVE", "AUTHORIZE", "REJECT"],
             ),
             (
                 "all_steps",
-                [Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+                [Permissions.PM_VIEW_DETAILS],
                 "LOCKED_FSP",
                 [
                     "SEND_FOR_APPROVAL",
@@ -133,10 +131,10 @@ class TestActionPaymentPlanMutation(APITestCase):
                     "REVIEW",
                 ],
             ),
-            ("reject_if_accepted", [Permissions.PAYMENT_MODULE_VIEW_DETAILS], "ACCEPTED", ["REJECT"]),
+            ("reject_if_accepted", [Permissions.PM_VIEW_DETAILS], "ACCEPTED", ["REJECT"]),
             (
                 "lock_unlock",
-                [Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+                [Permissions.PM_VIEW_DETAILS],
                 "LOCKED",
                 ["UNLOCK", "LOCK", "UNLOCK"],
             ),

@@ -76,90 +76,109 @@ export const PaymentPlanDetailsResults = ({
           <Typography variant='h6'>{t('Results')}</Typography>
         </Title>
         <ContentWrapper>
-          <Grid container spacing={0} justify='flex-start'>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.femaleChildren}>
-                <LabelizedField
-                  label={t('Female Children')}
-                  value={femaleChildrenCount}
-                />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.femaleAdult}>
-                <LabelizedField
-                  label={t('Female Adults')}
-                  value={femaleAdultsCount}
-                />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.maleChildren}>
-                <LabelizedField
-                  label={t('Male Children')}
-                  value={maleChildrenCount}
-                />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.maleAdult}>
-                <LabelizedField
-                  label={t('Male Adults')}
-                  value={maleAdultsCount}
-                />
-              </FieldBorder>
-            </Grid>
-          </Grid>
-          <Grid container spacing={0} justify='flex-start' alignItems='center'>
+          <Grid container>
             <Grid item xs={4}>
-              <ChartContainer data-cy="chart-container">
-                <Pie
-                  width={100}
-                  height={100}
-                  options={{
-                    legend: {
-                      display: false,
-                    },
-                  }}
-                  data={{
-                    labels: [
-                      t('Female Children'),
-                      t('Female Adults'),
-                      t('Male Children'),
-                      t('Male Adults'),
-                    ],
-                    datasets: [
-                      {
-                        data: [
-                          femaleChildrenCount,
-                          femaleAdultsCount,
-                          maleChildrenCount,
-                          maleAdultsCount,
-                        ],
-                        backgroundColor: [
-                          colors.femaleChildren,
-                          colors.femaleAdult,
-                          colors.maleChildren,
-                          colors.maleAdult,
-                        ],
-                      },
-                    ],
-                  }}
-                />
-              </ChartContainer>
+              <Grid container spacing={0} justify='flex-start'>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.femaleChildren}>
+                    <LabelizedField
+                      label={t('Female Children')}
+                      value={femaleChildrenCount}
+                    />
+                  </FieldBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.femaleAdult}>
+                    <LabelizedField
+                      label={t('Female Adults')}
+                      value={femaleAdultsCount}
+                    />
+                  </FieldBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.maleChildren}>
+                    <LabelizedField
+                      label={t('Male Children')}
+                      value={maleChildrenCount}
+                    />
+                  </FieldBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <FieldBorder color={colors.maleAdult}>
+                    <LabelizedField
+                      label={t('Male Adults')}
+                      value={maleAdultsCount}
+                    />
+                  </FieldBorder>
+                </Grid>
+              </Grid>
             </Grid>
-          </Grid>
-          <Grid container spacing={0} justify='flex-end'>
-            <SummaryBorder>
-              <LabelizedField label={t('Total Number of Households')}>
-                <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
-              </LabelizedField>
-            </SummaryBorder>
-            <SummaryBorder>
-              <LabelizedField label={t('Targeted Individuals')}>
-                <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
-              </LabelizedField>
-            </SummaryBorder>
+            <Grid item xs={4}>
+              <Grid
+                container
+                spacing={0}
+                justify='flex-start'
+                alignItems='center'
+              >
+                <Grid item xs={4}>
+                  <ChartContainer data-cy='chart-container'>
+                    <Pie
+                      width={100}
+                      height={100}
+                      options={{
+                        legend: {
+                          display: false,
+                        },
+                      }}
+                      data={{
+                        labels: [
+                          t('Female Children'),
+                          t('Female Adults'),
+                          t('Male Children'),
+                          t('Male Adults'),
+                        ],
+                        datasets: [
+                          {
+                            data: [
+                              femaleChildrenCount,
+                              femaleAdultsCount,
+                              maleChildrenCount,
+                              maleAdultsCount,
+                            ],
+                            backgroundColor: [
+                              colors.femaleChildren,
+                              colors.femaleAdult,
+                              colors.maleChildren,
+                              colors.maleAdult,
+                            ],
+                          },
+                        ],
+                      }}
+                    />
+                  </ChartContainer>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={4}>
+              <Grid container spacing={0} justify='flex-end'>
+                <Grid item xs={6}>
+                  <SummaryBorder>
+                    <LabelizedField label={t('Total Number of Households')}>
+                      <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
+                    </LabelizedField>
+                  </SummaryBorder>
+                </Grid>
+                <Grid item xs={6}>
+                  <SummaryBorder>
+                    <LabelizedField label={t('Targeted Individuals')}>
+                      <SummaryValue>
+                        {totalIndividualsCount || '0'}
+                      </SummaryValue>
+                    </LabelizedField>
+                  </SummaryBorder>
+                </Grid>
+              </Grid>
+            </Grid>
           </Grid>
         </ContentWrapper>
       </PaperContainer>
