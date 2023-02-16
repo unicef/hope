@@ -11,5 +11,3 @@ cypress/results
 .vscode
 env
 .DS_Store
-
-cypress.config.js
