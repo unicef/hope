@@ -50,7 +50,13 @@ if TYPE_CHECKING:
 
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("household", "status", "cash_plan_name", "target_population")
+    list_display = (
+        "unicef_id",
+        "household",
+        "status",
+        "cash_plan_name",
+        "target_population",
+    )
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -80,7 +86,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
     )
 
     def cash_plan_name(self, obj: Any) -> str:
-        return obj.parent.name
+        return obj.parent.name or ""
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
