@@ -425,9 +425,6 @@ class FspChoices(graphene.ObjectType):
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
-    approval_number_required = graphene.Int()
-    authorization_number_required = graphene.Int()
-    finance_release_number_required = graphene.Int()
     dispersion_start_date = graphene.Date()
     dispersion_end_date = graphene.Date()
     start_date = graphene.Date()
@@ -459,15 +456,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_verification_plans(self, info: Any) -> graphene.List:
         return self.get_payment_verification_plans
-
-    def resolve_approval_number_required(self, info: Any) -> graphene.Int:
-        return self.approval_number_required
-
-    def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
-        return self.authorization_number_required
-
-    def resolve_finance_release_number_required(self, info: Any) -> graphene.Int:
-        return self.finance_release_number_required
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
