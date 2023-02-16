@@ -147,6 +147,9 @@ export type ApprovalProcessNode = Node & {
   sentForFinanceReleaseBy?: Maybe<UserNode>,
   sentForFinanceReleaseDate?: Maybe<Scalars['DateTime']>,
   paymentPlan: PaymentPlanNode,
+  approvalNumberRequired: Scalars['Int'],
+  authorizationNumberRequired: Scalars['Int'],
+  financeReleaseNumberRequired: Scalars['Int'],
   rejectedOn?: Maybe<Scalars['String']>,
   actions?: Maybe<FilteredActionsListNode>,
 };
@@ -3864,9 +3867,6 @@ export type PaymentPlanNode = Node & {
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
   approvalProcess: ApprovalProcessNodeConnection,
-  approvalNumberRequired?: Maybe<Scalars['Int']>,
-  authorizationNumberRequired?: Maybe<Scalars['Int']>,
-  financeReleaseNumberRequired?: Maybe<Scalars['Int']>,
   currencyName?: Maybe<Scalars['String']>,
   hasPaymentListExportFile?: Maybe<Scalars['Boolean']>,
   hasFspDeliveryMechanismXlsxTemplate?: Maybe<Scalars['Boolean']>,
@@ -9835,7 +9835,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReleaseNumberRequired' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9852,7 +9852,7 @@ export type PaymentPlanQuery = (
         { __typename?: 'ApprovalProcessNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'ApprovalProcessNode' }
-          & Pick<ApprovalProcessNode, 'id' | 'sentForApprovalDate' | 'sentForAuthorizationDate' | 'sentForFinanceReleaseDate' | 'rejectedOn'>
+          & Pick<ApprovalProcessNode, 'id' | 'sentForApprovalDate' | 'sentForAuthorizationDate' | 'sentForFinanceReleaseDate' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReleaseNumberRequired' | 'rejectedOn'>
           & { sentForApprovalBy: Maybe<(
             { __typename?: 'UserNode' }
             & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -18040,6 +18040,9 @@ export const PaymentPlanDocument = gql`
             email
           }
           sentForFinanceReleaseDate
+          approvalNumberRequired
+          authorizationNumberRequired
+          financeReleaseNumberRequired
           actions {
             approval {
               createdAt
@@ -18090,9 +18093,6 @@ export const PaymentPlanDocument = gql`
         }
       }
     }
-    approvalNumberRequired
-    authorizationNumberRequired
-    financeReleaseNumberRequired
     steficonRule {
       id
       rule {
@@ -23551,6 +23551,9 @@ export type ApprovalProcessNodeResolvers<ContextType = any, ParentType extends R
   sentForFinanceReleaseBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   sentForFinanceReleaseDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
+  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  financeReleaseNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   rejectedOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   actions?: Resolver<Maybe<ResolversTypes['FilteredActionsListNode']>, ParentType, ContextType>,
 };
@@ -25123,9 +25126,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
   approvalProcess?: Resolver<ResolversTypes['ApprovalProcessNodeConnection'], ParentType, ContextType, PaymentPlanNodeApprovalProcessArgs>,
-  approvalNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  authorizationNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  financeReleaseNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currencyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasPaymentListExportFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasFspDeliveryMechanismXlsxTemplate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,

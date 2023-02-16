@@ -277,6 +277,7 @@ class GenericPayment(TimeStampedUUIDModel):
     status = models.CharField(
         max_length=255,
         choices=STATUS_CHOICE,
+        default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
@@ -1543,6 +1544,10 @@ class ApprovalProcess(TimeStampedUUIDModel):
     )
     sent_for_finance_release_date = models.DateTimeField(null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
+
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ("-created_at",)
