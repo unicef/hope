@@ -75,8 +75,8 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
             __typename: 'UserNode',
           },
           sentForAuthorizationDate: '2022-08-30T07:15:41.790444+00:00',
-          sentForFinanceReviewBy: null,
-          sentForFinanceReviewDate: null,
+          sentForFinanceReleaseBy: null,
+          sentForFinanceReleaseDate: null,
           actions: {
             approval: [
               {
@@ -95,7 +95,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
               },
             ],
             authorization: [],
-            financeReview: [],
+            financeRelease: [],
             reject: [],
             __typename: 'FilteredActionsListNode',
           },
@@ -109,7 +109,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
   },
   approvalNumberRequired: 1,
   authorizationNumberRequired: 1,
-  financeReviewNumberRequired: 1,
+  financeReleaseNumberRequired: 1,
   steficonRule: null,
   hasPaymentListExportFile: false,
   importedFileDate: null,
