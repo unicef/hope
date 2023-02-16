@@ -817,6 +817,7 @@ class DeduplicateTask:
     ) -> None:
         documents_to_dedup = evaluate_qs(
             new_documents.exclude(status=Document.STATUS_VALID)
+            .filter(type__is_identity_document=True)
             .select_related("individual")
             .select_for_update(of=("self", "individual"))
             .order_by("pk")
