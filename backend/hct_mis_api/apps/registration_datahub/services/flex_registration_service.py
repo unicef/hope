@@ -546,6 +546,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if not bank_account:
             return None
         photo_base_64 = individual_dict.get("bank_account_details_picture")
+        if not photo_base_64:
+            return None
         image = self._prepare_picture_from_base64(photo_base_64, bank_account)
         return ImportedDocument.objects.create(
             document_number=bank_account,

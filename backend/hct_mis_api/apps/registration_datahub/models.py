@@ -552,6 +552,8 @@ class Record(models.Model):
     def get_data(self) -> Dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
+        if not self.files:
+            return self.fields
         files = json.loads(self.files.tobytes().decode())
         return combine_collections(files, self.fields)
 
