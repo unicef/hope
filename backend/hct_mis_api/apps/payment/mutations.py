@@ -708,7 +708,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
                 PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
                 PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             }
-            return status_to_perm_map.get(status, "")
+            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
 
         action_to_permissions_map = {
             PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
