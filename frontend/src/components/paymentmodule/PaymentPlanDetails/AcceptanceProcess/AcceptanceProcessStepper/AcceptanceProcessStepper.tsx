@@ -15,14 +15,14 @@ interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
   approvalNumberRequired: number;
   authorizationNumberRequired: number;
-  financeReviewNumberRequired: number;
+  financeReleaseNumberRequired: number;
 }
 
 export const AcceptanceProcessStepper = ({
   acceptanceProcess,
   approvalNumberRequired,
   authorizationNumberRequired,
-  financeReviewNumberRequired,
+  financeReleaseNumberRequired,
 }: AcceptanceProcessStepperProps): React.ReactElement => {
   const { rejectedOn, actions } = acceptanceProcess;
   const { t } = useTranslation();
@@ -43,10 +43,11 @@ export const AcceptanceProcessStepper = ({
     },
     {
       name: `${t('Finance Release')} (${
-        actions.financeReview.length
-      }/${financeReviewNumberRequired})`,
+        actions.financeRelease.length
+      }/${financeReleaseNumberRequired})`,
       hasError: rejectedOn === 'IN_REVIEW',
-      isCompleted: actions.financeReview.length === financeReviewNumberRequired,
+      isCompleted:
+        actions.financeRelease.length === financeReleaseNumberRequired,
     },
   ];
   const getActiveStep = (): number => {

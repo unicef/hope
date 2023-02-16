@@ -59,7 +59,7 @@ export const PaymentPlanDetailsHeader = ({
   const canReject = true;
   const canApprove = true;
   const canAuthorize = true;
-  const canMarkAsReviewed = true;
+  const canMarkAsReleased = true;
   const canDownloadXlsx = true;
   const canSendToFsp =
     paymentPlan.status === PaymentPlanStatus.Accepted &&
@@ -121,7 +121,7 @@ export const PaymentPlanDetailsHeader = ({
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={canReject}
-          canMarkAsReviewed={canMarkAsReviewed}
+          canMarkAsReleased={canMarkAsReleased}
         />
       );
       break;
