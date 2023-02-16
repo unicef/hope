@@ -19260,6 +19260,18 @@
             "deprecationReason": null
           },
           {
+            "name": "hasFspDeliveryMechanismXlsxTemplate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "importedFileName",
             "description": null,
             "args": [],
