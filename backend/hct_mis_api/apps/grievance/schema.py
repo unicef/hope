@@ -54,7 +54,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.payment.schema import PaymentRecordNode, PaymentRecordAndPaymentNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
@@ -73,7 +73,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-    payment_record = graphene.Field(PaymentRecordNode)
+    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
