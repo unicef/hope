@@ -33,13 +33,15 @@ backend:
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: hope/service
-            operator: In
-            values:
-            - backend
-        topologyKey: "kubernetes.io/hostname"
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: hope/service
+              operator: In
+              values:
+              - backend
+          topologyKey: "kubernetes.io/hostname"
 
   service:
     type: ClusterIP
@@ -83,13 +85,15 @@ frontend:
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: hope/service
-            operator: In
-            values:
-            - frontend
-        topologyKey: "kubernetes.io/hostname"
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: hope/service
+              operator: In
+              values:
+              - frontend
+          topologyKey: "kubernetes.io/hostname"
   resources: {}
   nodeSelector: {}
 
@@ -221,13 +225,15 @@ celery:
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: hope/service
-            operator: In
-            values:
-            - celery-worker
-        topologyKey: "kubernetes.io/hostname"
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: hope/service
+              operator: In
+              values:
+              - celery-worker
+          topologyKey: "kubernetes.io/hostname"
 
 celeryflower:
   image: saxix/flower:1.6
