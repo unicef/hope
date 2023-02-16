@@ -10,17 +10,12 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Docker.backend.filePath: "**/backend/Dockerfile"
-  Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.cypress.filePath: "**/cypress/Dockerfile"
   Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
   tag: '$(System.PullRequest.PullRequestId)'
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.cypress.repository: "hope-cypress"
   Docker.url: "uniappsakshopedev.azurecr.io"
-  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
-  Kubernetes.namespace: "ictd-hope-dev"
   DOCKER_BUILDKIT: 1
 
 stages:
