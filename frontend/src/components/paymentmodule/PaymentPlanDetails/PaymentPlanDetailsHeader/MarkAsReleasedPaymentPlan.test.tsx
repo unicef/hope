@@ -5,13 +5,13 @@ import wait from 'waait';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { fakeActionPpMutation } from '../../../../../fixtures/paymentmodule/fakeApolloActionPaymentPlanMutation';
 import { render } from '../../../../testUtils/testUtils';
-import { MarkAsReviewedPaymentPlan } from './MarkAsReviewedPaymentPlan';
+import { MarkAsReleasedPaymentPlan } from './MarkAsReleasedPaymentPlan';
 
-describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/MarkAsReviewedPaymentPlan', () => {
+describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/MarkAsReleasedPaymentPlan', () => {
   it('should render', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeActionPpMutation}>
-        <MarkAsReviewedPaymentPlan paymentPlan={fakeApolloPaymentPlan} />
+        <MarkAsReleasedPaymentPlan paymentPlan={fakeApolloPaymentPlan} />
       </MockedProvider>,
     );
 
