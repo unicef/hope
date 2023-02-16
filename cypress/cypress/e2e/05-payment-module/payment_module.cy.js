@@ -47,14 +47,13 @@ context("Payment", () => {
         `[data-cy="select-option-${targetPopulationName}-${seed}"]`
       ).click();
     });
-    cy.get('[data-cy="input-start-date"]').click().type("2022-12-12");
-    cy.get('[data-cy="input-end-date"]').click().type("2022-12-23");
-    cy.get('[data-cy="input-currency"]').first().click(); // TODO: not visible?
-    cy.get('[data-cy="select-option-Afghan afghani"]').click();
+    cy.get('[data-cy="input-start-date"]').click().type("2032-12-12");
+    cy.get('[data-cy="input-end-date"]').click().type("2032-12-23");
+    cy.get('[data-cy="input-currency"]').click().type("Afghan").type("{downArrow}{enter}")
     cy.get('[data-cy="input-dispersion-start-date"]')
       .click()
-      .type("2023-12-12");
-    cy.get('[data-cy="input-dispersion-end-date"]').click().type("2023-12-23");
+      .type("2033-12-12");
+    cy.get('[data-cy="input-dispersion-end-date"]').click().type("2033-12-23");
     cy.get('[data-cy="button-save-payment-plan"]').click({
       force: true,
     });
@@ -69,7 +68,7 @@ context("Payment", () => {
     });
     cy.get("h6").contains("Details");
     cy.get("h6").contains("Results");
-    cy.get("h6").contains("Payments List");
+    cy.get("h6").contains("Payee List");
     cy.get("h6").contains("Activity Log");
 
     //Lock plan
@@ -108,7 +107,7 @@ context("Payment", () => {
     cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]').click();
     cy.get('[data-cy="select-option-Test FSP Transfer"]').click();
     cy.get('[data-cy="button-next-save"]').click({ force: true });
-    cy.contains("Volume by Delivery Mechanism in USD");
+    cy.contains("Volume by Delivery Mechanism");
     cy.get("[data-cy='button-lock-plan']").click({ force: true });
     cy.get("[data-cy='button-submit']").click({ force: true });
     cy.get("[data-cy='status-container']").contains("FSP Locked");
