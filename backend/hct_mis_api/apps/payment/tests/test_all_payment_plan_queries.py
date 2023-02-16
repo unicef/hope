@@ -65,7 +65,7 @@ class TestPaymentPlanQueries(APITestCase):
             }
             approvalNumberRequired
             authorizationNumberRequired
-            financeReviewNumberRequired
+            financeReleaseNumberRequired
             paymentsConflictsCount
           }
         }
@@ -205,7 +205,7 @@ class TestPaymentPlanQueries(APITestCase):
                 business_area=BusinessArea.objects.first(),
                 approval_number_required=2,
                 authorization_number_required=2,
-                finance_review_number_required=3,
+                finance_release_number_required=3,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):

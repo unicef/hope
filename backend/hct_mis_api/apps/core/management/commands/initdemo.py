@@ -95,12 +95,26 @@ class Command(BaseCommand):
             "nmkuzi@unicef.org",
             "swaheed@unicef.org",
         ]
-        for email in email_list:
-            user = User.objects.create_superuser(email, email, "password")
+        pm_list = [
+            "khaddad@unicef.org",
+            "stoor@unicef.org",
+            "jhalding@unicef.org",
+            "ysokadjo@unicef.org",
+            "nkuma@unicef.org",
+            "hatify@unicef.org",
+            "gfranco@unicef.org",
+            "ilutska@unicef.org",
+            "okozyrenko@unicef.org",
+        ]
+        for email in email_list + pm_list:
+            user = User.objects.create_user(email, email, "password")
             UserRole.objects.create(
                 user=user,
                 role=Role.objects.get(name="Role with all permissions"),
                 business_area=BusinessArea.objects.get(slug="afghanistan"),
             )
+            if email in email_list:
+                user.is_staff = True
+                user.is_superuser = True
             user.set_unusable_password()
             user.save()
