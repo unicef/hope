@@ -30,8 +30,16 @@ backend:
 
   tolerations: []
 
-  affinity: {}
-
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: hope/service
+            operator: In
+            values:
+            - backend
+        topologyKey: "kubernetes.io/hostname"
 
   service:
     type: ClusterIP
@@ -72,7 +80,15 @@ frontend:
 
   tolerations: []
 
-  affinity: {}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          - key: hope/service
+            operator: In
+            values:
+            - frontend
+        topologyKey: "kubernetes.io/hostname"
   resources: {}
   nodeSelector: {}
 
@@ -201,7 +217,15 @@ celery:
   securityContext: {}
 
   tolerations: []
-  affinity: {}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          - key: hope/service
+            operator: In
+            values:
+            - celery-worker
+        topologyKey: "kubernetes.io/hostname"
 
 celeryflower:
   image: saxix/flower:1.6
@@ -213,7 +237,6 @@ celeryflower:
 
   tolerations: []
   affinity: {}
-
   service:
     type: ClusterIP
     port: 8000
