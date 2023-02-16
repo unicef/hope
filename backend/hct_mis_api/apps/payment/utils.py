@@ -39,7 +39,7 @@ def get_number_of_samples(payment_records_sample_count: int, confidence_interval
 def from_received_to_status(
     received: bool, received_amount: Union[Decimal, float], delivered_amount: Union[Decimal, float]
 ) -> str:
-    received_amount_dec = float_to_decimal(received_amount)
+    received_amount_dec = to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
     if received:
@@ -53,10 +53,14 @@ def from_received_to_status(
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
-    if isinstance(received_amount, float):
-        return Decimal(f"{round(received_amount, 2):.2f}")
-    return received_amount
+def to_decimal(received_amount: Optional[Union[Decimal, float, int]]) -> Optional[Decimal]:
+    if received_amount is None:
+        return None
+
+    if isinstance(received_amount, Decimal):
+        return received_amount
+
+    return Decimal(f"{round(received_amount, 2):.2f}")
 
 
 @typing.no_type_check

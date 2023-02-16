@@ -218,7 +218,7 @@ class FinancialServiceProviderFilter(FilterSet):
             "delivery_mechanisms",
             "distribution_limit",
             "communication_channel",
-            "fsp_xlsx_template",
+            "xlsx_templates",
         )
         model = FinancialServiceProvider
 
@@ -352,7 +352,6 @@ class PaymentFilter(FilterSet):
             "household__size",
             "admin2",
             "collector_id",
-            "assigned_payment_channel",
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",
@@ -442,6 +441,31 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
     if order_by == "verification_status":
         qs = queryset.order_by(reverse + "custom_order")
     elif order_by == "unicef_id":
+        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+    else:
+        qs = queryset.order_by(reverse + order_by)
+
+    return list(qs)
+
+
+def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwargs: Any) -> ExtendedQuerySetSequence:
+    business_area = kwargs.get("business_area")
+    household = kwargs.get("household")
+
+    if business_area:
+        queryset = queryset.filter(business_area__slug=business_area)
+
+    if household:
+        queryset = queryset.filter(household__id=decode_id_string(household))
+
+    return queryset
+
+
+def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> List[Any]:
+    reverse = "-" if order_by.startswith("-") else ""
+    order_by = order_by[1:] if reverse else order_by
+
+    if order_by == "unicef_id":
         qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
     else:
         qs = queryset.order_by(reverse + order_by)

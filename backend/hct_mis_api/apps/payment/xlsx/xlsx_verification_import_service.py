@@ -1,25 +1,18 @@
 import io
 from decimal import Decimal
-from typing import Optional
+from typing import List
 
 import openpyxl
 from graphql import GraphQLError
 from xlwt import Row
 
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.utils import (
-    float_to_decimal,
-    from_received_yes_no_to_status,
-)
+from hct_mis_api.apps.payment.utils import from_received_yes_no_to_status, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-
-
-class XlsxError:
-    def __init__(self, sheet: str, coordinates: Optional[str], message: str) -> None:
-        self.sheet, self.coordinates, self.message = sheet, coordinates, message
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):
@@ -30,7 +23,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
         self.current_row = 0
-        self.errors = []
+        self.errors: List[XlsxError] = []
         self.cashplan_payment_verification = cashplan_payment_verification
         payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
         self.payment_record_verifications = payment_record_verification_obj.all()  # .prefetch_related("payment")
@@ -220,7 +213,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
         payment_verification.status = from_received_yes_no_to_status(received, received_amount, delivered_amount)
         if received_amount is not None and received_amount != "":
-            payment_verification.received_amount = float_to_decimal(received_amount)
+            payment_verification.received_amount = to_decimal(received_amount)
         else:
             payment_verification.received_amount = None
         self.payment_verifications_to_save.append(payment_verification)

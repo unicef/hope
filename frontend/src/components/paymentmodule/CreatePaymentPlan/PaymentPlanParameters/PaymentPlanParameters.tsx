@@ -6,18 +6,16 @@ import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { Title } from '../../../core/Title';
-import { CurrencyChoicesQuery } from '../../../../__generated__/graphql';
+import { FormikCurrencyAutocomplete } from '../../../../shared/FormikCurrencyAutocomplete';
 
 interface PaymentPlanParametersProps {
   values;
-  currencyChoicesData: CurrencyChoicesQuery['currencyChoices'];
 }
+const tomorrow = new Date().setDate(new Date().getDate() + 1);
 
 export const PaymentPlanParameters = ({
   values,
-  currencyChoicesData,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -57,11 +55,7 @@ export const PaymentPlanParameters = ({
           <Grid item xs={4}>
             <Field
               name='currency'
-              fullWidth
-              variant='outlined'
-              label={t('Currency')}
-              component={FormikSelectField}
-              choices={currencyChoicesData}
+              component={FormikCurrencyAutocomplete}
               required
               data-cy='input-currency'
             />
@@ -83,7 +77,7 @@ export const PaymentPlanParameters = ({
               label={t('Dispersion End Date')}
               component={FormikDateField}
               required
-              minDate={values.dispersionStartDate}
+              minDate={tomorrow}
               disabled={!values.dispersionStartDate}
               initialFocusedDate={values.dispersionStartDate}
               fullWidth

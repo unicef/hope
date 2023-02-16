@@ -19,10 +19,7 @@ metadata:
 spec:
   replicas: {{ .Values.enketo.replicas }}
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
   selector:
     matchLabels:
       app: {{ include "kobo.labels.app" . }}
@@ -63,6 +60,9 @@ spec:
           mountPath: /tmp/enketo_express_nginx/
         - name: nginx-available-config
           mountPath: /tmp/nginx_templates_available/
+        - name: nginx-main-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
         - name: config
           mountPath: /srv/src/enketo_express/config/config.json
           subPath: config.json
@@ -158,6 +158,9 @@ spec:
           mountPath: /tmp/nginx_templates_available/
         - name: nginx-config
           mountPath: /tmp/enketo_express_nginx/
+        - name: nginx-main-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
       volumes:
       - name: configmap
         configMap:
@@ -170,6 +173,10 @@ spec:
       - name: nginx-config
         configMap:
           name: enketo-nginx-config
+          defaultMode: 0777
+      - name: nginx-main-config
+        configMap:
+          name: enketo-nginx-main-config
           defaultMode: 0777
       - name: nginx-available-config
         emptyDir: {}

@@ -31,6 +31,7 @@ export const AllPaymentsForTable = gql`
         node {
           id
           unicefId
+          status
           household {
             id
             unicefId
@@ -69,7 +70,6 @@ export const AllPaymentsForTable = gql`
             id
             fullName
           }
-          hasPaymentChannel
           financialServiceProvider {
             id
             name

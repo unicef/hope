@@ -6,12 +6,16 @@ import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fak
 import { fakeImportXlsxPpListMutation } from '../../../../../fixtures/paymentmodule/fakeImportXlsxPpListMutation';
 import { render } from '../../../../testUtils/testUtils';
 import { ImportXlsxPaymentPlanPaymentList } from './ImportXlsxPaymentPlanPaymentList';
+import { PERMISSIONS } from '../../../../config/permissions';
 
 describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentList', () => {
   it('should render', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeImportXlsxPpListMutation}>
-        <ImportXlsxPaymentPlanPaymentList paymentPlan={fakeApolloPaymentPlan} />
+        <ImportXlsxPaymentPlanPaymentList
+          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_ENTITLEMENTS]}
+          paymentPlan={fakeApolloPaymentPlan}
+        />
       </MockedProvider>,
     );
 
@@ -23,7 +27,9 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
     });
 
     const inputFile = document.querySelector('[data-cy="file-input"]');
-    const buttonImportSubmit = document.querySelector('[data-cy="button-import-entitlement"]');
+    const buttonImportSubmit = document.querySelector(
+      '[data-cy="button-import-entitlement"]',
+    );
     const buttonClose = document.querySelector('[data-cy="close-button"]');
 
     expect(inputFile).toBeInTheDocument();
@@ -42,7 +48,9 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
     });
 
     act(() => {
-      buttonImportSubmit.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      buttonImportSubmit.dispatchEvent(
+        new MouseEvent('click', { bubbles: true }),
+      );
     });
 
     act(() => {

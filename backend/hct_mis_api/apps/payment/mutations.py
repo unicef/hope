@@ -1,11 +1,11 @@
 import io
 import logging
 from base64 import b64decode
+from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db import transaction
-from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -23,7 +23,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     fsp_generate_xlsx_report_task,
@@ -40,11 +39,9 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     GenericPayment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -58,7 +55,10 @@ from hct_mis_api.apps.payment.schema import (
     PaymentVerificationNode,
 )
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
-from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed
+from hct_mis_api.apps.payment.services.mark_as_failed import (
+    mark_as_failed,
+    revert_mark_as_failed,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
@@ -67,6 +67,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
@@ -499,14 +500,17 @@ class XlsxErrorNode(graphene.ObjectType):
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[0]  # type: ignore
+    @staticmethod
+    def resolve_sheet(parent: XlsxError, info: Any) -> str:
+        return parent.sheet
 
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[1]  # type: ignore
+    @staticmethod
+    def resolve_coordinates(parent: XlsxError, info: Any) -> Optional[str]:
+        return parent.coordinates
 
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> graphene.String:
-        return parent[2]  # type: ignore
+    @staticmethod
+    def resolve_message(parent: XlsxError, info: Any) -> str:
+        return parent.message
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -599,6 +603,8 @@ class RevertMarkAsFailedMutation(PermissionMutation):
 
     class Arguments:
         payment_record_id = graphene.ID(required=True)
+        delivered_quantity = graphene.Decimal(required=True)
+        delivery_date = graphene.Date(required=True)
 
     @classmethod
     @is_authenticated
@@ -608,11 +614,14 @@ class RevertMarkAsFailedMutation(PermissionMutation):
         root: Any,
         info: Any,
         payment_record_id: str,
+        delivered_quantity: Decimal,
+        delivery_date: date,
         **kwargs: Any,
     ) -> "RevertMarkAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
-        payment_record.revert_mark_as_failed()
+        delivery_date = datetime.combine(delivery_date, datetime.min.time())
+        revert_mark_as_failed(payment_record, delivered_quantity, delivery_date)
         return cls(payment_record)
 
 
@@ -629,7 +638,7 @@ class CreateFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
     ) -> "CreateFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
 
         fsp = FSPService.create(inputs, info.context.user)
         # Schedule task to generate downloadable report
@@ -652,7 +661,7 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
     ) -> "EditFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
 
         fsp_id = decode_id_string(financial_service_provider_id)
         fsp = FSPService.update(fsp_id, inputs)
@@ -676,7 +685,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
         old_payment_plan = copy_model_object(payment_plan)
 
         # TODO: maybe will update perms here?
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_VIEW_DETAILS, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
@@ -702,7 +711,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, input["business_area_slug"])
+        cls.has_permission(info, Permissions.PM_CREATE, input["business_area_slug"])
 
         payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user)
 
@@ -729,7 +738,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input)
 
@@ -758,7 +767,7 @@ class DeletePaymentPlanMutation(PermissionMutation):
 
         old_payment_plan = copy_model_object(payment_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
 
@@ -800,7 +809,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         cls, root: Any, info: Any, payment_plan_id: str, **kwargs: Any
     ) -> "ExportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
 
         old_payment_plan = copy_model_object(payment_plan)
 
@@ -820,8 +829,8 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
     def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
-        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
-            msg = "You can only export Payment List Per FSP for ACCEPTED Payment Plan"
+        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            msg = "You can only export Payment List Per FSP for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
@@ -831,26 +840,6 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             raise GraphQLError(msg)
 
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
-
-
-def create_insufficient_delivery_mechanisms_message(
-    collectors_that_cant_be_paid: QuerySet[Individual], delivery_mechanisms_in_order: List[str]
-) -> str:
-    needed_delivery_mechanisms = list(
-        PaymentChannel.objects.select_related("delivery_mechanism")
-        .filter(
-            individual__in=collectors_that_cant_be_paid,
-        )
-        .exclude(delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
-        .values_list("delivery_mechanism__delivery_mechanism", flat=True)
-        .distinct()
-    )
-    if (
-        GenericPayment.DELIVERY_TYPE_CASH not in delivery_mechanisms_in_order
-        and collectors_that_cant_be_paid.filter(payment_channels__isnull=True).exists()
-    ):
-        needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
-    return f"Delivery mechanisms that may be needed: {', '.join(needed_delivery_mechanisms)}."
 
 
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
@@ -866,7 +855,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         cls, root: Any, info: Any, input: Dict, **kwargs: Any
     ) -> "ChooseDeliveryMechanismsForPaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms", [])
@@ -875,22 +864,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
-        collectors_in_target_population = Individual.objects.filter(
-            id__in=payment_plan.not_excluded_payments.values_list("collector", flat=True)
-        )
-
-        query = Q(payment_channels__delivery_mechanism__delivery_mechanism__in=delivery_mechanisms_in_order)
-        if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
-            query |= Q(payment_channels__isnull=True)
-
-        collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
-        collectors_that_cant_be_paid = collectors_in_target_population.exclude(id__in=collectors_that_can_be_paid)
-
-        if collectors_that_cant_be_paid.exists():
-            raise GraphQLError(
-                "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                f"{create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order)}"
-            )
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
@@ -902,17 +875,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 delivery_mechanism_order=index + 1,
                 created_by=info.context.user,
             )
-
-        cash_fallback_payment_collectors = collectors_that_can_be_paid.filter(payment_channels__isnull=True)
-        payment_channels_to_create = []
-
-        cash_delivery_mechanism = DeliveryMechanism.objects.get(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH)
-        for collector in cash_fallback_payment_collectors:
-            payment_channel = PaymentChannel(
-                individual=collector, delivery_mechanism=cash_delivery_mechanism, is_fallback=True, delivery_data={}
-            )
-            payment_channels_to_create.append(payment_channel)
-        PaymentChannel.objects.bulk_create(payment_channels_to_create)
 
         return cls(payment_plan=payment_plan)
 
@@ -939,7 +901,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "AssignFspToDeliveryMechanismMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
 
@@ -973,7 +935,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
             payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
             payment_plan_service.validate_fsps_per_delivery_mechanisms(
-                dm_to_fsp_mapping, update_dms=True, update_payments=False
+                dm_to_fsp_mapping, update_dms=True, update_payments=True
             )
 
         return cls(payment_plan=payment_plan)
@@ -995,7 +957,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             msg = "You can only import for LOCKED Payment Plan"
@@ -1041,10 +1003,10 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
 
-        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
-            msg = "You can only import for ACCEPTED Payment Plan"
+        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
@@ -1075,9 +1037,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
     ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(
-            info, Permissions.PAYMENT_MODULE_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area
-        )
+        cls.has_permission(info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             msg = "You can run formula only for 'Locked' status of Payment Plan"

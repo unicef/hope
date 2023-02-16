@@ -1,7 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -13,8 +13,6 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.geo.models import Area
@@ -34,14 +32,13 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -202,39 +199,18 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
         FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
     )
     data_transfer_configuration = factory.Faker("json")
-    fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
-class DeliveryMechanismFactory(factory.DjangoModelFactory):
+class FspXlsxTemplatePerDeliveryMechanismFactory(factory.DjangoModelFactory):
     class Meta:
-        model = DeliveryMechanism
+        model = FspXlsxTemplatePerDeliveryMechanism
 
-    delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
-    global_core_fields = factory.List(
-        [
-            factory.fuzzy.FuzzyChoice(
-                FieldFactory.from_scope(Scope.GLOBAL).to_choices(),
-                getter=lambda c: c[0],
-            )
-        ]
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
+    delivery_mechanism = factory.fuzzy.FuzzyChoice(
+        GenericPayment.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
     )
-    payment_channel_fields = factory.List(
-        [
-            factory.fuzzy.FuzzyChoice(
-                FieldFactory.from_scope(Scope.PAYMENT_CHANNEL).to_choices(),
-                getter=lambda c: c[0],
-            )
-        ]
-    )
-
-
-class PaymentChannelFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = PaymentChannel
-
-    individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.LazyAttribute(lambda o: DeliveryMechanism.objects.first())
-    delivery_data = factory.Faker("json")
+    xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
@@ -579,7 +555,7 @@ class PaymentFactory(factory.DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = GenericPayment.STATUS_NOT_DISTRIBUTED
+    status = GenericPayment.STATUS_PENDING
     status_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
@@ -620,9 +596,6 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
-    assigned_payment_channel = factory.LazyAttribute(
-        lambda o: (o.collector.payment_channels.first() or PaymentChannelFactory(individual=o.collector))
-    )
 
 
 class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
@@ -653,10 +626,13 @@ def create_payment_verification_plan_with_status(
     program: Program,
     target_population: "TargetPopulation",
     status: str,
+    verification_channel: Optional[str] = None,
 ) -> PaymentVerificationPlan:
     payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
     payment_verification_plan.status = status
-    payment_verification_plan.save(update_fields=("status",))
+    if verification_channel:
+        payment_verification_plan.verification_channel = verification_channel
+    payment_verification_plan.save(update_fields=("status", "verification_channel"))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
     for _ in range(5):
         household, _ = create_household(
@@ -681,11 +657,13 @@ def create_payment_verification_plan_with_status(
                 household=household,
             )
 
-        PaymentVerificationFactory(
+        pv = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
             generic_fk_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
+        pv.set_pending()
+        pv.save()
         EntitlementCardFactory(household=household)
     return payment_verification_plan
 
@@ -760,7 +738,7 @@ def generate_reconciled_payment_plan() -> None:
     now = timezone.now()
     tp: TargetPopulation = TargetPopulation.objects.all()[0]
 
-    pp = PaymentPlan.objects.update_or_create(
+    payment_plan = PaymentPlan.objects.update_or_create(
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
         target_population=tp,
@@ -776,20 +754,27 @@ def generate_reconciled_payment_plan() -> None:
         total_delivered_quantity=999,
     )[0]
     # update status
-    pp.status_reconciled()
-    pp.save()
+    payment_plan.status_finished()
+    payment_plan.save()
 
     fsp_1 = FinancialServiceProviderFactory(
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
     )
+    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=pp, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+        payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
     )
 
     create_payment_verification_plan_with_status(
-        pp, root, afghanistan, tp.program, tp, PaymentVerificationPlan.STATUS_ACTIVE
+        payment_plan,
+        root,
+        afghanistan,
+        tp.program,
+        tp,
+        PaymentVerificationPlan.STATUS_ACTIVE,
+        PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     )
-    pp.update_population_count_fields()
+    payment_plan.update_population_count_fields()
 
 
 def generate_payment_plan() -> None:
@@ -819,21 +804,6 @@ def generate_payment_plan() -> None:
         full_name="Jan Kowalski",
         sex=MALE,
     )[0]
-    delivery_mechanism_transfer, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
-        defaults=dict(
-            global_core_fields=["given_name", "family_name"],
-            payment_channel_fields=["bank_account_number", "bank_name"],
-        ),
-    )
-    delivery_mechanism_cash, _ = DeliveryMechanism.objects.get_or_create(
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
-        defaults=dict(global_core_fields=["given_name", "family_name"], payment_channel_fields=[]),
-    )
-    payment_channel_1 = PaymentChannelFactory(
-        individual=individual_1,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
 
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
     individual_2 = Individual.objects.update_or_create(
@@ -845,10 +815,6 @@ def generate_payment_plan() -> None:
         full_name="Adam Nowak",
         sex=MALE,
     )[0]
-    payment_channel_2 = PaymentChannelFactory(
-        individual=individual_2,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
 
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
@@ -953,6 +919,9 @@ def generate_payment_plan() -> None:
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
     )
+    # create primary collector role
+    IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
+    IndividualRoleInHouseholdFactory(household=household_2, individual=individual_2, role=ROLE_PRIMARY)
 
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
@@ -964,7 +933,6 @@ def generate_payment_plan() -> None:
         household=household_1,
         collector=individual_1,
         delivery_type=Payment.DELIVERY_TYPE_CASH,
-        assigned_payment_channel=payment_channel_1,
         financial_service_provider=fsp_1,
         status_date=now,
     )
@@ -979,7 +947,6 @@ def generate_payment_plan() -> None:
         household=household_2,
         collector=individual_2,
         delivery_type=Payment.DELIVERY_TYPE_CASH,
-        assigned_payment_channel=payment_channel_2,
         financial_service_provider=fsp_1,
         status_date=now,
     )

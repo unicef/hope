@@ -7,6 +7,7 @@ from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
@@ -21,13 +22,12 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -50,7 +50,13 @@ if TYPE_CHECKING:
 
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("household", "status", "cash_plan_name", "target_population")
+    list_display = (
+        "unicef_id",
+        "household",
+        "status",
+        "cash_plan_name",
+        "target_population",
+    )
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -80,7 +86,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
     )
 
     def cash_plan_name(self, obj: Any) -> str:
-        return obj.parent.name
+        return obj.parent.name or ""
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
@@ -295,14 +301,6 @@ class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
 
 
-@admin.register(PaymentChannel)
-class PaymentChannelAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "delivery_mechanism_display_name")
-
-    def delivery_mechanism_display_name(self, obj: Any) -> str:
-        return obj.delivery_mechanism
-
-
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     list_display = (
@@ -312,10 +310,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
     list_filter = (("created_by", AutoCompleteFilter),)
     search_fields = ("name",)
-    fields = (
-        "name",
-        "columns",
-    )
+    fields = ("name", "columns", "core_fields")
 
     def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
@@ -325,9 +320,43 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     def save_model(
         self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
     ) -> None:
+        for required_field in ["payment_id", "delivered_quantity"]:
+            if required_field not in obj.columns:
+                raise ValidationError(f"'{required_field}' must be present in columns")
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
+
+
+@admin.register(FspXlsxTemplatePerDeliveryMechanism)
+class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
+    list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
+    fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
+
+    def save_model(
+        self, request: HttpRequest, obj: FinancialServiceProviderXlsxTemplate, form: "Form", change: bool
+    ) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
 
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
@@ -337,7 +366,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             ~Q(
                 status__in=[
                     PaymentPlan.Status.OPEN,
-                    PaymentPlan.Status.RECONCILED,
+                    PaymentPlan.Status.FINISHED,
                 ],
             ),
             delivery_mechanisms__financial_service_provider=obj,
@@ -354,6 +383,12 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
         return super().clean()
 
 
+class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
+    model = FspXlsxTemplatePerDeliveryMechanism
+    extra = 0
+    readonly_fields = ("created_by",)
+
+
 @admin.register(FinancialServiceProvider)
 class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     form = FinancialServiceProviderAdminForm
@@ -367,19 +402,42 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
     search_fields = ("name",)
     list_filter = ("delivery_mechanisms",)
-    autocomplete_fields = ("created_by", "fsp_xlsx_template")
-    list_select_related = ("created_by", "fsp_xlsx_template")
+    autocomplete_fields = ("created_by",)
+    list_select_related = ("created_by",)
     fields = (
         ("name", "vision_vendor_number"),
         ("delivery_mechanisms", "distribution_limit"),
-        ("communication_channel", "fsp_xlsx_template"),
+        ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
     )
+
+    readonly_fields = ("fsp_xlsx_templates",)
+    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
+
+    def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
+        return format_html(
+            "<br>".join(
+                f"<a href='{reverse('admin:%s_%s_change' % (template._meta.app_label, template._meta.model_name), args=[template.id])}'>{template}</a>"
+                for template in obj.fsp_xlsx_template_per_delivery_mechanisms.all()
+            )
+        )
+
+    fsp_xlsx_templates.short_description = "FSP XLSX Templates"
+    fsp_xlsx_templates.allow_tags = True
 
     def save_model(self, request: HttpRequest, obj: FinancialServiceProvider, form: "Form", change: bool) -> None:
         if not change:
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_change_fsp()
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return request.user.can_change_fsp()
 
 
 @admin.register(FinancialServiceProviderXlsxReport)
@@ -395,8 +453,3 @@ class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
-
-
-@admin.register(DeliveryMechanism)
-class DeliveryMechanismAdmin(HOPEModelAdminBase):
-    pass

@@ -100,7 +100,7 @@ rediscache:
 
 kpi:
   subdomain: kf
-  image: kobotoolbox/kpi:2.022.24e
+  image: kobotoolbox/kpi:2.022.44b
   ravenDsn:
     "" # Uses old raven_dsn # Check github.com (https://github.com/kobotoolbox/kpi/blob/master/kobo/settings/base.py)
     # you need to add ?verify_ssl=0 as a suffix
@@ -142,7 +142,7 @@ kpi:
 
 kobocat:
   subdomain: kc
-  image: kobotoolbox/kobocat:2.022.24a
+  image: kobotoolbox/kobocat:2.022.44b
   ravenDsn: ""
   service:
     type: "ClusterIP"
@@ -167,7 +167,7 @@ kobocat:
 
 enketo:
   subdomain: ek
-  image: kobotoolbox/enketo-express-extra-widgets:4.1.2
+  image: kobotoolbox/enketo-express-extra-widgets:4.1.3
   service:
     type: "ClusterIP"
   ## resource requests/limits for the kobocat pods
@@ -191,4 +191,4 @@ enketo:
 
 # Sidecar serving statics
 nginx:
-  image: nginx:1.19.0
+  image: nginx:1.23.0

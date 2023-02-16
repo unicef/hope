@@ -29,7 +29,7 @@ export const EditSetUpFspHeader = ({
       title={t('Edit Set up FSP')}
       breadCrumbs={
         hasPermissions(
-          PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_UPDATE,
+          PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE,
           permissions,
         )
           ? breadCrumbsItems
