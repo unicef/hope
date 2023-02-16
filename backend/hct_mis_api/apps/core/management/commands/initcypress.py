@@ -3,10 +3,10 @@ from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import GenericPayment
-from hct_mis_api.apps.account.models import User, UserRole, Role
-from hct_mis_api.apps.core.models import BusinessArea
 
 
 def create_fsps() -> None:
