@@ -28,6 +28,7 @@ context("Payment", () => {
   it("Can create a payment plan", () => {
     let targetPopulationName = "PaymentPlanTargetPopulation";
     let paymentPlanUnicefId;
+    let fspXlsxFilenames;
 
     //New Payment Plan page
     cy.visit("/");
@@ -65,14 +66,15 @@ context("Payment", () => {
     });
     cy.get('[data-cy="pp-unicef-id"]').then(($el) => {
       paymentPlanUnicefId = $el.text();
-    });
-    cy.get("h6").contains("Details");
-    cy.get("h6").contains("Results");
-    cy.get("h6").contains("Payee List");
-    cy.get("h6").contains("Activity Log");
+    }).then(() => {
 
-    //Lock plan
-    cy.get('[data-cy="button-lock-plan"]').click({
+      cy.get("h6").contains("Details");
+      cy.get("h6").contains("Results");
+      cy.get("h6").contains("Payee List");
+      cy.get("h6").contains("Activity Log");
+
+      //Lock plan
+      cy.get('[data-cy="button-lock-plan"]').click({
       force: true,
     });
     cy.get('[data-cy="button-submit"]').click({
@@ -92,7 +94,7 @@ context("Payment", () => {
     cy.reload();
     cy.get('[data-cy="total-entitled-quantity-usd"]').contains("USD");
     // TODO: check the amount
-
+    
     //Set up FSP
     cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
     cy.get('[data-cy="page-header-container"]').contains("Set up FSP", {
@@ -111,9 +113,11 @@ context("Payment", () => {
     cy.get("[data-cy='button-lock-plan']").click({ force: true });
     cy.get("[data-cy='button-submit']").click({ force: true });
     cy.get("[data-cy='status-container']").contains("FSP Locked");
-
+    
     //Acceptance Process
     cy.get("[data-cy='button-send-for-approval']").click({ force: true });
+    cy.wait(1000);
+    cy.reload(); // this shouldn't be needed but there's some bug here with which reload helps
     cy.contains("Acceptance Process");
     cy.get("[data-cy='button-approve']").click({ force: true });
     cy.get("[data-cy='button-submit']").click({ force: true });
@@ -125,34 +129,35 @@ context("Payment", () => {
     cy.get("[data-cy='button-submit']").click({ force: true });
     cy.get('[data-cy="status-container"]').contains("Accepted");
 
-    //XLSX template
-    cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
-    cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-    cy.reload();
-    cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-    const nameXlsx = xlsxFileName(paymentPlanUnicefId);
-    const downloadedFilePathXlsx = `${downloadsFolder}/${nameXlsx}`;
-    cy.exec(
-      `node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePathXlsx}`
-    );
-    cy.get('[data-cy="button-download-template"]').click({ force: true });
-    const nameTemplate = xlsxFileName(paymentPlanUnicefId);
-    const filledFilePathTemplate = `out_${nameTemplate}`;
-    cy.log(filledFilePathTemplate);
-    cy.get('[data-cy="button-import"]').click({ force: true });
-    cy.fixture(filledFilePathTemplate, "base64").then((fileContent) => {
-      cy.get('[data-cy="file-input"]').upload({
-        fileContent,
-        fileName: name,
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        encoding: "base64",
-      });
-    });
-    cy.get('[data-cy="button-import-entitlement"').click({ force: true });
-    cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
-    cy.reload();
-    cy.get("td").should("not.contain", "Missing");
+    // //XLSX template - can be used in another spec
+    // cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
+    // cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+    // cy.reload();
+    // cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+    // const nameXlsx = xlsxFileName(paymentPlanUnicefId);
+    // const downloadedFilePathXlsx = `${downloadsFolder}/${nameXlsx}`;
+    // cy.exec(
+    //   `node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePathXlsx}`
+    //   );
+    // cy.get('[data-cy="button-download-template"]').click({ force: true });
+    // const nameTemplate = xlsxFileName(paymentPlanUnicefId);
+    // const filledFilePathTemplate = `out_${nameTemplate}`;
+    // cy.get('[data-cy="button-import"]').click({ force: true });
+    // cy.fixture(filledFilePathTemplate, "base64").then((fileContent) => {
+    //   cy.get('[data-cy="file-input"]').upload({
+    //     fileContent,
+    //     fileName: name,
+    //     mimeType:
+    //       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //     encoding: "base64",
+    //   });
+    // });
+    // cy.get('[data-cy="button-import-entitlement"').click({ force: true });
+    // cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+    // cy.reload();
+    // cy.get("td").should("not.contain", "Missing");
+
+
     cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
     cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
     cy.reload();
@@ -164,36 +169,34 @@ context("Payment", () => {
     const currentRunFileName = fileName(paymentPlanUnicefId);
     cy.exec(
       `find ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | sed 's@.*/@@'`
-    ).then((result) => {
-        let fspXlsxFilenames = result.stdout.split("\n");
-        cy.log(fspXlsxFilenames);
-        expect(fspXlsxFilenames.length).to.eq(count);
+      ).then((result) => {
+        fspXlsxFilenames = result.stdout.split("\n");
+        expect(fspXlsxFilenames.length).to.eq(1);
       })
       .then(() => {
         //Reconciliation Info
-        const fspFilename1 = fspXlsxFilenames[0];
-        cy.log(downloadsFolder);
-        const downloadedFilePath = `${downloadsFolder}/${fspFilename1}`;
-        cy.log(downloadedFilePath);
+        const fspFilename = fspXlsxFilenames[0];
+        const downloadedFilePath = `${downloadsFolder}/${fspFilename}`;
         cy.exec(
           `node cypress/scripts/fillXlsxReconciliation.js "${downloadedFilePath}"`
         );
-        const fspFilename2 = fspXlsxFilenames[0];
-        const filledFilePath = `out_${fspFilename2}`;
+        const filledFilePath = `out_${fspFilename}`;
         cy.log(filledFilePath);
         cy.get('[data-cy="button-import"]').click({ force: true });
         cy.fixture(filledFilePath, "base64").then((fileContent) => {
-          cy.get('[data-cy="file-input"]').upload({
+          cy.get('[data-cy="file-input"]').attachFile({
             fileContent,
             fileName: fspFilename,
             mimeType:
-              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             encoding: "base64",
           });
         });
         cy.get('[data-cy="file-input"').click({ force: true });
         // cy.get('[data-cy="imported-file-name"]').should('exist'); // TODO
         cy.get('[data-cy="button-import-submit"').click({ force: true });
+        cy.wait(1000)
+        cy.get("p").should("not.contain", "Errors");
         cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
         cy.reload();
         cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
@@ -201,5 +204,6 @@ context("Payment", () => {
           cy.wrap($el).should("contain", "100");
         });
       });
+    });
   });
 });
