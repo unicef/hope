@@ -186,7 +186,7 @@ context("Payment", () => {
         cy.fixture(filledFilePath, "base64").then((fileContent) => {
           cy.get('[data-cy="file-input"]').attachFile({
             fileContent,
-            fileName: fspFilename,
+            fileName: filledFilePath,
             mimeType:
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             encoding: "base64",
@@ -201,8 +201,9 @@ context("Payment", () => {
         cy.reload();
         cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
           cy.wrap($el).should("contain", "AFN");
-          cy.wrap($el).should("contain", "100");
+          cy.wrap($el).should("contain", "500");
         });
+        cy.get('[data-cy="status-container"]').contains("Finished");
       });
     });
   });
