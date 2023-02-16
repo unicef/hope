@@ -54,5 +54,5 @@ class AcceptanceProcessThresholdForm(forms.ModelForm):
             "payments_range_usd",
             "approval_number_required",
             "authorization_number_required",
-            "finance_review_number_required",
+            "finance_release_number_required",
         ]

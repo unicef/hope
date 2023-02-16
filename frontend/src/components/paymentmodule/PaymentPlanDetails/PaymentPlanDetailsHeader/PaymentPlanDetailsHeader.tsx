@@ -10,9 +10,7 @@ import {
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import {
-  FinancialServiceProviderCommunicationChannel,
   PaymentPlanQuery,
-  PaymentPlanStatus,
 } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
@@ -59,15 +57,15 @@ export const PaymentPlanDetailsHeader = ({
   const canReject = true;
   const canApprove = true;
   const canAuthorize = true;
-  const canMarkAsReviewed = true;
+  const canMarkAsReleased = true;
   const canDownloadXlsx = true;
-  const canSendToFsp =
-    paymentPlan.status === PaymentPlanStatus.Accepted &&
-    paymentPlan.deliveryMechanisms.some(
-      ({ fsp: { communicationChannel } }) =>
-        communicationChannel ===
-        FinancialServiceProviderCommunicationChannel.Api,
-    );
+  const canSendToFsp = false;  // TODO: hide for now
+    // paymentPlan.status === PaymentPlanStatus.Accepted &&
+    // paymentPlan.deliveryMechanisms.some(
+    //   ({ fsp: { communicationChannel } }) =>
+    //     communicationChannel ===
+    //     FinancialServiceProviderCommunicationChannel.Api,
+    // );
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -121,7 +119,7 @@ export const PaymentPlanDetailsHeader = ({
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={canReject}
-          canMarkAsReviewed={canMarkAsReviewed}
+          canMarkAsReleased={canMarkAsReleased}
         />
       );
       break;

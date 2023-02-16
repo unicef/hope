@@ -545,7 +545,7 @@ class Household(
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     def __str__(self) -> str:
-        return f"{self.unicef_id}"
+        return self.unicef_id or ""
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -875,7 +875,7 @@ class Individual(
         self.save()
 
     def __str__(self) -> str:
-        return self.unicef_id
+        return self.unicef_id or ""
 
     class Meta:
         verbose_name = "Individual"
