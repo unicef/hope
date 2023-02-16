@@ -5,6 +5,8 @@ const filePath = process.argv[2];
 const jsonData = xlsx.parse(fileSys.readFileSync(filePath))[0];
 const rows = jsonData.data;
 
+console.log("ROWS", rows);
+
 for (let i = 1; i < rows.length; i++) {
   if (rows[i].length !== 0) {
     // column index 10 is delivered_quantity
