@@ -25,10 +25,10 @@ def save_payment_verification_extras(grievance_ticket: "GrievanceTicket", info: 
         return
     # update PaymentVerification status
     if (
-        payment_verification.payment_record
-        and not payment_verification_details.new_status == PaymentVerification.STATUS_NOT_RECEIVED
+        payment_verification.payment_obj
+        and payment_verification_details.new_status != PaymentVerification.STATUS_NOT_RECEIVED
     ):
-        if payment_verification_details.new_received_amount >= payment_verification.payment_record.delivered_quantity:
+        if payment_verification_details.new_received_amount >= payment_verification.payment_obj.delivered_quantity:
             status = PaymentVerification.STATUS_RECEIVED
         else:
             status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
