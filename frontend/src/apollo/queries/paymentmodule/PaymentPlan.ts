@@ -129,6 +129,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         }
       }
       hasPaymentListExportFile
+      hasFspDeliveryMechanismXlsxTemplate
       importedFileDate
       importedFileName
       totalEntitledQuantityUsd
@@ -156,9 +157,6 @@ export const PAYMENT_PLAN_QUERY = gql`
         volume
         volumeUsd
       }
-      hasPaymentListExportFile
-      importedFileName
-      importedFileDate
       verificationPlans {
         totalCount
         edges {
