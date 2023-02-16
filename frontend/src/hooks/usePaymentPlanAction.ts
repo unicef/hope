@@ -1,10 +1,8 @@
 import {
   Action,
-  AllPaymentsForTableDocument,
   PaymentPlanDocument,
   useActionPpMutation,
 } from '../__generated__/graphql';
-import { useBusinessArea } from './useBusinessArea';
 import { useSnackbar } from './useSnackBar';
 
 interface PaymentPlanAction {
