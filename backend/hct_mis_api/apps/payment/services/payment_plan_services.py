@@ -132,8 +132,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self) -> PaymentPlan:
-        if not self.payment_plan.delivery_mechanisms.filter(
-            Q(financial_service_provider__isnull=False) | Q(delivery_mechanism__isnull=False)
+        if self.payment_plan.delivery_mechanisms.filter(
+            Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
         ).exists():
             msg = "There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
             logging.exception(msg)
