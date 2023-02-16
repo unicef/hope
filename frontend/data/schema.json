@@ -19224,7 +19224,7 @@
             "deprecationReason": null
           },
           {
-            "name": "financeReviewNumberRequired",
+            "name": "financeReleaseNumberRequired",
             "description": null,
             "args": [],
             "type": {
@@ -19249,6 +19249,18 @@
           },
           {
             "name": "hasPaymentListExportFile",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hasFspDeliveryMechanismXlsxTemplate",
             "description": null,
             "args": [],
             "type": {
@@ -33003,7 +33015,7 @@
             "deprecationReason": null
           },
           {
-            "name": "sentForFinanceReviewBy",
+            "name": "sentForFinanceReleaseBy",
             "description": null,
             "args": [],
             "type": {
@@ -33015,7 +33027,7 @@
             "deprecationReason": null
           },
           {
-            "name": "sentForFinanceReviewDate",
+            "name": "sentForFinanceReleaseDate",
             "description": null,
             "args": [],
             "type": {
@@ -33116,7 +33128,7 @@
             "deprecationReason": null
           },
           {
-            "name": "financeReview",
+            "name": "financeRelease",
             "description": null,
             "args": [],
             "type": {

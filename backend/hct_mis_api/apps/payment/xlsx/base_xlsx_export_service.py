@@ -59,7 +59,7 @@ class XlsxExportBaseService:
                         value = str(value)
 
                     try:
-                        column_widths[i] = max(column_widths[i], len(value))
+                        column_widths[i] = max(column_widths[i], len(value)) + 3
                     except IndexError:
                         column_widths.append(len(value))
 

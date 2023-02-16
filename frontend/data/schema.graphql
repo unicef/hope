@@ -96,8 +96,8 @@ type ApprovalProcessNode implements Node {
   sentForApprovalDate: DateTime
   sentForAuthorizationBy: UserNode
   sentForAuthorizationDate: DateTime
-  sentForFinanceReviewBy: UserNode
-  sentForFinanceReviewDate: DateTime
+  sentForFinanceReleaseBy: UserNode
+  sentForFinanceReleaseDate: DateTime
   paymentPlan: PaymentPlanNode!
   rejectedOn: String
   actions: FilteredActionsListNode
@@ -844,7 +844,7 @@ type FieldAttributeNode {
 type FilteredActionsListNode {
   approval: [ApprovalNode]
   authorization: [ApprovalNode]
-  financeReview: [ApprovalNode]
+  financeRelease: [ApprovalNode]
   reject: [ApprovalNode]
 }
 
@@ -2600,9 +2600,10 @@ type PaymentPlanNode implements Node {
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   approvalNumberRequired: Int
   authorizationNumberRequired: Int
-  financeReviewNumberRequired: Int
+  financeReleaseNumberRequired: Int
   currencyName: String
   hasPaymentListExportFile: Boolean
+  hasFspDeliveryMechanismXlsxTemplate: Boolean
   importedFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]

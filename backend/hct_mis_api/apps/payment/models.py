@@ -730,11 +730,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.acceptance_process_threshold.authorization_number_required
 
     @property
-    def finance_review_number_required(self) -> int:
+    def finance_release_number_required(self) -> int:
         if not self.acceptance_process_threshold:
             return 1
 
-        return self.acceptance_process_threshold.finance_review_number_required
+        return self.acceptance_process_threshold.finance_release_number_required
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -790,7 +790,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return None
 
     @classmethod
-    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str:
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float]:
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
             "household_id": (payment.household, "unicef_id"),
@@ -806,6 +806,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
+        if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
+            return float(-1)
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
 
@@ -1536,10 +1538,10 @@ class ApprovalProcess(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
     )
     sent_for_authorization_date = models.DateTimeField(null=True)
-    sent_for_finance_review_by = models.ForeignKey(
+    sent_for_finance_release_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
     )
-    sent_for_finance_review_date = models.DateTimeField(null=True)
+    sent_for_finance_release_date = models.DateTimeField(null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
 
     class Meta:
@@ -1550,12 +1552,12 @@ class ApprovalProcess(TimeStampedUUIDModel):
 class Approval(TimeStampedUUIDModel):
     APPROVAL = "APPROVAL"
     AUTHORIZATION = "AUTHORIZATION"
-    FINANCE_REVIEW = "FINANCE_REVIEW"
+    FINANCE_RELEASE = "FINANCE_RELEASE"
     REJECT = "REJECT"
     TYPE_CHOICES = (
         (APPROVAL, "Approval"),
         (AUTHORIZATION, "Authorization"),
-        (FINANCE_REVIEW, "Finance Review"),
+        (FINANCE_RELEASE, "Finance Release"),
         (REJECT, "Reject"),
     )
 
@@ -1575,7 +1577,7 @@ class Approval(TimeStampedUUIDModel):
         types_map = {
             self.APPROVAL: "Approved",
             self.AUTHORIZATION: "Authorized",
-            self.FINANCE_REVIEW: "Reviewed",
+            self.FINANCE_RELEASE: "Released",
             self.REJECT: "Rejected",
         }
 
@@ -1594,7 +1596,7 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
     )
     approval_number_required = models.PositiveIntegerField(default=1)
     authorization_number_required = models.PositiveIntegerField(default=1)
-    finance_review_number_required = models.PositiveIntegerField(default=1)
+    finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ("payments_range_usd",)
@@ -1604,5 +1606,5 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
             f"{self.payments_range_usd} USD, "
             f"Approvals: {self.approval_number_required} "
             f"Authorization: {self.authorization_number_required} "
-            f"Finance Reviews: {self.finance_review_number_required}"
+            f"Finance Releases: {self.finance_release_number_required}"
         )
