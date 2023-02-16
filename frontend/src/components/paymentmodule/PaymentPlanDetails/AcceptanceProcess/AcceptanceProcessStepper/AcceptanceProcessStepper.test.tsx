@@ -12,7 +12,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         acceptanceProcess={fakeApolloPaymentPlan.approvalProcess.edges[0].node}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
-        financeReviewNumberRequired={1}
+        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -27,7 +27,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         }}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
-        financeReviewNumberRequired={1}
+        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -42,7 +42,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         }}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
-        financeReviewNumberRequired={1}
+        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -53,11 +53,11 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
       <AcceptanceProcessStepper
         acceptanceProcess={{
           ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
-          sentForFinanceReviewDate: '2020-01-02',
+          sentForFinanceReleaseDate: '2020-01-02',
         }}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
-        financeReviewNumberRequired={1}
+        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
