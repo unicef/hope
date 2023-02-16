@@ -7,103 +7,60 @@ from django.db.models import QuerySet
 import openpyxl
 from xlwt import Row
 
-from hct_mis_api.apps.payment.models import (
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    Payment,
-)
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
+    from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     class XlsxPaymentPlanImportPerFspServiceException(Exception):
         pass
 
-    HEADERS = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
-
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
         self.payment_list: QuerySet["Payment"] = payment_plan.not_excluded_payments
         self.file = file
-        self.errors: List = []
+        self.errors: List[XlsxError] = []
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids: List = list(self.payments_dict.keys())
         self.payments_to_save: List = []
-        self.fsp: Optional["FinancialServiceProvider"] = None
-        self.expected_columns: List[str] = []
+        self.required_columns: List[str] = ["payment_id", "delivered_quantity"]
+        self.xlsx_headers = []
         self.is_updated: bool = False
-        self.fsp_xlsx_template_per_delivery_mechanism = None
-
-    @property
-    def xlsx_template(self) -> Optional[FinancialServiceProviderXlsxTemplate]:
-        return self.fsp_xlsx_template_per_delivery_mechanism.xlsx_template
-
-    def _set_fsp_expected_columns(self) -> None:
-        first_payment_row = self.ws_payments[2]
-        payment_id = first_payment_row[self.HEADERS.index("payment_id")].value
-        payment = self.payments_dict[payment_id]
-        self.fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.get(
-            financial_service_provider=payment.financial_service_provider, delivery_mechanism=payment.delivery_type
-        )
-        self.fsp = payment.financial_service_provider
-        self.expected_columns = (self.xlsx_template and self.xlsx_template.columns) or self.HEADERS
-        self.expected_columns.extend(self.xlsx_template.core_fields)  # type: ignore
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws_payments = wb[wb.sheetnames[0]]
-        self._set_fsp_expected_columns()
-
+        self.sheetname = wb.sheetnames[0]
+        self.xlsx_headers = [header.value for header in self.ws_payments[1]]
         return wb
 
     def _validate_headers(self) -> None:
-        headers_row = self.ws_payments[1]
-
-        if len(headers_row) != len(self.expected_columns):
-            self.errors.append(
-                (
-                    self.fsp.name,
-                    None,
-                    f"Provided headers {[header.value for header in headers_row]}"
-                    f" do not match expected headers {self.expected_columns}, "
-                    f"please use exported Template File to import data.",
-                )
-            )
-            return
-
-        for header, expected_column in zip(headers_row, self.expected_columns):
-            if header.value != expected_column:
+        # need check only if "payment_id" and "delivered_quantity" exists
+        for required_column in self.required_columns:
+            if required_column not in self.xlsx_headers:
                 self.errors.append(
-                    (
-                        self.fsp.name,
-                        header.coordinate,
-                        f"Unexpected header {header.value}, expected {expected_column}, "
-                        f"please use exported Template File to import data.",
+                    XlsxError(
+                        self.sheetname,
+                        None,
+                        f"Provided headers {self.xlsx_headers}"
+                        f" do not match expected headers. {self.required_columns} "
+                        f"are required headers.",
                     )
                 )
+                return
 
     def _validate_payment_id(self, row: Row) -> None:
-        cell = row[self.expected_columns.index("payment_id")]
+        cell = row[self.xlsx_headers.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
-                (
-                    self.fsp.name,
-                    cell.coordinate,
-                    f"This payment id {cell.value} is not in Payment Plan Payment List",
-                )
-            )
-
-    def _validate_fsp(self, row: Row) -> None:
-        cell = row[self.expected_columns.index("payment_id")]
-        if cell.value not in self.payment_ids:
-            self.errors.append(
-                (
-                    self.fsp.name,
+                XlsxError(
+                    self.sheetname,
                     cell.coordinate,
                     f"This payment id {cell.value} is not in Payment Plan Payment List",
                 )
@@ -124,12 +81,12 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         * delivered quantity > entitled quantity
         """
 
-        payment_id = row[self.expected_columns.index("payment_id")].value
+        payment_id = row[self.xlsx_headers.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
 
-        cell = row[self.expected_columns.index("delivered_quantity")]
+        cell = row[self.xlsx_headers.index("delivered_quantity")]
         delivered_quantity = cell.value
         if delivered_quantity is not None and delivered_quantity != "":
 
@@ -138,8 +95,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
                 if delivered_quantity > payment.entitlement_quantity:
                     self.errors.append(
-                        (
-                            self.fsp.name,
+                        XlsxError(
+                            self.sheetname,
                             cell.coordinate,
                             f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
                             f"Entitlement quantity {payment.entitlement_quantity}",
@@ -154,14 +111,13 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 continue
 
             self._validate_payment_id(row)
-            self._validate_fsp(row)
             self._validate_delivered_quantity(row)
 
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
             self.errors.append(
-                (
-                    self.fsp.name,
+                XlsxError(
+                    self.sheetname,
                     None,
                     "There aren't any updates in imported file, please add changes and try again",
                 )
@@ -169,8 +125,9 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def validate(self) -> None:
         self._validate_headers()
-        self._validate_rows()
-        self._validate_imported_file()
+        if not self.errors:
+            self._validate_rows()
+            self._validate_imported_file()
 
     def import_payment_list(self) -> None:
         exchange_rate = self.payment_plan.get_exchange_rate()
@@ -208,11 +165,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def _import_row(self, row: Row, exchange_rate: float) -> None:
-        payment_id = row[self.expected_columns.index("payment_id")].value
+        payment_id = row[self.xlsx_headers.index("payment_id")].value
         if payment_id is None:
             return  # safety check
         payment = self.payments_dict[payment_id]
-        delivered_quantity = row[self.expected_columns.index("delivered_quantity")].value
+        delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
 
         if delivered_quantity is not None and delivered_quantity != "":
             status, delivered_quantity = self._get_delivered_quantity_status_and_value(

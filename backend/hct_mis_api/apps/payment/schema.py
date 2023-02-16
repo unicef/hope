@@ -68,6 +68,8 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationPlanFilter,
     cash_plan_and_payment_plan_filter,
     cash_plan_and_payment_plan_ordering,
+    payment_record_and_payment_filter,
+    payment_record_and_payment_ordering,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.managers import ArraySubquery
@@ -214,7 +216,7 @@ class ApprovalNode(DjangoObjectType):
 class FilteredActionsListNode(graphene.ObjectType):
     approval = graphene.List(ApprovalNode)
     authorization = graphene.List(ApprovalNode)
-    finance_review = graphene.List(ApprovalNode)
+    finance_release = graphene.List(ApprovalNode)
     reject = graphene.List(ApprovalNode)
 
 
@@ -231,7 +233,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_rejected_on(self, info: Any) -> Optional[str]:
         if self.approvals.filter(type=Approval.REJECT).exists():
-            if self.sent_for_finance_review_date:
+            if self.sent_for_finance_release_date:
                 return "IN_REVIEW"
             if self.sent_for_authorization_date:
                 return "IN_AUTHORIZATION"
@@ -243,7 +245,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
         resp = FilteredActionsListNode(
             approval=self.approvals.filter(type=Approval.APPROVAL),
             authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
-            finance_review=self.approvals.filter(type=Approval.FINANCE_REVIEW),
+            finance_release=self.approvals.filter(type=Approval.FINANCE_RELEASE),
             reject=self.approvals.filter(type=Approval.REJECT),
         )
         return resp
@@ -425,13 +427,14 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
     authorization_number_required = graphene.Int()
-    finance_review_number_required = graphene.Int()
+    finance_release_number_required = graphene.Int()
     dispersion_start_date = graphene.Date()
     dispersion_end_date = graphene.Date()
     start_date = graphene.Date()
     end_date = graphene.Date()
     currency_name = graphene.String()
     has_payment_list_export_file = graphene.Boolean()
+    has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
@@ -463,8 +466,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
         return self.authorization_number_required
 
-    def resolve_finance_review_number_required(self, info: Any) -> graphene.Int:
-        return self.finance_review_number_required
+    def resolve_finance_release_number_required(self, info: Any) -> graphene.Int:
+        return self.finance_release_number_required
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
@@ -486,6 +489,22 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
+
+    def resolve_has_fsp_delivery_mechanism_xlsx_template(self, info: Any) -> bool:
+        if (
+            not self.delivery_mechanisms.exists()
+            or self.delivery_mechanisms.filter(
+                Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
+            ).exists()
+        ):
+            return False
+        else:
+            for dm_per_payment_plan in self.delivery_mechanisms.all():
+                if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
+                    dm_per_payment_plan.delivery_mechanism
+                ):
+                    return False
+            return True
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -601,6 +620,31 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
         return ""
 
 
+class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
+
+    obj_type = graphene.String()
+    id = graphene.String()
+    ca_id = graphene.String(source="unicef_id")
+    status = graphene.String(source="status")
+    full_name = graphene.String(source="full_name")
+    parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
+    entitlement_quantity = graphene.Float(source="entitlement_quantity")
+    delivered_quantity = graphene.Float(source="delivered_quantity")
+    delivered_quantity_usd = graphene.Float(source="delivered_quantity_usd")
+    currency = graphene.String(source="currency")
+    delivery_date = graphene.String(source="delivery_date")
+
+    def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
+        return self.__class__.__name__
+
+    def resolve_id(self, info: Any, **kwargs: Any) -> str:
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+
 class PageInfoNode(graphene.ObjectType):
     start_cursor = graphene.String()
     end_cursor = graphene.String()
@@ -616,6 +660,17 @@ class CashPlanAndPaymentPlanEdges(graphene.ObjectType):
 class PaginatedCashPlanAndPaymentPlanNode(graphene.ObjectType):
     page_info = graphene.Field(PageInfoNode)
     edges = graphene.List(CashPlanAndPaymentPlanEdges)
+    total_count = graphene.Int()
+
+
+class PaymentRecordsAndPaymentsEdges(graphene.ObjectType):
+    cursor = graphene.String()
+    node = graphene.Field(PaymentRecordAndPaymentNode)
+
+
+class PaginatedPaymentRecordsAndPaymentsNode(graphene.ObjectType):
+    page_info = graphene.Field(PageInfoNode)
+    edges = graphene.List(PaymentRecordsAndPaymentsEdges)
     total_count = graphene.Int()
 
 
@@ -694,6 +749,18 @@ class Query(graphene.ObjectType):
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
         permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
+    )
+
+    all_payment_records_and_payments = graphene.Field(
+        PaginatedPaymentRecordsAndPaymentsNode,
+        business_area=graphene.String(required=True),
+        program=graphene.String(),
+        household=graphene.ID(),
+        order_by=graphene.String(),
+        first=graphene.Int(),
+        last=graphene.Int(),
+        before=graphene.String(),
+        after=graphene.String(),
     )
 
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -833,7 +900,10 @@ class Query(graphene.ObjectType):
         )
 
         def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
-            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            fsps = FinancialServiceProvider.objects.filter(
+                delivery_mechanisms__contains=[mechanism],
+                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism,
+            ).distinct()
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,
@@ -1228,4 +1298,23 @@ class Query(graphene.ObjectType):
         )
         resp.total_count = len(qs)
 
+        return resp
+
+    def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
+        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+
+        qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
+
+        if order_by_value := kwargs.get("order_by"):
+            qs = payment_record_and_payment_ordering(qs, order_by_value)
+
+        resp = connection_from_list_slice(
+            qs,
+            args=kwargs,
+            connection_type=PaginatedPaymentRecordsAndPaymentsNode,
+            edge_type=PaymentRecordsAndPaymentsEdges,
+            pageinfo_type=PageInfoNode,
+            list_length=len(qs),
+        )
+        resp.total_count = len(qs)
         return resp

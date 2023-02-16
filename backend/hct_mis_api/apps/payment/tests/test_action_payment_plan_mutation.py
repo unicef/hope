@@ -43,7 +43,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                         info
                         comment
                       }
-                      financeReview{
+                      financeRelease{
                         info
                         comment
                       }
@@ -61,7 +61,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                       firstName
                       lastName
                     }
-                    sentForFinanceReviewBy {
+                    sentForFinanceReleaseBy {
                       firstName
                       lastName
                     }
@@ -81,7 +81,7 @@ class TestActionPaymentPlanMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
             approval_number_required=2,
             authorization_number_required=2,
-            finance_review_number_required=3,
+            finance_release_number_required=3,
         )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 

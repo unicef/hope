@@ -67,6 +67,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
@@ -499,14 +500,17 @@ class XlsxErrorNode(graphene.ObjectType):
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: tuple[str], info: Any) -> str:
-        return parent[0]
+    @staticmethod
+    def resolve_sheet(parent: XlsxError, info: Any) -> str:
+        return parent.sheet
 
-    def resolve_coordinates(parent: tuple[str], info: Any) -> str:
-        return parent[1]
+    @staticmethod
+    def resolve_coordinates(parent: XlsxError, info: Any) -> Optional[str]:
+        return parent.coordinates
 
-    def resolve_message(parent: tuple[str], info: Any) -> str:
-        return parent[2]
+    @staticmethod
+    def resolve_message(parent: XlsxError, info: Any) -> str:
+        return parent.message
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
