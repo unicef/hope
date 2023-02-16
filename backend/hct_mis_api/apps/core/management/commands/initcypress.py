@@ -5,17 +5,29 @@ from django.core.management import BaseCommand, call_command
 
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+)
 from hct_mis_api.apps.payment.models import GenericPayment
 
 
 def create_fsps() -> None:
+    fsp_template = FinancialServiceProviderXlsxTemplateFactory(
+        name="TEST",
+    )
     for delivery_mechanism in GenericPayment.DELIVERY_TYPE_CHOICE:
         dm = delivery_mechanism[0]
-        FinancialServiceProviderFactory(
+        fsp = FinancialServiceProviderFactory(
             name=f"Test FSP {dm}",
             delivery_mechanisms=[dm],
             distribution_limit=None,
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            xlsx_template=fsp_template,
+            financial_service_provider=fsp,
+            delivery_mechanism=dm,
         )
 
 
