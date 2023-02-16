@@ -685,7 +685,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
 
-        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""))
+        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
@@ -701,7 +701,15 @@ class ActionPaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
     @classmethod
-    def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str) -> None:
+    def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str, pp_status: str) -> None:
+        def _get_reject_permission(status: str) -> Any:
+            status_to_perm_map = {
+                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            }
+            return status_to_perm_map.get(status, "")
+
         action_to_permissions_map = {
             PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
@@ -711,11 +719,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
             PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            PaymentPlan.Action.REJECT.name: [
-                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-                Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-                Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            ],
+            PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
             PaymentPlan.Action.FINISH.name: [],
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)

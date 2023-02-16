@@ -15,6 +15,8 @@ import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
+import {hasPermissions, PERMISSIONS} from "../../../../config/permissions";
+import {usePermissions} from "../../../../hooks/usePermissions";
 
 export interface LockFspPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -24,6 +26,7 @@ export const LockFspPaymentPlan = ({
   paymentPlan,
 }: LockFspPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
+  const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const {
@@ -36,7 +39,10 @@ export const LockFspPaymentPlan = ({
     () => setLockDialogOpen(false),
   );
 
-  const canLockFsp = paymentPlan.deliveryMechanisms.length > 0;
+  const canLockFsp = paymentPlan.deliveryMechanisms.length > 0 && hasPermissions(
+    PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP,
+    permissions,
+  );
 
   return (
     <>
