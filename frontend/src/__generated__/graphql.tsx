@@ -1515,7 +1515,7 @@ export type GrievanceTicketNode = Node & {
   referralTicketDetails?: Maybe<TicketReferralDetailsNode>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
-  paymentRecord?: Maybe<PaymentRecordNode>,
+  paymentRecord?: Maybe<PaymentRecordAndPaymentNode>,
   admin?: Maybe<Scalars['String']>,
   existingTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
@@ -9422,8 +9422,8 @@ export type GrievanceTicketQuery = (
       { __typename?: 'HouseholdNode' }
       & HouseholdDetailedFragment
     )>, paymentRecord: Maybe<(
-      { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
+      { __typename?: 'PaymentRecordAndPaymentNode' }
+      & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'objType'>
     )>, relatedTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
@@ -17180,6 +17180,7 @@ export const GrievanceTicketDocument = gql`
       id
       caId
       deliveredQuantity
+      objType
     }
     relatedTickets {
       id
@@ -22801,6 +22802,8 @@ export type ResolversTypes = {
   TicketPositiveFeedbackDetailsNode: ResolverTypeWrapper<TicketPositiveFeedbackDetailsNode>,
   TicketNegativeFeedbackDetailsNode: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNode>,
   TicketReferralDetailsNode: ResolverTypeWrapper<TicketReferralDetailsNode>,
+  PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>,
+  CashPlanAndPaymentPlanNode: ResolverTypeWrapper<CashPlanAndPaymentPlanNode>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
@@ -22860,8 +22863,6 @@ export type ResolversTypes = {
   PaginatedPaymentRecordsAndPaymentsNode: ResolverTypeWrapper<PaginatedPaymentRecordsAndPaymentsNode>,
   PageInfoNode: ResolverTypeWrapper<PageInfoNode>,
   PaymentRecordsAndPaymentsEdges: ResolverTypeWrapper<PaymentRecordsAndPaymentsEdges>,
-  PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>,
-  CashPlanAndPaymentPlanNode: ResolverTypeWrapper<CashPlanAndPaymentPlanNode>,
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
@@ -23249,6 +23250,8 @@ export type ResolversParentTypes = {
   TicketPositiveFeedbackDetailsNode: TicketPositiveFeedbackDetailsNode,
   TicketNegativeFeedbackDetailsNode: TicketNegativeFeedbackDetailsNode,
   TicketReferralDetailsNode: TicketReferralDetailsNode,
+  PaymentRecordAndPaymentNode: PaymentRecordAndPaymentNode,
+  CashPlanAndPaymentPlanNode: CashPlanAndPaymentPlanNode,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
   RoleNode: RoleNode,
@@ -23308,8 +23311,6 @@ export type ResolversParentTypes = {
   PaginatedPaymentRecordsAndPaymentsNode: PaginatedPaymentRecordsAndPaymentsNode,
   PageInfoNode: PageInfoNode,
   PaymentRecordsAndPaymentsEdges: PaymentRecordsAndPaymentsEdges,
-  PaymentRecordAndPaymentNode: PaymentRecordAndPaymentNode,
-  CashPlanAndPaymentPlanNode: CashPlanAndPaymentPlanNode,
   ChartPaymentVerification: ChartPaymentVerification,
   _DetailedDatasetsNode: _DetailedDatasetsNode,
   ChartDatasetNode: ChartDatasetNode,
@@ -24269,7 +24270,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordAndPaymentNode']>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
