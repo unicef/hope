@@ -13,7 +13,7 @@ context("Payment", () => {
       cy.exec(
         `yarn init-scenario ${
           Cypress.config().baseUrl
-        } payment_plan --seed ${seed}`
+        } payment_plan ${seed}`
       );
     });
     cy.visit("/api/unicorn/");
@@ -42,7 +42,6 @@ context("Payment", () => {
     cy.get('[data-cy="input-target-population"]').first().click();
     cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
 
-    return; // TODO: target population is not always showing
     cy.uniqueSeed().then((seed) => {
       cy.get(
         `[data-cy="select-option-${targetPopulationName}-${seed}"]`
@@ -50,7 +49,7 @@ context("Payment", () => {
     });
     cy.get('[data-cy="input-start-date"]').click().type("2022-12-12");
     cy.get('[data-cy="input-end-date"]').click().type("2022-12-23");
-    cy.get('[data-cy="input-currency"]').first().click();
+    cy.get('[data-cy="input-currency"]').first().click(); // TODO: not visible?
     cy.get('[data-cy="select-option-Afghan afghani"]').click();
     cy.get('[data-cy="input-dispersion-start-date"]')
       .click()
