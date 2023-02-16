@@ -72,7 +72,7 @@ class GrievanceTicketFilter(FilterSet):
                 "phone_no_alternative",
                 "preferred_language",
             )
-        }
+        },
     }
     TICKET_TYPES_WITH_FSP = (
         ("complaint_ticket_details", "payment_record__service_provider"),
