@@ -1,4 +1,4 @@
-FROM python:3.9.12-slim-bullseye
+FROM python:3.9.12-slim-bullseye as prod
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
@@ -19,13 +19,12 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
 
 WORKDIR /tmp
 
-ARG APP_ENV=prod
 RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -
 ENV PATH = "${PATH}:/root/.local/bin/"
 COPY pyproject.toml poetry.lock /tmp/
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
-    poetry config virtualenvs.create false \
-    && poetry install $(test "$APP_ENV" == prod && echo "--no-dev")  --no-interaction --no-ansi
+  poetry config virtualenvs.create false \
+  && poetry install --without dev --no-interaction --no-ansi
 
 ENV WAITFORIT_VERSION="v2.4.1"
 RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 && \
@@ -41,3 +40,10 @@ RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGloba
 
 COPY ./docker-entrypoint.sh /bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
+
+FROM prod as dev
+
+# all deps
+RUN --mount=type=cache,target=/root/.cache,sharing=private \
+  poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
