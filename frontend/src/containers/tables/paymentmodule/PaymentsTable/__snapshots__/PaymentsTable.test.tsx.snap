@@ -9,13 +9,13 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-12 sc-jKJlTe hdnGZH"
+        class="MuiBox-root MuiBox-root-12 sc-eNQAEJ eAIuLz"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
           data-cy="table-title"
         >
-          Payments List
+          Payee List
         </h6>
         <div
           class="MuiBox-root MuiBox-root-13"
@@ -89,13 +89,13 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-jKJlTe hdnGZH"
+        class="MuiBox-root MuiBox-root-1 sc-eNQAEJ eAIuLz"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
           data-cy="table-title"
         >
-          Payments List
+          Payee List
         </h6>
         <div
           class="MuiBox-root MuiBox-root-2"
@@ -303,29 +303,6 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     role="button"
                     tabindex="0"
                   >
-                    Payment Channel
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
-                  </span>
-                </th>
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-                  scope="col"
-                >
-                  <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
-                    role="button"
-                    tabindex="0"
-                  >
                     FSP
                     <svg
                       aria-hidden="true"
@@ -385,6 +362,29 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     </svg>
                   </span>
                 </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    role="button"
+                    tabindex="0"
+                  >
+                    
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody
@@ -425,20 +425,6 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root sc-fjdhpX gzFqeL"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"
-                    />
-                  </svg>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
                   Test FSP 1
                 </td>
                 <td
@@ -450,8 +436,15 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                   data-cy="delivered-quantity-cell"
                 >
-                  -
+                  <div
+                    class="sc-jTzLTM liqwSL"
+                  >
+                    UNSUCCESSFUL
+                  </div>
                 </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                />
               </tr>
               <tr
                 class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
@@ -488,32 +481,33 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root sc-fjdhpX gzFqeL"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"
-                    />
-                  </svg>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
                   Test FSP 1
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  -
+                  PLN 10.00 (USD 20.00)
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                   data-cy="delivered-quantity-cell"
                 >
-                  -
+                  PLN 10.00
+        (USD 20.00)
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root sc-cSHVUG gdxzAW"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.88-11.71L10 14.17l-1.88-1.88a.9959.9959 0 00-1.41 0c-.39.39-.39 1.02 0 1.41l2.59 2.59c.39.39 1.02.39 1.41 0L17.3 9.7c.39-.39.39-1.02 0-1.41-.39-.39-1.03-.39-1.42 0z"
+                    />
+                  </svg>
                 </td>
               </tr>
               <tr

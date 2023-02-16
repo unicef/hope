@@ -545,7 +545,7 @@ class Household(
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     def __str__(self) -> str:
-        return f"{self.unicef_id}"
+        return self.unicef_id or ""
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -795,7 +795,7 @@ class Individual(
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
-    preferred_language = models.CharField(max_length=3, choices=Languages.get_tuple(), null=True, blank=True)
+    preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
@@ -844,6 +844,16 @@ class Individual(
     def sanction_list_last_check(self) -> Any:
         return cache.get("sanction_list_last_check")
 
+    @property
+    def bank_name(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_name if bank_account_info else None
+
+    @property
+    def bank_account_number(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_account_number if bank_account_info else None
+
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
@@ -865,7 +875,7 @@ class Individual(
         self.save()
 
     def __str__(self) -> str:
-        return self.unicef_id
+        return self.unicef_id or ""
 
     class Meta:
         verbose_name = "Individual"

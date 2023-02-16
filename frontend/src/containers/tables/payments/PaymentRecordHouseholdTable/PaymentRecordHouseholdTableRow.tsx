@@ -1,7 +1,7 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { PaymentRecordNode } from '../../../../__generated__/graphql';
+import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/core/StatusBox';
@@ -12,25 +12,25 @@ import {
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
 
-interface PaymentRecordTableRowProps {
-  paymentRecord: PaymentRecordNode;
+interface PaymentRecordAndPaymentTableRowProps {
+  paymentRecordOrPayment: PaymentRecordAndPaymentNode;
   openInNewTab: boolean;
   canViewDetails: boolean;
 }
 
-export function PaymentRecordHouseholdTableRow({
-  paymentRecord,
+export function PaymentRecordAndPaymentHouseholdTableRow({
+  paymentRecordOrPayment,
   openInNewTab,
   canViewDetails,
-}: PaymentRecordTableRowProps): React.ReactElement {
+}: PaymentRecordAndPaymentTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
-  const paymentRecordDetailsPath = `/${businessArea}/payment-records/${paymentRecord.id}`;
+  const paymentRecordOrPaymentDetailsPath = `/${businessArea}/payment-records/${paymentRecordOrPayment.id}`;
   const handleClick = (): void => {
     if (openInNewTab) {
-      window.open(paymentRecordDetailsPath);
+      window.open(paymentRecordOrPaymentDetailsPath);
     } else {
-      history.push(paymentRecordDetailsPath);
+      history.push(paymentRecordOrPaymentDetailsPath);
     }
   };
   return (
@@ -38,39 +38,41 @@ export function PaymentRecordHouseholdTableRow({
       hover
       onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
-      key={paymentRecord.id}
+      key={paymentRecordOrPayment.id}
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentRecordDetailsPath}>
-            {paymentRecord.caId}
+          <BlackLink to={paymentRecordOrPaymentDetailsPath}>
+            {paymentRecordOrPayment.caId}
           </BlackLink>
         ) : (
-          paymentRecord.caId
+          paymentRecordOrPayment.caId
         )}
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={paymentRecord.status}
+          status={paymentRecordOrPayment.status}
           statusToColor={paymentRecordStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>{paymentRecord.fullName}</TableCell>
-      <TableCell align='left'>{paymentRecord?.parent?.program?.name}</TableCell>
+      <TableCell align='left'>{paymentRecordOrPayment.fullName}</TableCell>
+      <TableCell align='left'>
+        {paymentRecordOrPayment?.parent?.programmeName}
+      </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
-          paymentRecord.entitlementQuantity,
-          paymentRecord.currency,
+          paymentRecordOrPayment.entitlementQuantity,
+          paymentRecordOrPayment.currency,
         )}
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
-          paymentRecord.deliveredQuantity,
-          paymentRecord.currency,
+          paymentRecordOrPayment.deliveredQuantity,
+          paymentRecordOrPayment.currency,
         )}
       </TableCell>
       <TableCell align='right'>
-        <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
+        <UniversalMoment>{paymentRecordOrPayment.deliveryDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

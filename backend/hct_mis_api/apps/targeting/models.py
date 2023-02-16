@@ -247,14 +247,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def household_list(self) -> "QuerySet":
-        queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
-            return queryset
+            return self.households.all()
+        params = {
+            "target_population": self,
+        }
         if self.vulnerability_score_max is not None:
-            queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
+            params["vulnerability_score__lte"] = self.vulnerability_score_max
         if self.vulnerability_score_min is not None:
-            queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
-        return queryset.distinct()
+            params["vulnerability_score__gte"] = self.vulnerability_score_min
+        return Household.objects.filter(selections__in=HouseholdSelection.objects.filter(**params))
 
     def refresh_stats(self) -> None:
         households = self.household_list.only("id")

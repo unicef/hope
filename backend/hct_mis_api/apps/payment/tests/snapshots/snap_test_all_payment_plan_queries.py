@@ -259,6 +259,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'value': 'ACCEPTED'
             },
             {
+                'name': 'Finished',
+                'value': 'FINISHED'
+            },
+            {
                 'name': 'In Approval',
                 'value': 'IN_APPROVAL'
             },
@@ -282,10 +286,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'name': 'Open',
                 'value': 'OPEN'
             },
-            {
-                'name': 'Reconciled',
-                'value': 'RECONCILED'
-            }
         ]
     }
 }

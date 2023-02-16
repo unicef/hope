@@ -68,6 +68,8 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationPlanFilter,
     cash_plan_and_payment_plan_filter,
     cash_plan_and_payment_plan_ordering,
+    payment_record_and_payment_filter,
+    payment_record_and_payment_ordering,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.managers import ArraySubquery
@@ -81,7 +83,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
-    PaymentChannel,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -138,7 +139,7 @@ class RapidProFlow(graphene.ObjectType):
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
-        hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
     )
 
     class Meta:
@@ -148,7 +149,7 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
 
 
 class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
 
     class Meta:
         model = FinancialServiceProviderXlsxReport
@@ -163,7 +164,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
     full_name = graphene.String(source="name")
 
     class Meta:
@@ -220,7 +221,7 @@ class FilteredActionsListNode(graphene.ObjectType):
 
 
 class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     rejected_on = graphene.String()
     actions = graphene.Field(FilteredActionsListNode)
 
@@ -300,12 +301,11 @@ class GenericPaymentNode(graphene.ObjectType):
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
-    has_payment_channel = graphene.Boolean()
     full_name = graphene.String()
     target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
@@ -327,9 +327,6 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         if self.parent.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
-
-    def resolve_has_payment_channel(self, info: Any) -> bool:
-        return self.collector.payment_channels.exists()
 
     def resolve_payment_plan_hard_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
@@ -387,9 +384,9 @@ def _calculate_volume(
 ) -> Optional[Decimal]:
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
+    # TODO simple volume calculation
     payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-        assigned_payment_channel__delivery_mechanism__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
 
@@ -427,7 +424,7 @@ class FspChoices(graphene.ObjectType):
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
     authorization_number_required = graphene.Int()
     finance_review_number_required = graphene.Int()
@@ -463,13 +460,13 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment_verification_plans
 
     def resolve_approval_number_required(self, info: Any) -> graphene.Int:
-        return self.business_area.approval_number_required
+        return self.approval_number_required
 
     def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
-        return self.business_area.authorization_number_required
+        return self.authorization_number_required
 
     def resolve_finance_review_number_required(self, info: Any) -> graphene.Int:
-        return self.business_area.finance_review_number_required
+        return self.finance_review_number_required
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
@@ -546,16 +543,6 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
-class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
-
-    class Meta:
-        model = PaymentChannel
-        exclude = ("delivery_data",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
 
@@ -616,6 +603,31 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
         return ""
 
 
+class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
+
+    obj_type = graphene.String()
+    id = graphene.String()
+    ca_id = graphene.String(source="unicef_id")
+    status = graphene.String(source="status")
+    full_name = graphene.String(source="full_name")
+    parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
+    entitlement_quantity = graphene.Float(source="entitlement_quantity")
+    delivered_quantity = graphene.Float(source="delivered_quantity")
+    delivered_quantity_usd = graphene.Float(source="delivered_quantity_usd")
+    currency = graphene.String(source="currency")
+    delivery_date = graphene.String(source="delivery_date")
+
+    def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
+        return self.__class__.__name__
+
+    def resolve_id(self, info: Any, **kwargs: Any) -> str:
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+
 class PageInfoNode(graphene.ObjectType):
     start_cursor = graphene.String()
     end_cursor = graphene.String()
@@ -631,6 +643,17 @@ class CashPlanAndPaymentPlanEdges(graphene.ObjectType):
 class PaginatedCashPlanAndPaymentPlanNode(graphene.ObjectType):
     page_info = graphene.Field(PageInfoNode)
     edges = graphene.List(CashPlanAndPaymentPlanEdges)
+    total_count = graphene.Int()
+
+
+class PaymentRecordsAndPaymentsEdges(graphene.ObjectType):
+    cursor = graphene.String()
+    node = graphene.Field(PaymentRecordAndPaymentNode)
+
+
+class PaginatedPaymentRecordsAndPaymentsNode(graphene.ObjectType):
+    page_info = graphene.Field(PageInfoNode)
+    edges = graphene.List(PaymentRecordsAndPaymentsEdges)
     total_count = graphene.Int()
 
 
@@ -702,13 +725,25 @@ class Query(graphene.ObjectType):
     all_payments = DjangoPermissionFilterConnectionField(
         PaymentNode,
         filterset_class=PaymentFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
     )
     payment_record = relay.Node.Field(PaymentRecordNode)
     all_payment_records = DjangoPermissionFilterConnectionField(
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
         permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
+    )
+
+    all_payment_records_and_payments = graphene.Field(
+        PaginatedPaymentRecordsAndPaymentsNode,
+        business_area=graphene.String(required=True),
+        program=graphene.String(),
+        household=graphene.ID(),
+        order_by=graphene.String(),
+        first=graphene.Int(),
+        last=graphene.Int(),
+        before=graphene.String(),
+        after=graphene.String(),
     )
 
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -812,7 +847,7 @@ class Query(graphene.ObjectType):
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)
@@ -1188,7 +1223,7 @@ class Query(graphene.ObjectType):
             payment_plan_object_id=OuterRef("id")
         )
 
-        payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED).annotate(
+        payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.FINISHED).annotate(
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
             delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
         )
@@ -1243,4 +1278,23 @@ class Query(graphene.ObjectType):
         )
         resp.total_count = len(qs)
 
+        return resp
+
+    def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
+        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+
+        qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
+
+        if order_by_value := kwargs.get("order_by"):
+            qs = payment_record_and_payment_ordering(qs, order_by_value)
+
+        resp = connection_from_list_slice(
+            qs,
+            args=kwargs,
+            connection_type=PaginatedPaymentRecordsAndPaymentsNode,
+            edge_type=PaymentRecordsAndPaymentsEdges,
+            pageinfo_type=PageInfoNode,
+            list_length=len(qs),
+        )
+        resp.total_count = len(qs)
         return resp

@@ -32,7 +32,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   if (permissions === null) return null;
   if (!data) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
   const { paymentPlan } = data;
   const shouldDisplayEntitlement =
@@ -53,7 +53,9 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         paymentPlan={paymentPlan}
       />
       <AcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayEntitlement && <Entitlement paymentPlan={paymentPlan} />}
+      {shouldDisplayEntitlement && (
+        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+      )}
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}

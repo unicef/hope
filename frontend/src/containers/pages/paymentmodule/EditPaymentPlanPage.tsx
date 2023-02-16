@@ -15,7 +15,6 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
-  useCurrencyChoicesQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '../../../__generated__/graphql';
@@ -50,15 +49,9 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     variables: { businessArea, paymentPlanApplicable: true },
   });
 
-  const {
-    data: currencyChoicesData,
-    loading: loadingCurrencyChoices,
-  } = useCurrencyChoicesQuery();
-
-  if (loadingTargetPopulations || loadingCurrencyChoices || loadingPaymentPlan)
+  if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !currencyChoicesData || !paymentPlanData)
-    return null;
+  if (!allTargetPopulationsData || !paymentPlanData) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
@@ -67,7 +60,10 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     targetingId: paymentPlanData.paymentPlan.targetPopulation.id,
     startDate: paymentPlanData.paymentPlan.startDate,
     endDate: paymentPlanData.paymentPlan.endDate,
-    currency: paymentPlanData.paymentPlan.currency,
+    currency: {
+      name: paymentPlanData.paymentPlan.currencyName,
+      value: paymentPlanData.paymentPlan.currency,
+    },
     dispersionStartDate: paymentPlanData.paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlanData.paymentPlan.dispersionEndDate,
   };
@@ -120,7 +116,9 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
             endDate: values.endDate,
             dispersionStartDate: values.dispersionStartDate,
             dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency,
+            currency: values.currency?.value
+              ? values.currency.value
+              : values.currency,
           },
         },
       });
@@ -160,10 +158,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters
-            currencyChoicesData={currencyChoicesData.currencyChoices}
-            values={values}
-          />
+          <PaymentPlanParameters values={values} />
         </Form>
       )}
     </Formik>
