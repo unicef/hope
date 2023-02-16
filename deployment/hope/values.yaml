@@ -84,6 +84,7 @@ frontend:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
       - labelSelector:
+          matchExpressions:
           - key: hope/service
             operator: In
             values:
@@ -221,6 +222,7 @@ celery:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
       - labelSelector:
+          matchExpressions:
           - key: hope/service
             operator: In
             values:
