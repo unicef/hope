@@ -50,8 +50,8 @@ export const GrievancesDetails = ({
         )[0].name
     : '-';
 
-  const grievanceTicketUrl = (): React.ReactElement => {
-    if (ticket.paymentRecord.objType === 'PaymentRecord') {
+  const renderPaymentUrl = (): React.ReactElement => {
+    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return (
         <ContentLink
           href={`/${businessArea}/verification/payment-record/${ticket.paymentRecord.id}`}
@@ -60,7 +60,7 @@ export const GrievancesDetails = ({
         </ContentLink>
       );
     }
-    if (ticket.paymentRecord.objType === 'Payment') {
+    if (ticket?.paymentRecord?.objType === 'Payment') {
       return (
         <ContentLink
           href={`/${businessArea}/verification/payment/${ticket.paymentRecord.id}`}
@@ -146,7 +146,7 @@ export const GrievancesDetails = ({
               },
               {
                 label: t('PAYMENT ID'),
-                value: <span>{grievanceTicketUrl()}</span>,
+                value: <span>{renderPaymentUrl()}</span>,
                 size: 6,
               },
               {
