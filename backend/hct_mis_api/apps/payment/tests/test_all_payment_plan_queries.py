@@ -63,9 +63,6 @@ class TestPaymentPlanQueries(APITestCase):
             approvalProcess{
               totalCount
             }
-            approvalNumberRequired
-            authorizationNumberRequired
-            financeReleaseNumberRequired
             paymentsConflictsCount
           }
         }
