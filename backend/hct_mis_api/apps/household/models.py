@@ -175,6 +175,7 @@ IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
 IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
 IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
 IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
+IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -184,6 +185,7 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
     (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
     (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
+    (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -590,6 +592,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 class DocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
+    is_identity_document = models.BooleanField(default=True)
 
     class Meta:
         ordering = [
