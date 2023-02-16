@@ -14,7 +14,7 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={fakeApolloPaymentPlan}
           canReject
-          canMarkAsReviewed
+          canMarkAsReleased
         />
       </MockedProvider>,
     );

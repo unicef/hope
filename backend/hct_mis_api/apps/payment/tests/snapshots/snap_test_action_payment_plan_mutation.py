@@ -90,7 +90,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                     ],
                                     'authorization': [
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -101,7 +101,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                     'lastName': 'Walker'
                                 },
                                 'sentForAuthorizationBy': None,
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -130,7 +130,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                     ],
                                     'authorization': [
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -141,7 +141,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                     'lastName': 'Walker'
                                 },
                                 'sentForAuthorizationBy': None,
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -190,7 +190,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                     ],
                                     'authorization': [
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                         {
@@ -205,7 +205,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                     'lastName': 'Walker'
                                 },
                                 'sentForAuthorizationBy': None,
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -230,7 +230,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     ],
                                     'authorization': [
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -241,7 +241,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'lastName': 'Walker'
                                 },
                                 'sentForAuthorizationBy': None,
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -270,7 +270,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     ],
                                     'authorization': [
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -281,7 +281,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'lastName': 'Walker'
                                 },
                                 'sentForAuthorizationBy': None,
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -314,7 +314,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     ],
                                     'authorization': [
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -328,7 +328,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 },
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -365,7 +365,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                             'info': 'Authorized by Rachel Walker'
                                         }
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -379,7 +379,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 },
-                                'sentForFinanceReviewBy': None
+                                'sentForFinanceReleaseBy': None
                             }
                         }
                     ],
@@ -420,7 +420,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                             'info': 'Authorized by Rachel Walker'
                                         }
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                     ],
                                     'reject': [
                                     ]
@@ -434,7 +434,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 },
-                                'sentForFinanceReviewBy': {
+                                'sentForFinanceReleaseBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 }
@@ -478,10 +478,10 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                             'info': 'Authorized by Rachel Walker'
                                         }
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                         {
                                             'comment': 'all_steps, action: REVIEW',
-                                            'info': 'Reviewed by Rachel Walker'
+                                            'info': 'Released by Rachel Walker'
                                         }
                                     ],
                                     'reject': [
@@ -496,7 +496,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 },
-                                'sentForFinanceReviewBy': {
+                                'sentForFinanceReleaseBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 }
@@ -540,14 +540,14 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                             'info': 'Authorized by Rachel Walker'
                                         }
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                         {
                                             'comment': 'all_steps, action: REVIEW',
-                                            'info': 'Reviewed by Rachel Walker'
+                                            'info': 'Released by Rachel Walker'
                                         },
                                         {
                                             'comment': 'all_steps, action: REVIEW',
-                                            'info': 'Reviewed by Rachel Walker'
+                                            'info': 'Released by Rachel Walker'
                                         }
                                     ],
                                     'reject': [
@@ -562,7 +562,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 },
-                                'sentForFinanceReviewBy': {
+                                'sentForFinanceReleaseBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 }
@@ -606,18 +606,18 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                             'info': 'Authorized by Rachel Walker'
                                         }
                                     ],
-                                    'financeReview': [
+                                    'financeRelease': [
                                         {
                                             'comment': 'all_steps, action: REVIEW',
-                                            'info': 'Reviewed by Rachel Walker'
+                                            'info': 'Released by Rachel Walker'
                                         },
                                         {
                                             'comment': 'all_steps, action: REVIEW',
-                                            'info': 'Reviewed by Rachel Walker'
+                                            'info': 'Released by Rachel Walker'
                                         },
                                         {
                                             'comment': 'all_steps, action: REVIEW',
-                                            'info': 'Reviewed by Rachel Walker'
+                                            'info': 'Released by Rachel Walker'
                                         }
                                     ],
                                     'reject': [
@@ -632,7 +632,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 },
-                                'sentForFinanceReviewBy': {
+                                'sentForFinanceReleaseBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
                                 }
