@@ -23,6 +23,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
+    IDENTIFICATION_TYPE_BANK_STATEMENT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -33,7 +34,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     YES,
-    IDENTIFICATION_TYPE_BANK_STATEMENT,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
@@ -542,13 +542,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
 
     def _prepare_bank_statement_document(self, individual_dict: Dict, imported_individual: ImportedIndividual) -> None:
-        print("_prepare_bank_statement_document1")
         bank_account = individual_dict.get("confirm_bank_account_number")
         if not bank_account:
             return None
-        print("_prepare_bank_statement_document2")
         photo_base_64 = individual_dict.get("bank_account_details_picture")
-        print("_prepare_bank_statement_document3", len(photo_base_64))
         image = self._prepare_picture_from_base64(photo_base_64, bank_account)
         return ImportedDocument.objects.create(
             document_number=bank_account,
