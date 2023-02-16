@@ -21,15 +21,15 @@ import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
 
-export interface MarkAsReviewedPaymentPlanProps {
+export interface MarkAsReleasedPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const MarkAsReviewedPaymentPlan = ({
+export const MarkAsReleasedPaymentPlan = ({
   paymentPlan,
-}: MarkAsReviewedPaymentPlanProps): React.ReactElement => {
+}: MarkAsReleasedPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [markAsReviewedDialogOpen, setMarkAsReviewedDialogOpen] = useState(
+  const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] = useState(
     false,
   );
   const { showMessage } = useSnackbar();
@@ -40,15 +40,15 @@ export const MarkAsReviewedPaymentPlan = ({
     Action.Review,
     paymentPlan.id,
     () => showMessage(t('Payment Plan has been marked as reviewed.')),
-    () => setMarkAsReviewedDialogOpen(false),
+    () => setMarkAsReleasedDialogOpen(false),
   );
 
   const shouldShowLastReviewerMessage = (): boolean => {
-    const { financeReviewNumberRequired } = paymentPlan;
-    const financeReviewsCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeReview.length;
+    const { financeReleaseNumberRequired } = paymentPlan;
+    const financeReleasesCount =
+      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeRelease.length;
 
-    return financeReviewNumberRequired - 1 === financeReviewsCount;
+    return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };
 
   const initialValues = {
@@ -73,34 +73,34 @@ export const MarkAsReviewedPaymentPlan = ({
       >
         {({ submitForm }) => (
           <>
-            {markAsReviewedDialogOpen && <AutoSubmitFormOnEnter />}
+            {markAsReleasedDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
                 color='primary'
                 variant='contained'
-                onClick={() => setMarkAsReviewedDialogOpen(true)}
-                data-cy='button-mark-as-reviewed'
+                onClick={() => setMarkAsReleasedDialogOpen(true)}
+                data-cy='button-mark-as-released'
               >
-                {t('Mark as reviewed')}
+                {t('Mark as released')}
               </Button>
             </Box>
             <Dialog
-              open={markAsReviewedDialogOpen}
-              onClose={() => setMarkAsReviewedDialogOpen(false)}
+              open={markAsReleasedDialogOpen}
+              onClose={() => setMarkAsReleasedDialogOpen(false)}
               scroll='paper'
               aria-labelledby='form-dialog-title'
               maxWidth='md'
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  {t('Mark as Reviewed')}
+                  {t('Mark as Released')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogContainer>
                   <Box p={5}>
                     {t(
-                      'Are you sure you want to mark this Payment Plan as reviewed?',
+                      'Are you sure you want to mark this Payment Plan as released?',
                     )}
                   </Box>
                   {shouldShowLastReviewerMessage() && (
@@ -126,7 +126,7 @@ export const MarkAsReviewedPaymentPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setMarkAsReviewedDialogOpen(false)}>
+                  <Button onClick={() => setMarkAsReleasedDialogOpen(false)}>
                     CANCEL
                   </Button>
                   <LoadingButton
@@ -137,7 +137,7 @@ export const MarkAsReviewedPaymentPlan = ({
                     onClick={submitForm}
                     data-cy='button-submit'
                   >
-                    {t('Mark as reviewed')}
+                    {t('Mark as released')}
                   </LoadingButton>
                 </DialogActions>
               </DialogFooter>
