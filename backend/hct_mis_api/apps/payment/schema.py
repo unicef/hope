@@ -216,7 +216,7 @@ class ApprovalNode(DjangoObjectType):
 class FilteredActionsListNode(graphene.ObjectType):
     approval = graphene.List(ApprovalNode)
     authorization = graphene.List(ApprovalNode)
-    finance_review = graphene.List(ApprovalNode)
+    finance_release = graphene.List(ApprovalNode)
     reject = graphene.List(ApprovalNode)
 
 
@@ -233,7 +233,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_rejected_on(self, info: Any) -> Optional[str]:
         if self.approvals.filter(type=Approval.REJECT).exists():
-            if self.sent_for_finance_review_date:
+            if self.sent_for_finance_release_date:
                 return "IN_REVIEW"
             if self.sent_for_authorization_date:
                 return "IN_AUTHORIZATION"
@@ -245,7 +245,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
         resp = FilteredActionsListNode(
             approval=self.approvals.filter(type=Approval.APPROVAL),
             authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
-            finance_review=self.approvals.filter(type=Approval.FINANCE_REVIEW),
+            finance_release=self.approvals.filter(type=Approval.FINANCE_RELEASE),
             reject=self.approvals.filter(type=Approval.REJECT),
         )
         return resp
@@ -427,7 +427,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
     authorization_number_required = graphene.Int()
-    finance_review_number_required = graphene.Int()
+    finance_release_number_required = graphene.Int()
     dispersion_start_date = graphene.Date()
     dispersion_end_date = graphene.Date()
     start_date = graphene.Date()
@@ -465,8 +465,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
         return self.authorization_number_required
 
-    def resolve_finance_review_number_required(self, info: Any) -> graphene.Int:
-        return self.finance_review_number_required
+    def resolve_finance_release_number_required(self, info: Any) -> graphene.Int:
+        return self.finance_release_number_required
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()

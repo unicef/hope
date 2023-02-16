@@ -123,7 +123,7 @@ context("Payment", () => {
     cy.get("[data-cy='button-authorize']").click({ force: true });
     cy.get("[data-cy='button-submit']").click({ force: true });
     cy.get('[data-cy="status-container"]').contains("In Review");
-    cy.get("[data-cy='button-mark-as-reviewed']").click({ force: true });
+    cy.get("[data-cy='button-mark-as-released']").click({ force: true });
     cy.get("[data-cy='button-submit']").click({ force: true });
     cy.get('[data-cy="status-container"]').contains("Accepted");
 
@@ -166,8 +166,7 @@ context("Payment", () => {
     const currentRunFileName = fileName(paymentPlanUnicefId);
     cy.exec(
       `find ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | sed 's@.*/@@'`
-    )
-      .then((result) => {
+    ).then((result) => {
         let fspXlsxFilenames = result.stdout.split("\n");
         cy.log(fspXlsxFilenames);
         expect(fspXlsxFilenames.length).to.eq(count);

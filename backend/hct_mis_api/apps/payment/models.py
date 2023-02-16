@@ -730,11 +730,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.acceptance_process_threshold.authorization_number_required
 
     @property
-    def finance_review_number_required(self) -> int:
+    def finance_release_number_required(self) -> int:
         if not self.acceptance_process_threshold:
             return 1
 
-        return self.acceptance_process_threshold.finance_review_number_required
+        return self.acceptance_process_threshold.finance_release_number_required
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -1538,10 +1538,10 @@ class ApprovalProcess(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
     )
     sent_for_authorization_date = models.DateTimeField(null=True)
-    sent_for_finance_review_by = models.ForeignKey(
+    sent_for_finance_release_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
     )
-    sent_for_finance_review_date = models.DateTimeField(null=True)
+    sent_for_finance_release_date = models.DateTimeField(null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
 
     class Meta:
@@ -1552,12 +1552,12 @@ class ApprovalProcess(TimeStampedUUIDModel):
 class Approval(TimeStampedUUIDModel):
     APPROVAL = "APPROVAL"
     AUTHORIZATION = "AUTHORIZATION"
-    FINANCE_REVIEW = "FINANCE_REVIEW"
+    FINANCE_RELEASE = "FINANCE_RELEASE"
     REJECT = "REJECT"
     TYPE_CHOICES = (
         (APPROVAL, "Approval"),
         (AUTHORIZATION, "Authorization"),
-        (FINANCE_REVIEW, "Finance Review"),
+        (FINANCE_RELEASE, "Finance Release"),
         (REJECT, "Reject"),
     )
 
@@ -1577,7 +1577,7 @@ class Approval(TimeStampedUUIDModel):
         types_map = {
             self.APPROVAL: "Approved",
             self.AUTHORIZATION: "Authorized",
-            self.FINANCE_REVIEW: "Reviewed",
+            self.FINANCE_RELEASE: "Released",
             self.REJECT: "Rejected",
         }
 
@@ -1596,7 +1596,7 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
     )
     approval_number_required = models.PositiveIntegerField(default=1)
     authorization_number_required = models.PositiveIntegerField(default=1)
-    finance_review_number_required = models.PositiveIntegerField(default=1)
+    finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ("payments_range_usd",)
@@ -1606,5 +1606,5 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
             f"{self.payments_range_usd} USD, "
             f"Approvals: {self.approval_number_required} "
             f"Authorization: {self.authorization_number_required} "
-            f"Finance Reviews: {self.finance_review_number_required}"
+            f"Finance Releases: {self.finance_release_number_required}"
         )
