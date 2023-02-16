@@ -542,11 +542,14 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
 
     def _prepare_bank_statement_document(self, individual_dict: Dict, imported_individual: ImportedIndividual) -> None:
-        bank_account = individual_dict.get("bank_account_number")
+        print("_prepare_bank_statement_document1")
+        bank_account = individual_dict.get("confirm_bank_account_number")
         if not bank_account:
             return None
+        print("_prepare_bank_statement_document2")
         photo_base_64 = individual_dict.get("bank_account_details_picture")
-        image = self._prepare_picture_from_base64(photo_base_64)
+        print("_prepare_bank_statement_document3", len(photo_base_64))
+        image = self._prepare_picture_from_base64(photo_base_64, bank_account)
         return ImportedDocument.objects.create(
             document_number=bank_account,
             individual=imported_individual,
@@ -593,13 +596,12 @@ class SriLankaRegistrationService(BaseRegistrationService):
         bank_account_number = collector_dict.get("confirm_bank_account_number")
         if should_use_hoh_as_collector:
             primary_collector = head_of_household
-            self._prepare_bank_statement_document(head_of_household_dict, primary_collector)
         else:
             primary_collector = ImportedIndividual.objects.create(
                 **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
             )
-            self._prepare_bank_statement_document(collector_dict, primary_collector)
             self._prepare_national_id(collector_dict, primary_collector)
+        self._prepare_bank_statement_document(collector_dict, primary_collector)
 
         ImportedIndividualRoleInHousehold.objects.create(
             household=household, individual=primary_collector, role=ROLE_PRIMARY
