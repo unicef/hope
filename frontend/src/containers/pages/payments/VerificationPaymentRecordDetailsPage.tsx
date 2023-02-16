@@ -20,7 +20,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data: { paymentRecord }, loading, error } = usePaymentRecordQuery({
+  const { data, loading, error } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -31,6 +31,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  const {paymentRecord} = data;
   if (!paymentRecord || !choicesData || permissions === null) return null;
 
   const verification =
