@@ -5,6 +5,8 @@ from django.core.management import BaseCommand, call_command
 
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.account.models import User, UserRole, Role
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 def create_fsps() -> None:
@@ -42,6 +44,12 @@ class Command(BaseCommand):
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
         call_command(
             "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
+        )
+
+        UserRole.objects.create(
+            user=User.objects.create_superuser("cypress-username", "cypress@cypress.com", "cypress-password"),
+            role=Role.objects.get(name="Role with all permissions"),
+            business_area=BusinessArea.objects.get(name="Afghanistan"),
         )
 
         create_fsps()
