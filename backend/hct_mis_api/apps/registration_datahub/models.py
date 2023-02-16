@@ -440,6 +440,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    is_identity_document = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return f"{self.label}"
@@ -551,6 +552,8 @@ class Record(models.Model):
     def get_data(self) -> Dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
+        if not self.files:
+            return self.fields
         files = json.loads(self.files.tobytes().decode())
         return combine_collections(files, self.fields)
 
