@@ -19224,7 +19224,7 @@
             "deprecationReason": null
           },
           {
-            "name": "financeReviewNumberRequired",
+            "name": "financeReleaseNumberRequired",
             "description": null,
             "args": [],
             "type": {
@@ -33003,7 +33003,7 @@
             "deprecationReason": null
           },
           {
-            "name": "sentForFinanceReviewBy",
+            "name": "sentForFinanceReleaseBy",
             "description": null,
             "args": [],
             "type": {
@@ -33015,7 +33015,7 @@
             "deprecationReason": null
           },
           {
-            "name": "sentForFinanceReviewDate",
+            "name": "sentForFinanceReleaseDate",
             "description": null,
             "args": [],
             "type": {
@@ -33116,7 +33116,7 @@
             "deprecationReason": null
           },
           {
-            "name": "financeReview",
+            "name": "financeRelease",
             "description": null,
             "args": [],
             "type": {

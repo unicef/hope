@@ -28,15 +28,15 @@ export const AcceptanceProcessRow = ({
     sentForApprovalBy,
     sentForAuthorizationDate,
     sentForAuthorizationBy,
-    sentForFinanceReviewDate,
-    sentForFinanceReviewBy,
+    sentForFinanceReleaseDate,
+    sentForFinanceReleaseBy,
     rejectedOn,
   } = acceptanceProcess;
 
   const {
     approvalNumberRequired,
     authorizationNumberRequired,
-    financeReviewNumberRequired,
+    financeReleaseNumberRequired,
     approvalProcess,
   } = paymentPlan;
 
@@ -59,7 +59,7 @@ export const AcceptanceProcessRow = ({
       <AcceptanceProcessStepper
         approvalNumberRequired={approvalNumberRequired}
         authorizationNumberRequired={authorizationNumberRequired}
-        financeReviewNumberRequired={financeReviewNumberRequired}
+        financeReleaseNumberRequired={financeReleaseNumberRequired}
         acceptanceProcess={acceptanceProcess}
       />
       <Grid container>
@@ -86,13 +86,13 @@ export const AcceptanceProcessRow = ({
           )}
         </Grid>
         <Grid item xs={4}>
-          {actions.financeReview.length > 0 && (
+          {actions.financeRelease.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
-                sentForFinanceReviewBy,
+                sentForFinanceReleaseBy,
               )}`}
-              topDate={sentForFinanceReviewDate}
-              approvals={actions.financeReview}
+              topDate={sentForFinanceReleaseDate}
+              approvals={actions.financeRelease}
             />
           )}
         </Grid>
