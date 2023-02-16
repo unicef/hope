@@ -23,6 +23,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
+    IDENTIFICATION_TYPE_BANK_STATEMENT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -176,6 +177,13 @@ class BaseRegistrationService(abc.ABC):
         if not form.is_valid():
             raise ValidationError(form.errors)
         return form.save()
+
+    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> Union[ContentFile, Any]:
+        if certificate_picture:
+            format_image = "jpg"
+            name = hashlib.md5(document_number.encode()).hexdigest()
+            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
+        return certificate_picture
 
 
 class FlexRegistrationService(BaseRegistrationService):
@@ -386,13 +394,6 @@ class FlexRegistrationService(BaseRegistrationService):
 
         return documents
 
-    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> Union[ContentFile, Any]:
-        if certificate_picture:
-            format_image = "jpg"
-            name = hashlib.md5(document_number.encode()).hexdigest()
-            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
-        return certificate_picture
-
     def _prepare_bank_account_info(
         self, individual_dict: Dict, individual: ImportedIndividual
     ) -> Optional[Dict[str, Any]]:
@@ -540,26 +541,43 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country(code="LK"),
         )
 
+    def _prepare_bank_statement_document(self, individual_dict: Dict, imported_individual: ImportedIndividual) -> None:
+        bank_account = individual_dict.get("confirm_bank_account_number")
+        if not bank_account:
+            return None
+        photo_base_64 = individual_dict.get("bank_account_details_picture")
+        if not photo_base_64:
+            return None
+        image = self._prepare_picture_from_base64(photo_base_64, bank_account)
+        return ImportedDocument.objects.create(
+            document_number=bank_account,
+            individual=imported_individual,
+            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_BANK_STATEMENT),
+            photo=image,
+            country=Country(code="LK"),
+        )
+
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         if record.registration != self.SRI_LANKA_REGISTRATION_ID:
             raise ValidationError("Sri-Lanka data is processed only from registration 17!")
 
-        record_data_dict = record.fields
+        record_data_dict = record.get_data()
 
         localization_dict = record_data_dict.get("localization-info", [])[0]
         head_of_household_dict = record_data_dict.get("caretaker-info", [])[0]
         collector_dict = record_data_dict.get("collector-info", [])[0]
         individuals_list = record_data_dict.get("children-info", [])
-
+        id_enumerator = record_data_dict.get("id_enumerator")
         preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact")
         should_use_hoh_as_collector = (
             collector_dict.get("does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi") == "y"
         )
         household_data = self._prepare_household_data(localization_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
-
+        if id_enumerator:
+            household.flex_fields["id_enumerator"] = id_enumerator
         base_individual_data_dict = dict(
             household=household,
             registration_data_import=registration_data_import,
@@ -582,6 +600,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
                 **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
             )
             self._prepare_national_id(collector_dict, primary_collector)
+        self._prepare_bank_statement_document(collector_dict, primary_collector)
 
         ImportedIndividualRoleInHousehold.objects.create(
             household=household, individual=primary_collector, role=ROLE_PRIMARY
