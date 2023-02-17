@@ -10,10 +10,7 @@ context("Payment", () => {
         } payment_plan ${seed}`
       );
     });
-    cy.visit("/api/unicorn/");
-    cy.get('input[name="username"]').type(Cypress.env("username"));
-    cy.get('input[name="password"]').type(Cypress.env("password"));
-    cy.get("input").contains("Log in").click();
+    cy.adminLogin();
     cy.visit("/api/unicorn/core/businessarea/");
     cy.get("th").contains("Afghanistan").parent().find("a").click();
     cy.get("#id_is_payment_plan_applicable").should("be.checked");
