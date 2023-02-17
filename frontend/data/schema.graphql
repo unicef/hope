@@ -1071,7 +1071,7 @@ type GrievanceTicketNode implements Node {
   referralTicketDetails: TicketReferralDetailsNode
   household: HouseholdNode
   individual: IndividualNode
-  paymentRecord: PaymentRecordNode
+  paymentRecord: PaymentRecordAndPaymentNode
   admin: String
   existingTickets: [GrievanceTicketNode]
   relatedTickets: [GrievanceTicketNode]
