@@ -83,6 +83,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -638,7 +639,7 @@ class CreateFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
     ) -> "CreateFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
 
         fsp = FSPService.create(inputs, info.context.user)
         # Schedule task to generate downloadable report
@@ -661,7 +662,7 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
     ) -> "EditFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
 
         fsp_id = decode_id_string(financial_service_provider_id)
         fsp = FSPService.update(fsp_id, inputs)
@@ -684,8 +685,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
 
-        # TODO: maybe will update perms here?
-        cls.has_permission(info, Permissions.PM_VIEW_DETAILS, payment_plan.business_area)
+        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
@@ -699,6 +699,30 @@ class ActionPaymentPlanMutation(PermissionMutation):
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
+
+    @classmethod
+    def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str, pp_status: str) -> None:
+        def _get_reject_permission(status: str) -> Any:
+            status_to_perm_map = {
+                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            }
+            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
+
+        action_to_permissions_map = {
+            PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.UNLOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name: Permissions.PM_SEND_FOR_APPROVAL,
+            PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
+            PaymentPlan.Action.FINISH.name: [],
+        }
+        cls.has_permission(info, action_to_permissions_map[action], business_area)
 
 
 class CreatePaymentPlanMutation(PermissionMutation):
@@ -1003,7 +1027,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
 
         if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"

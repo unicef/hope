@@ -5,6 +5,7 @@ import wait from 'waait';
 import { fakeApolloPaymentPlan } from '../../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { fakeActionPpMutation } from '../../../../../../fixtures/paymentmodule/fakeApolloActionPaymentPlanMutation';
 import { render } from '../../../../../testUtils/testUtils';
+import { PERMISSIONS } from '../../../../../config/permissions';
 import { LockedPaymentPlanHeaderButtons } from './LockedPaymentPlanHeaderButtons';
 
 describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons', () => {
@@ -13,8 +14,8 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
       <MockedProvider addTypename={false} mocks={fakeActionPpMutation}>
         <LockedPaymentPlanHeaderButtons
           paymentPlan={fakeApolloPaymentPlan}
-          canLock
-          canSendForApproval
+          canUnlock={false}
+          permissions={[PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]}
         />
       </MockedProvider>,
     );

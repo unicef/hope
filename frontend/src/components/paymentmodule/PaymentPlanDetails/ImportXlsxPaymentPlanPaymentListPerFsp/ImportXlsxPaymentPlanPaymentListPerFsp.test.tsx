@@ -5,6 +5,7 @@ import wait from 'waait';
 import { fakeImportXlsxPpListPerFspMutation } from '../../../../../fixtures/paymentmodule/fakeImportXlsxPpListPerFspMutation';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
+import { PERMISSIONS } from '../../../../config/permissions';
 import { ImportXlsxPaymentPlanPaymentListPerFsp } from './ImportXlsxPaymentPlanPaymentListPerFsp';
 
 describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp', () => {
@@ -16,6 +17,7 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
       >
         <ImportXlsxPaymentPlanPaymentListPerFsp
           paymentPlan={fakeApolloPaymentPlan}
+          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />
       </MockedProvider>,
     );
