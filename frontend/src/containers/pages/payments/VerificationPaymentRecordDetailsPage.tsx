@@ -31,7 +31,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  const {paymentRecord} = data;
+  const { paymentRecord } = data;
   if (!paymentRecord || !choicesData || permissions === null) return null;
 
   const verification =
