@@ -30,6 +30,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         "payment_record_ca_id",
         "received",
         "head_of_household",
+        "phone_no",
+        "phone_no_alternative",
         "admin1",
         "admin2",
         "village",
@@ -43,8 +45,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     PAYMENT_RECORD_ID_LETTER = "A"
     RECEIVED_COLUMN_INDEX = 2
     RECEIVED_COLUMN_LETTER = "C"
-    RECEIVED_AMOUNT_COLUMN_INDEX = 11
-    RECEIVED_AMOUNT_COLUMN_LETTER = "L"
+    RECEIVED_AMOUNT_COLUMN_INDEX = 13
+    RECEIVED_AMOUNT_COLUMN_LETTER = "N"
     VERIFICATION_SHEET = "Payment Verifications"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
@@ -89,6 +91,10 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
+            str(head_of_household.phone_no) if household and hasattr(household, "phone_no") else "",
+            str(head_of_household.phone_no_alternative)
+            if household and hasattr(household, "phone_no_alternative")
+            else "",
             str(household.admin1.name) if household.admin1 else "",
             str(household.admin2.name) if household.admin2 else "",
             str(household.village),
