@@ -3,13 +3,7 @@
 context("Payment", () => {
 
   beforeEach(() => {
-    cy.uniqueSeed().then((seed) => {
-      cy.exec(
-        `yarn init-scenario ${
-          Cypress.config().baseUrl
-        } payment_plan ${seed}`
-      );
-    });
+    cy.initScenario("payment_plan")
     cy.adminLogin();
     cy.visit("/api/unicorn/core/businessarea/");
     cy.get("th").contains("Afghanistan").parent().find("a").click();
