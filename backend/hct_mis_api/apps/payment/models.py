@@ -770,7 +770,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         help_text=_("Select the columns to include in the report"),
     )
 
-    core_fields = ChoiceArrayFieldDM(
+    core_fields = HorizontalChoiceArrayField(
         models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
         default=list,
         blank=True,
