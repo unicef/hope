@@ -21,7 +21,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterFastConnectionField,
+    DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
     hopePermissionClass,
@@ -112,7 +112,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
-    all_programs = DjangoPermissionFilterFastConnectionField(
+    all_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
@@ -135,7 +135,7 @@ class Query(graphene.ObjectType):
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
-    all_cash_plans = DjangoPermissionFilterFastConnectionField(
+    all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
         filterset_class=CashPlanFilter,
         permission_classes=(
