@@ -1,12 +1,6 @@
 /// <reference types="cypress" />
 
 context("Payment", () => {
-  const downloadsFolder = Cypress.config("downloadsFolder");
-
-  const fileName = (id) => `payment_plan_payment_list_${id}`;
-
-  const xlsxFileName = (id) => `${fileName(id)}.xlsx`;
-  const zipFileName = (id) => `${fileName(id)}.zip`;
 
   beforeEach(() => {
     cy.uniqueSeed().then((seed) => {
@@ -26,6 +20,11 @@ context("Payment", () => {
   });
 
   it("Can create a payment plan", () => {
+    const downloadsFolder = Cypress.config("downloadsFolder");
+    const fileName = (id) => `payment_plan_payment_list_${id}`;
+    const zipFileName = (id) => `${fileName(id)}.zip`;
+
+
     let targetPopulationName = "PaymentPlanTargetPopulation";
     let paymentPlanUnicefId;
     let fspXlsxFilenames;
