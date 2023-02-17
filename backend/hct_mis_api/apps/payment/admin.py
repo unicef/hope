@@ -310,7 +310,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
     list_filter = (("created_by", AutoCompleteFilter),)
     search_fields = ("name",)
-    filter_horizontal = ("core_fields", )
+    filter_horizontal = ("core_fields",)
     fields = ("name", "columns", "core_fields")
 
     def total_selected_columns(self, obj: Any) -> str:
