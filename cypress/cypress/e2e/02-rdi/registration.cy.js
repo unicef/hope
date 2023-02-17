@@ -2,7 +2,7 @@
 
 context("RDI", () => {
   beforeEach(() => {
-    logIn();
+    cy.adminLogin()
   });
 
   it("Registration Data Import", () => {
@@ -55,18 +55,6 @@ function verifyMergedData() {
           cy.get('[data-cy="label-Household ID"]').contains(householdId);
         });
     });
-}
-
-function logIn() {
-  cy.uniqueSeed().then((seed) => {
-    cy.exec(
-      `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
-    );
-  });
-  cy.visit("/api/unicorn/");
-  cy.get('input[name="username"]').type(Cypress.env("username"));
-  cy.get('input[name="password"]').type(Cypress.env("password"));
-  cy.get("input").contains("Log in").click();
 }
 
 function uploadRDIFile() {
