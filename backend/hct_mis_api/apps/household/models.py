@@ -475,8 +475,6 @@ class Household(
             HouseholdSelection.objects.filter(
                 household=self, target_population__status=TargetPopulation.STATUS_LOCKED
             ).delete()
-        logger.info("*" * 10)
-        logger.info(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         super().save(*args, **kwargs)
 
