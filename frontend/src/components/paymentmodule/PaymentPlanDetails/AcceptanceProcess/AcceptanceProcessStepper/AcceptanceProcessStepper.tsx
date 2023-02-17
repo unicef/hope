@@ -13,18 +13,12 @@ const StyledCancelIcon = styled(CancelIcon)`
 
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
-  approvalNumberRequired: number;
-  authorizationNumberRequired: number;
-  financeReleaseNumberRequired: number;
 }
 
 export const AcceptanceProcessStepper = ({
   acceptanceProcess,
-  approvalNumberRequired,
-  authorizationNumberRequired,
-  financeReleaseNumberRequired,
 }: AcceptanceProcessStepperProps): React.ReactElement => {
-  const { rejectedOn, actions } = acceptanceProcess;
+  const { rejectedOn, actions, approvalNumberRequired, authorizationNumberRequired, financeReleaseNumberRequired } = acceptanceProcess;
   const { t } = useTranslation();
   const steps = [
     {

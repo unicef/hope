@@ -68,6 +68,9 @@ export const PAYMENT_PLAN_QUERY = gql`
               email
             }
             sentForFinanceReleaseDate
+            approvalNumberRequired
+            authorizationNumberRequired
+            financeReleaseNumberRequired
             actions {
               approval {
                 createdAt
@@ -118,9 +121,6 @@ export const PAYMENT_PLAN_QUERY = gql`
           }
         }
       }
-      approvalNumberRequired
-      authorizationNumberRequired
-      financeReleaseNumberRequired
       steficonRule {
         id
         rule {
