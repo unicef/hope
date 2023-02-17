@@ -13,8 +13,8 @@
     "node-xlsx": "^0.21.0"
   },
   "scripts": {
-    "generate-xlsx-files": "./generate_xlsx_files.js",
-    "init-scenario": "./init_scenario.js",
+    "generate-xlsx-files": "./cypress/scripts/generateXlsxFiles.js",
+    "init-scenario": "./cypress/scripts/initScenario.js",
     "lint": "eslint .",
     "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*"
   }
