@@ -7,9 +7,6 @@ context("RDI", () => {
 
   it("Registration Data Import", () => {
     uploadRDIFile();
-
-    return; // TODO: make this work
-
     mergeRDIFile();
     verifyMergedData();
   });
