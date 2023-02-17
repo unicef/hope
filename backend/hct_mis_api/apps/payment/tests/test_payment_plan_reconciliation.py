@@ -236,6 +236,13 @@ class TestPaymentPlanReconciliation(APITestCase):
             Permissions.TARGETING_CREATE,
             Permissions.TARGETING_LOCK,
             Permissions.TARGETING_SEND,
+            Permissions.PM_LOCK_AND_UNLOCK,
+            Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            Permissions.PM_SEND_FOR_APPROVAL,
+            Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION,
         ]
         cls.create_user_role_with_permissions(
             cls.user,
