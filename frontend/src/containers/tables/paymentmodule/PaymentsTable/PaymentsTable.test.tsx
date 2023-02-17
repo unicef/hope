@@ -6,21 +6,21 @@ import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { PERMISSIONS } from '../../../../config/permissions';
 import { PaymentsTable } from './PaymentsTable';
 
-const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data.allPaymentPlans.edges[0].node as PaymentPlanQuery['paymentPlan'];
+const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data
+  .allPaymentPlans.edges[0].node as PaymentPlanQuery['paymentPlan'];
 
 describe('containers/tables/paymentmodule/PaymentsTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllPaymentsForTable}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentsForTable}>
         <PaymentsTable
           canViewDetails={false}
           businessArea='afghanistan'
           paymentPlan={paymentPlan}
+          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />
       </MockedProvider>,
     );
@@ -40,6 +40,7 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
           canViewDetails={false}
           businessArea='afghanistan'
           paymentPlan={paymentPlan}
+          permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />
       </MockedProvider>,
     );
