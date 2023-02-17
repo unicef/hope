@@ -54,6 +54,7 @@ export const GrievanceTicket = gql`
         id
         caId
         deliveredQuantity
+        objType
       }
       relatedTickets {
         id

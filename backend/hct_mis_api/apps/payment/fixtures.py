@@ -935,6 +935,7 @@ def generate_payment_plan() -> None:
         delivery_type=Payment.DELIVERY_TYPE_CASH,
         financial_service_provider=fsp_1,
         status_date=now,
+        status=Payment.STATUS_PENDING,
     )
 
     payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
@@ -949,6 +950,7 @@ def generate_payment_plan() -> None:
         delivery_type=Payment.DELIVERY_TYPE_CASH,
         financial_service_provider=fsp_1,
         status_date=now,
+        status=Payment.STATUS_PENDING,
     )
 
     payment_plan.update_population_count_fields()

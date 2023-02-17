@@ -20,6 +20,7 @@ import {
   useImportXlsxPpListPerFspMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -32,10 +33,12 @@ const UploadIcon = styled(Publish)`
 
 interface ImportXlsxPaymentPlanPaymentListPerFspProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
+  permissions: string[];
 }
 
 export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   paymentPlan,
+  permissions,
 }: ImportXlsxPaymentPlanPaymentListPerFspProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -51,6 +54,10 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] = get(
     uploadData,
     'importXlsxPaymentPlanPaymentListPerFsp.errors',
+  );
+  const canUploadReconciliation = hasPermissions(
+    PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+    permissions,
   );
 
   const handleImport = async (): Promise<void> => {
@@ -85,16 +92,18 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
 
   return (
     <>
-      <Box key='import'>
-        <Button
-          startIcon={<UploadIcon />}
-          color='primary'
-          data-cy='button-import'
-          onClick={() => setOpenImport(true)}
-        >
-          {t('Upload Reconciliation Info')}
-        </Button>
-      </Box>
+      {canUploadReconciliation && (
+        <Box key='import'>
+          <Button
+            startIcon={<UploadIcon />}
+            color='primary'
+            data-cy='button-import'
+            onClick={() => setOpenImport(true)}
+          >
+            {t('Upload Reconciliation Info')}
+          </Button>
+        </Box>
+      )}
       <Dialog
         open={open}
         onClose={() => setOpenImport(false)}

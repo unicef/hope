@@ -37,7 +37,7 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from psycopg2._range import NumericRange
 
-from hct_mis_api.apps.account.models import ChoiceArrayField
+from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
@@ -277,6 +277,7 @@ class GenericPayment(TimeStampedUUIDModel):
     status = models.CharField(
         max_length=255,
         choices=STATUS_CHOICE,
+        default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
@@ -769,7 +770,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         help_text=_("Select the columns to include in the report"),
     )
 
-    core_fields = ChoiceArrayFieldDM(
+    core_fields = HorizontalChoiceArrayField(
         models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
         default=list,
         blank=True,
@@ -863,7 +864,9 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
-    delivery_mechanisms = ChoiceArrayField(models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24))
+    delivery_mechanisms = HorizontalChoiceArrayField(
+        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
+    )
     distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -1543,6 +1546,10 @@ class ApprovalProcess(TimeStampedUUIDModel):
     )
     sent_for_finance_release_date = models.DateTimeField(null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
+
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ("-created_at",)

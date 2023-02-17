@@ -2,6 +2,7 @@ import logging
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
@@ -138,6 +139,18 @@ class ChoiceArrayField(ArrayField):
     def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
         defaults = {
             "form_class": forms.MultipleChoiceField,
+            "choices": self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
+
+
+class HorizontalChoiceArrayField(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        widget = FilteredSelectMultiple(self.verbose_name, False)
+        defaults = {
+            "form_class": forms.MultipleChoiceField,
+            "widget": widget,
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)

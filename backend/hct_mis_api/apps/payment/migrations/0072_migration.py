@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "global_core_fields",
-                    hct_mis_api.apps.payment.models.ChoiceArrayField(
+                    hct_mis_api.apps.account.models.ChoiceArrayField(
                         base_field=models.CharField(
                             blank=True,
                             choices=[
@@ -192,7 +192,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_channel_fields",
-                    hct_mis_api.apps.payment.models.ChoiceArrayField(
+                    hct_mis_api.apps.account.models.ChoiceArrayField(
                         base_field=models.CharField(
                             blank=True,
                             choices=[

@@ -77,6 +77,9 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
           sentForAuthorizationDate: '2022-08-30T07:15:41.790444+00:00',
           sentForFinanceReleaseBy: null,
           sentForFinanceReleaseDate: null,
+          approvalNumberRequired: 1,
+          authorizationNumberRequired: 1,
+          financeReleaseNumberRequired: 1,
           actions: {
             approval: [
               {
@@ -107,9 +110,6 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
     ],
     __typename: 'ApprovalProcessNodeConnection',
   },
-  approvalNumberRequired: 1,
-  authorizationNumberRequired: 1,
-  financeReleaseNumberRequired: 1,
   steficonRule: null,
   hasPaymentListExportFile: false,
   importedFileDate: null,

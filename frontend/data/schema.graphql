@@ -99,6 +99,9 @@ type ApprovalProcessNode implements Node {
   sentForFinanceReleaseBy: UserNode
   sentForFinanceReleaseDate: DateTime
   paymentPlan: PaymentPlanNode!
+  approvalNumberRequired: Int!
+  authorizationNumberRequired: Int!
+  financeReleaseNumberRequired: Int!
   rejectedOn: String
   actions: FilteredActionsListNode
 }
@@ -1068,7 +1071,7 @@ type GrievanceTicketNode implements Node {
   referralTicketDetails: TicketReferralDetailsNode
   household: HouseholdNode
   individual: IndividualNode
-  paymentRecord: PaymentRecordNode
+  paymentRecord: PaymentRecordAndPaymentNode
   admin: String
   existingTickets: [GrievanceTicketNode]
   relatedTickets: [GrievanceTicketNode]
@@ -2598,11 +2601,9 @@ type PaymentPlanNode implements Node {
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
-  approvalNumberRequired: Int
-  authorizationNumberRequired: Int
-  financeReleaseNumberRequired: Int
   currencyName: String
   hasPaymentListExportFile: Boolean
+  hasFspDeliveryMechanismXlsxTemplate: Boolean
   importedFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
