@@ -55,11 +55,11 @@ class PaymentPlanService:
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
         }
 
-    def get_business_area_required_number_by_approval_type(self) -> Optional[int]:
+    def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> Optional[int]:
         approval_count_map = {
-            Approval.APPROVAL: self.payment_plan.approval_number_required,
-            Approval.AUTHORIZATION: self.payment_plan.authorization_number_required,
-            Approval.FINANCE_RELEASE: self.payment_plan.finance_release_number_required,
+            Approval.APPROVAL: approval_process.approval_number_required,
+            Approval.AUTHORIZATION: approval_process.authorization_number_required,
+            Approval.FINANCE_RELEASE: approval_process.finance_release_number_required,
             Approval.REJECT: 1,  # be default only one Reject per Acceptance Process object
         }
         return approval_count_map.get(self.get_approval_type_by_action())
@@ -103,7 +103,12 @@ class PaymentPlanService:
         self.payment_plan.save()
         # create new ApprovalProcess
         ApprovalProcess.objects.create(
-            payment_plan=self.payment_plan, sent_for_approval_by=self.user, sent_for_approval_date=timezone.now()
+            payment_plan=self.payment_plan,
+            sent_for_approval_by=self.user,
+            sent_for_approval_date=timezone.now(),
+            approval_number_required=self.payment_plan.approval_number_required,
+            authorization_number_required=self.payment_plan.authorization_number_required,
+            finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
         return self.payment_plan
 
@@ -205,17 +210,17 @@ class PaymentPlanService:
                 f"Not possible to create {self.action} for Payment Plan within status {self.payment_plan.status}"
             )
 
-    def validate_acceptance_process_approval_count(self, acceptance_process: ApprovalProcess) -> None:
+    def validate_acceptance_process_approval_count(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
-        required_number = self.get_business_area_required_number_by_approval_type()
-        if acceptance_process.approvals.filter(type=approval_type).count() >= required_number:
+        required_number = self.get_required_number_by_approval_type(approval_process)
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:
             raise GraphQLError(
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
 
     def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
-        required_number = self.get_business_area_required_number_by_approval_type()
+        required_number = self.get_required_number_by_approval_type(approval_process)
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
             if approval_type == Approval.APPROVAL:
