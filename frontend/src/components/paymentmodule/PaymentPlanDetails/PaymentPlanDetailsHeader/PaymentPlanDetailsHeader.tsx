@@ -9,9 +9,7 @@ import {
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import {
-  PaymentPlanQuery,
-} from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
@@ -49,22 +47,10 @@ export const PaymentPlanDetailsHeader = ({
 
   // TODO: add real values by permissions
 
-  const canRemove = hasPermissions(
-    PERMISSIONS.PM_CREATE,
-    permissions,
-  );
-  const canEdit = hasPermissions(
-    PERMISSIONS.PM_CREATE,
-    permissions,
-  );
-  const canLock = hasPermissions(
-    PERMISSIONS.PM_LOCK_AND_UNLOCK,
-    permissions,
-  );
-  const canUnlock = hasPermissions(
-    PERMISSIONS.PM_LOCK_AND_UNLOCK,
-    permissions,
-  );
+  const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
+  const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
+  const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
+  const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canSendForApproval = hasPermissions(
     PERMISSIONS.PM_SEND_FOR_APPROVAL,
     permissions,
@@ -82,13 +68,13 @@ export const PaymentPlanDetailsHeader = ({
     permissions,
   );
   const canDownloadXlsx = true;
-  const canSendToFsp = false;  // TODO: hide for now
-    // paymentPlan.status === PaymentPlanStatus.Accepted &&
-    // paymentPlan.deliveryMechanisms.some(
-    //   ({ fsp: { communicationChannel } }) =>
-    //     communicationChannel ===
-    //     FinancialServiceProviderCommunicationChannel.Api,
-    // );
+  const canSendToFsp = false; // TODO: hide for now
+  // paymentPlan.status === PaymentPlanStatus.Accepted &&
+  // paymentPlan.deliveryMechanisms.some(
+  //   ({ fsp: { communicationChannel } }) =>
+  //     communicationChannel ===
+  //     FinancialServiceProviderCommunicationChannel.Api,
+  // );
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -107,6 +93,7 @@ export const PaymentPlanDetailsHeader = ({
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}
+          permissions={permissions}
         />
       );
       break;

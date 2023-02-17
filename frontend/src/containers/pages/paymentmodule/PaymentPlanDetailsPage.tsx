@@ -63,6 +63,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       <PaymentsTable
         businessArea={businessArea}
         paymentPlan={paymentPlan}
+        permissions={permissions}
         canViewDetails
       />
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
