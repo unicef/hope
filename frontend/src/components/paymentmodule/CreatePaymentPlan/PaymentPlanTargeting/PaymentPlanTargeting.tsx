@@ -19,9 +19,11 @@ const StyledBox = styled(Box)`
 export const PaymentPlanTargeting = ({
   allTargetPopulations,
   loading,
+  disabled,
 }: {
   allTargetPopulations: AllTargetPopulationsQuery;
   loading: boolean;
+  disabled?: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
@@ -54,6 +56,7 @@ export const PaymentPlanTargeting = ({
                 required
                 choices={mappedTargetPopulations}
                 component={FormikSelectField}
+                disabled={disabled}
                 data-cy='input-target-population'
               />
             </Grid>
