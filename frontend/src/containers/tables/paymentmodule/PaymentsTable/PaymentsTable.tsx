@@ -22,12 +22,14 @@ const StyledBox = styled(Box)`
 interface PaymentsTableProps {
   businessArea: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
+  permissions: string[];
   canViewDetails?: boolean;
 }
 
 export const PaymentsTable = ({
   businessArea,
   paymentPlan,
+  permissions,
   canViewDetails = false,
 }: PaymentsTableProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -51,6 +53,7 @@ export const PaymentsTable = ({
               paymentPlan.status === PaymentPlanStatus.Finished) && (
               <ImportXlsxPaymentPlanPaymentListPerFsp
                 paymentPlan={paymentPlan}
+                permissions={permissions}
               />
             )}
           </StyledBox>

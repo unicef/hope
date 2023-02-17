@@ -20,8 +20,7 @@ import {
   useImportXlsxPpListPerFspMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
-import {hasPermissions, PERMISSIONS} from "../../../../config/permissions";
-import {usePermissions} from "../../../../hooks/usePermissions";
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -34,10 +33,12 @@ const UploadIcon = styled(Publish)`
 
 interface ImportXlsxPaymentPlanPaymentListPerFspProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
+  permissions: string[];
 }
 
 export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   paymentPlan,
+  permissions,
 }: ImportXlsxPaymentPlanPaymentListPerFspProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -54,7 +55,6 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
     uploadData,
     'importXlsxPaymentPlanPaymentListPerFsp.errors',
   );
-  const permissions = usePermissions();
   const canUploadReconciliation = hasPermissions(
     PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
     permissions,
