@@ -34,9 +34,6 @@ export const AcceptanceProcessRow = ({
   } = acceptanceProcess;
 
   const {
-    approvalNumberRequired,
-    authorizationNumberRequired,
-    financeReleaseNumberRequired,
     approvalProcess,
   } = paymentPlan;
 
@@ -57,9 +54,6 @@ export const AcceptanceProcessRow = ({
   return (
     <StyledBox m={5}>
       <AcceptanceProcessStepper
-        approvalNumberRequired={approvalNumberRequired}
-        authorizationNumberRequired={authorizationNumberRequired}
-        financeReleaseNumberRequired={financeReleaseNumberRequired}
         acceptanceProcess={acceptanceProcess}
       />
       <Grid container>

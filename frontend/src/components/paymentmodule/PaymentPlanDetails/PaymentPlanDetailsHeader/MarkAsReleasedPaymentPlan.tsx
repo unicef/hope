@@ -44,7 +44,8 @@ export const MarkAsReleasedPaymentPlan = ({
   );
 
   const shouldShowLastReviewerMessage = (): boolean => {
-    const { financeReleaseNumberRequired } = paymentPlan;
+    const financeReleaseNumberRequired =
+      paymentPlan.approvalProcess?.edges[0]?.node.financeReleaseNumberRequired;
     const financeReleasesCount =
       paymentPlan.approvalProcess?.edges[0]?.node.actions.financeRelease.length;
 

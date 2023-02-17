@@ -99,6 +99,9 @@ type ApprovalProcessNode implements Node {
   sentForFinanceReleaseBy: UserNode
   sentForFinanceReleaseDate: DateTime
   paymentPlan: PaymentPlanNode!
+  approvalNumberRequired: Int!
+  authorizationNumberRequired: Int!
+  financeReleaseNumberRequired: Int!
   rejectedOn: String
   actions: FilteredActionsListNode
 }
@@ -2598,9 +2601,6 @@ type PaymentPlanNode implements Node {
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
-  approvalNumberRequired: Int
-  authorizationNumberRequired: Int
-  financeReleaseNumberRequired: Int
   currencyName: String
   hasPaymentListExportFile: Boolean
   hasFspDeliveryMechanismXlsxTemplate: Boolean
