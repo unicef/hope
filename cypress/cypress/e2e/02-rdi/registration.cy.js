@@ -53,9 +53,9 @@ context("RDI", () => {
     cy.get("div").contains("Errors").should("not.exist");
     cy.get('[data-cy="button-import-rdi"').click();
 
-    cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
     cy.reload();
-    cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+    cy.wait(500);
     // it lets the browser load the status
 
     cy.get("div").contains("IMPORT ERROR").should("not.exist");
