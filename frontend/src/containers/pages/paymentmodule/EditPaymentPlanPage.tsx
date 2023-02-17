@@ -46,9 +46,9 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     data: allTargetPopulationsData,
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
-    variables: { businessArea, paymentPlanApplicable: true },
+    variables: { businessArea, paymentPlanApplicable: false },
   });
-
+  console.log('allTargetPopulationsData', allTargetPopulationsData);
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
@@ -157,6 +157,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
+            disabled
           />
           <PaymentPlanParameters values={values} />
         </Form>
