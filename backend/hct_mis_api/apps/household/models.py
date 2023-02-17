@@ -477,6 +477,7 @@ class Household(
             HouseholdSelection.objects.filter(
                 household=self, target_population__status=TargetPopulation.STATUS_LOCKED
             ).delete()
+        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         super().save(*args, **kwargs)
 
     @property
