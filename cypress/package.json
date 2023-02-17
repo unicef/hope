@@ -15,6 +15,7 @@
   "scripts": {
     "generate-xlsx-files": "./generate_xlsx_files.js",
     "init-scenario": "./init_scenario.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*"
   }
 }

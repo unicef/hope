@@ -27,33 +27,8 @@ context("Payment", () => {
     let fspXlsxFilenames;
 
     //New Payment Plan page
-    cy.visit("/");
-    cy.get("span").contains("Payment Module").click();
-    cy.get('[data-cy="page-header-container"]').contains("Payment Module");
-    cy.get('[data-cy="button-new-payment-plan"]').click({
-      force: true,
-    });
-    cy.get('[data-cy="page-header-container"]').contains("New Payment Plan");
+    createPaymentPlan(targetPopulationName);
 
-    //fill in the form and save
-    cy.get('[data-cy="input-target-population"]').first().click();
-    cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
-
-    cy.uniqueSeed().then((seed) => {
-      cy.get(
-        `[data-cy="select-option-${targetPopulationName}-${seed}"]`
-      ).click();
-    });
-    cy.get('[data-cy="input-start-date"]').click().type("2032-12-12");
-    cy.get('[data-cy="input-end-date"]').click().type("2032-12-23");
-    cy.get('[data-cy="input-currency"]').click().type("Afghan").type("{downArrow}{enter}")
-    cy.get('[data-cy="input-dispersion-start-date"]')
-      .click()
-      .type("2033-12-12");
-    cy.get('[data-cy="input-dispersion-end-date"]').click().type("2033-12-23");
-    cy.get('[data-cy="button-save-payment-plan"]').click({
-      force: true,
-    });
     cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 
     return; // TODO: make this work
@@ -206,3 +181,33 @@ context("Payment", () => {
     });
   });
 });
+
+function createPaymentPlan(targetPopulationName) {
+  cy.visit("/");
+  cy.get("span").contains("Payment Module").click();
+  cy.get('[data-cy="page-header-container"]').contains("Payment Module");
+  cy.get('[data-cy="button-new-payment-plan"]').click({
+    force: true,
+  });
+  cy.get('[data-cy="page-header-container"]').contains("New Payment Plan");
+
+  //fill in the form and save
+  cy.get('[data-cy="input-target-population"]').first().click();
+  cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
+
+  cy.uniqueSeed().then((seed) => {
+    cy.get(
+      `[data-cy="select-option-${targetPopulationName}-${seed}"]`
+    ).click();
+  });
+  cy.get('[data-cy="input-start-date"]').click().type("2032-12-12");
+  cy.get('[data-cy="input-end-date"]').click().type("2032-12-23");
+  cy.get('[data-cy="input-currency"]').click().type("Afghan").type("{downArrow}{enter}");
+  cy.get('[data-cy="input-dispersion-start-date"]')
+    .click()
+    .type("2033-12-12");
+  cy.get('[data-cy="input-dispersion-end-date"]').click().type("2033-12-23");
+  cy.get('[data-cy="button-save-payment-plan"]').click({
+    force: true,
+  });
+}
