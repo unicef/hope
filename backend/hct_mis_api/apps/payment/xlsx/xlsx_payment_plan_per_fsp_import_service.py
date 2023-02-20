@@ -5,10 +5,11 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from django.db.models import QuerySet
 
 import openpyxl
+from django.utils import timezone
 from xlwt import Row
 
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
+from hct_mis_api.apps.payment.models import Payment, PaymentVerification
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal, from_received_to_status, calculate_counts
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
@@ -28,6 +29,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids: List = list(self.payments_dict.keys())
         self.payments_to_save: List = []
+        self.payment_verifications_to_save: List = []
         self.required_columns: List[str] = ["payment_id", "delivered_quantity"]
         self.xlsx_headers = []
         self.is_updated: bool = False
@@ -136,6 +138,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
+        PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
 
     def _get_delivered_quantity_status_and_value(
         self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
@@ -186,3 +189,16 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 )
                 payment.status = status
                 self.payments_to_save.append(payment)
+                # update PaymentVerification status
+                if payment.payment_verification.exists():
+                    payment_verification = payment.payment_verification.first()
+                    payment_verification.status = from_received_to_status(
+                        payment_verification.received_amount > 0,
+                        payment_verification.received_amount,
+                        delivered_quantity
+                    )
+                    payment_verification.status_date = timezone.now()
+                    self.payment_verifications_to_save.append(payment_verification)
+
+                    calculate_counts(payment_verification.payment_verification_plan)
+                    payment_verification.payment_verification_plan.save()
