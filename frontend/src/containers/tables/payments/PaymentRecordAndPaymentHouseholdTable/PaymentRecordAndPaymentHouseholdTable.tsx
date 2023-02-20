@@ -7,9 +7,8 @@ import {
   useAllPaymentRecordsAndPaymentsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
-// TODO: rename files
-import { headCells } from './PaymentRecordHouseholdTableHeadCells';
-import { PaymentRecordAndPaymentHouseholdTableRow } from './PaymentRecordHouseholdTableRow';
+import { headCells } from './PaymentRecordAndPaymentHouseholdTableHeadCells';
+import { PaymentRecordAndPaymentHouseholdTableRow } from './PaymentRecordAndPaymentHouseholdTableRow';
 
 interface PaymentRecordAndPaymentTableProps {
   household?: HouseholdNode;
