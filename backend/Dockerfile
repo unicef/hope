@@ -28,7 +28,6 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 FROM base AS builder
 
-# RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -
 ENV PATH = "${PATH}:/root/.local/bin/"
 COPY pyproject.toml poetry.lock /tmp/
 
