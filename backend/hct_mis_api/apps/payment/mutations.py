@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     fsp_generate_xlsx_report_task,
     import_payment_plan_payment_list_from_xlsx,
-    payment_plan_apply_steficon,
+    payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
@@ -1000,12 +1000,22 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             if import_service.errors:
                 return cls(None, import_service.errors)
 
+            old_payment_plan = copy_model_object(payment_plan)
+
             payment_plan.background_action_status_xlsx_importing_entitlements()
             payment_plan.save()
 
-            import_service.create_import_xlsx_file(info.context.user)
+            payment_plan = import_service.create_import_xlsx_file(info.context.user)
 
             transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
+
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=info.context.user,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
 
         return cls(payment_plan, None)
 
@@ -1040,8 +1050,18 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         if import_service.errors:
             return cls(payment_plan=None, errors=import_service.errors)
 
+        old_payment_plan = copy_model_object(payment_plan)
+
         payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
             user=info.context.user, file=file
+        )
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
         )
 
         return cls(payment_plan=payment_plan, errors=None)
@@ -1068,20 +1088,23 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.STEFICON_RUN:
-            msg = "Steficon run in progress"
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
+            msg = "Rule Engine run in progress"
             logger.error(msg)
             raise GraphQLError(msg)
 
         old_payment_plan = copy_model_object(payment_plan)
 
-        steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
-        if not steficon_rule.enabled or steficon_rule.deprecated:
-            msg = "This steficon rule is not enabled or is deprecated."
+        engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
+        if not engine_rule.enabled or engine_rule.deprecated:
+            msg = "This engine rule is not enabled or is deprecated."
             logger.error(msg)
             raise GraphQLError(msg)
 
-        payment_plan_apply_steficon.delay(payment_plan.pk, steficon_rule_id)
+        payment_plan.background_action_status_steficon_run()
+        payment_plan.save()
+
+        payment_plan_apply_engine_rule.delay(payment_plan.pk, engine_rule.pk)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
