@@ -3653,8 +3653,8 @@ export type PaymentNodeEdge = {
 };
 
 export enum PaymentPlanBackgroundActionStatus {
-  SteficonRun = 'STEFICON_RUN',
-  SteficonError = 'STEFICON_ERROR',
+  RuleEngineRun = 'RULE_ENGINE_RUN',
+  RuleEngineError = 'RULE_ENGINE_ERROR',
   XlsxExporting = 'XLSX_EXPORTING',
   XlsxExportError = 'XLSX_EXPORT_ERROR',
   XlsxImportError = 'XLSX_IMPORT_ERROR',

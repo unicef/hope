@@ -37,8 +37,8 @@ export const PAYMENT_PLAN_STATES = {
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Entitlement Formula Run',
-  [PaymentPlanBackgroundActionStatus.SteficonError]:
+  [PaymentPlanBackgroundActionStatus.RuleEngineRun]: 'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatus.RuleEngineError]:
     'Entitlement Formula Error',
   [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
   [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
