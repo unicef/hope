@@ -17,6 +17,7 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -66,6 +67,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         permissions={permissions}
         canViewDetails
       />
+      <ReconciliationSummary paymentPlan={paymentPlan} />
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan.id} />
       )}
