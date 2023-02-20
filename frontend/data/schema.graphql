@@ -2613,6 +2613,7 @@ type PaymentPlanNode implements Node {
   bankReconciliationError: Int
   canCreatePaymentVerificationPlan: Boolean
   availablePaymentRecordsCount: Int
+  reconciliationSummary: ReconciliationSummaryNode
 }
 
 type PaymentPlanNodeConnection {
@@ -3173,6 +3174,16 @@ type ReassignRoleMutation {
 
 type RebuildTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type ReconciliationSummaryNode {
+  deliveredFully: Int
+  deliveredPartially: Int
+  notDelivered: Int
+  failed: Int
+  pending: Int
+  numberOfPayments: Int
+  reconciled: Int
 }
 
 input ReferralTicketExtras {
