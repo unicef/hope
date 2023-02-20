@@ -1,22 +1,23 @@
 import uuid
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
-from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
+from dateutil.relativedelta import relativedelta
+
 from hct_mis_api.apps.cash_assist_datahub.models import (
+    CashPlan,
+    PaymentRecord,
+    Programme,
+    ServiceProvider,
     Session,
     TargetPopulation,
-    ServiceProvider,
-    CashPlan,
-    Programme,
-    PaymentRecord,
 )
-from hct_mis_api.apps.household.models import Individual, MALE, FEMALE
-from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopulation
+from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord as HopePaymentRecord
+from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopulation
 
 
 @transaction.atomic
