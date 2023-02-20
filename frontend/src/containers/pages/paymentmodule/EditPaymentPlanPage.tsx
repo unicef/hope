@@ -48,7 +48,6 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   } = useAllTargetPopulationsQuery({
     variables: { businessArea, paymentPlanApplicable: false },
   });
-  console.log('allTargetPopulationsData', allTargetPopulationsData);
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
