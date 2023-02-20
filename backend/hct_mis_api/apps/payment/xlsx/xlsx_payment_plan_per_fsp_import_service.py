@@ -3,13 +3,17 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from django.db.models import QuerySet
+from django.utils import timezone
 
 import openpyxl
-from django.utils import timezone
 from xlwt import Row
 
 from hct_mis_api.apps.payment.models import Payment, PaymentVerification
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal, from_received_to_status, calculate_counts
+from hct_mis_api.apps.payment.utils import (
+    calculate_counts,
+    get_quantity_in_usd,
+    to_decimal,
+)
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
@@ -192,11 +196,15 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 # update PaymentVerification status
                 if payment.payment_verification.exists():
                     payment_verification = payment.payment_verification.first()
-                    payment_verification.status = from_received_to_status(
-                        payment_verification.received_amount > 0,
-                        payment_verification.received_amount,
-                        delivered_quantity
-                    )
+
+                    if payment_verification.received_amount == delivered_quantity:
+                        pv_status = PaymentVerification.STATUS_RECEIVED
+                    elif delivered_quantity == 0 or delivered_quantity is None:
+                        pv_status = PaymentVerification.STATUS_NOT_RECEIVED
+                    else:
+                        pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+
+                    payment_verification.status = pv_status
                     payment_verification.status_date = timezone.now()
                     self.payment_verifications_to_save.append(payment_verification)
 
