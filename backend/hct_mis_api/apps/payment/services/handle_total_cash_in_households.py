@@ -9,7 +9,6 @@ from hct_mis_api.apps.payment.models import Payment, PaymentPlan, PaymentRecord
 
 
 def handle_total_cash_in_specific_households(id_list: List[UUID]) -> None:
-    # TODO MB ExtendedQuerySetSequence
     total_cash_received_payment_record_subquery = Subquery(
         PaymentRecord.objects.filter(household__pk=OuterRef("pk"))
         .values("household__pk")

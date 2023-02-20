@@ -68,4 +68,5 @@ def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any
                     "currency": program["currency"],
                 }
             )
+
     return list(programs_dict.values())
