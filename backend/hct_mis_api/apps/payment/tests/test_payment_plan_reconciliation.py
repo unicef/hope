@@ -25,7 +25,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
-    payment_plan_apply_steficon,
+    payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
@@ -410,7 +410,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         self.assertEqual(payment_plan.background_action_status, None)
 
-        with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_steficon") as mock:
+        with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_engine_rule") as mock:
             set_steficon_response = self.graphql_request(
                 request_string=SET_STEFICON_RULE_MUTATION,
                 context={"user": self.user},
@@ -422,7 +422,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert "errors" not in set_steficon_response, set_steficon_response
             assert mock.delay.call_count == 1
             call_args = mock.delay.call_args[0]
-            payment_plan_apply_steficon(*call_args)
+            payment_plan_apply_engine_rule(*call_args)
 
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.background_action_status, None)

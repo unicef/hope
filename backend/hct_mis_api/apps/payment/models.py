@@ -326,6 +326,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             "name",
             "start_date",
             "end_date",
+            "background_action_status",
+            "imported_file_date",
+            "imported_file",
+            "export_file",
+            "steficon_rule",
+            "steficon_applied_date",
         ]
     )
 
@@ -340,8 +346,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         FINISHED = "FINISHED", "Finished"
 
     class BackgroundActionStatus(models.TextChoices):
-        STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
-        STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
+        RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
+        RULE_ENGINE_ERROR = "RULE_ENGINE_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
@@ -351,7 +357,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
-        BackgroundActionStatus.STEFICON_ERROR,
+        BackgroundActionStatus.RULE_ENGINE_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -460,7 +466,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @transition(
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
-        target=BackgroundActionStatus.STEFICON_RUN,
+        target=BackgroundActionStatus.RULE_ENGINE_RUN,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
     def background_action_status_steficon_run(self) -> None:
@@ -468,8 +474,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.STEFICON_RUN],
-        target=BackgroundActionStatus.STEFICON_ERROR,
+        source=[BackgroundActionStatus.RULE_ENGINE_RUN],
+        target=BackgroundActionStatus.RULE_ENGINE_ERROR,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
     def background_action_status_steficon_error(self) -> None:
@@ -678,13 +684,21 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def has_export_file(self) -> bool:
-        return bool(self.export_file)
+        try:
+            return self.export_file is not None
+        except FileTemp.DoesNotExist:
+            return False
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        if self.export_file:
-            return self.export_file.file.url
-        return None
+        return self.export_file.file.url if self.export_file else None
+
+    @property
+    def imported_file_name(self) -> str:
+        try:
+            return self.imported_file.file.name if self.imported_file else ""
+        except FileTemp.DoesNotExist:
+            return ""
 
     @property
     def is_reconciled(self) -> bool:
@@ -705,6 +719,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             self.imported_file.file.delete(save=False)
             self.imported_file.delete()
             self.imported_file = None
+            self.imported_file_date = None
 
     @cached_property
     def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
@@ -1325,26 +1340,20 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def has_xlsx_payment_verification_plan_file(self) -> bool:
-        if all(
+        return all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
                 FileTemp.objects.filter(object_id=self.pk, content_type=get_content_type_for_model(self)).count() == 1,
             ]
-        ):
-            return True
-        return False
+        )
 
     @property
     def xlsx_payment_verification_plan_file_link(self) -> Optional[str]:
-        if self.has_xlsx_payment_verification_plan_file:
-            return self.get_xlsx_verification_file.file.url
-        return None
+        return self.get_xlsx_verification_file.file.url if self.has_xlsx_payment_verification_plan_file else None
 
     @property
     def xlsx_payment_verification_plan_file_was_downloaded(self) -> bool:
-        if self.has_xlsx_payment_verification_plan_file:
-            return self.get_xlsx_verification_file.was_downloaded
-        return False
+        return self.get_xlsx_verification_file.was_downloaded if self.has_xlsx_payment_verification_plan_file else False
 
     def set_active(self) -> None:
         self.status = PaymentVerificationPlan.STATUS_ACTIVE

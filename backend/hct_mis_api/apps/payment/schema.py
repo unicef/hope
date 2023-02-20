@@ -468,7 +468,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.has_export_file
 
     def resolve_imported_file_name(self, info: Any) -> graphene.String:
-        return self.imported_file.file.name if self.imported_file else ""
+        return self.imported_file_name
 
     def resolve_volume_by_delivery_mechanism(self, info: Any) -> graphene.List:
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
