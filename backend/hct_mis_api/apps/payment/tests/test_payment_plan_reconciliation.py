@@ -697,9 +697,12 @@ class TestPaymentPlanReconciliation(APITestCase):
                     mock_import.on_commit.call_args[0][0]()  # call real func
 
             payment.refresh_from_db()
+            payment.household.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, 500)
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
+            self.assertEqual(payment.household.total_cash_received, 500)
+            self.assertEqual(payment.household.total_cash_received_usd, 250)
             self.assertEqual(payment_plan.is_reconciled, True)
 
     @parameterized.expand(

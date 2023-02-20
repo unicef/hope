@@ -139,7 +139,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
-        handle_total_cash_in_specific_households([payment.id for payment in self.payments_to_save])
+        handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
 
     def _get_delivered_quantity_status_and_value(
         self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
