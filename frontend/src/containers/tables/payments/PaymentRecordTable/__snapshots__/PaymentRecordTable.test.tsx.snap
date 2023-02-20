@@ -301,7 +301,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
                     DISTRIBUTION SUCCESSFUL
