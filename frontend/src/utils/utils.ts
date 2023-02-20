@@ -115,11 +115,11 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'Distribution Successful':
       return theme.hctPalette.green;
-    case 'TRANSACTION_PENDING':
+    case 'Pending':
       return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
