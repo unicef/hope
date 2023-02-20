@@ -28,12 +28,9 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 FROM base AS builder
 
-RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -
+# RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -
 ENV PATH = "${PATH}:/root/.local/bin/"
 COPY pyproject.toml poetry.lock /tmp/
-RUN --mount=type=cache,target=/root/.cache,sharing=private \
-  poetry config virtualenvs.create false \
-  && poetry install --without dev --no-interaction --no-ansi
 
 WORKDIR /code/
 COPY . /code/
@@ -44,7 +41,17 @@ RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGloba
 FROM builder as dev
 
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
-  poetry config virtualenvs.create false \
+  (curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -) \
+  && poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi
 
 FROM builder as dist
+
+RUN --mount=type=cache,target=/root/.cache,sharing=private \
+  (curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -) \
+  && poetry config virtualenvs.create false \
+  && poetry install --without dev --no-interaction --no-ansi \
+  && (curl -sSL https://install.python-poetry.org | POETRY_UNINSTALL=1 python -) \
+  && rm -rf \
+  /root/.local \
+  /root/.config
