@@ -168,7 +168,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
                 self.payments_to_save.append(payment)
 
-    def create_import_xlsx_file(self, user: "User") -> None:
+    def create_import_xlsx_file(self, user: "User") -> PaymentPlan:
         # remove old imported file
         self.payment_plan.remove_imported_file()
 
@@ -182,3 +182,5 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
         self.payment_plan.imported_file = xlsx_file
         self.payment_plan.save()
+
+        return self.payment_plan
