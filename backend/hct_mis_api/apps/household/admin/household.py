@@ -6,13 +6,16 @@ from uuid import UUID
 from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
@@ -26,6 +29,7 @@ from hct_mis_api.apps.utils.admin import (
     SoftDeletableAdminMixin,
 )
 
+from ...utils.security import is_root
 from ..models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -210,3 +214,49 @@ class HouseholdAdmin(
             "warnings": [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings],
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
+
+    @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
+    def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        household: Household = self.get_queryset(request).get(pk=pk)
+        if request.method == "POST":
+            try:
+                with transaction.atomic():
+                    household.erase()
+                self.message_user(request, f"Household {household.unicef_id} erased.", messages.SUCCESS)
+            except Exception as e:
+                self.message_user(request, str(e), messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
+        return confirm_action(
+            self,
+            request,
+            self.gdpr_remove,
+            mark_safe(
+                """<h1>Household erase</h1>
+                <p>After this operation household will be erased, all sensitive data will be overwritten.</p>
+                <p>This operation cannot be undo.</p>
+                """
+            ),
+            "Successfully executed",
+        )
+
+    @button(permission=lambda request, household, *args, **kwargs: is_root(request) and not household.is_removed)
+    def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        household: Household = self.get_queryset(request).get(pk=pk)
+        if request.method == "POST":
+            try:
+                household.delete()
+                self.message_user(request, f"Household {household.unicef_id} was soft removed.", messages.SUCCESS)
+            except Exception as e:
+                self.message_user(request, str(e), messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
+        return confirm_action(
+            self,
+            request,
+            self.logical_delete,
+            mark_safe(
+                """<h1>Household logical delete</h1>
+                <p>After this operation household will be marked as logical deleted and will be hidden in the application.</p>
+                """
+            ),
+            "Successfully executed",
+        )
