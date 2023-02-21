@@ -9,6 +9,9 @@ import openpyxl
 from xlwt import Row
 
 from hct_mis_api.apps.payment.models import Payment, PaymentVerification
+from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
+    handle_total_cash_in_specific_households,
+)
 from hct_mis_api.apps.payment.utils import (
     calculate_counts,
     get_quantity_in_usd,
@@ -142,6 +145,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
+        handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
 
     def _get_delivered_quantity_status_and_value(

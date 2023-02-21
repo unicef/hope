@@ -1,5 +1,6 @@
 FROM python:3.9.12-slim-bullseye
 
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   build-essential \
@@ -12,16 +13,14 @@ RUN apt-get update && \
   python3-gdal \
   gdal-bin \
   curl \
-  vim \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  vim
 
 WORKDIR /tmp
 
 ARG APP_ENV=prod
 RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -
 ENV PATH = "${PATH}:/root/.local/bin/"
-ADD pyproject.toml poetry.lock /tmp/
+COPY pyproject.toml poetry.lock /tmp/
 RUN poetry config virtualenvs.create false \
   && poetry install $(test "$APP_ENV" == prod && echo "--no-dev")  --no-interaction --no-ansi
 
@@ -29,7 +28,7 @@ ENV WAITFORIT_VERSION="v2.4.1"
 RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 && \
   chmod +x /usr/local/bin/waitforit
 
-ADD . /code/
+COPY . /code/
 
 WORKDIR /code/
 
@@ -37,5 +36,5 @@ EXPOSE 8000
 
 RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
-ADD ./docker-entrypoint.sh /bin/
+COPY ./docker-entrypoint.sh /bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
