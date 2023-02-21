@@ -239,7 +239,7 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker. registryConnection)
+              containerRegistry: $(Docker.registryConnection)
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
