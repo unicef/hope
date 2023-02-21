@@ -35,6 +35,7 @@ COPY ./docker-entrypoint.sh /bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 WORKDIR /code
+RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
 FROM base as builder
 
