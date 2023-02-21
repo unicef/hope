@@ -51,7 +51,9 @@ export const AuthorizePaymentPlan = ({
   });
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
-    const { authorizationNumberRequired } = paymentPlan;
+    const authorizationNumberRequired =
+      paymentPlan.approvalProcess?.edges[0]?.node.authorizationNumberRequired;
+
     const authorizationsCount =
       paymentPlan.approvalProcess?.edges[0]?.node.actions.authorization.length;
 

@@ -37,7 +37,7 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from psycopg2._range import NumericRange
 
-from hct_mis_api.apps.account.models import ChoiceArrayField
+from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
@@ -277,6 +277,7 @@ class GenericPayment(TimeStampedUUIDModel):
     status = models.CharField(
         max_length=255,
         choices=STATUS_CHOICE,
+        default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
@@ -325,6 +326,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             "name",
             "start_date",
             "end_date",
+            "background_action_status",
+            "imported_file_date",
+            "imported_file",
+            "export_file",
+            "steficon_rule",
+            "steficon_applied_date",
         ]
     )
 
@@ -339,8 +346,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         FINISHED = "FINISHED", "Finished"
 
     class BackgroundActionStatus(models.TextChoices):
-        STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
-        STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
+        RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
+        RULE_ENGINE_ERROR = "RULE_ENGINE_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
@@ -350,7 +357,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
-        BackgroundActionStatus.STEFICON_ERROR,
+        BackgroundActionStatus.RULE_ENGINE_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -459,7 +466,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @transition(
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
-        target=BackgroundActionStatus.STEFICON_RUN,
+        target=BackgroundActionStatus.RULE_ENGINE_RUN,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
     def background_action_status_steficon_run(self) -> None:
@@ -467,8 +474,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.STEFICON_RUN],
-        target=BackgroundActionStatus.STEFICON_ERROR,
+        source=[BackgroundActionStatus.RULE_ENGINE_RUN],
+        target=BackgroundActionStatus.RULE_ENGINE_ERROR,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
     def background_action_status_steficon_error(self) -> None:
@@ -677,13 +684,21 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def has_export_file(self) -> bool:
-        return bool(self.export_file)
+        try:
+            return self.export_file is not None
+        except FileTemp.DoesNotExist:
+            return False
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        if self.export_file:
-            return self.export_file.file.url
-        return None
+        return self.export_file.file.url if self.export_file else None
+
+    @property
+    def imported_file_name(self) -> str:
+        try:
+            return self.imported_file.file.name if self.imported_file else ""
+        except FileTemp.DoesNotExist:
+            return ""
 
     @property
     def is_reconciled(self) -> bool:
@@ -704,6 +719,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             self.imported_file.file.delete(save=False)
             self.imported_file.delete()
             self.imported_file = None
+            self.imported_file_date = None
 
     @cached_property
     def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
@@ -769,7 +785,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         help_text=_("Select the columns to include in the report"),
     )
 
-    core_fields = ChoiceArrayFieldDM(
+    core_fields = HorizontalChoiceArrayField(
         models.CharField(max_length=255, blank=True, choices=FieldFactory(CORE_FIELDS_ATTRIBUTES).to_choices()),
         default=list,
         blank=True,
@@ -863,7 +879,9 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
-    delivery_mechanisms = ChoiceArrayField(models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24))
+    delivery_mechanisms = HorizontalChoiceArrayField(
+        models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
+    )
     distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -1322,26 +1340,20 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def has_xlsx_payment_verification_plan_file(self) -> bool:
-        if all(
+        return all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
                 FileTemp.objects.filter(object_id=self.pk, content_type=get_content_type_for_model(self)).count() == 1,
             ]
-        ):
-            return True
-        return False
+        )
 
     @property
     def xlsx_payment_verification_plan_file_link(self) -> Optional[str]:
-        if self.has_xlsx_payment_verification_plan_file:
-            return self.get_xlsx_verification_file.file.url
-        return None
+        return self.get_xlsx_verification_file.file.url if self.has_xlsx_payment_verification_plan_file else None
 
     @property
     def xlsx_payment_verification_plan_file_was_downloaded(self) -> bool:
-        if self.has_xlsx_payment_verification_plan_file:
-            return self.get_xlsx_verification_file.was_downloaded
-        return False
+        return self.get_xlsx_verification_file.was_downloaded if self.has_xlsx_payment_verification_plan_file else False
 
     def set_active(self) -> None:
         self.status = PaymentVerificationPlan.STATUS_ACTIVE
@@ -1543,6 +1555,10 @@ class ApprovalProcess(TimeStampedUUIDModel):
     )
     sent_for_finance_release_date = models.DateTimeField(null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
+
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_release_number_required = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ("-created_at",)

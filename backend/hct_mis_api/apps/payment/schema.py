@@ -138,9 +138,7 @@ class RapidProFlow(graphene.ObjectType):
 
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (
-        hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
-    )
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -149,7 +147,7 @@ class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoOb
 
 
 class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
 
     class Meta:
         model = FinancialServiceProviderXlsxReport
@@ -164,7 +162,7 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PM_FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
     full_name = graphene.String(source="name")
 
     class Meta:
@@ -423,17 +421,25 @@ class FspChoices(graphene.ObjectType):
     fsps = graphene.List(FspChoice)
 
 
+class ReconciliationSummaryNode(graphene.ObjectType):
+    delivered_fully = graphene.Int()
+    delivered_partially = graphene.Int()
+    not_delivered = graphene.Int()
+    failed = graphene.Int()
+    pending = graphene.Int()
+    number_of_payments = graphene.Int()
+    reconciled = graphene.Int()
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
-    approval_number_required = graphene.Int()
-    authorization_number_required = graphene.Int()
-    finance_release_number_required = graphene.Int()
     dispersion_start_date = graphene.Date()
     dispersion_end_date = graphene.Date()
     start_date = graphene.Date()
     end_date = graphene.Date()
     currency_name = graphene.String()
     has_payment_list_export_file = graphene.Boolean()
+    has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
@@ -450,6 +456,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     bank_reconciliation_error = graphene.Int()
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
+    reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
 
     class Meta:
         model = PaymentPlan
@@ -458,15 +465,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_verification_plans(self, info: Any) -> graphene.List:
         return self.get_payment_verification_plans
-
-    def resolve_approval_number_required(self, info: Any) -> graphene.Int:
-        return self.approval_number_required
-
-    def resolve_authorization_number_required(self, info: Any) -> graphene.Int:
-        return self.authorization_number_required
-
-    def resolve_finance_release_number_required(self, info: Any) -> graphene.Int:
-        return self.finance_release_number_required
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
@@ -481,13 +479,41 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.has_export_file
 
     def resolve_imported_file_name(self, info: Any) -> graphene.String:
-        return self.imported_file.file.name if self.imported_file else ""
+        return self.imported_file_name
 
     def resolve_volume_by_delivery_mechanism(self, info: Any) -> graphene.List:
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
     def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
+
+    def resolve_has_fsp_delivery_mechanism_xlsx_template(self, info: Any) -> bool:
+        if (
+            not self.delivery_mechanisms.exists()
+            or self.delivery_mechanisms.filter(
+                Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
+            ).exists()
+        ):
+            return False
+        else:
+            for dm_per_payment_plan in self.delivery_mechanisms.all():
+                if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
+                    dm_per_payment_plan.delivery_mechanism
+                ):
+                    return False
+            return True
+
+    @staticmethod
+    def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
+        return parent.payment_items.aggregate(
+            delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
+            delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
+            not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
+            failed=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
+            pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            number_of_payments=Count("id"),
+            reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
+        )
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -883,7 +909,10 @@ class Query(graphene.ObjectType):
         )
 
         def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
-            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            fsps = FinancialServiceProvider.objects.filter(
+                delivery_mechanisms__contains=[mechanism],
+                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism,
+            ).distinct()
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,

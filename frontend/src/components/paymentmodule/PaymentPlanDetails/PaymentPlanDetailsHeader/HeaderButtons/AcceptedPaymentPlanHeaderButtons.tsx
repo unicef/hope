@@ -35,7 +35,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             <Box p={2}>
               <LoadingButton
                 loading={loadingExport}
-                disabled={loadingExport}
+                disabled={loadingExport || !paymentPlan.hasFspDeliveryMechanismXlsxTemplate}
                 color='primary'
                 variant='contained'
                 startIcon={<GetApp />}
@@ -65,6 +65,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 data-cy='button-download-xlsx'
                 download
                 href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                disabled={!paymentPlan.hasFspDeliveryMechanismXlsxTemplate}
               >
                 {t('Download XLSX')}
               </Button>

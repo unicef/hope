@@ -16,6 +16,7 @@ from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
@@ -119,6 +120,21 @@ def payment_plan_setup(cls: Any) -> None:
         ],
     )
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=cls.santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=cls.santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=cls.bank_of_europe_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=cls.bank_of_europe_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=cls.bank_of_america_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER
+    )
 
 
 ASSIGN_FSPS_MUTATION = """

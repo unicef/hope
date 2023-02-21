@@ -31,3 +31,11 @@ Cypress.Commands.add("adminLogin", () => {
   cy.get('input[name="password"]').type(Cypress.env("password"));
   cy.get("input").contains("Log in").click();
 })
+
+Cypress.Commands.add("initScenario", (scenario) => {
+  cy.uniqueSeed().then((seed) => {
+    cy.exec(
+      `yarn init-scenario ${Cypress.config().baseUrl} ${scenario} ${seed}`
+    );
+  });
+})
