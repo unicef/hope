@@ -1,13 +1,11 @@
 import logging
 from typing import Any, Union
 
-from django.db.transaction import atomic
-from django.utils import timezone
-
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 from ..core.celery import app
 from .models import Query, Report
+from .utils import should_run
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +30,7 @@ def run_background_query(query_id: int, **kwargs: Any) -> Union[str, bool, None]
     try:
         query = Query.objects.get(pk=query_id)
         query.execute_matrix()
-    except Exception as e:
+    except BaseException as e:
         logger.exception(e)
         return False
     return "Ok"
@@ -42,10 +40,8 @@ def run_background_query(query_id: int, **kwargs: Any) -> Union[str, bool, None]
 @sentry_tags
 def refresh_reports() -> None:
     try:
-        for report in Report.objects.filter(active=True, refresh_daily=True):
-            run_background_query.delay(report.query.id)
-            with atomic():
-                report.last_run = timezone.now()
-                report.execute()
-    except Exception as e:
+        for report in Report.objects.filter(active=True, frequence__isnull=False):
+            if should_run(report.frequence):
+                report.execute(run_query=True)
+    except BaseException as e:
         logger.exception(e)
