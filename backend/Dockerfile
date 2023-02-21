@@ -8,49 +8,51 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   build-essential \
   libjpeg-dev \
   zlib1g-dev \
-  git-core \
   postgresql-client \
   libpq-dev \
   python3-psycopg2 \
   python3-gdal \
   gdal-bin \
   curl \
-  vim
+  vim \
+  && addgroup --system --gid 82 hope \
+  && adduser --system --uid 82 --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope \
+  && mkdir -p /code /tmp /data \
+  && chown -R hope:hope /code /tmp /data
 
 WORKDIR /tmp
 
-ENV WAITFORIT_VERSION="v2.4.1"
-RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 && \
-  chmod +x /usr/local/bin/waitforit
+ENV WAITFORIT_VERSION="v2.4.1" \
+  PYTHONPYCACHEPREFIX=/tmp/pycache \
+  VIRTUAL_ENV=/opt/venv \
+  POETRY_HOME=/opt/poetry \
+  PATH=/opt/venv/bin:/opt/poetry/bin:${PATH}
+
+RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 \
+  && chmod +x /usr/local/bin/waitforit
 
 COPY ./docker-entrypoint.sh /bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-FROM base AS builder
+WORKDIR /code
 
-ENV PATH = "${PATH}:/root/.local/bin/"
-COPY pyproject.toml poetry.lock /tmp/
+FROM base as builder
 
-WORKDIR /code/
-COPY . /code/
-
-EXPOSE 8000
-RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
-
-FROM builder as dev
-
-RUN --mount=type=cache,target=/root/.cache,sharing=private \
-  (curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -) \
+RUN python3 -m venv --copies $VIRTUAL_ENV \
+  && python3 -m venv --copies $POETRY_HOME \
+  && pip install poetry==1.3.0 \
   && poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
+  && poetry config cache-dir /var/cache/poetry
 
-FROM builder as dist
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --without dev
 
-RUN --mount=type=cache,target=/root/.cache,sharing=private \
-  (curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.2.0 python -) \
-  && poetry config virtualenvs.create false \
-  && poetry install --without dev --no-interaction --no-ansi \
-  && (curl -sSL https://install.python-poetry.org | POETRY_UNINSTALL=1 python -) \
-  && rm -rf \
-  /root/.local \
-  /root/.config
+FROM builder AS dev
+
+RUN poetry install
+
+FROM base AS dist
+
+COPY --chown=hope:hope ./ ./
+COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
+USER hope
