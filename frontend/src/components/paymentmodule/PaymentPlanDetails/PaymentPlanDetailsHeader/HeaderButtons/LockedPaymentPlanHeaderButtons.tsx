@@ -10,11 +10,13 @@ import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   canUnlock: boolean;
+  permissions: string[];
 }
 
 export const LockedPaymentPlanHeaderButtons = ({
   paymentPlan,
   canUnlock,
+  permissions,
 }: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = paymentPlan;
@@ -40,7 +42,7 @@ export const LockedPaymentPlanHeaderButtons = ({
           </LoadingButton>
         </Box>
       )}
-      <LockFspPaymentPlan paymentPlan={paymentPlan} />
+      <LockFspPaymentPlan paymentPlan={paymentPlan} permissions={permissions} />
     </Box>
   );
 };

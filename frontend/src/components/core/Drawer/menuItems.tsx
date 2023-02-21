@@ -93,6 +93,7 @@ export const menuItems = [
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
     ],
+    flag: 'isPaymentPlanApplicable',
   },
   {
     name: 'Payment Verification',

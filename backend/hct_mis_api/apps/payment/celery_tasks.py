@@ -13,7 +13,6 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
@@ -92,7 +91,7 @@ def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
-        files_qs = FileTemp.objects.filter(content_type=ct, created_at__lte=days)
+        files_qs = FileTemp.objects.filter(content_type=ct, created__lte=days)
         if files_qs:
             for obj in files_qs:
                 obj.file.delete(save=False)
@@ -117,8 +116,6 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id: str, user_id: str) ->
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        payment_plan.background_action_status_xlsx_exporting()
-        payment_plan.save()
 
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
@@ -156,8 +153,6 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: str, user_id:
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        payment_plan.background_action_status_xlsx_exporting()
-        payment_plan.save()
 
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
@@ -226,7 +221,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id: str) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: str, user_id: str, file_pk: str) -> None:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: str, file_pk: str) -> None:
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -318,35 +313,33 @@ def create_cash_plan_reconciliation_xlsx(
 @app.task
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_steficon(payment_plan_id: str, steficon_rule_id: str) -> None:
+def payment_plan_apply_engine_rule(payment_plan_id: str, engine_rule_id: str) -> None:
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
     payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-    steficon_rule = Rule.objects.get(id=decode_id_string(steficon_rule_id))
-    rule: RuleCommit = steficon_rule.latest
-
+    engine_rule = Rule.objects.get(id=engine_rule_id)
+    rule: RuleCommit = engine_rule.latest
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
-    payment_plan.background_action_status_steficon_run()
-    payment_plan.save()
+        payment_plan.save()
 
     try:
         updates = []
         with transaction.atomic():
-            entry: Payment
-            for entry in payment_plan.not_excluded_payments:
-                # TODO: not sure how will work steficon function payment_plan or payment need ??
-                result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
-                entry.entitlement_quantity = result.value
-                entry.entitlement_quantity_usd = get_quantity_in_usd(
+            payment: Payment
+            for payment in payment_plan.not_excluded_payments:
+                # TODO: not sure how will work engine function payment_plan or payment need ??
+                result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
+                payment.entitlement_quantity = result.value
+                payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=result.value,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
                     currency_exchange_date=payment_plan.currency_exchange_date,
                 )
-                entry.entitlement_date = timezone.now()
-                updates.append(entry)
+                payment.entitlement_date = timezone.now()
+                updates.append(payment)
             Payment.objects.bulk_update(
                 updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
             )
@@ -360,7 +353,7 @@ def payment_plan_apply_steficon(payment_plan_id: str, steficon_rule_id: str) -> 
                 payment_plan.update_money_fields()
 
     except Exception:
-        logger.exception("PaymentPlan Steficon Error")
+        logger.exception("PaymentPlan Run Engine Rule Error")
         payment_plan.background_action_status_steficon_error()
         payment_plan.save()
         raise

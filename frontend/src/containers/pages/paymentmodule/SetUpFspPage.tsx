@@ -13,7 +13,7 @@ export const SetUpFspPage = (): React.ReactElement => {
   if (permissions === null) return null;
   if (
     !hasPermissions(
-      PERMISSIONS.PM_FINANCIAL_SERVICE_PROVIDER_CREATE,
+      PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP,
       permissions,
     )
   )

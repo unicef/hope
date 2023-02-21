@@ -115,11 +115,11 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'TRANSACTION_SUCCESSFUL':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'Distribution Successful':
       return theme.hctPalette.green;
-    case 'TRANSACTION_PENDING':
+    case 'Pending':
       return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
@@ -237,8 +237,9 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatus.SteficonRun]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+      theme.palette.error.main,
     [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatus.XlsxExportError]:
       theme.palette.error.main,
