@@ -798,7 +798,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             ],
         )
 
-        import_xlsx_service._import_row([row(str(payment_1.id)), row(999)], 1)  # ignore type
+        import_xlsx_service._import_row([row(str(payment_1.id)), row(999)], 1)
         import_xlsx_service._import_row([row(str(payment_2.id)), row(100)], 1)
         payment_1.save()
         payment_2.save()
