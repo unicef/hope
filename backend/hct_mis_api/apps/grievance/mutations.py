@@ -70,7 +70,11 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
-from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
+from hct_mis_api.apps.grievance.utils import (
+    clear_cache,
+    get_individual,
+    traverse_sibling_tickets,
+)
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -725,6 +729,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                 )
             close_function(grievance_ticket, info)
             grievance_ticket.refresh_from_db()
+
+            clear_cache(ticket_details, grievance_ticket.business_area.slug)
+
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
             cls.has_permission(info, Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)
             grievance_ticket.assigned_to = info.context.user

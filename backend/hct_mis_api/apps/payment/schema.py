@@ -32,7 +32,6 @@ from graphql_relay.connection.arrayconnection import connection_from_list_slice
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
-    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -862,7 +861,7 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    all_payment_verification_log_entries = DjangoPermissionFilterFastConnectionField(
+    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),

@@ -13,7 +13,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
-    DjangoPermissionFilterFastConnectionField,
+    DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -312,7 +312,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
-    all_imported_households = DjangoPermissionFilterFastConnectionField(
+    all_imported_households = DjangoPermissionFilterConnectionField(
         ImportedHouseholdNode,
         filterset_class=ImportedHouseholdFilter,
         permission_classes=(
@@ -324,7 +324,7 @@ class Query(graphene.ObjectType):
     registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode)
     all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode)
     imported_individual = relay.Node.Field(ImportedIndividualNode)
-    all_imported_individuals = DjangoPermissionFilterFastConnectionField(
+    all_imported_individuals = DjangoPermissionFilterConnectionField(
         ImportedIndividualNode,
         filterset_class=ImportedIndividualFilter,
         permission_classes=(
