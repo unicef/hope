@@ -161,13 +161,13 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend lint'
@@ -200,13 +200,13 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend mypy'
@@ -239,12 +239,12 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker. registryConnection)
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend test'
