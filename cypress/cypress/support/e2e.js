@@ -16,8 +16,26 @@
 // Import commands.js using ES2015 syntax:
 import "cypress-file-upload";
 import "./commands";
-const uniqueSeed = Date.now();
 
+const uniqueSeed = Date.now();
 Cypress.Commands.add("uniqueSeed", () => uniqueSeed);
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
+
+Cypress.Commands.add("adminLogin", () => {
+  cy.uniqueSeed().then((seed) => {
+    cy.exec(
+      `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
+    );
+  });
+  cy.visit("/api/unicorn/");
+  cy.get('input[name="username"]').type(Cypress.env("username"));
+  cy.get('input[name="password"]').type(Cypress.env("password"));
+  cy.get("input").contains("Log in").click();
+})
+
+Cypress.Commands.add("initScenario", (scenario) => {
+  cy.uniqueSeed().then((seed) => {
+    cy.exec(
+      `yarn init-scenario ${Cypress.config().baseUrl} ${scenario} ${seed}`
+    );
+  });
+})
