@@ -13,13 +13,21 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
-def get_households_from_text(ba: BusinessArea, text: Any) -> Optional[List]:
+def get_households_from_text(ba: BusinessArea, text: Any, targeting_criteria: Any) -> Optional[List]:
     """
     Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
     """
-    return Household.objects.filter(
-        withdrawn=False, business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", text)
-    )
+    if targeting_criteria == "unicef_id":
+        return Household.objects.filter(
+            withdrawn=False, business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", text)
+        )
+    if targeting_criteria == "unique_id":
+        return Household.objects.filter(
+            withdrawn=False,
+            business_area=ba,
+            id__in=re.findall(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", text),
+        )
+    return []
 
 
 class UpdateByXlsxStage1Form(forms.Form):
@@ -138,8 +146,9 @@ class CreateTargetPopulationTextForm(forms.Form):
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all(), help_text=_("Chose the correct business area")
     )
-    criteria = forms.CharField(widget=forms.Textarea)
+    target_field = forms.ChoiceField(choices=(("unique_id", _("UUID")), ("unicef_id", _("Unicef ID"))))
     action = forms.CharField(widget=forms.HiddenInput)
+    criteria = forms.CharField(widget=forms.Textarea)
     targeting_criteria = forms.ModelChoiceField(widget=forms.HiddenInput, queryset=TargetingCriteria.objects.all())
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -153,9 +162,12 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["name"].widget = HiddenInput()
             self.fields["criteria"].widget = HiddenInput()
             self.fields["targeting_criteria"].widget = HiddenInput()
+            self.fields["target_field"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
         try:
-            return get_households_from_text(self.cleaned_data["business_area"], self.cleaned_data["criteria"])
+            return get_households_from_text(
+                self.cleaned_data["business_area"], self.cleaned_data["criteria"], self.cleaned_data["target_field"]
+            )
         except Exception as e:
             raise ValidationError(str(e))

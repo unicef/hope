@@ -19,9 +19,7 @@ class TargetPopulationFromListMixin:
         if "apply" in request.POST:
             form = CreateTargetPopulationTextForm(request.POST, read_only=True)
             if form.is_valid():
-                ba = form.cleaned_data["business_area"]
-                context["ba_name"] = ba.name
-                context["targeting_criteria"] = form.cleaned_data["targeting_criteria"]
+                context["ba_name"] = form.cleaned_data["business_area"].name
                 context["households"] = form.cleaned_data["criteria"][:101]
                 context["total"] = form.cleaned_data["criteria"].count()
         elif "confirm" in request.POST:
