@@ -67,7 +67,7 @@ stages:
             displayName: "Check imports order"
 
 
-  - stage: build_and_push_backend
+  - stage: build_and_push
     dependsOn: check_format
     displayName: BUILD and PUSH
     jobs:
@@ -147,7 +147,7 @@ stages:
             displayName: Docker build
 
   - stage: lint_backend
-    dependsOn: build_and_push_backend
+    dependsOn: build_and_push
     displayName: Lint-Backend
     jobs:
       - job: django_lint
@@ -186,7 +186,7 @@ stages:
               testRunTitle: 'Lint results'
 
   - stage: mypy_backend
-    dependsOn: build_and_push_backend
+    dependsOn: build_and_push
     displayName: Mypy-Backend
     jobs:
       - job: django_mypy
@@ -263,7 +263,7 @@ stages:
               testRunTitle: 'TEST Results'
 
   - stage: e2e_tests
-    dependsOn: [build_and_push_backend, build_and_push_frontend, test_frontend, build_and_push_cypress]
+    dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
