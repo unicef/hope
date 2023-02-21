@@ -73,19 +73,21 @@ def from_received_yes_no_to_status(received: bool, received_amount: float, deliv
     return from_received_to_status(received_bool, received_amount, delivered_amount)
 
 
-def calculate_counts(cash_plan_verification: PaymentVerificationPlan) -> None:
-    cash_plan_verification.responded_count = cash_plan_verification.payment_record_verifications.filter(
+def calculate_counts(payment_verification_plan: PaymentVerificationPlan) -> None:
+    payment_verification_plan.responded_count = payment_verification_plan.payment_record_verifications.filter(
         ~Q(status=PaymentVerification.STATUS_PENDING)
     ).count()
-    cash_plan_verification.received_count = cash_plan_verification.payment_record_verifications.filter(
+    payment_verification_plan.received_count = payment_verification_plan.payment_record_verifications.filter(
         Q(status=PaymentVerification.STATUS_RECEIVED)
     ).count()
-    cash_plan_verification.not_received_count = cash_plan_verification.payment_record_verifications.filter(
+    payment_verification_plan.not_received_count = payment_verification_plan.payment_record_verifications.filter(
         Q(status=PaymentVerification.STATUS_NOT_RECEIVED)
     ).count()
-    cash_plan_verification.received_with_problems_count = cash_plan_verification.payment_record_verifications.filter(
-        Q(status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
-    ).count()
+    payment_verification_plan.received_with_problems_count = (
+        payment_verification_plan.payment_record_verifications.filter(
+            Q(status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+        ).count()
+    )
 
 
 def get_payment_items_for_dashboard(
