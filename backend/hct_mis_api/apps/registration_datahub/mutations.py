@@ -29,8 +29,10 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_xlsx_import_task,
     validate_xlsx_import_task,
 )
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedIndividual,
     KoboImportData,
     RegistrationDataImportDatahub,
 )
@@ -38,6 +40,9 @@ from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     KoboImportDataNode,
     XlsxRowErrorNode,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -324,6 +329,13 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.validate(status=obj_hct.status)
         obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
         obj_hct.save()
+
+        imported_individuals_to_remove = ImportedIndividual.objects.filter(registration_data_import=obj_hct.datahub_id)
+
+        remove_elasticsearch_documents_by_matching_ids(
+            list(imported_individuals_to_remove.values_list("id", flat=True)),
+            get_imported_individual_doc(obj_hct.business_area.slug),
+        )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
