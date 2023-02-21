@@ -48,6 +48,7 @@ export const FormikCurrencyAutocomplete = ({
             margin='dense'
           />
         )}
+        data-cy="input-currency"
       />
     </Box>
   );
