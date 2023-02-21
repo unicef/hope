@@ -5,10 +5,14 @@ const filePath = process.argv[2];
 const jsonData = xlsx.parse(fileSys.readFileSync(filePath))[0];
 const rows = jsonData.data;
 
+console.log(rows)
+
+entitlement_quantity_index = rows[0].indexOf("entitlement_quantity");
+delivered_quantity_index = rows[0].indexOf("delivered_quantity");
+
 for (let i = 1; i < rows.length; i++) {
   if (rows[i].length !== 0) {
-    // column index 10 is delivered_quantity
-    rows[i][10] = 100;
+    rows[i][delivered_quantity_index] = rows[i][entitlement_quantity_index];
   }
 }
 
