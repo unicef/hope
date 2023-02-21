@@ -31,7 +31,6 @@ data:
   INTERNAL_DOMAIN_NAME: "enketo"
   PUBLIC_REQUEST_SCHEME: {{ .Values.ingress.scheme }}
 
-  # TODO: helper for host
   ENKETO_REDIS_MAIN_HOST: "kobo-redis-master"
   ENKETO_REDIS_CACHE_HOST: "kobo-redis-cache"
 
@@ -72,7 +71,7 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   nginx.conf: |
-        user  nginx;
+    user  nginx;
     worker_processes  1;
 
     error_log  /var/log/nginx/error.log warn;
