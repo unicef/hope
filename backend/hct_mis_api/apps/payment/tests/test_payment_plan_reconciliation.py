@@ -1,5 +1,7 @@
+import io
 import os
 import tempfile
+from collections import namedtuple
 from datetime import timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Tuple
@@ -32,12 +34,17 @@ from hct_mis_api.apps.payment.fixtures import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     GenericPayment,
     Payment,
     PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -727,3 +734,84 @@ class TestPaymentPlanReconciliation(APITestCase):
             status, value = service._get_delivered_quantity_status_and_value(delivered_quantity, Decimal(500), "xx")
             self.assertEqual(status, expected_status)
             self.assertEqual(value, expected_delivered_quantity)
+
+    def test_xlsx_payment_plan_import_per_fsp_service_import_row(self) -> None:
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
+        pp.refresh_from_db()
+        PaymentVerificationSummaryFactory(generic_fk_obj=pp)
+        pvp = PaymentVerificationPlanFactory(
+            generic_fk_obj=pp,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
+        )
+
+        payment_1 = PaymentFactory(
+            parent=PaymentPlan.objects.get(id=pp.id),
+            business_area=self.business_area,
+            household=self.household_1,
+            collector=self.individual_1,
+            delivery_type=None,
+            entitlement_quantity=1111,
+            entitlement_quantity_usd=100,
+            delivered_quantity=1000,
+            delivered_quantity_usd=99,
+            financial_service_provider=None,
+            excluded=False,
+        )
+        payment_2 = PaymentFactory(
+            parent=PaymentPlan.objects.get(id=pp.id),
+            business_area=self.business_area,
+            household=self.household_2,
+            collector=self.individual_2,
+            delivery_type=None,
+            entitlement_quantity=2222,
+            entitlement_quantity_usd=100,
+            delivered_quantity=2000,
+            delivered_quantity_usd=500,
+            financial_service_provider=None,
+            excluded=False,
+        )
+        verification_1 = PaymentVerificationFactory(
+            payment_verification_plan=pvp,
+            generic_fk_obj=payment_1,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            received_amount=999,
+        )
+        verification_2 = PaymentVerificationFactory(
+            payment_verification_plan=pvp,
+            generic_fk_obj=payment_2,
+            status=PaymentVerification.STATUS_RECEIVED,
+            received_amount=500,
+        )
+        import_xlsx_service = XlsxPaymentPlanImportPerFspService(pp, io.BytesIO())
+        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity"]
+        import_xlsx_service.payments_dict[str(payment_1.pk)] = payment_1
+        import_xlsx_service.payments_dict[str(payment_2.pk)] = payment_2
+
+        row = namedtuple(
+            "row",
+            [
+                "value",
+            ],
+        )
+
+        import_xlsx_service._import_row([row(str(payment_1.id)), row(999)], 1)  # ignore type
+        import_xlsx_service._import_row([row(str(payment_2.id)), row(100)], 1)
+        payment_1.save()
+        payment_2.save()
+        # Update payment Verification
+        PaymentVerification.objects.bulk_update(
+            import_xlsx_service.payment_verifications_to_save, ("status", "status_date")
+        )
+        payment_1.refresh_from_db()
+        payment_2.refresh_from_db()
+        verification_1.refresh_from_db()
+        verification_2.refresh_from_db()
+
+        self.assertEqual(payment_1.delivered_quantity, 999)
+        self.assertEqual(verification_1.received_amount, 999)
+        self.assertEqual(verification_1.status, PaymentVerification.STATUS_RECEIVED)
+
+        self.assertEqual(payment_2.delivered_quantity, 100)
+        self.assertEqual(verification_2.received_amount, 500)
+        self.assertEqual(verification_2.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
