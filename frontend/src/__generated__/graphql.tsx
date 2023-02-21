@@ -147,6 +147,9 @@ export type ApprovalProcessNode = Node & {
   sentForFinanceReleaseBy?: Maybe<UserNode>,
   sentForFinanceReleaseDate?: Maybe<Scalars['DateTime']>,
   paymentPlan: PaymentPlanNode,
+  approvalNumberRequired: Scalars['Int'],
+  authorizationNumberRequired: Scalars['Int'],
+  financeReleaseNumberRequired: Scalars['Int'],
   rejectedOn?: Maybe<Scalars['String']>,
   actions?: Maybe<FilteredActionsListNode>,
 };
@@ -1515,7 +1518,7 @@ export type GrievanceTicketNode = Node & {
   referralTicketDetails?: Maybe<TicketReferralDetailsNode>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
-  paymentRecord?: Maybe<PaymentRecordNode>,
+  paymentRecord?: Maybe<PaymentRecordAndPaymentNode>,
   admin?: Maybe<Scalars['String']>,
   existingTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
@@ -3650,8 +3653,8 @@ export type PaymentNodeEdge = {
 };
 
 export enum PaymentPlanBackgroundActionStatus {
-  SteficonRun = 'STEFICON_RUN',
-  SteficonError = 'STEFICON_ERROR',
+  RuleEngineRun = 'RULE_ENGINE_RUN',
+  RuleEngineError = 'RULE_ENGINE_ERROR',
   XlsxExporting = 'XLSX_EXPORTING',
   XlsxExportError = 'XLSX_EXPORT_ERROR',
   XlsxImportError = 'XLSX_IMPORT_ERROR',
@@ -3864,11 +3867,9 @@ export type PaymentPlanNode = Node & {
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
   approvalProcess: ApprovalProcessNodeConnection,
-  approvalNumberRequired?: Maybe<Scalars['Int']>,
-  authorizationNumberRequired?: Maybe<Scalars['Int']>,
-  financeReleaseNumberRequired?: Maybe<Scalars['Int']>,
   currencyName?: Maybe<Scalars['String']>,
   hasPaymentListExportFile?: Maybe<Scalars['Boolean']>,
+  hasFspDeliveryMechanismXlsxTemplate?: Maybe<Scalars['Boolean']>,
   importedFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
@@ -3878,6 +3879,7 @@ export type PaymentPlanNode = Node & {
   bankReconciliationError?: Maybe<Scalars['Int']>,
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
   availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
+  reconciliationSummary?: Maybe<ReconciliationSummaryNode>,
 };
 
 
@@ -5387,6 +5389,17 @@ export type ReassignRoleMutation = {
 export type RebuildTargetPopulationMutation = {
    __typename?: 'RebuildTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type ReconciliationSummaryNode = {
+   __typename?: 'ReconciliationSummaryNode',
+  deliveredFully?: Maybe<Scalars['Int']>,
+  deliveredPartially?: Maybe<Scalars['Int']>,
+  notDelivered?: Maybe<Scalars['Int']>,
+  failed?: Maybe<Scalars['Int']>,
+  pending?: Maybe<Scalars['Int']>,
+  numberOfPayments?: Maybe<Scalars['Int']>,
+  reconciled?: Maybe<Scalars['Int']>,
 };
 
 export type ReferralTicketExtras = {
@@ -9421,8 +9434,8 @@ export type GrievanceTicketQuery = (
       { __typename?: 'HouseholdNode' }
       & HouseholdDetailedFragment
     )>, paymentRecord: Maybe<(
-      { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
+      { __typename?: 'PaymentRecordAndPaymentNode' }
+      & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'objType'>
     )>, relatedTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
@@ -9834,7 +9847,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReleaseNumberRequired' | 'hasPaymentListExportFile' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9851,7 +9864,7 @@ export type PaymentPlanQuery = (
         { __typename?: 'ApprovalProcessNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'ApprovalProcessNode' }
-          & Pick<ApprovalProcessNode, 'id' | 'sentForApprovalDate' | 'sentForAuthorizationDate' | 'sentForFinanceReleaseDate' | 'rejectedOn'>
+          & Pick<ApprovalProcessNode, 'id' | 'sentForApprovalDate' | 'sentForAuthorizationDate' | 'sentForFinanceReleaseDate' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReleaseNumberRequired' | 'rejectedOn'>
           & { sentForApprovalBy: Maybe<(
             { __typename?: 'UserNode' }
             & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9947,7 +9960,10 @@ export type PaymentPlanQuery = (
           & Pick<PaymentNode, 'id'>
         )> }
       )>> }
-    ) }
+    ), reconciliationSummary: Maybe<(
+      { __typename?: 'ReconciliationSummaryNode' }
+      & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'failed' | 'pending' | 'numberOfPayments' | 'reconciled'>
+    )> }
   )> }
 );
 
@@ -17179,6 +17195,7 @@ export const GrievanceTicketDocument = gql`
       id
       caId
       deliveredQuantity
+      objType
     }
     relatedTickets {
       id
@@ -18039,6 +18056,9 @@ export const PaymentPlanDocument = gql`
             email
           }
           sentForFinanceReleaseDate
+          approvalNumberRequired
+          authorizationNumberRequired
+          financeReleaseNumberRequired
           actions {
             approval {
               createdAt
@@ -18089,9 +18109,6 @@ export const PaymentPlanDocument = gql`
         }
       }
     }
-    approvalNumberRequired
-    authorizationNumberRequired
-    financeReleaseNumberRequired
     steficonRule {
       id
       rule {
@@ -18100,6 +18117,7 @@ export const PaymentPlanDocument = gql`
       }
     }
     hasPaymentListExportFile
+    hasFspDeliveryMechanismXlsxTemplate
     importedFileDate
     importedFileName
     totalEntitledQuantityUsd
@@ -18127,9 +18145,6 @@ export const PaymentPlanDocument = gql`
       volume
       volumeUsd
     }
-    hasPaymentListExportFile
-    importedFileName
-    importedFileDate
     verificationPlans {
       totalCount
       edges {
@@ -18179,6 +18194,15 @@ export const PaymentPlanDocument = gql`
           id
         }
       }
+    }
+    reconciliationSummary {
+      deliveredFully
+      deliveredPartially
+      notDelivered
+      failed
+      pending
+      numberOfPayments
+      reconciled
     }
   }
 }
@@ -22766,6 +22790,7 @@ export type ResolversTypes = {
   FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>,
   ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
   VolumeByDeliveryMechanismNode: ResolverTypeWrapper<VolumeByDeliveryMechanismNode>,
+  ReconciliationSummaryNode: ResolverTypeWrapper<ReconciliationSummaryNode>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
   GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
@@ -22802,6 +22827,8 @@ export type ResolversTypes = {
   TicketPositiveFeedbackDetailsNode: ResolverTypeWrapper<TicketPositiveFeedbackDetailsNode>,
   TicketNegativeFeedbackDetailsNode: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNode>,
   TicketReferralDetailsNode: ResolverTypeWrapper<TicketReferralDetailsNode>,
+  PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>,
+  CashPlanAndPaymentPlanNode: ResolverTypeWrapper<CashPlanAndPaymentPlanNode>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
@@ -22861,8 +22888,6 @@ export type ResolversTypes = {
   PaginatedPaymentRecordsAndPaymentsNode: ResolverTypeWrapper<PaginatedPaymentRecordsAndPaymentsNode>,
   PageInfoNode: ResolverTypeWrapper<PageInfoNode>,
   PaymentRecordsAndPaymentsEdges: ResolverTypeWrapper<PaymentRecordsAndPaymentsEdges>,
-  PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>,
-  CashPlanAndPaymentPlanNode: ResolverTypeWrapper<CashPlanAndPaymentPlanNode>,
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
@@ -23214,6 +23239,7 @@ export type ResolversParentTypes = {
   FilteredActionsListNode: FilteredActionsListNode,
   ApprovalNode: ApprovalNode,
   VolumeByDeliveryMechanismNode: VolumeByDeliveryMechanismNode,
+  ReconciliationSummaryNode: ReconciliationSummaryNode,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
   GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
@@ -23250,6 +23276,8 @@ export type ResolversParentTypes = {
   TicketPositiveFeedbackDetailsNode: TicketPositiveFeedbackDetailsNode,
   TicketNegativeFeedbackDetailsNode: TicketNegativeFeedbackDetailsNode,
   TicketReferralDetailsNode: TicketReferralDetailsNode,
+  PaymentRecordAndPaymentNode: PaymentRecordAndPaymentNode,
+  CashPlanAndPaymentPlanNode: CashPlanAndPaymentPlanNode,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
   RoleNode: RoleNode,
@@ -23309,8 +23337,6 @@ export type ResolversParentTypes = {
   PaginatedPaymentRecordsAndPaymentsNode: PaginatedPaymentRecordsAndPaymentsNode,
   PageInfoNode: PageInfoNode,
   PaymentRecordsAndPaymentsEdges: PaymentRecordsAndPaymentsEdges,
-  PaymentRecordAndPaymentNode: PaymentRecordAndPaymentNode,
-  CashPlanAndPaymentPlanNode: CashPlanAndPaymentPlanNode,
   ChartPaymentVerification: ChartPaymentVerification,
   _DetailedDatasetsNode: _DetailedDatasetsNode,
   ChartDatasetNode: ChartDatasetNode,
@@ -23552,6 +23578,9 @@ export type ApprovalProcessNodeResolvers<ContextType = any, ParentType extends R
   sentForFinanceReleaseBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   sentForFinanceReleaseDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
+  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  financeReleaseNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   rejectedOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   actions?: Resolver<Maybe<ResolversTypes['FilteredActionsListNode']>, ParentType, ContextType>,
 };
@@ -24270,7 +24299,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordAndPaymentNode']>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
@@ -25124,11 +25153,9 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
   approvalProcess?: Resolver<ResolversTypes['ApprovalProcessNodeConnection'], ParentType, ContextType, PaymentPlanNodeApprovalProcessArgs>,
-  approvalNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  authorizationNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  financeReleaseNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currencyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasPaymentListExportFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasFspDeliveryMechanismXlsxTemplate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   importedFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
@@ -25138,6 +25165,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  reconciliationSummary?: Resolver<Maybe<ResolversTypes['ReconciliationSummaryNode']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
@@ -25564,6 +25592,16 @@ export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends 
 
 export type RebuildTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RebuildTargetPopulationMutation'] = ResolversParentTypes['RebuildTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type ReconciliationSummaryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReconciliationSummaryNode'] = ResolversParentTypes['ReconciliationSummaryNode']> = {
+  deliveredFully?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  deliveredPartially?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  notDelivered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  failed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  pending?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  numberOfPayments?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  reconciled?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type RefuseRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RefuseRegistrationDataImportMutation'] = ResolversParentTypes['RefuseRegistrationDataImportMutation']> = {
@@ -26735,6 +26773,7 @@ export type Resolvers<ContextType = any> = {
   RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
   ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
   RebuildTargetPopulationMutation?: RebuildTargetPopulationMutationResolvers<ContextType>,
+  ReconciliationSummaryNode?: ReconciliationSummaryNodeResolvers<ContextType>,
   RefuseRegistrationDataImportMutation?: RefuseRegistrationDataImportMutationResolvers<ContextType>,
   RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
   RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,

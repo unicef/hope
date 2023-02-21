@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     fsp_generate_xlsx_report_task,
     import_payment_plan_payment_list_from_xlsx,
-    payment_plan_apply_steficon,
+    payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
@@ -83,6 +83,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -638,7 +639,7 @@ class CreateFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
     ) -> "CreateFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
 
         fsp = FSPService.create(inputs, info.context.user)
         # Schedule task to generate downloadable report
@@ -661,7 +662,7 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
     ) -> "EditFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
 
         fsp_id = decode_id_string(financial_service_provider_id)
         fsp = FSPService.update(fsp_id, inputs)
@@ -684,8 +685,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
 
-        # TODO: maybe will update perms here?
-        cls.has_permission(info, Permissions.PM_VIEW_DETAILS, payment_plan.business_area)
+        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
@@ -699,6 +699,30 @@ class ActionPaymentPlanMutation(PermissionMutation):
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
+
+    @classmethod
+    def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str, pp_status: str) -> None:
+        def _get_reject_permission(status: str) -> Any:
+            status_to_perm_map = {
+                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            }
+            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
+
+        action_to_permissions_map = {
+            PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.UNLOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name: Permissions.PM_SEND_FOR_APPROVAL,
+            PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
+            PaymentPlan.Action.FINISH.name: [],
+        }
+        cls.has_permission(info, action_to_permissions_map[action], business_area)
 
 
 class CreatePaymentPlanMutation(PermissionMutation):
@@ -976,12 +1000,22 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             if import_service.errors:
                 return cls(None, import_service.errors)
 
+            old_payment_plan = copy_model_object(payment_plan)
+
             payment_plan.background_action_status_xlsx_importing_entitlements()
             payment_plan.save()
 
-            import_service.create_import_xlsx_file(info.context.user)
+            payment_plan = import_service.create_import_xlsx_file(info.context.user)
 
             transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
+
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=info.context.user,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
 
         return cls(payment_plan, None)
 
@@ -1003,7 +1037,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
+        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
 
         if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
@@ -1016,8 +1050,18 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         if import_service.errors:
             return cls(payment_plan=None, errors=import_service.errors)
 
+        old_payment_plan = copy_model_object(payment_plan)
+
         payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
             user=info.context.user, file=file
+        )
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
         )
 
         return cls(payment_plan=payment_plan, errors=None)
@@ -1044,20 +1088,23 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.STEFICON_RUN:
-            msg = "Steficon run in progress"
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
+            msg = "Rule Engine run in progress"
             logger.error(msg)
             raise GraphQLError(msg)
 
         old_payment_plan = copy_model_object(payment_plan)
 
-        steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
-        if not steficon_rule.enabled or steficon_rule.deprecated:
-            msg = "This steficon rule is not enabled or is deprecated."
+        engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
+        if not engine_rule.enabled or engine_rule.deprecated:
+            msg = "This engine rule is not enabled or is deprecated."
             logger.error(msg)
             raise GraphQLError(msg)
 
-        payment_plan_apply_steficon.delay(payment_plan.pk, steficon_rule_id)
+        payment_plan.background_action_status_steficon_run()
+        payment_plan.save()
+
+        payment_plan_apply_engine_rule.delay(payment_plan.pk, engine_rule.pk)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

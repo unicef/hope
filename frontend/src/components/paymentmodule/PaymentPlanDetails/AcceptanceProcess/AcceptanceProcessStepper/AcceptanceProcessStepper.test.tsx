@@ -10,9 +10,6 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     const { container } = render(
       <AcceptanceProcessStepper
         acceptanceProcess={fakeApolloPaymentPlan.approvalProcess.edges[0].node}
-        approvalNumberRequired={1}
-        authorizationNumberRequired={1}
-        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -25,9 +22,6 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
           ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
           sentForApprovalDate: '2020-01-01',
         }}
-        approvalNumberRequired={1}
-        authorizationNumberRequired={1}
-        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -40,9 +34,6 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
           ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
           sentForAuthorizationDate: '2020-01-01',
         }}
-        approvalNumberRequired={1}
-        authorizationNumberRequired={1}
-        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -55,9 +46,6 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
           ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
           sentForFinanceReleaseDate: '2020-01-02',
         }}
-        approvalNumberRequired={1}
-        authorizationNumberRequired={1}
-        financeReleaseNumberRequired={1}
       />,
     );
     await act(() => wait(0)); // wait for response

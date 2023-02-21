@@ -7,14 +7,16 @@
     "copy": "^0.3.2",
     "cypress": "^12.4.1",
     "cypress-file-upload": "^5.0.8",
+    "cypress-repeat": "^2.3.3",
     "eslint": "^8.34.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-mocha": "^10.1.0",
     "node-xlsx": "^0.21.0"
   },
   "scripts": {
-    "generate-xlsx-files": "./generate_xlsx_files.js",
-    "init-scenario": "./init_scenario.js",
-    "lint": "eslint ."
+    "generate-xlsx-files": "./cypress/scripts/generateXlsxFiles.js",
+    "init-scenario": "./cypress/scripts/initScenario.js",
+    "lint": "eslint .",
+    "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*"
   }
 }

@@ -4,11 +4,7 @@ context("Targeting", () => {
   let programName = "TargetingProgram";
 
   beforeEach(() => {
-    cy.uniqueSeed().then((seed) => {
-      cy.exec(
-        `yarn run init-scenario ${Cypress.config().baseUrl} targeting ${seed}`
-      );
-    });
+    cy.initScenario("targeting")
     cy.visit("/api/unicorn/");
     cy.get('input[name="username"]').type(Cypress.env("username"));
     cy.get('input[name="password"]').type(Cypress.env("password"));
