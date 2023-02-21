@@ -48,6 +48,8 @@ RUN python3 -m venv --copies $VIRTUAL_ENV \
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --without dev
 
+COPY ./ ./
+
 FROM builder AS dev
 
 RUN poetry install
