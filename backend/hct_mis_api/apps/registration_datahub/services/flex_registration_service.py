@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -425,6 +426,7 @@ class FlexRegistrationService(BaseRegistrationService):
 
 class SriLankaRegistrationService(BaseRegistrationService):
     BUSINESS_AREA_SLUG = "sri-lanka"
+    SRI_LANKA_REGISTRATION_ID = 17
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin2": "admin2_h_c",
@@ -454,7 +456,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
-        return {
+
+        household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
             "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
@@ -465,9 +468,33 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "consent": True,
             "collect_individual_data": YES,
             "size": 0,
-            "admin1": "LK",
             "flex_fields": {"moh_center_of_reference": localization_dict.get("moh_center_of_reference")},
         }
+        admin2 = localization_dict.get("admin2_h_c")
+        if admin2 and Area.objects.filter(p_code=admin2).exists():
+            household_data["admin2_title"] = Area.objects.get(p_code=admin2).name
+        admin3 = localization_dict.get("admin3_h_c")
+        if admin3 and Area.objects.filter(p_code=admin3).exists():
+            household_data["admin3_title"] = Area.objects.get(p_code=admin3).name
+        admin4 = localization_dict.get("admin4_h_c")
+        if admin4 and Area.objects.filter(p_code=admin4).exists():
+            household_data["admin4_title"] = Area.objects.get(p_code=admin4).name
+
+        if admin2 and Area.objects.filter(p_code=admin2).exists():
+            household_data["admin1"] = Area.objects.get(p_code=admin2).parent.p_code
+            household_data["admin1_title"] = Area.objects.get(p_code=admin2).parent.name
+
+        if admin4 and Area.objects.filter(p_code=admin4).exists():
+            household_data["admin_area"] = Area.objects.get(p_code=admin4).p_code
+            household_data["admin_area_title"] = Area.objects.get(p_code=admin4).name
+        elif admin3 and Area.objects.filter(p_code=admin3).exists():
+            household_data["admin_area"] = Area.objects.get(p_code=admin3).p_code
+            household_data["admin_area_title"] = Area.objects.get(p_code=admin3).name
+        elif admin2 and Area.objects.filter(p_code=admin2).exists():
+            household_data["admin_area"] = Area.objects.get(p_code=admin2).p_code
+            household_data["admin_area_title"] = Area.objects.get(p_code=admin2).name
+
+        return household_data
 
     def _prepare_individual_data(self, head_of_household_info: Dict, **kwargs: Any) -> Dict:
         individual_data = dict(
@@ -487,9 +514,38 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         return individual_data
 
+    def _prepare_national_id(
+        self, individual_dict: Dict, imported_individual: ImportedIndividual
+    ) -> Optional[ImportedDocument]:
+        national_id = individual_dict.get("national_id_no_i_c")
+        if not national_id:
+            return None
+        return ImportedDocument.objects.create(
+            document_number=national_id,
+            individual=imported_individual,
+            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID),
+            country=Country(code="LK"),
+        )
+
+    def _prepare_birth_certificate(
+        self, individual_dict: Dict, imported_individual: ImportedIndividual
+    ) -> Optional[ImportedDocument]:
+        national_id = individual_dict.get("chidlren_birth_certificate")
+        if not national_id:
+            return None
+        return ImportedDocument.objects.create(
+            document_number=national_id,
+            individual=imported_individual,
+            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE),
+            country=Country(code="LK"),
+        )
+
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
+        if record.registration != self.SRI_LANKA_REGISTRATION_ID:
+            raise ValidationError("Sri-Lanka data is processed only from registration 17!")
+
         record_data_dict = record.fields
 
         localization_dict = record_data_dict.get("localization-info", [])[0]
@@ -498,7 +554,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         individuals_list = record_data_dict.get("children-info", [])
 
         preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact")
-
+        should_use_hoh_as_collector = (
+            collector_dict.get("does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi") == "y"
+        )
         household_data = self._prepare_household_data(localization_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
 
@@ -513,32 +571,25 @@ class SriLankaRegistrationService(BaseRegistrationService):
         head_of_household = ImportedIndividual.objects.create(
             **base_individual_data_dict, **self._prepare_individual_data(head_of_household_dict), relationship=HEAD
         )
+        self._prepare_national_id(head_of_household_dict, head_of_household)
 
-        bank_name = collector_dict.pop("bank_description")
-        bank_account_number = collector_dict.pop("bank_name")
-        national_id = collector_dict.pop("national_id_no_i_c")
-
-        primary_collector = ImportedIndividual.objects.create(
-            **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
-        )
+        bank_name = f"{collector_dict.get('bank_description')} [{collector_dict.get('bank_name')} - {collector_dict.get('branch_or_branch_code')}]"  # TODO: check if this is correct
+        bank_account_number = collector_dict.get("confirm_bank_account_number")
+        if should_use_hoh_as_collector:
+            primary_collector = head_of_household
+        else:
+            primary_collector = ImportedIndividual.objects.create(
+                **base_individual_data_dict, **self._prepare_individual_data(collector_dict)
+            )
+            self._prepare_national_id(collector_dict, primary_collector)
 
         ImportedIndividualRoleInHousehold.objects.create(
             household=household, individual=primary_collector, role=ROLE_PRIMARY
         )
-
         if bank_name and bank_account_number:
             ImportedBankAccountInfo.objects.create(
                 bank_name=bank_name, bank_account_number=bank_account_number, individual=primary_collector
             )
-
-        if national_id:
-            ImportedDocument.objects.create(
-                document_number=national_id,
-                individual=primary_collector,
-                type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID),
-                country=Country(code="LK"),
-            )
-
         individuals_to_create = []
         for individual_data_dict in individuals_list:
             individuals_to_create.append(
@@ -551,7 +602,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
 
         ImportedIndividual.objects.bulk_create(individuals_to_create)
-
-        household.set_admin_areas()
+        for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create):
+            self._prepare_birth_certificate(individual_data_dict, imported_individual)
+        household.size = len(individuals_to_create) + 1
         household.head_of_household = head_of_household
         household.save()
+
+        record.mark_as_imported()

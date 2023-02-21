@@ -1,4 +1,5 @@
 import logging
+from datetime import date, datetime
 from decimal import Decimal
 from io import BytesIO
 from typing import Any, Dict, Optional
@@ -559,6 +560,8 @@ class RevertMarkAsFailedMutation(PermissionMutation):
 
     class Arguments:
         payment_record_id = graphene.ID(required=True)
+        delivered_quantity = graphene.Decimal(required=True)
+        delivery_date = graphene.Date(required=True)
 
     @classmethod
     @is_authenticated
@@ -568,11 +571,14 @@ class RevertMarkAsFailedMutation(PermissionMutation):
         root: Any,
         info: Any,
         payment_record_id: str,
+        delivered_quantity: Decimal,
+        delivery_date: date,
         **kwargs: Any,
     ) -> "RevertMarkAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
-        revert_mark_as_failed(payment_record)
+        delivery_date = datetime.combine(delivery_date, datetime.min.time())
+        revert_mark_as_failed(payment_record, delivered_quantity, delivery_date)
         return cls(payment_record)
 
 
