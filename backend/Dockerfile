@@ -3,8 +3,8 @@ FROM python:3.9.12-slim-bullseye as base
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
   --mount=type=cache,target=/var/lib/apt,sharing=private \
-  apt-get update && \
-  apt-get install -y --no-install-recommends \
+  apt-get update \
+  && apt-get install -y --no-install-recommends \
   build-essential \
   libjpeg-dev \
   zlib1g-dev \
