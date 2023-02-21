@@ -146,121 +146,121 @@ stages:
               ./cypress
             displayName: Docker build
 
-  # - stage: lint_backend
-  #   dependsOn: build_and_push
-  #   displayName: Lint-Backend
-  #   jobs:
-  #     - job: django_lint
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[DJANGO LINT]"
-  #       variables:
-  #         backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-  #       steps:
-  #         - task: Docker@2
-  #           displayName: "[ACR] Login"
-  #           inputs:
-  #             command: login
-  #             containerRegistry: $(Docker.registry)
+  - stage: lint_backend
+    dependsOn: build_and_push
+    displayName: Lint-Backend
+    jobs:
+      - job: django_lint
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO LINT]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(tag)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
 
-  #         - task: DockerCompose@0
-  #           displayName: "Run tests"
-  #           inputs:
-  #             containerregistrytype: 'Azure Container Registry'
-  #             azureContainerRegistry: $(Docker.registry)
-  #             dockerComposeFile: '**/docker-compose.tst.yml'
-  #             action: 'Run a Docker Compose command'
-  #             dockerComposeCommand: 'run --no-deps backend lint'
-  #             dockerComposeFileArgs: |
-  #              backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registryConnection)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend lint'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
 
-  #         - task: PublishTestResults@2
-  #           displayName: "Publish lint result"
-  #           condition: always()
-  #           inputs:
-  #             testResultsFormat: 'JUnit'
-  #             testResultsFiles: '*.xml'
-  #             searchFolder: 'backend/lint-results/'
-  #             mergeTestResults: true
-  #             failTaskOnFailedTests: true
-  #             testRunTitle: 'Lint results'
+          - task: PublishTestResults@2
+            displayName: "Publish lint result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/lint-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'Lint results'
 
-  # - stage: mypy_backend
-  #   dependsOn: build_and_push
-  #   displayName: Mypy-Backend
-  #   jobs:
-  #     - job: django_mypy
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[DJANGO MYPY]"
-  #       variables:
-  #         backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-  #       steps:
-  #         - task: Docker@2
-  #           displayName: "[ACR] Login"
-  #           inputs:
-  #             command: login
-  #             containerRegistry: $(Docker.registry)
+  - stage: mypy_backend
+    dependsOn: build_and_push
+    displayName: Mypy-Backend
+    jobs:
+      - job: django_mypy
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO MYPY]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(tag)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
 
-  #         - task: DockerCompose@0
-  #           displayName: "Run tests"
-  #           inputs:
-  #             containerregistrytype: 'Azure Container Registry'
-  #             azureContainerRegistry: $(Docker.registry)
-  #             dockerComposeFile: '**/docker-compose.tst.yml'
-  #             action: 'Run a Docker Compose command'
-  #             dockerComposeCommand: 'run --no-deps backend mypy'
-  #             dockerComposeFileArgs: |
-  #              backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registryConnection)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend mypy'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
 
-  #         - task: PublishTestResults@2
-  #           displayName: "Publish mypy result"
-  #           condition: always()
-  #           inputs:
-  #             testResultsFormat: 'JUnit'
-  #             testResultsFiles: '*.xml'
-  #             searchFolder: 'backend/mypy-results/'
-  #             mergeTestResults: true
-  #             failTaskOnFailedTests: true
-  #             testRunTitle: 'Mypy results'
+          - task: PublishTestResults@2
+            displayName: "Publish mypy result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/mypy-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'Mypy results'
 
-  # - stage: test_backend
-  #   dependsOn: [lint_backend, mypy_backend]
-  #   displayName: Test-Backend
-  #   jobs:
-  #     - job: django_tests
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[DJANGO TEST]"
-  #       variables:
-  #         backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
-  #       steps:
-  #         - task: Docker@2
-  #           displayName: "[ACR] Login"
-  #           inputs:
-  #             command: login
-  #             containerRegistry: $(Docker.registry)
-  #         - task: DockerCompose@0
-  #           displayName: "Run tests"
-  #           inputs:
-  #             containerregistrytype: 'Azure Container Registry'
-  #             azureContainerRegistry: $(Docker.registry)
-  #             dockerComposeFile: '**/docker-compose.tst.yml'
-  #             action: 'Run a Docker Compose command'
-  #             dockerComposeCommand: 'run backend test'
-  #             dockerComposeFileArgs: |
-  #              backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+  - stage: test_backend
+    dependsOn: [lint_backend, mypy_backend]
+    displayName: Test-Backend
+    jobs:
+      - job: django_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO TEST]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(tag)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registryConnection)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run backend test'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
 
-  #         - task: PublishTestResults@2
-  #           displayName: "Publish Test Result"
-  #           condition: always()
-  #           inputs:
-  #             testResultsFormat: 'JUnit'
-  #             testResultsFiles: '*.xml'
-  #             searchFolder: 'backend/test-results/'
-  #             mergeTestResults: true
-  #             failTaskOnFailedTests: true
-  #             testRunTitle: 'TEST Results'
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/test-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
 
   - stage: e2e_tests
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
