@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+from hct_mis_api.apps.account.fields import ChoiceArrayField
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
@@ -133,16 +134,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),
         )
-
-
-class ChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "choices": self.base_field.choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
 
 
 class HorizontalChoiceArrayField(ArrayField):
