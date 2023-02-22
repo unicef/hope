@@ -115,7 +115,6 @@ stages:
               --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(additionalTag) \
               -t $(Docker.url.trn)/$(Docker.backend.repository):dev-$(tag) \
-              -t $(Docker.url.trn)/$(Docker.backend.repository):latest \
               --push \
               --target dev \
               ./backend
