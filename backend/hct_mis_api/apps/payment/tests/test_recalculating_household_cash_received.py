@@ -18,7 +18,10 @@ from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 
 
 class TestRecalculatingCash(APITestCase):
-    databases = "__all__"
+    databases = (
+        "default",
+        "cash_assist_datahub_ca",
+    )
 
     CREATE_PROGRAM_MUTATION = """
     mutation CreateProgram($programData: CreateProgramInput!) {
