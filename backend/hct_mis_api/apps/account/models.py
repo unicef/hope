@@ -19,13 +19,13 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
+from hct_mis_api.apps.account.fields import ChoiceArrayField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-from hct_mis_api.apps.account.fields import ChoiceArrayField
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea
