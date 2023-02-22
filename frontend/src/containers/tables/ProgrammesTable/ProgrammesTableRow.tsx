@@ -9,6 +9,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   formatCurrency,
+  programStatusMapping,
   programStatusToColor,
 } from '../../../utils/utils';
 import {
@@ -50,6 +51,7 @@ export function ProgrammesTableRow({
         <StatusBox
           status={program.status}
           statusToColor={programStatusToColor}
+          statusNameMapping={programStatusMapping}
         />
       </TableCell>
       <TableCell align='left'>

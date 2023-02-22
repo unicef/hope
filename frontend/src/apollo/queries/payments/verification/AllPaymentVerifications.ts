@@ -7,12 +7,12 @@ export const AllPaymentVerifications = gql`
     $first: Int
     $last: Int
     $orderBy: String
-    $cashPlanPaymentVerification: ID
+    $paymentVerificationPlan: ID
     $search: String
     $status: String
-    $businessArea: String
-    $cashPlanId: ID
+    $businessArea: String!
     $verificationChannel: String
+    $paymentPlanId: String
   ) {
     allPaymentVerifications(
       after: $after
@@ -20,12 +20,12 @@ export const AllPaymentVerifications = gql`
       first: $first
       last: $last
       orderBy: $orderBy
-      cashPlanPaymentVerification: $cashPlanPaymentVerification
-      cashPlanPaymentVerification_CashPlan: $cashPlanId
+      paymentVerificationPlan: $paymentVerificationPlan
       search: $search
       status: $status
       businessArea: $businessArea
       verificationChannel: $verificationChannel
+      paymentPlanId: $paymentPlanId
     ) {
       pageInfo {
         hasNextPage
@@ -38,14 +38,14 @@ export const AllPaymentVerifications = gql`
         cursor
         node {
           id
-          cashPlanPaymentVerification {
+          paymentVerificationPlan {
             id
             unicefId
             verificationChannel
           }
-          paymentRecord {
+          payment {
             id
-            caId
+            unicefId
             deliveredQuantity
             currency
             household {

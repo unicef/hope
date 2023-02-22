@@ -3,3 +3,7 @@ test_times.txt
 ./generated
 ./test-results
 ./lint-results
+
+**/*.pyc
+**/*__pycache__*
+**/.mypy_cache

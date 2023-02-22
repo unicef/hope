@@ -787,7 +787,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
-MAX_STORAGE_FILE_SIZE = 30
+USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
@@ -841,3 +841,12 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Individual",
     "mis_datahub.Household",
 ]
+
+CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
+
+if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
+    )

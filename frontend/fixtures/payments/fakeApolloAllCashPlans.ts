@@ -22,7 +22,7 @@ export const fakeApolloAllCashPlans = [
             endCursor: 'YXJyYXljb25uZWN0aW9uOjQ=',
             __typename: 'PageInfo',
           },
-          totalCount: 6,
+          totalCount: 1,
           edges: [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
@@ -51,11 +51,19 @@ export const fakeApolloAllCashPlans = [
                 totalDeliveredQuantity: 24029588.26,
                 totalUndeliveredQuantity: 53795776.44,
                 updatedAt: '2022-02-24T09:56:48.875230',
-                cashPlanPaymentVerificationSummary: {
-                  id:
-                    'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NGNhNTdkZDUtYmY4ZC00MGIxLWE3NWEtOTM0Yzg4OTc3ZTM4',
-                  status: 'PENDING',
-                  __typename: 'CashPlanPaymentVerificationSummaryNode',
+                paymentVerificationSummary: {
+                  edges: [
+                    {
+                      cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
+                      node: {
+                        id:
+                          'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NGNhNTdkZDUtYmY4ZC00MGIxLWE3NWEtOTM0Yzg4OTc3ZTM4',
+                        status: 'PENDING',
+                        __typename: 'PaymentVerificationPlanSummaryNode',
+                      },
+                      __typename: 'PaymentVerificationPlanSummaryEdge',
+                    },
+                  ],
                 },
                 __typename: 'CashPlanNode',
               },

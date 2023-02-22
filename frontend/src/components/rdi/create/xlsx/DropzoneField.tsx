@@ -55,7 +55,7 @@ export function DropzoneField({ loading }): React.ReactElement {
   return (
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
-        <input {...getInputProps()} data-cy='rdi-file-input' />
+        <input {...getInputProps()} data-cy='file-input' />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>

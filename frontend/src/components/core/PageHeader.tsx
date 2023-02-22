@@ -83,7 +83,7 @@ export function PageHeader({
         <HeaderContainer>
           <div>
             {React.isValidElement(title) && hasInputComponent ? (
-              <TitleWrapper>{title}</TitleWrapper>
+              <TitleWrapper data-cy='page-header-title'>{title}</TitleWrapper>
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}

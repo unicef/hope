@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/FspPlanDetails/TotalAmount should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <div
+      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-2"
+      >
+        <div
+          class="sc-bwzfXH glegqy"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6"
+          >
+            Total Amount
+            (PLN) 
+            per FSP
+          </h6>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
