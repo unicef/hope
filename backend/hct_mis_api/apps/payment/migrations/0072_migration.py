@@ -30,7 +30,7 @@ def fix_fsp_communication_channels(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("payment", "0051_migration_squashed_0071_migration"),
+        ("payment", "0052_migration_squashed_0071_migration"),
     ]
 
     operations = [
@@ -228,6 +228,7 @@ class Migration(migrations.Migration):
                 max_length=50,
             ),
         ),
+        # WUUUUT
         migrations.AlterField(
             model_name="payment",
             name="status",
