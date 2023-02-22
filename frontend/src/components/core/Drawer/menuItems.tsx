@@ -88,11 +88,7 @@ export const menuItems = [
     href: '/payment-module',
     selectedRegexp: /^\/payment-module.*$/,
     icon: <PaymentIcon />,
-    permissions: [
-      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
-      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
-      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
-    ],
+    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
     flag: 'isPaymentPlanApplicable',
   },
   {
