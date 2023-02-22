@@ -4,7 +4,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 from django.db.models import Q
 
-import hct_mis_api.apps.payment.models
+from hct_mis_api.apps.account.fields import ChoiceArrayField
 import model_utils.fields
 import uuid
 import multiselectfield.db.fields
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "global_core_fields",
-                    hct_mis_api.apps.account.models.ChoiceArrayField(
+                    ChoiceArrayField(
                         base_field=models.CharField(
                             blank=True,
                             choices=[
@@ -192,7 +192,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_channel_fields",
-                    hct_mis_api.apps.account.models.ChoiceArrayField(
+                    ChoiceArrayField(
                         base_field=models.CharField(
                             blank=True,
                             choices=[
