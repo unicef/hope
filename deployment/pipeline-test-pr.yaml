@@ -104,6 +104,42 @@ stages:
               --push --target dev \
               ./backend
             displayName: Docker build dev
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:lint-$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:lint-latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:lint-$(additionalTag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:lint-latest \
+              -t $(Docker.url)/$(Docker.backend.repository):lint-$(tag) \
+              --push \
+              --target lint \
+              ./backend
+            displayName: Docker build lint
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:mypy-$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:mypy-latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:mypy-$(additionalTag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:mypy-latest \
+              -t $(Docker.url)/$(Docker.backend.repository):mypy-$(tag) \
+              --push \
+              --target mypy \
+              ./backend
+            displayName: Docker build mypy
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:tests-$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:tests-latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:tests-$(additionalTag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:tests-latest \
+              -t $(Docker.url)/$(Docker.backend.repository):tests-$(tag) \
+              --push \
+              --target tests \
+              ./backend
+            displayName: Docker build tests
 
   - stage: build_and_push_frontend
     dependsOn: test_frontend
@@ -181,7 +217,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend lint'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):lint-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish lint result"
@@ -218,7 +254,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend mypy'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):mypy-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish mypy result"
@@ -254,7 +290,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):tests-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
