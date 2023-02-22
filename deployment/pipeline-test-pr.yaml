@@ -93,6 +93,17 @@ stages:
               --push \
               ./backend
             displayName: Docker build
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
+              --push --target dev \
+              ./backend
+            displayName: Docker build dev
 
   - stage: build_and_push_frontend
     dependsOn: test_frontend
@@ -154,8 +165,6 @@ stages:
         pool:
           vmImage: ubuntu-latest
         displayName: "[DJANGO LINT]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(tag)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -172,7 +181,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend lint'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish lint result"
@@ -193,8 +202,6 @@ stages:
         pool:
           vmImage: ubuntu-latest
         displayName: "[DJANGO MYPY]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(tag)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -211,7 +218,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend mypy'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish mypy result"
@@ -232,8 +239,6 @@ stages:
         pool:
           vmImage: ubuntu-latest
         displayName: "[DJANGO TEST]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(tag)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -249,7 +254,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
