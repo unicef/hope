@@ -3,8 +3,10 @@ from typing import Any
 from unittest.mock import patch
 
 from django.test import TestCase
+from django.utils import timezone
 
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -41,7 +43,10 @@ class TestGenerateReportService(TestCase):
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.user = UserFactory.create()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
-        last_registration_dates = ("2020-01-01", "2021-01-01")
+        last_registration_dates = (
+            timezone.datetime(2020, 1, 1, tzinfo=utc),
+            timezone.datetime(2021, 1, 1, tzinfo=utc),
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -111,13 +116,13 @@ class TestGenerateReportService(TestCase):
         record_1 = PaymentRecordFactory(
             household=self.households[0],
             business_area=self.business_area,
-            delivery_date="2020-01-01",
+            delivery_date="2020-01-01T00:00+00:00",
             parent=self.cash_plan_1,
         )
         record_2 = PaymentRecordFactory(
             household=self.households[1],
             business_area=self.business_area,
-            delivery_date="2020-01-01",
+            delivery_date="2020-01-01T00:00+00:00",
             parent=self.cash_plan_2,
         )
         payment_1 = PaymentFactory(
