@@ -23,7 +23,7 @@ Chart.defaults.global.plugins.datalabels.font.family = FONT;
 Chart.defaults.global.plugins.datalabels.font.weight = 'bold';
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development')
+if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_FRONTEND_DSN)
   Sentry.init({
     dsn: process.env.SENTRY_FRONTEND_DSN,
     release: packageJson.version,

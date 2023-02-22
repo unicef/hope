@@ -1,16 +1,16 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllCashPlansQuery,
-  AllCashPlansQueryVariables,
-  useAllCashPlansQuery,
+  AllCashPlansAndPaymentPlansQueryVariables,
+  useAllCashPlansAndPaymentPlansQuery,
+  CashPlanAndPaymentPlanNode,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
-  filter;
+  filter?: AllCashPlansAndPaymentPlansQueryVariables;
   businessArea: string;
   canViewDetails: boolean;
 }
@@ -20,30 +20,31 @@ export function PaymentVerificationTable({
   businessArea,
 }: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
-  const initialVariables: AllCashPlansQueryVariables = {
+  const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
     businessArea,
-    program: filter.program,
-    search: filter.search,
-    serviceProvider: filter.serviceProvider,
-    deliveryType: filter.deliveryType,
-    verificationStatus: filter.verificationStatus,
-    startDateGte: filter.startDate,
-    endDateLte: filter.endDate,
+    ...(filter || {}),
+    // program: filter.program,
+    // search: filter.search,
+    // serviceProvider: filter.serviceProvider,
+    // deliveryType: filter.deliveryType,
+    // verificationStatus: filter.verificationStatus,
+    // startDateGte: filter.startDate,
+    // endDateLte: filter.endDate,
   };
   return (
     <UniversalTable<
-      AllCashPlansQuery['allCashPlans']['edges'][number]['node'],
-      AllCashPlansQueryVariables
+      CashPlanAndPaymentPlanNode,
+      AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('List of Cash Plans')}
       headCells={headCells}
-      query={useAllCashPlansQuery}
-      queriedObjectName='allCashPlans'
+      query={useAllCashPlansAndPaymentPlansQuery}
+      queriedObjectName='allCashPlansAndPaymentPlans'
       initialVariables={initialVariables}
-      renderRow={(row) => (
+      renderRow={(cashPlanAndPaymentPlanNode) => (
         <PaymentVerificationTableRow
-          key={row.id}
-          plan={row}
+          key={cashPlanAndPaymentPlanNode.id}
+          plan={cashPlanAndPaymentPlanNode}
           canViewDetails={canViewDetails}
         />
       )}

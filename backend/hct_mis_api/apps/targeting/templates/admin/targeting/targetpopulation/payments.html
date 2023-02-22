@@ -27,8 +27,8 @@
             </td>
             <td>{{ payment.head_of_household }}</td>
             <td>
-                <a target="_new" href="{% url "admin:program_cashplan_change" payment.cash_plan.pk %}">
-                {{ payment.cash_plan.name }}
+                <a target="_new" href="{% url "admin:program_cashplan_change" payment.parent.pk %}">
+                {{ payment.parent.name }}
                 </a>
             </td>
             </tr>

@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import date, timedelta
-from decimal import Decimal
 from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
@@ -12,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField, QuerySet
+from django.db.models import JSONField, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -537,22 +536,6 @@ class Household(
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
 
     @property
-    def total_cash_received_realtime(self) -> Decimal:
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
-            .get("delivered_quantity__sum")
-        )
-
-    @property
-    def total_cash_received_usd_realtime(self) -> Decimal:
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
-            .get("delivered_quantity_usd__sum")
-        )
-
-    @property
     def active_individuals(self) -> QuerySet:
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
@@ -565,7 +548,7 @@ class Household(
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     def __str__(self) -> str:
-        return f"{self.unicef_id}"
+        return self.unicef_id or ""
 
     def can_be_erase(self) -> bool:
         yesterday = timezone.now() - timedelta(days=1)
@@ -889,6 +872,16 @@ class Individual(
     def sanction_list_last_check(self) -> Any:
         return cache.get("sanction_list_last_check")
 
+    @property
+    def bank_name(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_name if bank_account_info else None
+
+    @property
+    def bank_account_number(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_account_number if bank_account_info else None
+
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
@@ -910,7 +903,7 @@ class Individual(
         self.save()
 
     def __str__(self) -> str:
-        return self.unicef_id
+        return self.unicef_id or ""
 
     class Meta:
         verbose_name = "Individual"

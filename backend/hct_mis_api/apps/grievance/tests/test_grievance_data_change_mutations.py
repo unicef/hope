@@ -340,6 +340,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 },
             }
         }
+
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user},

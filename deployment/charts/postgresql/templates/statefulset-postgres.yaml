@@ -1,0 +1,51 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "postgresql.fullname" . }}
+spec:
+  ports:
+  - protocol: TCP
+    port: 5432
+  clusterIP: None
+  selector:
+    pod: {{ include "postgresql.fullname" . }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "postgresql.fullname" . }}
+spec:
+  replicas: 1
+  serviceName: {{ include "postgresql.fullname" . }}
+  selector:
+    matchLabels:
+      pod: {{ include "postgresql.fullname" . }}
+  template:
+    metadata:
+      labels:
+        pod: {{ include "postgresql.fullname" . }}
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        envFrom:
+          - secretRef:
+              name: {{ include "postgresql.fullname" . }}-auth
+        volumeMounts:
+        - mountPath: "/var/lib/postgresql/data"
+          name: postgres-data
+        {{- if .Values.initScripts }}
+        - mountPath: "/docker-entrypoint-initdb.d"
+          name: postgres-init-script
+        {{- end }}
+        resources: {{ toYaml .Values.resources | nindent 10 }}
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+      {{- if .Values.initScripts }}
+      - name: postgres-init-script
+        configMap:
+          name: {{ include "postgresql.fullname" . }}-init-scripts
+      {{- end }}

@@ -7,14 +7,13 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 
 
 class TestAllPaymentRecords(APITestCase):
     ALL_PAYMENT_RECORDS_QUERY = """
     query AllPaymentRecords($cashPlan: ID, $household: ID, $businessArea: String) {
-      allPaymentRecords(cashPlan: $cashPlan, household: $household, businessArea: $businessArea) {
+      allPaymentRecords(parent: $cashPlan, household: $household, businessArea: $businessArea) {
         totalCount
         edgeCount
       }
@@ -36,25 +35,25 @@ class TestAllPaymentRecords(APITestCase):
             2,
             business_area=business_area,
             household=cls.household1,
-            cash_plan=cls.cash_plan1,
+            parent=cls.cash_plan1,
         )
         PaymentRecordFactory.create_batch(
             1,
             business_area=business_area,
             household=cls.household1,
-            cash_plan=cls.cash_plan2,
+            parent=cls.cash_plan2,
         )
         PaymentRecordFactory.create_batch(
             2,
             business_area=business_area,
             household=cls.household2,
-            cash_plan=cls.cash_plan1,
+            parent=cls.cash_plan1,
         )
         PaymentRecordFactory.create_batch(
             2,
             business_area=business_area,
             household=cls.household2,
-            cash_plan=cls.cash_plan3,
+            parent=cls.cash_plan3,
         )
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")

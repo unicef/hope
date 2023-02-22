@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -24,7 +24,15 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
-    LANGUAGES: List = [[a.label.lower(), a.label] for a in interpreters]
+    TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
+    TYPE_TARGETING = "TARGETING"
+
+    TYPE_CHOICES = (
+        (TYPE_PAYMENT_PLAN, "Payment Plan"),
+        (TYPE_TARGETING, "Targeting"),
+    )
+
+    LANGUAGES: Sequence[Tuple] = [(a.label.lower(), a.label) for a in interpreters]
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,
@@ -39,7 +47,7 @@ class Rule(models.Model):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)  # type: ignore # FIXME
     security = models.IntegerField(
         choices=(
             (SAFETY_NONE, "Low"),
@@ -52,6 +60,9 @@ class Rule(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    type = models.CharField(
+        choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
+    )
 
     flags = JSONField(default=dict, blank=True)
 
@@ -197,7 +208,7 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
+    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)  # type: ignore # FIXME
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)
