@@ -3,12 +3,20 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from django.db.models import QuerySet
+from django.utils import timezone
 
 import openpyxl
 from xlwt import Row
 
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd, to_decimal
+from hct_mis_api.apps.payment.models import Payment, PaymentVerification
+from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
+    handle_total_cash_in_specific_households,
+)
+from hct_mis_api.apps.payment.utils import (
+    calculate_counts,
+    get_quantity_in_usd,
+    to_decimal,
+)
 from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
@@ -28,6 +36,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids: List = list(self.payments_dict.keys())
         self.payments_to_save: List = []
+        self.payment_verifications_to_save: List = []
         self.required_columns: List[str] = ["payment_id", "delivered_quantity"]
         self.xlsx_headers = []
         self.is_updated: bool = False
@@ -136,6 +145,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
+        handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
+        PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
 
     def _get_delivered_quantity_status_and_value(
         self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
@@ -186,3 +197,20 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 )
                 payment.status = status
                 self.payments_to_save.append(payment)
+                # update PaymentVerification status
+                if payment.payment_verification.exists():
+                    payment_verification = payment.payment_verification.first()
+
+                    if payment_verification.received_amount == delivered_quantity:
+                        pv_status = PaymentVerification.STATUS_RECEIVED
+                    elif delivered_quantity == 0 or delivered_quantity is None:
+                        pv_status = PaymentVerification.STATUS_NOT_RECEIVED
+                    else:
+                        pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+
+                    payment_verification.status = pv_status
+                    payment_verification.status_date = timezone.now()
+                    self.payment_verifications_to_save.append(payment_verification)
+
+                    calculate_counts(payment_verification.payment_verification_plan)
+                    payment_verification.payment_verification_plan.save()

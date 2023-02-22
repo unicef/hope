@@ -1,11 +1,17 @@
 import logging
-from typing import List
+from typing import List, Union
 
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
+    TicketAddIndividualDetails,
+    TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.models import Individual
@@ -44,3 +50,23 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         ticket_individuals = ticket_details.selected_individuals.all()
 
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
+
+
+def clear_cache(
+    ticket_details: Union[
+        TicketHouseholdDataUpdateDetails,
+        TicketDeleteHouseholdDetails,
+        TicketAddIndividualDetails,
+        TicketIndividualDataUpdateDetails,
+        TicketDeleteIndividualDetails,
+    ],
+    business_area_slug: str,
+) -> None:
+    if isinstance(ticket_details, (TicketHouseholdDataUpdateDetails, TicketDeleteHouseholdDetails)):
+        cache.delete_pattern(f"count_{business_area_slug}_HouseholdNodeConnection_*")
+
+    if isinstance(
+        ticket_details,
+        (TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketDeleteIndividualDetails),
+    ):
+        cache.delete_pattern(f"count_{business_area_slug}_IndividualNodeConnection_*")
