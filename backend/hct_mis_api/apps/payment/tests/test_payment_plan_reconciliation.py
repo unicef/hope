@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from openpyxl import load_workbook
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -273,8 +274,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "programData": {
                     "name": "NName",
                     "scope": "UNICEF",
-                    "startDate": "2022-08-24",
-                    "endDate": "2022-08-31",
+                    "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
+                    "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
                     "description": "desc",
                     "budget": "0.00",
                     "administrativeAreasOfImplementation": "",
@@ -350,7 +351,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         status = finalize_tp_response["data"]["finalizeTargetPopulation"]["targetPopulation"]["status"]
         self.assertEqual(status, "READY_FOR_PAYMENT_MODULE")
 
-        # TODO: naive datetime
         create_payment_plan_response = self.graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user},
@@ -358,8 +358,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "input": {
                     "businessAreaSlug": self.business_area.slug,
                     "targetingId": target_population_id,
-                    "startDate": "2022-08-24",
-                    "endDate": "2022-08-31",
+                    "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
+                    "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
                     "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                     "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "currency": "USD",

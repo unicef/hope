@@ -1,9 +1,10 @@
-import datetime
 from unittest import skip
 
 from django.core.management import call_command
+from django.utils import timezone
 
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -146,7 +147,7 @@ class TestDashboardQueries(APITestCase):
             cash_plan1 = CashPlanFactory(program=program1, business_area=business_area)
             PaymentRecordFactory(
                 parent=cash_plan1,
-                delivery_date=datetime.date(2021, 10, 10),
+                delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household1,
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=10 + idx,
@@ -155,7 +156,7 @@ class TestDashboardQueries(APITestCase):
             )
             PaymentRecordFactory(
                 parent=cash_plan1,
-                delivery_date=datetime.date(2021, 10, 10),
+                delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household2,
                 delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=20 + idx,
@@ -164,7 +165,7 @@ class TestDashboardQueries(APITestCase):
             )
             PaymentRecordFactory(
                 parent=cash_plan1,
-                delivery_date=datetime.date(2021, 11, 10),
+                delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 household=household3,
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=30 + idx,
@@ -175,7 +176,7 @@ class TestDashboardQueries(APITestCase):
             payment_plan1 = PaymentPlanFactory(program=program1, business_area=business_area)
             PaymentFactory(
                 parent=payment_plan1,
-                delivery_date=datetime.date(2021, 10, 10),
+                delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=10 + idx,
                 status=GenericPayment.STATUS_SUCCESS,
@@ -184,7 +185,7 @@ class TestDashboardQueries(APITestCase):
             )
             PaymentFactory(
                 parent=payment_plan1,
-                delivery_date=datetime.date(2021, 10, 10),
+                delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=20 + idx,
                 status=GenericPayment.STATUS_SUCCESS,
@@ -193,7 +194,7 @@ class TestDashboardQueries(APITestCase):
             )
             PaymentFactory(
                 parent=payment_plan1,
-                delivery_date=datetime.date(2021, 11, 10),
+                delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=30 + idx,
                 status=GenericPayment.STATUS_ERROR,
