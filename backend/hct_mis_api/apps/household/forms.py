@@ -13,15 +13,15 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
-def get_households_from_text(ba: BusinessArea, text: Any, targeting_criteria: Any) -> Optional[List]:
+def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any) -> Optional[List]:
     """
     Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
     """
-    if targeting_criteria == "unicef_id":
+    if target_field == "unicef_id":
         return Household.objects.filter(
             withdrawn=False, business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", text)
         )
-    if targeting_criteria == "unique_id":
+    elif target_field == "unique_id":
         return Household.objects.filter(
             withdrawn=False,
             business_area=ba,
