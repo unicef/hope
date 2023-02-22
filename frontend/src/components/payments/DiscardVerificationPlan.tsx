@@ -9,29 +9,29 @@ import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DiscardVerificationPlanProps {
-  cashPlanVerificationId: string;
-  cashPlanId: string;
+  paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function DiscardVerificationPlan({
-  cashPlanVerificationId,
-  cashPlanId,
+  paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: DiscardVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useDiscardCashPlanPaymentVerificationMutation();
+  const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
   const discard = async (): Promise<void> => {
     try {
       await mutate({
-        variables: { cashPlanVerificationId },
+        variables: { paymentVerificationPlanId },
         refetchQueries,
       });
       showMessage(t('Verification plan has been discarded.'));
