@@ -62,7 +62,6 @@ def populate_existing_cash_plan_usd_amount(apps, schema_editor):
 class Migration(migrations.Migration):
 
     replaces = [
-        ("payment", "0051_migration"),
         ("payment", "0052_migration"),
         ("payment", "0053_migration"),
         ("payment", "0054_migration"),
@@ -91,7 +90,7 @@ class Migration(migrations.Migration):
         ("core", "0060_migration"),
         ("household", "0119_migration"),
         ("program", "0035_migration"),
-        ("payment", "0050_migration"),
+        ("payment", "0051_migration"),
         ("core", "0048_migration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
