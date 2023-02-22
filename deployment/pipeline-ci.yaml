@@ -119,7 +119,7 @@ stages:
         steps:
           - task: Docker@2
             inputs:
-              containerRegistry: '$(Docker.registry)'
+              containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
           - task: Docker@2
             condition: and(succeeded(), eq(variables.isTraining, true))
@@ -165,7 +165,7 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
