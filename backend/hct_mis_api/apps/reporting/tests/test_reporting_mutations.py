@@ -1,11 +1,11 @@
-import datetime
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import Any, List
 
 from django.core.management import call_command
 from django.utils import timezone
 
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -56,7 +56,10 @@ class TestReportingMutation(APITestCase):
         cls.business_area_slug = "afghanistan"
         cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
-        last_registration_dates = ("2020-01-01", "2021-01-01")
+        last_registration_dates = (
+            timezone.datetime(2020, 1, 1, tzinfo=utc),
+            timezone.datetime(2021, 1, 1, tzinfo=utc),
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -117,7 +120,7 @@ class TestReportingMutation(APITestCase):
         ]
     )
     def test_create_report_with_no_extra_filters(
-        self, _: Any, permissions: List[Permissions], report_type: str, date_to: datetime.date
+        self, _: Any, permissions: List[Permissions], report_type: str, date_to: date
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
@@ -127,7 +130,7 @@ class TestReportingMutation(APITestCase):
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
                     "reportType": report_type,
-                    "dateFrom": "2019-01-01",
+                    "dateFrom": "2018-01-01",
                     "dateTo": date_to,
                 }
             },

@@ -1,6 +1,8 @@
 from datetime import datetime
 from unittest.mock import patch
 
+from django.utils import timezone
+
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from pytz import utc
@@ -139,8 +141,8 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp = PaymentPlanFactory(
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                start_date=datetime(2020, 9, 10, tzinfo=utc),
-                end_date=datetime(2020, 11, 10, tzinfo=utc),
+                start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+                end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
