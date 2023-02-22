@@ -185,7 +185,7 @@ class AcceptanceProcessThresholdInline(TabularInline):
         "payments_range_usd",
     ]
     verbose_name_plural = (
-        "AcceptanceProcessThresholds in USD- "
+        "Acceptance Process Thresholds in USD- "
         "Please leave empty value to set max range as ∞, whole range [0, ∞) need to be covered. "
         "Example: [0, 100000) [100000, )"
     )
