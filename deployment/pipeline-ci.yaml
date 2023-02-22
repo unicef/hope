@@ -58,10 +58,9 @@ stages:
               key: $(Build.SourcesDirectory)/frontend/yarn.lock
               path: $(Build.SourcesDirectory)/frontend/node_modules
             displayName: Cache Yarn packages
-          - script: yarn
+          - script: yarn install --frozen-lockfile
             displayName: "Yarn Install"
             workingDirectory: 'frontend'
-
           - script: yarn test --watchAll=false
             workingDirectory: 'frontend'
             displayName: "Test"
