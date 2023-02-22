@@ -1,6 +1,7 @@
-import datetime
+from django.utils import timezone
 
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -166,21 +167,22 @@ class TestDashboardQueries(APITestCase):
             },
         )
         cash_plan1 = CashPlanFactory(program=cls.program_one)
+        delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date,
             household=household1,
             delivered_quantity_usd=100,
         )
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date,
             household=household2,
             delivered_quantity_usd=100,
         )
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date,
             household=household3,
             delivered_quantity_usd=100,
         )
@@ -188,19 +190,19 @@ class TestDashboardQueries(APITestCase):
         payment_plan1 = PaymentPlanFactory(program=cls.program_two)
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household1,
         )
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household2,
         )
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household4,
         )

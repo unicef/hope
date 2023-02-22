@@ -1,6 +1,7 @@
-import datetime
+from django.utils import timezone
 
 from freezegun import freeze_time
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -69,9 +70,11 @@ class TestProgramChoices(APITestCase):
             household_args={"size": 2, "business_area": business_area},
         )
         PaymentRecordFactory(
-            delivery_date=datetime.date(2021, 10, 10), business_area=business_area, household=household
+            delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc), business_area=business_area, household=household
         )
-        PaymentFactory(delivery_date=datetime.date(2020, 10, 10), business_area=business_area, household=household)
+        PaymentFactory(
+            delivery_date=timezone.datetime(2020, 10, 10, tzinfo=utc), business_area=business_area, household=household
+        )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,
