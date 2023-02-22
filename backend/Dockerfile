@@ -47,13 +47,27 @@ RUN python3 -m venv --copies $VIRTUAL_ENV &&\
   poetry config cache-dir /var/cache/poetry
 
 COPY pyproject.toml poetry.lock ./
-RUN poetry install --without dev
+RUN poetry install --only main
+
+# Layer with the code copied
+FROM builder as containing-code
+COPY ./ ./
+
+# Lint image
+FROM containing-code as lint
+RUN poetry install --only lint
+
+# Mypy image
+FROM containing-code as mypy
+RUN poetry install --only mypy
+
+# Tests image
+FROM containing-code as tests
+RUN poetry install --only tests
 
 # Dev image
-FROM builder AS dev
-
+FROM containing-code AS dev
 RUN poetry install
-COPY ./ ./
 
 # Dist image
 FROM base AS dist
