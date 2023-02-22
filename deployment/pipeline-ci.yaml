@@ -99,24 +99,23 @@ stages:
           - script: |
               docker buildx create --use
               docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(additionalTag) \
               --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(additionalTag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(additionalTag) \
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.backend.repository):latest \
+              -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
               --push \
+              --target dev \
               ./backend
             displayName: Docker build dev
           - script: |
               docker buildx create --use
               docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(additionalTag) \
               --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(additionalTag) \
-              -t $(Docker.url.trn)/$(Docker.backend.repository):dev-$(tag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(additionalTag) \
+              -t $(Docker.url.trn)/$(Docker.backend.repository):$(tag) \
               --push \
-              --target dev \
               ./backend
             displayName: Docker build trn
             condition: and(succeeded(), eq(variables.isTraining, true))
