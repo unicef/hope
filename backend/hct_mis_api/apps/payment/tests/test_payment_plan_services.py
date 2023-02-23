@@ -1,9 +1,12 @@
 from typing import Any
 from unittest.mock import patch
 
+from django.utils import timezone
+
 from aniso8601 import parse_date
 from freezegun import freeze_time
 from graphql import GraphQLError
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -25,7 +28,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestPaymentPlanServices(APITestCase):
-    databases = "__all__"
+    databases = ("default",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -58,8 +61,8 @@ class TestPaymentPlanServices(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            start_date=parse_date("2021-10-10"),
-            end_date=parse_date("2021-12-10"),
+            start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
@@ -113,8 +116,8 @@ class TestPaymentPlanServices(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            start_date=parse_date("2021-10-10"),
-            end_date=parse_date("2021-12-10"),
+            start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
@@ -146,8 +149,8 @@ class TestPaymentPlanServices(APITestCase):
 
         input_data = dict(
             targeting_id=self.id_to_base64(new_targeting.id, "Targeting"),
-            start_date=parse_date("2021-10-10"),
-            end_date=parse_date("2021-12-10"),
+            start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
@@ -202,7 +205,7 @@ class TestPaymentPlanServices(APITestCase):
             old_pp_updated_at = pp.updated_at
             old_pp_start_date = pp.start_date
             updated_pp_1 = PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(start_date=parse_date("2021-12-10"))
+                input_data=dict(start_date=timezone.datetime(2021, 12, 10, tzinfo=utc))
             )
             updated_pp_1.refresh_from_db()
             self.assertNotEqual(old_pp_updated_at, updated_pp_1.updated_at)

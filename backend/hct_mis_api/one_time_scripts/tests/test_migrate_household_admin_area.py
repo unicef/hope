@@ -1,3 +1,6 @@
+from io import StringIO
+from unittest import mock
+
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -45,7 +48,8 @@ class TestMigrateAdminArea(TestCase):
         household.admin_area = self.area1
         household.save()
 
-        migrate_household_admin_area()
+        with mock.patch("sys.stdout", new=StringIO()):
+            migrate_household_admin_area()
         household.refresh_from_db()
 
         self.assertEqual(household.admin_area, self.area1)
@@ -59,7 +63,8 @@ class TestMigrateAdminArea(TestCase):
         household.admin_area = self.area2
         household.save()
 
-        migrate_household_admin_area()
+        with mock.patch("sys.stdout", new=StringIO()):
+            migrate_household_admin_area()
         household.refresh_from_db()
 
         self.assertEqual(household.admin_area, self.area2)
@@ -73,7 +78,8 @@ class TestMigrateAdminArea(TestCase):
         household.admin_area = self.area3
         household.save()
 
-        migrate_household_admin_area()
+        with mock.patch("sys.stdout", new=StringIO()):
+            migrate_household_admin_area()
         household.refresh_from_db()
 
         self.assertEqual(household.admin_area, self.area3)
@@ -87,7 +93,8 @@ class TestMigrateAdminArea(TestCase):
         household.admin_area = self.area4
         household.save()
 
-        migrate_household_admin_area()
+        with mock.patch("sys.stdout", new=StringIO()):
+            migrate_household_admin_area()
         household.refresh_from_db()
 
         self.assertEqual(household.admin_area, self.area4)
@@ -102,7 +109,8 @@ class TestMigrateAdminArea(TestCase):
         imported_household.admin1_title = self.area1.name
         imported_household.save()
 
-        migrate_imported_household_admin_area()
+        with mock.patch("sys.stdout", new=StringIO()):
+            migrate_imported_household_admin_area()
         imported_household.refresh_from_db()
 
         self.assertEqual(imported_household.admin_area, self.area1.p_code)
@@ -122,7 +130,8 @@ class TestMigrateAdminArea(TestCase):
         imported_household.admin2_title = self.area2.name
         imported_household.save()
 
-        migrate_imported_household_admin_area()
+        with mock.patch("sys.stdout", new=StringIO()):
+            migrate_imported_household_admin_area()
         imported_household.refresh_from_db()
 
         self.assertEqual(imported_household.admin_area, self.area2.p_code)

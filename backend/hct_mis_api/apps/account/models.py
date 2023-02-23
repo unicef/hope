@@ -19,6 +19,7 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
+from hct_mis_api.apps.account.fields import ChoiceArrayField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -133,16 +134,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),
         )
-
-
-class ChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
-        defaults = {
-            "form_class": forms.MultipleChoiceField,
-            "choices": self.base_field.choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
 
 
 class HorizontalChoiceArrayField(ArrayField):

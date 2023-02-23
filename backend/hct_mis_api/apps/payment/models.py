@@ -1426,7 +1426,6 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "payment_verification_plan",
-            "payment_record",
             "status",
             "status_date",
             "received_amount",

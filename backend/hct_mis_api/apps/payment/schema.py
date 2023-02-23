@@ -32,7 +32,6 @@ from graphql_relay.connection.arrayconnection import connection_from_list_slice
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
-    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -421,6 +420,16 @@ class FspChoices(graphene.ObjectType):
     fsps = graphene.List(FspChoice)
 
 
+class ReconciliationSummaryNode(graphene.ObjectType):
+    delivered_fully = graphene.Int()
+    delivered_partially = graphene.Int()
+    not_delivered = graphene.Int()
+    failed = graphene.Int()
+    pending = graphene.Int()
+    number_of_payments = graphene.Int()
+    reconciled = graphene.Int()
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     dispersion_start_date = graphene.Date()
@@ -446,6 +455,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     bank_reconciliation_error = graphene.Int()
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
+    reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
 
     class Meta:
         model = PaymentPlan
@@ -491,6 +501,18 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                 ):
                     return False
             return True
+
+    @staticmethod
+    def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
+        return parent.payment_items.aggregate(
+            delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
+            delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
+            not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
+            failed=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
+            pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            number_of_payments=Count("id"),
+            reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
+        )
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -839,7 +861,7 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    all_payment_verification_log_entries = DjangoPermissionFilterFastConnectionField(
+    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),

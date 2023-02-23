@@ -16,7 +16,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentChannel
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -77,10 +76,6 @@ def create_household_with_individual_for_payment_plan(address: str) -> None:
         role=ROLE_PRIMARY,
         household=hh,
         individual=ind,
-    )
-    PaymentChannel.objects.create(
-        individual=ind,
-        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
     )
 
 

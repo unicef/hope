@@ -2388,8 +2388,8 @@ type PaymentNodeEdge {
 }
 
 enum PaymentPlanBackgroundActionStatus {
-  STEFICON_RUN
-  STEFICON_ERROR
+  RULE_ENGINE_RUN
+  RULE_ENGINE_ERROR
   XLSX_EXPORTING
   XLSX_EXPORT_ERROR
   XLSX_IMPORT_ERROR
@@ -2613,6 +2613,7 @@ type PaymentPlanNode implements Node {
   bankReconciliationError: Int
   canCreatePaymentVerificationPlan: Boolean
   availablePaymentRecordsCount: Int
+  reconciliationSummary: ReconciliationSummaryNode
 }
 
 type PaymentPlanNodeConnection {
@@ -3173,6 +3174,16 @@ type ReassignRoleMutation {
 
 type RebuildTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type ReconciliationSummaryNode {
+  deliveredFully: Int
+  deliveredPartially: Int
+  notDelivered: Int
+  failed: Int
+  pending: Int
+  numberOfPayments: Int
+  reconciled: Int
 }
 
 input ReferralTicketExtras {

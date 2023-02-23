@@ -15,7 +15,11 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    encode_id_base64,
+    timezone_datetime,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -96,8 +100,8 @@ class GenerateReportContentHelpers:
         filter_vars = {
             "business_area": report.business_area,
             "withdrawn": False,
-            "last_registration_date__gte": report.date_from,
-            "last_registration_date__lte": report.date_to,
+            "last_registration_date__gte": timezone_datetime(report.date_from),
+            "last_registration_date__lte": timezone_datetime(report.date_to),
         }
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()

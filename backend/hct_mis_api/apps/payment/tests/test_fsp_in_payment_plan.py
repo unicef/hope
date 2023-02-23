@@ -998,7 +998,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         )
 
         payment2.refresh_from_db()
-        print(payment2.financial_service_provider)
         # santander_fsp has a limited value, so it could take only one transfer payment
         assert payment2.financial_service_provider == self.santander_fsp
         assert payment2.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
@@ -1007,7 +1006,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         assert payment3.financial_service_provider == self.bank_of_europe_fsp
         assert payment3.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
         payment1.refresh_from_db()
-        print(payment1.financial_service_provider)
         # voucher payment is covered by bank_of_america_fsp
         assert payment1.financial_service_provider == self.bank_of_europe_fsp
         assert payment1.delivery_type == GenericPayment.DELIVERY_TYPE_TRANSFER
