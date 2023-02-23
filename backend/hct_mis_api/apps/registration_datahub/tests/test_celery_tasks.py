@@ -103,6 +103,29 @@ def create_ukraine_business_area() -> None:
         has_data_sharing_agreement=True,
     )
 
+def create_sri_lanka_business_area() -> None:
+    BusinessArea.objects.create(
+        slug="sri-lanka",
+        code="0608",
+        name="Sri Lanka",
+        long_name="THE DEMOCRATIC SOCIALIST REPUBLIC OF SRI LANKA",
+        region_code="64",
+        region_name="SAR",
+        has_data_sharing_agreement=True,
+    )
+
+
+def create_czech_republic_business_area() -> None:
+    BusinessArea.objects.create(
+        slug="czech-republic",
+        code="BOCZ",
+        name="Czech Republic",
+        long_name="The Czech Republic",
+        region_code="66",
+        region_name="ECAR",
+        has_data_sharing_agreement=True,
+    )
+
 
 def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
     @contextmanager
@@ -127,13 +150,13 @@ class TestAutomatingRDICreationTask(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_successful_run_without_records_to_import(self) -> None:
-        result = run_automate_rdi_creation_task(registration_id=123, page_size=1)
+        result = run_automate_rdi_creation_task(registration_id=2, page_size=1)
         assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
-        record = create_record(registration=234, status=Record.STATUS_ERROR)
+        record = create_record(registration=2, status=Record.STATUS_ERROR)
 
         page_size = 1
         assert RegistrationDataImport.objects.count() == 0
@@ -147,7 +170,7 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
 
-        registration = 345
+        registration = 2
         amount_of_records = 10
         page_size = 3
 
@@ -174,7 +197,7 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
 
-        registration = 345
+        registration = 3
         amount_of_records = 10
         page_size = 3
 
@@ -201,7 +224,7 @@ class TestAutomatingRDICreationTask(TestCase):
         create_ukraine_business_area()
         create_imported_document_types()
 
-        registration = 345
+        registration = 2
         amount_of_records = 10
         page_size = 3
 
@@ -224,3 +247,60 @@ class TestAutomatingRDICreationTask(TestCase):
         assert len(result) == 4
         assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
         assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}
+
+    def test_with_different_registration_ids(self) -> None:
+        """
+        based on registration_id select RegistrationService
+        Ukraine - 2, 3 -> FlexRegistrationService()
+        Sri Lanka - 17 -> SriLankaRegistrationService()
+        Czech Republic - 18, 19 -> NotImplementedError for now
+        """
+        create_ukraine_business_area()
+        create_imported_document_types()
+        create_czech_republic_business_area()
+        create_sri_lanka_business_area()
+
+        registration_id_to_ba_name_map = {
+            2: "Ukraine",
+            3: "Ukraine",
+            17: "Sri Lanka",
+            18: "Czech Republic",
+            19: "Czech Republic",
+        }
+
+        amount_of_records = 10
+        page_size = 5
+
+        records_count = 0
+        rdi_count = 0
+        imported_ind_count = 0
+
+        registration_ids = [2, 3, 18, 19, 999]  # TODO: add 17 , add create_record() for SriLanka
+        for registration_id in registration_ids:
+
+            for _ in range(amount_of_records):
+                records_count += 1
+                create_record(registration=registration_id, status=Record.STATUS_TO_IMPORT)
+
+            assert Record.objects.count() == records_count
+            assert RegistrationDataImport.objects.count() == rdi_count
+            assert ImportedIndividual.objects.count() == imported_ind_count
+
+            if registration_id in [999, 18, 19]:
+                with self.assertRaises(NotImplementedError):
+                    run_automate_rdi_creation_task(
+                        registration_id=registration_id, page_size=page_size,
+                        template="{business_area_name} template {date} {records}"
+                    )
+            else:
+                rdi_count += amount_of_records // page_size
+                imported_ind_count += amount_of_records
+                result = run_automate_rdi_creation_task(
+                    registration_id=registration_id, page_size=page_size, template="{business_area_name} template {date} {records}"
+                )
+
+                assert RegistrationDataImport.objects.count() == rdi_count
+                assert ImportedIndividual.objects.count() == imported_ind_count
+                assert result[0][0].startswith(registration_id_to_ba_name_map.get(registration_id, "wrong"))
+                assert result[0][1] == page_size
+                assert result[1][1] == page_size
