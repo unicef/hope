@@ -1,4 +1,6 @@
-import datetime
+from django.utils import timezone
+
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -81,13 +83,14 @@ class TestDashboardQueries(APITestCase):
 
         cash_plan1 = CashPlanFactory(program=program1)
         cash_plan2 = CashPlanFactory(program=program2)
-        PaymentRecordFactory(parent=cash_plan1, delivery_date=datetime.date(2021, 10, 10), household=household)
-        PaymentRecordFactory(parent=cash_plan2, delivery_date=datetime.date(2021, 10, 10), household=household)
+        delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
+        PaymentRecordFactory(parent=cash_plan1, delivery_date=delivery_date, household=household)
+        PaymentRecordFactory(parent=cash_plan2, delivery_date=delivery_date, household=household)
 
         payment_plan1 = PaymentPlanFactory(program=program3)
         payment_plan2 = PaymentPlanFactory(program=program4)
-        PaymentFactory(parent=payment_plan1, delivery_date=datetime.date(2021, 10, 10), household=household)
-        PaymentFactory(parent=payment_plan2, delivery_date=datetime.date(2021, 10, 10), household=household)
+        PaymentFactory(parent=payment_plan1, delivery_date=delivery_date, household=household)
+        PaymentFactory(parent=payment_plan2, delivery_date=delivery_date, household=household)
 
         self.snapshot_graphql_request(
             request_string=QUERY_CHART_PROGRAMMES_BY_SECTOR,
@@ -101,30 +104,32 @@ class TestDashboardQueries(APITestCase):
         )
         program1 = ProgramFactory.create(cash_plus=True, sector=Program.EDUCATION)
         cash_plan1 = CashPlanFactory(program=program1)
+        delivery_date1 = timezone.datetime(2021, 10, 10, tzinfo=utc)
+        delivery_date2 = timezone.datetime(2021, 11, 10, tzinfo=utc)
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date1,
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
         )
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date1,
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
         )
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 11, 10),
+            delivery_date=delivery_date2,
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
         )
         PaymentRecordFactory(
             parent=cash_plan1,
-            delivery_date=datetime.date(2021, 11, 10),
+            delivery_date=delivery_date2,
             household=household,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
@@ -133,25 +138,25 @@ class TestDashboardQueries(APITestCase):
         payment_plan1 = PaymentPlanFactory(program=program1)
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date1,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
         )
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 10, 10),
+            delivery_date=delivery_date1,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
         )
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 11, 10),
+            delivery_date=delivery_date2,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             delivered_quantity_usd=133,
         )
         PaymentFactory(
             parent=payment_plan1,
-            delivery_date=datetime.date(2021, 11, 10),
+            delivery_date=delivery_date2,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             delivered_quantity_usd=25,
         )
