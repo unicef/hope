@@ -126,16 +126,17 @@ export const LockedTargetPopulationHeaderButtons = ({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      <FinalizeTargetPopulation
-        open={openFinalize}
-        setOpen={setOpenFinalize}
-        targetPopulationId={targetPopulation.id}
-        totalHouseholds={targetPopulation.totalHouseholdsCount}
-      />
-      {isPaymentPlanApplicable && (
+      {isPaymentPlanApplicable ? (
         <FinalizeTargetPopulationPaymentPlan
           open={openFinalizePaymentPlan}
           setOpen={setOpenFinalizePaymentPlan}
+          targetPopulationId={targetPopulation.id}
+          totalHouseholds={targetPopulation.totalHouseholdsCount}
+        />
+      ) : (
+        <FinalizeTargetPopulation
+          open={openFinalize}
+          setOpen={setOpenFinalize}
           targetPopulationId={targetPopulation.id}
           totalHouseholds={targetPopulation.totalHouseholdsCount}
         />

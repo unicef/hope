@@ -16,8 +16,6 @@ date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()
 
-household_ids = []
-
 household_header_mapping = {
     "A": ("household_id", random_number),
     "B": ("residence_status_h_c", "REFUGEE"),
@@ -185,6 +183,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
+        household_ids = []
         amount = options["amount"]
         seed = options["seed"]
         print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")

@@ -57,7 +57,6 @@ export const PaymentPlanParameters = ({
               name='currency'
               component={FormikCurrencyAutocomplete}
               required
-              data-cy='input-currency'
             />
           </Grid>
           <Grid item xs={4}>

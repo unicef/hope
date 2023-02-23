@@ -4,9 +4,7 @@ import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterFastConnectionField,
-)
+from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.sanction_list.filters import SanctionListIndividualFilter
 from hct_mis_api.apps.sanction_list.models import (
@@ -88,7 +86,7 @@ class SanctionListIndividualDateOfBirthNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     sanction_list_individual = relay.Node.Field(SanctionListIndividualNode)
-    all_sanction_list_individuals = DjangoPermissionFilterFastConnectionField(
+    all_sanction_list_individuals = DjangoPermissionFilterConnectionField(
         SanctionListIndividualNode,
         filterset_class=SanctionListIndividualFilter,
     )

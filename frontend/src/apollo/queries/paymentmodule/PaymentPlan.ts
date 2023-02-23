@@ -207,6 +207,15 @@ export const PAYMENT_PLAN_QUERY = gql`
           }
         }
       }
+      reconciliationSummary {
+        deliveredFully
+        deliveredPartially
+        notDelivered
+        failed
+        pending
+        numberOfPayments
+        reconciled
+      }
     }
   }
 `;

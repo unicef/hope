@@ -237,8 +237,9 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatus.SteficonRun]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+      theme.palette.error.main,
     [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatus.XlsxExportError]:
       theme.palette.error.main,
