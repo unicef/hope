@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
+  capitalizeWord,
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentRecordStatusToColor,
@@ -49,7 +50,7 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
-                status={paymentRecord.status}
+                status={capitalizeWord(paymentRecord.status)}
                 statusToColor={paymentRecordStatusToColor}
               />
             </LabelizedField>

@@ -668,3 +668,13 @@ export async function clearCache(apolloClient = null): Promise<void> {
   localStorage.clear();
   await localForage.clear();
 }
+
+export const capitalizeWord = (word): string => {
+  const words = word.split("_");
+
+  // eslint-disable-next-line no-plusplus
+  for(let i = 0; i < words.length; i++) {
+    words[i] = words[i][0] + words[i].substr(1).toLowerCase();
+  }
+  return words.join(" ");
+}
