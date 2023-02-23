@@ -327,7 +327,7 @@ def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = No
 def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,
-    template: str = "ukraine rdi {date}",
+    template: str = "{business_area_name} rdi {date}",
     auto_merge: bool = False,
     fix_tax_id: bool = False,
     **filters: Any,
@@ -335,13 +335,27 @@ def automate_rdi_creation_task(
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        SriLankaRegistrationService,
+    )
 
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as locked:
             if not locked:
                 return []
             output = []
-            service = FlexRegistrationService()
+
+            if registration_id == 17:  # SriLanka
+                service = SriLankaRegistrationService()
+                business_area_name = "Sri Lanka"
+            elif registration_id in [2, 3]:  # Ukraine
+                service = FlexRegistrationService()
+                business_area_name = "Ukraine"
+            elif registration_id in [18, 19]:  # CzechRepublic
+                # will add soon
+                raise NotImplementedError
+            else:
+                raise NotImplementedError
 
             qs = Record.objects.filter(registration=registration_id, **filters).exclude(
                 status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
@@ -362,6 +376,7 @@ def automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
                     records=len(records_ids),
+                    business_area_name=business_area_name,
                 )
                 rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
                 service.process_records(rdi_id=rdi.id, records_ids=records_ids)
