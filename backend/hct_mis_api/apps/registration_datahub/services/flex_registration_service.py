@@ -645,9 +645,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
 def get_registration_to_rdi_service_map() -> Dict[int, Any]:
     return {
-        2: FlexRegistrationService(),  # ukraine
-        3: FlexRegistrationService(),  # ukraine
-        17: SriLankaRegistrationService(),  # sri lanka
+        2: FlexRegistrationService,  # ukraine
+        3: FlexRegistrationService,  # ukraine
+        17: SriLankaRegistrationService,  # sri lanka
         # 18: "czech republic",
         # 19: "czech republic",
     }
