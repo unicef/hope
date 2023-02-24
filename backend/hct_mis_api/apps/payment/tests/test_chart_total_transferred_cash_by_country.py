@@ -1,19 +1,18 @@
-from datetime import datetime
 from typing import Any, List
 
 from django.core.management import call_command
 from django.utils import timezone
 
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class TestChartTotalTransferredCashByCountry(APITestCase):
@@ -36,24 +35,25 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
         (household, _) = create_household(household_args={"size": 1})
         cash_plan = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
         chosen_business_areas = ("afghanistan", "botswana", "angola")
+        delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
         for business_area_slug in chosen_business_areas:
             business_area = BusinessArea.objects.get(slug=business_area_slug)
             PaymentRecordFactory.create_batch(
                 3,
-                delivery_date=timezone.make_aware(datetime(year=2021, day=1, month=1)),
+                delivery_date=delivery_date,
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=200.20,
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
             )
             PaymentRecordFactory.create_batch(
                 3,
-                delivery_date=timezone.make_aware(datetime(year=2021, day=1, month=1)),
+                delivery_date=delivery_date,
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=100.00,
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
             )
 

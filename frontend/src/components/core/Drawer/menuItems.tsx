@@ -84,6 +84,14 @@ export const menuItems = [
     external: true,
   },
   {
+    name: 'Payment Module',
+    href: '/payment-module',
+    selectedRegexp: /^\/payment-module.*$/,
+    icon: <PaymentIcon />,
+    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+    flag: 'isPaymentPlanApplicable',
+  },
+  {
     name: 'Payment Verification',
     href: '/payment-verification',
     selectedRegexp: /^\/payment-verification.*$/,

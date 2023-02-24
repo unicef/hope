@@ -2,20 +2,19 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { PaymentVerificationTable } from '.';
-import { fakeApolloAllCashPlansPaymentVerification } from '../../../../../fixtures/payments/fakeApolloAllCashPlansPaymentVerification';
+import { fakeApolloAllCashPlansAndPaymentPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlansAndPaymentPlans';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { PaymentVerificationTable } from '.';
 
 describe('containers/tables/payments/PaymentVerificationTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloAllCashPlansPaymentVerification}
+        mocks={fakeApolloAllCashPlansAndPaymentPlans}
       >
         <PaymentVerificationTable
           canViewDetails={false}
-          filter={{}}
           businessArea='afghanistan'
         />
       </MockedProvider>,
@@ -30,11 +29,10 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllCashPlansPaymentVerification}
+        mocks={fakeApolloAllCashPlansAndPaymentPlans}
       >
         <PaymentVerificationTable
           canViewDetails={false}
-          filter={{}}
           businessArea='afghanistan'
         />
       </MockedProvider>,
