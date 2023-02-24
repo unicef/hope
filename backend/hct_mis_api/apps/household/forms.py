@@ -1,4 +1,3 @@
-import re
 from typing import Any, Dict, List, Optional
 
 from django import forms
@@ -10,22 +9,21 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any) -> Optional[List]:
     """
     Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
     """
+    list_of_households = list(map(str.strip, text.split(",")))
     if target_field == "unicef_id":
-        return Household.objects.filter(
-            withdrawn=False, business_area=ba, unicef_id__in=re.findall(r"HH-\d{2}-\d{4}.\d{4}", text)
-        )
+        return Household.objects.filter(withdrawn=False, business_area=ba, unicef_id__in=list_of_households)
     elif target_field == "unique_id":
         return Household.objects.filter(
             withdrawn=False,
             business_area=ba,
-            id__in=re.findall(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", text),
+            id__in=list_of_households,
         )
     return []
 
@@ -144,12 +142,13 @@ class CreateTargetPopulationForm(forms.Form):
 class CreateTargetPopulationTextForm(forms.Form):
     name = forms.CharField()
     business_area = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.all(), help_text=_("Chose the correct business area")
+        queryset=BusinessArea.objects.all(), help_text=_("Choose the correct business area")
     )
     target_field = forms.ChoiceField(choices=(("unique_id", _("UUID")), ("unicef_id", _("Unicef ID"))))
     action = forms.CharField(widget=forms.HiddenInput)
-    criteria = forms.CharField(widget=forms.Textarea)
-    targeting_criteria = forms.ModelChoiceField(widget=forms.HiddenInput, queryset=TargetingCriteria.objects.all())
+    criteria = forms.CharField(
+        widget=forms.Textarea, help_text=_("List of either UUID4 or UNICEF IDs separated by a Comma ',' ")
+    )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         read_only = kwargs.pop("read_only", False)
@@ -161,7 +160,6 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["business_area"].widget = HiddenInput()
             self.fields["name"].widget = HiddenInput()
             self.fields["criteria"].widget = HiddenInput()
-            self.fields["targeting_criteria"].widget = HiddenInput()
             self.fields["target_field"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
