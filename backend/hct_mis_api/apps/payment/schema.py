@@ -965,7 +965,6 @@ class Query(graphene.ObjectType):
                 kw["payment_verification_plan"] = payment_verification_plan
             if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
                 kw["extra_validation"] = does_payment_record_have_right_hoh_phone_number
-            kw["class_name"] = obj.__class__.__name__
             return obj.available_payment_records(**kw)
 
         payment_verification_plan = None
