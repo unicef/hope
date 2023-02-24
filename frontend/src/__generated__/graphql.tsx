@@ -1119,6 +1119,7 @@ export type DocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
   type: DocumentTypeType,
+  isIdentityDocument: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -1139,6 +1140,7 @@ export enum DocumentTypeType {
   NationalPassport = 'NATIONAL_PASSPORT',
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
+  BankStatement = 'BANK_STATEMENT',
   Other = 'OTHER'
 }
 
@@ -2005,6 +2007,7 @@ export type ImportedDocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
   type: ImportedDocumentTypeType,
+  isIdentityDocument: Scalars['Boolean'],
   documents: ImportedDocumentNodeConnection,
 };
 
@@ -2025,6 +2028,7 @@ export enum ImportedDocumentTypeType {
   NationalPassport = 'NATIONAL_PASSPORT',
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
+  BankStatement = 'BANK_STATEMENT',
   Other = 'OTHER'
 }
 
@@ -24078,6 +24082,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
+  isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
 
@@ -24502,6 +24507,7 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
+  isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };
 

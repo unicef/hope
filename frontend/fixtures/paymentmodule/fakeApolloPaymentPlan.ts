@@ -112,6 +112,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   },
   steficonRule: null,
   hasPaymentListExportFile: false,
+  hasFspDeliveryMechanismXlsxTemplate: true,
   importedFileDate: null,
   importedFileName: '',
   totalEntitledQuantityUsd: 376,
