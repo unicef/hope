@@ -826,7 +826,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         for hh, ind in [
             (self.household_1, self.individual_1),
             (self.household_2, self.individual_2),
-            (self.household_3, self.individual_3)
+            (self.household_3, self.individual_3),
         ]:
             PaymentFactory(
                 parent=payment_plan,
