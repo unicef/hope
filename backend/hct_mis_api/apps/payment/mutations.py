@@ -1001,6 +1001,8 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 return cls(None, import_service.errors)
 
             old_payment_plan = copy_model_object(payment_plan)
+            if old_payment_plan.imported_file:
+                old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
 
             payment_plan.background_action_status_xlsx_importing_entitlements()
             payment_plan.save()
@@ -1016,6 +1018,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+            logger.info("after logging")
 
         return cls(payment_plan, None)
 
