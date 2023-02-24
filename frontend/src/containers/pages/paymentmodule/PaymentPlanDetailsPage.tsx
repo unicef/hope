@@ -41,6 +41,9 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
     paymentPlan.status !== PaymentPlanStatus.Accepted;
 
   const shouldDisplayFsp = paymentPlan.status !== PaymentPlanStatus.Open;
+  const shouldDisplayReconciliationSummary =
+    paymentPlan.status === PaymentPlanStatus.Accepted ||
+    paymentPlan.status === PaymentPlanStatus.Finished;
 
   return (
     <>
@@ -67,7 +70,9 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         permissions={permissions}
         canViewDetails
       />
-      <ReconciliationSummary paymentPlan={paymentPlan} />
+      {shouldDisplayReconciliationSummary && (
+        <ReconciliationSummary paymentPlan={paymentPlan} />
+      )}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan.id} />
       )}
