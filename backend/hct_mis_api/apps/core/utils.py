@@ -20,7 +20,9 @@ from typing import (
     Union,
 )
 
+from django.conf import settings
 from django.core.cache import cache
+from django.db.models import Q
 from django.utils import timezone
 
 import pytz
@@ -44,13 +46,16 @@ class CaseInsensitiveTuple(tuple):
         return key.casefold() in (element.casefold() for element in self)
 
 
-def decode_id_string(id_string: Optional[str]) -> Optional[str]:
-    if not id_string:
-        return None
-
+def decode_id_string_required(id_string: str) -> str:
     from base64 import b64decode
 
     return b64decode(id_string).decode().split(":")[1]
+
+
+def decode_id_string(id_string: Optional[str]) -> Optional[str]:
+    if not id_string:
+        return None
+    return decode_id_string_required(id_string)
 
 
 def encode_id_base64_required(id_string: str, model_name: str) -> str:
@@ -59,7 +64,7 @@ def encode_id_base64_required(id_string: str, model_name: str) -> str:
     return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
 
 
-def encode_id_base64(id_string: str, model_name: str) -> Optional[str]:
+def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]:
     if not id_string:
         return None
     return encode_id_base64_required(id_string, model_name)
@@ -221,7 +226,10 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
 
 
 def get_combined_attributes() -> Dict:
-    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
+    from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -479,7 +487,10 @@ def update_labels_mapping(csv_file: str) -> None:
 
     from django.conf import settings
 
-    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
+    from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
     with open(csv_file, newline="") as csv_file_ptr:
         reader = csv.reader(csv_file_ptr)
@@ -546,21 +557,36 @@ def chart_map_choices(choices: Iterable) -> Dict:
 
 
 def chart_get_filtered_qs(
-    obj: Any,
+    qs: Any,
     year: int,
     business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Optional[Dict] = None,
+    additional_filters: Union[Dict, Q, None] = None,
     year_filter_path: Optional[str] = None,
+    payment_verification_gfk: bool = False,
 ) -> "QuerySet":
+    # if payment_verification_gfk True will use Q() object for filtering by PaymentPlan and CashPlan
+    q_obj = Q()
     if additional_filters is None:
         additional_filters = {}
+    if isinstance(additional_filters, Q):
+        q_obj, additional_filters = additional_filters, {}
     if year_filter_path is None:
         year_filter = {"created_at__year": year}
     else:
         year_filter = {f"{year_filter_path}__year": year}
+        if payment_verification_gfk:
+            year_filter = {}
+            for k in year_filter_path.split(","):
+                q_obj |= Q(**{f"{k}__year": year})
+
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
+
+    if payment_verification_gfk and len(business_area_slug_filter) > 1:
+        for key, value in business_area_slug_filter.items():
+            q_obj |= Q(**{key: value})
+
+    return qs.filter(q_obj, **year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse: List) -> List[int]:
@@ -606,15 +632,29 @@ def chart_create_filter_query(
     filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
 ) -> Dict:
     filter_query = {}
-    if filters.get("program") is not None:
-        filter_query.update({program_id_path: filters.get("program")})
-    if filters.get("administrative_area") is not None:
+    if program := filters.get("program"):
+        filter_query.update({program_id_path: program})
+    if administrative_area := filters.get("administrative_area"):
         filter_query.update(
             {
-                f"{administrative_area_path}__id": filters.get("administrative_area"),
+                f"{administrative_area_path}__id": administrative_area,
                 f"{administrative_area_path}__area_type__area_level": 2,
             }
         )
+    return filter_query
+
+
+def chart_create_filter_query_for_payment_verification_gfk(
+    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+) -> Q:
+    filter_query = Q()
+    if program := filters.get("program"):
+        for path in program_id_path.split(","):
+            filter_query |= Q(**{path: program})
+
+    if administrative_area := filters.get("administrative_area"):
+        for path in administrative_area_path.split(","):
+            filter_query |= Q(Q(**{f"{path}__id": administrative_area}) & Q(**{f"{path}__area_type__area_level": 2}))
     return filter_query
 
 
@@ -744,3 +784,25 @@ def save_data_in_cache(
             return cache_data
         cache.set(cache_key, cache_data, timeout=timeout)
     return cache_data
+
+
+def clear_cache_for_dashboard_totals() -> None:
+    keys = (
+        "resolve_section_households_reached",
+        "resolve_section_individuals_reached",
+        "resolve_section_child_reached",
+        "resolve_chart_volume_by_delivery_mechanism",
+        "resolve_chart_payment",
+        "resolve_chart_programmes_by_sector",
+        "resolve_section_total_transferred",
+        "resolve_chart_payment_verification",
+        "resolve_table_total_cash_transferred_by_administrative_area",
+        "resolve_chart_individuals_reached_by_age_and_gender",
+        "resolve_chart_individuals_with_disability_reached_by_age",
+        "resolve_chart_total_transferred_by_month",
+    )
+    # we need skip remove cache for test and because LocMemCache don't have .keys()
+    if not getattr(settings, "IS_TEST", False):
+        all_cache_keys = cache.keys("*")
+        for k in [key for key in all_cache_keys if key.startswith(keys)]:
+            cache.delete(k)

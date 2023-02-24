@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hope.fullname" . }}-backend
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+data:
+  {{- include "hope.cashassistdatahubpostgresql.config" . | nindent 2 }}
+  {{- include "hope.registrationdatahubpostgresql.config" . | nindent 2 }}
+  {{- include "hope.postgresql.config" . | nindent 2 }}
+  {{- include "hope.elasticsearch.config" . | nindent 2 }}
+  DJANGO_ALLOWED_HOSTS: "{{.Values.ingress.host }},kubernetes.internal"
+  DOMAIN: {{.Values.ingress.host }}
+  ENV: {{ .Values.global.env }}
+  REDIS_INSTANCE: hope-main-redis-master
+  FLOWER_BROKER_API: redis://hope-main-redis-master:6379/0
+{{- range $key, $value :=  .Values.backend.config }}
+  {{ if eq $value "" }}
+  {{ else }}
+  {{ $key }}: {{ $value }}
+  {{- end }}
+{{- end }}

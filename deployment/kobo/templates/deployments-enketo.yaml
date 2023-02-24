@@ -60,6 +60,9 @@ spec:
           mountPath: /tmp/enketo_express_nginx/
         - name: nginx-available-config
           mountPath: /tmp/nginx_templates_available/
+        - name: nginx-main-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
         - name: config
           mountPath: /srv/src/enketo_express/config/config.json
           subPath: config.json

@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 from typing import IO, TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from django.core.exceptions import ValidationError
@@ -29,8 +30,10 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_xlsx_import_task,
     validate_xlsx_import_task,
 )
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedIndividual,
     KoboImportData,
     RegistrationDataImportDatahub,
 )
@@ -38,6 +41,9 @@ from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     KoboImportDataNode,
     XlsxRowErrorNode,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -325,6 +331,13 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
         obj_hct.save()
 
+        imported_individuals_to_remove = ImportedIndividual.objects.filter(registration_data_import=obj_hct.datahub_id)
+
+        remove_elasticsearch_documents_by_matching_ids(
+            list(imported_individuals_to_remove.values_list("id", flat=True)),
+            get_imported_individual_doc(obj_hct.business_area.slug),
+        )
+
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
         )
@@ -340,6 +353,8 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
         business_area_slug = graphene.String(required=True)
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
 
@@ -351,7 +366,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
         )
-        validate_xlsx_import_task.delay(import_data.id)
+        transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id))
         return UploadImportDataXLSXFileAsync(import_data, [])
 
 

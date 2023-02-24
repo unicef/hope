@@ -1,7 +1,6 @@
 import logging
 import uuid
 from datetime import datetime
-from decimal import Decimal
 from io import BytesIO
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
@@ -13,14 +12,18 @@ from django.template.loader import render_to_string
 import openpyxl
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.core.exchange_rates.utils import (
+    calculate_delivery_quantity_in_usd,
+)
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
+from hct_mis_api.apps.core.utils import clear_cache_for_dashboard_totals
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerificationSummary,
+    CashPlan,
     PaymentRecord,
+    PaymentVerificationSummary,
 )
-from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
@@ -84,6 +87,8 @@ class CreateCashPlanReconciliationService:
             self._parse_row(row_values, index)
         self._add_cashplan_info()
         self._update_exchange_rates()
+        # clear cached total numbers for dashboard statistics
+        clear_cache_for_dashboard_totals()
 
     def _parse_header(self, header: List) -> None:
         for column, xlsx_column in self.column_mapping.items():
@@ -157,25 +162,16 @@ class CreateCashPlanReconciliationService:
         self.cash_plan.total_persons_covered_revised = self.total_person_covered
         self.cash_plan.total_entitled_quantity = self.total_entitlement_amount
         self.cash_plan.total_delivered_quantity = self.total_delivered_amount
-        CashPlanPaymentVerificationSummary.objects.create(cash_plan=self.cash_plan)
+        PaymentVerificationSummary.objects.create(
+            payment_plan_obj=self.cash_plan
+        )  # previously CashPlanPaymentVerificationSummary
         self.cash_plan.save()
 
     def _update_exchange_rates(self) -> None:
         exchange_rates_client = ExchangeRates()
         payment_records_qs = PaymentRecord.objects.filter(cash_plan=self.cash_plan)
         for payment_record in payment_records_qs:
-            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
-                payment_record.currency, payment_record.cash_plan.dispersion_date
-            )
-
-            if exchange_rate is None:
-                logger.info(f"exchange_rate not found for {payment_record.ca_id}")
-                continue
-            else:
-                exchange_rate = Decimal(exchange_rate)
-            payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity / exchange_rate).quantize(
-                Decimal(".01")
-            )
+            calculate_delivery_quantity_in_usd(exchange_rates_client, payment_record)
 
         PaymentRecord.objects.bulk_update(payment_records_qs, ["delivered_quantity_usd"], 1000)
 

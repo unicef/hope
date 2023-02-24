@@ -4,6 +4,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -391,6 +392,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
+        cache.delete_pattern(f"count_{self.business_area.slug}_GrievanceTicketNodeConnection_*")
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
@@ -701,7 +703,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional["PaymentRecord"]:
-        return getattr(self.payment_verification, "payment_record", None)
+        return getattr(self.payment_verification, "payment_obj", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

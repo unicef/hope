@@ -12,13 +12,15 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
+    DjangoPermissionFilterConnectionField,
     DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
 from hct_mis_api.apps.core.utils import (
@@ -53,7 +55,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
@@ -72,7 +74,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-    payment_record = graphene.Field(PaymentRecordNode)
+    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
@@ -415,7 +417,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
         ),
     )
-    all_ticket_notes = DjangoPermissionFilterFastConnectionField(
+    all_ticket_notes = DjangoPermissionFilterConnectionField(
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
     )
@@ -492,7 +494,7 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, object]:
         grievance_tickets = chart_get_filtered_qs(
-            GrievanceTicket,
+            GrievanceTicket.objects,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
         )

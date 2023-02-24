@@ -3,8 +3,12 @@ from typing import Any
 from django.db import connections
 
 
-def sql_drop_tables(connection: Any) -> str:
-    tables = connection.introspection.django_table_names(only_existing=True, include_views=False)
+def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
+    if connection_name == "default":
+        # TODO: sometimes tables not dropped if using .django_table_names()
+        tables = connection.introspection.table_names(include_views=False)
+    else:
+        tables = connection.introspection.django_table_names(only_existing=True, include_views=False)
     tables.append("django_migrations")
     if not tables:
         return ""

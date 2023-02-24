@@ -11,7 +11,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterFastConnectionField,
+    DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.reporting.filters import ReportFilter
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
@@ -64,7 +64,7 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     report = relay.Node.Field(ReportNode)
-    all_reports = DjangoPermissionFilterFastConnectionField(
+    all_reports = DjangoPermissionFilterConnectionField(
         ReportNode,
         filterset_class=ReportFilter,
         permission_classes=(
@@ -111,6 +111,7 @@ class Query(graphene.ObjectType):
         years_list = [*range(current_year, current_year - 5, -1)]
         models = [
             (PaymentRecord, "delivery_date"),
+            (Payment, "delivery_date"),
             (GrievanceTicket, "created_at"),
         ]
         years_list_from_db = []

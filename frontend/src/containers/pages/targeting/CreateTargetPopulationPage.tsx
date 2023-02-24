@@ -26,6 +26,7 @@ import {
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
 import { PaperContainer } from '../../../components/targeting/PaperContainer';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -117,6 +118,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     >
       {({ submitForm, values, setFieldValue }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
             handleSubmit={submitForm}
             loading={loading}

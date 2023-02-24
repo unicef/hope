@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, List, Tuple
 
+from django.core.cache import cache
 from django.db import transaction
 from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404
@@ -415,6 +416,9 @@ class RdiMergeTask:
                 log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 
             self._update_individuals_and_households(individual_ids)
+
+            cache.delete_pattern(f"count_{obj_hub.business_area_slug}_HouseholdNodeConnection_*")
+            cache.delete_pattern(f"count_{obj_hub.business_area_slug}_IndividualNodeConnection_*")
 
         except Exception as e:
             logger.error(e)
