@@ -367,8 +367,8 @@ def automate_rdi_creation_task(
                     records=len(records_ids),
                     business_area_name=service.BUSINESS_AREA_SLUG,
                 )
-                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
-                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                rdi = service().create_rdi(imported_by=None, rdi_name=rdi_name)
+                service().process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
                     merge_registration_data_import_task.delay(rdi.id)
