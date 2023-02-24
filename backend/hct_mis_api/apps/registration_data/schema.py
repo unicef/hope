@@ -5,7 +5,7 @@ from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
-    DjangoPermissionFilterFastConnectionField,
+    DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
@@ -75,7 +75,7 @@ class Query(graphene.ObjectType):
     registration_data_import = graphene.relay.Node.Field(
         RegistrationDataImportNode,
     )
-    all_registration_data_imports = DjangoPermissionFilterFastConnectionField(
+    all_registration_data_imports = DjangoPermissionFilterConnectionField(
         RegistrationDataImportNode,
         filterset_class=RegistrationDataImportFilter,
         permission_classes=(hopePermissionClass(Permissions.RDI_VIEW_LIST),),
