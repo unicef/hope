@@ -48,7 +48,6 @@ from hct_mis_api.apps.payment.filters import (
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     GenericPayment,
-    PaymentRecord,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
