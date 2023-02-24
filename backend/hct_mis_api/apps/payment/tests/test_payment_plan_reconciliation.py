@@ -710,7 +710,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment.household.total_cash_received, 500)
             self.assertEqual(payment.household.total_cash_received_usd, 250)
-            self.assertEqual(payment_plan.is_reconciled, True)
+            self.assertTrue(payment_plan.is_reconciled)
+            self.assertFalse(payment_plan.is_fully_delivered)
 
     @parameterized.expand(
         [
@@ -818,3 +819,29 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(payment_2.delivered_quantity, 100)
         self.assertEqual(verification_2.received_amount, 500)
         self.assertEqual(verification_2.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+
+    def test_payment_plan_is_fully_delivered(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        self.assertFalse(payment_plan.is_fully_delivered)
+        for hh, ind in [
+            (self.household_1, self.individual_1),
+            (self.household_2, self.individual_2),
+            (self.household_3, self.individual_3)
+        ]:
+            PaymentFactory(
+                parent=payment_plan,
+                business_area=self.business_area,
+                household=hh,
+                collector=ind,
+                delivery_type=None,
+                entitlement_quantity=999,
+                entitlement_quantity_usd=10,
+                delivered_quantity=999,
+                delivered_quantity_usd=10,
+                financial_service_provider=None,
+                excluded=False,
+            )
+        payment_plan.status_finished()
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+        self.assertTrue(payment_plan.is_fully_delivered)
