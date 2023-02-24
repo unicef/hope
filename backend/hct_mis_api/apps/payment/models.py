@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
@@ -169,12 +170,17 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
             raise ValidationError("Status shouldn't be failed")
         self.status = self.STATUS_FORCE_FAILED
         self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
 
-    def revert_mark_as_failed(self) -> None:
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime.datetime) -> None:
         if self.status != self.STATUS_FORCE_FAILED:
             raise ValidationError("Only payment record marked as force failed can be reverted")
         self.status = self.STATUS_SUCCESS
         self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
 
 
 class ServiceProvider(TimeStampedUUIDModel):
