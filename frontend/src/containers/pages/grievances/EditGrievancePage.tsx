@@ -54,6 +54,7 @@ import {
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import { LoadingButton } from '../../../components/core/LoadingButton';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -256,6 +257,7 @@ export function EditGrievancePage(): React.ReactElement {
         );
         return (
           <>
+            <AutoSubmitFormOnEnter />
             <PageHeader
               title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}

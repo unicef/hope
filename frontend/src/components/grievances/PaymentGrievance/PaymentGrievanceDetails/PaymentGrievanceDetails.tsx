@@ -51,11 +51,10 @@ export function PaymentGrievanceDetails({
   const {
     approveStatus,
     newReceivedAmount,
-    paymentVerification: {
-      receivedAmount,
-      paymentRecord: { deliveredQuantity },
-    },
+    paymentVerification: { receivedAmount },
   } = ticket.paymentVerificationTicketDetails;
+
+  const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
 
   let dialogText = t('Are you sure you want to disapprove this payment?');
   if (!approveStatus) {

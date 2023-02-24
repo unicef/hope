@@ -204,11 +204,20 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         exclusion_reason = input.get("exclusion_reason")
         targeting_criteria_input = input.get("targeting_criteria")
 
-        cls.validate_statuses(
-            name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
-        )
-        should_rebuild_list = False
         should_rebuild_stats = False
+        should_rebuild_list = False
+
+        if target_population.is_locked() and name:
+            msg = "Name can't be changed when Target Population is in Locked status"
+            logger.error(msg)
+            raise ValidationError(msg)
+        if target_population.is_finalized():
+            msg = "Finalized Target Population can't be changed"
+            logger.error(msg)
+            raise ValidationError(msg)
+        if target_population.status == TargetPopulation.STATUS_ASSIGNED:
+            logger.error("Assigned Target Population can't be changed")
+            raise ValidationError("Assigned Target Population can't be changed")
         if name:
             target_population.name = name
         if vulnerability_score_min is not None:
@@ -374,16 +383,23 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
 
     @classmethod
     def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "FinalizeTargetPopulationMutation":
-        with transaction.atomic():
-            user = info.context.user
-            target_population: TargetPopulation = kwargs["model_object"]
-            old_target_population = kwargs.get("old_model_object")
-            target_population.status = TargetPopulation.STATUS_PROCESSING
-            target_population.finalized_by = user
-            target_population.finalized_at = timezone.now()
-            target_population.save()
-            transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
-            transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
+        user = info.context.user
+        old_target_population = kwargs.get("old_model_object")
+        target_population: TargetPopulation = kwargs["model_object"]
+        if target_population.program.business_area.is_payment_plan_applicable:
+            with transaction.atomic():
+                target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+                target_population.finalized_by = user
+                target_population.finalized_at = timezone.now()
+                target_population.save()
+        else:
+            with transaction.atomic():
+                target_population.status = TargetPopulation.STATUS_PROCESSING
+                target_population.finalized_by = user
+                target_population.finalized_at = timezone.now()
+                target_population.save()
+                transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
+                transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",

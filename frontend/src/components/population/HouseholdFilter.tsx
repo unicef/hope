@@ -46,7 +46,7 @@ export const HouseholdFilters = ({
             label={t('Search')}
             value={filter.text}
             onChange={(e) => handleFilterChange(e, 'text')}
-            data-cy='filters-search'
+            data-cy='hh-filters-search'
           />
         </Grid>
         <Grid item>

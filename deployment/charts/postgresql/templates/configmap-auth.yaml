@@ -1,0 +1,12 @@
+{{- if and (and .Values.auth.database .Values.auth.username) .Values.auth.password }}
+---
+apiVersion: v1
+kind: Secret 
+metadata:
+  name: {{ include "postgresql.fullname" . }}-auth
+stringData:
+  POSTGRES_USER: {{ .Values.auth.username  }}
+  POSTGRES_PASSWORD: {{ .Values.auth.password }}
+  PG_PASSWORD: {{ .Values.auth.password }}
+  POSTGRES_DB: {{ .Values.auth.database }}
+{{- end }}

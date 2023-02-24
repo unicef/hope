@@ -2,9 +2,9 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { TargetPopulationTable } from '.';
 import { fakeApolloAllTargetPopulation } from '../../../../../fixtures/targeting/fakeApolloAllTargetPopulation';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { TargetPopulationTable } from '.';
 
 describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', () => {
   it('should render with data', async () => {

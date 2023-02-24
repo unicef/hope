@@ -48,6 +48,7 @@ export function HouseHoldTableRow({
       onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={household.unicefId}
+      data-cy='household-table-row'
     >
       <TableCell align='left'>
         <>

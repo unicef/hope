@@ -27,7 +27,7 @@ def fix_exchange_rates(all: Optional[Any] = None) -> None:
 
 def calculate_delivery_quantity_in_usd(exchange_rates_client: ExchangeRates, payment_record: PaymentRecord) -> None:
     exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
-        payment_record.currency, payment_record.cash_plan.dispersion_date
+        payment_record.currency, payment_record.parent.dispersion_date
     )
 
     if exchange_rate is None:

@@ -1,9 +1,13 @@
 from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
+from django.contrib.postgres.forms import DecimalRangeField
 from django.templatetags.static import static
 
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import (
+    AcceptanceProcessThreshold,
+    CashPlan,
+    PaymentRecord,
+)
 
 
 class ImportPaymentRecordsForm(forms.ModelForm):
@@ -34,3 +38,21 @@ class ImportPaymentRecordsForm(forms.ModelForm):
 
     class Media:
         js = (static("admin/js/core.js"),)
+
+
+class AcceptanceProcessThresholdForm(forms.ModelForm):
+    payments_range_usd = DecimalRangeField(
+        fields=[
+            forms.IntegerField(required=True),
+            forms.IntegerField(required=False),
+        ],
+    )
+
+    class Meta:
+        model = AcceptanceProcessThreshold
+        fields = [
+            "payments_range_usd",
+            "approval_number_required",
+            "authorization_number_required",
+            "finance_release_number_required",
+        ]
