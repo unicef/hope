@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 class BaseRegistrationService(abc.ABC):
     BUSINESS_AREA_SLUG = ""
-    REGISTRATION_ID = ()
+    REGISTRATION_ID = tuple()
     PROCESS_FLEX_RECORDS_TASK = None
 
     @atomic("default")
@@ -438,7 +438,7 @@ class FlexRegistrationService(BaseRegistrationService):
 
 class SriLankaRegistrationService(BaseRegistrationService):
     BUSINESS_AREA_SLUG = "sri-lanka"
-    REGISTRATION_ID = 17
+    REGISTRATION_ID = (17,)
     PROCESS_FLEX_RECORDS_TASK = process_sri_lanka_flex_records_task
 
     HOUSEHOLD_MAPPING_DICT = {
@@ -572,7 +572,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        if record.registration != self.REGISTRATION_ID:
+        if record.registration not in self.REGISTRATION_ID:
             raise ValidationError("Sri-Lanka data is processed only from registration 17!")
 
         record_data_dict = record.get_data()
@@ -645,8 +645,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
 def get_registration_to_rdi_service_map() -> Dict[int, Any]:
     return {
-        2: FlexRegistrationService(),       # ukraine
-        3: FlexRegistrationService(),       # ukraine
+        2: FlexRegistrationService(),  # ukraine
+        3: FlexRegistrationService(),  # ukraine
         17: SriLankaRegistrationService(),  # sri lanka
         # 18: "czech republic",
         # 19: "czech republic",
