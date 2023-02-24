@@ -1018,7 +1018,6 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
-            logger.info("after logging")
 
         return cls(payment_plan, None)
 
