@@ -47,6 +47,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    FlexRegistrationService,
+    SriLankaRegistrationService,
     create_task_for_processing_records,
     get_registration_to_rdi_service_map,
 )
@@ -392,17 +394,14 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             )
             return
 
+        service_list = [FlexRegistrationService(), SriLankaRegistrationService()]
         msg_resp = ""
-        for registration in list(set(queryset.values_list("registration", flat=True))):
-            queryset = queryset.filter(registration=registration).values_list("id", flat=True)
-
-            service = get_registration_to_rdi_service_map().get(registration)
-            if service is None:
-                # NotImplementedError
-                self.message_user(request, f"Service not implemented for registration {registration}", messages.ERROR)
-                return
+        for service in service_list:
+            qs = queryset.filter(registration__in=service.REGISTRATION_ID).values_list("id", flat=True)
+            if not qs:
+                continue
             try:
-                records_ids = queryset.values_list("id", flat=True)
+                records_ids = qs.values_list("id", flat=True)
                 rdi = service.create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
 
                 create_task_for_processing_records(service, rdi.pk, list(records_ids))
