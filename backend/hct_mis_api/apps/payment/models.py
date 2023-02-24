@@ -424,6 +424,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         object_id_field="payment_plan_object_id",
         related_query_name="payment_plan",
     )
+    is_fully_delivered = models.BooleanField(
+        default=False, db_index=True, help_text="For all Payments entitlement quantity is equal to delivered quantity"
+    )
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -603,10 +606,16 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     def status_finished(self) -> None:
         self.status_date = timezone.now()
-        if not self.payment_verification_summary.exists():
+        self.set_is_fully_delivered()
+
+        if not self.is_fully_delivered and not self.payment_verification_summary.exists():
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
+
+    def set_is_fully_delivered(self) -> None:
+        if all([payment.entitlement_quantity == payment.delivered_quantity for payment in self.not_excluded_payments]):
+            self.is_fully_delivered = True
 
     @property
     def currency_exchange_date(self) -> datetime:

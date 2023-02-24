@@ -1250,9 +1250,15 @@ class Query(graphene.ObjectType):
             payment_plan_object_id=OuterRef("id")
         )
 
-        payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.FINISHED).annotate(
-            fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
-            delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
+        payment_plan_qs = (
+            PaymentPlan.objects.filter(status=PaymentPlan.Status.FINISHED)
+            .exclude(is_fully_delivered=True)
+            .annotate(
+                fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
+                delivery_types=ArraySubquery(
+                    delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)
+                ),
+            )
         )
         cash_plan_qs = CashPlan.objects.all().annotate(
             unicef_id=F("ca_id"),
