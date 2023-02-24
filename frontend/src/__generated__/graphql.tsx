@@ -1119,6 +1119,7 @@ export type DocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
   type: DocumentTypeType,
+  isIdentityDocument: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -1139,6 +1140,7 @@ export enum DocumentTypeType {
   NationalPassport = 'NATIONAL_PASSPORT',
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
+  BankStatement = 'BANK_STATEMENT',
   Other = 'OTHER'
 }
 
@@ -2005,6 +2007,7 @@ export type ImportedDocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
   type: ImportedDocumentTypeType,
+  isIdentityDocument: Scalars['Boolean'],
   documents: ImportedDocumentNodeConnection,
 };
 
@@ -2025,6 +2028,7 @@ export enum ImportedDocumentTypeType {
   NationalPassport = 'NATIONAL_PASSPORT',
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
+  BankStatement = 'BANK_STATEMENT',
   Other = 'OTHER'
 }
 
@@ -5396,7 +5400,7 @@ export type ReconciliationSummaryNode = {
   deliveredFully?: Maybe<Scalars['Int']>,
   deliveredPartially?: Maybe<Scalars['Int']>,
   notDelivered?: Maybe<Scalars['Int']>,
-  failed?: Maybe<Scalars['Int']>,
+  unsuccessful?: Maybe<Scalars['Int']>,
   pending?: Maybe<Scalars['Int']>,
   numberOfPayments?: Maybe<Scalars['Int']>,
   reconciled?: Maybe<Scalars['Int']>,
@@ -9962,7 +9966,7 @@ export type PaymentPlanQuery = (
       )>> }
     ), reconciliationSummary: Maybe<(
       { __typename?: 'ReconciliationSummaryNode' }
-      & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'failed' | 'pending' | 'numberOfPayments' | 'reconciled'>
+      & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'unsuccessful' | 'pending' | 'numberOfPayments' | 'reconciled'>
     )> }
   )> }
 );
@@ -18199,7 +18203,7 @@ export const PaymentPlanDocument = gql`
       deliveredFully
       deliveredPartially
       notDelivered
-      failed
+      unsuccessful
       pending
       numberOfPayments
       reconciled
@@ -24078,6 +24082,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
+  isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
 
@@ -24502,6 +24507,7 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
+  isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };
 
@@ -25598,7 +25604,7 @@ export type ReconciliationSummaryNodeResolvers<ContextType = any, ParentType ext
   deliveredFully?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   deliveredPartially?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   notDelivered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  failed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  unsuccessful?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   pending?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   numberOfPayments?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reconciled?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
