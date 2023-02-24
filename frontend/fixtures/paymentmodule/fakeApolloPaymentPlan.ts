@@ -277,7 +277,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     deliveredFully: 100,
     deliveredPartially: 15,
     notDelivered: 5,
-    failed: 5,
+    unsuccessful: 5,
     pending: 0,
     numberOfPayments: 120,
     reconciled: 120,
