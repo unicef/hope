@@ -333,10 +333,7 @@ def automate_rdi_creation_task(
     **filters: Any,
 ) -> List:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        FlexRegistrationService,
-    )
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        SriLankaRegistrationService,
+        get_registration_to_rdi_service_map,
     )
 
     try:
@@ -345,16 +342,8 @@ def automate_rdi_creation_task(
                 return []
             output = []
 
-            if registration_id == 17:  # SriLanka
-                service = SriLankaRegistrationService()
-                business_area_name = "Sri Lanka"
-            elif registration_id in [2, 3]:  # Ukraine
-                service = FlexRegistrationService()
-                business_area_name = "Ukraine"
-            elif registration_id in [18, 19]:  # CzechRepublic
-                # will add soon
-                raise NotImplementedError
-            else:
+            service: Optional[Any] = get_registration_to_rdi_service_map().get(registration_id)
+            if service is None:
                 raise NotImplementedError
 
             qs = Record.objects.filter(registration=registration_id, **filters).exclude(
@@ -376,7 +365,7 @@ def automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
                     records=len(records_ids),
-                    business_area_name=business_area_name,
+                    business_area_name=service.BUSINESS_AREA_SLUG,
                 )
                 rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
                 service.process_records(rdi_id=rdi.id, records_ids=records_ids)
