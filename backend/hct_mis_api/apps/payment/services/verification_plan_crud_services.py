@@ -26,9 +26,7 @@ def get_payment_records(
     payment_plan: Union["PaymentPlan", "CashPlan"], verification_channel: Optional[Any]
 ) -> QuerySet:
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
-        return payment_plan.available_payment_records(
-            extra_validation=does_payment_record_have_right_hoh_phone_number
-        )
+        return payment_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return payment_plan.available_payment_records()
 
 
