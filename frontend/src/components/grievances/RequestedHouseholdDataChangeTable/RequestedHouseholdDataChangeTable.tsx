@@ -3,9 +3,9 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import styled from 'styled-components';
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import {

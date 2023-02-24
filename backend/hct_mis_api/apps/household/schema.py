@@ -76,7 +76,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     programs_with_delivered_quantity,
 )
-from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
@@ -617,10 +617,10 @@ class Query(graphene.ObjectType):
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
+        return {"total": payment_items_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
@@ -639,13 +639,13 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         individuals_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_individuals_params)
+            payment_items_qs.select_related("household")
             .distinct("household__id")
+            .values_list(*households_individuals_params)
         )
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
@@ -662,14 +662,12 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
         ]
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         household_child_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_child_params)
-            .distinct("household__id")
+            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_child_params)
         )
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
@@ -690,14 +688,13 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-
         household_child_counts = (
-            payment_records_qs.select_related("household").values_list(*households_params).distinct("household__id")
+            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_params)
         )
+
         return {
             "labels": INDIVIDUALS_CHART_LABELS,
             "datasets": [{"data": sum_lists_with_values(household_child_counts, len(households_params))}],
@@ -733,23 +730,22 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
+
         # aggregate with distinct by household__id is not possible
         households_with_disability_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_with_disability)
+            payment_items_qs.select_related("household")
             .distinct("household__id")
+            .values_list(*households_params_with_disability)
         )
         sum_of_with_disability = sum_lists_with_values(
             households_with_disability_counts, len(households_params_with_disability)
         )
 
         households_totals_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_total)
-            .distinct("household__id")
+            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_params_total)
         )
         sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
 

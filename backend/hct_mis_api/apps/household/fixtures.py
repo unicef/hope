@@ -1,8 +1,6 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-from django.db.models import Model
-
 import factory
 from factory import enums, fuzzy
 from faker import Faker
@@ -128,22 +126,17 @@ class HouseholdFactory(factory.DjangoModelFactory):
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
-    @classmethod
-    def _create(cls, model_class: Model, *args: Any, **kwargs: Any) -> Household:
-        if not (hoh := kwargs.get("head_of_household", None)):
-            hoh = IndividualFactory(household=None)
-            kwargs["head_of_household"] = hoh
-        ret = super()._create(model_class, *args, **kwargs)
-        hoh.household = ret
-        hoh.save()
-        return ret
-
 
 class IndividualIdentityFactory(factory.DjangoModelFactory):
     class Meta:
         model = IndividualIdentity
 
     number = factory.Faker("pystr", min_chars=None, max_chars=20)
+
+
+class IndividualRoleInHouseholdFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = IndividualRoleInHousehold
 
 
 class IndividualFactory(factory.DjangoModelFactory):

@@ -703,7 +703,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional["PaymentRecord"]:
-        return getattr(self.payment_verification, "payment_record", None)
+        return getattr(self.payment_verification, "payment_obj", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

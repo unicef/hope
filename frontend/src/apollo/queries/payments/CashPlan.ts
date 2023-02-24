@@ -27,7 +27,7 @@ export const CashPlan = gql`
       bankReconciliationSuccess
       bankReconciliationError
       totalNumberOfHouseholds
-      verifications {
+      verificationPlans {
         totalCount
         edges {
           node {
@@ -60,7 +60,7 @@ export const CashPlan = gql`
           }
         }
       }
-      cashPlanPaymentVerificationSummary {
+      paymentVerificationSummary {
         id
         createdAt
         updatedAt
@@ -73,7 +73,7 @@ export const CashPlan = gql`
         name
         caId
       }
-      paymentRecords {
+      paymentItems {
         totalCount
         edgeCount
         edges {

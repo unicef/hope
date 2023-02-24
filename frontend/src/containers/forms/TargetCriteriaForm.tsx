@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import {
@@ -223,6 +224,7 @@ export function TargetCriteriaForm({
             fullWidth
             maxWidth='md'
           >
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle disableTypography>
                 <Typography variant='h6'>{t('Add Filter')}</Typography>
@@ -289,6 +291,7 @@ export function TargetCriteriaForm({
                     }
                     color='primary'
                     startIcon={<AddCircleOutline />}
+                    data-cy='button-household-rule'
                   >
                     ADD HOUSEHOLD RULE
                   </Button>
@@ -329,6 +332,7 @@ export function TargetCriteriaForm({
               <Box display='flex' flexDirection='column'>
                 <ButtonBox>
                   <Button
+                    data-cy='button-individual-rule'
                     onClick={() =>
                       individualsFiltersBlocksWrapperRef.current
                         .getArrayHelpers()

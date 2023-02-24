@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField
@@ -9,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
+from model_utils.models import SoftDeletableModel, TimeStampedModel
 from natural_keys import NaturalKeyModel
 
 import mptt
@@ -98,6 +99,8 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+
+    is_payment_plan_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -390,3 +393,16 @@ class StorageFile(models.Model):
 
     def __str__(self) -> str:
         return self.file.name
+
+
+class FileTemp(TimeStampedModel):
+    """Use this model for temporary store files"""
+
+    object_id = models.CharField(max_length=120, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    file = models.FileField()
+    was_downloaded = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.file.name} - {self.created}"
