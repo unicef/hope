@@ -654,7 +654,5 @@ def get_registration_to_rdi_service_map() -> Dict[int, Any]:
 
 
 def create_task_for_processing_records(service: Any, rdi_id: "UUID", records_ids: List) -> None:
-
-    celery_task = service.PROCESS_FLEX_RECORDS_TASK
-    if celery_task:
+    if celery_task := service.PROCESS_FLEX_RECORDS_TASK:
         celery_task.delay(rdi_id, records_ids)
