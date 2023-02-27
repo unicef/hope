@@ -1,7 +1,9 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
+from uuid import UUID
 
 from django.contrib import admin
-from django.http import HttpResponseRedirect
+from django.db.models.query import QuerySet
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
@@ -15,18 +17,21 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
+from .forms import TargetPopulationForm
+from .mixins import TargetPopulationFromListMixin
 from .models import HouseholdSelection, TargetPopulation
 from .steficon import SteficonExecutorMixin
 
-if TYPE_CHECKING:
-    from uuid import UUID
-
-    from django.db.models.query import QuerySet
-    from django.http import HttpRequest, HttpResponse
-
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class TargetPopulationAdmin(
+    SoftDeletableAdminMixin,
+    SteficonExecutorMixin,
+    TargetPopulationFromListMixin,
+    LinkedObjectsMixin,
+    HOPEModelAdminBase,
+):
+    form = TargetPopulationForm
     list_display = (
         "name",
         "status",
