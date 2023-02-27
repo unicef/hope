@@ -8,7 +8,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -354,7 +354,7 @@ class CreateRDIForm(forms.Form):
         help_text="filters to use to select the records (Uses Django filtering syntax)",
     )
 
-    def clean_filters(self):
+    def clean_filters(self) -> QueryStringFilter:
         filter = QueryStringFilter(None, {}, Record, None)
         return filter.get_filters(self.cleaned_data["filters"])
 
@@ -482,7 +482,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         return is_root(request)
 
     @button()
-    def create_new_rdi(self, request):
+    def create_new_rdi(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request, title="Create RDI")
         if request.method == "POST":
             form = CreateRDIForm(request.POST)
@@ -492,15 +492,31 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
 
-                service = get_registration_to_rdi_service_map().get(registration_id, None)
-                if service:
-                    qs = Record.objects.filter(registration__id=registration_id).filter(**filters).exclude(**exclude)
-                    records_ids = qs.values_list("id", flat=True)
-                    rdi = service().create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
-                    create_task_for_processing_records(service, rdi.pk, list(records_ids))
-                else:
-                    self.message_user(request, f"Invalid registration number", messages.ERROR)
+                if service := get_registration_to_rdi_service_map().get(registration_id):
+                    if qs := Record.objects.filter(registration=registration_id).filter(**filters).exclude(**exclude):
+                        try:
+                            records_ids = qs.values_list("id", flat=True)
+                            rdi = service().create_rdi(
+                                request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
+                            )
+                            create_task_for_processing_records(service, rdi.pk, list(records_ids))
+                        except Exception as e:
+                            self.message_user(request, str(e), messages.ERROR)
 
+                        url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                        self.message_user(
+                            request,
+                            mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                            messages.SUCCESS,
+                        )
+                    else:
+                        self.message_user(request, "There are no Records by filtering criteria", messages.ERROR)
+                else:
+                    self.message_user(
+                        request,
+                        "Invalid registration number. Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3 - Ukraine;",
+                        messages.ERROR,
+                    )
         else:
             form = CreateRDIForm()
 
