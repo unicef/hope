@@ -25,8 +25,6 @@ context("Payment", () => {
 
     cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 
-    return; // TODO: make this work
-
     //Payment Plan Details page
     cy.get('[data-cy="page-header-container"]').contains("Payment Plan ID", {
       timeout: 10000,
@@ -59,6 +57,7 @@ context("Payment", () => {
     });
     cy.get('[data-cy="button-apply-steficon"]').click({ force: true });
     cy.reload();
+    cy.wait(500);
     cy.get('[data-cy="total-entitled-quantity-usd"]').contains("USD");
     // TODO: check the amount
     
@@ -85,6 +84,7 @@ context("Payment", () => {
     cy.get("[data-cy='button-send-for-approval']").click({ force: true });
     cy.wait(1000);
     cy.reload(); // this shouldn't be needed but there's some bug here with which reload helps
+    cy.wait(500);
     cy.contains("Acceptance Process");
     cy.get("[data-cy='button-approve']").click({ force: true });
     cy.get("[data-cy='button-submit']").click({ force: true });
@@ -128,6 +128,7 @@ context("Payment", () => {
     cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
     cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
     cy.reload();
+    cy.wait(500);
     cy.get('[data-cy="button-download-xlsx"]').click({ force: true });
     cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
     const nameZip = zipFileName(paymentPlanUnicefId);
@@ -162,10 +163,14 @@ context("Payment", () => {
         cy.get('[data-cy="file-input"').click({ force: true });
         // cy.get('[data-cy="imported-file-name"]').should('exist'); // TODO
         cy.get('[data-cy="button-import-submit"').click({ force: true });
-        cy.wait(1000)
+        cy.intercept({
+            method: "POST",
+            url: "http://**",
+          }).as("requests");
+        cy.wait("@requests");
         cy.get("p").should("not.contain", "Errors");
-        cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
         cy.reload();
+        cy.wait(500);
         cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
           cy.wrap($el).should("contain", "AFN");
           cy.wrap($el).should("contain", "500");

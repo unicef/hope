@@ -21,9 +21,9 @@ def cypress_post(data: Dict) -> HttpResponse:
         seed = data.get("seed")
         if not seed:
             return HttpResponse("No seed provided", status=400)
-        call_command(command, scenario, "--seed", seed)
+        return call_command(command, scenario, "--seed", seed)
 
-    elif command == "generate-xlsx-files":
+    if command == "generate-xlsx-files":
         household_size = data.get("size")
         if not household_size:
             return HttpResponse("No household size provided", status=400)
@@ -31,7 +31,7 @@ def cypress_post(data: Dict) -> HttpResponse:
         if not seed:
             return HttpResponse("No seed provided", status=400)
         print(f"Generating xlsx files for household size {household_size} with seed {seed}")
-        call_command("generate_rdi_xlsx_files", household_size, "--seed", seed)
+        return call_command("generate_rdi_xlsx_files", household_size, "--seed", seed)
 
     raise ValueError(f"Unknown command: {command}")
 
