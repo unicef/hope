@@ -1252,7 +1252,6 @@ class Query(graphene.ObjectType):
 
         payment_plan_qs = (
             PaymentPlan.objects.filter(status=PaymentPlan.Status.FINISHED)
-            .exclude(is_fully_delivered=True)
             .annotate(
                 fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
                 delivery_types=ArraySubquery(
