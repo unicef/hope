@@ -220,7 +220,6 @@ class GenericPayment(TimeStampedUUIDModel):
     )
 
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
-    # TODO: upd this statuses ^ STATUS_NOT_DISTRIBUTED == 0, STATUS_ERROR < 0,
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -609,9 +608,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
-
-    def is_fully_delivered(self) -> bool:
-        return all([payment.entitlement_quantity == payment.delivered_quantity for payment in self.not_excluded_payments])
 
     @property
     def currency_exchange_date(self) -> datetime:
