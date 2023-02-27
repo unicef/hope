@@ -8,7 +8,8 @@ from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -345,6 +346,19 @@ class AlexisFilter(SimpleListFilter):
             }
 
 
+class CreateRDIForm(forms.Form):
+    registration = forms.IntegerField(required=True)
+    filters = forms.CharField(
+        widget=forms.Textarea,
+        required=False,
+        help_text="filters to use to select the records (Uses Django filtering syntax)",
+    )
+
+    def clean_filters(self) -> QueryStringFilter:
+        filter = QueryStringFilter(None, {}, Record, None)
+        return filter.get_filters(self.cleaned_data["filters"])
+
+
 @admin.register(Record)
 class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
@@ -466,6 +480,48 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
+
+    @button()
+    def create_new_rdi(self, request: HttpRequest) -> HttpResponse:
+        ctx = self.get_common_context(request, title="Create RDI")
+        if request.method == "POST":
+            form = CreateRDIForm(request.POST)
+            if form.is_valid():
+                registration_id = form.cleaned_data["registration"]
+                filters, exclude = form.cleaned_data["filters"]
+                ctx["filters"] = filters
+                ctx["exclude"] = exclude
+
+                if service := get_registration_to_rdi_service_map().get(registration_id):
+                    if qs := Record.objects.filter(registration=registration_id).filter(**filters).exclude(**exclude):
+                        try:
+                            records_ids = qs.values_list("id", flat=True)
+                            rdi = service().create_rdi(
+                                request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
+                            )
+                            create_task_for_processing_records(service, rdi.pk, list(records_ids))
+                        except Exception as e:
+                            self.message_user(request, str(e), messages.ERROR)
+
+                        url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                        self.message_user(
+                            request,
+                            mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                            messages.SUCCESS,
+                        )
+                    else:
+                        self.message_user(request, "There are no Records by filtering criteria", messages.ERROR)
+                else:
+                    self.message_user(
+                        request,
+                        "Invalid registration number. Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3 - Ukraine;",
+                        messages.ERROR,
+                    )
+        else:
+            form = CreateRDIForm()
+
+        ctx["form"] = form
+        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
 
 
 @admin.register(DiiaIndividual)
