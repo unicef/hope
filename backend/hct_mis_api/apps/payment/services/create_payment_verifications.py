@@ -25,6 +25,7 @@ class CreatePaymentVerifications:
                 payment_verification_plan=self.payment_verification_plan,
                 payment_content_type=get_content_type_for_model(payment_record),
                 payment_object_id=payment_record.pk,
+                received_amount=None,
             )
             payment_record_verifications_to_create.append(payment_record_verification)
         PaymentVerification.objects.bulk_create(payment_record_verifications_to_create)

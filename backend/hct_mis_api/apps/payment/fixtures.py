@@ -628,6 +628,10 @@ def create_payment_verification_plan_with_status(
     status: str,
     verification_channel: Optional[str] = None,
 ) -> PaymentVerificationPlan:
+    if not cash_plan.payment_verification_summary.exists():
+        PaymentVerificationSummary.objects.create(
+            payment_plan_obj=cash_plan,
+        )
     payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
     payment_verification_plan.status = status
     if verification_channel:
