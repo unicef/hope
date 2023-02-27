@@ -168,6 +168,7 @@ export const GrievanceTicket = gql`
       paymentVerificationTicketDetails {
         id
         newStatus
+        oldReceivedAmount
         newReceivedAmount
         approveStatus
         paymentVerificationStatus
