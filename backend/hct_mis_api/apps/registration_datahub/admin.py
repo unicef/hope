@@ -347,11 +347,16 @@ class AlexisFilter(SimpleListFilter):
 
 
 class CreateRDIForm(forms.Form):
+    ANY = "ANY"
     registration = forms.IntegerField(required=True)
     filters = forms.CharField(
         widget=forms.Textarea,
         required=False,
         help_text="filters to use to select the records (Uses Django filtering syntax)",
+    )
+    status = forms.ChoiceField(
+        required=True,
+        choices=Record.STATUSES_CHOICES + ((ANY, "Any"),),
     )
 
     def clean_filters(self) -> QueryStringFilter:
@@ -489,10 +494,14 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             if form.is_valid():
                 registration_id = form.cleaned_data["registration"]
                 filters, exclude = form.cleaned_data["filters"]
+                status = form.cleaned_data["status"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
+                ctx["status"] = status
 
                 if service := get_registration_to_rdi_service_map().get(registration_id):
+                    if status != CreateRDIForm.ANY:
+                        filters["status"] = status
                     if qs := Record.objects.filter(registration=registration_id).filter(**filters).exclude(**exclude):
                         try:
                             records_ids = qs.values_list("id", flat=True)

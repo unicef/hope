@@ -514,7 +514,7 @@ class Record(models.Model):
         (STATUS_ERROR, "Error"),
     )
 
-    registration = models.IntegerField()
+    registration = models.IntegerField(db_index=True)
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
     registration_data_import = models.ForeignKey(
