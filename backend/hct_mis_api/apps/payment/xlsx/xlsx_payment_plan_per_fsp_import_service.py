@@ -201,16 +201,17 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 if payment.payment_verification.exists():
                     payment_verification = payment.payment_verification.first()
 
-                    if payment_verification.received_amount == delivered_quantity:
-                        pv_status = PaymentVerification.STATUS_RECEIVED
-                    elif delivered_quantity == 0 or delivered_quantity is None:
-                        pv_status = PaymentVerification.STATUS_NOT_RECEIVED
-                    else:
-                        pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+                    if payment_verification.status != PaymentVerification.STATUS_PENDING:
+                        if payment_verification.received_amount == delivered_quantity:
+                            pv_status = PaymentVerification.STATUS_RECEIVED
+                        elif delivered_quantity == 0 or delivered_quantity is None:
+                            pv_status = PaymentVerification.STATUS_NOT_RECEIVED
+                        else:
+                            pv_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
 
-                    payment_verification.status = pv_status
-                    payment_verification.status_date = timezone.now()
-                    self.payment_verifications_to_save.append(payment_verification)
+                        payment_verification.status = pv_status
+                        payment_verification.status_date = timezone.now()
+                        self.payment_verifications_to_save.append(payment_verification)
 
-                    calculate_counts(payment_verification.payment_verification_plan)
-                    payment_verification.payment_verification_plan.save()
+                        calculate_counts(payment_verification.payment_verification_plan)
+                        payment_verification.payment_verification_plan.save()
