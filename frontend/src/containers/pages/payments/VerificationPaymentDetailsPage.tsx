@@ -64,7 +64,8 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
       breadCrumbs={breadCrumbsItems}
     >
       {verification.verificationChannel === 'MANUAL' &&
-      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
+      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
+      verification.status !== "FINISHED" ? (
         <VerifyManual paymentVerificationId={payment.verification.id} enabled />
       ) : null}
     </PageHeader>
