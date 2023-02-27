@@ -50,6 +50,7 @@ export function PaymentGrievanceDetails({
   const confirm = useConfirmation();
   const {
     approveStatus,
+    oldReceivedAmount,
     newReceivedAmount,
     paymentVerification: { receivedAmount },
   } = ticket.paymentVerificationTicketDetails;
@@ -129,7 +130,7 @@ export function PaymentGrievanceDetails({
               ) : null}
             </TableCell>
             <TableCell align='right'>{deliveredQuantity}</TableCell>
-            <TableCell align='right'>{receivedAmount}</TableCell>
+            <TableCell align='right'>{oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}</TableCell>
             <TableCell align='right'>{newReceivedAmount}</TableCell>
           </TableRow>
         </TableBody>
