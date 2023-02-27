@@ -12,11 +12,17 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any) -> Optional[List]:
+def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Optional[List]:
     """
     Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
     """
-    list_of_households = list(map(str.strip, text.split(",")))
+    list_of_households = None
+    if separator in ["space", "tab"]:
+        list_of_households = list(map(str.strip, text.split(" ")))
+    elif separator == "new_line":
+        list_of_households = list(map(str.strip, text.splitlines()))
+    else:
+        list_of_households = list(map(str.strip, text.split(separator)))
     if target_field == "unicef_id":
         return Household.objects.filter(withdrawn=False, business_area=ba, unicef_id__in=list_of_households)
     elif target_field == "unique_id":
@@ -140,14 +146,23 @@ class CreateTargetPopulationForm(forms.Form):
 
 
 class CreateTargetPopulationTextForm(forms.Form):
+    action = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField()
+    target_field = forms.ChoiceField(choices=(("unicef_id", _("Unicef ID")), ("unique_id", _("UUID"))))
+    separator = forms.ChoiceField(
+        choices=(
+            (",", _("Comma")),
+            ("new_line", _("New line")),
+            ("space", _("Space")),
+            (";", _("Semi colon")),
+            ("tab", _("Tab")),
+        )
+    )
     business_area = forms.ModelChoiceField(
         queryset=BusinessArea.objects.all(), help_text=_("Choose the correct business area")
     )
-    target_field = forms.ChoiceField(choices=(("unique_id", _("UUID")), ("unicef_id", _("Unicef ID"))))
-    action = forms.CharField(widget=forms.HiddenInput)
     criteria = forms.CharField(
-        widget=forms.Textarea, help_text=_("List of either UUID4 or UNICEF IDs separated by a Comma ',' ")
+        widget=forms.Textarea, help_text=_("List of either UUID4 or UNICEF IDs separated the separator")
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -161,11 +176,15 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["name"].widget = HiddenInput()
             self.fields["criteria"].widget = HiddenInput()
             self.fields["target_field"].widget = HiddenInput()
+            self.fields["separator"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
         try:
             return get_households_from_text(
-                self.cleaned_data["business_area"], self.cleaned_data["criteria"], self.cleaned_data["target_field"]
+                self.cleaned_data["business_area"],
+                self.cleaned_data["criteria"],
+                self.cleaned_data["target_field"],
+                self.cleaned_data["separator"],
             )
         except Exception as e:
             raise ValidationError(str(e))
