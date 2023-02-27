@@ -4055,6 +4055,7 @@ type TicketPaymentVerificationDetailsNode implements Node {
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus!
   paymentVerification: PaymentVerificationNode
   newStatus: TicketPaymentVerificationDetailsNewStatus
+  oldReceivedAmount: Float
   newReceivedAmount: Float
   approveStatus: Boolean!
   hasMultiplePaymentVerifications: Boolean

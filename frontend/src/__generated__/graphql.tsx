@@ -6576,6 +6576,7 @@ export type TicketPaymentVerificationDetailsNode = Node & {
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   paymentVerification?: Maybe<PaymentVerificationNode>,
   newStatus?: Maybe<TicketPaymentVerificationDetailsNewStatus>,
+  oldReceivedAmount?: Maybe<Scalars['Float']>,
   newReceivedAmount?: Maybe<Scalars['Float']>,
   approveStatus: Scalars['Boolean'],
   hasMultiplePaymentVerifications?: Maybe<Scalars['Boolean']>,
@@ -9537,7 +9538,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
+      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'oldReceivedAmount' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
       & { paymentVerification: Maybe<(
         { __typename?: 'PaymentVerificationNode' }
         & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
@@ -17312,6 +17313,7 @@ export const GrievanceTicketDocument = gql`
     paymentVerificationTicketDetails {
       id
       newStatus
+      oldReceivedAmount
       newReceivedAmount
       approveStatus
       paymentVerificationStatus
@@ -26308,6 +26310,7 @@ export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, Par
   paymentVerificationStatus?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsPaymentVerificationStatus'], ParentType, ContextType>,
   paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   newStatus?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>, ParentType, ContextType>,
+  oldReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   newReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   hasMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
