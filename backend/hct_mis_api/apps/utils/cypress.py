@@ -7,31 +7,33 @@ from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 
-def cypress_post(data: Dict) -> HttpResponse:
+def cypress_post(data: Dict) -> None:
     command = data.get("command")
     print(f"Handling cy command: {data}")
 
     if not command:
-        return HttpResponse("No command provided", status=400)
+        raise RuntimeError("No command provided")
 
     if command == "init-e2e-scenario":
         scenario = data.get("scenario")
         if not scenario:
-            return HttpResponse("No scenario provided", status=400)
+            raise RuntimeError("No scenario provided")
         seed = data.get("seed")
         if not seed:
-            return HttpResponse("No seed provided", status=400)
-        return call_command(command, scenario, "--seed", seed)
+            raise RuntimeError("No seed provided")
+        call_command(command, scenario, "--seed", seed)
+        return
 
     if command == "generate-xlsx-files":
         household_size = data.get("size")
         if not household_size:
-            return HttpResponse("No household size provided", status=400)
+            raise RuntimeError("No household size provided")
         seed = data.get("seed")
         if not seed:
-            return HttpResponse("No seed provided", status=400)
+            raise RuntimeError("No seed provided")
         print(f"Generating xlsx files for household size {household_size} with seed {seed}")
-        return call_command("generate_rdi_xlsx_files", household_size, "--seed", seed)
+        call_command("generate_rdi_xlsx_files", household_size, "--seed", seed)
+        return
 
     raise ValueError(f"Unknown command: {command}")
 
@@ -39,7 +41,10 @@ def cypress_post(data: Dict) -> HttpResponse:
 @csrf_exempt
 def handle_cypress_command(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        cypress_post(request.POST)
+        try:
+            cypress_post(request.POST)
+        except Exception as exc:
+            return HttpResponse(str(exc), status=500)
         return HttpResponse("OK", status=200)
     return HttpResponse("Method not allowed", status=405)
 
