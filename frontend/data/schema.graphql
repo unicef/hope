@@ -758,6 +758,7 @@ type DocumentTypeNode {
   updatedAt: DateTime!
   label: String!
   type: DocumentTypeType!
+  isIdentityDocument: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
@@ -769,6 +770,7 @@ enum DocumentTypeType {
   NATIONAL_PASSPORT
   TAX_ID
   RESIDENCE_PERMIT_NO
+  BANK_STATEMENT
   OTHER
 }
 
@@ -1388,6 +1390,7 @@ type ImportedDocumentTypeNode {
   updatedAt: DateTime!
   label: String!
   type: ImportedDocumentTypeType!
+  isIdentityDocument: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
 }
 
@@ -1399,6 +1402,7 @@ enum ImportedDocumentTypeType {
   NATIONAL_PASSPORT
   TAX_ID
   RESIDENCE_PERMIT_NO
+  BANK_STATEMENT
   OTHER
 }
 
@@ -3180,7 +3184,7 @@ type ReconciliationSummaryNode {
   deliveredFully: Int
   deliveredPartially: Int
   notDelivered: Int
-  failed: Int
+  unsuccessful: Int
   pending: Int
   numberOfPayments: Int
   reconciled: Int

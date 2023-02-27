@@ -455,6 +455,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_population_copy.full_clean()
             target_population_copy.save()
             target_population_copy.refresh_from_db()
+            transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population_copy.id))
             log_create(
                 TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population
             )
