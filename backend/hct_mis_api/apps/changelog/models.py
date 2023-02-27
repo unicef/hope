@@ -9,10 +9,10 @@ class Changelog(models.Model):
     description = models.TextField(blank=True)
     version = models.CharField(max_length=30, help_text=_("HOPE version"))
     active = models.BooleanField(default=False)
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
 
     class Meta:
-        ordering = ("date",)
+        ordering = ("-date",)
 
     def __str__(self) -> str:
         return f"{self.version}-{self.date}"
