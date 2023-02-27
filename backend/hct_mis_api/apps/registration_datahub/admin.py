@@ -29,8 +29,6 @@ from requests.auth import HTTPBasicAuth
 
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
-    process_flex_records_task,
-    process_sri_lanka_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     DiiaHousehold,
@@ -49,8 +47,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    FlexRegistrationService,
-    SriLankaRegistrationService,
+    create_task_for_processing_records,
+    get_registration_to_rdi_service_map,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
@@ -386,33 +384,33 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
 
     @admin.action(description="Create RDI")
     def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-        service = FlexRegistrationService()
-        try:
-            records_ids = queryset.values_list("id", flat=True)
-            rdi = service.create_rdi(request.user, f"ukraine rdi {timezone.now()}")
 
-            process_flex_records_task.delay(rdi.id, list(records_ids))
-            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+        if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
             self.message_user(
-                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
+                request,
+                "Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3 - Ukraine;",
+                messages.ERROR,
             )
-        except Exception as e:
-            self.message_user(request, str(e), messages.ERROR)
+            return
 
-    @admin.action(description="Create Sri-Lanka RDI")
-    def create_sr_lanka_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-        sri_lanka_service = SriLankaRegistrationService()
-        try:
-            records_ids = queryset.values_list("id", flat=True)
-            rdi = sri_lanka_service.create_rdi(request.user, f"sri-lanka rdi {timezone.now()}")
+        msg_resp = ""
+        for service in list(set(get_registration_to_rdi_service_map().values())):
+            qs = queryset.filter(registration__in=service.REGISTRATION_ID).values_list("id", flat=True)
+            if not qs:
+                continue
+            try:
+                records_ids = qs.values_list("id", flat=True)
+                rdi = service().create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
 
-            process_sri_lanka_flex_records_task.delay(rdi.id, list(records_ids))
-            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
-            self.message_user(
-                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
-            )
-        except Exception as e:
-            self.message_user(request, str(e), messages.ERROR)
+                create_task_for_processing_records(service, rdi.pk, list(records_ids))
+
+                url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                msg_resp += f"<ul><a href='{url}'>{rdi.name}</ul></a> "
+
+            except Exception as e:
+                self.message_user(request, str(e), messages.ERROR)
+
+        self.message_user(request, mark_safe(f"Started RDI Import with name(s): {msg_resp}"), messages.SUCCESS)
 
     @admin.action(description="Async extract")
     def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
