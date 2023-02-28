@@ -79,6 +79,7 @@ export const menuItems = [
   },
   {
     name: 'Cash Assist',
+    href: process.env.CA_LINK,
     selectedRegexp: /^\/unique.*$/,
     icon: <PaymentIcon />,
     external: true,

@@ -77,7 +77,8 @@ function getClientEnvironment(publicUrl) {
         // This should only be used as an escape hatch. Normally you would put
         // images into the `src` and `import` them in code to get their paths.
         PUBLIC_URL: publicUrl,
-        SENTRY_FRONTEND_DSN: process.env.SENTRY_FRONTEND_DSN
+        SENTRY_FRONTEND_DSN: process.env.SENTRY_FRONTEND_DSN,
+        CA_LINK: process.env.CA_LINK || 'https://unhcr-cashassist-uatr321.crm4.dynamics.com/main.aspx?appid=cbc214f5-baf1-ea11-a815-000d3ab878dc'
       }
     );
   // Stringify all values so we can feed into Webpack DefinePlugin
