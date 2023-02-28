@@ -516,7 +516,9 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                 ctx["status"] = status
 
                 if service := get_registration_to_rdi_service_map().get(registration_id):
-                    if status != CreateRDIForm.ANY:
+                    if status == CreateRDIForm.STATUS_TO_IMPORT:
+                        filters["status__isnull"] = True
+                    elif status != CreateRDIForm.ANY:
                         filters["status"] = status
                     if qs := Record.objects.filter(registration=registration_id).filter(**filters).exclude(**exclude):
                         try:
