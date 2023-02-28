@@ -66,7 +66,7 @@ const StyledLink = styled.a`
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
-  const servicenow = `https://unicefdev.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${window.location.pathname.split('/')[2]}&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${window.location.href}`
+  const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${window.location.pathname.split('/')[2]}&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${window.location.href}`
   if (meLoading) {
     return null;
   }
