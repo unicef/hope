@@ -28477,6 +28477,18 @@
             "deprecationReason": null
           },
           {
+            "name": "oldReceivedAmount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "newReceivedAmount",
             "description": null,
             "args": [],
