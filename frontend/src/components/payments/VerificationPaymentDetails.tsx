@@ -7,7 +7,7 @@ import {
   choicesToDict,
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
-  paymentRecordStatusToColor, paymentStatusToColor,
+  paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { PaymentQuery } from '../../__generated__/graphql';
