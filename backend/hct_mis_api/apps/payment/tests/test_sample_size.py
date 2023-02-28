@@ -88,7 +88,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
 
         rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
 
-        with self.assertNumQueries(4):  # sometimes 3 for some reason? or 4
+        with self.assertNumQueries(4):
             self.graphql_request(
                 request_string=self.SAMPLE_SIZE_QUERY,
                 variables=rapid_pro_sample_query_variables,
