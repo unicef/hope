@@ -6,6 +6,7 @@ from uuid import UUID
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
 from django.http import HttpRequest, HttpResponse
@@ -379,6 +380,25 @@ class CreateRDIForm(forms.Form):
         filter = QueryStringFilter(None, {}, Record, None)
         return filter.get_filters(self.cleaned_data["filters"])
 
+    def clean_registration(self) -> dict:
+        if self.cleaned_data["registration"] not in get_registration_to_rdi_service_map().keys():
+            raise ValidationError(
+                "Invalid registration number. Data can be processed only for registration(s): "
+                "17 - Sri Lanka; 2, 3 - Ukraine;"
+            )
+        return self.cleaned_data["registration"]
+
+    def clean(self) -> None:
+        super().clean()
+        filters, excludes = self.cleaned_data["filters"]
+        filters["registration"] = self.cleaned_data["registration"]
+        if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
+            filters["status__isnull"] = True
+        elif self.cleaned_data["status"] in [Record.STATUS_IMPORTED, Record.STATUS_ERROR]:
+            filters["status"] = self.cleaned_data["status"]
+
+        self.cleaned_data["filters"] = filters, excludes
+
 
 @admin.register(Record)
 class RecordDatahubAdmin(HOPEModelAdminBase):
@@ -510,32 +530,30 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
             if form.is_valid():
                 registration_id = form.cleaned_data["registration"]
                 filters, exclude = form.cleaned_data["filters"]
-                status = form.cleaned_data["status"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
-                ctx["status"] = status
 
                 if service := get_registration_to_rdi_service_map().get(registration_id):
-                    if status == CreateRDIForm.STATUS_TO_IMPORT:
-                        filters["status__isnull"] = True
-                    elif status != CreateRDIForm.ANY:
-                        filters["status"] = status
-                    if qs := Record.objects.filter(registration=registration_id).filter(**filters).exclude(**exclude):
+                    qs = (
+                        Record.objects.defer("storage", "counters", "files", "fields")
+                        .filter(**filters)
+                        .exclude(**exclude)
+                    )
+                    if records_ids := qs.values_list("id", flat=True):
                         try:
-                            records_ids = qs.values_list("id", flat=True)
                             rdi = service().create_rdi(
                                 request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
                             )
                             create_task_for_processing_records(service, rdi.pk, list(records_ids))
+                            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                            self.message_user(
+                                request,
+                                mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                                messages.SUCCESS,
+                            )
                         except Exception as e:
-                            self.message_user(request, str(e), messages.ERROR)
+                            self.message_error_to_user(request, e)
 
-                        url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
-                        self.message_user(
-                            request,
-                            mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
-                            messages.SUCCESS,
-                        )
                     else:
                         self.message_user(request, "There are no Records by filtering criteria", messages.ERROR)
                 else:
