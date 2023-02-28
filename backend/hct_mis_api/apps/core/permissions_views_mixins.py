@@ -16,7 +16,7 @@ class ViewPermissionsMixinBase(AccessMixin):
             return self.handle_no_permission()
         if not self.has_permissions():
             raise PermissionDenied
-        return super(ViewPermissionsMixinBase, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class UploadFilePermissionMixin(ViewPermissionsMixinBase):
