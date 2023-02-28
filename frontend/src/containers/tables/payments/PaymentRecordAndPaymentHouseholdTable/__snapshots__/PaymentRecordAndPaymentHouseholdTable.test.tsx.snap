@@ -243,7 +243,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               >
                 <a
                   class="sc-bZQynM iXasVI"
-                  href="/afghanistan/payment-records/UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk"
+                  href="/afghanistan/payment-module/payments/UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk"
                 >
                   RCPT-0060-23-0.000.001
                 </a>
