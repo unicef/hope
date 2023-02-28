@@ -1,5 +1,3 @@
-from unittest import skip
-
 from django.core.management import call_command
 from django.utils import timezone
 
@@ -215,7 +213,6 @@ class TestDashboardQueries(APITestCase):
             context={"user": self.user},
         )
 
-    @skip("needs fix")  # TODO: need FIX > was failed on PM env
     def test_chart_total_transferred_by_country(self) -> None:
         business_area = BusinessArea.objects.get(slug="global")
         self.create_user_role_with_permissions(self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area)
