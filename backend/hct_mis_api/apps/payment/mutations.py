@@ -684,6 +684,8 @@ class ActionPaymentPlanMutation(PermissionMutation):
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
+        if old_payment_plan.imported_file:
+            old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
 
         cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
 
