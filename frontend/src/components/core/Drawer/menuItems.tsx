@@ -79,6 +79,7 @@ export const menuItems = [
   },
   {
     name: 'Cash Assist',
+    href: 'https://unhcr-cashassist-uatr321.crm4.dynamics.com/main.aspx?appid=cbc214f5-baf1-ea11-a815-000d3ab878dc',
     selectedRegexp: /^\/unique.*$/,
     icon: <PaymentIcon />,
     external: true,
