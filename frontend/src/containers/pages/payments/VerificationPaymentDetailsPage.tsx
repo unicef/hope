@@ -12,6 +12,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
+  PaymentVerificationPlanStatus,
   usePaymentQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
@@ -65,7 +66,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     >
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
-      verification.status !== "FINISHED" ? (
+      verification.status !== PaymentVerificationPlanStatus.Finished ? (
         <VerifyManual paymentVerificationId={payment.verification.id} enabled />
       ) : null}
     </PageHeader>
