@@ -581,6 +581,11 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "recalculate_population_fields_task Household table pagination value",
         "positive_integers",
     ),
+    "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
+        False,
+        "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)

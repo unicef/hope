@@ -1,6 +1,7 @@
 from typing import Any, List
 from unittest.mock import patch
 
+from constance.test import override_config
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -152,6 +153,7 @@ class TestActionPaymentPlanMutation(APITestCase):
         ]
     )
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
     def test_update_status_payment_plan(
         self, name: Any, permissions: List[Permissions], status: str, actions: List[str], get_exchange_rate_mock: Any
     ) -> None:
