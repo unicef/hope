@@ -9,6 +9,7 @@ from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from constance import config
 from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
@@ -178,7 +179,7 @@ class PaymentPlanService:
             logging.exception(msg)
             raise GraphQLError(msg)
 
-        # validate approval required number
+        # validate approval required number and user as well
         self.validate_acceptance_process_approval_count(approval_process)
 
         approval_data = {
@@ -217,6 +218,27 @@ class PaymentPlanService:
             raise GraphQLError(
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
+        # validate if the user can create approval
+        # for test purposes this validation can be skipped
+        if not config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS:
+            approvals_by_user = approval_process.approvals.filter(created_by=self.user)
+
+            # validate REJECT based on status payment plan
+            if approval_type == Approval.REJECT:
+                status_to_approval_type_map = {
+                    PaymentPlan.Status.IN_APPROVAL: Approval.APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION.name: Approval.AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW.name: Approval.FINANCE_RELEASE,
+                }
+
+                created_approval_type = status_to_approval_type_map[self.payment_plan.status]
+                if approvals_by_user.filter(type=created_approval_type).exists():
+                    raise GraphQLError(
+                        f"Can't create {approval_type}. User have already created {created_approval_type}"
+                    )
+            # validate other approval types
+            elif approvals_by_user.filter(type=approval_type).exists():
+                raise GraphQLError(f"Can't create new {approval_type}. User have already created {approval_type}")
 
     def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
