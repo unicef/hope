@@ -82,7 +82,9 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
     (item) => item.name === 'Cash Assist',
   );
 
-  menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+  if (cashAssistUrlData?.cashAssistUrlPrefix) {
+    menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+  }
 
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
   const flags = {
