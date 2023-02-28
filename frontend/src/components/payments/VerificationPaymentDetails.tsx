@@ -7,7 +7,7 @@ import {
   choicesToDict,
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
-  paymentRecordStatusToColor,
+  paymentRecordStatusToColor, paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { PaymentQuery } from '../../__generated__/graphql';
@@ -50,7 +50,7 @@ export function VerificationPaymentDetails({
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.status}
-                statusToColor={paymentRecordStatusToColor}
+                statusToColor={paymentStatusToColor}
               />
             </LabelizedField>
           </Grid>
