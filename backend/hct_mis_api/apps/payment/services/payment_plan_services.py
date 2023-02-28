@@ -237,8 +237,7 @@ class PaymentPlanService:
                         f"Can't create {approval_type}. User have already created {created_approval_type}"
                     )
             # validate other approval types
-            else:
-                if approvals_by_user.filter(type=approval_type).exists():
+            elif approvals_by_user.filter(type=approval_type).exists():
                     raise GraphQLError(f"Can't create new {approval_type}. User have already created {approval_type}")
 
     def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
