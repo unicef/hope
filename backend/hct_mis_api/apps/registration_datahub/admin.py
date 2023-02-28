@@ -347,17 +347,33 @@ class AlexisFilter(SimpleListFilter):
 
 
 class CreateRDIForm(forms.Form):
+    STATUS_TO_IMPORT = "TO_IMPORT"
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
     ANY = "ANY"
+
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_ERROR, "Error"),
+    )
+    STATUSES_ROOT_CHOICES = (
+        (STATUS_IMPORTED, "Imported"),
+        (ANY, "Any"),
+    )
+
     registration = forms.IntegerField(required=True)
     filters = forms.CharField(
         widget=forms.Textarea,
         required=False,
         help_text="filters to use to select the records (Uses Django filtering syntax)",
     )
-    status = forms.ChoiceField(
-        required=True,
-        choices=Record.STATUSES_CHOICES + ((ANY, "Any"),),
-    )
+    status = forms.ChoiceField(required=True, choices=STATUSES_CHOICES)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if request := kwargs.pop("request", None):
+            if is_root(request):
+                self.base_fields["status"].choices += self.STATUSES_ROOT_CHOICES
+        super().__init__(*args, **kwargs)
 
     def clean_filters(self) -> QueryStringFilter:
         filter = QueryStringFilter(None, {}, Record, None)
@@ -490,7 +506,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     def create_new_rdi(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request, title="Create RDI")
         if request.method == "POST":
-            form = CreateRDIForm(request.POST)
+            form = CreateRDIForm(request.POST, request=request)
             if form.is_valid():
                 registration_id = form.cleaned_data["registration"]
                 filters, exclude = form.cleaned_data["filters"]
@@ -527,7 +543,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
                         messages.ERROR,
                     )
         else:
-            form = CreateRDIForm()
+            form = CreateRDIForm(request=request)
 
         ctx["form"] = form
         return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
