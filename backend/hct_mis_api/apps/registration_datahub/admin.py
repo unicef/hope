@@ -17,7 +17,6 @@ from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 
 import requests
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button, link
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -347,6 +346,7 @@ class AlexisFilter(SimpleListFilter):
 
 
 class CreateRDIForm(forms.Form):
+
     STATUS_TO_IMPORT = "TO_IMPORT"
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
@@ -381,7 +381,7 @@ class CreateRDIForm(forms.Form):
 
 
 @admin.register(Record)
-class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
+class RecordDatahubAdmin(HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
