@@ -37,6 +37,15 @@ export const Payment = gql`
           fullName
         }
       }
+      collector {
+        id
+        unicefId
+        fullName
+        phoneNo
+        phoneNoValid
+        phoneNoAlternative
+        phoneNoAlternativeValid
+      }
       parent {
         id
         unicefId

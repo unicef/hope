@@ -74,7 +74,7 @@ class ChoiceArrayFieldDM(ArrayField):
         }
         defaults.update(kwargs)
 
-        return super(ArrayField, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -171,7 +171,6 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         self,
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Optional[Callable] = None,
-        class_name: str = "",
     ) -> QuerySet:
         params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
@@ -188,7 +187,9 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
 
-        qs = (PaymentRecord if class_name == "CashPlan" else Payment).objects.filter(pk__in=payment_records)
+        qs = (PaymentRecord if self.__class__.__name__ == "CashPlan" else Payment).objects.filter(
+            pk__in=payment_records
+        )
 
         return qs
 
@@ -602,6 +603,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     def status_finished(self) -> None:
         self.status_date = timezone.now()
+
         if not self.payment_verification_summary.exists():
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,

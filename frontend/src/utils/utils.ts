@@ -7,7 +7,7 @@ import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
+  PaymentPlanStatus, PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -123,6 +123,25 @@ export function paymentRecordStatusToColor(
       return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
+  }
+}
+
+export function paymentStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case PaymentStatus.Pending:
+      return theme.hctPalette.orange;
+    case PaymentStatus.DistributionSuccessful:
+    case PaymentStatus.TransactionSuccessful:
+      return theme.hctPalette.green;
+    case PaymentStatus.ForceFailed:
+    case PaymentStatus.NotDistributed:
+    case PaymentStatus.TransactionErroneous:
+      return theme.palette.error.main;
+    default:
+      return theme.hctPalette.lightBlue;
   }
 }
 export function paymentVerificationStatusToColor(

@@ -710,7 +710,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment.household.total_cash_received, 500)
             self.assertEqual(payment.household.total_cash_received_usd, 250)
-            self.assertEqual(payment_plan.is_reconciled, True)
+            self.assertTrue(payment_plan.is_reconciled)
 
     @parameterized.expand(
         [
@@ -774,6 +774,19 @@ class TestPaymentPlanReconciliation(APITestCase):
             financial_service_provider=None,
             excluded=False,
         )
+        payment_3 = PaymentFactory(
+            parent=PaymentPlan.objects.get(id=pp.id),
+            business_area=self.business_area,
+            household=self.household_3,
+            collector=self.individual_3,
+            delivery_type=None,
+            entitlement_quantity=3333,
+            entitlement_quantity_usd=300,
+            delivered_quantity=3000,
+            delivered_quantity_usd=290,
+            financial_service_provider=None,
+            excluded=False,
+        )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
             generic_fk_obj=payment_1,
@@ -786,11 +799,17 @@ class TestPaymentPlanReconciliation(APITestCase):
             status=PaymentVerification.STATUS_RECEIVED,
             received_amount=500,
         )
+        verification_3 = PaymentVerificationFactory(
+            payment_verification_plan=pvp,
+            generic_fk_obj=payment_3,
+            status=PaymentVerification.STATUS_PENDING,
+            received_amount=None,
+        )
         import_xlsx_service = XlsxPaymentPlanImportPerFspService(pp, io.BytesIO())
         import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity"]
         import_xlsx_service.payments_dict[str(payment_1.pk)] = payment_1
         import_xlsx_service.payments_dict[str(payment_2.pk)] = payment_2
-
+        import_xlsx_service.payments_dict[str(payment_3.pk)] = payment_3
         row = namedtuple(
             "row",
             [
@@ -800,16 +819,20 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         import_xlsx_service._import_row([row(str(payment_1.id)), row(999)], 1)
         import_xlsx_service._import_row([row(str(payment_2.id)), row(100)], 1)
+        import_xlsx_service._import_row([row(str(payment_3.id)), row(2999)], 1)
         payment_1.save()
         payment_2.save()
+        payment_3.save()
         # Update payment Verification
         PaymentVerification.objects.bulk_update(
             import_xlsx_service.payment_verifications_to_save, ("status", "status_date")
         )
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
+        payment_3.refresh_from_db()
         verification_1.refresh_from_db()
         verification_2.refresh_from_db()
+        verification_3.refresh_from_db()
 
         self.assertEqual(payment_1.delivered_quantity, 999)
         self.assertEqual(verification_1.received_amount, 999)
@@ -818,3 +841,39 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(payment_2.delivered_quantity, 100)
         self.assertEqual(verification_2.received_amount, 500)
         self.assertEqual(verification_2.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+
+        self.assertEqual(payment_3.delivered_quantity, 2999)
+        self.assertEqual(verification_3.received_amount, None)
+        self.assertEqual(verification_3.status, PaymentVerification.STATUS_PENDING)
+
+    def test_payment_plan_is_fully_delivered(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        for hh, ind in [
+            (self.household_1, self.individual_1),
+            (self.household_2, self.individual_2),
+            (self.household_3, self.individual_3),
+        ]:
+            PaymentFactory(
+                parent=payment_plan,
+                business_area=self.business_area,
+                household=hh,
+                collector=ind,
+                delivery_type=None,
+                entitlement_quantity=999,
+                entitlement_quantity_usd=10,
+                delivered_quantity=999,
+                delivered_quantity_usd=10,
+                financial_service_provider=None,
+                excluded=False,
+            )
+        payment_plan.status_finished()
+        payment_plan.save()
+        payment_plan.refresh_from_db()
+        self.assertTrue(
+            all(
+                [
+                    payment.entitlement_quantity == payment.delivered_quantity
+                    for payment in payment_plan.not_excluded_payments
+                ]
+            )
+        )

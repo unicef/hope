@@ -25,12 +25,17 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
 }: PaymentRecordAndPaymentTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
-  const paymentRecordOrPaymentDetailsPath = `/${businessArea}/payment-records/${paymentRecordOrPayment.id}`;
+  const paymentRecordDetailsPath = `/${businessArea}/payment-records/${paymentRecordOrPayment.id}`;
+  const paymentDetailsPath = `/${businessArea}/payment-module/payments/${paymentRecordOrPayment.id}`;
+  const detailsPath =
+    paymentRecordOrPayment.objType === 'PaymentRecord'
+      ? paymentRecordDetailsPath
+      : paymentDetailsPath;
   const handleClick = (): void => {
     if (openInNewTab) {
-      window.open(paymentRecordOrPaymentDetailsPath);
+      window.open(detailsPath);
     } else {
-      history.push(paymentRecordOrPaymentDetailsPath);
+      history.push(detailsPath);
     }
   };
   return (
@@ -42,9 +47,7 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentRecordOrPaymentDetailsPath}>
-            {paymentRecordOrPayment.caId}
-          </BlackLink>
+          <BlackLink to={detailsPath}>{paymentRecordOrPayment.caId}</BlackLink>
         ) : (
           paymentRecordOrPayment.caId
         )}

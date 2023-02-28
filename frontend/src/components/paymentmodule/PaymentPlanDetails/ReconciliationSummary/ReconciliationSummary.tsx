@@ -21,10 +21,15 @@ const FieldBorder = styled.div`
   border-left-width: 2px;
   border-left-style: solid;
 `;
+
 const ChartContainer = styled.div`
   width: 100px;
   height: 100px;
   margin: 0 auto;
+`;
+
+const ReconciliationWrapUp = styled.div`
+  padding-bottom: 8px;
 `;
 
 interface ReconciliationSummaryProps {
@@ -40,7 +45,7 @@ export const ReconciliationSummary = ({
     reconciliationSummary: {
       deliveredFully,
       deliveredPartially,
-      failed,
+      unsuccessful,
       notDelivered,
       numberOfPayments,
       pending,
@@ -65,8 +70,8 @@ export const ReconciliationSummary = ({
       color: '#EF4343',
     },
     {
-      label: t('Failed'),
-      value: failed,
+      label: t('Unsuccessful'),
+      value: unsuccessful,
       color: '#EF4343',
     },
     {
@@ -123,26 +128,28 @@ export const ReconciliationSummary = ({
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={0} justify='flex-start'>
-                  <Grid item xs={2}>
-                    <FieldBorder color='#4E606A'>
-                      <LabelizedField
-                        label={t('Number of payments')}
-                        value={numberOfPayments}
-                      />
-                    </FieldBorder>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <FieldBorder color='#4E606A'>
-                      <LabelizedField
-                        label={t('Reconciled')}
-                        value={`${reconciled} (${reconciledInPercent}%)`}
-                      />
-                    </FieldBorder>
+              <ReconciliationWrapUp>
+                <Grid item xs={12}>
+                  <Grid container spacing={0} justify='flex-start'>
+                    <Grid item xs={2}>
+                      <FieldBorder color='#4E606A'>
+                        <LabelizedField
+                          label={t('Number of payments')}
+                          value={numberOfPayments}
+                        />
+                      </FieldBorder>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <FieldBorder color='#4E606A'>
+                        <LabelizedField
+                          label={t('Reconciled')}
+                          value={`${reconciled} (${reconciledInPercent}%)`}
+                        />
+                      </FieldBorder>
+                    </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
+              </ReconciliationWrapUp>
             </Grid>
           </Grid>
         </ContentWrapper>
