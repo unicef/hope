@@ -145,7 +145,7 @@ class HorizontalChoiceArrayField(ArrayField):
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
 
 class UserRole(NaturalKeyModel, TimeStampedUUIDModel):

@@ -25,12 +25,9 @@ if TYPE_CHECKING:
 def get_payment_records(
     payment_plan: Union["PaymentPlan", "CashPlan"], verification_channel: Optional[Any]
 ) -> QuerySet:
-    payment_plan_type = payment_plan.__class__.__name__
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
-        return payment_plan.available_payment_records(
-            class_name=payment_plan_type, extra_validation=does_payment_record_have_right_hoh_phone_number
-        )
-    return payment_plan.available_payment_records(class_name=payment_plan_type)
+        return payment_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
+    return payment_plan.available_payment_records()
 
 
 class VerificationPlanCrudServices:

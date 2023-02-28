@@ -48,7 +48,6 @@ from hct_mis_api.apps.payment.filters import (
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     GenericPayment,
-    PaymentRecord,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
@@ -125,7 +124,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> Int:
         return self.payment_items.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+            status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
 
     def resolve_verification_plans(self, info: Any, **kwargs: Any) -> QuerySet:

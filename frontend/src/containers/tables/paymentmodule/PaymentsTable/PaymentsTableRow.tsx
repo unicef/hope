@@ -68,6 +68,7 @@ export const PaymentsTableRow = ({
 }: PaymentsTableRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const paymentDetailsPath = `/${businessArea}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${businessArea}/population/household/${payment.household.id}`;
   const collectorDetailsPath = `/${businessArea}/population/individuals/${payment.collector.id}`;
 
@@ -128,7 +129,13 @@ export const PaymentsTableRow = ({
           />
         )}
       </TableCell>
-      <TableCell align='left'>{payment.unicefId}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink to={paymentDetailsPath}>{payment.unicefId}</BlackLink>
+        ) : (
+          payment.unicefId
+        )}
+      </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>

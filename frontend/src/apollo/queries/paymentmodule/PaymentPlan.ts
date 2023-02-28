@@ -211,7 +211,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         deliveredFully
         deliveredPartially
         notDelivered
-        failed
+        unsuccessful
         pending
         numberOfPayments
         reconciled
