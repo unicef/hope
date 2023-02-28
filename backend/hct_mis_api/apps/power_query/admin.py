@@ -77,7 +77,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         elif db_field.name == "owner":
             kwargs = {"widget": forms.HiddenInput}
 
-        return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_superuser or bool(obj and obj.owner == request.user)
@@ -241,7 +241,7 @@ class ReportResource(resources.ModelResource):
 
 @register(Report)
 class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "query", "formatter", "last_run")
+    list_display = ("name", "query", "formatter", "last_run", "frequence")
     autocomplete_fields = ("query", "formatter")
     filter_horizontal = ("limit_access_to",)
     readonly_fields = ("last_run",)
