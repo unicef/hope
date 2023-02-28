@@ -1,5 +1,4 @@
 from typing import Any, Dict
-from unittest import skip
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -77,7 +76,6 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
         )
         self.assertEqual(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"], 0)
 
-    @skip("Sometimes fails on CI with 3 queries instead of 4")
     def test_number_of_queries(self) -> None:
         PaymentRecordFactory.create_batch(
             4,
@@ -90,7 +88,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
 
         rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
 
-        with self.assertNumQueries(4):  # sometimes 3 for some reason?
+        with self.assertNumQueries(4):  # sometimes 3 for some reason? or 4
             self.graphql_request(
                 request_string=self.SAMPLE_SIZE_QUERY,
                 variables=rapid_pro_sample_query_variables,
