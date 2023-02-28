@@ -45,6 +45,7 @@ import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulation
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { VerificationPaymentRecordDetailsPage } from './pages/payments/VerificationPaymentRecordDetailsPage';
+import {PaymentDetailsPage} from "./pages/paymentmodule/PaymentDetailsPage";
 
 const Root = styled.div`
   display: flex;
@@ -135,6 +136,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
             <EditPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payments/:id'>
+            <PaymentDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
             <PaymentPlanDetailsPage />
