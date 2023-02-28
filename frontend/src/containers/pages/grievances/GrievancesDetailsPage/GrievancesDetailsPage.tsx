@@ -40,7 +40,12 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !currentUserData || permissions === null)
+  if (
+    !data?.grievanceTicket ||
+    !choicesData ||
+    !currentUserData ||
+    permissions === null
+  )
     return null;
 
   const ticket = data?.grievanceTicket;

@@ -326,7 +326,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
     def is_locked(self) -> bool:
-        return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
+        return self.status in (
+            self.STATUS_LOCKED,
+            self.STATUS_STEFICON_COMPLETED,
+            self.STATUS_STEFICON_ERROR,
+            self.STATUS_STEFICON_RUN,
+        )
 
     def is_open(self) -> bool:
         return self.status in (self.STATUS_OPEN,)
