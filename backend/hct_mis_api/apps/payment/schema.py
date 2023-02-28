@@ -424,7 +424,7 @@ class ReconciliationSummaryNode(graphene.ObjectType):
     delivered_fully = graphene.Int()
     delivered_partially = graphene.Int()
     not_delivered = graphene.Int()
-    failed = graphene.Int()
+    unsuccessful = graphene.Int()
     pending = graphene.Int()
     number_of_payments = graphene.Int()
     reconciled = graphene.Int()
@@ -504,11 +504,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
-        return parent.payment_items.aggregate(
+        return parent.not_excluded_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
-            failed=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
+            unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
             pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
@@ -965,7 +965,6 @@ class Query(graphene.ObjectType):
                 kw["payment_verification_plan"] = payment_verification_plan
             if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
                 kw["extra_validation"] = does_payment_record_have_right_hoh_phone_number
-            kw["class_name"] = obj.__class__.__name__
             return obj.available_payment_records(**kw)
 
         payment_verification_plan = None

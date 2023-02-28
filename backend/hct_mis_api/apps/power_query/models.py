@@ -104,7 +104,6 @@ class Query(NaturalKeyModel, models.Model):
     error_message = models.CharField(max_length=400, blank=True, null=True)
 
     active = models.BooleanField(default=True)
-    refresh_daily = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.name or ""
@@ -253,11 +252,12 @@ class Report(NaturalKeyModel, models.Model):
     document_title = models.CharField(max_length=255, blank=True, null=True)
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     formatter = models.ForeignKey(Formatter, on_delete=models.CASCADE)
-    refresh_daily = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="+")
     limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
-
+    frequence = models.CharField(
+        max_length=3, null=True, blank=True, help_text="Refresh every (e.g. 3 - 1/3 - mon - 1/3,Mon)"
+    )
     last_run = models.DateTimeField(null=True, blank=True)
 
     def save(
@@ -301,6 +301,7 @@ class Report(NaturalKeyModel, models.Model):
             except Exception as e:
                 logger.exception(e)
                 result.append([dataset.pk, e])
+            self.last_run = timezone.now()
         if not result:
             result = ["No Dataset available"]
         return result

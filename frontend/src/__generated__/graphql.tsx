@@ -1119,6 +1119,7 @@ export type DocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
   type: DocumentTypeType,
+  isIdentityDocument: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -1139,6 +1140,7 @@ export enum DocumentTypeType {
   NationalPassport = 'NATIONAL_PASSPORT',
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
+  BankStatement = 'BANK_STATEMENT',
   Other = 'OTHER'
 }
 
@@ -2005,6 +2007,7 @@ export type ImportedDocumentTypeNode = {
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
   type: ImportedDocumentTypeType,
+  isIdentityDocument: Scalars['Boolean'],
   documents: ImportedDocumentNodeConnection,
 };
 
@@ -2025,6 +2028,7 @@ export enum ImportedDocumentTypeType {
   NationalPassport = 'NATIONAL_PASSPORT',
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
+  BankStatement = 'BANK_STATEMENT',
   Other = 'OTHER'
 }
 
@@ -5396,7 +5400,7 @@ export type ReconciliationSummaryNode = {
   deliveredFully?: Maybe<Scalars['Int']>,
   deliveredPartially?: Maybe<Scalars['Int']>,
   notDelivered?: Maybe<Scalars['Int']>,
-  failed?: Maybe<Scalars['Int']>,
+  unsuccessful?: Maybe<Scalars['Int']>,
   pending?: Maybe<Scalars['Int']>,
   numberOfPayments?: Maybe<Scalars['Int']>,
   reconciled?: Maybe<Scalars['Int']>,
@@ -6572,6 +6576,7 @@ export type TicketPaymentVerificationDetailsNode = Node & {
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   paymentVerification?: Maybe<PaymentVerificationNode>,
   newStatus?: Maybe<TicketPaymentVerificationDetailsNewStatus>,
+  oldReceivedAmount?: Maybe<Scalars['Float']>,
   newReceivedAmount?: Maybe<Scalars['Float']>,
   approveStatus: Scalars['Boolean'],
   hasMultiplePaymentVerifications?: Maybe<Scalars['Boolean']>,
@@ -9533,7 +9538,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
+      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'oldReceivedAmount' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
       & { paymentVerification: Maybe<(
         { __typename?: 'PaymentVerificationNode' }
         & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
@@ -9838,6 +9843,55 @@ export type AvailableFspsForDeliveryMechanismsQuery = (
   )>>> }
 );
 
+export type PaymentQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentQuery = (
+  { __typename?: 'Query' }
+  & { payment: Maybe<(
+    { __typename?: 'PaymentNode' }
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, verification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
+    )>, household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'size' | 'status' | 'unicefId'>
+      & { headOfHousehold: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'fullName'>
+      ) }
+    ), collector: (
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
+    ), parent: (
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+      & { program: (
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      ), verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'verificationChannel'>
+          )> }
+        )>> }
+      )> }
+    ), serviceProvider: Maybe<(
+      { __typename?: 'FinancialServiceProviderNode' }
+      & Pick<FinancialServiceProviderNode, 'id' | 'fullName'>
+    )> }
+  )> }
+);
+
 export type PaymentPlanQueryVariables = {
   id: Scalars['ID']
 };
@@ -9962,7 +10016,7 @@ export type PaymentPlanQuery = (
       )>> }
     ), reconciliationSummary: Maybe<(
       { __typename?: 'ReconciliationSummaryNode' }
-      & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'failed' | 'pending' | 'numberOfPayments' | 'reconciled'>
+      & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'unsuccessful' | 'pending' | 'numberOfPayments' | 'reconciled'>
     )> }
   )> }
 );
@@ -10310,52 +10364,6 @@ export type LookUpPaymentRecordsQuery = (
         )> }
       )> }
     )>> }
-  )> }
-);
-
-export type PaymentQueryVariables = {
-  id: Scalars['ID']
-};
-
-
-export type PaymentQuery = (
-  { __typename?: 'Query' }
-  & { payment: Maybe<(
-    { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
-    & { targetPopulation: Maybe<(
-      { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name'>
-    )>, verification: Maybe<(
-      { __typename?: 'PaymentVerificationNode' }
-      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
-    )>, household: (
-      { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'size' | 'status' | 'unicefId'>
-      & { headOfHousehold: (
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'fullName'>
-      ) }
-    ), parent: (
-      { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
-      & { program: (
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      ), verificationPlans: Maybe<(
-        { __typename?: 'PaymentVerificationPlanNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'PaymentVerificationPlanNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'PaymentVerificationPlanNode' }
-            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'verificationChannel'>
-          )> }
-        )>> }
-      )> }
-    ), serviceProvider: Maybe<(
-      { __typename?: 'FinancialServiceProviderNode' }
-      & Pick<FinancialServiceProviderNode, 'id' | 'fullName'>
-    )> }
   )> }
 );
 
@@ -17308,6 +17316,7 @@ export const GrievanceTicketDocument = gql`
     paymentVerificationTicketDetails {
       id
       newStatus
+      oldReceivedAmount
       newReceivedAmount
       approveStatus
       paymentVerificationStatus
@@ -17988,6 +17997,122 @@ export function useAvailableFspsForDeliveryMechanismsLazyQuery(baseOptions?: Apo
 export type AvailableFspsForDeliveryMechanismsQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsQuery>;
 export type AvailableFspsForDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsLazyQuery>;
 export type AvailableFspsForDeliveryMechanismsQueryResult = ApolloReactCommon.QueryResult<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>;
+export const PaymentDocument = gql`
+    query Payment($id: ID!) {
+  payment(id: $id) {
+    id
+    unicefId
+    distributionModality
+    status
+    statusDate
+    targetPopulation {
+      id
+      name
+    }
+    verification {
+      id
+      status
+      statusDate
+      receivedAmount
+      isManuallyEditable
+    }
+    currency
+    entitlementQuantity
+    deliveredQuantity
+    deliveryDate
+    household {
+      id
+      size
+      status
+      unicefId
+      headOfHousehold {
+        id
+        phoneNo
+        phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
+        fullName
+      }
+    }
+    collector {
+      id
+      unicefId
+      fullName
+      phoneNo
+      phoneNoValid
+      phoneNoAlternative
+      phoneNoAlternativeValid
+    }
+    parent {
+      id
+      unicefId
+      program {
+        id
+        name
+      }
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            verificationChannel
+          }
+        }
+      }
+    }
+    deliveredQuantityUsd
+    deliveryType
+    transactionReferenceId
+    serviceProvider {
+      id
+      fullName
+    }
+  }
+}
+    `;
+export type PaymentComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentQuery, PaymentQueryVariables>, 'query'> & ({ variables: PaymentQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentComponent = (props: PaymentComponentProps) => (
+      <ApolloReactComponents.Query<PaymentQuery, PaymentQueryVariables> query={PaymentDocument} {...props} />
+    );
+    
+export type PaymentProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentQuery, PaymentQueryVariables> & TChildProps;
+export function withPayment<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentQuery,
+  PaymentQueryVariables,
+  PaymentProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentQuery, PaymentQueryVariables, PaymentProps<TChildProps>>(PaymentDocument, {
+      alias: 'payment',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentQuery__
+ *
+ * To run a query within a React component, call `usePaymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, baseOptions);
+      }
+export function usePaymentLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, baseOptions);
+        }
+export type PaymentQueryHookResult = ReturnType<typeof usePaymentQuery>;
+export type PaymentLazyQueryHookResult = ReturnType<typeof usePaymentLazyQuery>;
+export type PaymentQueryResult = ApolloReactCommon.QueryResult<PaymentQuery, PaymentQueryVariables>;
 export const PaymentPlanDocument = gql`
     query PaymentPlan($id: ID!) {
   paymentPlan(id: $id) {
@@ -18199,7 +18324,7 @@ export const PaymentPlanDocument = gql`
       deliveredFully
       deliveredPartially
       notDelivered
-      failed
+      unsuccessful
       pending
       numberOfPayments
       reconciled
@@ -19063,113 +19188,6 @@ export function useLookUpPaymentRecordsLazyQuery(baseOptions?: ApolloReactHooks.
 export type LookUpPaymentRecordsQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsQuery>;
 export type LookUpPaymentRecordsLazyQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsLazyQuery>;
 export type LookUpPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>;
-export const PaymentDocument = gql`
-    query Payment($id: ID!) {
-  payment(id: $id) {
-    id
-    unicefId
-    distributionModality
-    status
-    statusDate
-    targetPopulation {
-      id
-      name
-    }
-    verification {
-      id
-      status
-      statusDate
-      receivedAmount
-      isManuallyEditable
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveryDate
-    household {
-      id
-      size
-      status
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-        fullName
-      }
-    }
-    parent {
-      id
-      unicefId
-      program {
-        id
-        name
-      }
-      verificationPlans {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    deliveredQuantityUsd
-    deliveryType
-    transactionReferenceId
-    serviceProvider {
-      id
-      fullName
-    }
-  }
-}
-    `;
-export type PaymentComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentQuery, PaymentQueryVariables>, 'query'> & ({ variables: PaymentQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const PaymentComponent = (props: PaymentComponentProps) => (
-      <ApolloReactComponents.Query<PaymentQuery, PaymentQueryVariables> query={PaymentDocument} {...props} />
-    );
-    
-export type PaymentProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentQuery, PaymentQueryVariables> & TChildProps;
-export function withPayment<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  PaymentQuery,
-  PaymentQueryVariables,
-  PaymentProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, PaymentQuery, PaymentQueryVariables, PaymentProps<TChildProps>>(PaymentDocument, {
-      alias: 'payment',
-      ...operationOptions
-    });
-};
-
-/**
- * __usePaymentQuery__
- *
- * To run a query within a React component, call `usePaymentQuery` and pass it any options that fit your needs.
- * When your component renders, `usePaymentQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePaymentQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function usePaymentQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-        return ApolloReactHooks.useQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, baseOptions);
-      }
-export function usePaymentLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, baseOptions);
-        }
-export type PaymentQueryHookResult = ReturnType<typeof usePaymentQuery>;
-export type PaymentLazyQueryHookResult = ReturnType<typeof usePaymentLazyQuery>;
-export type PaymentQueryResult = ApolloReactCommon.QueryResult<PaymentQuery, PaymentQueryVariables>;
 export const PaymentRecordDocument = gql`
     query PaymentRecord($id: ID!) {
   paymentRecord(id: $id) {
@@ -24078,6 +24096,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
+  isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
 
@@ -24502,6 +24521,7 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
+  isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };
 
@@ -25598,7 +25618,7 @@ export type ReconciliationSummaryNodeResolvers<ContextType = any, ParentType ext
   deliveredFully?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   deliveredPartially?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   notDelivered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  failed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  unsuccessful?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   pending?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   numberOfPayments?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reconciled?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -26302,6 +26322,7 @@ export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, Par
   paymentVerificationStatus?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsPaymentVerificationStatus'], ParentType, ContextType>,
   paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   newStatus?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>, ParentType, ContextType>,
+  oldReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   newReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   hasMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
