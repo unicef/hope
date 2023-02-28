@@ -8,7 +8,7 @@ import { render } from '../../../../../testUtils/testUtils';
 import { AcceptedPaymentPlanHeaderButtons } from './AcceptedPaymentPlanHeaderButtons';
 
 describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons', () => {
-  it('should render with no buttons', async () => {
+  it('should render disabled buttons', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
@@ -16,6 +16,7 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
       >
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={false}
+          canExportXlsx={false}
           canSendToFsp={false}
           paymentPlan={fakeApolloPaymentPlan}
         />
@@ -24,12 +25,19 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
     await act(() => wait(0)); // wait for response
 
     const buttons = container.querySelectorAll('button');
-    expect(buttons).toHaveLength(0);
+    const disabledButtons = container.querySelectorAll('button[disabled]');
+    const notDisabledButtons = container.querySelectorAll(
+      'button:not([disabled])',
+    );
+
+    expect(buttons).toHaveLength(2);
+    expect(disabledButtons).toHaveLength(2);
+    expect(notDisabledButtons).toHaveLength(0);
 
     expect(container).toMatchSnapshot();
   });
 
-  it('should render with buttons', async () => {
+  it('should render not disabled buttons', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
@@ -37,6 +45,7 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
       >
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx
+          canExportXlsx
           canSendToFsp
           paymentPlan={fakeApolloPaymentPlan}
         />
@@ -45,7 +54,14 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
     await act(() => wait(0)); // wait for response
 
     const buttons = container.querySelectorAll('button');
+    const disabledButtons = container.querySelectorAll('button[disabled]');
+    const notDisabledButtons = container.querySelectorAll(
+      'button:not([disabled])',
+    );
+
     expect(buttons).toHaveLength(2);
+    expect(disabledButtons).toHaveLength(0);
+    expect(notDisabledButtons).toHaveLength(2);
 
     expect(container).toMatchSnapshot();
   });
