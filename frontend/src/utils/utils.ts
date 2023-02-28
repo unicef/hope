@@ -7,7 +7,7 @@ import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus, PaymentStatus,
+  PaymentPlanStatus, PaymentRecordStatus, PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -115,12 +115,13 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'Transaction Successful':
-      return theme.hctPalette.green;
-    case 'Distribution Successful':
-      return theme.hctPalette.green;
-    case 'Pending':
+    case PaymentRecordStatus.Pending:
       return theme.hctPalette.orange;
+    case PaymentRecordStatus.DistributionSuccessful:
+    case PaymentRecordStatus.TransactionSuccessful:
+      return theme.hctPalette.green;
+    case PaymentRecordStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
   }
@@ -136,12 +137,10 @@ export function paymentStatusToColor(
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
       return theme.hctPalette.green;
-    case PaymentStatus.ForceFailed:
-    case PaymentStatus.NotDistributed:
-    case PaymentStatus.TransactionErroneous:
-      return theme.palette.error.main;
-    default:
+    case PaymentStatus.PartiallyDistributed:
       return theme.hctPalette.lightBlue;
+    default:
+      return theme.palette.error.main;
   }
 }
 export function paymentVerificationStatusToColor(

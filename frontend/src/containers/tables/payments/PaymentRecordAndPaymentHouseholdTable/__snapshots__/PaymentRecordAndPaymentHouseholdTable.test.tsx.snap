@@ -255,7 +255,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje ruJtq"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
                     Pending
@@ -313,7 +313,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje ruJtq"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
                     Pending
@@ -371,7 +371,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
                     Distribution Successful
@@ -429,7 +429,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
                     Transaction Successful
