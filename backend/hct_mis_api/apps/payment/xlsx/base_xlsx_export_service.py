@@ -59,9 +59,9 @@ class XlsxExportBaseService:
                         value = str(value)
 
                     try:
-                        column_widths[i] = max(column_widths[i], len(value)) + 3
+                        column_widths[i] = max(column_widths[i], len(value)) + 1
                     except IndexError:
-                        column_widths.append(len(value))
+                        column_widths.append(len(value) + 1)
 
         for i, width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
