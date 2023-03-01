@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Optional
+
 from dateutil.parser import parse
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -6,7 +8,7 @@ from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKN
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 
-def reduce_asset(asset: dict, *args, **kwargs) -> dict:
+def reduce_asset(asset: Dict, *args: Any, **kwargs: Any) -> Dict:
     """
     Takes from asset only values that are needed by our frontend.
 
@@ -33,10 +35,10 @@ def reduce_asset(asset: dict, *args, **kwargs) -> dict:
     sector = None
 
     if settings:
-        if settings.get("sector"):
-            sector = settings["sector"].get("label")
-        if settings.get("country"):
-            country = settings["country"].get("label")
+        if sector := settings.get("sector"):
+            sector = sector.get("label")
+        if country := settings.get("country"):
+            country = next(iter(country)).get("label") if isinstance(country, list) else country.get("label")
 
     return {
         "id": asset["uid"],
@@ -58,7 +60,7 @@ def get_field_name(field_name: str) -> str:
         return field_name
 
 
-def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> list:
+def reduce_assets_list(assets: List, deployed: bool = True, *args: Any, **kwarg: Any) -> List:
     if deployed:
         return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]
@@ -86,7 +88,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
         if submission_exists is False:
             total_households_count += 1
             for individual_data in result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
-                fields = {
+                fields: Dict[str, Optional[str]] = {
                     "given_name_i_c": None,
                     "middle_name_i_c": None,
                     "family_name_i_c": None,
@@ -100,7 +102,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
                 reduced_submission = rename_dict_keys(individual_data, get_field_name)
                 for field_name in fields:
                     fields[field_name] = str(reduced_submission.get(field_name))
-                hash_key = sha256(";".join(fields.values()).encode()).hexdigest()
+                hash_key = sha256(";".join(fields.values()).encode()).hexdigest()  # type: ignore # TODO: bug?
                 seen_hash_keys.append(hash_key)
                 total_individuals_count += 1
                 if (
@@ -112,9 +114,8 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data, business_area):
+def filter_by_owner(data: List, business_area: BusinessArea) -> List:
     kobo_username = business_area.kobo_username
-    if isinstance(data, list):
+    if data:
         return [element for element in data if element["owner__username"] == kobo_username]
-    if data["owner__username"] == kobo_username:
-        return data
+    return []

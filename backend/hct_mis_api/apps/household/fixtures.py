@@ -1,4 +1,5 @@
 import random
+from typing import Any, Dict, List, Optional, Tuple
 
 import factory
 from factory import enums, fuzzy
@@ -33,7 +34,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 faker = Faker()
 
 
-def flex_field_households(o):
+def flex_field_households(o: Any) -> Dict:
     return {
         "treatment_facility_h_f": random.sample(
             [
@@ -51,7 +52,7 @@ def flex_field_households(o):
     }
 
 
-def flex_field_individual(o):
+def flex_field_individual(o: Any) -> Dict:
     return {
         "wellbeing_index_i_f": random.choice(["24", "150d", "666", None]),
         "school_enrolled_before_i_f": random.choice(["0", "1", None]),
@@ -78,6 +79,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = Household
 
+    unicef_id = factory.Sequence(lambda n: f"HH-{n}")
     consent_sign = factory.django.ImageField(color="blue")
     consent = True
     consent_sharing = (UNICEF, HUMANITARIAN_PARTNER)
@@ -118,22 +120,11 @@ class HouseholdFactory(factory.DjangoModelFactory):
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
     @classmethod
-    def build(cls, **kwargs):
+    def build(cls, **kwargs: Any) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
         if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        hoh = kwargs.get("head_of_household", None)
-        if not hoh:
-            hoh = IndividualFactory(household=None)
-            kwargs["head_of_household"] = hoh
-        ret = super()._create(model_class, *args, **kwargs)
-        hoh.household = ret
-        hoh.save()
-        return ret
 
 
 class IndividualIdentityFactory(factory.DjangoModelFactory):
@@ -141,6 +132,11 @@ class IndividualIdentityFactory(factory.DjangoModelFactory):
         model = IndividualIdentity
 
     number = factory.Faker("pystr", min_chars=None, max_chars=20)
+
+
+class IndividualRoleInHouseholdFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = IndividualRoleInHousehold
 
 
 class IndividualFactory(factory.DjangoModelFactory):
@@ -160,8 +156,10 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.LazyAttribute(lambda _: f"+380 {faker.msisdn()[:9]}")
+    phone_no = factory.Sequence(lambda n: f"+48 609 456 {n%1000:03d}")
+    phone_no_valid = True
     phone_no_alternative = ""
+    phone_no_alternative_valid = True
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -170,6 +168,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+    unicef_id = factory.Sequence(lambda n: f"IND-{n}")
 
 
 class BankAccountInfoFactory(factory.DjangoModelFactory):
@@ -200,6 +199,16 @@ class DocumentFactory(factory.DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
+class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+
+
 class EntitlementCardFactory(factory.DjangoModelFactory):
     class Meta:
         model = EntitlementCard
@@ -216,7 +225,9 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
 
 
-def create_household(household_args=None, individual_args=None):
+def create_household(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -258,7 +269,9 @@ def create_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_household_for_fixtures(household_args=None, individual_args=None):
+def create_household_for_fixtures(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -299,23 +312,27 @@ def create_household_for_fixtures(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_household_and_individuals(household_data=None, individuals_data=None, imported=False):
+def create_household_and_individuals(
+    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
+) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
+        individuals_data = []
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
-    household = HouseholdFactory.build(**household_data)
+    household: Household = HouseholdFactory.build(**household_data)
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
-    individuals = [IndividualFactory(household=household, **individual_data) for individual_data in individuals_data]
+    individuals: List[Individual] = [
+        IndividualFactory(household=household, **individual_data) for individual_data in individuals_data
+    ]
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals
 
 
-def create_individual_document(individual, document_type=None):
+def create_individual_document(individual: Individual, document_type: Optional[str] = None) -> Document:
     additional_fields = {}
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)

@@ -30,9 +30,10 @@ import { getPercentage } from '../../utils/utils';
 import {
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
-  useCreateCashPlanPaymentVerificationMutation,
+  useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '../core/ButtonTooltip';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
@@ -63,10 +64,10 @@ const initialValues = {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
+function prepareVariables(cashOrPaymentPlanId, selectedTab, values, businessArea) {
   const variables = {
     input: {
-      cashPlanId,
+      cashOrPaymentPlanId,
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedTab === 0
@@ -102,21 +103,21 @@ function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
 }
 
 export interface Props {
-  cashPlanId: string;
+  cashOrPaymentPlanId: string;
   disabled: boolean;
   canCreatePaymentVerificationPlan: boolean;
 }
 export function CreateVerificationPlan({
-  cashPlanId,
+  cashOrPaymentPlanId,
   disabled,
   canCreatePaymentVerificationPlan,
 }: Props): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useCreateCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
   const businessArea = useBusinessArea();
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -134,7 +135,7 @@ export function CreateVerificationPlan({
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
-      cashPlanId,
+      cashOrPaymentPlanId,
       selectedTab,
       formValues,
       businessArea,
@@ -150,7 +151,7 @@ export function CreateVerificationPlan({
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        cashPlanId,
+        cashOrPaymentPlanId,
         selectedTab,
         values,
         businessArea,
@@ -200,6 +201,7 @@ export function CreateVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <FormikEffect
             values={values}
             onChange={() => handleFormChange(values)}
@@ -223,9 +225,7 @@ export function CreateVerificationPlan({
             maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Create Verification Plan')}
-              </DialogTitle>
+              <DialogTitle>{t('Create Verification Plan')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>

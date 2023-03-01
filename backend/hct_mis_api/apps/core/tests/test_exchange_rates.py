@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Any
 from unittest import mock
 
 from django.core.management import call_command
@@ -10,7 +11,7 @@ from django.utils import timezone
 import requests_mock
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.exchange_rates import ExchangeRateAPI, ExchangeRates
+from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import (
     EXCHANGE_RATES_API_RESPONSE,
@@ -102,8 +103,8 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 
 class TestExchangeRatesAPI(TestCase):
     @mock.patch.dict(os.environ, clear=True)
-    def test_test_api_class_initialization_key_not_in_env(self):
-        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateAPI)
+    def test_test_api_class_initialization_key_not_in_env(self) -> None:
+        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateClientAPI)
 
     @parameterized.expand(
         [
@@ -112,9 +113,9 @@ class TestExchangeRatesAPI(TestCase):
             ("api_url_provided_as_arg", None, "https://uni-apis.org"),
         ]
     )
-    def test_api_class_initialization(self, _, api_key, api_url):
+    def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
         with mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True):
-            api_client = ExchangeRateAPI(api_key=api_key, api_url=api_url)
+            api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
             if api_key is not None:
                 self.assertEqual(api_key, api_client.api_key)
@@ -132,7 +133,7 @@ class TestExchangeRatesAPI(TestCase):
             ("without_history", False),
         ]
     )
-    def test_fetch_exchange_rates(self, test_name, with_history):
+    def test_fetch_exchange_rates(self, test_name: str, with_history: bool) -> None:
         with requests_mock.Mocker() as adapter:
             if with_history is True:
                 adapter.register_uri(
@@ -147,7 +148,7 @@ class TestExchangeRatesAPI(TestCase):
                     json=EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA,
                 )
 
-            api_client = ExchangeRateAPI(api_key="TEST_API_KEY")
+            api_client = ExchangeRateClientAPI(api_key="TEST_API_KEY")
             response_dict = api_client.fetch_exchange_rates(with_history=with_history)
 
             if test_name == "with_history":
@@ -158,7 +159,7 @@ class TestExchangeRatesAPI(TestCase):
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestExchangeRates(TestCase):
-    def test_convert_response_json_to_exchange_rates(self):
+    def test_convert_response_json_to_exchange_rates(self) -> None:
         converted_response = ExchangeRates._convert_response_json_to_exchange_rates(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
         xeu = converted_response.get("XEU")
         cup1 = converted_response.get("CUP1")
@@ -174,10 +175,28 @@ class TestExchangeRates(TestCase):
         self.assertEqual(3, len(xeu.historical_exchange_rates))
 
         xeu_second_historical_rate = xeu.historical_exchange_rates[1]
-        self.assertEqual(datetime(1998, 2, 1, 0, 0), xeu_second_historical_rate.valid_from)
-        self.assertEqual(datetime(1998, 2, 28, 0, 0), xeu_second_historical_rate.valid_to)
-        self.assertEqual(0.926, xeu_second_historical_rate.past_xrate)
-        self.assertEqual(1, xeu_second_historical_rate.past_ratio)
+        self.assertEqual(
+            xeu_second_historical_rate,
+            {
+                "VALID_FROM": "01-FEB-98",
+                "VALID_TO": "28-FEB-98",
+                "PAST_XRATE": ".926",
+                "PAST_RATIO": "1",
+            },
+        )
+
+        # dispersion_date not provided, return current rate
+        self.assertEqual(xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None), xeu.x_rate * xeu.ratio)
+        # dispersion_date from current valid date range, return current rate
+        self.assertEqual(
+            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 12, 15, 0, 0)),
+            xeu.x_rate * xeu.ratio,
+        )
+        # dispersion_date from past valid date range, return past rate
+        self.assertEqual(
+            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 2, 15, 0, 0)),
+            float(xeu_second_historical_rate["PAST_XRATE"]) * float(xeu_second_historical_rate["PAST_RATIO"]),
+        )
 
         self.assertEqual("CUP1", cup1.currency_code)
         self.assertEqual(1.0, cup1.ratio)
@@ -196,7 +215,9 @@ class TestExchangeRates(TestCase):
             ("cup1_future_date", "CUP1", timezone.now() + timedelta(weeks=200), 24),
         ]
     )
-    def test_get_exchange_rate_for_currency_code(self, _, currency_code, dispersion_date, expected_result):
+    def test_get_exchange_rate_for_currency_code(
+        self, _: Any, currency_code: str, dispersion_date: datetime, expected_result: Any
+    ) -> None:
         with requests_mock.Mocker() as adapter:
             adapter.register_uri(
                 "GET",
@@ -211,7 +232,7 @@ class TestExchangeRates(TestCase):
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestFixExchangeRatesCommand(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -241,13 +262,13 @@ class TestFixExchangeRatesCommand(TestCase):
         )
         for currency, cash_plan in cash_plans_with_currency:
             RealPaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 currency=currency,
                 delivered_quantity=200,
             )
 
     @requests_mock.Mocker()
-    def test_modify_delivered_quantity_in_usd(self, mocker):
+    def test_modify_delivered_quantity_in_usd(self, mocker: Any) -> None:
         mocker.register_uri(
             "GET",
             "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",

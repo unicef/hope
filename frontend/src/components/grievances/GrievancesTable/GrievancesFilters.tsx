@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
+import { Box, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,11 +8,12 @@ import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
-import { FieldLabel } from '../../core/FieldLabel';
+import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from './AssigneeAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -38,7 +39,7 @@ export function GrievancesFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            value={filter.search || ''}
+            value={filter.search}
             label='Search'
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
@@ -48,7 +49,7 @@ export function GrievancesFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
-            value={filter.status || ''}
+            value={filter.status}
           >
             <MenuItem value=''>
               <em>None</em>
@@ -64,7 +65,7 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <SearchTextField
-            value={filter.fsp || ''}
+            value={filter.fsp}
             label='FSP'
             onChange={(e) => handleFilterChange(e, 'fsp')}
           />
@@ -108,7 +109,7 @@ export function GrievancesFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'category')}
             label={t('Category')}
-            value={filter.category || ''}
+            value={filter.category}
           >
             <MenuItem value=''>
               <em>None</em>
@@ -128,7 +129,7 @@ export function GrievancesFilters({
             <SelectFilter
               onChange={(e) => handleFilterChange(e, 'issueType')}
               label='Issue Type'
-              value={filter.issueType || ''}
+              value={filter.issueType}
             >
               <MenuItem value=''>
                 <em>None</em>
@@ -154,27 +155,19 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Similarity Score')}</FieldLabel>
-            <TextField
-              value={filter.scoreMin || null}
-              variant='outlined'
-              margin='dense'
-              placeholder='From'
-              onChange={(e) => handleFilterChange(e, 'scoreMin')}
-              type='number'
-            />
-          </Box>
+          <NumberTextField
+            topLabel={t('Similarity Score')}
+            value={filter.scoreMin}
+            placeholder={t('From')}
+            onChange={(e) => handleFilterChange(e, 'scoreMin')}
+          />
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <TextField
-              value={filter.scoreMax || null}
-              variant='outlined'
-              margin='dense'
+            <NumberTextField
+              value={filter.scoreMax}
               placeholder='To'
               onChange={(e) => handleFilterChange(e, 'scoreMax')}
-              type='number'
             />
           </Box>
         </Grid>
@@ -182,6 +175,12 @@ export function GrievancesFilters({
           <RdiAutocomplete
             onFilterChange={onFilterChange}
             name='registrationDataImport'
+          />
+        </Grid>
+        <Grid item>
+          <LanguageAutocomplete
+            onFilterChange={onFilterChange}
+            name='preferredLanguage'
           />
         </Grid>
       </Grid>

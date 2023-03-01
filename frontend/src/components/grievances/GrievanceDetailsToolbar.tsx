@@ -18,10 +18,10 @@ import {
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../core/BreadCrumbs';
-import { PageHeader } from '../core/PageHeader';
-import { useConfirmation } from '../core/ConfirmationDialog';
 import { ButtonDialog } from '../core/ButtonDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { LoadingButton } from '../core/LoadingButton';
+import { PageHeader } from '../core/PageHeader';
 
 const Separator = styled.div`
   width: 1px;
@@ -93,39 +93,39 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
-    (): string => {
-      const householdData =
-        ticket.householdDataUpdateTicketDetails?.householdData || {};
-      const individualData =
-        ticket.individualDataUpdateTicketDetails?.individualData || {};
-      const allData = {
-        ...householdData,
-        ...individualData,
-        ...householdData?.flex_fields,
-        ...individualData?.flex_fields,
-      };
-      delete allData.previous_documents;
-      delete allData.previous_identities;
-      delete allData.flex_fields;
-
-      const { approved, notApproved } = countApprovedAndUnapproved(
-        Object.values(allData),
-      );
-      // all changes were approved
-      if (!notApproved) return '';
-
-      // no changes were approved
-      if (!approved)
-        return t(
-          `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
-        );
-
-      // some changes were approved
-      return `You approved ${approved} change${
-        approved > 1 ? 's' : ''
-      }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
+    const householdData =
+      ticket.householdDataUpdateTicketDetails?.householdData || {};
+    const individualData =
+      ticket.individualDataUpdateTicketDetails?.individualData || {};
+    const allData = {
+      ...householdData,
+      ...individualData,
+      ...householdData?.flex_fields,
+      ...individualData?.flex_fields,
     };
+    delete allData.previous_documents;
+    delete allData.previous_identities;
+    delete allData.flex_fields;
+    delete allData.previous_payment_channels;
+
+    const { approved, notApproved } = countApprovedAndUnapproved(
+      Object.values(allData),
+    );
+    // all changes were approved
+    if (!notApproved) return '';
+
+    // no changes were approved
+    if (!approved)
+      return t(
+        `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+      );
+
+    // some changes were approved
+    return `You approved ${approved} change${
+      approved > 1 ? 's' : ''
+    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
     const hasApproveOption =

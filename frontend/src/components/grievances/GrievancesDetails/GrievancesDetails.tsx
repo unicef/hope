@@ -2,8 +2,8 @@ import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  choicesToDict,
   grievanceTicketStatusToColor,
-  reduceChoices,
   renderUserName,
 } from '../../../utils/utils';
 import {
@@ -36,11 +36,11 @@ export const GrievancesDetails = ({
   const { t } = useTranslation();
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -49,6 +49,29 @@ export const GrievancesDetails = ({
           (el) => el.value === ticket.issueType.toString(),
         )[0].name
     : '-';
+
+  const renderPaymentUrl = (): React.ReactElement => {
+    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
+      return (
+        <ContentLink
+          href={`/${businessArea}/verification/payment-record/${ticket.paymentRecord.id}`}
+        >
+          {ticket.paymentRecord.caId}
+        </ContentLink>
+      );
+    }
+    if (ticket?.paymentRecord?.objType === 'Payment') {
+      return (
+        <ContentLink
+          href={`/${businessArea}/verification/payment/${ticket.paymentRecord.id}`}
+        >
+          {ticket.paymentRecord.caId}
+        </ContentLink>
+      );
+    }
+
+    return <>-</>;
+  };
 
   return (
     <Grid item xs={12}>
@@ -123,19 +146,7 @@ export const GrievancesDetails = ({
               },
               {
                 label: t('PAYMENT ID'),
-                value: (
-                  <span>
-                    {ticket.paymentRecord?.caId ? (
-                      <ContentLink
-                        href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
-                      >
-                        {ticket.paymentRecord.caId}
-                      </ContentLink>
-                    ) : (
-                      '-'
-                    )}
-                  </span>
-                ),
+                value: <span>{renderPaymentUrl()}</span>,
                 size: 6,
               },
               {

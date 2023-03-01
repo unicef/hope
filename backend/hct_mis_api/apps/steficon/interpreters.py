@@ -5,10 +5,11 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
+from typing import Any, Dict, List, Type
+from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
 
 from jinja2 import Environment
@@ -21,33 +22,22 @@ logger = logging.getLogger(__name__)
 
 
 class Interpreter:
-    def __init__(self, init_string):
+    def __init__(self, init_string: str) -> None:
         self.init_string = init_string
 
-    def validate(self):
+    def validate(self) -> bool:
         try:
             self.execute()
             return True
         except Exception as e:
             logger.exception(e)
-            raise ValidationError(e)
+            raise ValidationError(str(e))
 
-    def get_result(self):
+    def get_result(self) -> Any:
         return config.RESULT()
 
 
-class PythonFunction(Interpreter):
-    label = "internal"
-
-    @cached_property
-    def code(self):
-        return import_string(self.init_string)
-
-    def execute(self, **context):
-        return self.code(**context)
-
-
-def call_rule(rule_id, context):
+def call_rule(rule_id: UUID, context: Dict) -> Any:
     from .models import Rule
 
     rule: Rule = Rule.objects.get(id=rule_id)
@@ -58,10 +48,10 @@ class PythonExec(Interpreter):
     label = "Python"
 
     @cached_property
-    def code(self):
+    def code(self) -> Any:
         return compile(self.init_string, "<code>", mode="exec")
 
-    def execute(self, context):
+    def execute(self, context: Dict) -> Any:
         gl = {
             "__builtins__": {
                 "__build_class__": __build_class__,
@@ -125,7 +115,7 @@ class PythonExec(Interpreter):
         else:
             return pts
 
-    def validate(self):
+    def validate(self) -> bool:
         errors = []
         for forbidden in [
             "__import__",
@@ -151,19 +141,13 @@ class PythonExec(Interpreter):
             raise ValidationError(mark_safe(msg))
 
 
-def get_env(**options) -> Environment:
+def get_env(**options: Any) -> Environment:
     env = Environment(**options)
-    env.filters.update(
-        {
-            "adults": engine.adults
-            # 'url': reverse,
-        }
-    )
+    env.filters.update({"adults": engine.adults})
     return env
 
 
-interpreters = [
+interpreters: List[Type[Interpreter]] = [
     PythonExec,
-    # PythonFunction,
 ]
-mapping = {a.label.lower(): a for a in interpreters}
+mapping: Dict[str, Type[Interpreter]] = {a.label.lower(): a for a in interpreters}

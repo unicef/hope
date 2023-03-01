@@ -1,10 +1,11 @@
 import time
+from typing import Any
 
 from django.contrib.auth import get_user_model
 
 import factory
 
-from hct_mis_api.apps.account.models import Partner, Role, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -18,6 +19,7 @@ class PartnerFactory(factory.DjangoModelFactory):
 
 class BusinessAreaFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda x: "BusinessArea{}".format(x))
+    code = factory.Sequence(lambda x: "BA{}".format(x))
     active = True
 
     class Meta:
@@ -37,7 +39,7 @@ class UserFactory(factory.DjangoModelFactory):
     username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}")
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs):
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> User:
         manager = cls._get_manager(model_class)
         keyword_arguments = kwargs.copy()
         if "password" not in keyword_arguments:

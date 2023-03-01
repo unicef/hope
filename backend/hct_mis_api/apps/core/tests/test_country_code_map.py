@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -10,7 +12,7 @@ class TestCountryCodeMap(TestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         call_command("loadcountrycodes")
 
     @parameterized.expand(
@@ -21,7 +23,7 @@ class TestCountryCodeMap(TestCase):
             ("custom_code", "AUS", "AUL"),
         ]
     )
-    def test_get_code(self, _, iso_code, expected):
+    def test_get_code(self, _: Any, iso_code: str, expected: str) -> None:
         self.assertEqual(CountryCodeMap.objects.get_code(iso_code), expected)
 
     @parameterized.expand(
@@ -31,7 +33,7 @@ class TestCountryCodeMap(TestCase):
             ("custom_code", "AUL", "AU"),
         ]
     )
-    def test_get_iso2_code_from_ca_code(self, _, ca_code, expected):
+    def test_get_iso2_code_from_ca_code(self, _: Any, ca_code: str, expected: str) -> None:
         self.assertEqual(CountryCodeMap.objects.get_iso2_code(ca_code), expected)
 
     @parameterized.expand(
@@ -41,10 +43,10 @@ class TestCountryCodeMap(TestCase):
             ("custom_code", "AUL", "AUS"),
         ]
     )
-    def test_get_iso3_code_from_ca_code(self, _, ca_code, expected):
+    def test_get_iso3_code_from_ca_code(self, _: Any, ca_code: str, expected: str) -> None:
         self.assertEqual(CountryCodeMap.objects.get_iso3_code(ca_code), expected)
 
-    def test_cache(self):
+    def test_cache(self) -> None:
         CountryCodeMap.objects._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         with self.assertNumQueries(1):
             self.assertEqual(CountryCodeMap.objects.get_code("AFG"), "AFG")

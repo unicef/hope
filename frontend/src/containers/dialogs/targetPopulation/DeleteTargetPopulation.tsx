@@ -4,11 +4,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
 } from '@material-ui/core';
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -57,12 +57,9 @@ export const DeleteTargetPopulation = ({
       >
         {({ submitForm }) => (
           <>
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>
-                  {t('Delete Target Population')}
-                </Typography>
-              </DialogTitle>
+              <DialogTitle>{t('Delete Target Population')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>

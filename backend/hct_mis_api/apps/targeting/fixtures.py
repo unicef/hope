@@ -1,13 +1,18 @@
 import datetime as dt
 import random
+import typing
+from typing import Any, Iterable, List, Optional, Union
 
 import factory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -17,7 +22,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-def comparison_method_resolver(obj):
+def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
     core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
@@ -28,9 +33,11 @@ def comparison_method_resolver(obj):
         return random.choice(["EQUALS", "NOT_EQUALS"])
     if core_field_attr.get("type") == "STRING":
         return "CONTAINS"
+    return None
 
 
-def arguments_resolver(obj):
+@typing.no_type_check
+def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
     min = None
     max = None
     if obj.field_name == "age":
@@ -81,10 +88,11 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
     updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
     status = TargetPopulation.STATUS_OPEN
-    business_area = None
+    program = factory.LazyAttribute(lambda t: Program.objects.filter(status=Program.ACTIVE).first())
+    business_area = factory.LazyAttribute(lambda t: BusinessArea.objects.first())
 
     @factory.post_generation
-    def households(self, create, extracted, **kwargs):
+    def households(self, create: bool, extracted: Iterable, **kwargs: Any) -> None:
         if not create:
             households = HouseholdFactory.create_batch(5)
             self.households.add(*households)

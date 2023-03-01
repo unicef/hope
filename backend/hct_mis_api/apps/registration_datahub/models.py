@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from datetime import date
+from typing import Any, Dict, Optional
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -19,7 +20,11 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.languages import Languages
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -43,9 +48,9 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -90,10 +95,17 @@ class ImportedHousehold(TimeStampedUUIDModel):
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
+    """location contains lowest administrative area info"""
+    admin_area = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin_area_title = models.CharField(max_length=255, blank=True, default=BLANK)
     admin1 = models.CharField(max_length=255, blank=True, default=BLANK)
     admin1_title = models.CharField(max_length=255, blank=True, default=BLANK)
     admin2 = models.CharField(max_length=255, blank=True, default=BLANK)
     admin2_title = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin3 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin3_title = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin4 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin4_title = models.CharField(max_length=255, blank=True, default=BLANK)
     geopoint = PointField(null=True, default=None)
     female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
@@ -152,21 +164,37 @@ class ImportedHousehold(TimeStampedUUIDModel):
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
-    def business_area(self):
+    def business_area(self) -> str:
         return self.registration_data_import.business_area
 
     @cached_property
-    def primary_collector(self):
+    def primary_collector(self) -> Optional[User]:
         return self.individuals_and_roles.get(role=ROLE_PRIMARY).individual
 
     @cached_property
-    def alternate_collector(self):
+    def alternate_collector(self) -> Optional[User]:
         try:
             return self.individuals_and_roles.filter(role=ROLE_ALTERNATE).first().individual
         except AttributeError:
             return None
 
-    def __str__(self):
+    def set_admin_areas(self) -> None:
+        admins = {
+            "admin1": self.admin1,
+            "admin2": self.admin2,
+            "admin3": self.admin3,
+            "admin4": self.admin4,
+        }
+
+        for admin_key, admin_value in admins.items():
+            if admin_value:
+                admin_area = Area.objects.filter(p_code=admin_value).first()
+                if admin_area:
+                    self.admin_area = admin_value
+                    self.admin_area_title = admin_area.name
+                    setattr(self, f"{admin_key}_title", admin_area.name)
+
+    def __str__(self) -> str:
         return f"Household ID: {self.id}"
 
 
@@ -197,7 +225,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_valid = models.BooleanField(default=False)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_alternative_valid = models.BooleanField(default=False)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -246,10 +276,11 @@ class ImportedIndividual(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
-    def age(self):
+    def age(self) -> int:
         today = date.today()
         return (
             today.year
@@ -258,7 +289,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         )
 
     @property
-    def get_hash_key(self):
+    def get_hash_key(self) -> str:
         from hashlib import sha256
 
         fields = (
@@ -276,25 +307,21 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
         return sha256(";".join(values).encode()).hexdigest()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.full_name
 
     @property
-    def business_area(self):
+    def business_area(self) -> BusinessArea:
         return self.registration_data_import.business_area
 
     @property
-    def phone_no_valid(self):
-        return is_right_phone_number_format(str(self.phone_no))
-
-    @property
-    def phone_no_alternative_valid(self):
-        return is_right_phone_number_format(str(self.phone_no_alternative))
-
-    @property
-    def role(self):
+    def role(self) -> Optional[str]:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        recalculate_phone_numbers_validity(self, ImportedIndividual)
+        super().save(*args, **kwargs)
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
@@ -347,15 +374,15 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         ordering = ("name",)
         permissions = (["api_upload", "Can upload"],)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
-    def business_area(self):
+    def business_area(self) -> str:
         return self.business_area_slug
 
     @property
-    def linked_rdi(self):
+    def linked_rdi(self) -> Any:  # TODO: (circular import) "RegistrationDataImport":
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         return RegistrationDataImport.objects.get(datahub_id=self.id)
@@ -413,8 +440,9 @@ class DocumentValidator(TimeStampedUUIDModel):
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    is_identity_document = models.BooleanField(default=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.label}"
 
 
@@ -430,7 +458,7 @@ class ImportedDocument(TimeStampedUUIDModel):
     country = CountryField(default="U")
     doc_date = models.DateField(blank=True, null=True, default=None)
 
-    def clean(self):
+    def clean(self) -> None:
         from django.core.exceptions import ValidationError
 
         for validator in self.type.validators.all():
@@ -439,24 +467,7 @@ class ImportedDocument(TimeStampedUUIDModel):
                 raise ValidationError("Document number is not validating")
 
 
-class ImportedAgency(models.Model):
-    type = models.CharField(
-        max_length=100,
-    )
-    label = models.CharField(
-        max_length=100,
-    )
-    country = CountryField()
-
-    class Meta:
-        unique_together = ("country", "type")
-
-    def __str__(self):
-        return f"{self.label}"
-
-
 class ImportedIndividualIdentity(models.Model):
-    agency = models.ForeignKey("ImportedAgency", related_name="identities", on_delete=models.CASCADE)
     individual = models.ForeignKey(
         "ImportedIndividual",
         related_name="identities",
@@ -465,12 +476,14 @@ class ImportedIndividualIdentity(models.Model):
     document_number = models.CharField(
         max_length=255,
     )
+    country = CountryField(default="U")
+    partner = models.CharField(max_length=100, null=True)
 
     class Meta:
         verbose_name_plural = "Imported Individual Identities"
 
-    def __str__(self):
-        return f"{self.agency} {self.individual} {self.document_number}"
+    def __str__(self) -> str:
+        return f"{self.partner} {self.individual} {self.document_number}"
 
 
 class KoboImportedSubmission(models.Model):
@@ -527,18 +540,20 @@ class Record(models.Model):
     index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
     index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
 
-    def mark_as_invalid(self, msg: str):
+    def mark_as_invalid(self, msg: str) -> None:
         self.error_message = msg
         self.status = self.STATUS_ERROR
         self.save()
 
-    def mark_as_imported(self):
+    def mark_as_imported(self) -> None:
         self.status = self.STATUS_IMPORTED
         self.save()
 
-    def get_data(self):
+    def get_data(self) -> Dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
+        if not self.files:
+            return self.fields
         files = json.loads(self.files.tobytes().decode())
         return combine_collections(files, self.fields)
 
@@ -551,7 +566,7 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:
@@ -592,7 +607,7 @@ class DiiaHousehold(models.Model):
     )
     status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Diia Household ID: {self.id}"
 
 
@@ -660,10 +675,10 @@ class DiiaIndividual(models.Model):
     )
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         return f"{self.last_name} {self.first_name} {self.second_name}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.iban:
             self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)

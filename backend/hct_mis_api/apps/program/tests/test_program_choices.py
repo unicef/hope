@@ -41,28 +41,28 @@ class TestProgramChoices(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
 
-    def test_status_choices_query(self):
+    def test_status_choices_query(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_STATUS_CHOICES,
             context={"user": self.user},
         )
 
-    def test_program_frequency_of_payments_choices(self):
+    def test_program_frequency_of_payments_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_FREQUENCY_OF_PAYMENTS_CHOICES,
             context={"user": self.user},
         )
 
-    def test_program_sector_choices(self):
+    def test_program_sector_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_SECTOR_CHOICES,
             context={"user": self.user},
         )
 
-    def test_program_scope_choices(self):
+    def test_program_scope_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_PROGRAM_SCOPE_CHOICES,
             context={"user": self.user},

@@ -1,8 +1,10 @@
 # Create your models here.
 import logging
 import sys
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from django.db import models
+from django.http import HttpRequest
 from django.utils import timezone
 
 from concurrency.fields import IntegerVersionField
@@ -11,6 +13,10 @@ from model_utils.models import UUIDModel
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +46,9 @@ class SoftDeletableModelWithDate(models.Model):
     objects = SoftDeletableManager()
     all_objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -49,12 +57,13 @@ class SoftDeletableModelWithDate(models.Model):
             self.is_removed = True
             self.removed_date = timezone.now()
             self.save(using=using)
-        else:
-            return super().delete(using=using, *args, **kwargs)
+            return 1, {self._meta.label: 1}
+
+        return super().delete(using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):
-    def get_queryset(self, *args, **kwargs):
+    def get_queryset(self, *args: Any, **kwargs: Any) -> "QuerySet":
         """
         Return queryset limited to not removed entries.
         """
@@ -75,7 +84,9 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     objects = SoftDeletionTreeManager()
     all_objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(
+        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -86,6 +97,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
+        return None
 
 
 class AbstractSession(models.Model):
@@ -138,7 +150,7 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
-    def process_exception(self, exc, request=None):
+    def process_exception(self, exc: BaseException, request: Optional[HttpRequest] = None) -> Optional[int]:
         try:
             from sentry_sdk import capture_exception
 
@@ -160,7 +172,7 @@ class AbstractSession(models.Model):
 
         return self.sentry_id
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"#{self.id} on {self.timestamp}"
 
 
@@ -187,7 +199,9 @@ class SoftDeletableDefaultManagerModel(models.Model):
     active_objects = SoftDeletableManager()
     objects = models.Manager()
 
-    def delete(self, using=None, soft=True, *args, **kwargs):
+    def delete(
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
@@ -195,8 +209,9 @@ class SoftDeletableDefaultManagerModel(models.Model):
         if soft:
             self.is_removed = True
             self.save(using=using)
-        else:
-            return super().delete(using=using, *args, **kwargs)
+            return 1, {self._meta.label: 1}
+
+        return super().delete(using=using, *args, **kwargs)
 
 
 class ConcurrencyModel(models.Model):
@@ -207,13 +222,13 @@ class ConcurrencyModel(models.Model):
 
 
 class UnicefIdentifiedModel(models.Model):
-    unicef_id = models.CharField(max_length=255, null=True, blank=True)
+    unicef_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
 
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
         if self._state.adding:
             # due to existence of "CREATE TRIGGER" in migrations
-            self.refresh_from_db(fields=("unicef_id",))
+            self.refresh_from_db(fields=["unicef_id"])

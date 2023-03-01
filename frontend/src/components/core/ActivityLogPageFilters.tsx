@@ -23,7 +23,7 @@ export function ActivityLogPageFilters({
     household: 'Household',
     individual: 'Individual',
     grievanceticket: 'Grievance ticket',
-    cashplanpaymentverification: 'Cash plan payment verification',
+    paymentverificationplan: 'Cash plan payment verification',
     targetpopulation: 'Target Population',
     registrationdataimport: 'Registration data import',
   };
@@ -33,7 +33,7 @@ export function ActivityLogPageFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            value={filter.search || ''}
+            value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
           />
@@ -42,7 +42,7 @@ export function ActivityLogPageFilters({
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'module')}
             label={t('Module')}
-            value={filter.module || ''}
+            value={filter.module}
             icon={<ViewModuleRoundedIcon />}
             SelectDisplayProps={{
               'data-cy': 'filters-residence-status',

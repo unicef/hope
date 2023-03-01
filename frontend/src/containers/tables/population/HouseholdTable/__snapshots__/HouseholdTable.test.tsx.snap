@@ -55,6 +55,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
             >
               <h6
                 class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+                data-cy="table-title"
               >
                 Households
               </h6>
@@ -80,23 +81,8 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
-                  >
-                    
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
-                  </span>
+                    class="sc-bxivhb fYYxJD"
+                  />
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
@@ -104,22 +90,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Household Id
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -128,22 +101,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Status
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -152,22 +112,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Head of Household
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -176,22 +123,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Household Size
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -200,22 +134,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Administrative Level 2
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -224,22 +145,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Residence Status
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -248,22 +156,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Total Cash Received
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -272,22 +167,9 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
-                    role="button"
-                    tabindex="0"
+                    class="sc-bxivhb fYYxJD"
                   >
                     Registration Date
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
               </tr>
@@ -297,6 +179,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
             >
               <tr
                 class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                data-cy="household-table-row"
                 role="checkbox"
               >
                 <td

@@ -9,35 +9,35 @@ import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DiscardVerificationPlanProps {
-  cashPlanVerificationId: string;
-  cashPlanId: string;
+  paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function DiscardVerificationPlan({
-  cashPlanVerificationId,
-  cashPlanId,
+  paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: DiscardVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useDiscardCashPlanPaymentVerificationMutation();
+  const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
   const discard = async (): Promise<void> => {
-    const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
-      refetchQueries,
-    });
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
+    try {
+      await mutate({
+        variables: { paymentVerificationPlanId },
+        refetchQueries,
+      });
+      showMessage(t('Verification plan has been discarded.'));
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
-    showMessage(t('Verification plan has been discarded.'));
   };
   return (
     <>
@@ -58,9 +58,7 @@ export function DiscardVerificationPlan({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Discard Verification Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Discard Verification Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

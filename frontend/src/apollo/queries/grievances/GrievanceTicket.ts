@@ -53,8 +53,28 @@ export const GrievanceTicket = gql`
       paymentRecord {
         id
         caId
+        deliveredQuantity
+        objType
       }
       relatedTickets {
+        id
+        unicefId
+        status
+        household {
+          id
+          unicefId
+        }
+      }
+      linkedTickets {
+        id
+        unicefId
+        status
+        household {
+          id
+          unicefId
+        }
+      }
+      existingTickets {
         id
         unicefId
         status
@@ -95,6 +115,10 @@ export const GrievanceTicket = gql`
       deleteHouseholdTicketDetails {
         id
         approveStatus
+        reasonHousehold {
+          id
+          unicefId
+        }
       }
       systemFlaggingTicketDetails {
         id
@@ -144,6 +168,7 @@ export const GrievanceTicket = gql`
       paymentVerificationTicketDetails {
         id
         newStatus
+        oldReceivedAmount
         newReceivedAmount
         approveStatus
         paymentVerificationStatus
@@ -151,19 +176,11 @@ export const GrievanceTicket = gql`
         paymentVerification {
           id
           receivedAmount
-          paymentRecord {
-            id
-            deliveredQuantity
-          }
         }
         paymentVerifications {
           edges {
             node {
               id
-              paymentRecord {
-                id
-                caId
-              }
             }
           }
         }

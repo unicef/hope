@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -7,10 +9,11 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     create_payment_verification_plan_with_status,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -19,11 +22,11 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestDeleteVerificationMutation(APITestCase):
     MUTATION = """
-        mutation DeleteVerification($cashPlanVerificationId: ID!){
-          deleteCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
-            cashPlan{
-                name
-                verifications {
+        mutation DeleteVerification($paymentVerificationPlanId: ID!){
+          deletePaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
+            paymentPlan{
+            objType
+                verificationPlans {
                     edges {
                         node {
                             status
@@ -36,7 +39,7 @@ class TestDeleteVerificationMutation(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -53,7 +56,7 @@ class TestDeleteVerificationMutation(APITestCase):
             program=cls.program,
             business_area=cls.business_area,
         )
-        cls.verification = cls.cash_plan.verifications.first()
+        cls.verification = cls.cash_plan.payment_verification_plan.first()
 
     @parameterized.expand(
         [
@@ -61,17 +64,17 @@ class TestDeleteVerificationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_delete_pending_verification_plan(self, _, permissions):
+    def test_delete_pending_verification_plan(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.create_active_payment_verification_plan()
-        cash_plan_payment_verification = self.create_pending_payment_verification_plan()
+        payment_verification_plan = self.create_pending_payment_verification_plan()
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [
-                    self.id_to_base64(cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode")
+                "paymentVerificationPlanId": [
+                    self.id_to_base64(payment_verification_plan.id, "PaymentVerificationPlanNode")
                 ]
             },
         )
@@ -82,37 +85,37 @@ class TestDeleteVerificationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_delete_active_verification_plan(self, _, permissions):
+    def test_delete_active_verification_plan(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        cash_plan_payment_verification = self.create_active_payment_verification_plan()
+        payment_verification_plan = self.create_active_payment_verification_plan()
         self.create_pending_payment_verification_plan()
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [
-                    self.id_to_base64(cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode")
+                "paymentVerificationPlanId": [
+                    self.id_to_base64(payment_verification_plan.id, "PaymentVerificationPlanNode")
                 ]
             },
         )
 
-    def create_pending_payment_verification_plan(self):
+    def create_pending_payment_verification_plan(self) -> PaymentVerificationPlan:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
             self.business_area,
             self.program,
             self.target_population,
-            CashPlanPaymentVerification.STATUS_PENDING,
+            PaymentVerificationPlan.STATUS_PENDING,
         )
 
-    def create_active_payment_verification_plan(self):
+    def create_active_payment_verification_plan(self) -> PaymentVerificationPlan:
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
             self.business_area,
             self.program,
             self.target_population,
-            CashPlanPaymentVerification.STATUS_ACTIVE,
+            PaymentVerificationPlan.STATUS_ACTIVE,
         )

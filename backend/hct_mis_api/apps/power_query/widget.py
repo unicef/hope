@@ -1,12 +1,18 @@
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+
 from django import forms
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django.templatetags.static import static
+
+if TYPE_CHECKING:
+    from django.db.models.fields import _ChoicesCallable
 
 
 class FormatterEditor(forms.Textarea):
     template_name = "steficon/widgets/codewidget.html"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         theme = kwargs.pop("theme", "midnight")
         super().__init__(*args, **kwargs)
         self.attrs["class"] = "formatter-editor"
@@ -38,15 +44,15 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
     def __init__(
         self,
         *,
-        empty_label="---------",
-        required=True,
-        widget=None,
-        label=None,
-        initial=None,
-        help_text="",
-        to_field_name=None,
-        limit_choices_to=None,
-        **kwargs,
+        empty_label: str = "---------",
+        required: bool = True,
+        widget: Optional[Any] = None,
+        label: Optional[Any] = None,
+        initial: Optional[Any] = None,
+        help_text: str = "",
+        to_field_name: Optional[str] = None,
+        limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
+        **kwargs: Any,
     ):
         queryset = ContentType.objects.order_by("model", "app_label")
         super().__init__(
@@ -62,5 +68,5 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj):
+    def label_from_instance(self, obj: Any) -> str:
         return f"{obj.name.title()} ({obj.app_label})"

@@ -7,7 +7,7 @@ import {
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { decodeIdString, reduceChoices } from '../../../utils/utils';
+import { decodeIdString, choicesToDict } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -44,6 +44,7 @@ export const GrievancesTable = ({
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
     scoreMax: filter.scoreMax,
+    preferredLanguage: filter.preferredLanguage,
   };
 
   const {
@@ -61,11 +62,11 @@ export const GrievancesTable = ({
 
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+  } = choicesToDict(choicesData.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
 

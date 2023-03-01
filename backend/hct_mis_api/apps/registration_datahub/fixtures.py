@@ -1,5 +1,6 @@
 import random
 import time
+from typing import Dict, List, Optional, Tuple
 
 from django.contrib.gis.geos import Point
 
@@ -63,6 +64,12 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     admin1 = ""
     admin2 = ""
+    admin3 = ""
+    admin4 = ""
+    admin1_title = ""
+    admin2_title = ""
+    admin3_title = ""
+    admin4_title = ""
     geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
@@ -114,7 +121,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Faker("phone_number")
+    phone_no = factory.LazyFunction(faker.phone_number)
     phone_no_alternative = ""
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
@@ -123,7 +130,9 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
 
-def create_imported_household(household_args=None, individual_args=None):
+def create_imported_household(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[ImportedHousehold, ImportedIndividual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -137,13 +146,15 @@ def create_imported_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_imported_household_and_individuals(household_data=None, individuals_data=None):
+def create_imported_household_and_individuals(
+    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None
+) -> Tuple[ImportedHousehold, List[ImportedIndividual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
-        individuals_data = {}
-    household = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
-    individuals = [
+        individuals_data = []
+    household: ImportedHousehold = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
+    individuals: List[ImportedIndividual] = [
         ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]

@@ -172,7 +172,7 @@ export const importedIndividualDetailed = gql`
         node {
           id
           documentNumber
-          type
+          partner
           country
         }
       }
@@ -195,5 +195,6 @@ export const importedIndividualDetailed = gql`
     phoneNoAlternative
     phoneNoValid
     phoneNoAlternativeValid
+    preferredLanguage
   }
 `;

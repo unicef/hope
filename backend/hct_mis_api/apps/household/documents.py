@@ -1,15 +1,32 @@
+from typing import Optional, Type, Union
+
 from django.conf import settings
+from django.db.models import Q, QuerySet
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
+from hct_mis_api.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 
-from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
+RelatedInstanceType = Union[Document, Household, IndividualIdentity, IndividualRoleInHousehold]
 
-@registry.register_document
+index_settings = {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "similarity": {
+        "default": {
+            "type": "scripted",
+            "script": {
+                "source": DEFAULT_SCRIPT,
+            },
+        },
+    },
+}
+
+
 class IndividualDocument(Document):
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
@@ -30,38 +47,38 @@ class IndividualDocument(Document):
     household = fields.ObjectField(
         properties={
             "unicef_id": fields.TextField(),
-            "residence_status": fields.KeywordField(similarity="boolean"),
-            "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
-            "size": fields.IntegerField(),
-            "address": fields.TextField(),
-            "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
-            "female_age_group_0_5_count": fields.IntegerField(),
-            "female_age_group_6_11_count": fields.IntegerField(),
-            "female_age_group_12_17_count": fields.IntegerField(),
-            "female_age_group_18_59_count": fields.IntegerField(),
-            "female_age_group_60_count": fields.IntegerField(),
-            "pregnant_count": fields.IntegerField(),
-            "male_age_group_0_5_count": fields.IntegerField(),
-            "male_age_group_6_11_count": fields.IntegerField(),
-            "male_age_group_12_17_count": fields.IntegerField(),
-            "male_age_group_18_59_count": fields.IntegerField(),
-            "male_age_group_60_count": fields.IntegerField(),
-            "female_age_group_0_5_disabled_count": fields.IntegerField(),
-            "female_age_group_6_11_disabled_count": fields.IntegerField(),
-            "female_age_group_12_17_disabled_count": fields.IntegerField(),
-            "female_age_group_18_59_disabled_count": fields.IntegerField(),
-            "female_age_group_60_disabled_count": fields.IntegerField(),
-            "male_age_group_0_5_disabled_count": fields.IntegerField(),
-            "male_age_group_6_11_disabled_count": fields.IntegerField(),
-            "male_age_group_12_17_disabled_count": fields.IntegerField(),
-            "male_age_group_18_59_disabled_count": fields.IntegerField(),
-            "male_age_group_60_disabled_count": fields.IntegerField(),
-            "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
-            "returnee": fields.BooleanField(),
-            "registration_method": fields.KeywordField(similarity="boolean"),
-            "collect_individual_data": fields.KeywordField(similarity="boolean"),
-            "currency": fields.KeywordField(similarity="boolean"),
-            "unhcr_id": fields.KeywordField(similarity="boolean"),
+            # "residence_status": fields.KeywordField(similarity="boolean"),
+            # "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
+            # "size": fields.IntegerField(),
+            # "address": fields.TextField(),
+            # "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
+            # "female_age_group_0_5_count": fields.IntegerField(),
+            # "female_age_group_6_11_count": fields.IntegerField(),
+            # "female_age_group_12_17_count": fields.IntegerField(),
+            # "female_age_group_18_59_count": fields.IntegerField(),
+            # "female_age_group_60_count": fields.IntegerField(),
+            # "pregnant_count": fields.IntegerField(),
+            # "male_age_group_0_5_count": fields.IntegerField(),
+            # "male_age_group_6_11_count": fields.IntegerField(),
+            # "male_age_group_12_17_count": fields.IntegerField(),
+            # "male_age_group_18_59_count": fields.IntegerField(),
+            # "male_age_group_60_count": fields.IntegerField(),
+            # "female_age_group_0_5_disabled_count": fields.IntegerField(),
+            # "female_age_group_6_11_disabled_count": fields.IntegerField(),
+            # "female_age_group_12_17_disabled_count": fields.IntegerField(),
+            # "female_age_group_18_59_disabled_count": fields.IntegerField(),
+            # "female_age_group_60_disabled_count": fields.IntegerField(),
+            # "male_age_group_0_5_disabled_count": fields.IntegerField(),
+            # "male_age_group_6_11_disabled_count": fields.IntegerField(),
+            # "male_age_group_12_17_disabled_count": fields.IntegerField(),
+            # "male_age_group_18_59_disabled_count": fields.IntegerField(),
+            # "male_age_group_60_disabled_count": fields.IntegerField(),
+            # "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
+            # "returnee": fields.BooleanField(),
+            # "registration_method": fields.KeywordField(similarity="boolean"),
+            # "collect_individual_data": fields.KeywordField(similarity="boolean"),
+            # "currency": fields.KeywordField(similarity="boolean"),
+            # "unhcr_id": fields.KeywordField(similarity="boolean"),
         }
     )
     documents = fields.ObjectField(
@@ -74,54 +91,35 @@ class IndividualDocument(Document):
     identities = fields.ObjectField(
         properties={
             "number": fields.KeywordField(similarity="boolean"),
-            "agency": fields.KeywordField(attr="agency.type", similarity="boolean"),
-        }
-    )
-    households_and_roles = fields.ObjectField(
-        properties={
-            "role": fields.KeywordField(similarity="boolean"),
-            "individual": fields.KeywordField(attr="individual.id", similarity="boolean"),
+            "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
         }
     )
 
-    def prepare_phone_no_text(self, instance):
+    def prepare_phone_no_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_phone_no_alternative_text(self, instance):
+    def prepare_phone_no_alternative_text(self, instance: Individual) -> str:
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_admin1(self, instance):
+    def prepare_admin1(self, instance: Individual) -> Optional[str]:
         household = instance.household
         if household:
             if household.admin1:
                 return household.admin1.name
+        return None
 
-    def prepare_admin2(self, instance):
+    def prepare_admin2(self, instance: Individual) -> Optional[str]:
         household = instance.household
         if household:
             if household.admin2:
                 return household.admin2.name
+        return None
 
-    def prepare_hash_key(self, instance):
+    def prepare_hash_key(self, instance: Individual) -> str:
         return instance.get_hash_key
 
-    def prepare_business_area(self, instance):
+    def prepare_business_area(self, instance: Individual) -> str:
         return instance.business_area.slug
-
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "similarity": {
-                "default": {
-                    "type": "scripted",
-                    "script": {
-                        "source": DEFAULT_SCRIPT,
-                    },
-                },
-            },
-        }
 
     class Django:
         model = Individual
@@ -133,13 +131,54 @@ class IndividualDocument(Document):
             "updated_at",
         ]
 
-        related_models = [Household, Document, IndividualIdentity, IndividualRoleInHousehold]
+        related_models = [Household, Document, IndividualIdentity]
 
-    def get_instances_from_related(self, related_instance):
-        if isinstance(related_instance, (Document, IndividualIdentity, IndividualRoleInHousehold)):
+    def get_instances_from_related(
+        self, related_instance: RelatedInstanceType
+    ) -> Optional[Union[Individual, QuerySet[Individual]]]:
+        if isinstance(related_instance, (Document, IndividualIdentity)):
             return related_instance.individual
         if isinstance(related_instance, Household):
             return related_instance.individuals.all()
+
+        return None
+
+
+@registry.register_document
+class IndividualDocumentAfghanistan(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_afghanistan"
+        settings = index_settings
+
+    def get_queryset(self) -> QuerySet[Individual]:
+        return Individual.objects.filter(business_area__slug="afghanistan")
+
+
+@registry.register_document
+class IndividualDocumentUkraine(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_ukraine"
+        settings = index_settings
+
+    def get_queryset(self) -> QuerySet[Individual]:
+        return Individual.objects.filter(business_area__slug="ukraine")
+
+
+@registry.register_document
+class IndividualDocumentOthers(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_others"
+        settings = index_settings
+
+    def get_queryset(self) -> QuerySet[Individual]:
+        return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
+
+
+def get_individual_doc(business_area_slug: str) -> Type:
+    return {
+        "afghanistan": IndividualDocumentAfghanistan,
+        "ukraine": IndividualDocumentUkraine,
+    }.get(business_area_slug, IndividualDocumentOthers)
 
 
 @registry.register_document
@@ -158,17 +197,19 @@ class HouseholdDocument(Document):
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
 
-    def prepare_admin1(self, household):
+    def prepare_admin1(self, household: Household) -> Optional[str]:
         if household:
             if household.admin1:
                 return household.admin1.name
+        return None
 
-    def prepare_admin2(self, household):
+    def prepare_admin2(self, household: Household) -> Optional[str]:
         if household:
             if household.admin2:
                 return household.admin2.name
+        return None
 
-    def prepare_business_area(self, instance):
+    def prepare_business_area(self, instance: Household) -> str:
         return instance.business_area.slug
 
     class Django:
@@ -178,7 +219,7 @@ class HouseholdDocument(Document):
 
         related_models = [Individual]
 
-    def get_instances_from_related(self, related_instance):
+    def get_instances_from_related(self, related_instance: Individual) -> Household:
         if isinstance(related_instance, Individual):
             return related_instance.household
 

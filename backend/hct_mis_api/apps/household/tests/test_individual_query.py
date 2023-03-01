@@ -1,16 +1,17 @@
+from typing import Any, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestIndividualQuery(APITestCase):
+class TestIndividualQuery(BaseElasticSearchTestCase, APITestCase):
+    databases = "__all__"
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
       allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
@@ -63,12 +64,9 @@ class TestIndividualQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
-        cls.maxDiff = None
-        cached_business_areas_slug_id_dict.cache_clear()
-        create_afghanistan()
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
@@ -78,8 +76,8 @@ class TestIndividualQuery(APITestCase):
             business_area=cls.business_area,
         )
 
-        household_one = HouseholdFactory.build()
-        household_two = HouseholdFactory.build()
+        household_one = HouseholdFactory.build(business_area=cls.business_area)
+        household_two = HouseholdFactory.build(business_area=cls.business_area)
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_two.registration_data_import.imported_by.save()
@@ -138,6 +136,7 @@ class TestIndividualQuery(APITestCase):
         household_two.head_of_household = cls.individuals[1]
         household_one.save()
         household_two.save()
+        super().setUpTestData()
 
     @parameterized.expand(
         [
@@ -145,7 +144,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_all(self, _, permissions):
+    def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -159,7 +158,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_single(self, _, permissions):
+    def test_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -174,7 +173,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_programme_filter(self, _, permissions):
+    def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -189,7 +188,7 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_query_individuals_by_search_filter(self, _, permissions):
+    def test_query_individuals_by_search_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,

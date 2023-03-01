@@ -1,13 +1,14 @@
 import logging
+from typing import Any, List, Optional
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     TYPE_DECIMAL,
@@ -27,7 +28,7 @@ class TargetingCriteriaQueryingBase:
     this mixin connects OR blocks
     """
 
-    def __init__(self, rules=None, excluded_household_ids=None):
+    def __init__(self, rules: Optional[List] = None, excluded_household_ids: Optional[List] = None) -> None:
         if rules is None:
             return
         self.rules = rules
@@ -36,27 +37,27 @@ class TargetingCriteriaQueryingBase:
         else:
             self._excluded_household_ids = excluded_household_ids
 
-    def get_household_queryset(self):
+    def get_household_queryset(self) -> QuerySet:
         return Household.objects
 
-    def get_individual_queryset(self):
+    def get_individual_queryset(self) -> QuerySet:
         return Individual.objects
 
-    def get_rules(self):
+    def get_rules(self) -> Any:
         return self.rules
 
-    def get_excluded_household_ids(self):
+    def get_excluded_household_ids(self) -> Any:
         return self._excluded_household_ids
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         rules = self.get_rules()
         rules_string = [x.get_criteria_string() for x in rules]
         return " OR ".join(rules_string).strip()
 
-    def get_basic_query(self):
+    def get_basic_query(self) -> Q:
         return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
 
-    def get_query(self):
+    def get_query(self) -> Q:
         rules = self.get_rules()
         query = Q()
         for rule in rules:
@@ -70,19 +71,19 @@ class TargetingCriteriaRuleQueryingBase:
     combines individual filters block with household filters
     """
 
-    def __init__(self, filters=None, individuals_filters_blocks=None):
+    def __init__(self, filters: Optional[Any] = None, individuals_filters_blocks: Optional[Any] = None) -> None:
         if filters is not None:
             self.filters = filters
         if individuals_filters_blocks is not None:
             self.individuals_filters_blocks = individuals_filters_blocks
 
-    def get_filters(self):
+    def get_filters(self) -> Any:
         return self.filters
 
-    def get_individuals_filters_blocks(self):
+    def get_individuals_filters_blocks(self) -> Any:
         return self.individuals_filters_blocks
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         filters = self.get_filters()
         filters_strings = [x.get_criteria_string() for x in filters]
         individuals_filters_blocks = self.get_individuals_filters_blocks()
@@ -94,7 +95,7 @@ class TargetingCriteriaRuleQueryingBase:
             all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
         return " AND ".join(all_strings).strip()
 
-    def get_query(self):
+    def get_query(self) -> Q:
         query = Q()
         filters = self.get_filters()
         individuals_filters_blocks = self.get_individuals_filters_blocks()
@@ -108,24 +109,26 @@ class TargetingCriteriaRuleQueryingBase:
 
 
 class TargetingIndividualRuleFilterBlockBase:
-    def __init__(self, individual_block_filters=None, target_only_hoh=None):
+    def __init__(
+        self, individual_block_filters: Optional[Any] = None, target_only_hoh: Optional[List[Household]] = None
+    ) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
         if target_only_hoh is not None:
             self.target_only_hoh = target_only_hoh
 
-    def get_individual_block_filters(self):
+    def get_individual_block_filters(self) -> Any:
         return self.individual_block_filters
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         filters = self.get_individual_block_filters()
         filters_string = [x.get_criteria_string() for x in filters]
         return f"({' AND '.join(filters_string).strip()})"
 
-    def get_basic_individual_query(self):
+    def get_basic_individual_query(self) -> Q:
         return Q(duplicate=False) & Q(withdrawn=False)
 
-    def get_query(self):
+    def get_query(self) -> Q:
         individuals_query = self.get_basic_individual_query()
         filters = self.get_individual_block_filters()
         filtered = False
@@ -134,7 +137,7 @@ class TargetingIndividualRuleFilterBlockBase:
         for ruleFilter in filters:
             filtered = True
             if ruleFilter.field_name in ("observed_disability", "full_name"):
-                for arg in ruleFilter.parametrizer:
+                for arg in getattr(ruleFilter, "parametrizer", []):
                     search_query &= SearchQuery(arg)
             else:
                 individuals_query &= ruleFilter.get_query()
@@ -218,13 +221,13 @@ class TargetingCriteriaFilterBase:
         ("LESS_THAN", _("Less than")),
     )
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         return f"{{{self.field_name} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
 
-    def get_lookup_prefix(self, associated_with):
+    def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments, field_attr):
+    def prepare_arguments(self, arguments: List, field_attr: str) -> List:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -237,9 +240,9 @@ class TargetingCriteriaFilterBase:
 
     def get_query_for_lookup(
         self,
-        lookup,
-        field_attr,
-    ):
+        lookup: str,
+        field_attr: str,
+    ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
@@ -280,7 +283,7 @@ class TargetingCriteriaFilterBase:
             return ~query
         return query
 
-    def get_query_for_core_field(self):
+    def get_query_for_core_field(self) -> Q:
         core_fields = self.get_core_fields()
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
@@ -305,7 +308,7 @@ class TargetingCriteriaFilterBase:
         lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(f"{lookup_prefix}{lookup}", core_field_attr)
 
-    def get_query_for_flex_field(self):
+    def get_query_for_flex_field(self) -> Q:
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
             logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
@@ -316,10 +319,10 @@ class TargetingCriteriaFilterBase:
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
         return self.get_query_for_lookup(lookup, flex_field_attr)
 
-    def get_query(self):
+    def get_query(self) -> Q:
         if not self.is_flex_field:
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.field_name} {self.comparison_method} {self.arguments}"

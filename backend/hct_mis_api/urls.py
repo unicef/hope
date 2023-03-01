@@ -25,6 +25,7 @@ from hct_mis_api.apps.core.views import (
     schema,
     trigger_error,
 )
+from hct_mis_api.apps.utils.cypress import get_cypress_xlsx_file, handle_cypress_command
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
@@ -49,9 +50,14 @@ api_patterns = [
         hct_mis_api.apps.account.views.download_exported_users,
     ),
     path(
-        "download-cash-plan-payment-verification/<str:verification_id>",
-        hct_mis_api.apps.payment.views.download_cash_plan_payment_verification,
-        name="download-cash-plan-payment-verification",
+        "download-payment-verification-plan/<str:verification_id>",
+        hct_mis_api.apps.payment.views.download_payment_verification_plan,
+        name="download-payment-verification-plan",
+    ),
+    path(
+        "download-payment-plan-payment-list/<str:payment_plan_id>",
+        hct_mis_api.apps.payment.views.download_payment_plan_payment_list,
+        name="download-payment-plan-payment-list",
     ),
     path(
         "download-sanction-template",
@@ -77,6 +83,10 @@ api_patterns = [
         "power_query/",
         include("hct_mis_api.apps.power_query.urls"),
     ),
+    path(
+        "changelog/",
+        include("hct_mis_api.apps.changelog.urls"),
+    ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
     path("upload-file/", UploadFile.as_view(), name="upload-file"),
@@ -86,6 +96,10 @@ if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
 if settings.DEBUG:
     api_patterns.append(path("root/__debug__/", include(debug_toolbar.urls)))
+
+if settings.CYPRESS_TESTING:
+    api_patterns.append(path("cypress/", handle_cypress_command))
+    api_patterns.append(path("cypress/xlsx/<int:seed>/", get_cypress_xlsx_file))
 
 urlpatterns = (
     [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]

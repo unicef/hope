@@ -1,21 +1,24 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 from django.utils import timezone
 
 from dateutil.parser import parse
 
-from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateAPI
+from hct_mis_api.apps.core.exchange_rates.api import (
+    ExchangeRateClient,
+    get_exchange_rate_client,
+)
 
 
 class HistoryExchangeRate:
-    def __init__(self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str):
+    def __init__(self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str) -> None:
         self.valid_from = parse(VALID_FROM)
         self.valid_to = parse(VALID_TO)
         self.past_xrate = float(PAST_XRATE)
         self.past_ratio = float(PAST_RATIO)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"HistoryExchangeRate(valid_from: {self.valid_from.isoformat()}, valid_to: {self.valid_to.isoformat()}, "
             f"ratio: {self.past_ratio}, x_rate: {self.past_xrate})"
@@ -35,8 +38,8 @@ class SingleExchangeRate:
         VALID_TO: str,
         RATIO: str,
         NO_OF_DECIMAL: str,
-        PAST_XRATE: str,
-    ):
+        PAST_XRATE: Optional[Dict],
+    ) -> None:
         self.currency_code = CURRENCY_CODE
         self.currency_name = CURRENCY_NAME
         self.x_rate = float(X_RATE)
@@ -50,27 +53,26 @@ class SingleExchangeRate:
             past_xrates = [past_xrates]
         else:
             past_xrates.reverse()
+        self.historical_exchange_rates = past_xrates
 
-        self.historical_exchange_rates = [HistoryExchangeRate(**past_xrate) for past_xrate in past_xrates]
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: Optional[datetime]) -> Optional[float]:
         today = timezone.now()
 
-        dispersion_date_is_not_provided = dispersion_date is None
-        if dispersion_date_is_not_provided:
+        if dispersion_date is None:
             return self.x_rate * self.ratio
 
-        dispersion_date = datetime.combine(dispersion_date.date(), datetime.min.time())
+        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
         dispersion_date_is_in_current_date_range = (
             self.valid_from <= dispersion_date <= (today if self.valid_to is None else self.valid_to)
         )
         if dispersion_date_is_in_current_date_range:
             return self.x_rate * self.ratio
 
-        for historical_exchange_rate in self.historical_exchange_rates:
+        for historical_exchange_rate_raw_data in self.historical_exchange_rates:
+            historical_exchange_rate = HistoryExchangeRate(**historical_exchange_rate_raw_data)
             if historical_exchange_rate.is_valid_for_provided_dispersion_date(dispersion_date):
                 return historical_exchange_rate.past_xrate * historical_exchange_rate.past_ratio
 
@@ -78,20 +80,18 @@ class SingleExchangeRate:
 
 
 class ExchangeRates:
-    def __init__(self, with_history: bool = True, api_client: ExchangeRateAPI = None):
+    def __init__(self, with_history: bool = True, api_client: Optional[ExchangeRateClient] = None) -> None:
         if api_client is None:
-            api = ExchangeRateAPI()
-        else:
-            api = api_client
+            api_client = get_exchange_rate_client()
 
         self.exchange_rates_dict = self._convert_response_json_to_exchange_rates(
-            api.fetch_exchange_rates(with_history=with_history)
+            api_client.fetch_exchange_rates(with_history=with_history)
         )
 
     @staticmethod
     def _convert_response_json_to_exchange_rates(
-        response_json: dict,
-    ) -> dict[str, SingleExchangeRate]:
+        response_json: Dict,
+    ) -> Dict[str, SingleExchangeRate]:
         raw_exchange_rates = response_json.get("ROWSET", {}).get("ROW", [])
 
         return {
@@ -100,9 +100,9 @@ class ExchangeRates:
         }
 
     def get_exchange_rate_for_currency_code(
-        self, currency_code: str, dispersion_date: datetime = None
+        self, currency_code: str, dispersion_date: Optional[datetime] = None
     ) -> Optional[float]:
-        currency: SingleExchangeRate = self.exchange_rates_dict.get(currency_code)
+        currency: Optional[SingleExchangeRate] = self.exchange_rates_dict.get(currency_code)
 
         if currency is None:
             return None

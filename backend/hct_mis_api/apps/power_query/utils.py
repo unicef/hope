@@ -2,19 +2,20 @@ import base64
 import hashlib
 import inspect
 import json
-from typing import Any, Dict
+from datetime import datetime
+from typing import Any, Callable, Dict
 
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db.models import QuerySet
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.utils.safestring import mark_safe
 
 import tablib
 from concurrency.utils import get_classname
 
 
-def fqn(o):
+def fqn(o: Any) -> str:
     parts = []
 
     if inspect.isclass(o):
@@ -33,7 +34,7 @@ def fqn(o):
     return ".".join(parts)
 
 
-def to_dataset(result):
+def to_dataset(result: Any) -> tablib.Dataset:
     if isinstance(result, QuerySet):
         data = tablib.Dataset()
         fields = result.__dict__["_fields"]
@@ -61,15 +62,15 @@ def to_dataset(result):
     return data
 
 
-def get_sentry_url(event_id, html=False):
+def get_sentry_url(event_id: int, html: bool = False) -> str:
     url = f"{settings.SENTRY_URL}?query={event_id}"
     if html:
         return mark_safe('<a href="{url}" target="_sentry" >View on Sentry<a/>')
     return url
 
 
-def basicauth(view):
-    def wrap(request, *args, **kwargs):
+def basicauth(view: Callable) -> Callable:
+    def wrap(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if request.user.is_authenticated:
             return view(request, *args, **kwargs)
 
@@ -91,7 +92,7 @@ def basicauth(view):
     return wrap
 
 
-def sizeof(num, suffix=""):
+def sizeof(num: float, suffix: str = "") -> str:
     for unit in ["&nbsp;&nbsp;", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb"]:
         if abs(num) < 1024.0:
             return f"{num:3.1f} {unit}{suffix} "
@@ -107,3 +108,23 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
     encoded = json.dumps(dictionary, sort_keys=True).encode()
     dhash.update(encoded)
     return dhash.hexdigest()
+
+
+def should_run(expression: str) -> bool:
+
+    match_expressions = expression.split(",")
+    today = datetime.today()
+
+    for exp in match_expressions:
+
+        if exp.lower() in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
+            if exp.lower() == datetime.today().strftime("%a").lower():
+                return True
+        elif exp.isnumeric():
+            if today.day == int(exp):
+                return True
+        elif exp.count("/") == 1:
+            day, month = exp.split("/")
+            if day.isnumeric() and month.isnumeric() and int(day) == today.day and int(month) == today.month:
+                return True
+    return False

@@ -21,6 +21,8 @@ import {
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 
@@ -84,7 +86,8 @@ export const LookUpReassignRoleModal = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  if (loading) return null;
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
@@ -103,7 +106,7 @@ export const LookUpReassignRoleModal = ({
         const multipleRolesVariables = {
           grievanceTicketId: id,
           householdId: household.id,
-          newIndividualId: values.selectedIndividual.id,
+          newIndividualId: values.selectedIndividual?.id,
           individualId: individual.id,
           role: values.role,
         };
@@ -111,7 +114,7 @@ export const LookUpReassignRoleModal = ({
         const singleRoleVariables = {
           grievanceTicketId: id,
           householdId: household.id,
-          individualId: values.selectedIndividual.id,
+          individualId: values.selectedIndividual?.id,
           role: values.role,
         };
 
@@ -145,10 +148,9 @@ export const LookUpReassignRoleModal = ({
           scroll='paper'
           aria-labelledby='form-dialog-title'
         >
+          {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              {t('Reassign Role')}
-            </DialogTitle>
+            <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpIndividualFilters

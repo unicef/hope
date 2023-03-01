@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 from unittest import TestCase
 from unittest.mock import Mock
 
@@ -31,17 +32,16 @@ class ValidatorTest(TestCase):
     def setUpClass(cls) -> None:
         cls.validator = RDINestedSerializer
 
-    def _run(self, data):
+    def _run(self, data: Dict) -> Dict:
         serializer = self.validator(data=data, business_area=Mock(slug="afghanistan"))
         serializer.is_valid()
-        r = JsonResponse(serializer.errors)
-        return humanize_errors(json.loads(r.content))
+        return humanize_errors(json.loads(JsonResponse(serializer.errors).content))
 
-    def assertErrors(self, post_data, expected):
+    def assertErrors(self, post_data: Dict, expected: Dict) -> None:
         res = self._run(post_data)
         self.assertDictEqual(res, expected)
 
-    def test_empty_post(self):
+    def test_empty_post(self) -> None:
         self.assertErrors(
             {},
             {
@@ -50,11 +50,11 @@ class ValidatorTest(TestCase):
             },
         )
 
-    def test_empty_households(self):
+    def test_empty_households(self) -> None:
         data = {"households": [], "name": "Test1"}
         self.assertErrors(data, {"households": ["This field is required."]})
 
-    def test_empty_household_value(self):
+    def test_empty_household_value(self) -> None:
         data = {"households": [{}], "name": "Test1"}
         self.assertErrors(
             data,
@@ -67,7 +67,6 @@ class ValidatorTest(TestCase):
                                 "country": ["This field is required."],
                                 "members": ["This field is required."],
                                 "residence_status": ["This field is required."],
-                                # "size": ["This field is required."],
                             }
                         ]
                     }
@@ -75,7 +74,7 @@ class ValidatorTest(TestCase):
             },
         )
 
-    def test_empty_members(self):
+    def test_empty_members(self) -> None:
         data = {
             "households": [
                 {"country": "AF", "collect_individual_data": "N", "residence_status": "IDP", "size": 1, "members": []},
@@ -84,7 +83,7 @@ class ValidatorTest(TestCase):
         }
         self.assertErrors(data, {"households": [{"Household #1": [{"members": ["This field is required"]}]}]})
 
-    def test_double_entries(self):
+    def test_double_entries(self) -> None:
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
 
@@ -105,7 +104,7 @@ class ValidatorTest(TestCase):
             },
         )
 
-    def test_double_entry_multiple_hh(self):
+    def test_double_entry_multiple_hh(self) -> None:
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
         data = {"collect_individual_data": "N", "name": "Test1", "households": [HOUSEHOLD, HOUSEHOLD, h1]}

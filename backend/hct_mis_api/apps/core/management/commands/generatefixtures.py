@@ -1,6 +1,9 @@
 import random
 import time
+from argparse import ArgumentParser
 from decimal import Decimal
+from functools import partial
+from typing import Any, Callable, Dict
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -19,7 +22,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
 )
-from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     EntitlementCardFactory,
@@ -27,11 +30,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -45,12 +49,13 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaRuleFilterFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 
 class Command(BaseCommand):
     help = "Generate fixtures data for project"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--program",
             dest="programs_amount",
@@ -110,7 +115,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _generate_program_with_dependencies(options, business_area_index):
+    def _generate_program_with_dependencies(options: Dict, business_area_index: int) -> None:
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
 
@@ -153,7 +158,7 @@ class Command(BaseCommand):
                     program.admin_areas.add(household.admin_area)
 
                 payment_record = PaymentRecordFactory(
-                    cash_plan=cash_plan,
+                    parent=cash_plan,
                     household=household,
                     target_population=target_population,
                     delivered_quantity_usd=None,
@@ -168,33 +173,36 @@ class Command(BaseCommand):
                 if should_create_grievance:
                     grievance_type = random.choice(("feedback", "sensitive", "complaint"))
                     should_contain_payment_record = random.choice((True, False))
-                    switch_dict = {
-                        "feedback": lambda: GrievanceTicketFactory(
+                    switch_dict: Dict[str, Callable[[], GrievanceTicket]] = {
+                        "feedback": partial(
+                            GrievanceTicketFactory,
                             admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)
                             .order_by("?")
                             .first()
                             .name,
                         ),
-                        "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
+                        "sensitive": partial(
+                            SensitiveGrievanceTicketWithoutExtrasFactory,
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
                         ),
-                        "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
+                        "complaint": partial(
+                            GrievanceComplaintTicketWithoutExtrasFactory,
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
                         ),
                     }
 
-                    grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
+                    switch_dict[grievance_type]()
 
                 EntitlementCardFactory(household=household)
-        CashPlanPaymentVerificationFactory.create_batch(1)
+        PaymentVerificationPlanFactory()
         PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")

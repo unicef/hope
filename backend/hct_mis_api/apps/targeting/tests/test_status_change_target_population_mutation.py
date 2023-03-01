@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -18,36 +20,44 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
-            mutation LockTargetPopulation($id: ID!) {
-              lockTargetPopulation(id: $id) {
-                targetPopulation {
-                  status
-                  householdList {
-                    totalCount
-                    edges {
-                      node {
-                        size
-                        residenceStatus
+                mutation LockTargetPopulation($id: ID!) {
+                  lockTargetPopulation(id: $id) {
+                    targetPopulation {
+                      status
+                      householdList(orderBy: "size") {
+                        totalCount
+                        edges {
+                          node {
+                            size
+                            residenceStatus
+                          }
+                        }
                       }
                     }
                   }
                 }
-              }
-            }
             """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
@@ -61,6 +71,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
+        tp.households.set(cls.households)
         cls.target_population_draft = tp
 
         tp = TargetPopulation(
@@ -88,7 +99,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.target_population_approved = tp
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
@@ -103,9 +114,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_approve_target_population(self, _, permissions):
+    def test_approve_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -114,7 +124,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
             },
         )
 
-    def test_approve_fail_target_population(self):
+    def test_approve_fail_target_population(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_LOCK], self.business_area)
 
         self.snapshot_graphql_request(
@@ -135,14 +145,8 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
               unlockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  households {
+                  households(orderBy: "size") {
                     totalCount
-                    edges {
-                      node {
-                        size
-                        residenceStatus
-                      }
-                    }
                   }
                 }
               }
@@ -150,7 +154,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         cls.households = []
         create_afghanistan()
@@ -201,7 +205,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.target_population_approved = tp
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
@@ -216,7 +220,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_unapprove_target_population(self, _, permissions):
+    def test_unapprove_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -230,7 +234,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
             },
         )
 
-    def test_unapprove_fail_target_population(self):
+    def test_unapprove_fail_target_population(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UNLOCK], self.business_area)
 
         self.snapshot_graphql_request(
@@ -246,7 +250,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
               finalizeTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  householdList{
+                  householdList(orderBy: "size") {
                     edges{
                       node{
                         size
@@ -254,7 +258,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                       }
                     }
                   }
-                  households {
+                  households(orderBy: "size") {
                     totalCount
                     edges {
                       node {
@@ -269,7 +273,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
         cls.households = []
         create_afghanistan()
@@ -324,7 +328,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.target_population_approved = tp
 
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter):
+    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
         targeting_criteria = TargetingCriteria()
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
@@ -333,7 +337,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    def test_finalize_target_population_with_final_criteria(self):
+    def test_finalize_target_population_with_final_criteria(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_SEND], self.business_area)
 
         self.snapshot_graphql_request(
@@ -353,17 +357,16 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_finalize_target_population(self, _, permissions):
+    def test_finalize_target_population(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
             variables={"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulationNode")},
         )
 
-    def test_finalize_fail_target_population(self):
+    def test_finalize_fail_target_population(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_SEND], self.business_area)
 
         self.snapshot_graphql_request(

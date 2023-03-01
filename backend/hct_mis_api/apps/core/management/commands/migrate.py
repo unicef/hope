@@ -1,6 +1,8 @@
 import time
+from argparse import ArgumentParser
 from collections import OrderedDict
 from importlib import import_module
+from typing import Any, Iterable, List, Optional, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -19,7 +21,7 @@ from django.utils.text import Truncator
 class Command(BaseCommand):
     help = "Updates database schema. Manages both apps with migrations and those without."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "app_label",
             nargs="?",
@@ -66,14 +68,13 @@ class Command(BaseCommand):
             help="Creates tables for apps without migrations.",
         )
 
-    def _run_checks(self, **kwargs):
+    def _run_checks(self, **kwargs: Any) -> List:
         issues = run_checks(tags=[Tags.database])
         issues.extend(super()._run_checks(**kwargs))
         return issues
 
     @no_translations
-    def handle(self, *args, **options):
-
+    def handle(self, *args: Any, **options: Any) -> None:
         self.verbosity = options["verbosity"]
         self.interactive = options["interactive"]
         # Import the 'management' module within each installed app, to register
@@ -94,7 +95,7 @@ class Command(BaseCommand):
         # Hook for backends needing any database preparation
         connection.prepare_database()
         # Work out which apps have migrations and which do not
-        executor = MigrationExecutor(connection, self.migration_progress_callback)
+        executor = MigrationExecutor(connection, self.migration_progress_callback)  # type: ignore # Argument 2 to "MigrationExecutor" has incompatible type "Callable[[str, Optional[str], Optional[bool]], None]"; expected "Optional[_ProgressCallbackT]"
 
         # Raise an error if any migrations are applied before their dependencies.
         executor.loader.check_consistent_history(connection)
@@ -125,6 +126,7 @@ class Command(BaseCommand):
             elif app_label not in executor.loader.migrated_apps:
                 raise CommandError("App '{}' does not have migrations.".format(app_label))
 
+        targets: List[Tuple[Any, Optional[str]]]
         if options["app_label"] and options["migration_name"]:
             migration_name = options["migration_name"]
             if migration_name == "zero":
@@ -277,7 +279,9 @@ class Command(BaseCommand):
             plan=plan,
         )
 
-    def migration_progress_callback(self, action, migration=None, fake=False):
+    def migration_progress_callback(
+        self, action: str, migration: Optional[str] = None, fake: Optional[bool] = False
+    ) -> None:
         if self.verbosity >= 1:
             compute_time = self.verbosity > 1
             if action == "apply_start":
@@ -311,7 +315,7 @@ class Command(BaseCommand):
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
                 self.stdout.write(self.style.SUCCESS(" DONE" + elapsed))
 
-    def sync_apps(self, connection, app_labels):
+    def sync_apps(self, connection: Any, app_labels: Iterable[str]) -> None:  # TODO connection
         """Run the old syncdb-style operation on a list of app_labels."""
         with connection.cursor() as cursor:
             tables = connection.introspection.table_names(cursor)
@@ -326,7 +330,7 @@ class Command(BaseCommand):
             if app_config.models_module is not None and app_config.label in app_labels
         ]
 
-        def model_installed(model):
+        def model_installed(model: Any) -> bool:
             opts = model._meta
             converter = connection.introspection.identifier_converter
             return not (
@@ -358,17 +362,17 @@ class Command(BaseCommand):
                 self.stdout.write("    Running deferred SQL...\n")
 
     @staticmethod
-    def describe_operation(operation, backwards):
+    def describe_operation(operation: Any, backwards: Any) -> Tuple[str, bool]:
         """Return a string that describes a migration operation for --plan."""
         prefix = ""
         is_error = False
+        action = ""
         if hasattr(operation, "code"):
             code = operation.reverse_code if backwards else operation.code
-            action = (code.__doc__ or "") if code else None
+            action = (code.__doc__ or "") if code else ""
         elif hasattr(operation, "sql"):
             action = operation.reverse_sql if backwards else operation.sql
         else:
-            action = ""
             if backwards:
                 prefix = "Undo "
         if action is not None:

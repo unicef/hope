@@ -1,13 +1,9 @@
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -86,12 +82,9 @@ export const DuplicateTargetPopulation = ({
       >
         {({ submitForm }) => (
           <>
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>
-                  Duplicate Target Population?
-                </Typography>
-              </DialogTitle>
+              <DialogTitle>Duplicate Target Population?</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>

@@ -10,6 +10,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
 
 export const LookUpPaymentRecordModal = ({
@@ -37,10 +38,9 @@ export const LookUpPaymentRecordModal = ({
             scroll='paper'
             aria-labelledby='form-dialog-title'
           >
+            {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Look up Payment Record')}
-              </DialogTitle>
+              <DialogTitle>{t('Look up Payment Record')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <LookUpPaymentRecordTable

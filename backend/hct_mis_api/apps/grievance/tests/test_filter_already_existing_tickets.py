@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -17,8 +19,8 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestAlreadyExistingFilterTickets(APITestCase):
@@ -63,7 +65,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -87,13 +89,13 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
         cls.payment_record2 = PaymentRecordFactory(
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
         grievance_1 = GrievanceTicketFactory(
             id="0fdbf2fc-e94e-4c64-acce-6e7edd4bbd87",
@@ -149,7 +151,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
         ]
     )
-    def test_filter_existing_tickets_by_payment_record(self, _, permissions):
+    def test_filter_existing_tickets_by_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -172,7 +174,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_filter_existing_tickets_by_two_payment_records(self, _, permissions):
+    def test_filter_existing_tickets_by_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
@@ -197,7 +199,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
         ]
     )
-    def test_filter_existing_tickets_by_household(self, _, permissions):
+    def test_filter_existing_tickets_by_household(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -217,7 +219,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
         ]
     )
-    def test_filter_existing_tickets_by_individual(self, _, permissions):
+    def test_filter_existing_tickets_by_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {**self.variables}

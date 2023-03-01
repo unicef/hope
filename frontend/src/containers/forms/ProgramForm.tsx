@@ -11,6 +11,7 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
@@ -95,12 +96,18 @@ export const ProgramForm = ({
       .required(t('Sector is required'))
       .min(2, t('Too short'))
       .max(50, t('Too long')),
-    budget: Yup.number().min(0).max(99999999, t('Number is too big')),
+    budget: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    description: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
-    populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
+    description: Yup.string()
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
+    populationGoal: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,11 +165,13 @@ export const ProgramForm = ({
             return onSubmit(newValues, setFieldError);
           }}
           validationSchema={validationSchema}
+          enableReinitialize
         >
           {({ submitForm, values }) => (
             <>
+              {open && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title' disableTypography>
+                <DialogTitle disableTypography>
                   <Typography variant='h6'>{title}</Typography>
                 </DialogTitle>
               </DialogTitleWrapper>
@@ -181,6 +190,7 @@ export const ProgramForm = ({
                     required
                     variant='outlined'
                     component={FormikTextField}
+                    data-cy='input-programme-name'
                   />
                   <Field
                     name='scope'
@@ -190,6 +200,7 @@ export const ProgramForm = ({
                     required
                     choices={data.programScopeChoices}
                     component={FormikSelectField}
+                    data-cy='input-cash-assist-scope'
                   />
                   <Field
                     name='sector'
@@ -199,6 +210,7 @@ export const ProgramForm = ({
                     variant='outlined'
                     choices={data.programSectorChoices}
                     component={FormikSelectField}
+                    data-cy='input-sector'
                   />
                   <DateFields>
                     <DateField>
@@ -211,6 +223,7 @@ export const ProgramForm = ({
                         decoratorEnd={
                           <CalendarTodayRoundedIcon color='disabled' />
                         }
+                        data-cy='input-start-date'
                       />
                     </DateField>
                     <DateField>
@@ -226,6 +239,7 @@ export const ProgramForm = ({
                           <CalendarTodayRoundedIcon color='disabled' />
                         }
                         minDate={today}
+                        data-cy='input-end-date'
                       />
                     </DateField>
                   </DateFields>
@@ -237,6 +251,7 @@ export const ProgramForm = ({
                     multiline
                     variant='outlined'
                     component={FormikTextField}
+                    data-cy='input-description'
                   />
                   <Field
                     name='budget'
@@ -246,12 +261,14 @@ export const ProgramForm = ({
                     precision={2}
                     variant='outlined'
                     component={FormikTextField}
+                    data-cy='input-budget'
                   />
                   <Field
                     name='frequencyOfPayments'
                     label={t('Frequency of Payment')}
                     choices={data.programFrequencyOfPaymentsChoices}
                     component={FormikRadioGroup}
+                    data-cy='input-frequency-of-payment'
                   />
                   <Field
                     name='administrativeAreasOfImplementation'
@@ -260,6 +277,7 @@ export const ProgramForm = ({
                     fullWidth
                     variant='outlined'
                     component={FormikTextField}
+                    data-cy='input-admin-area'
                   />
                   <Field
                     name='populationGoal'
@@ -268,6 +286,7 @@ export const ProgramForm = ({
                     fullWidth
                     variant='outlined'
                     component={FormikTextField}
+                    data-cy='input-population-goal'
                   />
                   <FullWidth>
                     <Field
@@ -275,6 +294,7 @@ export const ProgramForm = ({
                       label={t('Cash+')}
                       color='primary'
                       component={FormikCheckboxField}
+                      data-cy='input-cash-plus'
                     />
                   </FullWidth>
                   <FullWidth>
@@ -295,6 +315,7 @@ export const ProgramForm = ({
                         },
                       ]}
                       component={FormikRadioGroup}
+                      data-cy='input-individual-data-needed'
                     />
                   </FullWidth>
                 </Form>

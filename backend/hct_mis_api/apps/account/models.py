@@ -1,6 +1,8 @@
 import logging
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
@@ -17,12 +19,17 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
+from hct_mis_api.apps.account.fields import ChoiceArrayField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import BusinessArea
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +48,11 @@ class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod
-    def get_partners_as_choices(cls):
+    def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
@@ -73,19 +80,19 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         help_text="System field used to check if changes need to be sent to CA",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.partner:
             self.partner = Partner.objects.get(name="UNICEF")
         if not self.partner.pk:
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug):
+    def permissions_in_business_area(self, business_area_slug: str) -> List:
         all_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
@@ -96,7 +103,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
-    def has_permission(self, permission, business_area, write=False):
+    def has_permission(self, permission: str, business_area: "BusinessArea", write: bool = False) -> bool:
         query = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,
@@ -104,9 +111,15 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
         return query.count() > 0
 
-    def can_download_storage_files(self):
+    def can_download_storage_files(self) -> bool:
         return any(
             self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
+    def can_change_fsp(self) -> bool:
+        return any(
+            self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
             for role in self.user_roles.all()
         )
 
@@ -123,10 +136,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
 
 
-class ChoiceArrayField(ArrayField):
-    def formfield(self, **kwargs):
+class HorizontalChoiceArrayField(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,
+            "widget": widget,
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
@@ -141,7 +156,7 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ("business_area", "user", "role")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} {self.role} in {self.business_area}"
 
 
@@ -153,7 +168,7 @@ class UserGroup(NaturalKeyModel, models.Model):
     class Meta:
         unique_together = ("business_area", "user", "group")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} {self.group} in {self.business_area}"
 
 
@@ -186,23 +201,23 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True,
     )
 
-    def clean(self):
+    def clean(self) -> None:
         if self.subsystem != Role.HOPE and self.permissions:
             raise ValidationError("Only HOPE roles can have permissions")
 
     class Meta:
         unique_together = ("name", "subsystem")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
-    def get_roles_as_choices(cls):
+    def get_roles_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user, business_area, role):
+    def validate_user_role(self, user: User, business_area: "BusinessArea", role: UserRole) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
@@ -234,7 +249,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
 
     objects = IncompatibleRolesManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.role_one.name} and {self.role_two.name}"
 
     class Meta:
@@ -242,7 +257,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         verbose_name_plural = "incompatible roles"
         unique_together = ("role_one", "role_two")
 
-    def clean(self):
+    def clean(self) -> None:
         super().clean()
         if self.role_one == self.role_two:
             logger.error(f"Provided roles are the same role={self.role_one}")
@@ -270,7 +285,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
                 )
             )
 
-    def validate_unique(self, *args, **kwargs):
+    def validate_unique(self, *args: Any, **kwargs: Any) -> None:
         super().validate_unique(*args, **kwargs)
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well

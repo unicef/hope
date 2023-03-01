@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
@@ -14,7 +15,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
         {
             'locations': [
                 {
-                    'column': 15,
+                    'column': 19,
                     'line': 3
                 }
             ],
@@ -61,7 +62,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1
         {
             'locations': [
                 {
-                    'column': 15,
+                    'column': 19,
                     'line': 3
                 }
             ],
@@ -224,20 +225,6 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
         'unlockTargetPopulation': {
             'targetPopulation': {
                 'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
                     'totalCount': 2
                 },
                 'status': 'OPEN'

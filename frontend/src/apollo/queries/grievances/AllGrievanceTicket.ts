@@ -22,6 +22,7 @@ export const AllGrievanceTicket = gql`
     $scoreMin: String
     $scoreMax: String
     $household: String
+    $preferredLanguage: String
   ) {
     allGrievanceTicket(
       before: $before
@@ -44,6 +45,7 @@ export const AllGrievanceTicket = gql`
       scoreMin: $scoreMin
       scoreMax: $scoreMax
       household: $household
+      preferredLanguage: $preferredLanguage
     ) {
       totalCount
       pageInfo {
@@ -74,15 +76,8 @@ export const AllGrievanceTicket = gql`
             id
           }
           unicefId
-          existingTickets {
-            id
-          }
           relatedTickets {
             id
-            status
-            category
-            issueType
-            unicefId
           }
         }
       }

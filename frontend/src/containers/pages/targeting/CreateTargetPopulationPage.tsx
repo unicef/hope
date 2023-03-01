@@ -21,16 +21,18 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
+  ProgramStatus,
   useAllProgramsForChoicesQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
 import { PaperContainer } from '../../../components/targeting/PaperContainer';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export function CreateTargetPopulationPage(): React.ReactElement {
+export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
     name: '',
@@ -48,8 +50,8 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     data: allProgramsData,
     loading: loadingPrograms,
   } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
+    variables: { businessArea, status: [ProgramStatus.Active] },
+    fetchPolicy: 'network-only',
   });
 
   if (loadingPrograms) return <LoadingComponent />;
@@ -114,8 +116,9 @@ export function CreateTargetPopulationPage(): React.ReactElement {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setFieldValue }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
             handleSubmit={submitForm}
             loading={loading}
@@ -127,6 +130,8 @@ export function CreateTargetPopulationPage(): React.ReactElement {
             allPrograms={allProgramsData}
             loading={loadingPrograms}
             program={values.program}
+            setFieldValue={setFieldValue}
+            values={values}
           />
           {values.program ? (
             <FieldArray
@@ -134,12 +139,12 @@ export function CreateTargetPopulationPage(): React.ReactElement {
               render={(arrayHelpers) => (
                 <TargetingCriteria
                   helpers={arrayHelpers}
-                  candidateListRules={values.criterias}
-                  isEdit
+                  rules={values.criterias}
                   selectedProgram={getFullNodeFromEdgesById(
                     allProgramsData?.allPrograms?.edges,
                     values.program,
                   )}
+                  isEdit
                 />
               )}
             />
@@ -159,4 +164,4 @@ export function CreateTargetPopulationPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};

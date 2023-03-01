@@ -86,7 +86,7 @@ export function VerificationRecordsFilters({
           <Grid container spacing={3}>
             <Grid item>
               <SearchTextField
-                value={filter.search || ''}
+                value={filter.search}
                 label={t('Search')}
                 onChange={(e) => handleFilterChange(e, 'search')}
                 data-cy='filters-search'
@@ -96,7 +96,7 @@ export function VerificationRecordsFilters({
               <SelectFilter
                 onChange={(e) => handleFilterChange(e, 'status')}
                 label={t('Verification Status')}
-                value={filter.status || ''}
+                value={filter.status}
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -114,7 +114,7 @@ export function VerificationRecordsFilters({
               <SelectFilter
                 onChange={(e) => handleFilterChange(e, 'verificationChannel')}
                 label={t('Verification Channel')}
-                value={filter.verificationChannel || ''}
+                value={filter.verificationChannel}
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -133,10 +133,10 @@ export function VerificationRecordsFilters({
             <Grid item>
               <SelectFilter
                 onChange={(e) =>
-                  handleFilterChange(e, 'cashPlanPaymentVerification')
+                  handleFilterChange(e, 'paymentVerificationPlan')
                 }
                 label={t('Verification Plan Id')}
-                value={filter.cashPlanPaymentVerification || ''}
+                value={filter.paymentVerificationPlan}
               >
                 <MenuItem value=''>
                   <em>None</em>

@@ -34,8 +34,9 @@ export function GrievancesTablePage(): React.ReactElement {
     admin: null,
     registrationDataImport: id,
     cashPlan: cashPlanId,
-    scoreMin: null,
-    scoreMax: null,
+    scoreMin: '',
+    scoreMax: '',
+    preferredLanguage: '',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {

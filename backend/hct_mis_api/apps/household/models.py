@@ -1,6 +1,7 @@
 import logging
 import re
-from datetime import date
+from datetime import date, timedelta
+from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -10,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField
+from django.db.models import JSONField, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -24,13 +25,17 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
+from hct_mis_api.apps.core.languages import Languages
+from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
 )
+from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
 BLANK = ""
 IDP = "IDP"
@@ -49,10 +54,14 @@ RESIDENCE_STATUS_CHOICE = (
 # INDIVIDUALS
 MALE = "MALE"
 FEMALE = "FEMALE"
+UNKNOWN = "UNKNOWN"
+
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
 )
+
+
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
 WIDOWED = "WIDOWED"
@@ -165,6 +174,7 @@ IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
 IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
 IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
 IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
+IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -174,6 +184,7 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
     (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
     (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
+    (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -282,7 +293,9 @@ INDIVIDUAL_FLAGS_CHOICES = (
 logger = logging.getLogger(__name__)
 
 
-class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Household(
+    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "withdrawn",
@@ -296,6 +309,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             "size",
             "address",
             "admin_area",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
             "representatives",
             "geopoint",
             "female_age_group_0_5_count",
@@ -355,6 +372,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
+    admin1 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin2 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin3 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -411,7 +432,6 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
-    unicef_id = CICharField(max_length=250, blank=True, default=BLANK, db_index=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK)
@@ -439,11 +459,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         blank=True,
     )
 
+    family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
+    storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
+
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         from hct_mis_api.apps.targeting.models import (
             HouseholdSelection,
             TargetPopulation,
@@ -453,13 +476,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             HouseholdSelection.objects.filter(
                 household=self, target_population__status=TargetPopulation.STATUS_LOCKED
             ).delete()
+        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         super().save(*args, **kwargs)
 
     @property
-    def status(self):
+    def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag=None):
+    def withdraw(self, tag: Optional[Any] = None) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         user_fields = self.user_fields or {}
@@ -467,83 +491,81 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         self.user_fields = user_fields
         self.save()
 
-    def unwithdraw(self):
+    def unwithdraw(self) -> None:
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
 
-    def set_sys_field(self, key, value):
+    def set_sys_field(self, key: str, value: Any) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key):
+    def get_sys_field(self, key: str) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
 
-    @property
-    def admin_area_title(self):
-        return self.admin_area.name
+    def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
+        """Propagates admin1,2,3,4 based on admin_area parents"""
+        admins = ["admin1", "admin2", "admin3", "admin4"]
+
+        if not new_admin_area:
+            new_admin_area = self.admin_area
+        else:
+            self.admin_area = new_admin_area
+
+        for admin in admins:
+            setattr(self, admin, None)
+
+        new_admin_area_level = new_admin_area.area_type.area_level
+
+        for admin_level in reversed(range(1, new_admin_area_level + 1)):
+            setattr(self, f"admin{admin_level}", new_admin_area)
+            new_admin_area = new_admin_area.parent
+
+        if save:
+            self.save(update_fields=["admin_area"] + admins)
 
     @property
-    def admin1(self):
-        if self.admin_area is None:
-            return None
-        if self.admin_area.area_type.area_level == 0:
-            return None
-        current_admin = self.admin_area
-        while current_admin.area_type.area_level != 1:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin2(self):
-        if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
-            return None
-        current_admin = self.admin_area
-        while current_admin.area_type.area_level != 2:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def sanction_list_possible_match(self):
+    def sanction_list_possible_match(self) -> bool:
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
     @property
-    def sanction_list_confirmed_match(self):
+    def sanction_list_confirmed_match(self) -> bool:
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
 
     @property
-    def total_cash_received_realtime(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
-            .get("delivered_quantity__sum")
-        )
-
-    @property
-    def total_cash_received_usd_realtime(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
-            .get("delivered_quantity_usd__sum")
-        )
-
-    @property
-    def active_individuals(self):
+    def active_individuals(self) -> QuerySet:
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
     @cached_property
-    def primary_collector(self):
+    def primary_collector(self) -> Optional["Individual"]:
         return self.representatives.get(households_and_roles__role=ROLE_PRIMARY)
 
     @cached_property
-    def alternate_collector(self):
+    def alternate_collector(self) -> Optional["Individual"]:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
-    def __str__(self):
-        return f"{self.unicef_id}"
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    def can_be_erase(self) -> bool:
+        yesterday = timezone.now() - timedelta(days=1)
+        conditions = [
+            self.is_removed,
+            self.withdrawn,
+            self.removed_date >= yesterday,
+            self.withdrawn_date >= yesterday,
+        ]
+        return all(conditions)
+
+    def erase(self) -> None:
+        for individual in self.individuals.all():
+            individual.erase()
+
+        self.flex_fields = {}
+        self.save()
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -554,22 +576,18 @@ class DocumentValidator(TimeStampedUUIDModel):
 class DocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
+    is_identity_document = models.BooleanField(default=True)
 
     class Meta:
         ordering = [
             "label",
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.label}"
 
 
-class Document(SoftDeletableModel, TimeStampedUUIDModel):
-    document_number = models.CharField(max_length=255, blank=True)
-    photo = models.ImageField(blank=True)
-    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
-    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -580,9 +598,15 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_NEED_INVESTIGATION, _("Need Investigation")),
         (STATUS_INVALID, _("Invalid")),
     )
+
+    document_number = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
+    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
 
-    def clean(self):
+    def clean(self) -> None:
         from django.core.exceptions import ValidationError
 
         for validator in self.type.validators.all():
@@ -593,54 +617,43 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["document_number", "type"],
+                fields=["document_number", "type", "country"],
                 condition=Q(Q(is_removed=False) & Q(status="VALID")),
                 name="unique_if_not_removed_and_valid",
             )
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.type} - {self.document_number}"
 
-    def mark_as_need_investigation(self):
+    def mark_as_need_investigation(self) -> None:
         self.status = self.STATUS_NEED_INVESTIGATION
 
-    def mark_as_valid(self):
+    def mark_as_valid(self) -> None:
         self.status = self.STATUS_VALID
 
-
-class Agency(models.Model):
-    type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
-    label = models.CharField(
-        max_length=100,
-    )
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
-
-    class Meta:
-        verbose_name_plural = "Agencies"
-        constraints = [
-            UniqueConstraint(
-                fields=["type", "country"],
-                name="unique_type_and_country",
-            )
-        ]
-
-    def __str__(self):
-        return f"{self.label} in {self.country}"
+    def erase(self) -> None:
+        self.is_removed = True
+        self.photo = ""
+        self.document_number = "GDPR REMOVED"
+        self.save()
 
 
 class IndividualIdentity(models.Model):
-    agency = models.ForeignKey("Agency", related_name="individual_identities", on_delete=models.CASCADE)
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     number = models.CharField(
         max_length=255,
     )
+    partner = models.ForeignKey(
+        "account.Partner", related_name="individual_identities", null=True, on_delete=models.PROTECT
+    )
+    country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Individual Identities"
 
-    def __str__(self):
-        return f"{self.agency} {self.individual} {self.number}"
+    def __str__(self) -> str:
+        return f"{self.partner} {self.individual} {self.number}"
 
 
 class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
@@ -663,11 +676,13 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     class Meta:
         unique_together = ("role", "household")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Individual(
+    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -732,8 +747,12 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
+
     phone_no = PhoneNumberField(blank=True, db_index=True)
+    phone_no_valid = models.BooleanField(default=False, db_index=True)
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
+    phone_no_alternative_valid = models.BooleanField(default=False, db_index=True)
+
     relationship = models.CharField(
         max_length=255,
         blank=True,
@@ -771,16 +790,17 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     user_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.BooleanField(null=True)
     administration_of_rutf = models.BooleanField(null=True)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
         choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
     )
     deduplication_batch_status = models.CharField(
         max_length=50,
         default=UNIQUE_IN_BATCH,
         choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
     )
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
@@ -803,28 +823,21 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
     @property
-    def phone_no_valid(self):
-        return is_right_phone_number_format(self.phone_no)
-
-    @property
-    def phone_no_alternative_valid(self):
-        return is_right_phone_number_format(self.phone_no_alternative)
-
-    @property
-    def age(self):
+    def age(self) -> int:
         return relativedelta(date.today(), self.birth_date).years
 
     @property
-    def role(self):
+    def role(self) -> str:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
 
     @property
-    def get_hash_key(self):
+    def get_hash_key(self) -> str:
         from hashlib import sha256
 
         fields = (
@@ -841,7 +854,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         return sha256(";".join(values).encode()).hexdigest()
 
     @property
-    def status(self):
+    def status(self) -> str:
         statuses = []
         if self.duplicate:
             statuses.append(STATUS_DUPLICATE)
@@ -852,26 +865,36 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         return STATUS_ACTIVE
 
     @property
-    def cash_assist_status(self):
+    def cash_assist_status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
 
     @property
-    def sanction_list_last_check(self):
+    def sanction_list_last_check(self) -> Any:
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self):
+    @property
+    def bank_name(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_name if bank_account_info else None
+
+    @property
+    def bank_account_number(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_account_number if bank_account_info else None
+
+    def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
 
-    def unwithdraw(self):
+    def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
 
-    def mark_as_duplicate(self, original_individual=None):
+    def mark_as_duplicate(self, original_individual: Optional["Individual"] = None) -> None:
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
         self.documents.update(status=Document.STATUS_INVALID)
@@ -879,24 +902,26 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         self.duplicate_date = timezone.now()
         self.save()
 
-    def __str__(self):
-        return self.unicef_id
+    def __str__(self) -> str:
+        return self.unicef_id or ""
 
     class Meta:
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
 
-    def set_sys_field(self, key, value):
+    def set_sys_field(self, key: str, value: Any) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key):
+    def get_sys_field(self, key: str) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
 
-    def recalculate_data(self):
+    def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
+        update_fields = ["disability"]
+
         disability_fields = (
             "seeing_disability",
             "hearing_disability",
@@ -910,34 +935,62 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
-        self.save(update_fields=["disability"])
 
-    def count_all_roles(self):
+        if save:
+            self.save(update_fields=update_fields)
+
+        return self, update_fields
+
+    def count_all_roles(self) -> int:
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
 
-    def count_primary_roles(self):
+    def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
     @cached_property
-    def parents(self):
+    def parents(self) -> List["Individual"]:
         return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
-    def is_golden_record_duplicated(self):
+    def is_golden_record_duplicated(self) -> bool:
         return self.deduplication_golden_record_status == DUPLICATE
 
-    def get_deduplication_golden_record(self):
+    def get_deduplication_golden_record(self) -> List:
         status_key = "duplicates" if self.is_golden_record_duplicated() else "possible_duplicates"
         return self.deduplication_golden_record_results.get(status_key, [])
 
     @cached_property
-    def active_record(self):
+    def active_record(self) -> Optional["Individual"]:
         if self.duplicate:
             return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
+        return None
 
-    def is_head(self):
+    def is_head(self) -> bool:
         if not self.household:
             return False
         return self.household.head_of_household.id == self.id
+
+    def erase(self) -> None:
+        for document in self.documents.all():
+            document.erase()
+
+        self.is_removed = True
+        self.removed_date = timezone.now()
+        self.full_name = "GDPR REMOVED"
+        self.given_name = "GDPR REMOVED"
+        self.middle_name = "GDPR REMOVED"
+        self.family_name = "GDPR REMOVED"
+        self.photo = ""
+        self.disability_certificate_picture = ""
+        self.phone_no = ""
+        self.phone_no_valid = False
+        self.phone_no_alternative = ""
+        self.phone_no_alternative_valid = False
+        self.flex_fields = {}
+        self.save()
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        recalculate_phone_numbers_validity(self, Individual)
+        super().save(*args, **kwargs)
 
 
 class EntitlementCard(TimeStampedUUIDModel):
@@ -981,10 +1034,10 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:

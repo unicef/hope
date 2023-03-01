@@ -1,0 +1,70 @@
+global:
+  env: prod
+  storageClass: default
+
+backend:
+  image: #from-pipeline
+  replicaCount: 6
+  config:
+    POSTGRES_SSL: "true"
+    STORAGE_AZURE_ACCOUNT_NAME: saunihopestg
+    STATIC_STORAGE_AZURE_ACCOUNT_NAME: saunihopeprd
+    MEDIA_STORAGE_AZURE_ACCOUNT_NAME: saunihopemediaprd
+    EMAIL_HOST: extmail01.unicef.org
+    EMAIL_USE_TLS: "false"
+    KOBO_KF_URL: https://kf.hope.unicef.org
+    KOBO_KC_URL: https://kc.hope.unicef.org
+  secret:
+    AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
+    AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
+    AZURE_TENANT_KEY: #secret-variables: AZURE_TENANT_KEY
+    STATIC_STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STATIC_STORAGE_AZURE_ACCOUNT_KEY
+    MEDIA_STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: MEDIA_STORAGE_AZURE_ACCOUNT_KEY
+    SECRET_KEY: #secret-variables: SECRET_KEY
+    SENTRY_DSN: #secret-variables: SENTRY_DSN
+    KOBO_APP_API_TOKEN: #secret-variables: KOBO_APP_API_TOKEN
+    EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY
+    ROOT_ACCESS_TOKEN: #secret-variables: ROOT_ACCESS_TOKEN
+    NEW_RELIC_LICENSE_KEY: #secret-variables: NEW_RELIC_LICENSE_KEY
+
+frontend:
+  image: #from-pipeline
+
+celery:
+  image: #from-pipeline
+  replicaCount: 2
+
+celeryflower:
+  secret:
+    FLOWER_BASIC_AUTH: #secret-variables: FLOWER_BASIC_AUTH
+
+ingress:
+  tls: true
+  tlsSecret: aks-unicef-tls
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  host: hope.unicef.org
+
+
+postgresql:
+  enabled: false
+  externalDatabase:
+    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+    user: hctappprdusr
+    password: #secret-variables: POSTGRES_PASSWORD
+    db: prd_hctmis_appdb
+registrationdatahubpostgresql:
+  enabled: false
+  externalDatabase:
+    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+    user: reghubprdusr
+    password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
+    db: prd_registration_datahubdb
+cashassistdatahubpostgresql:
+  enabled: false
+  externalDatabase:
+    host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
+    user: cahubprdusr
+    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+    db: prd_cashassist_datahubdb

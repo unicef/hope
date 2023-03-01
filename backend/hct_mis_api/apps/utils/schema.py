@@ -1,10 +1,11 @@
 import logging
+from typing import Any, Optional
 
 from django.core.files.storage import default_storage
 
 import graphene
 
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import TYPE_IMAGE
 from hct_mis_api.apps.core.models import FlexibleAttribute
 
 logger = logging.getLogger(__name__)
@@ -19,15 +20,15 @@ class Arg(graphene.Scalar):
     """
 
     @staticmethod
-    def serialize(dt):
+    def serialize(dt: graphene.Argument) -> Any:
         return dt
 
     @staticmethod
-    def parse_literal(node):
+    def parse_literal(node: graphene.Node) -> graphene.Node:
         return node
 
     @staticmethod
-    def parse_value(value):
+    def parse_value(value: Any) -> Any:
         return value
 
 
@@ -74,7 +75,7 @@ class FlexFieldsScalar(graphene.Scalar):
     """
 
     @staticmethod
-    def serialize(dt):
+    def serialize(dt: Any) -> Optional[Any]:
         if not dt:
             return dt
 
@@ -90,9 +91,9 @@ class FlexFieldsScalar(graphene.Scalar):
         return dt
 
     @staticmethod
-    def parse_literal(node):
+    def parse_literal(node: graphene.Node) -> graphene.Node:
         return node
 
     @staticmethod
-    def parse_value(value):
+    def parse_value(value: Any) -> Any:
         return value

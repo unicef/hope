@@ -1,9 +1,11 @@
+from typing import Dict
+
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
 class DataChangeValidator:
     @classmethod
-    def verify_approve_data(cls, approve_data):
+    def verify_approve_data(cls, approve_data: Dict) -> None:
         if not isinstance(approve_data, dict):
             log_and_raise("Fields must be a dictionary with field name as key and boolean as a value")
 
@@ -11,7 +13,7 @@ class DataChangeValidator:
             log_and_raise("Values must be booleans")
 
     @classmethod
-    def verify_approve_data_against_object_data(cls, object_data, approve_data):
+    def verify_approve_data_against_object_data(cls, object_data: Dict, approve_data: Dict) -> None:
         error = "Provided fields are not the same as provided in the object approve data"
         if approve_data and not isinstance(object_data, dict):
             log_and_raise(error)

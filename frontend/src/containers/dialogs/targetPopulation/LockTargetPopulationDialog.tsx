@@ -1,9 +1,4 @@
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -40,9 +35,7 @@ export function LockTargetPopulationDialog({
     >
       <>
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Lock Target Population')}</Typography>
-          </DialogTitle>
+          <DialogTitle>{t('Lock Target Population')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
@@ -73,7 +66,7 @@ export function LockTargetPopulationDialog({
                   });
                 });
               }}
-              data-cy='button-target-population-close'
+              data-cy='button-target-population-modal-lock'
             >
               {t('Lock')}
             </LoadingButton>

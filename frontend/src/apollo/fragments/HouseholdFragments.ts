@@ -101,18 +101,6 @@ export const householdDetailed = gql`
       edges {
         node {
           ...individualMinimal
-
-          birthDate
-          relationship
-          identities {
-            edges {
-              node {
-                id
-                number
-                type
-              }
-            }
-          }
         }
       }
     }
@@ -135,12 +123,12 @@ export const householdDetailed = gql`
         username
       }
     }
-    paymentRecords {
+    paymentrecordSet {
       edges {
         node {
           id
           fullName
-          cashPlan {
+          parent {
             id
             totalPersonsCovered
             program {

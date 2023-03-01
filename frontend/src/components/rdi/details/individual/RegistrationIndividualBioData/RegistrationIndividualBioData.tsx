@@ -79,7 +79,7 @@ export function RegistrationIndividualBioData({
     <Grid key={item.node.id} item xs={3}>
       <Box flexDirection='column'>
         <Box mb={1}>
-          <LabelizedField label={`${item.node.type} ID`}>
+          <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.documentNumber}
           </LabelizedField>
         </Box>
@@ -170,6 +170,11 @@ export function RegistrationIndividualBioData({
         <Grid item xs={3}>
           <LabelizedField label={t('Relationship to HOH')}>
             {relationshipChoicesDict[individual.relationship]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Preferred language')}>
+            {individual.preferredLanguage}
           </LabelizedField>
         </Grid>
         <Grid item xs={12}>

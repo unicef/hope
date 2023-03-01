@@ -9,28 +9,28 @@ import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDeleteCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DeleteVerificationPlanProps {
-  cashPlanVerificationId: string;
-  cashPlanId: string;
+  paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function DeleteVerificationPlan({
-  cashPlanVerificationId,
-  cashPlanId,
+  paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: DeleteVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useDeleteCashPlanPaymentVerificationMutation();
+  const [mutate] = useDeletePaymentVerificationPlanMutation();
 
   const handleDeleteVerificationPlan = async (): Promise<void> => {
     const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
+      variables: { paymentVerificationPlanId },
       refetchQueries,
     });
     if (errors) {
@@ -58,9 +58,7 @@ export function DeleteVerificationPlan({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Delete Verification Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Delete Verification Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

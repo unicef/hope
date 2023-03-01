@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import * as Sentry from '@sentry/react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Chart from 'chart.js';
+import packageJson from '../package.json';
 import setupInternalization from './i18n';
 import { App } from './App';
 import * as serviceWorker from './serviceWorker';
@@ -22,9 +23,10 @@ Chart.defaults.global.plugins.datalabels.font.family = FONT;
 Chart.defaults.global.plugins.datalabels.font.weight = 'bold';
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development')
+if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_FRONTEND_DSN)
   Sentry.init({
     dsn: process.env.SENTRY_FRONTEND_DSN,
+    release: packageJson.version,
     environment: process.env.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
   });

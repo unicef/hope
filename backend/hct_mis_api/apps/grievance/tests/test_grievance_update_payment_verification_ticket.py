@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Optional
+
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -13,15 +15,13 @@ from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetails
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -55,7 +55,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -101,8 +101,8 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan, status=CashPlanPaymentVerification.STATUS_ACTIVE
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            generic_fk_obj=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(
@@ -112,15 +112,15 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             business_area=cls.business_area,
         )
         payment_record = PaymentRecordFactory(
-            cash_plan=cash_plan,
+            parent=cash_plan,
             household=household,
             target_population=target_population,
             ca_id="P8F-21-CSH-00031-123123",
         )
         payment_verification = PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
-            cash_plan_payment_verification=cash_plan_payment_verification,
-            payment_record=payment_record,
+            payment_verification_plan=payment_verification_plan,
+            generic_fk_obj=payment_record,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         cls.ticket = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
@@ -136,7 +136,9 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_payment_verification_ticket_with_new_received_amount_extras(self, _, permissions):
+    def test_update_payment_verification_ticket_with_new_received_amount_extras(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         extras = {"newReceivedAmount": 1234.99, "newStatus": PaymentVerification.STATUS_RECEIVED}
@@ -157,7 +159,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_payment_verification_ticket_approve_payment_details(self, _, permissions):
+    def test_payment_verification_ticket_approve_payment_details(self, _: Any, permissions: List[Permissions]) -> None:
         # update status for approval
         self.ticket.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.ticket.ticket.save()
@@ -174,8 +176,8 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def _prepare_input(self, extras=None):
-        input_data = {
+    def _prepare_input(self, extras: Optional[Any] = None) -> Dict:
+        input_data: Dict = {
             "input": {
                 "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
             }

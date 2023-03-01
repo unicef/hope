@@ -1,4 +1,3 @@
-
 import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
@@ -7,10 +6,19 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-  ProgramStatus, TargetPopulationBuildStatus,
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus, PaymentRecordStatus, PaymentStatus,
+  ProgramStatus,
+  TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -48,14 +56,14 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'DRAFT':
+    case ProgramStatus.Draft:
       return theme.hctPalette.gray;
-    case 'ACTIVE':
+    case ProgramStatus.Active:
       return theme.hctPalette.green;
-    case 'FINISHED':
+    case ProgramStatus.Finished:
       return theme.hctPalette.gray;
     default:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
   }
 }
 export function maritalStatusToColor(
@@ -66,7 +74,7 @@ export function maritalStatusToColor(
     case 'SINGLE':
       return theme.hctPalette.green;
     case 'MARRIED':
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
     case 'WIDOW':
       return theme.hctPalette.gray;
     case 'DIVORCED':
@@ -107,12 +115,30 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'TRANSACTION_SUCCESSFUL':
+    case PaymentRecordStatus.Pending:
+      return theme.hctPalette.orange;
+    case PaymentRecordStatus.DistributionSuccessful:
+    case PaymentRecordStatus.TransactionSuccessful:
       return theme.hctPalette.green;
-    case 'DISTRIBUTION_SUCCESSFUL':
+    case PaymentRecordStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function paymentStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case PaymentStatus.Pending:
+      return theme.hctPalette.orange;
+    case PaymentStatus.DistributionSuccessful:
+    case PaymentStatus.TransactionSuccessful:
       return theme.hctPalette.green;
-    case 'TRANSACTION_PENDING':
-      return theme.hctPalette.oragne;
+    case PaymentStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
   }
@@ -125,7 +151,7 @@ export function paymentVerificationStatusToColor(
     case 'ACTIVE':
       return theme.hctPalette.green;
     case 'PENDING':
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
     case 'FINISHED':
       return theme.hctPalette.gray;
     default:
@@ -145,7 +171,7 @@ export function verificationRecordsStatusToColor(
     case 'NOT_RECEIVED':
       return theme.palette.error.main;
     case 'RECEIVED_WITH_ISSUES':
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
   }
@@ -160,9 +186,9 @@ export function registrationDataImportStatusToColor(
     case 'MERGED':
       return theme.hctPalette.gray;
     case 'IN_PROGRESS':
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
     default:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
   }
 }
 
@@ -175,7 +201,9 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
-    [TargetPopulationStatus.SteficonWait]: theme.hctPalette.oragne,
+    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
+    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
+    [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
@@ -193,7 +221,7 @@ export function targetPopulationBuildStatusToColor(
   const colorsMap = {
     [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
-    [TargetPopulationBuildStatus.Building]: theme.hctPalette.oragne,
+    [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
@@ -202,6 +230,49 @@ export function targetPopulationBuildStatusToColor(
   return theme.palette.error.main;
 }
 
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.Finished]: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanBackgroundActionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
+      theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
 
 export function userStatusToColor(
   theme: typeof themeObj,
@@ -239,7 +310,7 @@ export function grievanceTicketStatusToColor(
 ): string {
   switch (status) {
     case 'New':
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.orange;
     case 'Assigned':
       return theme.hctPalette.darkerBlue;
     case 'In Progress':
@@ -323,6 +394,7 @@ export function columnToOrderBy(
 export function choicesToDict(
   choices: ChoiceObject[],
 ): { [key: string]: string } {
+  if (!choices) return {};
   return choices.reduce((previousValue, currentValue) => {
     const newDict = { ...previousValue };
     newDict[currentValue.value] = currentValue.name;
@@ -417,6 +489,18 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
+export function programStatusMapping(status): string {
+  return PROGRAM_STATES[status];
+}
+
+export function paymentPlanStatusMapping(status): string {
+  return PAYMENT_PLAN_STATES[status];
+}
+
+export function paymentPlanBackgroundActionStatusMapping(status): string {
+  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
@@ -445,14 +529,6 @@ export function getComparator(
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-export function reduceChoices(choices): { [id: number]: string } {
-  return choices.reduce((previousValue, currentValue) => {
-    // eslint-disable-next-line no-param-reassign
-    previousValue[currentValue.value] = currentValue.name;
-    return previousValue;
-  }, {});
 }
 
 export function renderUserName(user): string {

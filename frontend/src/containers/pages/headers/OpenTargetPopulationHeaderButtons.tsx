@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Box, Button } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { Box, Button, IconButton } from '@material-ui/core';
 import {
   EditRounded,
   Delete,
@@ -14,21 +14,10 @@ import {
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
-
-const IconContainer = styled.span`
-  button {
-    color: #949494;
-    min-width: 40px;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
-  setEditState: Function;
   canDuplicate: boolean;
   canRemove: boolean;
   canEdit: boolean;
@@ -37,15 +26,15 @@ export interface InProgressTargetPopulationHeaderButtonsPropTypes {
 
 export const OpenTargetPopulationHeaderButtons = ({
   targetPopulation,
-  setEditState,
   canDuplicate,
   canEdit,
   canLock,
   canRemove,
 }: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
-  const [openApprove, setOpenApprove] = useState(false);
+  const [openLock, setOpenLock] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const businessArea = useBusinessArea();
 
   const [
     rebuildTargetPopulation,
@@ -54,21 +43,17 @@ export const OpenTargetPopulationHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
-        <IconContainer>
-          <Button
-            onClick={() => setOpenDuplicate(true)}
-            data-cy='button-target-population-duplicate'
-          >
-            <FileCopy />
-          </Button>
-        </IconContainer>
+        <IconButton
+          onClick={() => setOpenDuplicate(true)}
+          data-cy='button-target-population-duplicate'
+        >
+          <FileCopy />
+        </IconButton>
       )}
       {canRemove && (
-        <IconContainer>
-          <Button onClick={() => setOpenDelete(true)}>
-            <Delete />
-          </Button>
-        </IconContainer>
+        <IconButton onClick={() => setOpenDelete(true)}>
+          <Delete />
+        </IconButton>
       )}
       {canEdit && (
         <Box m={2}>
@@ -76,7 +61,8 @@ export const OpenTargetPopulationHeaderButtons = ({
             variant='outlined'
             color='primary'
             startIcon={<EditRounded />}
-            onClick={() => setEditState(true)}
+            component={Link}
+            to={`/${businessArea}/target-population/edit-tp/${targetPopulation.id}`}
           >
             Edit
           </Button>
@@ -104,8 +90,8 @@ export const OpenTargetPopulationHeaderButtons = ({
           <Button
             variant='contained'
             color='primary'
-            onClick={() => setOpenApprove(true)}
-            data-cy='button-target-population-close'
+            onClick={() => setOpenLock(true)}
+            data-cy='button-target-population-lock'
           >
             Lock
           </Button>
@@ -122,8 +108,8 @@ export const OpenTargetPopulationHeaderButtons = ({
         targetPopulationId={targetPopulation.id}
       />
       <LockTargetPopulationDialog
-        open={openApprove}
-        setOpen={setOpenApprove}
+        open={openLock}
+        setOpen={setOpenLock}
         targetPopulationId={targetPopulation.id}
       />
     </Box>

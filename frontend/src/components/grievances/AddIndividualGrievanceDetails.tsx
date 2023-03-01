@@ -12,6 +12,7 @@ import {
 } from '../../__generated__/graphql';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
@@ -28,16 +29,19 @@ export function AddIndividualGrievanceDetails({
   const confirm = useConfirmation();
   const { showMessage } = useSnackbar();
   if (loading) {
+    return <LoadingComponent />;
+  }
+  if (!data) {
     return null;
   }
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
+    (previousValue, currentValue) => ({
+      ...previousValue,
+      [currentValue?.name]: currentValue,
+    }),
     {},
   );
+
   const individualData = {
     ...ticket.addIndividualTicketDetails?.individualData,
   };
@@ -96,9 +100,10 @@ export function AddIndividualGrievanceDetails({
     }) || [];
   const identityLabels =
     identities?.map((item) => {
+      const partner = item.partner || item.agency; // For backward compatibility
       return (
-        <Grid key={item.country + item.agency} item xs={6}>
-          <LabelizedField label={item.agency} value={item.number} />
+        <Grid key={item.country + partner} item xs={6}>
+          <LabelizedField label={partner} value={item.number} />
         </Grid>
       );
     }) || [];

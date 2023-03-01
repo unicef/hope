@@ -13,11 +13,11 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useConfirmation } from '../core/ConfirmationDialog';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {
@@ -70,11 +70,10 @@ export function DeleteIndividualGrievanceDetails({
   if (loading) return <LoadingComponent />;
   const documents = ticket.individual?.documents;
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
+    (previousValue, currentValue) => ({
+      ...previousValue,
+      [currentValue?.name]: currentValue,
+    }),
     {},
   );
 

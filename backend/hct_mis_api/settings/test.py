@@ -6,6 +6,7 @@ from .base import *  # noqa: ignore=F403
 # dev overrides
 DEBUG = True
 IS_DEV = True
+IS_TEST = True
 TEMPLATES[0]["OPTIONS"]["debug"] = True
 
 # domains/hosts etc.
@@ -18,7 +19,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
         "TIMEOUT": 1800,
     }
 }
@@ -77,10 +78,6 @@ LOGGING = {
 }
 
 # ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL = {
-    "default": {"hosts": "elasticsearch:9200"},
-    "test": {"hosts": "elasticsearch:9200"},
-}
 ELASTICSEARCH_INDEX_PREFIX = "test_"
 
 logging.disable(logging.CRITICAL)
@@ -88,3 +85,5 @@ logging.disable(logging.CRITICAL)
 EXCHANGE_RATE_CACHE_EXPIRY = 0
 del DATABASES["read_only"]
 CELERY_TASK_ALWAYS_EAGER = True
+
+USE_DUMMY_EXCHANGE_RATES = False

@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any, Iterable
+
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
@@ -7,8 +9,11 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
 from hct_mis_api.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Individual
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
 
-def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
+
+def close_system_flagging_ticket(grievance_ticket: "GrievanceTicket", info: Any, should_log: bool = True) -> None:
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:
@@ -35,7 +40,7 @@ def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
         )
 
 
-def _clear_deduplication_individuals_fields(individuals):
+def _clear_deduplication_individuals_fields(individuals: Iterable[Individual]) -> None:
     for individual in individuals:
         individual.deduplication_golden_record_status = UNIQUE
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
@@ -53,7 +58,7 @@ def _clear_deduplication_individuals_fields(individuals):
     )
 
 
-def close_needs_adjudication_old_ticket(ticket_details, info):
+def close_needs_adjudication_old_ticket(ticket_details: Any, info: Any) -> None:
     both_individuals = (ticket_details.golden_records_individual, ticket_details.possible_duplicate)
 
     if ticket_details.selected_individual is None:
@@ -67,7 +72,7 @@ def close_needs_adjudication_old_ticket(ticket_details, info):
         _clear_deduplication_individuals_fields(unique_individuals)
 
 
-def close_needs_adjudication_new_ticket(ticket_details, info):
+def close_needs_adjudication_new_ticket(ticket_details: Any, info: Any) -> None:
     individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
     selected_individuals = ticket_details.selected_individuals.all()
 
@@ -82,7 +87,7 @@ def close_needs_adjudication_new_ticket(ticket_details, info):
         _clear_deduplication_individuals_fields(unique_individuals)
 
 
-def close_needs_adjudication_ticket(grievance_ticket, info):
+def close_needs_adjudication_ticket(grievance_ticket: "GrievanceTicket", info: Any) -> None:
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details:
         return

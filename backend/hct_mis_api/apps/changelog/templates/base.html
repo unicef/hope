@@ -1,0 +1,38 @@
+{% load static %}
+<html>
+  <head>
+    <title>HOPE - ChangeLog</title>
+    <link rel="stylesheet" href="{% static 'explorer/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'changelog/changelog.css' %}">
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">
+            <img alt="HOPE" src="{% static 'changelog/logo.17b19eb3.jpg' %}">
+          </a>
+        </div>
+        <div class="navbar-collapse collapse">
+          {% if user.is_authenticated %}
+          <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li class="active"><a href="{% url 'changelog_changelog_list'  %}">Changelog</a></li>
+          </ul>
+          {% endif %}
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    
+    <div id="content" class="container">
+      {% block content %}{% endblock %}
+    </div>
+  
+  </body>
+</html>

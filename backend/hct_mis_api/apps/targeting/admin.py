@@ -1,5 +1,9 @@
+from typing import Optional
+from uuid import UUID
+
 from django.contrib import admin
-from django.http import HttpResponseRedirect
+from django.db.models.query import QuerySet
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
@@ -13,22 +17,27 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
+from .forms import TargetPopulationForm
+from .mixins import TargetPopulationFromListMixin
 from .models import HouseholdSelection, TargetPopulation
 from .steficon import SteficonExecutorMixin
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class TargetPopulationAdmin(
+    SoftDeletableAdminMixin,
+    SteficonExecutorMixin,
+    TargetPopulationFromListMixin,
+    LinkedObjectsMixin,
+    HOPEModelAdminBase,
+):
+    form = TargetPopulationForm
     list_display = (
         "name",
         "status",
         "sent_to_datahub",
         "business_area",
         "program",
-        # "candidate_list_total_households",
-        # "candidate_list_total_individuals",
-        # "final_list_total_households",
-        # "final_list_total_individuals",
     )
     date_hierarchy = "created_at"
     search_fields = ("name",)
@@ -51,35 +60,33 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
     )
 
     @button()
-    def selection(self, request, pk):
-        obj = self.get_object(request, pk)
+    def selection(self, request: "HttpRequest", pk: "UUID") -> "HttpResponse":
+        obj = self.get_object(request, str(pk))
         url = reverse("admin:targeting_householdselection_changelist")
         return HttpResponseRedirect(f"{url}?target_population={obj.id}")
 
     @button()
-    def inspect(self, request, pk):
+    def inspect(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="Inspect")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/inspect.html", context)
 
     @button()
-    def payments(self, request, pk):
+    def payments(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
-    # @button()
-    # def download_xlsx(self, request, pk):
-    #     return redirect("admin-download-target-population", target_population_id=pk)
-
     @button(enabled=lambda b: b.context["original"].steficon_rule)
-    def rerun_steficon(self, request, pk):
-        def _rerun(request):
+    def rerun_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
+        def _rerun(request: "HttpRequest") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
 
-        obj: TargetPopulation = self.get_object(request, pk)
+        obj: Optional[TargetPopulation] = self.get_object(request, str(pk))
+        if not obj:
+            raise Exception("Target population not found")
         return confirm_action(
             self,
             request,
@@ -111,10 +118,10 @@ class HouseholdSelectionAdmin(HOPEModelAdminBase):
     )
     actions = ["reset_sync_date", "reset_vulnerability_score"]
 
-    def reset_sync_date(self, request, queryset):
+    def reset_sync_date(self, request: "HttpRequest", queryset: "QuerySet") -> None:
         from hct_mis_api.apps.household.models import Household
 
         Household.objects.filter(selections__in=queryset).update(last_sync_at=None)
 
-    def reset_vulnerability_score(self, request, queryset):
+    def reset_vulnerability_score(self, request: "HttpRequest", queryset: "QuerySet") -> None:
         queryset.update(vulnerability_score=None)

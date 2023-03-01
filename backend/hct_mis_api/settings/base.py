@@ -2,9 +2,11 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
@@ -86,9 +88,6 @@ IS_PROD = False
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
-# EMAIL_CONFIG = env.email_url('EMAIL_URL', default='smtp://user@:password@localhost:25')
-# vars().update(EMAIL_CONFIG)
-
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
@@ -165,7 +164,7 @@ DATABASES = {
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
 # If app is not specified here it will use default db
-DATABASE_APPS_MAPPING = {
+DATABASE_APPS_MAPPING: Dict[str, str] = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
     "mis_datahub": "cash_assist_datahub_mis",
     "erp_datahub": "cash_assist_datahub_erp",
@@ -186,7 +185,7 @@ MIDDLEWARE = [
     "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
 
-TEMPLATES = [
+TEMPLATES: List[Dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
@@ -215,26 +214,27 @@ TEMPLATES = [
 ]
 PROJECT_APPS = [
     "hct_mis_api.api",
-    "hct_mis_api.apps.geo",
+    "hct_mis_api.apps.geo.apps.Config",
     "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",
-    "hct_mis_api.apps.grievance",
-    "hct_mis_api.apps.household",
-    "hct_mis_api.apps.payment",
-    "hct_mis_api.apps.program",
+    "hct_mis_api.apps.grievance.apps.GrievanceConfig",
+    "hct_mis_api.apps.household.apps.HouseholdConfig",
+    "hct_mis_api.apps.payment.apps.PaymentConfig",
+    "hct_mis_api.apps.program.apps.ProgramConfig",
+    "hct_mis_api.apps.changelog.apps.ChangelogConfig",
     "hct_mis_api.apps.power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
-    "hct_mis_api.apps.utils",
+    "hct_mis_api.apps.utils.apps.UtilsConfig",
     "hct_mis_api.apps.registration_datahub.apps.Config",
-    "hct_mis_api.apps.registration_data",
+    "hct_mis_api.apps.registration_data.apps.RegistrationDataConfig",
     "hct_mis_api.apps.cash_assist_datahub.apps.Config",
     "hct_mis_api.apps.mis_datahub.apps.Config",
     "hct_mis_api.apps.erp_datahub.apps.Config",
-    "hct_mis_api.apps.sanction_list",
-    "hct_mis_api.apps.steficon",
-    "hct_mis_api.apps.reporting",
-    "hct_mis_api.apps.activity_log",
+    "hct_mis_api.apps.sanction_list.apps.SanctionListConfig",
+    "hct_mis_api.apps.steficon.apps.SteficonConfig",
+    "hct_mis_api.apps.reporting.apps.ReportingConfig",
+    "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
 ]
 
 DJANGO_APPS = [
@@ -283,6 +283,7 @@ OTHER_APPS = [
     "drf_yasg",
     "flags",
     "admin_cursor_paginator",
+    "markdownify.apps.MarkdownifyConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -313,14 +314,14 @@ NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
 # helper function to extend all the common lists
-def extend_list_avoid_repeats(list_to_extend, extend_with):
+def extend_list_avoid_repeats(list_to_extend: List, extend_with: List) -> None:
     """Extends the first list with the elements in the second one, making sure its elements are not already there in the
     original list."""
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
 LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
@@ -361,20 +362,6 @@ LOGGING = {
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
-# REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
-#
-# if REDIS_INSTANCE:
-#     CACHES = {
-#         "default": {
-#             "BACKEND": "django_redis.cache.RedisCache",
-#             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
-#             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-#             "TIMEOUT": 3600,
-#         }
-#     }
-#     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
-# else:
-#     CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
 
 REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
 if "CACHE_URL" not in os.environ:
@@ -456,6 +443,9 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
 ELASTICSEARCH_INDEX_PREFIX = ""
+ELASTICSEARCH_DSL = {
+    "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
+}
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
@@ -586,6 +576,16 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "Automatically merge the population after server-triggered RDI import",
         bool,
     ),
+    "RECALCULATE_POPULATION_FIELDS_CHUNK": (
+        100000,
+        "recalculate_population_fields_task Household table pagination value",
+        "positive_integers",
+    ),
+    "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
+        False,
+        "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -632,9 +632,16 @@ if SENTRY_DSN:
         release=get_full_version(),
         traces_sample_rate=1.0,
         send_default_pii=True,
+        ignore_errors=[
+            "ValidationError",
+            "PermissionDenied",
+            "Http404",
+            "AuthCanceled",
+        ],
         environment=SENTRY_ENVIRONMENT,
     )
     ignore_logger("graphql.execution.utils")
+
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -665,7 +672,6 @@ SMART_ADMIN_SECTIONS = {
     "Configuration": [
         "core",
         "constance",
-        "household.agency",
         "flags",
     ],
     "Power Query & Reports": [
@@ -685,12 +691,6 @@ SMART_ADMIN_SECTIONS = {
         "core.FlexibleAttribute",
         "core.FlexibleAttributeGroup",
     ],
-    # "HUBs": [
-    #     "cash_assist_datahub",
-    #     "erp_datahub",
-    #     "mis_datahub",
-    #     "registration_datahub",
-    # ],
     "HUB (Hope->CA)": [
         "mis_datahub",
     ],
@@ -725,11 +725,11 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 AA_PERMISSION_HANDLER = 3
 
 
-def filter_environment(key, config, request):
+def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
     return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
 
 
-def masker(key, value, config, request):
+def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
     from ..apps.utils.security import is_root
@@ -778,12 +778,6 @@ POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
 CONCURRENCY_ENABLED = False
 
-# import warnings
-# warnings.filterwarnings(
-#     'error', r"DateTimeField .* received a naive datetime",
-#     RuntimeWarning, r'django\.db\.models\.fields',
-# )
-
 PROFILING = env("PROFILING", default="off") == "on"
 if PROFILING:
     # SILK
@@ -799,7 +793,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
-MAX_STORAGE_FILE_SIZE = 30
+USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
@@ -815,7 +809,7 @@ if DEBUG:
     MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
     # DEBUG TOOLBAR
-    def show_ddt(request):  # pragma: no-cover
+    def show_ddt(request: HttpRequest) -> None:  # pragma: no-cover
         from flags.state import flag_enabled
 
         return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)
@@ -842,3 +836,23 @@ if DEBUG:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
+
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
+    }
+}
+
+SHELL_PLUS_DONT_LOAD = [
+    "mis_datahub.Individual",
+    "mis_datahub.Household",
+]
+
+CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
+
+if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
+    )

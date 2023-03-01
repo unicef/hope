@@ -1,14 +1,18 @@
 import base64
 import logging
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.signing import BadSignature, Signer
-from django.db.models import F
+from django.db.models import F, QuerySet
+from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 
 import requests
@@ -26,6 +30,7 @@ from requests.auth import HTTPBasicAuth
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
     process_flex_records_task,
+    process_sri_lanka_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     DiiaHousehold,
@@ -45,8 +50,11 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
+    SriLankaRegistrationService,
 )
-from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.registration_datahub.utils import (
+    post_process_dedupe_results as _post_process_dedupe_results,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 
@@ -71,7 +79,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         href=None,
         label="RDI",
     )
-    def hub(self, button):
+    def hub(self, button: button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
             if obj.hct_id:
@@ -80,9 +88,10 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
                 button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
                 return "javascript:alert('RDI not imported');"
         button.visible = False
+        return None
 
     @button()
-    def inspect(self, request, pk):
+    def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         obj: RegistrationDataImportDatahub = context["original"]
         context["title"] = f"Import {obj.name} - {obj.import_done}"
@@ -128,19 +137,19 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
     actions = ["enrich_deduplication"]
     inlines = (ImportedBankAccountInfoStackedInline,)
 
-    def score(self, obj):
+    def score(self, obj: ImportedIndividual) -> Union[int, str]:
         try:
             return obj.deduplication_golden_record_results["score"]["max"]
         except KeyError:
             return ""
 
-    def batch_score(self, obj):
+    def batch_score(self, obj: ImportedIndividual) -> Union[int, str]:
         try:
             return obj.deduplication_batch_results["score"]["max"]
         except KeyError:
             return ""
 
-    def dedupe_status(self, obj):
+    def dedupe_status(self, obj: ImportedIndividual) -> str:
         lbl = f"{obj.deduplication_batch_status}/{obj.deduplication_golden_record_status}"
         url = reverse("admin:registration_datahub_importedindividual_duplicates", args=[obj.pk])
         if "duplicates" in obj.deduplication_batch_results:
@@ -151,25 +160,25 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
             ret = lbl
         return mark_safe(ret)
 
-    def enrich_deduplication(self, request, queryset):
+    def enrich_deduplication(self, request: HttpRequest, queryset: QuerySet) -> None:
         for record in queryset.exclude(deduplication_batch_results__has_key="score"):
-            post_process_dedupe_results(record)
+            _post_process_dedupe_results(record)
 
     @button()
-    def post_process_dedupe_results(self, request, pk):
+    def post_process_dedupe_results(self, request: HttpRequest, pk: UUID) -> None:
         record = self.get_queryset(request).get(id=pk)
-        post_process_dedupe_results(record)
+        _post_process_dedupe_results(record)
         record.save()
 
     @button()
-    def duplicates(self, request, pk):
+    def duplicates(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         ctx = self.get_common_context(request, pk, title="Duplicates")
         return TemplateResponse(request, "registration_datahub/admin/duplicates.html", ctx)
 
 
 @admin.register(ImportedIndividualIdentity)
 class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "agency", "document_number")
+    list_display = ("individual", "document_number")
     raw_id_fields = ("individual",)
 
 
@@ -245,15 +254,15 @@ class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
     remember = forms.BooleanField(label="Remember me", required=False)
 
-    def get_signed_cookie(self, request):
-        signer = Signer(request.user.password)
+    def get_signed_cookie(self, request: HttpRequest) -> Any:
+        signer = Signer(str(request.user.password))
         return signer.sign_object(self.cleaned_data)
 
     @classmethod
-    def get_saved_config(cls, request):
+    def get_saved_config(cls, request: HttpRequest) -> Dict:
         try:
-            signer = Signer(request.user.password)
-            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            signer = Signer(str(request.user.password))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
             return obj
         except BadSignature:
             return {}
@@ -269,7 +278,7 @@ class FetchForm(RemeberDataForm):
     start = forms.IntegerField()
     end = forms.IntegerField()
 
-    def clean(self):
+    def clean(self) -> Optional[Dict[str, Any]]:
         return super().clean()
 
 
@@ -284,12 +293,14 @@ class AlexisFilter(SimpleListFilter):
     title = "Alexis"
     parameter_name = "alexis"
 
-    def __init__(self, request, params, model, model_admin):
+    def __init__(
+        self, request: HttpRequest, params: MultiValueDict[str, str], model: Any, model_admin: ModelAdmin
+    ) -> None:
         super().__init__(request, params, model, model_admin)
         self.lookup_kwarg = self.parameter_name
         self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if "1" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__individuals_num=F("data__household__0__size_h_c"))
         if "2" in self.lookup_val:
@@ -310,20 +321,20 @@ class AlexisFilter(SimpleListFilter):
             queryset = queryset.filter(data__w_counters__collector_bank_account=True)
         return queryset
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Optional[Iterable[Tuple[Any, str]]]:
         return (
-            ["1", "Household size match"],
-            ["2", "Only one collector"],
-            ["3", "One and only one head"],
-            ["4", "More than 1 phone number"],
-            ["5", "At least 1 HoH has TaxId ans BankAccount"],
-            ["6", "at least one birth certificate picture"],
-            ["7", "disability certificate for each disabled"],
-            ["8", "At least 1 member has TaxId ans BankAccount"],
-            ["9", "Collector has BankAccount"],
+            ("1", "Household size match"),
+            ("2", "Only one collector"),
+            ("3", "One and only one head"),
+            ("4", "More than 1 phone number"),
+            ("5", "At least 1 HoH has TaxId ans BankAccount"),
+            ("6", "at least one birth certificate picture"),
+            ("7", "disability certificate for each disabled"),
+            ("8", "At least 1 member has TaxId ans BankAccount"),
+            ("9", "Collector has BankAccount"),
         )
 
-    def choices(self, changelist):
+    def choices(self, changelist: List) -> Generator:
         for lookup, title in self.lookup_choices:
             qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
             qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
@@ -363,18 +374,18 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     change_form_template = "registration_datahub/admin/record/change_form.html"
     # change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi", "create_sr_lanka_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs
 
     @admin.action(description="Create RDI")
-    def create_rdi(self, request, queryset):
+    def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
         service = FlexRegistrationService()
         try:
             records_ids = queryset.values_list("id", flat=True)
@@ -388,8 +399,23 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         except Exception as e:
             self.message_user(request, str(e), messages.ERROR)
 
+    @admin.action(description="Create Sri-Lanka RDI")
+    def create_sr_lanka_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
+        sri_lanka_service = SriLankaRegistrationService()
+        try:
+            records_ids = queryset.values_list("id", flat=True)
+            rdi = sri_lanka_service.create_rdi(request.user, f"sri-lanka rdi {timezone.now()}")
+
+            process_sri_lanka_flex_records_task.delay(rdi.id, list(records_ids))
+            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+            self.message_user(
+                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
+            )
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
+
     @admin.action(description="Async extract")
-    def async_extract(self, request, queryset):
+    def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
             records_ids = queryset.values_list("id", flat=True)
             fresh_extract_records_task.delay(list(records_ids))
@@ -398,7 +424,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission=is_root)
-    def fetch(self, request):
+    def fetch(self, request: HttpRequest) -> TemplateResponse:
         ctx = self.get_common_context(request)
         cookies = {}
         if request.method == "POST":
@@ -430,17 +456,17 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         return response
 
     @button(label="Extract")
-    def extract_single(self, request, pk):
+    def extract_single(self, request: HttpRequest, pk: UUID) -> None:
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         try:
             extract(records_ids, raise_exception=True)
         except Exception as e:
             self.message_error_to_user(request, e)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
 

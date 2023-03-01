@@ -1,4 +1,7 @@
-def humanize_errors(errors):
+from typing import Dict, List, Union
+
+
+def humanize_errors(errors: Dict) -> Dict:
     try:
         households = errors.pop("households", [])
         errs = {}
@@ -9,6 +12,7 @@ def humanize_errors(errors):
             for i, h in enumerate(households, 1):
                 if h and isinstance(h, dict):
                     members = h.pop("members", [])
+                    mm_info: Union[List, Dict]
                     if isinstance(members, list) and len(members) == 1 and isinstance(members[0], str):
                         mm_info = members
                     else:
@@ -23,7 +27,3 @@ def humanize_errors(errors):
         return errs
     except (ValueError, AttributeError):
         return errors
-
-
-def humanize_errors2(errors):
-    return errors

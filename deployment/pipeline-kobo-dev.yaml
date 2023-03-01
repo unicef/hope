@@ -45,11 +45,11 @@ stages:
                 rediscache.password=$(REDIS_CACHE_PASSWORD),\
                 redismain.password=$(REDIS_MAIN_PASSWORD),\
                 smtp.host=$(SMTP_HOST),\
+                kpi.ravenDsn=$(KPI_SENTRY_DSN),\
+                kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),\
                 smtp.email=kobo@unitst.org,\
                 ingress.host=$(DOMAIN),\
                 kpi.subdomain=kf-hope,\
                 kobocat.subdomain=kc-hope,\
                 enketo.subdomain=ek-hope,\
-                ingress.tlsSecret=aks-unitst-tls,\
-                ingress.scheme=https,\
-                ingress.tls=true,"
+                ingress.scheme=https"

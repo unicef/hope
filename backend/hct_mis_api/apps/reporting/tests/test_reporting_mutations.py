@@ -1,8 +1,11 @@
-from datetime import timedelta
+from datetime import date, timedelta
+from typing import Any, List
 
+from django.core.management import call_command
 from django.utils import timezone
 
 from parameterized import parameterized
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -46,13 +49,17 @@ class TestReportingMutation(APITestCase):
         """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
         cls.user = UserFactory()
         create_afghanistan()
+        call_command("loadcountries")
         cls.business_area_slug = "afghanistan"
         cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
-        last_registration_dates = ("2020-01-01", "2021-01-01")
+        last_registration_dates = (
+            timezone.datetime(2020, 1, 1, tzinfo=utc),
+            timezone.datetime(2021, 1, 1, tzinfo=utc),
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -70,7 +77,7 @@ class TestReportingMutation(APITestCase):
                 {
                     "size": family_size,
                     "address": "Lorem Ipsum",
-                    "country_origin": "PL",
+                    "country_origin": geo_models.Country.objects.get(name="Poland"),
                     "business_area": cls.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                 },
@@ -112,7 +119,9 @@ class TestReportingMutation(APITestCase):
             ("without_permission_individuals_report", [], Report.INDIVIDUALS, "2022-01-02"),
         ]
     )
-    def test_create_report_with_no_extra_filters(self, _, permissions, report_type, date_to):
+    def test_create_report_with_no_extra_filters(
+        self, _: Any, permissions: List[Permissions], report_type: str, date_to: date
+    ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REPORT,
@@ -121,7 +130,7 @@ class TestReportingMutation(APITestCase):
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
                     "reportType": report_type,
-                    "dateFrom": "2019-01-01",
+                    "dateFrom": "2018-01-01",
                     "dateTo": date_to,
                 }
             },
@@ -141,7 +150,9 @@ class TestReportingMutation(APITestCase):
             ("individuals_payments", Report.INDIVIDUALS_AND_PAYMENT, "program", None),
         ]
     )
-    def test_create_report_validator(self, _, report_type, should_exist_field, should_not_exist_field):
+    def test_create_report_validator(
+        self, _: Any, report_type: str, should_exist_field: str, should_not_exist_field: str
+    ) -> None:
 
         report_data = {
             "report_type": report_type,
@@ -164,7 +175,7 @@ class TestReportingMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_restart_create_report(self, _, permissions):
+    def test_restart_create_report(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.RESTART_CREATE_REPORT,
@@ -172,12 +183,12 @@ class TestReportingMutation(APITestCase):
             variables={
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
-                    "reportId": encode_id_base64(self.report.id, Report),
+                    "reportId": encode_id_base64(self.report.id, "Report"),
                 }
             },
         )
 
-    def test_restart_create_report_invalid_status_update_time(self):
+    def test_restart_create_report_invalid_status_update_time(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.REPORTING_EXPORT], self.business_area)
         self.report.status = Report.COMPLETED
         self.report.save()
@@ -187,7 +198,7 @@ class TestReportingMutation(APITestCase):
             variables={
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
-                    "reportId": encode_id_base64(self.report.id, Report),
+                    "reportId": encode_id_base64(self.report.id, "Report"),
                 }
             },
         )
@@ -200,7 +211,7 @@ class TestReportingMutation(APITestCase):
             variables={
                 "reportData": {
                     "businessAreaSlug": self.business_area_slug,
-                    "reportId": encode_id_base64(self.report.id, Report),
+                    "reportId": encode_id_base64(self.report.id, "Report"),
                 }
             },
         )

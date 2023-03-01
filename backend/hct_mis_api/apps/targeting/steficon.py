@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django import forms
 from django.contrib import messages
@@ -11,6 +12,12 @@ from admin_extra_buttons.decorators import button
 from hct_mis_api.apps.steficon.debug import get_error_info
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from django.http import HttpRequest
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +40,7 @@ try:
 
     class SteficonExecutorMixin:
         @button(visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR)
-        def re_run_steficon(self, request, pk):
+        def re_run_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             tp = context["original"]
             if request.method == "POST":
@@ -50,7 +57,7 @@ try:
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_rerun.html", context)
 
         @button()
-        def test_steficon(self, request, pk):
+        def test_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             if request.method == "GET":
                 context["title"] = "Test Steficon rule"
@@ -89,5 +96,5 @@ try:
 
 except ImportError:
 
-    class SteficonExecutorMixin:
+    class SteficonExecutorMixin:  # type: ignore # intentional
         pass

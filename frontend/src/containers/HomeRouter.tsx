@@ -15,12 +15,19 @@ import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
+import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
+import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
-import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
+import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
+import { PaymentPlanVerificationDetailsPage } from './pages/payments/PaymentPlanVerificationDetailsPage';
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
-import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
+import { VerificationPaymentDetailsPage } from './pages/payments/VerificationPaymentDetailsPage';
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
@@ -34,8 +41,11 @@ import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndiv
 import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
 import { ReportingPage } from './pages/reporting/ReportingPage';
 import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
+import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { VerificationPaymentRecordDetailsPage } from './pages/payments/VerificationPaymentRecordDetailsPage';
+import {PaymentDetailsPage} from "./pages/paymentmodule/PaymentDetailsPage";
 
 const Root = styled.div`
   display: flex;
@@ -88,20 +98,50 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/target-population/create'>
             <CreateTargetPopulationPage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/target-population/edit-tp/:id'>
+            <EditTargetPopulationPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/verification/payment-record/:id'>
+            <VerificationPaymentRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/verification/payment/:id'>
+            <VerificationPaymentDetailsPage />
           </SentryRoute>
           <SentryRoute exact path='/:businessArea/payment-verification'>
             <PaymentVerificationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/verification-records/:id'>
-            <VerificationRecordDetailsPage />
+          <SentryRoute path='/:businessArea/payment-verification/cash-plan/:id'>
+            <CashPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-verification/:id'>
-            <PaymentVerificationDetailsPage />
+          <SentryRoute path='/:businessArea/payment-verification/payment-plan/:id'>
+            <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/csh-payment-verification/:id'>
             <CashPlanVerificationRedirectPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/new-plan'>
+            <CreatePaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/payment-module'>
+            <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
+            <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
+            <EditSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
+            <EditPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payments/:id'>
+            <PaymentDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
+            <PaymentPlanDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />

@@ -7,5 +7,5 @@ from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType
 class TestImportedDocumentTypeModel(TestCase):
     databases = "__all__"
 
-    def test_create_document_type(self):
+    def test_create_document_type(self) -> None:
         assert ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)

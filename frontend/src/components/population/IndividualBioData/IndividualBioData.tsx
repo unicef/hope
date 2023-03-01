@@ -36,12 +36,12 @@ interface IndividualBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export function IndividualBioData({
+export const IndividualBioData = ({
   individual,
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement {
+}: IndividualBioDataProps): React.ReactElement => {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -58,32 +58,34 @@ export function IndividualBioData({
     choicesData.severityOfDisabilityChoices,
   );
 
-  const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3} key={edge.node.id}>
-      <Box flexDirection='column'>
-        <Box mb={1}>
-          <LabelizedField label={edge.node.type.label}>
-            {edge.node.photo ? (
-              <DocumentPopulationPhotoModal
-                documentNumber={edge.node.documentNumber}
-                documentId={edge.node.id}
-                individual={individual}
-              />
-            ) : (
-              edge.node.documentNumber
-            )}
-          </LabelizedField>
+  const mappedIndividualDocuments = individual?.documents?.edges?.map(
+    (edge) => (
+      <Grid item xs={3} key={edge.node.id}>
+        <Box flexDirection='column'>
+          <Box mb={1}>
+            <LabelizedField label={edge.node.type.label}>
+              {edge.node.photo ? (
+                <DocumentPopulationPhotoModal
+                  documentNumber={edge.node.documentNumber}
+                  documentId={edge.node.id}
+                  individual={individual}
+                />
+              ) : (
+                edge.node.documentNumber
+              )}
+            </LabelizedField>
+          </Box>
+          <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
-      </Box>
-    </Grid>
-  ));
+      </Grid>
+    ),
+  );
 
-  const mappedIdentities = individual.identities?.edges?.map((item) => (
+  const mappedIdentities = individual?.identities?.edges?.map((item) => (
     <Grid item xs={3} key={item.node.id}>
       <Box flexDirection='column'>
         <Box mb={1}>
-          <LabelizedField label={`${item.node.type} ID`}>
+          <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.number}
           </LabelizedField>
         </Box>
@@ -95,8 +97,8 @@ export function IndividualBioData({
   const mappedRoles = (
     <Grid item xs={3}>
       <LabelizedField label={t('Linked Households')}>
-        {individual.householdsAndRoles.length
-          ? individual.householdsAndRoles?.map((item) => (
+        {individual?.householdsAndRoles?.length
+          ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} - {roleChoicesDict[item.role]}
               </Box>
@@ -107,7 +109,7 @@ export function IndividualBioData({
   );
 
   const renderBankAccountInfo = (): React.ReactNode => {
-    if (!individual.bankAccountInfo) {
+    if (!individual?.bankAccountInfo) {
       return null;
     }
     return (
@@ -117,12 +119,12 @@ export function IndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Bank name')}>
-            {individual.bankAccountInfo.bankName}
+            {individual?.bankAccountInfo?.bankName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Bank account number')}>
-            {individual.bankAccountInfo.bankAccountNumber}
+            {individual?.bankAccountInfo?.bankAccountNumber}
           </LabelizedField>
         </Grid>
       </>
@@ -137,57 +139,57 @@ export function IndividualBioData({
       <Grid container spacing={6}>
         <Grid item xs={3}>
           <LabelizedField label={t('Full Name')}>
-            {individual.fullName}
+            {individual?.fullName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Given Name')}>
-            {individual.givenName}
+            {individual?.givenName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Middle Name')}>
-            {individual.middleName}
+            {individual?.middleName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Family Name')}>
-            {individual.familyName}
+            {individual?.familyName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Gender')}>
-            {sexToCapitalize(individual.sex)}
+            {sexToCapitalize(individual?.sex)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Age')}>
-            {formatAge(individual.age)}
+            {formatAge(individual?.age)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Date of Birth')}>
-            <UniversalMoment>{individual.birthDate}</UniversalMoment>
+            <UniversalMoment>{individual?.birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Estimated Date of Birth')}>
-            {renderBoolean(individual.estimatedBirthDate)}
+            {renderBoolean(individual?.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Marital Status')}>
-            {maritalStatusChoicesDict[individual.maritalStatus]}
+            {maritalStatusChoicesDict[individual?.maritalStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Work Status')}>
-            {workStatusChoicesDict[individual.workStatus]}
+            {workStatusChoicesDict[individual?.workStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Pregnant')}>
-            {renderBoolean(individual.pregnant)}
+            {renderBoolean(individual?.pregnant)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -205,12 +207,17 @@ export function IndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Role')}>
-            {roleChoicesDict[individual.role]}
+            {roleChoicesDict[individual?.role]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Relationship to HOH')}>
-            {relationshipChoicesDict[individual.relationship]}
+            {relationshipChoicesDict[individual?.relationship]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Preferred language')}>
+            {individual?.preferredLanguage}
           </LabelizedField>
         </Grid>
         {mappedRoles}
@@ -219,50 +226,52 @@ export function IndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual.observedDisability
+            {individual?.observedDisability
               .map((choice) => observedDisabilityChoicesDict[choice])
               .join(', ')}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Seeing disability severity')}>
-            {severityOfDisabilityChoicesDict[individual.seeingDisability]}
+            {severityOfDisabilityChoicesDict[individual?.seeingDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Hearing disability severity')}>
-            {severityOfDisabilityChoicesDict[individual.hearingDisability]}
+            {severityOfDisabilityChoicesDict[individual?.hearingDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Physical disability severity')}>
-            {severityOfDisabilityChoicesDict[individual.physicalDisability]}
+            {severityOfDisabilityChoicesDict[individual?.physicalDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField
             label={t('Remembering or concentrating disability severity')}
           >
-            {severityOfDisabilityChoicesDict[individual.memoryDisability]}
+            {severityOfDisabilityChoicesDict[individual?.memoryDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Self-care disability severity')}>
-            {severityOfDisabilityChoicesDict[individual.selfcareDisability]}
+            {severityOfDisabilityChoicesDict[individual?.selfcareDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Communicating disability severity')}>
-            {severityOfDisabilityChoicesDict[individual.commsDisability]}
+            {severityOfDisabilityChoicesDict[individual?.commsDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Disability')}>
-            {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
+            {individual?.disability === 'DISABLED'
+              ? 'Disabled'
+              : 'Not Disabled'}
           </LabelizedField>
         </Grid>
-        {!mappedIndividualDocuments.length &&
-        !mappedIdentities.length ? null : (
+        {!mappedIndividualDocuments?.length &&
+        !mappedIdentities?.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
@@ -274,14 +283,14 @@ export function IndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Phone Number')}>
-            {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
+            {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Alternative Phone Number')}>
             {getPhoneNoLabel(
-              individual.phoneNoAlternative,
-              individual.phoneNoAlternativeValid,
+              individual?.phoneNoAlternative,
+              individual?.phoneNoAlternativeValid,
             )}
           </LabelizedField>
         </Grid>
@@ -293,14 +302,14 @@ export function IndividualBioData({
             label={t('Date of last screening against sanctions list')}
           >
             <UniversalMoment>
-              {individual.sanctionListLastCheck}
+              {individual?.sanctionListLastCheck}
             </UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={6}>
-          {individual.household?.unicefId && (
+          {individual?.household?.unicefId && (
             <LinkedGrievancesModal
-              household={individual.household}
+              household={individual?.household}
               businessArea={businessArea}
               grievancesChoices={grievancesChoices}
             />
@@ -310,4 +319,4 @@ export function IndividualBioData({
       </Grid>
     </Overview>
   );
-}
+};

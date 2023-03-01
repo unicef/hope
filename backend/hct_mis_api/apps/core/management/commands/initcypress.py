@@ -1,11 +1,38 @@
-from django.core.management import BaseCommand, call_command
-from django.db import connections
+from argparse import ArgumentParser
+from typing import Any
 
-from hct_mis_api.apps.core.management.sql import sql_drop_tables
+from django.core.management import BaseCommand, call_command
+
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+)
+from hct_mis_api.apps.payment.models import GenericPayment
+
+
+def create_fsps() -> None:
+    fsp_template = FinancialServiceProviderXlsxTemplateFactory(
+        name="TEST",
+    )
+    for delivery_mechanism in GenericPayment.DELIVERY_TYPE_CHOICE:
+        dm = delivery_mechanism[0]
+        fsp = FinancialServiceProviderFactory(
+            name=f"Test FSP {dm}",
+            delivery_mechanisms=[dm],
+            distribution_limit=None,
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            xlsx_template=fsp_template,
+            financial_service_provider=fsp,
+            delivery_mechanism=dm,
+        )
 
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--skip-drop",
             action="store_true",
@@ -13,9 +40,9 @@ class Command(BaseCommand):
             help="Skip migrating - just reload the data",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if options["skip_drop"] is False:
-            self._drop_databases()
+            call_command("dropalldb")
             call_command("migratealldb")
 
         call_command("flush", "--noinput")
@@ -31,16 +58,12 @@ class Command(BaseCommand):
             "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
         )
 
-        call_command("search_index", "--rebuild", "-f")
+        UserRole.objects.create(
+            user=User.objects.create_superuser("cypress-username", "cypress@cypress.com", "cypress-password"),
+            role=Role.objects.get(name="Role with all permissions"),
+            business_area=BusinessArea.objects.get(name="Afghanistan"),
+        )
 
-    def _drop_databases(self):
-        for connection_name in connections:
-            if connection_name == "read_only":
-                continue
-            connection = connections[connection_name]
-            with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection)
-                if not sql:
-                    continue
-                print(sql)
-                cursor.execute(sql)
+        create_fsps()
+
+        call_command("search_index", "--rebuild", "-f")
