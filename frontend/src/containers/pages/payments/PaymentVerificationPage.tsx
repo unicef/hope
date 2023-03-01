@@ -10,7 +10,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
-  ProgramNode,
+  ProgramNodeEdge,
   useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
@@ -36,18 +36,20 @@ export function PaymentVerificationPage(): React.ReactElement {
     fetchPolicy: 'cache-and-network',
   });
   if (loading) return <LoadingComponent />;
-  if (permissions === null) return null;
+  if (!data || permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   const allPrograms = get(data, 'allPrograms.edges', []);
-  const programs = allPrograms.map((edge) => edge.node);
+  const programs: Array<ProgramNodeEdge['node']> = allPrograms.map(
+    (edge: ProgramNodeEdge) => edge.node,
+  );
 
   return (
     <>
       <PageHeader title={t('Payment Verification')} />
       <PaymentFilters
-        programs={programs as ProgramNode[]}
+        programs={programs}
         filter={filter}
         onFilterChange={setFilter}
       />

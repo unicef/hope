@@ -20,10 +20,10 @@ from hct_mis_api.apps.core.utils import clear_cache_for_dashboard_totals
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_reconciliation_xlsx
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerificationSummary,
+    CashPlan,
     PaymentRecord,
+    PaymentVerificationSummary,
 )
-from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
@@ -162,7 +162,9 @@ class CreateCashPlanReconciliationService:
         self.cash_plan.total_persons_covered_revised = self.total_person_covered
         self.cash_plan.total_entitled_quantity = self.total_entitlement_amount
         self.cash_plan.total_delivered_quantity = self.total_delivered_amount
-        CashPlanPaymentVerificationSummary.objects.create(cash_plan=self.cash_plan)
+        PaymentVerificationSummary.objects.create(
+            payment_plan_obj=self.cash_plan
+        )  # previously CashPlanPaymentVerificationSummary
         self.cash_plan.save()
 
     def _update_exchange_rates(self) -> None:

@@ -11,6 +11,7 @@ volumes:
   data_es_test:
   ipython_data_local:
 
+
 services:
   proxy:
     image: unicef/hct-mis-proxy
@@ -45,6 +46,7 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
+      target: dev
       args:
         APP_ENV: DEV
     ports:
@@ -99,7 +101,12 @@ services:
 
   celery-flower:
     image: johniak/flower:1.6
-    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
+    command:
+      [
+        "flower",
+        "--broker=redis://redis:6379/0",
+        "--port=5555"
+      ]
     environment:
       - FLOWER_AUTH_PROVIDER=""
       - FLOWER_DEBUG="1"

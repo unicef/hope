@@ -214,27 +214,27 @@ TEMPLATES: List[Dict[str, Any]] = [
 ]
 PROJECT_APPS = [
     "hct_mis_api.api",
-    "hct_mis_api.apps.geo",
+    "hct_mis_api.apps.geo.apps.Config",
     "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",
-    "hct_mis_api.apps.grievance",
-    "hct_mis_api.apps.household",
-    "hct_mis_api.apps.payment",
-    "hct_mis_api.apps.program",
-    "hct_mis_api.apps.changelog",
+    "hct_mis_api.apps.grievance.apps.GrievanceConfig",
+    "hct_mis_api.apps.household.apps.HouseholdConfig",
+    "hct_mis_api.apps.payment.apps.PaymentConfig",
+    "hct_mis_api.apps.program.apps.ProgramConfig",
+    "hct_mis_api.apps.changelog.apps.ChangelogConfig",
     "hct_mis_api.apps.power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
-    "hct_mis_api.apps.utils",
+    "hct_mis_api.apps.utils.apps.UtilsConfig",
     "hct_mis_api.apps.registration_datahub.apps.Config",
-    "hct_mis_api.apps.registration_data",
+    "hct_mis_api.apps.registration_data.apps.RegistrationDataConfig",
     "hct_mis_api.apps.cash_assist_datahub.apps.Config",
     "hct_mis_api.apps.mis_datahub.apps.Config",
     "hct_mis_api.apps.erp_datahub.apps.Config",
-    "hct_mis_api.apps.sanction_list",
-    "hct_mis_api.apps.steficon",
-    "hct_mis_api.apps.reporting",
-    "hct_mis_api.apps.activity_log",
+    "hct_mis_api.apps.sanction_list.apps.SanctionListConfig",
+    "hct_mis_api.apps.steficon.apps.SteficonConfig",
+    "hct_mis_api.apps.reporting.apps.ReportingConfig",
+    "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
 ]
 
 DJANGO_APPS = [
@@ -581,6 +581,11 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "recalculate_population_fields_task Household table pagination value",
         "positive_integers",
     ),
+    "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
+        False,
+        "The same user can have multiple approvals in acceptance process. Intended to be used only for testing purposes",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -787,7 +792,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
-MAX_STORAGE_FILE_SIZE = 30
+USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
@@ -841,3 +846,12 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Individual",
     "mis_datahub.Household",
 ]
+
+CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
+
+if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
+    )
