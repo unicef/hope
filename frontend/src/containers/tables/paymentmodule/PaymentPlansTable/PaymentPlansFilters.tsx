@@ -5,11 +5,11 @@ import { ContainerWithBorder } from '../../../../components/core/ContainerWithBo
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
 import {
   usePaymentPlanStatusChoicesQueryQuery,
   AllPaymentPlansForTableQueryVariables,
 } from '../../../../__generated__/graphql';
+import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -42,7 +42,7 @@ export function PaymentPlansFilters({
   return (
     <ContainerWithBorder>
       <Grid container spacing={4}>
-        <Grid item container spacing={4} xs={6} alignItems='flex-end'>
+        <Grid item container spacing={4} xs={12} md={6} alignItems='flex-end'>
           <Grid item xs={8}>
             <SearchTextField
               label={t('Search')}
@@ -52,7 +52,7 @@ export function PaymentPlansFilters({
             />
           </Grid>
           <Grid item xs={4}>
-            <SelectFilter
+            <FlexSelectFilter
               onChange={(e: unknown) => handleFilterChange(e, 'status')}
               variant='outlined'
               label={t('Status')}
@@ -68,10 +68,10 @@ export function PaymentPlansFilters({
                   </MenuItem>
                 );
               })}
-            </SelectFilter>
+            </FlexSelectFilter>
           </Grid>
         </Grid>
-        <Grid item container spacing={2} xs={3} alignItems='flex-end'>
+        <Grid item container spacing={2} xs={6} md={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <NumberTextField
               id='totalEntitledQuantityFromFilter'
@@ -106,7 +106,7 @@ export function PaymentPlansFilters({
             />
           </Grid>
         </Grid>
-        <Grid item container spacing={2} xs={3} alignItems='flex-end'>
+        <Grid item container spacing={2} xs={6} md={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <DatePickerFilter
               topLabel={t('Dispersion Date')}
