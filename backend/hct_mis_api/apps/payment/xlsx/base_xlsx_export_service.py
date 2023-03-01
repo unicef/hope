@@ -11,7 +11,7 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
-from openpyxl.worksheet.dimensions import DimensionHolder, ColumnDimension
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 from hct_mis_api.apps.core.utils import encode_id_base64
 
