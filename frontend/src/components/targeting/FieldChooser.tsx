@@ -40,6 +40,7 @@ export function FieldChooser({
         value={fieldName || null}
         onChange={onChange}
         component={CriteriaAutocomplete}
+        data-cy={`field-chooser-${baseName}`}
       />
       {showDelete && (
         <IconButton onClick={onDelete}>

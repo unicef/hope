@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -10,6 +11,7 @@ import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
+  useBusinessAreaDataQuery,
 } from '../../../__generated__/graphql';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
@@ -50,12 +52,21 @@ export const TargetPopulationPageHeader = ({
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
       to: `/${businessArea}/target-population/`,
     },
   ];
+
+  if (!businessAreaData) return null;
+  if (businessAreaDataLoading) return <LoadingComponent />;
 
   let buttons;
 
@@ -81,15 +92,17 @@ export const TargetPopulationPageHeader = ({
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
           canSend={canSend}
+          businessAreaData={businessAreaData}
         />
       );
       break;
     default:
-      //Ready for Cash Assist, Processing
+      //Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           canDuplicate={canDuplicate}
+          businessAreaData={businessAreaData}
         />
       );
       break;

@@ -1,28 +1,26 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CashPlanQuery } from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
 import { paymentVerificationStatusToColor } from '../../utils/utils';
+import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
+import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 interface VerificationPlansSummaryProps {
-  cashPlan: CashPlanQuery['cashPlan'];
+  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
 export function VerificationPlansSummary({
-  cashPlan,
+  planNode,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
   const {
-    cashPlanPaymentVerificationSummary: {
-      status,
-      activationDate,
-      completionDate,
-    },
-  } = cashPlan;
+    status,
+    activationDate,
+    completionDate,
+  } = planNode.paymentVerificationSummary;
 
   return (
     <Grid container>
@@ -60,7 +58,7 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Number of Verification Plans')}>
-                {cashPlan.verifications.totalCount}
+                {planNode.verificationPlans.totalCount}
               </LabelizedField>
             </Box>
           </Grid>

@@ -4,11 +4,12 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment_verification_0_with_permission_was_downloaded_false 1'] = {
+snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_payment_verification_plan_0_with_permission_was_downloaded_false 1'] = {
     'data': {
-        'invalidCashPlanPaymentVerification': None
+        'invalidPaymentVerificationPlan': None
     },
     'errors': [
         {
@@ -20,17 +21,17 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment
             ],
             'message': 'You can mark invalid if xlsx file was downloaded or imported',
             'path': [
-                'invalidCashPlanPaymentVerification'
+                'invalidPaymentVerificationPlan'
             ]
         }
     ]
 }
 
-snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment_verification_1_with_permission_was_downloaded_true 1'] = {
+snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_payment_verification_plan_1_with_permission_was_downloaded_true 1'] = {
     'data': {
-        'invalidCashPlanPaymentVerification': {
-            'cashPlan': {
-                'verifications': {
+        'invalidPaymentVerificationPlan': {
+            'paymentPlan': {
+                'verificationPlans': {
                     'edges': [
                         {
                             'node': {
@@ -47,9 +48,9 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment
     }
 }
 
-snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment_verification_2_without_permission 1'] = {
+snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_payment_verification_plan_2_without_permission 1'] = {
     'data': {
-        'invalidCashPlanPaymentVerification': None
+        'invalidPaymentVerificationPlan': None
     },
     'errors': [
         {
@@ -61,7 +62,7 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'invalidCashPlanPaymentVerification'
+                'invalidPaymentVerificationPlan'
             ]
         }
     ]

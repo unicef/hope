@@ -6,11 +6,19 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus, PaymentRecordStatus, PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -48,11 +56,11 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'DRAFT':
+    case ProgramStatus.Draft:
       return theme.hctPalette.gray;
-    case 'ACTIVE':
+    case ProgramStatus.Active:
       return theme.hctPalette.green;
-    case 'FINISHED':
+    case ProgramStatus.Finished:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
@@ -107,12 +115,30 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'TRANSACTION_SUCCESSFUL':
-      return theme.hctPalette.green;
-    case 'DISTRIBUTION_SUCCESSFUL':
-      return theme.hctPalette.green;
-    case 'TRANSACTION_PENDING':
+    case PaymentRecordStatus.Pending:
       return theme.hctPalette.orange;
+    case PaymentRecordStatus.DistributionSuccessful:
+    case PaymentRecordStatus.TransactionSuccessful:
+      return theme.hctPalette.green;
+    case PaymentRecordStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function paymentStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case PaymentStatus.Pending:
+      return theme.hctPalette.orange;
+    case PaymentStatus.DistributionSuccessful:
+    case PaymentStatus.TransactionSuccessful:
+      return theme.hctPalette.green;
+    case PaymentStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
   }
@@ -175,6 +201,8 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
+    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
@@ -195,6 +223,50 @@ export function targetPopulationBuildStatusToColor(
     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
     [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.Finished]: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanBackgroundActionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -415,6 +487,18 @@ export function formatThousands(value: string): string {
 
 export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
+}
+
+export function programStatusMapping(status): string {
+  return PROGRAM_STATES[status];
+}
+
+export function paymentPlanStatusMapping(status): string {
+  return PAYMENT_PLAN_STATES[status];
+}
+
+export function paymentPlanBackgroundActionStatusMapping(status): string {
+  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

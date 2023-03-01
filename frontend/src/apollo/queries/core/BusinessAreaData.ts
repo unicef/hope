@@ -5,6 +5,7 @@ export const BusinessAreaData = gql`
     businessArea(businessAreaSlug: $businessAreaSlug) {
       id
       screenBeneficiary
+      isPaymentPlanApplicable
     }
   }
 `;

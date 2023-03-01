@@ -681,6 +681,12 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
     )
     new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
+    old_received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+    )
     new_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -703,7 +709,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional["PaymentRecord"]:
-        return getattr(self.payment_verification, "payment_record", None)
+        return getattr(self.payment_verification, "payment_obj", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

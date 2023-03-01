@@ -8,8 +8,8 @@ from django.db.models import Q
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, PaymentVerification
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -118,11 +118,13 @@ class HopeRedirectPayment(HopeRedirect):
 
     def _get_business_area_slug_from_obj(self) -> str:
         if payment_verification := self._get_payment_verification():
-            return payment_verification.payment_record.business_area.slug
+            return payment_verification.payment_obj.business_area.slug
         return "/"
 
     def _get_payment_verification(self) -> Optional[PaymentVerification]:
-        return PaymentVerification.objects.filter(payment_record__ca_id=self.ca_id).first()
+        if payment_record := PaymentRecord.objects.filter(ca_id=self.ca_id).first():
+            return payment_record.verification
+        return None
 
 
 class HopeRedirectTargetPopulation(HopeRedirect):
