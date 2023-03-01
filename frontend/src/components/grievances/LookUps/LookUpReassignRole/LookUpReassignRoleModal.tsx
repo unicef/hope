@@ -21,6 +21,7 @@ import {
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
@@ -147,6 +148,7 @@ export const LookUpReassignRoleModal = ({
           scroll='paper'
           aria-labelledby='form-dialog-title'
         >
+          {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>

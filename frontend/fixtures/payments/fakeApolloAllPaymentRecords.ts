@@ -48,7 +48,7 @@ export const fakeApolloAllPaymentRecords = [
                 deliveredQuantity: 3326.0,
                 deliveredQuantityUsd: 1694.0,
                 deliveryDate: '2021-01-11T17:05:53',
-                cashPlan: {
+                parent: {
                   id:
                     'Q2FzaFBsYW5Ob2RlOjViZWQ0OTUyLTMyNmItNDgxNS04MjA5LTBmOGNmYjIyMTc2NA==',
                   program: {

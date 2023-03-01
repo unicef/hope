@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons should render with buttons 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <div
+      class="MuiBox-root MuiBox-root-2"
+    >
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-text makeStyles-error-3"
+        tabindex="0"
+        type="button"
+      >
+        <span
+          class="MuiButton-label"
+        >
+          Reject
+        </span>
+        <span
+          class="MuiTouchRipple-root"
+        />
+      </button>
+    </div>
+    <div
+      class="MuiBox-root MuiBox-root-4"
+    >
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        data-cy="button-approve"
+        tabindex="0"
+        type="button"
+      >
+        <span
+          class="MuiButton-label"
+        >
+          Approve
+        </span>
+        <span
+          class="MuiTouchRipple-root"
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;

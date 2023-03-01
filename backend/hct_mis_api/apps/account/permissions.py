@@ -76,6 +76,27 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_INVALID = auto()
     PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
+    # Payment Module
+    PM_VIEW_LIST = auto()
+    PM_CREATE = auto()
+    PM_VIEW_DETAILS = auto()
+    PM_IMPORT_XLSX_WITH_ENTITLEMENTS = auto()
+    PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS = auto()
+
+    PM_LOCK_AND_UNLOCK = auto()
+    PM_LOCK_AND_UNLOCK_FSP = auto()
+    PM_SEND_FOR_APPROVAL = auto()
+    PM_ACCEPTANCE_PROCESS_APPROVE = auto()
+    PM_ACCEPTANCE_PROCESS_AUTHORIZE = auto()
+    PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW = auto()
+    PM_IMPORT_XLSX_WITH_RECONCILIATION = auto()
+    PM_EXPORT_XLSX_FOR_FSP = auto()
+    PM_DOWNLOAD_XLSX_FOR_FSP = auto()
+    PM_SENDING_PAYMENT_PLAN_TO_FSP = auto()
+
+    # Payment Module Admin
+    PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
+
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
 

@@ -22,6 +22,7 @@ import {
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { TabPanel } from '../../../core/TabPanel';
 import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
@@ -154,6 +155,7 @@ export const LookUpHouseholdIndividualModal = ({
           scroll='paper'
           aria-labelledby='form-dialog-title'
         >
+          {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle>
               <StyledTabs

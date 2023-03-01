@@ -2,7 +2,7 @@ import { gql } from 'apollo-boost';
 
 export const AllPaymentRecords = gql`
   query AllPaymentRecords(
-    $cashPlan: ID
+    $parent: ID
     $household: ID
     $after: String
     $before: String
@@ -12,7 +12,7 @@ export const AllPaymentRecords = gql`
     $businessArea: String
   ) {
     allPaymentRecords(
-      cashPlan: $cashPlan
+      parent: $parent
       household: $household
       after: $after
       before: $before
@@ -52,7 +52,7 @@ export const AllPaymentRecords = gql`
           deliveredQuantity
           deliveredQuantityUsd
           deliveryDate
-          cashPlan {
+          parent {
             id
             program {
               id

@@ -40,7 +40,7 @@ exports[`components/ProgramDetails should render 1`] = `
                   class="sc-EHOje eEdtvm"
                   data-cy="status-container"
                 >
-                  FINISHED
+                  Finished
                 </div>
               </div>
             </div>

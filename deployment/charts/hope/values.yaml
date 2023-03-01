@@ -1,0 +1,158 @@
+# Default values for hope.
+# This is a YAML-formatted file.
+
+global:
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  env: "dev"
+  storageClass: "standard"
+  imagePullPolicy: Always
+  init: true
+
+backend:
+  image: backend:latest
+
+  replicaCount: 6
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+
+  tolerations: []
+
+  affinity: {}
+
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  config:
+    STORAGE_AZURE_ACCOUNT_NAME: ""
+    AZURE_CLIENT_ID: ""
+    POSTGRES_SQL: ""
+    EMAIL_HOST: ""
+    POSTGRES_SSL: ""
+    KOBO_API_URL: ""
+
+  secret:
+    SECRET_KEY: ""
+    STORAGE_AZURE_ACCOUNT_KEY: ""
+    AZURE_CLIENT_SECRET: ""
+    AZURE_TENANT_KEY: ""
+    SENTRY_DSN: ""
+    
+frontend:
+  image: fronted:latest
+
+  replicaCount: 1
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+
+  tolerations: []
+
+  affinity: {}
+  resources: {}
+  nodeSelector: {}
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  secret:
+    SENTRY_FRONTEND_DSN: ""
+
+ingress:
+  enabled: true
+  annotations: []
+    # kubernetes.io/ingress.class: azure/application-gateway
+    # appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  host: hope-dev.test
+  tls: false
+  tlsSecret: "aks-unitst-tls"
+
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+redis:
+  enabled: true
+  fullnameOverride: hope-main-redis
+  persistence.enabled: true
+  usePassword: false
+  redis:
+    usePassword: false
+  cluster:
+    slaveCount: 0
+    enabled: false
+  image:
+    tag: 4.0.14
+
+elasticsearch:
+  enabled: true
+  master:
+    replicas: 1
+  sysctlImage:
+    replicas: 1
+  plugins: "analysis-phonetic"
+  externalElasticsearch:
+    host: ""
+
+celery:
+  image: backend:latest
+  replicaCount: 3
+  podAnnotations: {}
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  tolerations: []
+  affinity: {}
+
+celeryflower:
+  image: saxix/flower:1.6
+  replicaCount: 1
+  podAnnotations: {}
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  tolerations: []
+  affinity: {}
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  config:
+    FLOWER_URL_PREFIX: flower
+
+  secret:
+    FLOWER_BASIC_AUTH: "use-azure-devops:variables-to-set"

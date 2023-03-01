@@ -13,11 +13,11 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useConfirmation } from '../core/ConfirmationDialog';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {
