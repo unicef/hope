@@ -9,7 +9,7 @@ worker_class = "gthread"
 timeout = 65
 keepalive = 2
 workers = os.getenv("GUNICORN_WORKERS") or 4
-threads = os.getenv("GUNICORN_THREADS") or 10
+threads = os.getenv("GUNICORN_THREADS") or 8
 
 proc_name = None
 daemon = False
@@ -18,7 +18,7 @@ umask = 0
 user = None
 group = None
 tmp_upload_dir = None
-
+max_requests = 100
 
 errorlog = "-"
 loglevel = "info"
