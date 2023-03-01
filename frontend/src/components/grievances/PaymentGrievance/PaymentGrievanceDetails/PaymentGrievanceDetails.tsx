@@ -130,8 +130,10 @@ export function PaymentGrievanceDetails({
               ) : null}
             </TableCell>
             <TableCell align='right'>{deliveredQuantity}</TableCell>
-            <TableCell align='right'>{oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}</TableCell>
-            <TableCell align='right'>{newReceivedAmount}</TableCell>
+            <TableCell align='right'>
+              {oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}
+            </TableCell>
+            <TableCell align='right'>{newReceivedAmount ?? 0}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>
