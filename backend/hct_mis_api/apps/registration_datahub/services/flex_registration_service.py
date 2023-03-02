@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Type, Uni
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.transaction import atomic, rollback, get_connection
+from django.db.transaction import atomic
 from django.forms import modelform_factory
 
 from django_countries.fields import Country
