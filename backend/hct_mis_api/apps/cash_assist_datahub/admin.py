@@ -28,6 +28,7 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household import models as people
+from hct_mis_api.apps.payment import models as payment
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -189,7 +190,7 @@ class SessionAdmin(HOPEModelAdminBase):
             svs.append(sv.ca_id)
 
         session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
-        hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
+        hope_cacheplans = payment.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
             "ca_id", flat=True
         )
         known_cacheplans = list(session_cacheplans) + list(hope_cacheplans)
