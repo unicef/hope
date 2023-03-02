@@ -154,7 +154,6 @@ class SessionAdmin(HOPEModelAdminBase):
         context["data"] = {}
         warnings: List[List] = []
         errors = 0
-        errors = 0
         has_content: bool = False
         if settings.SENTRY_URL and obj.sentry_id:
             context["sentry_url"] = f"{settings.SENTRY_URL}?query={obj.sentry_id}"
