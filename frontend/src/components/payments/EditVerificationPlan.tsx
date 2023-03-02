@@ -30,7 +30,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
   PaymentPlanQuery,
   useAllAdminAreasQuery,
-  useAllRapidProFlowsQuery,
+  useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
@@ -150,7 +150,10 @@ export function EditVerificationPlan({
 
   const [formValues, setFormValues] = useState(initialValues);
 
-  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
+  const [
+    loadRapidProFlows,
+    { data: rapidProFlows },
+  ] = useAllRapidProFlowsLazyQuery({
     variables: {
       businessAreaSlug: businessArea,
     },
@@ -174,9 +177,13 @@ export function EditVerificationPlan({
   });
 
   useEffect(() => {
-    loadSampleSize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues, open]);
+    if (open) {
+      loadSampleSize();
+      if (formValues.verificationChannel === 'RAPIDPRO') {
+        loadRapidProFlows();
+      }
+    }
+  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
