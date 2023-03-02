@@ -361,7 +361,7 @@ class CreateRDIForm(forms.Form):
         (STATUS_IMPORTED, "Imported"),
         (ANY, "Any"),
     )
-
+    name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
     registration = forms.IntegerField(required=True)
     filters = forms.CharField(
         widget=forms.Textarea,
@@ -373,7 +373,7 @@ class CreateRDIForm(forms.Form):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         if request := kwargs.pop("request", None):
             if is_root(request):
-                self.base_fields["status"].choices += self.STATUSES_ROOT_CHOICES
+                self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
     def clean_filters(self) -> QueryStringFilter:
@@ -391,7 +391,8 @@ class CreateRDIForm(forms.Form):
     def clean(self) -> None:
         super().clean()
         filters, excludes = self.cleaned_data["filters"]
-        filters["registration"] = self.cleaned_data["registration"]
+        if "registration" in self.cleaned_data:
+            filters["registration"] = self.cleaned_data["registration"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
             filters["status__isnull"] = True
         elif self.cleaned_data["status"] in [Record.STATUS_IMPORTED, Record.STATUS_ERROR]:
@@ -541,9 +542,8 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                     )
                     if records_ids := qs.values_list("id", flat=True):
                         try:
-                            rdi = service().create_rdi(
-                                request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
-                            )
+                            rdi_name = form.cleaned_data["name"] or f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
+                            rdi = service().create_rdi(request.user, rdi_name)
                             create_task_for_processing_records(service, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
