@@ -124,17 +124,23 @@ class BaseRegistrationService(abc.ABC):
             .values_list("id", flat=True)
         )
         imported_records_ids = []
-        try:
-            for record_id in records_ids_to_import:
-                try:
-                    with atomic("default"), atomic("registration_datahub"):
-                        record = Record.objects.defer("data").get(id=record_id)
-                        self.create_household_for_rdi_household(record, rdi_datahub)
-                        imported_records_ids.append(record_id)
-                except ValidationError as e:
-                    logger.exception(e)
-                    record.mark_as_invalid(str(e))
 
+        for record_id in records_ids_to_import:
+            try:
+                with atomic("default"), atomic("registration_datahub"):
+                    record = Record.objects.defer("data").get(id=record_id)
+                    self.create_household_for_rdi_household(record, rdi_datahub)
+                    imported_records_ids.append(record_id)
+            except ValidationError as e:
+                logger.exception(e)
+                record.mark_as_invalid(str(e))
+
+        # update processed records
+        Record.objects.filter(id__in=imported_records_ids).update(
+            status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
+        )
+
+        try:
             number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
             number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
 
@@ -158,9 +164,6 @@ class BaseRegistrationService(abc.ABC):
                 )
             )
 
-            Record.objects.filter(id__in=imported_records_ids).update(
-                status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
-            )
             if not rdi.business_area.postpone_deduplication:
                 transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
             else:
