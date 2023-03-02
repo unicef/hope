@@ -188,11 +188,11 @@ class SessionAdmin(HOPEModelAdminBase):
         for sv in ServiceProvider.objects.filter(session=pk):
             svs.append(sv.ca_id)
 
-        session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
-        hope_cacheplans = payment.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
+        session_cash_plans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
+        hope_cash_plans = payment.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
             "ca_id", flat=True
         )
-        known_cacheplans = list(session_cacheplans) + list(hope_cacheplans)
+        known_cash_plans = list(session_cash_plans) + list(hope_cash_plans)
 
         for pr in PaymentRecord.objects.filter(session=pk):
             if pr.service_provider_ca_id not in svs:
@@ -200,7 +200,7 @@ class SessionAdmin(HOPEModelAdminBase):
                 context["data"][PaymentRecord]["errors"].append(
                     f"PaymentRecord uses ServiceProvider {pr.service_provider_ca_id} that is not present in the Session"
                 )
-            if pr.cash_plan_ca_id not in known_cacheplans:
+            if pr.cash_plan_ca_id not in known_cash_plans:
                 errors += 1
                 context["data"][PaymentRecord]["errors"].append(
                     f"PaymentRecord is part of an  unknown CashPlan {pr.cash_plan_ca_id}"
