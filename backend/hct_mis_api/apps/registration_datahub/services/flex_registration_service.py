@@ -623,6 +623,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
         individuals_to_create = []
         for individual_data_dict in individuals_list:
+            if not bool(individual_data_dict):
+                continue
             individuals_to_create.append(
                 ImportedIndividual(
                     **{
