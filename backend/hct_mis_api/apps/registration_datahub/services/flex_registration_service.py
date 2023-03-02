@@ -127,7 +127,7 @@ class BaseRegistrationService(abc.ABC):
         records_with_error = []
 
         try:
-            with atomic("default"), atomic("registration_datahub"):
+            with atomic("registration_datahub"):
                 for record_id in records_ids_to_import:
                     record = Record.objects.defer("data").get(id=record_id)
                     try:
@@ -137,7 +137,7 @@ class BaseRegistrationService(abc.ABC):
                         logger.exception(e)
                         records_with_error.append((record, str(e)))
 
-                # rollback if any Records is invalid
+                # rollback if at least one Record is invalid
                 if records_with_error:
                     transaction.set_rollback(True, using="registration_datahub")
 
