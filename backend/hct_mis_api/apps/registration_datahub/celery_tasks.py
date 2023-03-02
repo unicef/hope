@@ -285,8 +285,7 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
     )
 
     try:
-        with transaction.atomic():
-            FlexRegistrationService().process_records(rdi_id, records_ids)
+        FlexRegistrationService().process_records(rdi_id, records_ids)
     except Exception:
         logger.exception("Process Flex Records Task error")
 
@@ -300,8 +299,7 @@ def process_sri_lanka_flex_records_task(rdi_id: "UUID", records_ids: List) -> No
     )
 
     try:
-        with transaction.atomic():
-            SriLankaRegistrationService().process_records(rdi_id, records_ids)
+        SriLankaRegistrationService().process_records(rdi_id, records_ids)
     except Exception:
         logger.exception("Process Flex Records Task for Sri-Lanka caused error")
 
