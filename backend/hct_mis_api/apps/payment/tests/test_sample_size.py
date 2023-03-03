@@ -88,6 +88,8 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
 
         rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
 
+        # with self.assertNumQueries(4): > sometimes fails on CI with 3 queries instead of 4
+        # maybe will update later
         self.snapshot_graphql_request(
             request_string=self.SAMPLE_SIZE_QUERY,
             variables=rapid_pro_sample_query_variables,
