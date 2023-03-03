@@ -11,12 +11,14 @@ import { LoadingButton } from '../../../../core/LoadingButton';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
+  canExportXlsx: boolean;
   canSendToFsp: boolean;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const AcceptedPaymentPlanHeaderButtons = ({
   canDownloadXlsx,
+  canExportXlsx,
   canSendToFsp,
   paymentPlan,
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
@@ -29,58 +31,62 @@ export const AcceptedPaymentPlanHeaderButtons = ({
 
   return (
     <Box display='flex' alignItems='center'>
-      {canDownloadXlsx && (
-        <>
-          {!paymentPlan.hasPaymentListExportFile ? (
-            <Box p={2}>
-              <LoadingButton
-                loading={loadingExport}
-                disabled={loadingExport || !paymentPlan.hasFspDeliveryMechanismXlsxTemplate}
-                color='primary'
-                variant='contained'
-                startIcon={<GetApp />}
-                data-cy='button-export-xlsx'
-                onClick={async () => {
-                  try {
-                    await mutateExport({
-                      variables: {
-                        paymentPlanId: paymentPlan.id,
-                      },
-                    });
-                    showMessage(t('Exporting XLSX started'));
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
-                  }
-                }}
-              >
-                {t('Export Xlsx')}
-              </LoadingButton>
-            </Box>
-          ) : (
-            <Box m={2}>
-              <Button
-                color='primary'
-                component='a'
-                variant='contained'
-                data-cy='button-download-xlsx'
-                download
-                href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-                disabled={!paymentPlan.hasFspDeliveryMechanismXlsxTemplate}
-              >
-                {t('Download XLSX')}
-              </Button>
-            </Box>
-          )}
-        </>
-      )}
-      {canSendToFsp && (
+      <>
+        {!paymentPlan.hasPaymentListExportFile && (
+          <Box p={2}>
+            <LoadingButton
+              loading={loadingExport}
+              disabled={
+                loadingExport ||
+                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
+                !canExportXlsx
+              }
+              color='primary'
+              variant='contained'
+              startIcon={<GetApp />}
+              data-cy='button-export-xlsx'
+              onClick={async () => {
+                try {
+                  await mutateExport({
+                    variables: {
+                      paymentPlanId: paymentPlan.id,
+                    },
+                  });
+                  showMessage(t('Exporting XLSX started'));
+                } catch (e) {
+                  e.graphQLErrors.map((x) => showMessage(x.message));
+                }
+              }}
+            >
+              {t('Export Xlsx')}
+            </LoadingButton>
+          </Box>
+        )}
+        {paymentPlan.hasPaymentListExportFile && (
+          <Box m={2}>
+            <Button
+              color='primary'
+              component='a'
+              variant='contained'
+              data-cy='button-download-xlsx'
+              download
+              href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+              disabled={
+                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
+                !canDownloadXlsx
+              }
+            >
+              {t('Download XLSX')}
+            </Button>
+          </Box>
+        )}
         <Box m={2}>
           {/*TODO: connect this button*/}
-          <Button color='primary' variant='contained'>
+          <Button color='primary' variant='contained' disabled={!canSendToFsp}>
             {t('Send to FSP')}
           </Button>
         </Box>
-      )}
+      </>
     </Box>
   );
 };

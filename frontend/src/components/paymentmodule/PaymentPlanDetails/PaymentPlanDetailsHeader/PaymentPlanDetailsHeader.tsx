@@ -67,8 +67,16 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
     permissions,
   );
-  const canDownloadXlsx = true;
-  const canSendToFsp = false; // TODO: hide for now
+  const canDownloadXlsx = hasPermissions(
+    PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
+    permissions,
+  );
+  const canExportXlsx = hasPermissions(
+    PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
+    permissions,
+  );
+  const canSendToFsp = false; // TODO: disabled for now
+  // hasPermissions(PERMISSIONS.PM_SENDING_PAYMENT_PLAN_TO_FSP, permissions) &&
   // paymentPlan.status === PaymentPlanStatus.Accepted &&
   // paymentPlan.deliveryMechanisms.some(
   //   ({ fsp: { communicationChannel } }) =>
@@ -146,6 +154,7 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
+          canExportXlsx={canExportXlsx}
           canSendToFsp={canSendToFsp}
           paymentPlan={paymentPlan}
         />
@@ -155,6 +164,7 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
+          canExportXlsx={canExportXlsx}
           canSendToFsp={canSendToFsp}
           paymentPlan={paymentPlan}
         />

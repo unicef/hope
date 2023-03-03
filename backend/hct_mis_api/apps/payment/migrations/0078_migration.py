@@ -19,7 +19,7 @@ def update_xlsx_payment_verification_plan_file(apps, schema_editor):
             content_type_id=ct.pk,
             was_downloaded=xlsx.was_downloaded,
             created_by=xlsx.created_by,
-            created_at=xlsx.created_at,
+            created=xlsx.created_at,
         )
         objs_create_list.append(new_obj)
 
