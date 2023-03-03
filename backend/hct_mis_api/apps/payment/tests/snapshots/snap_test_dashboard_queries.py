@@ -7,44 +7,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestDashboardQueries::test_chart_total_transferred_by_country 1'] = {
-    'data': {
-        'chartTotalTransferredCashByCountry': {
-            'datasets': [
-                {
-                    'data': [
-                        80.0,
-                        88.0,
-                        84.0
-                    ],
-                    'label': 'Actual cash transferred'
-                },
-                {
-                    'data': [
-                        40.0,
-                        44.0,
-                        42.0
-                    ],
-                    'label': 'Actual voucher transferred'
-                },
-                {
-                    'data': [
-                        120.0,
-                        132.0,
-                        126.0
-                    ],
-                    'label': 'Total transferred'
-                }
-            ],
-            'labels': [
-                'Afghanistan',
-                'Angola',
-                'Botswana'
-            ]
-        }
-    }
-}
-
 snapshots['TestDashboardQueries::test_charts_0_chartVolumeByDeliveryMechanism 1'] = {
     'data': {
         'chartVolumeByDeliveryMechanism': {
