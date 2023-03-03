@@ -46,7 +46,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self._create_workbook()
         self._add_headers()
         self._add_payment_list()
-        self._adjust_column_width_from_col(ws=self.ws_export_list, max_col=len(self.HEADERS))
+        self._adjust_column_width_from_col(ws=self.ws_export_list)
         self._add_col_bgcolor(
             [
                 self.HEADERS.index("entitlement_quantity") + 1,

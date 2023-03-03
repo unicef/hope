@@ -2,20 +2,19 @@ import { Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
 import {
-  choicesToDict,
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
-} from '../../utils/utils';
-import { PaymentQuery } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { Title } from '../core/Title';
+} from '../../../utils/utils';
+import { PaymentQuery } from '../../../__generated__/graphql';
+import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../../core/LabelizedField';
+import { StatusBox } from '../../core/StatusBox';
+import { Title } from '../../core/Title';
+import { UniversalMoment } from '../../core/UniversalMoment';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -23,22 +22,20 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-interface VerificationPaymentDetailsProps {
+interface PaymentDetailsProps {
   payment: PaymentQuery['payment'];
   canViewActivityLog: boolean;
-  choicesData;
 }
 
-export function VerificationPaymentDetails({
+export function PaymentDetails({
   payment,
   canViewActivityLog,
-  choicesData,
-}: VerificationPaymentDetailsProps): React.ReactElement {
+}: PaymentDetailsProps): React.ReactElement {
   const { t } = useTranslation();
-  const deliveryTypeDict = choicesToDict(
-    choicesData.paymentRecordDeliveryTypeChoices,
-  );
-
+  let paymentVerification: PaymentQuery['payment']['verification'] = null;
+  if (payment.verification && payment.verification.status !== 'PENDING') {
+    paymentVerification = payment.verification;
+  }
   return (
     <>
       <ContainerColumnWithBorder>
@@ -56,6 +53,12 @@ export function VerificationPaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
+              label={t('Household')}
+              value={payment.household.unicefId}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
               label={t('TARGET POPULATION')}
               value={payment.targetPopulation.name}
             />
@@ -68,30 +71,32 @@ export function VerificationPaymentDetails({
           </Grid>
         </Grid>
       </ContainerColumnWithBorder>
-      <ContainerColumnWithBorder>
-        <Title>
-          <Typography variant='h6'>{t('Verification Details')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <Grid item xs={3}>
-            <LabelizedField label={t('STATUS')}>
-              <StatusBox
-                status={payment.verification.status}
-                statusToColor={verificationRecordsStatusToColor}
+      {paymentVerification != null ? (
+        <ContainerColumnWithBorder>
+          <Title>
+            <Typography variant='h6'>{t('Verification Details')}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            <Grid item xs={3}>
+              <LabelizedField label={t('STATUS')}>
+                <StatusBox
+                  status={paymentVerification.status}
+                  statusToColor={verificationRecordsStatusToColor}
+                />
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField
+                label={t('AMOUNT RECEIVED')}
+                value={formatCurrencyWithSymbol(
+                  paymentVerification.receivedAmount,
+                  payment.currency,
+                )}
               />
-            </LabelizedField>
+            </Grid>
           </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('AMOUNT RECEIVED')}
-              value={formatCurrencyWithSymbol(
-                payment.verification.receivedAmount,
-                payment.currency,
-              )}
-            />
-          </Grid>
-        </Grid>
-      </ContainerColumnWithBorder>
+        </ContainerColumnWithBorder>
+      ) : null}
       <Overview>
         <Title>
           <Typography variant='h6'>{t('Household')}</Typography>
@@ -105,8 +110,8 @@ export function VerificationPaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('HEAD OF HOUSEHOLD')}
-              value={payment.household.headOfHousehold.fullName}
+              label={t('Collector')}
+              value={payment.collector.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -119,8 +124,8 @@ export function VerificationPaymentDetails({
             <LabelizedField
               label={t('PHONE NUMBER')}
               value={getPhoneNoLabel(
-                payment.household.headOfHousehold.phoneNo,
-                payment.household.headOfHousehold.phoneNoValid,
+                payment.collector.phoneNo,
+                payment.collector.phoneNoValid,
               )}
             />
           </Grid>
@@ -128,8 +133,8 @@ export function VerificationPaymentDetails({
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
               value={getPhoneNoLabel(
-                payment.household.headOfHousehold.phoneNoAlternative,
-                payment.household.headOfHousehold.phoneNoAlternativeValid,
+                payment.collector.phoneNoAlternative,
+                payment.collector.phoneNoAlternativeValid,
               )}
             />
           </Grid>
@@ -158,13 +163,19 @@ export function VerificationPaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={deliveryTypeDict[payment.deliveryType]}
+              value={payment.deliveryType}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY DATE')}
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label={t('TRANSACTION REFERENCE ID')}
+              value={payment.transactionReferenceId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -176,9 +187,7 @@ export function VerificationPaymentDetails({
         </Grid>
       </Overview>
       {canViewActivityLog && (
-        <UniversalActivityLogTable
-          objectId={payment.parent.verificationPlans.edges[0].node.id}
-        />
+        <UniversalActivityLogTable objectId={payment.id} />
       )}
     </>
   );
