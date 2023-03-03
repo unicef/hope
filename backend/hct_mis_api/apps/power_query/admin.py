@@ -241,7 +241,7 @@ class ReportResource(resources.ModelResource):
 
 @register(Report)
 class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "query", "formatter", "last_run")
+    list_display = ("name", "query", "formatter", "last_run", "frequence")
     autocomplete_fields = ("query", "formatter")
     filter_horizontal = ("limit_access_to",)
     readonly_fields = ("last_run",)

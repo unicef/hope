@@ -7,6 +7,7 @@ import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   BusinessAreaDataQuery,
+  ProgramStatus,
   TargetPopulationQuery,
   useUnlockTpMutation,
 } from '../../../__generated__/graphql';
@@ -63,12 +64,15 @@ export const LockedTargetPopulationHeaderButtons = ({
             loading={loading}
             color='primary'
             variant='outlined'
-            onClick={() => {
-              mutate({
-                variables: { id: targetPopulation.id },
-              }).then(() => {
+            onClick={async () => {
+              try {
+                await mutate({
+                  variables: { id: targetPopulation.id },
+                });
                 showMessage('Target Population Unlocked');
-              });
+              } catch (e) {
+                e.graphQLErrors.map((x) => showMessage(x.message));
+              }
             }}
             data-cy='button-target-population-unlocked'
           >
@@ -81,7 +85,7 @@ export const LockedTargetPopulationHeaderButtons = ({
           {isPaymentPlanApplicable ? (
             <Tooltip
               title={
-                targetPopulation.program.status !== 'ACTIVE'
+                targetPopulation.program.status !== ProgramStatus.Active
                   ? t('Assigned programme is not ACTIVE')
                   : ''
               }
@@ -90,7 +94,9 @@ export const LockedTargetPopulationHeaderButtons = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={targetPopulation.program.status !== 'ACTIVE'}
+                  disabled={
+                    targetPopulation.program.status !== ProgramStatus.Active
+                  }
                   onClick={() => setOpenFinalizePaymentPlan(true)}
                   data-cy='button-target-population-send-to-hope'
                 >
@@ -101,7 +107,7 @@ export const LockedTargetPopulationHeaderButtons = ({
           ) : (
             <Tooltip
               title={
-                targetPopulation.program.status !== 'ACTIVE'
+                targetPopulation.program.status !== ProgramStatus.Active
                   ? t('Assigned programme is not ACTIVE')
                   : t('Send to Cash Assist')
               }
@@ -110,7 +116,9 @@ export const LockedTargetPopulationHeaderButtons = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={targetPopulation.program.status !== 'ACTIVE'}
+                  disabled={
+                    targetPopulation.program.status !== ProgramStatus.Active
+                  }
                   onClick={() => setOpenFinalize(true)}
                   data-cy='button-target-population-send-to-cash-assist'
                 >

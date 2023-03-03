@@ -6,9 +6,11 @@ from uuid import UUID
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -16,7 +18,6 @@ from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 
 import requests
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button, link
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -29,8 +30,6 @@ from requests.auth import HTTPBasicAuth
 
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
-    process_flex_records_task,
-    process_sri_lanka_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     DiiaHousehold,
@@ -49,8 +48,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    FlexRegistrationService,
-    SriLankaRegistrationService,
+    create_task_for_processing_records,
+    get_registration_to_rdi_service_map,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
@@ -347,8 +346,63 @@ class AlexisFilter(SimpleListFilter):
             }
 
 
+class CreateRDIForm(forms.Form):
+
+    STATUS_TO_IMPORT = "TO_IMPORT"
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
+    ANY = "ANY"
+
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_ERROR, "Error"),
+    )
+    STATUSES_ROOT_CHOICES = (
+        (STATUS_IMPORTED, "Imported"),
+        (ANY, "Any"),
+    )
+    name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
+    registration = forms.IntegerField(required=True)
+    filters = forms.CharField(
+        widget=forms.Textarea,
+        required=False,
+        help_text="filters to use to select the records (Uses Django filtering syntax)",
+    )
+    status = forms.ChoiceField(required=True, choices=STATUSES_CHOICES)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if request := kwargs.pop("request", None):
+            if is_root(request):
+                self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
+        super().__init__(*args, **kwargs)
+
+    def clean_filters(self) -> QueryStringFilter:
+        filter = QueryStringFilter(None, {}, Record, None)
+        return filter.get_filters(self.cleaned_data["filters"])
+
+    def clean_registration(self) -> dict:
+        if self.cleaned_data["registration"] not in get_registration_to_rdi_service_map().keys():
+            raise ValidationError(
+                "Invalid registration number. Data can be processed only for registration(s): "
+                "17 - Sri Lanka; 2, 3 - Ukraine;"
+            )
+        return self.cleaned_data["registration"]
+
+    def clean(self) -> None:
+        super().clean()
+        filters, excludes = self.cleaned_data["filters"]
+        if "registration" in self.cleaned_data:
+            filters["registration"] = self.cleaned_data["registration"]
+        if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
+            filters["status__isnull"] = True
+        elif self.cleaned_data["status"] in [Record.STATUS_IMPORTED, Record.STATUS_ERROR]:
+            filters["status"] = self.cleaned_data["status"]
+
+        self.cleaned_data["filters"] = filters, excludes
+
+
 @admin.register(Record)
-class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
+class RecordDatahubAdmin(HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
@@ -386,33 +440,33 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
 
     @admin.action(description="Create RDI")
     def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-        service = FlexRegistrationService()
-        try:
-            records_ids = queryset.values_list("id", flat=True)
-            rdi = service.create_rdi(request.user, f"ukraine rdi {timezone.now()}")
 
-            process_flex_records_task.delay(rdi.id, list(records_ids))
-            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+        if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
             self.message_user(
-                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
+                request,
+                "Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3 - Ukraine;",
+                messages.ERROR,
             )
-        except Exception as e:
-            self.message_user(request, str(e), messages.ERROR)
+            return
 
-    @admin.action(description="Create Sri-Lanka RDI")
-    def create_sr_lanka_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-        sri_lanka_service = SriLankaRegistrationService()
-        try:
-            records_ids = queryset.values_list("id", flat=True)
-            rdi = sri_lanka_service.create_rdi(request.user, f"sri-lanka rdi {timezone.now()}")
+        msg_resp = ""
+        for service in list(set(get_registration_to_rdi_service_map().values())):
+            qs = queryset.filter(registration__in=service.REGISTRATION_ID).values_list("id", flat=True)
+            if not qs:
+                continue
+            try:
+                records_ids = qs.values_list("id", flat=True)
+                rdi = service().create_rdi(request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}")
 
-            process_sri_lanka_flex_records_task.delay(rdi.id, list(records_ids))
-            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
-            self.message_user(
-                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
-            )
-        except Exception as e:
-            self.message_user(request, str(e), messages.ERROR)
+                create_task_for_processing_records(service, rdi.pk, list(records_ids))
+
+                url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                msg_resp += f"<ul><a href='{url}'>{rdi.name}</ul></a> "
+
+            except Exception as e:
+                self.message_user(request, str(e), messages.ERROR)
+
+        self.message_user(request, mark_safe(f"Started RDI Import with name(s): {msg_resp}"), messages.SUCCESS)
 
     @admin.action(description="Async extract")
     def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
@@ -468,6 +522,51 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
+
+    @button()
+    def create_new_rdi(self, request: HttpRequest) -> HttpResponse:
+        ctx = self.get_common_context(request, title="Create RDI")
+        if request.method == "POST":
+            form = CreateRDIForm(request.POST, request=request)
+            if form.is_valid():
+                registration_id = form.cleaned_data["registration"]
+                filters, exclude = form.cleaned_data["filters"]
+                ctx["filters"] = filters
+                ctx["exclude"] = exclude
+
+                if service := get_registration_to_rdi_service_map().get(registration_id):
+                    qs = (
+                        Record.objects.defer("storage", "counters", "files", "fields")
+                        .filter(**filters)
+                        .exclude(**exclude)
+                    )
+                    if records_ids := qs.values_list("id", flat=True):
+                        try:
+                            rdi_name = form.cleaned_data["name"] or f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
+                            rdi = service().create_rdi(request.user, rdi_name)
+                            create_task_for_processing_records(service, rdi.pk, list(records_ids))
+                            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                            self.message_user(
+                                request,
+                                mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                                messages.SUCCESS,
+                            )
+                        except Exception as e:
+                            self.message_error_to_user(request, e)
+
+                    else:
+                        self.message_user(request, "There are no Records by filtering criteria", messages.ERROR)
+                else:
+                    self.message_user(
+                        request,
+                        "Invalid registration number. Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3 - Ukraine;",
+                        messages.ERROR,
+                    )
+        else:
+            form = CreateRDIForm(request=request)
+
+        ctx["form"] = form
+        return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
 
 
 @admin.register(DiiaIndividual)
