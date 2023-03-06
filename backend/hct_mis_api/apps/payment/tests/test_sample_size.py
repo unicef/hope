@@ -85,7 +85,6 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             head_of_household_id=self.individuals[1].id,
             status=PaymentRecord.STATUS_SUCCESS,
         )
-
         rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
 
         # with self.assertNumQueries(4): > sometimes fails on CI with 3 queries instead of 4
