@@ -233,10 +233,10 @@ elasticsearch:
     resources:
       limits:
         cpu: 100m
-        memory: 1000Mi
+        memory: 2000Mi
       requests:
         cpu: 25m
-        memory: 256Mi
+        memory: 1000Mi
   data:
     resources:
       limits:
