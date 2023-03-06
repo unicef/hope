@@ -61,8 +61,8 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.household.services.household_recalculate_data import (
-    recalculate_data,
     RECALCULATION_INDIVIDUAL_FIELDS,
+    recalculate_data,
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
