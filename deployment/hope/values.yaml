@@ -224,7 +224,7 @@ elasticsearch:
     resources:
       limits:
         cpu: 100m
-        memory: 400Mi
+        memory: 1500Mi
       requests:
         cpu: 25m
         memory: 256Mi
