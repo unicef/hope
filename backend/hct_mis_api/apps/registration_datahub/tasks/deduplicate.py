@@ -824,7 +824,7 @@ class DeduplicateTask:
             new_documents.exclude(status=Document.STATUS_VALID)
             .filter(type__is_identity_document=True)
             .select_related("individual")
-            .select_for_update(of=("self", "individual"))
+            .select_for_update(of=("self",))  # no need to lock individuals
             .order_by("pk")
         )
         documents_numbers = [x.document_number for x in documents_to_dedup]
