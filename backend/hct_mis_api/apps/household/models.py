@@ -109,6 +109,7 @@ SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
 GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
+FOSTER_CHILD = "FOSTER_CHILD"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
 
@@ -132,6 +133,7 @@ RELATIONSHIP_CHOICE = (
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
+    (FOSTER_CHILD, "Foster child"),
 )
 YES = "1"
 NO = "0"
@@ -824,6 +826,7 @@ class Individual(
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
+    certified = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
