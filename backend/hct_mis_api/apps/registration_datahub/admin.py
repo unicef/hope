@@ -6,6 +6,7 @@ from uuid import UUID
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.contrib.admin.views.main import ChangeList
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
@@ -16,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.decorators import button, link
@@ -58,6 +60,32 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
+
+
+class StatusFilter(ChoicesFieldComboFilter):
+    def choices(self, changelist: ChangeList) -> Generator:
+        yield {
+            "selected": self.lookup_val is None,
+            "query_string": changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull]),
+            "display": _("All"),
+        }
+        for lookup, title in self.field.flatchoices:
+            if lookup == Record.STATUS_TO_IMPORT:
+                yield {
+                    "selected": bool(self.lookup_val_isnull),
+                    "query_string": changelist.get_query_string(
+                        {self.lookup_kwarg_isnull: "True"}, [self.lookup_kwarg]
+                    ),
+                    "display": title,
+                }
+            else:
+                yield {
+                    "selected": str(lookup) == self.lookup_val,
+                    "query_string": changelist.get_query_string(
+                        {self.lookup_kwarg: lookup}, [self.lookup_kwarg_isnull]
+                    ),
+                    "display": title,
+                }
 
 
 @admin.register(RegistrationDataImportDatahub)
@@ -419,7 +447,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("registration_data_import", AutoCompleteFilter),
-        "status",
+        ("status", StatusFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         ("data", JsonFieldFilter),
