@@ -582,7 +582,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         collector_dict = record_data_dict.get("collector-info", [])[0]
         individuals_list = record_data_dict.get("children-info", [])
         id_enumerator = record_data_dict.get("id_enumerator")
-        preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact")
+        preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact", None)
         should_use_hoh_as_collector = (
             collector_dict.get("does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi") == "y"
         )
