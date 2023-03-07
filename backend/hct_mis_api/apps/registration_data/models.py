@@ -104,6 +104,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     pull_pictures = models.BooleanField(default=True)
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
+    excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
 
     def __str__(self) -> str:
         return self.name
