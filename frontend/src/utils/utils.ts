@@ -449,11 +449,6 @@ export function formatCurrencyWithSymbol(
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
   if (!currency) return formatCurrency(amountCleared, true);
   // undefined forces to use local browser settings
-
-  console.log("*******")
-  console.log("amount", amount)
-  console.log("amountCleared", amountCleared)
-
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
