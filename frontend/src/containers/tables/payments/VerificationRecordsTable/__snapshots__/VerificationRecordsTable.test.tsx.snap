@@ -464,12 +464,12 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                BYR 5,526
+                BYR 5,526.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                BYR 0
+                BYR 0.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -542,12 +542,12 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                SLL 1,877
+                SLL 1,877.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                SLL 0
+                SLL 0.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -698,12 +698,12 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                YER 974
+                YER 974.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                YER 0
+                YER 0.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
