@@ -9,12 +9,10 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, JSONField, Q
-from django.utils import timezone
+from django.db.models import JSONField, Q
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
-from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -22,7 +20,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -257,38 +255,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if self.vulnerability_score_min is not None:
             params["vulnerability_score__gte"] = self.vulnerability_score_min
         return Household.objects.filter(selections__in=HouseholdSelection.objects.filter(**params))
-
-    def refresh_stats(self) -> None:
-        households = self.household_list.only("id")
-        delta18 = relativedelta(years=+18)
-        date18ago = timezone.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__in=households).aggregate(
-            child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-        )
-        self.child_male_count = targeted_individuals.get("child_male_count")
-        self.child_female_count = targeted_individuals.get("child_female_count")
-        self.adult_male_count = targeted_individuals.get("adult_male_count")
-        self.adult_female_count = targeted_individuals.get("adult_female_count")
-        self.total_households_count = households.count()
-        self.total_individuals_count = (
-            targeted_individuals.get("child_male_count")
-            + targeted_individuals.get("child_female_count")
-            + targeted_individuals.get("adult_male_count")
-            + targeted_individuals.get("adult_female_count")
-        )
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
-
-    def full_rebuild(self) -> None:
-        household_queryset = Household.objects.filter(business_area=self.business_area)
-        household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
-        self.households.set(household_queryset)
-        self.refresh_stats()
-        self.build_status = TargetPopulation.BUILD_STATUS_OK
-        self.built_at = timezone.now()
 
     def get_criteria_string(self) -> str:
         try:
