@@ -333,12 +333,12 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                IRR 4,468
+                IRR 4,468.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                IRR 1,308
+                IRR 1,308.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
@@ -391,12 +391,12 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                LBP 1,787
+                LBP 1,787.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                LBP 372
+                LBP 372.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
