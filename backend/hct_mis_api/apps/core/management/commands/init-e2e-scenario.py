@@ -28,6 +28,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 faker = Faker()
 
@@ -128,7 +129,7 @@ def init_payment_plan(seed: str) -> None:
         program=program,
         created_by=root,
     )
-    target_population.full_rebuild()
+    full_rebuild(target_population)
     target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
     target_population.save()
 
