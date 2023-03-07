@@ -9,6 +9,7 @@ import { ProfilePage } from './containers/pages/core/ProfilePage';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { Providers } from './providers';
 import { SentryRoute } from './components/core/SentryRoute';
+import { MaintenancePage } from './containers/pages/core/MaintenancePage';
 
 export const App: React.FC = () => {
   return (
@@ -37,6 +38,9 @@ export const App: React.FC = () => {
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
+          <Route path='/maintenance'>
+            <MaintenancePage />
+          </Route>
           <Route path='/:businessArea/'>
             <HomeRouter />
           </Route>
