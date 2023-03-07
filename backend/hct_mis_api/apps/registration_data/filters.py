@@ -36,4 +36,3 @@ class RegistrationDataImportFilter(FilterSet):
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         qs = super().filter_queryset(queryset)
         return qs.exclude(excluded=True)
-
