@@ -105,5 +105,5 @@ class HUBBusinessAreaFilter(SimpleListFilter):
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
-            return queryset.filter(business_area=self.value()).distinct()
+            return queryset.filter(session__business_area=self.value()).distinct()
         return queryset
