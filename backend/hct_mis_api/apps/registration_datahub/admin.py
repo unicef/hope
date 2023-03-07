@@ -396,7 +396,7 @@ class CreateRDIForm(forms.Form):
         return self.cleaned_data["registration"]
 
     def clean_rdi(self) -> dict:
-        if self.cleaned_data["rdi"] and self.cleaned_data["rdi"].status != RegistrationDataImport.IN_REVIEW:
+        if self.cleaned_data.get("rdi") and self.cleaned_data["rdi"].status != RegistrationDataImport.IN_REVIEW:
             raise ValidationError("Only RDI within status 'In Review' can be processed")
         return self.cleaned_data["rdi"]
 
@@ -543,7 +543,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
             if form.is_valid():
                 registration_id = form.cleaned_data["registration"]
                 filters, exclude = form.cleaned_data["filters"]
-                rdi = form.cleaned_data["rdi"]
+                rdi = form.cleaned_data.get("rdi")
                 update_rdi = "update " if rdi else ""
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
@@ -557,10 +557,10 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                     if records_ids := qs.values_list("id", flat=True):
                         try:
                             if not rdi:
-
                                 rdi = service().create_rdi(
                                     request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
                                 )
+
                             create_task_for_processing_records(service, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
