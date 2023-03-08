@@ -49,7 +49,7 @@ class ChoiceObject(graphene.ObjectType):
 
 class BusinessAreaNode(DjangoObjectType):
     @classmethod
-    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
+    def get_queryset(cls, queryset: "QuerySet", info: Any) -> "QuerySet":
         return queryset.filter(is_split=False)
 
     class Meta:
