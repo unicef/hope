@@ -1,13 +1,13 @@
-import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus, PaymentRecordStatus, PaymentStatus,
+  PaymentPlanStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -115,12 +115,12 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentRecordStatus.Pending:
+    case 'Pending':
       return theme.hctPalette.orange;
-    case PaymentRecordStatus.DistributionSuccessful:
-    case PaymentRecordStatus.TransactionSuccessful:
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case PaymentRecordStatus.PartiallyDistributed:
+    case 'Partially Distributed':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -132,12 +132,12 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentStatus.Pending:
+    case 'Pending':
       return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'Distribution Successful':
+    case 'Transaction Successful':
       return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
+    case 'Partially Distributed':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
