@@ -74,6 +74,9 @@ export function HomeRouter(): React.ReactElement {
     setOpen(false);
   };
   const { data, loading } = useAllBusinessAreasQuery({
+    variables: {
+      slug: businessArea,
+    },
     fetchPolicy: 'cache-first',
   });
 
