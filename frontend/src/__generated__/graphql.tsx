@@ -8890,7 +8890,9 @@ export type AllAdminAreasQuery = (
   )> }
 );
 
-export type AllBusinessAreasQueryVariables = {};
+export type AllBusinessAreasQueryVariables = {
+  slug?: Maybe<Scalars['String']>
+};
 
 
 export type AllBusinessAreasQuery = (
@@ -15814,8 +15816,8 @@ export type AllAdminAreasQueryHookResult = ReturnType<typeof useAllAdminAreasQue
 export type AllAdminAreasLazyQueryHookResult = ReturnType<typeof useAllAdminAreasLazyQuery>;
 export type AllAdminAreasQueryResult = ApolloReactCommon.QueryResult<AllAdminAreasQuery, AllAdminAreasQueryVariables>;
 export const AllBusinessAreasDocument = gql`
-    query AllBusinessAreas {
-  allBusinessAreas {
+    query AllBusinessAreas($slug: String) {
+  allBusinessAreas(slug: $slug) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -15862,6 +15864,7 @@ export function withAllBusinessAreas<TProps, TChildProps = {}>(operationOptions?
  * @example
  * const { data, loading, error } = useAllBusinessAreasQuery({
  *   variables: {
+ *      slug: // value for 'slug'
  *   },
  * });
  */
