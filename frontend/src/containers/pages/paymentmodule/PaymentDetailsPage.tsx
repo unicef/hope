@@ -10,10 +10,13 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
+  PaymentStatus,
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
 } from '../../../__generated__/graphql';
 import { PaymentDetails } from '../../../components/paymentmodule/PaymentDetails';
+import { RevertForceFailedButton } from '../../../components/paymentmodule/RevertForceFailedButton';
+import { ForceFailedButton } from '../../../components/paymentmodule/ForceFailedButton';
 
 export const PaymentDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -45,12 +48,24 @@ export const PaymentDetailsPage = (): React.ReactElement => {
     },
   ];
 
+  const renderButton = (): React.ReactElement => {
+    if (hasPermissions(PERMISSIONS.PM_MARK_AS_FAILED, permissions)) {
+      const ButtonComponent =
+        payment.status === PaymentStatus.ForceFailed
+          ? RevertForceFailedButton
+          : ForceFailedButton;
+      return <ButtonComponent paymentId={payment.id} />;
+    }
+  };
+
   return (
     <>
       <PageHeader
         title={`Payment ${payment.unicefId}`}
         breadCrumbs={breadCrumbsItems}
-      />
+      >
+        {renderButton()}
+      </PageHeader>
       <Box display='flex' flexDirection='column'>
         <PaymentDetails
           payment={payment}
