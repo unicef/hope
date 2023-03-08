@@ -234,6 +234,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
+    "hct_mis_api.aurora.apps.Config",
 ]
 
 DJANGO_APPS = [
@@ -791,6 +792,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
+MAX_STORAGE_FILE_SIZE = 30
 USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
@@ -845,6 +847,10 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Individual",
     "mis_datahub.Household",
 ]
+
+AURORA_SERVER = env("AURORA_SERVER")
+AURORA_TOKEN = env("AURORA_TOKEN")
+AURORA_USER = env("AURORA_USER")
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
 
