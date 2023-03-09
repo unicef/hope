@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
-  paymentPlanBackgroundActionStatusMapping,
   paymentPlanBackgroundActionStatusToColor,
-  paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
@@ -186,7 +184,6 @@ export const PaymentPlanDetailsHeader = ({
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
-              statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
           {paymentPlan.backgroundActionStatus && (
@@ -194,7 +191,6 @@ export const PaymentPlanDetailsHeader = ({
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
-                statusNameMapping={paymentPlanBackgroundActionStatusMapping}
               />
             </StatusWrapper>
           )}
