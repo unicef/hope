@@ -49,7 +49,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
   ];
 
   const renderButton = (): React.ReactElement => {
-    if (hasPermissions(PERMISSIONS.PM_MARK_AS_FAILED, permissions)) {
+    if (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions)) {
       const ButtonComponent =
         payment.status === PaymentStatus.ForceFailed
           ? RevertForceFailedButton
