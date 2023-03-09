@@ -1,15 +1,14 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import GroupIcon from '@material-ui/icons/Group';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { createHandleLocalStorageFilterChange } from '../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
-import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
@@ -36,8 +35,12 @@ export const HouseholdFilters = ({
   choicesData,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+
+  const handleLocalStorageFilterChange = createHandleLocalStorageFilterChange(
+    onFilterChange,
+    'populationHouseholds',
+  );
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -45,13 +48,17 @@ export const HouseholdFilters = ({
           <SearchTextField
             label={t('Search')}
             value={filter.text}
-            onChange={(e) => handleFilterChange(e, 'text')}
+            onChange={(e) =>
+              handleLocalStorageFilterChange('text', e.target.value, filter)
+            }
             data-cy='hh-filters-search'
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'program')}
+            onChange={(e) =>
+              handleLocalStorageFilterChange('program', e.target.value, filter)
+            }
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
@@ -68,7 +75,13 @@ export const HouseholdFilters = ({
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'residenceStatus')}
+            onChange={(e) =>
+              handleLocalStorageFilterChange(
+                'residenceStatus',
+                e.target.value,
+                filter,
+              )
+            }
             label={t('Residence Status')}
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
@@ -92,7 +105,7 @@ export const HouseholdFilters = ({
             name='adminArea'
           />
         </Grid>
-        <Grid item>
+        {/* <Grid item>
           <NumberTextField
             topLabel={t('Household Size')}
             value={filter.householdSize.min}
@@ -124,10 +137,12 @@ export const HouseholdFilters = ({
               })
             }
           />
-        </Grid>
+        </Grid> */}
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'orderBy')}
+            onChange={(e) =>
+              handleLocalStorageFilterChange('orderBy', e.target.value, filter)
+            }
             label={t('Sort by')}
             value={filter.orderBy}
           >

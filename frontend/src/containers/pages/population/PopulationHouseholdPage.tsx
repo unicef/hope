@@ -10,6 +10,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getLocalStorageFilterKeyValue } from '../../../utils/utils';
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
@@ -19,12 +20,21 @@ import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
+
   const [filter, setFilter] = useState({
-    text: '',
-    program: '',
-    residenceStatus: '',
+    text: getLocalStorageFilterKeyValue('populationHouseholds', 'text') || '',
+    program:
+      getLocalStorageFilterKeyValue('filter-populationHouseholds', 'program') ||
+      '',
+    residenceStatus:
+      getLocalStorageFilterKeyValue(
+        'populationHouseholds',
+        'residenceStatus',
+      ) || '',
     householdSize: { min: '', max: '' },
-    orderBy: 'unicef_id',
+    orderBy:
+      getLocalStorageFilterKeyValue('populationHouseholds', 'orderBy') ||
+      'unicef_id',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
