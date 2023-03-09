@@ -328,7 +328,10 @@ class GenericPayment(TimeStampedUUIDModel):
 
     def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
         if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment record marked as force failed can be reverted")
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
         self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
         self.status_date = timezone.now()
         self.delivered_quantity = delivered_quantity
