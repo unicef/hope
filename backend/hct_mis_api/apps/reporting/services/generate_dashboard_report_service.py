@@ -926,7 +926,7 @@ class GenerateDashboardReportService:
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
             sheet_title = self._report_type_to_str(report_type)
-            active_sheet = self.wb.create_sheet(sheet_title, -1)
+            active_sheet = self.wb.create_sheet(sheet_title, -1) # type: ignore
             number_of_columns = self._add_headers(active_sheet, report_type)
             number_of_rows = self._add_rows(active_sheet, report_type)
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)

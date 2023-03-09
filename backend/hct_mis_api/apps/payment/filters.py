@@ -355,7 +355,7 @@ class PaymentFilter(FilterSet):
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",
-            "parent__program__name"
+            "parent__program__name",
         )
     )
 
