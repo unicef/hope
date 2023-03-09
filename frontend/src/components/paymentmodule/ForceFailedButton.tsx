@@ -7,7 +7,7 @@ import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useMarkPaymentAsFailedMutation } from '../../__generated__/graphql';
+import { useMarkPayAsFailedMutation } from '../../__generated__/graphql';
 
 export interface ForceFailedButtonProps {
   paymentId: string;
@@ -20,7 +20,7 @@ export function ForceFailedButton({
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useMarkPaymentAsFailedMutation();
+  const [mutate, { loading }] = useMarkPayAsFailedMutation();
 
   const submit = async (): Promise<void> => {
     try {

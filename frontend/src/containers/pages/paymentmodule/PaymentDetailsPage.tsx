@@ -48,7 +48,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
     },
   ];
 
-  const renderButton = (): React.ReactElement => {
+  const renderButton = (): React.ReactElement | null => {
     if (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions)) {
       const ButtonComponent =
         payment.status === PaymentStatus.ForceFailed
@@ -56,6 +56,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
           : ForceFailedButton;
       return <ButtonComponent paymentId={payment.id} />;
     }
+    return null;
   };
 
   return (
