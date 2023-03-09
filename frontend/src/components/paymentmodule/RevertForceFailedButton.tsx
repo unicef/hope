@@ -9,9 +9,9 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useRevertMarkPrAsFailedMutation } from '../../__generated__/graphql';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { useRevertMarkPayAsFailedMutation } from '../../__generated__/graphql';
 
 export interface RevertForceFailedButtonProps {
   paymentId: string;
@@ -24,7 +24,7 @@ export function RevertForceFailedButton({
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useRevertMarkPaymentAsFailedMutation();
+  const [mutate, { loading }] = useRevertMarkPayAsFailedMutation();
 
   const validationSchema = Yup.object().shape({
     deliveredQuantity: Yup.number()
