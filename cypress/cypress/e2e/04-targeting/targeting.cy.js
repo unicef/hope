@@ -4,7 +4,7 @@ context("Targeting", () => {
   let programName = "TargetingProgram";
 
   beforeEach(() => {
-    cy.initScenario("targeting")
+    cy.initScenario("targeting");
     cy.visit("/api/unicorn/");
     cy.get('input[name="username"]').type(Cypress.env("username"));
     cy.get('input[name="password"]').type(Cypress.env("password"));
@@ -16,7 +16,7 @@ context("Targeting", () => {
     cy.get("span").contains("Targeting").click();
     cy.get("h5").contains("Targeting");
     cy.get('[data-cy="button-target-population-create-new"]').click({
-      force: true,
+      force: true
     });
     cy.uniqueSeed().then((seed) => {
       const targetPopulationName = `test TP ${seed}`;
@@ -29,7 +29,7 @@ context("Targeting", () => {
       cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
       cy.get('[data-cy="button-household-rule"]', {
-        timeout: 10000,
+        timeout: 10000
       }).click();
       cy.get('[data-cy="autocomplete-target-criteria"]')
         .click()
@@ -46,7 +46,7 @@ context("Targeting", () => {
       //   "[data-cy=button-target-population-create] > .MuiButton-label"
       // ).click();
       // cy.get("h6").contains("Targeting Criteria");
-      // cy.get('[data-cy="status-container"]').contains("Open");
+      // cy.get('[data-cy="status-container"]').contains("OPEN");
       // cy.get('[data-cy="button-target-population-lock"]').click({
       //   force: true
       // });
@@ -54,13 +54,13 @@ context("Targeting", () => {
       //   force: true
       // });
       // cy.get("h6").contains("Targeting Criteria");
-      // cy.get('[data-cy="status-container"]').contains("Locked");
+      // cy.get('[data-cy="status-container"]').contains("LOCKED");
       // cy.get('[data-cy="button-target-population-send-to-hope"]').click({
       //   force: true
       // });
       // cy.get('[data-cy="button-target-population-modal-send-to-hope"]').click();
       // cy.get("h6").contains("Targeting Criteria");
-      // cy.get('[data-cy="status-container"]').contains("Ready");
+      // cy.get('[data-cy="status-container"]').contains("READY");
     });
   });
 });
