@@ -1,7 +1,7 @@
 import { gql } from 'apollo-boost';
 
 export const REVERT_MARK_PAYMENT_AS_FAILED = gql`
-  mutation revertMarkPaymentAsFailed(
+  mutation revertMarkPayAsFailed(
     $paymentId: ID!
     $deliveredQuantity: Decimal!
     $deliveryDate: Date!
@@ -11,7 +11,7 @@ export const REVERT_MARK_PAYMENT_AS_FAILED = gql`
       deliveredQuantity: $deliveredQuantity
       deliveryDate: $deliveryDate
     ) {
-      payment(id: $paymentId) {
+      payment {
         id
         unicefId
         status
@@ -19,7 +19,6 @@ export const REVERT_MARK_PAYMENT_AS_FAILED = gql`
         deliveredQuantity
         deliveryDate
       }
-    }
     }
   }
 `;
