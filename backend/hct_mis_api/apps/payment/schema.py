@@ -637,7 +637,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     obj_type = graphene.String()
     id = graphene.String()
     ca_id = graphene.String(source="unicef_id")
-    status = graphene.String(source="status")
+    status = graphene.String()
     full_name = graphene.String(source="full_name")
     parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
     entitlement_quantity = graphene.Float(source="entitlement_quantity")
@@ -651,6 +651,9 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     def resolve_id(self, info: Any, **kwargs: Any) -> str:
         return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+    def resolve_status(self, info: Any, **kwargs: Any) -> str:
+        return self.status.replace(" ", "_").upper()
 
 
 class PageInfoNode(graphene.ObjectType):
