@@ -355,6 +355,7 @@ class PaymentFilter(FilterSet):
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",
+            "parent__program__name"
         )
     )
 
@@ -465,7 +466,7 @@ def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, orde
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
-    if order_by == "unicef_id":
+    if order_by == "ca_id":
         qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
     else:
         qs = queryset.order_by(reverse + order_by)

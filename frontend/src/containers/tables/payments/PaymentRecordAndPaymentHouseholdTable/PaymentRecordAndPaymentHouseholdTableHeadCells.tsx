@@ -23,19 +23,19 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   {
     disablePadding: false,
     label: 'Programme',
-    id: 'cash_plan__program__name',
+    id: 'parent__program__name',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Entitlement Quantity',
-    id: 'entitlement__entitlement_quantity',
+    id: 'entitlement_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Delivered Quantity',
-    id: 'entitlement__delivered_quantity',
+    id: 'delivered_quantity',
     numeric: true,
   },
   {

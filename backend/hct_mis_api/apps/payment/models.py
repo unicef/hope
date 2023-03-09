@@ -314,6 +314,10 @@ class GenericPayment(TimeStampedUUIDModel):
             return None
         return verification
 
+    @property
+    def get_unicef_id(self) -> str:
+        return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
