@@ -688,3 +688,44 @@ export async function clearCache(apolloClient = null): Promise<void> {
   localStorage.clear();
   await localForage.clear();
 }
+
+export const getLocalStorageItem = (key: string): string | null => {
+  return localStorage.getItem(key);
+};
+
+export const getLocalStorageFilterKeyValue = (
+  prefix: string,
+  key: string,
+): string | null => getLocalStorageItem(`${prefix}-${key}`) || '';
+
+export const setLocalStorageItem = (key: string, value: string): void => {
+  localStorage.setItem(key, value);
+};
+
+export const setLocalStorageFilter = (
+  prefix: string,
+  key: string,
+  value: string,
+): void => {
+  setLocalStorageItem(`${prefix}-${key}`, value);
+};
+
+export const createHandleLocalStorageFilterChange = (
+  onFilterChange: (key: string, filter: { [key: string]: string }) => void,
+  localStorageFilterPrefix: string,
+): ((
+  key: string,
+  value: string,
+  filter: { [key: string]: string },
+) => void) => {
+  const handleLocalStorageFilterChange = (
+    key: string,
+    value: string,
+    filter: { [key: string]: string },
+  ): void => {
+    const newFilter = { ...filter, [key]: value };
+    onFilterChange(key, newFilter);
+    setLocalStorageFilter(localStorageFilterPrefix, key, value);
+  };
+  return handleLocalStorageFilterChange;
+};
