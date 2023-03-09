@@ -670,7 +670,7 @@ class RevertMarkPaymentAsFailedMutation(PermissionMutation):
         delivery_date: date,
         **kwargs: Any,
     ) -> "RevertMarkPaymentAsFailedMutation":
-        payment = get_object_or_404(PaymentRecord, id=decode_id_string(payment_id))
+        payment = get_object_or_404(Payment, id=decode_id_string(payment_id))
         cls.has_permission(info, Permissions.PM_MARK_PAYMENT_AS_FAILED, payment.business_area)
         delivery_date = datetime.combine(delivery_date, datetime.min.time())
         revert_mark_as_failed(payment, delivered_quantity, delivery_date)
