@@ -3,7 +3,7 @@ from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, CharField, Count, Q, QuerySet, Value, When
+from django.db.models import Case, CharField, Count, Func, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -356,6 +356,7 @@ class PaymentFilter(FilterSet):
             "delivered_quantity",
             "financial_service_provider__name",
             "parent__program__name",
+            "delivery_date",
         )
     )
 
@@ -462,12 +463,23 @@ def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwar
     return queryset
 
 
+class IsNull(Func):
+    template = "%(expressions)s IS NULL"
+
+
 def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> List[Any]:
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
     if order_by == "ca_id":
         qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+    elif order_by == "delivery_date":
+        # TODO: maybe override OrderingFilter and move it there?
+        qs_delivery_date_null = list(queryset.filter(delivery_date__isnull=True))
+        if reverse:
+            qs = list(queryset.exclude(delivery_date__isnull=True).order_by("-delivery_date")) + qs_delivery_date_null
+        else:
+            qs = qs_delivery_date_null + list(queryset.exclude(delivery_date__isnull=True).order_by("delivery_date"))
     else:
         qs = queryset.order_by(reverse + order_by)
 

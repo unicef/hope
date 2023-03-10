@@ -41,7 +41,7 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   {
     disablePadding: false,
     label: 'Delivery Date',
-    id: 'entitlement__delivery_date',
+    id: 'delivery_date',
     numeric: true,
   },
 ];
