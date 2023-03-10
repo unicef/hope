@@ -29,9 +29,9 @@ export function AdminAreaAutocomplete({
   name,
   value,
 }: {
-  disabled?;
+  disabled?: boolean;
   fullWidth?: boolean;
-  onFilterChange;
+  onFilterChange: (filters: { [key: string]: string }) => void;
   name: string;
   value?: AreaNodeEdge;
 }): React.ReactElement {
@@ -55,19 +55,19 @@ export function AdminAreaAutocomplete({
     }
   }, [open, debouncedInputText, loadAdminAreas]);
 
-  const onChangeMiddleware = (e, selectedValue): void => {
-    onFilterChange((filters) => ({
-      ...filters,
+  const handleFilterChange = (selectedValue): void => {
+    onFilterChange({
       [name]: selectedValue || undefined,
-    }));
+    });
   };
+
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       value={value}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={onChangeMiddleware}
+      onChange={(_, selectedValue) => handleFilterChange(selectedValue)}
       onOpen={() => {
         setOpen(true);
       }}
