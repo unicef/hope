@@ -234,6 +234,16 @@
   }
 },
 {
+  "model": "household.documenttype",
+  "pk": "afd33528-f377-4494-80be-89f5ab8c2d3b",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.291Z",
+    "updated_at": "2022-08-10T14:00:37.291Z",
+    "label": "Disability Certificate",
+    "type": "DISABILITY_CERTIFICATE"
+  }
+},
+{
   "model": "household.document",
   "pk": "0040cb2a-4b86-41b2-82b1-d5ac4d11471d",
   "fields": {
