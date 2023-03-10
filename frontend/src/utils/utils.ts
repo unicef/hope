@@ -713,6 +713,7 @@ export const getFilterFromQueryParams = (
       }
     }
   });
+  console.log('filter', filter);
   return filter;
 };
 
@@ -741,14 +742,14 @@ export const createHandleFilterChange = (
   onFilterChange: (filter: { [key: string]: string }) => void,
   history: useHistory<LocationState>,
   location: Location,
-): ((key: string, value: string) => void) => {
+): ((filter: { [key: string]: string }) => void) => {
   const filterFromQueryParams = getFilterFromQueryParams(location);
   const initialFilter: { [key: string]: string } = { ...filterFromQueryParams };
 
-  const handleFilterChange = (key: string, value: string): void => {
-    const newFilter = { ...initialFilter, [key]: value };
+  const handleFilterChange = (filter: { [key: string]: string }): void => {
+    const newFilter = { ...initialFilter, ...filter };
     onFilterChange(newFilter);
-    setQueryParam(`filter-${key}`, value, history, location);
+    setFilterToQueryParams(newFilter, history, location);
   };
   return handleFilterChange;
 };
