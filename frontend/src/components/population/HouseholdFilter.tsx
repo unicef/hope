@@ -1,9 +1,10 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { useHistory, useLocation } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { createHandleLocalStorageFilterChange } from '../../utils/utils';
+import { createHandleFilterChange } from '../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -35,10 +36,13 @@ export const HouseholdFilters = ({
   choicesData,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
 
-  const handleLocalStorageFilterChange = createHandleLocalStorageFilterChange(
+  const handleFilterChange = createHandleFilterChange(
     onFilterChange,
-    'populationHouseholds',
+    history,
+    location,
   );
 
   return (
@@ -48,17 +52,13 @@ export const HouseholdFilters = ({
           <SearchTextField
             label={t('Search')}
             value={filter.text}
-            onChange={(e) =>
-              handleLocalStorageFilterChange('text', e.target.value, filter)
-            }
+            onChange={(e) => handleFilterChange('text', e.target.value)}
             data-cy='hh-filters-search'
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) =>
-              handleLocalStorageFilterChange('program', e.target.value, filter)
-            }
+            onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
@@ -76,11 +76,7 @@ export const HouseholdFilters = ({
         <Grid item>
           <SelectFilter
             onChange={(e) =>
-              handleLocalStorageFilterChange(
-                'residenceStatus',
-                e.target.value,
-                filter,
-              )
+              handleFilterChange('residenceStatus', e.target.value)
             }
             label={t('Residence Status')}
             value={filter.residenceStatus}
@@ -140,9 +136,7 @@ export const HouseholdFilters = ({
         </Grid> */}
         <Grid item>
           <SelectFilter
-            onChange={(e) =>
-              handleLocalStorageFilterChange('orderBy', e.target.value, filter)
-            }
+            onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
           >

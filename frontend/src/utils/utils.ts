@@ -1,6 +1,7 @@
-import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
+import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -689,43 +690,65 @@ export async function clearCache(apolloClient = null): Promise<void> {
   await localForage.clear();
 }
 
-export const getLocalStorageItem = (key: string): string | null => {
-  return localStorage.getItem(key);
-};
+type Location = ReturnType<typeof useLocation>;
 
-export const getLocalStorageFilterKeyValue = (
-  prefix: string,
+export const getQueryParam = (
   key: string,
-): string | null => getLocalStorageItem(`${prefix}-${key}`) || '';
-
-export const setLocalStorageItem = (key: string, value: string): void => {
-  localStorage.setItem(key, value);
+  location: Location,
+): string | null => {
+  const params = new URLSearchParams(location.search);
+  return params.get(key);
 };
 
-export const setLocalStorageFilter = (
-  prefix: string,
+export const getFilterFromQueryParams = (
+  location: Location,
+): { [key: string]: string } => {
+  const filter: { [key: string]: string } = {};
+  const params = new URLSearchParams(location.search);
+  params.forEach((value, key) => {
+    if (key.includes('-')) {
+      const [prefix, filterKey] = key.split('-');
+      if (prefix === 'filter') {
+        filter[filterKey] = value;
+      }
+    }
+  });
+  return filter;
+};
+
+export const setQueryParam = (
   key: string,
   value: string,
+  history: useHistory<LocationState>,
+  location: Location,
 ): void => {
-  setLocalStorageItem(`${prefix}-${key}`, value);
+  const params = new URLSearchParams(location.search);
+  params.set(key, value);
+  history.push({ search: params.toString() });
 };
 
-export const createHandleLocalStorageFilterChange = (
-  onFilterChange: (key: string, filter: { [key: string]: string }) => void,
-  localStorageFilterPrefix: string,
-): ((
-  key: string,
-  value: string,
+export const setFilterToQueryParams = (
   filter: { [key: string]: string },
-) => void) => {
-  const handleLocalStorageFilterChange = (
-    key: string,
-    value: string,
-    filter: { [key: string]: string },
-  ): void => {
-    const newFilter = { ...filter, [key]: value };
-    onFilterChange(key, newFilter);
-    setLocalStorageFilter(localStorageFilterPrefix, key, value);
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  Object.entries(filter).forEach(([key, value]) => {
+    setQueryParam(`filter-${key}`, value, history, location);
+  });
+};
+
+export const createHandleFilterChange = (
+  onFilterChange: (filter: { [key: string]: string }) => void,
+  history: useHistory<LocationState>,
+  location: Location,
+): ((key: string, value: string) => void) => {
+  const filterFromQueryParams = getFilterFromQueryParams(location);
+  const initialFilter: { [key: string]: string } = { ...filterFromQueryParams };
+
+  const handleFilterChange = (key: string, value: string): void => {
+    const newFilter = { ...initialFilter, [key]: value };
+    onFilterChange(newFilter);
+    setQueryParam(`filter-${key}`, value, history, location);
   };
-  return handleLocalStorageFilterChange;
+  return handleFilterChange;
 };
