@@ -1,6 +1,7 @@
 import { Box } from '@material-ui/core';
 import get from 'lodash/get';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -10,7 +11,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getLocalStorageFilterKeyValue } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
@@ -20,22 +21,11 @@ import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
 
-  const [filter, setFilter] = useState({
-    text: getLocalStorageFilterKeyValue('populationHouseholds', 'text') || '',
-    program:
-      getLocalStorageFilterKeyValue('filter-populationHouseholds', 'program') ||
-      '',
-    residenceStatus:
-      getLocalStorageFilterKeyValue(
-        'populationHouseholds',
-        'residenceStatus',
-      ) || '',
-    householdSize: { min: '', max: '' },
-    orderBy:
-      getLocalStorageFilterKeyValue('populationHouseholds', 'orderBy') ||
-      'unicef_id',
-  });
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location.search),
+  );
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
