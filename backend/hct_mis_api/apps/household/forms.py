@@ -9,7 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
 def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Optional[List]:
@@ -149,6 +149,7 @@ class CreateTargetPopulationTextForm(forms.Form):
     action = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField()
     target_field = forms.ChoiceField(choices=(("unicef_id", _("Unicef ID")), ("unique_id", _("UUID"))))
+    targeting_criteria = forms.ModelChoiceField(widget=forms.HiddenInput, queryset=TargetingCriteria.objects.all())
     separator = forms.ChoiceField(
         choices=(
             (",", _("Comma")),
@@ -177,6 +178,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["criteria"].widget = HiddenInput()
             self.fields["target_field"].widget = HiddenInput()
             self.fields["separator"].widget = HiddenInput()
+            self.fields["targeting_criteria"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
         try:
