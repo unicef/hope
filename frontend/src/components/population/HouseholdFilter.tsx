@@ -97,8 +97,9 @@ export const HouseholdFilters = ({
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete
-            onFilterChange={onFilterChange}
             name='adminArea'
+            value={filter.adminArea}
+            onFilterChange={handleFilterChange}
           />
         </Grid>
         {/* <Grid item>
