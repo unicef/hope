@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation, LocationState } from 'react-router-dom';
-import { get } from 'lodash';
-import styled from 'styled-components';
-import { TextField, InputAdornment, CircularProgress } from '@material-ui/core';
+import { CircularProgress, InputAdornment, TextField } from '@material-ui/core';
 import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { get } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LocationState, useHistory, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { createHandleFilterChange } from '../../utils/utils';
 import {
+  AllAdminAreasQuery,
   AreaNodeEdge,
   useAllAdminAreasLazyQuery,
-  AllAdminAreasQuery,
 } from '../../__generated__/graphql';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
