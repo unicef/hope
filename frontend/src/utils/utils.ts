@@ -724,9 +724,12 @@ export const setFilterToQueryParams = (
   history: useHistory<LocationState>,
   location: Location,
 ): void => {
+  const params = new URLSearchParams(location.search);
   Object.entries(filter).forEach(([key, value]) => {
-    setQueryParam(`filter-${key}`, value, history, location);
+    params.set(`filter-${key}`, value);
   });
+  const search = params.toString();
+  history.push({ search });
 };
 
 export const createHandleFilterChange = (
@@ -741,6 +744,8 @@ export const createHandleFilterChange = (
     const newFilter = { ...initialFilter, [key]: value };
     onFilterChange(newFilter);
     setFilterToQueryParams(newFilter, history, location);
+    initialFilter[key] = value; // Update the initialFilter with the new value
   };
+
   return handleFilterChange;
 };
