@@ -74,9 +74,8 @@ export function PageHeader({
     <Wrapper data-cy='page-header-container'>
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
-          <BackButton
-            onClick={() => history.push(breadCrumbs[breadCrumbs.length - 1].to)}
-          >
+          // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
+          <BackButton onClick={() => window.history.back()}>
             <ArrowBackRoundedIcon fontSize='large' />
           </BackButton>
         ) : null}

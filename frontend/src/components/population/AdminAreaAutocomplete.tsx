@@ -50,10 +50,15 @@ export function AdminAreaAutocomplete({
   });
 
   useEffect(() => {
-    if (open || value) {
+    if (open) {
       loadAdminAreas();
     }
-  }, [open, debouncedInputText, loadAdminAreas, value]);
+  }, [open, debouncedInputText, loadAdminAreas]);
+
+  // load all admin areas on mount to match the value from the url
+  useEffect(() => {
+    loadAdminAreas();
+  }, [loadAdminAreas]);
 
   const handleFilterChange = createHandleFilterChange(
     onFilterChange,
