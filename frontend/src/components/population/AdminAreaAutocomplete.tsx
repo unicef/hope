@@ -1,19 +1,19 @@
-import { InputAdornment } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation, LocationState } from 'react-router-dom';
+import { get } from 'lodash';
 import styled from 'styled-components';
+import { TextField, InputAdornment, CircularProgress } from '@material-ui/core';
+import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../../shared/TextField';
+import { createHandleFilterChange } from '../../utils/utils';
 import {
   AreaNodeEdge,
-  AllAdminAreasQuery,
   useAllAdminAreasLazyQuery,
+  AllAdminAreasQuery,
 } from '../../__generated__/graphql';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -25,22 +25,22 @@ const StyledAutocomplete = styled(Autocomplete)`
 export function AdminAreaAutocomplete({
   disabled,
   fullWidth,
-  onFilterChange,
   name,
+  onFilterChange,
   value,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
-  onFilterChange: (filters: { [key: string]: string }) => void;
   name: string;
+  onFilterChange: (filters: { [key: string]: string }) => void;
   value?: AreaNodeEdge;
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
+
   const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
       first: 20,
@@ -49,17 +49,18 @@ export function AdminAreaAutocomplete({
       level: 2,
     },
   });
+
   useEffect(() => {
     if (open) {
       loadAdminAreas();
     }
   }, [open, debouncedInputText, loadAdminAreas]);
 
-  const handleFilterChange = (selectedValue): void => {
-    onFilterChange({
-      [name]: selectedValue || undefined,
-    });
-  };
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    useHistory<LocationState>(),
+    useLocation(),
+  );
 
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
@@ -67,7 +68,9 @@ export function AdminAreaAutocomplete({
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) => handleFilterChange(selectedValue)}
+      onChange={(_, selectedValue) =>
+        handleFilterChange(name, selectedValue?.node?.id)
+      }
       onOpen={() => {
         setOpen(true);
       }}

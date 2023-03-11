@@ -96,11 +96,11 @@ export const HouseholdFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item>
-          <AdminAreaAutocomplete
+          {/* <AdminAreaAutocomplete
             name='adminArea'
             value={filter.adminArea}
             onFilterChange={handleFilterChange}
-          />
+          /> */}
         </Grid>
         {/* <Grid item>
           <NumberTextField
