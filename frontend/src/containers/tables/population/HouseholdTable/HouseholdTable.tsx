@@ -27,11 +27,12 @@ export const HouseholdTable = ({
   filterOrderBy,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
+  console.log('filter', filter);
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     familySize: JSON.stringify(filter.householdSize),
     search: filter.text,
-    adminArea: filter.adminArea?.node?.id,
+    adminArea: filter.adminArea,
     residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {

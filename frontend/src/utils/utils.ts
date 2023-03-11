@@ -698,12 +698,7 @@ export const getFilterFromQueryParams = (
   const filter: { [key: string]: string } = {};
   const params = new URLSearchParams(location.search);
   params.forEach((value, key) => {
-    if (key.includes('-')) {
-      const [prefix, filterKey] = key.split('-');
-      if (prefix === 'filter') {
-        filter[filterKey] = value;
-      }
-    }
+    filter[key] = value;
   });
   return filter;
 };
@@ -726,7 +721,7 @@ export const setFilterToQueryParams = (
 ): void => {
   const params = new URLSearchParams(location.search);
   Object.entries(filter).forEach(([key, value]) => {
-    params.set(`filter-${key}`, value);
+    params.set(key, value);
   });
   const search = params.toString();
   history.push({ search });

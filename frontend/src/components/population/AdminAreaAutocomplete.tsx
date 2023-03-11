@@ -11,7 +11,6 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { createHandleFilterChange } from '../../utils/utils';
 import {
   AllAdminAreasQuery,
-  AreaNodeEdge,
   useAllAdminAreasLazyQuery,
 } from '../../__generated__/graphql';
 
@@ -33,7 +32,7 @@ export function AdminAreaAutocomplete({
   fullWidth?: boolean;
   name: string;
   onFilterChange: (filters: { [key: string]: string }) => void;
-  value?: AreaNodeEdge;
+  value?: string;
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -51,16 +50,18 @@ export function AdminAreaAutocomplete({
   });
 
   useEffect(() => {
-    if (open) {
+    if (open || value) {
       loadAdminAreas();
     }
-  }, [open, debouncedInputText, loadAdminAreas]);
+  }, [open, debouncedInputText, loadAdminAreas, value]);
 
   const handleFilterChange = createHandleFilterChange(
     onFilterChange,
     useHistory<LocationState>(),
     useLocation(),
   );
+
+  if (!data) return null;
 
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
@@ -80,13 +81,18 @@ export function AdminAreaAutocomplete({
         onInputTextChange('');
       }}
       getOptionSelected={(option, value1) => {
-        return value1?.node?.id === option.node.id;
+        return option.node.id === value1;
       }}
       getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
+        let label;
+        if (option.node) {
+          label = `${option.node.name}`;
+        } else {
+          label =
+            data?.allAdminAreas?.edges?.find((el) => el.node.id === option)
+              ?.node.name || '';
         }
-        return `${option.node.name}`;
+        return `${label}`;
       }}
       disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}
