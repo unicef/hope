@@ -692,14 +692,6 @@ export async function clearCache(apolloClient = null): Promise<void> {
 
 type Location = ReturnType<typeof useLocation>;
 
-export const getQueryParam = (
-  key: string,
-  location: Location,
-): string | null => {
-  const params = new URLSearchParams(location.search);
-  return params.get(key);
-};
-
 export const getFilterFromQueryParams = (
   location: Location,
 ): { [key: string]: string } => {
@@ -713,7 +705,6 @@ export const getFilterFromQueryParams = (
       }
     }
   });
-  console.log('filter', filter);
   return filter;
 };
 
@@ -742,12 +733,12 @@ export const createHandleFilterChange = (
   onFilterChange: (filter: { [key: string]: string }) => void,
   history: useHistory<LocationState>,
   location: Location,
-): ((filter: { [key: string]: string }) => void) => {
+): ((key: string, value: string) => void) => {
   const filterFromQueryParams = getFilterFromQueryParams(location);
   const initialFilter: { [key: string]: string } = { ...filterFromQueryParams };
 
-  const handleFilterChange = (filter: { [key: string]: string }): void => {
-    const newFilter = { ...initialFilter, ...filter };
+  const handleFilterChange = (key: string, value: string): void => {
+    const newFilter = { ...initialFilter, [key]: value };
     onFilterChange(newFilter);
     setFilterToQueryParams(newFilter, history, location);
   };
