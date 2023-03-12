@@ -1,7 +1,6 @@
 import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
 
@@ -69,7 +68,6 @@ export function PageHeader({
   hasInputComponent,
   flags,
 }: Props): React.ReactElement {
-  const history = useHistory();
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>

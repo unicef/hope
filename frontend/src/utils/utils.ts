@@ -691,16 +691,30 @@ export async function clearCache(apolloClient = null): Promise<void> {
 }
 
 type Location = ReturnType<typeof useLocation>;
+type FilterValue = string | string[] | null | undefined;
+type Filter = { [key: string]: FilterValue };
 
 export const getFilterFromQueryParams = (
   location: Location,
-): { [key: string]: string } => {
-  const filter: { [key: string]: string } = {};
-  const params = new URLSearchParams(location.search);
-  params.forEach((value, key) => {
-    filter[key] = value;
-  });
-  return filter;
+  initialFilter: Filter = {},
+): Filter => {
+  const filter: Filter = { ...initialFilter };
+  const searchParams = new URLSearchParams(location.search);
+
+  for (const [key, value] of searchParams.entries()) {
+    if (Array.isArray(filter[key])) {
+      (filter[key] as string[]).push(value);
+    } else if (typeof filter[key] === 'string') {
+      const filterValue = filter[key];
+      filter[key] = [filterValue, value] as string[];
+    } else {
+      filter[key] = value;
+    }
+  }
+
+  return Object.fromEntries(
+    Object.entries(filter).filter(([_, value]) => value != null),
+  );
 };
 
 export const setQueryParam = (
@@ -715,32 +729,45 @@ export const setQueryParam = (
 };
 
 export const setFilterToQueryParams = (
-  filter: { [key: string]: string },
+  filter: { [key: string]: FilterValue },
   history: useHistory<LocationState>,
   location: Location,
 ): void => {
   const params = new URLSearchParams(location.search);
   Object.entries(filter).forEach(([key, value]) => {
-    params.set(key, value);
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        value.forEach((val) => {
+          if (val !== null && val !== undefined) {
+            params.append(key, val);
+          }
+        });
+      } else {
+        params.set(key, value);
+      }
+    }
   });
   const search = params.toString();
   history.push({ search });
 };
 
 export const createHandleFilterChange = (
-  onFilterChange: (filter: { [key: string]: string }) => void,
+  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
   history: useHistory<LocationState>,
   location: Location,
 ): ((key: string, value: string) => void) => {
-  const filterFromQueryParams = getFilterFromQueryParams(location);
-  const initialFilter: { [key: string]: string } = { ...filterFromQueryParams };
-
+  let initialFilter: { [key: string]: FilterValue } = {};
   const handleFilterChange = (key: string, value: string): void => {
-    const newFilter = { ...initialFilter, [key]: value };
-    onFilterChange(newFilter);
-    setFilterToQueryParams(newFilter, history, location);
-    initialFilter[key] = value; // Update the initialFilter with the new value
+    const filterFromQueryParams = getFilterFromQueryParams(
+      location,
+      initialFilter,
+    );
+    initialFilter = {
+      ...filterFromQueryParams,
+      [key]: value,
+    };
+    onFilterChange(initialFilter);
+    setFilterToQueryParams(initialFilter, history, location);
   };
-
   return handleFilterChange;
 };
