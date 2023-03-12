@@ -1,15 +1,17 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import { useHistory, useLocation } from 'react-router-dom';
+import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import { createHandleFilterChange } from '../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
@@ -102,39 +104,27 @@ export const HouseholdFilters = ({
             onFilterChange={onFilterChange}
           />
         </Grid>
-        {/* <Grid item>
+        <Grid item>
           <NumberTextField
             topLabel={t('Household Size')}
-            value={filter.householdSize.min}
+            value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
             onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                householdSize: {
-                  ...filter.householdSize,
-                  min: e.target.value,
-                },
-              })
+              handleFilterChange('householdSizeMin', e.target.value)
             }
           />
         </Grid>
         <Grid item>
           <NumberTextField
-            value={filter.householdSize.max}
+            value={filter.householdSizeMax}
             placeholder={t('To')}
             icon={<GroupIcon />}
             onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                householdSize: {
-                  ...filter.householdSize,
-                  max: e.target.value,
-                },
-              })
+              handleFilterChange('householdSizeMax', e.target.value)
             }
           />
-        </Grid> */}
+        </Grid>
         <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
