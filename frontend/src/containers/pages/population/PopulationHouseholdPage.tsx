@@ -23,22 +23,20 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
 
-  // const [filter, setFilter] = useState({
-  //   text: getLocalStorageFilterKeyValue('populationHouseholds', 'text') || '',
-  //   program:
-  //     getLocalStorageFilterKeyValue('filter-populationHouseholds', 'program') ||
-  //     '',
-  //   residenceStatus:
-  //     getLocalStorageFilterKeyValue(
-  //       'populationHouseholds',
-  //       'residenceStatus',
-  //     ) || '',
-  //   householdSize: { min: '', max: '' },
-  //   orderBy:
-  //     getLocalStorageFilterKeyValue('populationHouseholds', 'orderBy') ||
-  //     'unicef_id',
-  // });
-  const [filter, setFilter] = useState(getFilterFromQueryParams(location));
+  const initialFilter = {
+    text: '',
+    program: '',
+    residenceStatus: '',
+    adminArea: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+  };
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(initialFilter, location),
+  );
+  console.log('filter in PopulationHouseholdPage', filter);
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();

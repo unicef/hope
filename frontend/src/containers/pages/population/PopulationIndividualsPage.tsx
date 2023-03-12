@@ -1,5 +1,6 @@
 import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -9,14 +10,16 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
-export function PopulationIndividualsPage(): React.ReactElement {
+export const PopulationIndividualsPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const {
@@ -24,13 +27,19 @@ export function PopulationIndividualsPage(): React.ReactElement {
     loading: householdChoicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  const [filter, setFilter] = useState({
+  const initialFilter = {
     text: '',
-    sex: [],
-    age: { min: '', max: '' },
+    sex: '',
+    ageMin: '',
+    ageMax: '',
     flags: [],
     orderBy: 'unicef_id',
-  });
+  };
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(initialFilter, location),
+  );
+  console.log('filter in PopulationIndividualsPage', filter);
+
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: individualChoicesData,
@@ -74,4 +83,4 @@ export function PopulationIndividualsPage(): React.ReactElement {
       </Box>
     </>
   );
-}
+};
