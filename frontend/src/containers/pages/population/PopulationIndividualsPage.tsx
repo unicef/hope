@@ -29,6 +29,7 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
 
   const initialFilter = {
     text: '',
+    adminArea: '',
     sex: '',
     ageMin: '',
     ageMax: '',
@@ -38,7 +39,6 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  console.log('filter in PopulationIndividualsPage', filter);
 
   const debouncedFilter = useDebounce(filter, 500);
   const {
