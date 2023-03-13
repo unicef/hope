@@ -1,8 +1,8 @@
 import { Box } from '@material-ui/core';
 import get from 'lodash/get';
-import { useLocation } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -36,7 +36,6 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  console.log('filter in PopulationHouseholdPage', filter);
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
