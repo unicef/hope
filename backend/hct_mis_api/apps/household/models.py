@@ -908,6 +908,10 @@ class Individual(
         self.duplicate_date = timezone.now()
         self.save()
 
+    def mark_relationship_as_confirmed(self) -> None:
+        self.relationship_confirmed = True
+        self.save(update_fields=["relationship_confirmed"])
+
     def __str__(self) -> str:
         return self.unicef_id or ""
 

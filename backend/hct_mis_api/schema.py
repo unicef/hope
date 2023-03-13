@@ -10,6 +10,7 @@ import hct_mis_api.apps.core.schema
 import hct_mis_api.apps.geo.schema
 import hct_mis_api.apps.grievance.mutations
 import hct_mis_api.apps.grievance.schema
+import hct_mis_api.apps.household.mutations
 import hct_mis_api.apps.household.schema
 import hct_mis_api.apps.payment.mutations
 import hct_mis_api.apps.payment.schema
@@ -55,6 +56,7 @@ class Mutations(
     hct_mis_api.apps.payment.mutations.Mutations,
     hct_mis_api.apps.grievance.mutations.Mutations,
     hct_mis_api.apps.reporting.mutations.Mutations,
+    hct_mis_api.apps.household.mutations.Mutations,
     graphene.ObjectType,
 ):
     pass
