@@ -39,7 +39,6 @@ class ValidateXlsxImport:
             number_of_households += 1
 
         for row in ind_sheet.iter_rows(min_row=3):
-
             if not any([cell.value for cell in row]):
                 continue
             number_of_individuals += 1
