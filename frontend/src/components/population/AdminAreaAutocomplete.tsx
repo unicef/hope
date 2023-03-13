@@ -26,12 +26,14 @@ export function AdminAreaAutocomplete({
   fullWidth,
   name,
   onFilterChange,
+  filter,
   value,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
   name: string;
   onFilterChange: (filters: { [key: string]: string }) => void;
+  filter?;
   value?: string;
 }): React.ReactElement {
   const { t } = useTranslation();
@@ -62,6 +64,7 @@ export function AdminAreaAutocomplete({
 
   const handleFilterChange = createHandleFilterChange(
     onFilterChange,
+    filter,
     useHistory<LocationState>(),
     useLocation(),
   );
