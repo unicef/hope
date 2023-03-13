@@ -1,6 +1,8 @@
 import { InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import moment from 'moment';
 import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TextField from '../../shared/TextField';
@@ -9,6 +11,7 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { SelectFilter } from '../core/SelectFilter';
 import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
+import { createHandleFilterChange } from '../../utils/utils';
 
 const StyledTextField = styled(TextField)`
   flex: 1;
@@ -21,12 +24,20 @@ interface RegistrationFiltersProps {
   onFilterChange;
   filter;
 }
-export function RegistrationFilters({
+export const RegistrationFilters = ({
   onFilterChange,
   filter,
-}: RegistrationFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+}: RegistrationFiltersProps): React.ReactElement => {
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+
   const { t } = useTranslation();
   const { data: registrationChoicesData } = useRegistrationChoicesQuery();
   if (!registrationChoicesData) {
@@ -39,7 +50,7 @@ export function RegistrationFilters({
         variant='outlined'
         label={t('Search')}
         margin='dense'
-        onChange={(e) => handleFilterChange(e, 'search')}
+        onChange={(e) => handleFilterChange('search', e.target.value)}
         value={filter.search}
         InputProps={{
           startAdornment: (
@@ -51,18 +62,22 @@ export function RegistrationFilters({
       />
       <DatePickerFilter
         label={t('Import Date')}
-        onChange={(date) => onFilterChange({ ...filter, importDate: date })}
+        onChange={(date) =>
+          handleFilterChange('importDate', moment(date).format('YYYY-MM-DD'))
+        }
         value={filter.importDate}
       />
       <AssigneeAutocomplete
-        onFilterChange={onFilterChange}
         name='importedBy'
+        value={filter.importedBy}
+        onFilterChange={onFilterChange}
+        filter={filter}
         label={t('Imported By')}
       />
       <SelectFilter
         value={filter.status}
         label={t('Status')}
-        onChange={(e) => handleFilterChange(e, 'status')}
+        onChange={(e) => handleFilterChange('status', e.target.value)}
       >
         <MenuItem value=''>
           <em>{t('None')}</em>
@@ -77,4 +92,4 @@ export function RegistrationFilters({
       </SelectFilter>
     </ContainerWithBorder>
   );
-}
+};
