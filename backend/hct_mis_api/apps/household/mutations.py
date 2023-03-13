@@ -1,12 +1,13 @@
 from typing import Any
 
-import graphene
 from django.core.exceptions import ValidationError
+
+import graphene
 
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.household.models import Individual, FOSTER_CHILD, Document
-from hct_mis_api.apps.household.schema import IndividualNode, DocumentNode
+from hct_mis_api.apps.household.models import FOSTER_CHILD, Document, Individual
+from hct_mis_api.apps.household.schema import DocumentNode, IndividualNode
 
 
 class ConfirmFosterChildRelationMutation(graphene.Mutation):
@@ -20,7 +21,7 @@ class ConfirmFosterChildRelationMutation(graphene.Mutation):
     def mutate(cls, root: Any, info: Any, individual_id: str) -> "ConfirmFosterChildRelationMutation":
         decoded_individual_id = decode_id_string(individual_id)
         individual = Individual.objects.filter(id=decoded_individual_id).first()
-        if not(individual or individual.relationship != FOSTER_CHILD):
+        if not (individual or individual.relationship != FOSTER_CHILD):
             raise ValidationError("Individual does not exist or is not in foster child relationship")
 
         individual.mark_relationship_as_confirmed()
