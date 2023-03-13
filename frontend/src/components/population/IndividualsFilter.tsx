@@ -38,6 +38,7 @@ export const IndividualsFilter = ({
 
   const handleFilterChange = createHandleFilterChange(
     onFilterChange,
+    filter,
     history,
     location,
   );
@@ -58,6 +59,7 @@ export const IndividualsFilter = ({
             name='adminArea'
             value={filter.adminArea}
             onFilterChange={onFilterChange}
+            filter={filter}
           />
         </Grid>
         <Grid item>
@@ -104,7 +106,7 @@ export const IndividualsFilter = ({
           />
         </Grid>
         <Grid item>
-          {/* <SelectFilter
+          <SelectFilter
             onChange={(e) => handleFilterChange('flags', e.target.value)}
             label={t('Flags')}
             multiple
@@ -123,7 +125,7 @@ export const IndividualsFilter = ({
                 {each.name}
               </MenuItem>
             ))}
-          </SelectFilter> */}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <SelectFilter

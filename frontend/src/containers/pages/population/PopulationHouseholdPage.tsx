@@ -34,7 +34,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   };
 
   const [filter, setFilter] = useState(
-    getFilterFromQueryParams(initialFilter, location),
+    getFilterFromQueryParams(location, initialFilter),
   );
   console.log('filter in PopulationHouseholdPage', filter);
   const debouncedFilter = useDebounce(filter, 500);

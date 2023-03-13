@@ -43,6 +43,7 @@ export const HouseholdFilters = ({
 
   const handleFilterChange = createHandleFilterChange(
     onFilterChange,
+    filter,
     history,
     location,
   );
@@ -102,6 +103,7 @@ export const HouseholdFilters = ({
             name='adminArea'
             value={filter.adminArea}
             onFilterChange={onFilterChange}
+            filter={filter}
           />
         </Grid>
         <Grid item>

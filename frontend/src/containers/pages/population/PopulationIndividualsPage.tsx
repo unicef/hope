@@ -36,7 +36,7 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
     orderBy: 'unicef_id',
   };
   const [filter, setFilter] = useState(
-    getFilterFromQueryParams(initialFilter, location),
+    getFilterFromQueryParams(location, initialFilter),
   );
   console.log('filter in PopulationIndividualsPage', filter);
 
