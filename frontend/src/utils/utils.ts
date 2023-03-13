@@ -704,7 +704,8 @@ export const getFilterFromQueryParams = (
     if (key in filter) {
       const existingValue = filter[key];
       if (Array.isArray(existingValue)) {
-        filter[key] = [...existingValue, value];
+        const values = value.split(',');
+        filter[key] = [...existingValue, ...values];
       } else {
         filter[key] = value;
       }
@@ -712,6 +713,7 @@ export const getFilterFromQueryParams = (
   }
   return filter;
 };
+
 export const setQueryParam = (
   key: string,
   value: string,
@@ -738,25 +740,20 @@ export const setFilterToQueryParams = (
   Object.entries(filter).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       if (Array.isArray(value)) {
-        const existingValues = params.getAll(key);
-        existingValues.forEach((val) => {
-          if (!value.includes(val)) {
-            params.delete(key);
-            params.append(key, val);
-          }
-        });
+        // remove all existing params for this key
+        params.delete(key);
+
+        // add each value as a separate param
         value.forEach((val) => {
-          if (
-            val !== null &&
-            val !== undefined &&
-            !existingValues.includes(val)
-          ) {
+          if (val !== null && val !== undefined) {
             params.append(key, val);
           }
         });
       } else {
         params.set(key, value);
       }
+    } else {
+      params.delete(key);
     }
   });
   const search = params.toString();
@@ -777,7 +774,23 @@ export const createHandleFilterChange = (
     };
     filterFromQueryParams = newFilter;
     onFilterChange(newFilter);
-    setFilterToQueryParams(newFilter, history, location);
+
+    // Update searchParam based on value
+    const params = new URLSearchParams(location.search);
+    if (
+      value === '' ||
+      value === null ||
+      value === undefined ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      params.delete(key);
+    } else if (Array.isArray(value)) {
+      params.set(key, value.join(','));
+    } else {
+      params.set(key, value);
+    }
+    const search = params.toString();
+    history.push({ search });
   };
   return handleFilterChange;
 };
