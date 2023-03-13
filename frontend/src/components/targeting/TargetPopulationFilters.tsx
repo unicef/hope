@@ -22,11 +22,11 @@ interface TargetPopulationFiltersProps {
   filter;
   programs: ProgramNode[];
 }
-export function TargetPopulationFilters({
+export const TargetPopulationFilters = ({
   onFilterChange,
   filter,
   programs,
-}: TargetPopulationFiltersProps): React.ReactElement {
+}: TargetPopulationFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
@@ -106,4 +106,4 @@ export function TargetPopulationFilters({
       </Grid>
     </ContainerWithBorder>
   );
-}
+};
