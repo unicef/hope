@@ -1,4 +1,5 @@
 import { Grid, MenuItem, Paper } from '@material-ui/core';
+import { useHistory, useLocation } from 'react-router-dom';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
@@ -8,6 +9,7 @@ import { NumberTextField } from '../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
+import { createHandleFilterChange } from '../../../utils/utils';
 
 const Container = styled(Paper)`
   display: flex;
@@ -28,13 +30,20 @@ interface ProgrammesFilterProps {
   filter;
   choicesData: ProgrammeChoiceDataQuery;
 }
-export function ProgrammesFilters({
+export const ProgrammesFilters = ({
   onFilterChange,
   filter,
   choicesData,
-}: ProgrammesFilterProps): React.ReactElement {
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+}: ProgrammesFilterProps): React.ReactElement => {
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
 
   return (
     <Container>
@@ -45,13 +54,13 @@ export function ProgrammesFilters({
               <SearchTextField
                 label='Search'
                 value={filter.search}
-                onChange={(e) => handleFilterChange(e, 'search')}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
                 data-cy='filters-search'
               />
             </Grid>
             <Grid item>
               <SelectFilter
-                onChange={(e) => handleFilterChange(e, 'status')}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
                 label='Status'
                 value={filter.status}
               >
@@ -71,10 +80,10 @@ export function ProgrammesFilters({
               <DatePickerFilter
                 label='Start Date'
                 onChange={(date) =>
-                  onFilterChange({
-                    ...filter,
-                    startDate: date ? moment(date).format('YYYY-MM-DD') : null,
-                  })
+                  handleFilterChange(
+                    'startDate',
+                    moment(date).format('YYYY-MM-DD'),
+                  )
                 }
                 value={filter.startDate}
               />
@@ -83,19 +92,20 @@ export function ProgrammesFilters({
               <DatePickerFilter
                 label='End Date'
                 onChange={(date) =>
-                  onFilterChange({
-                    ...filter,
-                    endDate: date ? moment(date).format('YYYY-MM-DD') : null,
-                  })
+                  handleFilterChange(
+                    'endDate',
+                    moment(date).format('YYYY-MM-DD'),
+                  )
                 }
                 value={filter.endDate}
               />
             </Grid>
             <Grid item>
               <SelectFilter
-                onChange={(e) => handleFilterChange(e, 'sector')}
+                onChange={(e) => handleFilterChange('sector', e.target.value)}
                 label='Sector'
                 value={filter.sector}
+                multiple
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -117,31 +127,19 @@ export function ProgrammesFilters({
               <NumberTextField
                 topLabel='Num. of Households'
                 placeholder='From'
-                value={filter.numberOfHouseholds.min}
+                value={filter.numberOfHouseholdsMin}
                 onChange={(e) =>
-                  onFilterChange({
-                    ...filter,
-                    numberOfHouseholds: {
-                      ...filter.numberOfHouseholds,
-                      min: e.target.value,
-                    },
-                  })
+                  handleFilterChange('numberOfHouseholdsMin', e.target.value)
                 }
                 icon={<GroupIcon />}
               />
             </Grid>
             <Grid item>
               <NumberTextField
-                value={filter.numberOfHouseholds.max}
+                value={filter.numberOfHouseholdsMax}
                 placeholder='To'
                 onChange={(e) =>
-                  onFilterChange({
-                    ...filter,
-                    numberOfHouseholds: {
-                      ...filter.numberOfHouseholds,
-                      max: e.target.value,
-                    },
-                  })
+                  handleFilterChange('numberOfHouseholdsMax', e.target.value)
                 }
                 icon={<GroupIcon />}
               />
@@ -149,31 +147,19 @@ export function ProgrammesFilters({
             <Grid item>
               <NumberTextField
                 topLabel='Budget (USD)'
-                value={filter.budget.min}
+                value={filter.budgetMin}
                 placeholder='From'
                 onChange={(e) =>
-                  onFilterChange({
-                    ...filter,
-                    budget: {
-                      ...filter.budget,
-                      min: e.target.value,
-                    },
-                  })
+                  handleFilterChange('budgetMin', e.target.value)
                 }
               />
             </Grid>
             <Grid item>
               <NumberTextField
-                value={filter.budget.max}
+                value={filter.budgetMax}
                 placeholder='To'
                 onChange={(e) =>
-                  onFilterChange({
-                    ...filter,
-                    budget: {
-                      ...filter.budget,
-                      max: e.target.value,
-                    },
-                  })
+                  handleFilterChange('budgetMax', e.target.value)
                 }
               />
             </Grid>
@@ -182,4 +168,4 @@ export function ProgrammesFilters({
       </Grid>
     </Container>
   );
-}
+};
