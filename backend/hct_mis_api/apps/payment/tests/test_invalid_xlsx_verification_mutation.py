@@ -23,7 +23,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestXlsxVerificationMarkAsInvalid(APITestCase):
-
     INVALID_MUTATION = """
         mutation invalidPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
           invalidPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {

@@ -4,6 +4,7 @@ import typing
 from typing import Any, Iterable, List, Optional, Union
 
 import factory
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -53,7 +54,7 @@ def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
     return [min]
 
 
-class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
+class TargetingCriteriaRuleFilterFactory(DjangoModelFactory):
     field_name = factory.fuzzy.FuzzyChoice(
         ["size", "residence_status"],
     )
@@ -64,17 +65,17 @@ class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
         model = TargetingCriteriaRuleFilter
 
 
-class TargetingCriteriaRuleFactory(factory.DjangoModelFactory):
+class TargetingCriteriaRuleFactory(DjangoModelFactory):
     class Meta:
         model = TargetingCriteriaRule
 
 
-class TargetingCriteriaFactory(factory.DjangoModelFactory):
+class TargetingCriteriaFactory(DjangoModelFactory):
     class Meta:
         model = TargetingCriteria
 
 
-class TargetPopulationFactory(factory.DjangoModelFactory):
+class TargetPopulationFactory(DjangoModelFactory):
     class Meta:
         model = TargetPopulation
 
@@ -102,7 +103,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
                 self.households.add(household)
 
 
-class HouseholdSelectionFactory(factory.DjangoModelFactory):
+class HouseholdSelectionFactory(DjangoModelFactory):
     class Meta:
         model = HouseholdSelection
 

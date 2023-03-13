@@ -46,12 +46,11 @@ class TestPowerQuery(TestCase):
             self.client.login(username=self.user1.username, password="password")
             with user_grant_office_permission(self.user1, self.ba1, "power_query.view_reportdocument"):
                 response = self.client.get(url)
-                self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_access_forbidden(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:document", args=[self.report1.pk, self.report1.documents.first().pk])
             self.client.login(username=self.user2.username, password="password")
-
             response = self.client.get(url)
             self.assertEqual(response.status_code, 403)

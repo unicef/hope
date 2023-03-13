@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 import factory
+from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User, UserGroup
@@ -15,7 +16,7 @@ from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
 from hct_mis_api.apps.power_query.models import Formatter, Parametrizer, Query, Report
 
 
-class GroupFactory(factory.DjangoModelFactory):
+class GroupFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Group%s" % x)
 
     class Meta:
@@ -23,13 +24,13 @@ class GroupFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class ContentTypeFactory(factory.DjangoModelFactory):
+class ContentTypeFactory(DjangoModelFactory):
     class Meta:
         model = ContentType
         django_get_or_create = ("app_label", "model")
 
 
-class QueryFactory(factory.DjangoModelFactory):
+class QueryFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Query%s" % x)
     owner = factory.SubFactory(UserFactory, is_superuser=True, is_staff=True)
     target = factory.Iterator(ContentType.objects.filter(app_label="auth", model="permission"))
@@ -40,7 +41,7 @@ class QueryFactory(factory.DjangoModelFactory):
         # django_get_or_create = ("name",)
 
 
-class FormatterFactory(factory.DjangoModelFactory):
+class FormatterFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Formatter%s" % x)
     content_type = "html"
 
@@ -49,7 +50,7 @@ class FormatterFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class ReportFactory(factory.DjangoModelFactory):
+class ReportFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "Report%s" % x)
     query = factory.Iterator(Query.objects.all())
     formatter = factory.Iterator(Formatter.objects.all())
@@ -60,7 +61,7 @@ class ReportFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class ParametrizerFactory(factory.DjangoModelFactory):
+class ParametrizerFactory(DjangoModelFactory):
     code = "active-business-areas"
     name = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["name"])
     value = factory.Sequence(lambda x: SYSTEM_PARAMETRIZER["active-business-areas"]["value"])

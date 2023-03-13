@@ -3,7 +3,6 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestProgramChoices(APITestCase):
-
     QUERY_PROGRAM_STATUS_CHOICES = """
     query ProgramStatusChoices {
         programStatusChoices{
