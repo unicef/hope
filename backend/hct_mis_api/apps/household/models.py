@@ -177,6 +177,7 @@ IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
 IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
 IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
 IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
+IDENTIFICATION_TYPE_FOSTER_CHILD = "FOSTER_CHILD"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -187,6 +188,7 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
     (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
     (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
+    (IDENTIFICATION_TYPE_FOSTER_CHILD, _("Foster Child")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -607,6 +609,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    cleared = models.BooleanField(default=False)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -826,7 +829,7 @@ class Individual(
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
-    certified = models.BooleanField(default=False)
+    relationship_confirmed = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
