@@ -21,7 +21,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AdminAreaAutocomplete({
+export const AdminAreaAutocomplete = ({
   disabled,
   fullWidth,
   name,
@@ -35,7 +35,7 @@ export function AdminAreaAutocomplete({
   onFilterChange: (filters: { [key: string]: string }) => void;
   filter?;
   value?: string;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -133,4 +133,4 @@ export function AdminAreaAutocomplete({
       )}
     />
   );
-}
+};
