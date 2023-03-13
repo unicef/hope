@@ -885,18 +885,19 @@ tzdata = "*"
 
 [[package]]
 name = "django-celery-results"
-version = "2.4.0"
+version = "2.5.0"
 description = "Celery result backends for Django."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django_celery_results-2.4.0-py3-none-any.whl", hash = "sha256:be91307c02fbbf0dda21993c3001c60edb74595444ccd6ad696552fe3689e85b"},
-    {file = "django_celery_results-2.4.0.tar.gz", hash = "sha256:75aa51970db5691cbf242c6a0ff50c8cdf419e265cd0e9b772335d06436c4b99"},
+    {file = "django_celery_results-2.5.0-py3-none-any.whl", hash = "sha256:efb68932bde8938794068a9d0929bea8601ec5f6a4150a7f7ab6e2a83a735938"},
+    {file = "django_celery_results-2.5.0.tar.gz", hash = "sha256:8631fd68158c41afddfc378840ecee2f10ddd7d4879e964f2597f483e4203269"},
 ]
 
 [package.dependencies]
-celery = ">=5.2.3,<6.0"
+celery = ">=5.2.7,<6.0"
+Django = ">=3.2.18"
 
 [[package]]
 name = "django-compressor"
@@ -1117,14 +1118,14 @@ files = [
 
 [[package]]
 name = "django-hijack"
-version = "3.2.6"
+version = "3.2.7"
 description = "django-hijack allows superusers to hijack (=login as) and work on behalf of another user."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-hijack-3.2.6.tar.gz", hash = "sha256:a6df02875c6a653eeb2c0768391587c3ffe711613b8f6cd9e56b9ba62f0b44d9"},
-    {file = "django_hijack-3.2.6-py3-none-any.whl", hash = "sha256:c453d9d37208d7cd78f9b679831ec60ff03160c88bb87e9ac1f49e5c4ada3874"},
+    {file = "django-hijack-3.2.7.tar.gz", hash = "sha256:1293d21d14a46276738bb1a9ecc395e038cbd023289593f5b44fdddda2d50909"},
+    {file = "django_hijack-3.2.7-py3-none-any.whl", hash = "sha256:d7c36a4d1be25340ad0fbb28303757ecde47a4b644456ff3a8163ea88c44aed9"},
 ]
 
 [package.dependencies]
@@ -2144,14 +2145,14 @@ files = [
 
 [[package]]
 name = "ipdb"
-version = "0.13.11"
+version = "0.13.13"
 description = "IPython-enabled pdb"
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "ipdb-0.13.11-py3-none-any.whl", hash = "sha256:f74c2f741c18b909eaf89f19fde973f745ac721744aa1465888ce45813b63a9c"},
-    {file = "ipdb-0.13.11.tar.gz", hash = "sha256:c23b6736f01fd4586cc2ecbebdf79a5eb454796853e1cd8f2ed3b7b91d4a3e93"},
+    {file = "ipdb-0.13.13-py3-none-any.whl", hash = "sha256:45529994741c4ab6d2388bfa5d7b725c2cf7fe9deffabdb8a6113aa5ed449ed4"},
+    {file = "ipdb-0.13.13.tar.gz", hash = "sha256:e3ac6018ef05126d442af680aad863006ec19d02290561ac88b8b1c0b0cfc726"},
 ]
 
 [package.dependencies]
@@ -2913,14 +2914,14 @@ tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "pa
 
 [[package]]
 name = "platformdirs"
-version = "3.1.0"
+version = "3.1.1"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.1.0-py3-none-any.whl", hash = "sha256:13b08a53ed71021350c9e300d4ea8668438fb0046ab3937ac9a29913a1a1350a"},
-    {file = "platformdirs-3.1.0.tar.gz", hash = "sha256:accc3665857288317f32c7bebb5a8e482ba717b474f3fc1d18ca7f9214be0cef"},
+    {file = "platformdirs-3.1.1-py3-none-any.whl", hash = "sha256:e5986afb596e4bb5bde29a79ac9061aa955b94fca2399b7aaac4090860920dd8"},
+    {file = "platformdirs-3.1.1.tar.gz", hash = "sha256:024996549ee88ec1a9aa99ff7f8fc819bb59e2c3477b410d90a16d32d6e707aa"},
 ]
 
 [package.extras]
@@ -4022,14 +4023,14 @@ files = [
 
 [[package]]
 name = "types-redis"
-version = "4.5.1.4"
+version = "4.5.1.5"
 description = "Typing stubs for redis"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-redis-4.5.1.4.tar.gz", hash = "sha256:7660178754d60a4cfacf5b33ee063aa0625311791c62075cd936136627a3f7bf"},
-    {file = "types_redis-4.5.1.4-py3-none-any.whl", hash = "sha256:4ad21473605b9e1f96162b1298383dcbc73daa3bec2abe1fd3e81d077753f9ab"},
+    {file = "types-redis-4.5.1.5.tar.gz", hash = "sha256:f516254bd593023110a38b77e80d5a76a7f033f1d94c53bee09a7d5d0433f34d"},
+    {file = "types_redis-4.5.1.5-py3-none-any.whl", hash = "sha256:43d92b4d6315a45bb0e9a790683ba4448ada88cd1233f3f9886fa6f783f53956"},
 ]
 
 [package.dependencies]
@@ -4130,14 +4131,14 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "1.26.14"
+version = "1.26.15"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 files = [
-    {file = "urllib3-1.26.14-py2.py3-none-any.whl", hash = "sha256:75edcdc2f7d85b137124a6c3c9fc3933cdeaa12ecb9a6a959f22797a0feca7e1"},
-    {file = "urllib3-1.26.14.tar.gz", hash = "sha256:076907bf8fd355cde77728471316625a4d2f7e713c125f51953bb5b3eecf4f72"},
+    {file = "urllib3-1.26.15-py2.py3-none-any.whl", hash = "sha256:aa751d169e23c7479ce47a0cb0da579e3ede798f994f5816a74e4f4500dcea42"},
+    {file = "urllib3-1.26.15.tar.gz", hash = "sha256:8a388717b9476f934a21484e8c8e61875ab60644d29b9b39e11e4b9dc1c6b305"},
 ]
 
 [package.extras]
@@ -4337,14 +4338,14 @@ files = [
 
 [[package]]
 name = "xlsxwriter"
-version = "3.0.8"
+version = "3.0.9"
 description = "A Python module for creating Excel XLSX files."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "XlsxWriter-3.0.8-py3-none-any.whl", hash = "sha256:f5c7491b8450cf49968428f062355de16c9140aa24eafc466c9dfe107610bd44"},
-    {file = "XlsxWriter-3.0.8.tar.gz", hash = "sha256:ec77335fb118c36bc5ed1c89e33904d649e4989df2d7980f7d6a9dd95ee5874e"},
+    {file = "XlsxWriter-3.0.9-py3-none-any.whl", hash = "sha256:5eaaf3c6f791cba1dd1c3065147c35982180f693436093aabe5b7d6c16148e95"},
+    {file = "XlsxWriter-3.0.9.tar.gz", hash = "sha256:7216d39a2075afac7a28cad81f6ac31b0b16d8976bf1b775577d157346f891dd"},
 ]
 
 [[package]]
