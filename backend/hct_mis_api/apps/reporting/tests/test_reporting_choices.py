@@ -12,7 +12,6 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentRecordFacto
 
 
 class TestProgramChoices(APITestCase):
-
     QUERY_REPORT_STATUS_CHOICES = """
     query ReportStatusChoices {
         reportStatusChoices{
