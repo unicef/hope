@@ -18,21 +18,21 @@ import {
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
 
+const initialFilter = {
+  search: '',
+  verificationStatus: [],
+  program: '',
+  serviceProvider: '',
+  deliveryType: '',
+  startDate: null,
+  endDate: null,
+};
+
 export const PaymentVerificationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const location = useLocation();
-
-  const initialFilter = {
-    search: '',
-    verificationStatus: [],
-    program: '',
-    serviceProvider: '',
-    deliveryType: '',
-    startDate: null,
-    endDate: null,
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

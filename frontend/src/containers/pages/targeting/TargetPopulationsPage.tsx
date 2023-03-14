@@ -20,18 +20,19 @@ import {
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 
+const initialFilter = {
+  name: '',
+  status: '',
+  program: '',
+  numIndividualsMin: null,
+  numIndividualsMax: null,
+};
+
 export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const initialFilter = {
-    name: '',
-    status: '',
-    program: '',
-    numIndividualsMin: null,
-    numIndividualsMax: null,
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

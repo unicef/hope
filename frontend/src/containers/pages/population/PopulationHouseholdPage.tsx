@@ -19,19 +19,19 @@ import {
 } from '../../../__generated__/graphql';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
+const initialFilter = {
+  text: '',
+  program: '',
+  residenceStatus: '',
+  adminArea: '',
+  householdSizeMin: '',
+  householdSizeMax: '',
+  orderBy: 'unicef_id',
+};
+
 export const PopulationHouseholdPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-
-  const initialFilter = {
-    text: '',
-    program: '',
-    residenceStatus: '',
-    adminArea: '',
-    householdSizeMin: '',
-    householdSizeMax: '',
-    orderBy: 'unicef_id',
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -85,7 +85,6 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             permissions,
           )}
-          filterOrderBy={filter.orderBy}
         />
       </Box>
     </>

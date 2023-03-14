@@ -11,16 +11,18 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { RegistrationFilters } from '../../../components/rdi/RegistrationFilters';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 
+const initialFilter = {
+  search: '',
+  importDate: null,
+  importedBy: '',
+  status: '',
+};
+
 export const RegistrationDataImportPage = (): React.ReactElement => {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const initialFilter = {
-    search: '',
-    importDate: null,
-    importedBy: '',
-    status: '',
-  };
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
