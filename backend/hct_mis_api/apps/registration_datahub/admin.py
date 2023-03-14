@@ -375,7 +375,6 @@ class AlexisFilter(SimpleListFilter):
 
 
 class CreateRDIForm(forms.Form):
-
     STATUS_TO_IMPORT = "TO_IMPORT"
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
@@ -468,7 +467,6 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
 
     @admin.action(description="Create RDI")
     def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-
         if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
             self.message_user(
                 request,
