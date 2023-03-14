@@ -1,19 +1,17 @@
 import { Box, Button } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { StatusBox } from '../../../core/StatusBox';
 import {
-  paymentPlanBackgroundActionStatusMapping,
   paymentPlanBackgroundActionStatusToColor,
-  paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
+import { PageHeader } from '../../../core/PageHeader';
+import { StatusBox } from '../../../core/StatusBox';
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -52,7 +50,6 @@ export const EditPaymentPlanHeader = ({
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
-              statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
           {paymentPlan.backgroundActionStatus && (
@@ -60,7 +57,6 @@ export const EditPaymentPlanHeader = ({
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
-                statusNameMapping={paymentPlanBackgroundActionStatusMapping}
               />
             </StatusWrapper>
           )}
