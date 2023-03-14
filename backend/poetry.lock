@@ -41,15 +41,21 @@ files = [
 
 [[package]]
 name = "argh"
-version = "0.26.2"
+version = "0.28.1"
 description = "An unobtrusive argparse wrapper with natural syntax"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.8"
 files = [
-    {file = "argh-0.26.2-py2.py3-none-any.whl", hash = "sha256:a9b3aaa1904eeb78e32394cd46c6f37ac0fb4af6dc488daa58971bdc7d7fcaf3"},
-    {file = "argh-0.26.2.tar.gz", hash = "sha256:e9535b8c84dc9571a48999094fda7f33e63c3f1b74f3e5f3ac0105a58405bb65"},
+    {file = "argh-0.28.1-py3-none-any.whl", hash = "sha256:10e7311f3ea54a78a366e5456900d8b81049f44d8d653b524eb90cf7d29a71ee"},
+    {file = "argh-0.28.1.tar.gz", hash = "sha256:b2093086f0e809a3ecc24b64a2145309ee8f56d034936cd59e57c558a357329d"},
 ]
+
+[package.extras]
+completion = ["argcomplete (>=2.0)"]
+docs = ["readthedocs-sphinx-search (==0.2.0)", "sphinx (>=6.1)", "sphinx-pyproject (==0.1.0)", "sphinx_rtd_theme (>=1.2.0)"]
+linters = ["pre-commit (>=3.0.4)"]
+test = ["iocapture (>=0.1.2)", "pytest (>=7.2)", "pytest-cov (>=4.0)", "tox (>=4.4)"]
 
 [[package]]
 name = "asgiref"
@@ -1056,14 +1062,14 @@ six = "*"
 
 [[package]]
 name = "django-environ"
-version = "0.9.0"
+version = "0.10.0"
 description = "A package that allows you to utilize 12factor inspired environment variables to configure your Django application."
 category = "main"
 optional = false
-python-versions = ">=3.4,<4"
+python-versions = ">=3.5,<4"
 files = [
-    {file = "django-environ-0.9.0.tar.gz", hash = "sha256:bff5381533056328c9ac02f71790bd5bf1cea81b1beeb648f28b81c9e83e0a21"},
-    {file = "django_environ-0.9.0-py2.py3-none-any.whl", hash = "sha256:f21a5ef8cc603da1870bbf9a09b7e5577ab5f6da451b843dbcc721a7bca6b3d9"},
+    {file = "django-environ-0.10.0.tar.gz", hash = "sha256:b3559a91439c9d774a9e0c1ced872364772c612cdf6dc919506a2b13f7a77225"},
+    {file = "django_environ-0.10.0-py2.py3-none-any.whl", hash = "sha256:510f8c9c1d0a38b0815f91504270c29440a0cf44fab07f55942fa8d31bbb9be6"},
 ]
 
 [package.extras]
@@ -1088,18 +1094,18 @@ Django = ">=3.2"
 
 [[package]]
 name = "django-filter"
-version = "21.1"
+version = "22.1"
 description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 files = [
-    {file = "django-filter-21.1.tar.gz", hash = "sha256:632a251fa8f1aadb4b8cceff932bb52fe2f826dd7dfe7f3eac40e5c463d6836e"},
-    {file = "django_filter-21.1-py3-none-any.whl", hash = "sha256:f4a6737a30104c98d2e2a5fb93043f36dd7978e0c7ddc92f5998e85433ea5063"},
+    {file = "django-filter-22.1.tar.gz", hash = "sha256:ed473b76e84f7e83b2511bb2050c3efb36d135207d0128dfe3ae4b36e3594ba5"},
+    {file = "django_filter-22.1-py3-none-any.whl", hash = "sha256:ed429e34760127e3520a67f415bec4c905d4649fbe45d0d6da37e6ff5e0287eb"},
 ]
 
 [package.dependencies]
-Django = ">=2.2"
+Django = ">=3.2"
 
 [[package]]
 name = "django-flags"
@@ -1122,13 +1128,13 @@ testing = ["coverage (>=3.7.0)", "django-debug-toolbar (>=3.2,<4)", "jinja2"]
 
 [[package]]
 name = "django-front-door"
-version = "0.2.0"
+version = "0.10.0"
 description = ""
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-front-door-0.2.0.tar.gz", hash = "sha256:ec551bb31e5e0f5e1ba892257c04327a17834fab99aa2c0923ac4371f3c8d802"},
+    {file = "django-front-door-0.10.0.tar.gz", hash = "sha256:6c169a829b86d2a8e4bb1365af8a04d54cd5ef1787b0e9c720231c0bdb51abf1"},
 ]
 
 [package.dependencies]
@@ -1273,14 +1279,14 @@ Django = ">=3.2"
 
 [[package]]
 name = "django-mptt"
-version = "0.13.4"
+version = "0.14.0"
 description = "Utilities for implementing Modified Preorder Tree Traversal with your Django Models and working with trees of Model instances."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "django-mptt-0.13.4.tar.gz", hash = "sha256:80c9fb34df7796a4e5af0cb6b8ade3697555b1aa438bd07a01f32b3ab5202b63"},
-    {file = "django_mptt-0.13.4-py3-none-any.whl", hash = "sha256:75745b621ae31d97957ed924155a750dfa8cacd9543799ada2d713fd6bc3f5c7"},
+    {file = "django-mptt-0.14.0.tar.gz", hash = "sha256:2c92a2b1614c53086278795ccf50580cf1f9b8564f3ff03055dd62bab5987711"},
+    {file = "django_mptt-0.14.0-py3-none-any.whl", hash = "sha256:d9a87433ab0e4f35247c6f6d5a93ace6990860a4ba8796f815d185f773b9acfc"},
 ]
 
 [package.dependencies]
@@ -1306,14 +1312,14 @@ django = ">=1.4"
 
 [[package]]
 name = "django-phonenumber-field"
-version = "6.4.0"
+version = "7.0.2"
 description = "An international phone number field for django models."
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "django-phonenumber-field-6.4.0.tar.gz", hash = "sha256:72a3e7a3e7493bf2a12c07a3bc77ce89813acc16592bf04d0eee3b5a452097ed"},
-    {file = "django_phonenumber_field-6.4.0-py3-none-any.whl", hash = "sha256:a31b4f05ac0ff898661516c84940f83adb5cdcf0ae4b9b1d31bb8ad3ff345b58"},
+    {file = "django-phonenumber-field-7.0.2.tar.gz", hash = "sha256:de3e47b986b4959949762c16fd8fe26b3e462ef3e5531ed00950bd20c698576a"},
+    {file = "django_phonenumber_field-7.0.2-py3-none-any.whl", hash = "sha256:9edad2b2602af25f2aefc73c4cf53eaf7abf9e17d73c1c4372bd3052bebb26f9"},
 ]
 
 [package.dependencies]
@@ -1429,24 +1435,25 @@ dev = ["bump2version", "django-constance", "django-environ", "django-picklefield
 
 [[package]]
 name = "django-sql-explorer"
-version = "2.5"
+version = "3.1.1"
 description = "A pluggable app that allows users (admins) to execute SQL, view, and export the results."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "django-sql-explorer-2.5.tar.gz", hash = "sha256:be6439b67aac3bdb87795e60f749d0564b0f62b56af0bd8ab3e1cfdbae9f87a2"},
-    {file = "django_sql_explorer-2.5-py3-none-any.whl", hash = "sha256:8767c384926dca6ecc869186a40540bcd1504e34dde7bc1ceb460b6fad5a8675"},
+    {file = "django-sql-explorer-3.1.1.tar.gz", hash = "sha256:95b217983b87eeff6287d9786755bb5c1e4358a8ed6602845f3346becdb434c1"},
+    {file = "django_sql_explorer-3.1.1-py3-none-any.whl", hash = "sha256:1bfdeee2b679d81756062ed161fb827b56431f1640216784faebb5666d5f8d26"},
 ]
 
 [package.dependencies]
-Django = ">=2.2.27"
+Django = ">=3.2.12"
 sqlparse = ">=0.4.0"
-xlsxwriter = {version = ">=1.2.1", optional = true, markers = "extra == \"xls\""}
+xlsxwriter = {version = ">=1.3.6", optional = true, markers = "extra == \"xls\""}
 
 [package.extras]
 charts = ["matplotlib (<4)", "seaborn (<0.12)"]
-xls = ["xlsxwriter (>=1.2.1)"]
+snapshots = ["boto3 (>=1.20.0)", "celery (>=4.0)"]
+xls = ["xlsxwriter (>=1.3.6)"]
 
 [[package]]
 name = "django-storages"
@@ -3476,22 +3483,24 @@ rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
 name = "responses"
-version = "0.21.0"
+version = "0.22.0"
 description = "A utility library for mocking out the `requests` Python library."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "responses-0.21.0-py3-none-any.whl", hash = "sha256:2dcc863ba63963c0c3d9ee3fa9507cbe36b7d7b0fccb4f0bdfd9e96c539b1487"},
-    {file = "responses-0.21.0.tar.gz", hash = "sha256:b82502eb5f09a0289d8e209e7bad71ef3978334f56d09b444253d5ad67bf5253"},
+    {file = "responses-0.22.0-py3-none-any.whl", hash = "sha256:dcf294d204d14c436fddcc74caefdbc5764795a40ff4e6a7740ed8ddbf3294be"},
+    {file = "responses-0.22.0.tar.gz", hash = "sha256:396acb2a13d25297789a5866b4881cf4e46ffd49cc26c43ab1117f40b973102e"},
 ]
 
 [package.dependencies]
-requests = ">=2.0,<3.0"
+requests = ">=2.22.0,<3.0"
+toml = "*"
+types-toml = "*"
 urllib3 = ">=1.25.10"
 
 [package.extras]
-tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asyncio", "pytest-cov", "pytest-localserver", "types-mock", "types-requests"]
+tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "types-requests"]
 
 [[package]]
 name = "rjsmin"
@@ -4014,6 +4023,18 @@ doc = ["sphinx", "sphinx_rtd_theme"]
 test = ["coverage[toml]", "pytest", "pytest-cov", "pytest-flake8", "pytest-isort"]
 
 [[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+category = "dev"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
+    {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
+]
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -4146,6 +4167,18 @@ files = [
 
 [package.dependencies]
 types-urllib3 = "<1.27"
+
+[[package]]
+name = "types-toml"
+version = "0.10.8.5"
+description = "Typing stubs for toml"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-toml-0.10.8.5.tar.gz", hash = "sha256:bf80fce7d2d74be91148f47b88d9ae5adeb1024abef22aa2fdbabc036d6b8b3c"},
+    {file = "types_toml-0.10.8.5-py3-none-any.whl", hash = "sha256:2432017febe43174af0f3c65f03116e3d3cf43e7e1406b8200e106da8cf98992"},
+]
 
 [[package]]
 name = "types-urllib3"
@@ -4568,4 +4601,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.*"
-content-hash = "1182d21aa51fe0a903a68c719fbc9bc4acc6777e81c6e226be605e19959ccb50"
+content-hash = "2d1c445b478530c8655a4cea33cc3c8bde83c6503ee850580a5a204b30e26a91"
