@@ -11,9 +11,6 @@ class TargetPopulationForm(forms.ModelForm):
 
     def clean_program(self) -> Program:
         program = self.cleaned_data["program"]
-        import ipdb
-
-        ipdb.set_trace()
         if program is None or program.status == "FINISHED":
             raise forms.ValidationError("Program must be set and active")
         elif program.business_area != self.cleaned_data["business_area"]:
