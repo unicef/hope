@@ -140,8 +140,6 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "registration_data_import": cls.rdi_hub,
                 "phone_no": "wrong-phone",
                 "phone_no_alternative": "definitely-wrong-phone",
-                "phone_no_valid": None,
-                "phone_no_alternative_valid": None,
                 "household": imported_household,
             },
             {
