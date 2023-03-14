@@ -25,7 +25,6 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 
 class TestDiscardVerificationMutation(APITestCase):
-
     DISCARD_MUTATION = """
         mutation DiscardVerification($paymentVerificationPlanId: ID!){
           discardPaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
