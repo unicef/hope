@@ -115,7 +115,7 @@ class Query(graphene.ObjectType):
             (GrievanceTicket, "created_at"),
         ]
         years_list_from_db = []
-        for (model_name, field_name) in models:
+        for model_name, field_name in models:
             if business_area_slug == "global":
                 years_list_from_db.extend(
                     list(
