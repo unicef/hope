@@ -646,7 +646,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         self.document_number = "GDPR REMOVED"
         self.save()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         try:
             old_object = Document.objects.get(id=self.id)
             if self.confirmed != old_object.confirmed:
