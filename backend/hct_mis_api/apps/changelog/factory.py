@@ -1,4 +1,4 @@
-import factory
+from factory.django import DjangoModelFactory
 from faker import Faker
 
 from hct_mis_api.apps.changelog.models import Changelog
@@ -6,7 +6,7 @@ from hct_mis_api.apps.changelog.models import Changelog
 faker = Faker()
 
 
-class ChangelogFactory(factory.DjangoModelFactory):
+class ChangelogFactory(DjangoModelFactory):
     class Meta:
         model = Changelog
 
