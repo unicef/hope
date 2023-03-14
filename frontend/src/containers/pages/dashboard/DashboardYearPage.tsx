@@ -22,6 +22,7 @@ import {
   useGlobalAreaChartsLazyQuery,
 } from '../../../__generated__/graphql';
 import { TotalAmountTransferredByCountrySection } from '../../../components/dashboard/sections/TotalAmountTransferredByCountrySection';
+import { decodeIdString } from '../../../utils/utils';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -63,7 +64,7 @@ export function DashboardYearPage({
       businessAreaSlug: businessArea,
       ...(!isGlobal && {
         program: filter.program,
-        administrativeArea: filter.administrativeArea?.node?.id,
+        administrativeArea: filter.administrativeArea,
       }),
     },
     fetchPolicy: 'cache-and-network',
