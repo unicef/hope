@@ -46,7 +46,6 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 if TYPE_CHECKING:
-
     from xlrd.sheet import Sheet
 
 

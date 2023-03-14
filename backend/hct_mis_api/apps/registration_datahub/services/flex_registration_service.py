@@ -330,7 +330,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
-
         household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
             "flex_registrations_record": record,

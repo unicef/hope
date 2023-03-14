@@ -898,7 +898,7 @@ class DeduplicateTask:
         )
 
         possible_duplicates_through_dict = defaultdict(set)
-        for (ticked_details_id, individual_id, main_individual_id) in possible_duplicates_through_existing_list:
+        for ticked_details_id, individual_id, main_individual_id in possible_duplicates_through_existing_list:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 

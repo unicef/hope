@@ -215,7 +215,6 @@ def merge_registration_data_import_task(registration_data_import_id: str) -> boo
 @log_start_and_end
 @sentry_tags
 def rdi_deduplication_task(registration_data_import_id: str) -> None:
-
     try:
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
