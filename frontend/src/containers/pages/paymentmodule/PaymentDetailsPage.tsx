@@ -10,6 +10,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
+  PaymentPlanStatus,
   PaymentStatus,
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
@@ -28,6 +29,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const paymentPlanStatus = data?.payment?.parent?.status;
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   if (loading || caLoading) return <LoadingComponent />;
@@ -49,7 +51,11 @@ export const PaymentDetailsPage = (): React.ReactElement => {
   ];
 
   const renderButton = (): React.ReactElement | null => {
-    if (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions)) {
+    if (
+      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
+        paymentPlanStatus === PaymentPlanStatus.Accepted) ||
+      paymentPlanStatus === PaymentPlanStatus.Finished
+    ) {
       const ButtonComponent =
         payment.status === PaymentStatus.ForceFailed
           ? RevertForceFailedButton
