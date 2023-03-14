@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import {
   hasPermissionInModule,
   hasPermissions,
@@ -16,18 +16,21 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 
-export function GrievancesTablePage(): React.ReactElement {
+export const GrievancesTablePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-
   const { id, cashPlanId } = useParams();
-  const [filter, setFilter] = useState({
+  const location = useLocation();
+
+  const initialFilter = {
     search: '',
     status: '',
     fsp: '',
-    createdAtRange: '',
+    createdAtRangeMin: undefined,
+    createdAtRangeMax: undefined,
     category: '',
     issueType: '',
     assignedTo: '',
@@ -37,7 +40,10 @@ export function GrievancesTablePage(): React.ReactElement {
     scoreMin: '',
     scoreMax: '',
     preferredLanguage: '',
-  });
+  };
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: choicesData,
@@ -72,4 +78,4 @@ export function GrievancesTablePage(): React.ReactElement {
       <GrievancesTable filter={debouncedFilter} businessArea={businessArea} />
     </>
   );
-}
+};
