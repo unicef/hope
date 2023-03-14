@@ -1,5 +1,6 @@
 import { Tab, Tabs, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
 import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
@@ -12,16 +13,22 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
 import { DashboardYearPage } from './DashboardYearPage';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 
-export function DashboardPage(): React.ReactElement {
+export const DashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filter, setFilter] = useState({
+  const initialFilter = {
     program: '',
     administrativeArea: '',
-  });
+  };
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
   const { data, loading } = useDashboardYearsChoiceDataQuery({
     variables: { businessArea },
   });
@@ -86,4 +93,4 @@ export function DashboardPage(): React.ReactElement {
       )}
     </>
   );
-}
+};
