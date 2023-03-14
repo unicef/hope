@@ -15,16 +15,18 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
 import { DashboardYearPage } from './DashboardYearPage';
 
+const initialFilter = {
+  program: '',
+  administrativeArea: '',
+};
+
 export const DashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
-  const initialFilter = {
-    program: '',
-    administrativeArea: '',
-  };
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
