@@ -13,20 +13,20 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
-export function PaymentModulePage(): React.ReactElement {
+const initialFilter = {
+  search: null,
+  dispersionStartDate: null,
+  dispersionEndDate: null,
+  status: [],
+  totalEntitledQuantityFrom: null,
+  totalEntitledQuantityTo: null,
+};
+
+export const PaymentModulePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const location = useLocation();
-
-  const initialFilter = {
-    search: null,
-    dispersionStartDate: null,
-    dispersionEndDate: null,
-    status: [],
-    totalEntitledQuantityFrom: null,
-    totalEntitledQuantityTo: null,
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -66,4 +66,4 @@ export function PaymentModulePage(): React.ReactElement {
       </TableWrapper>
     </>
   );
-}
+};

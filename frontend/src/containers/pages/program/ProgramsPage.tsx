@@ -14,20 +14,20 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 
+const initialFilter = {
+  search: '',
+  startDate: undefined,
+  endDate: undefined,
+  status: '',
+  sector: [],
+  numberOfHouseholdsMin: '',
+  numberOfHouseholdsMax: '',
+  budgetMin: '',
+  budgetMax: '',
+};
+
 export const ProgramsPage = (): React.ReactElement => {
   const location = useLocation();
-
-  const initialFilter = {
-    search: '',
-    startDate: undefined,
-    endDate: undefined,
-    status: '',
-    sector: [],
-    numberOfHouseholdsMin: '',
-    numberOfHouseholdsMax: '',
-    budgetMin: '',
-    budgetMax: '',
-  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
