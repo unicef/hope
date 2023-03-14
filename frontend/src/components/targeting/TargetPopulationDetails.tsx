@@ -1,10 +1,7 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  targetPopulationStatusMapping,
-  targetPopulationStatusToColor,
-} from '../../utils/utils';
+import { targetPopulationStatusToColor } from '../../utils/utils';
 import { TargetPopulationQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
@@ -54,7 +51,6 @@ export function TargetPopulationDetails({
               <StatusBox
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
-                statusNameMapping={targetPopulationStatusMapping}
               />
             </LabelizedField>
           </Grid>

@@ -242,14 +242,14 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+                class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-gzVnrw hnJLim"
+                    class="sc-ifAKCX hQSvGu"
                     href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6OTlmZGJhYmQtMzc4Ni00MjQ0LWEwNGQtMjIyYTI5MGZmNzRh"
                   >
                     frfr
@@ -265,7 +265,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                       class="sc-bZQynM cnJqP"
                       data-cy="status-container"
                     >
-                      Locked
+                      LOCKED
                     </div>
                   </div>
                 </td>
