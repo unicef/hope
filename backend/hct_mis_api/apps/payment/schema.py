@@ -1031,7 +1031,7 @@ class Query(graphene.ObjectType):
         additional_filters: Q = chart_create_filter_query_for_payment_verification_gfk(
             filters,
             program_id_path="payment__parent__program__id,payment_record__parent__program__id",
-            administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
+            administrative_area_path="payment__household__admin_area,payment_record__household__admin_area"
         )
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,

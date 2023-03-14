@@ -1,19 +1,19 @@
 import { Tab, Tabs, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
-import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
-import { ExportModal } from '../../../components/dashboard/ExportModal';
+import { useLocation } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
+import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
+import { ExportModal } from '../../../components/dashboard/ExportModal';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
 import { DashboardYearPage } from './DashboardYearPage';
-import { getFilterFromQueryParams } from '../../../utils/utils';
 
 export const DashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
