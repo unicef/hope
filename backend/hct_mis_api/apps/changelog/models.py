@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Changelog(models.Model):
-
     # Fields
     description = models.TextField(blank=True)
     version = models.CharField(max_length=30, help_text=_("HOPE version"))

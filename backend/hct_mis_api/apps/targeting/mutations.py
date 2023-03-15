@@ -95,7 +95,6 @@ class ValidatedMutation(PermissionMutation):
 
 
 class UpdateTargetPopulationInput(graphene.InputObjectType):
-
     id = graphene.ID(required=True)
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
