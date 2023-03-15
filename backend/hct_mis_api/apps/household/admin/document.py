@@ -4,6 +4,7 @@ from typing import Any
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from django.utils import timezone
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
@@ -26,7 +27,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     autocomplete_fields = ["type"]
-    exclude = ("cleared_by",)
+    exclude = ("cleared_date", "cleared_by")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "type", "country")
@@ -36,6 +37,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             cleared = form.cleaned_data["cleared"]
             obj.individual.set_relationship_confirmed_flag(cleared)
             obj.cleared_by = request.user
+            obj.cleared_date = timezone.now()
         return super(DocumentAdmin, self).save_model(request, obj, form, change)
 
 
