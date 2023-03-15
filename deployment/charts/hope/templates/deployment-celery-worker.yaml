@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hope.fullname" . }}-celery-worker
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+spec:
+  replicas: {{ int (.Values.celery.replicaCount) }}
+  selector:
+    matchLabels:
+      {{- include "hope.selectorLabels" . | nindent 6 }}
+      hope/service: celery-worker
+  template:
+    metadata:
+    {{- with .Values.celery.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "hope.selectorLabels" . | nindent 8 }}
+        hope/service: celery-worker
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hope.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-celery-worker-low-priority
+          args: 
+            - celery  -A hct_mis_api.apps.core.celery worker -n low-priority-$HOSTNAME -E -l info --max-tasks-per-child=4 -Q  default
+          command:
+            - sh
+            - -c
+          securityContext:
+            {{- toYaml .Values.celery.securityContext | nindent 12 }}
+          image: "{{ .Values.celery.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+          resources:
+            {{- toYaml .Values.celery.resources | nindent 12 }}
+        - name: {{ .Chart.Name }}-celery-worker-high-priority
+          args:
+            - celery -A hct_mis_api.apps.core.celery worker  -n high-priority-$HOSTNAME  -E -l info --max-tasks-per-child=4 -Q  priority
+          command:
+            - sh
+            - -c
+          securityContext:
+            {{- toYaml .Values.celery.securityContext | nindent 12 }}
+          image: "{{ .Values.celery.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+          resources:
+            {{- toYaml .Values.celery.resources | nindent 12 }}
+      {{- with .Values.celery.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celery.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celery.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
