@@ -612,7 +612,8 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     cleared = models.BooleanField(default=False)
-    confirmed = models.BooleanField(default=False)
+    cleared_date = models.DateTimeField(auto_now=True)
+    cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -645,15 +646,6 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         self.photo = ""
         self.document_number = "GDPR REMOVED"
         self.save()
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        try:
-            old_object = Document.objects.get(id=self.id)
-            if self.confirmed != old_object.confirmed:
-                self.individual.set_relationship_confirmed_flag(self.confirmed)
-        except Document.DoesNotExist:
-            self.individual.set_relationship_confirmed_flag(self.confirmed)
-        super().save(*args, **kwargs)
 
 
 class IndividualIdentity(models.Model):
