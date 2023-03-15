@@ -1141,6 +1141,7 @@ export enum DocumentTypeType {
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
+  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
   Other = 'OTHER'
 }
 
@@ -2029,6 +2030,7 @@ export enum ImportedDocumentTypeType {
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
+  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
   Other = 'OTHER'
 }
 
@@ -5498,6 +5500,7 @@ export type RegistrationDataImportNode = Node & {
   pullPictures: Scalars['Boolean'],
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
+  excluded: Scalars['Boolean'],
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -7648,7 +7651,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'status'>
+    & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
@@ -12281,6 +12284,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     id
     name
     status
+    startDate
+    endDate
   }
   createdBy {
     id
@@ -25675,6 +25680,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,

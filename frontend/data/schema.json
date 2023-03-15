@@ -13836,6 +13836,22 @@
             "deprecationReason": null
           },
           {
+            "name": "excluded",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -38873,6 +38889,12 @@
             "deprecationReason": null
           },
           {
+            "name": "DISABILITY_CERTIFICATE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "OTHER",
             "description": null,
             "isDeprecated": false,
@@ -48329,6 +48351,12 @@
           },
           {
             "name": "BANK_STATEMENT",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DISABILITY_CERTIFICATE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
