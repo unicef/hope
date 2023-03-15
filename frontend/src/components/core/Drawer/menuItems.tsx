@@ -155,7 +155,7 @@ export const resourcesItems = [
   {
     name: 'Conversations',
     href:
-      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiI2NDk1MDA4In0',
+      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIxMzAzMTkwMDc3NDQifQ/all',
     icon: <QuestionAnswerIcon />,
   },
   {
