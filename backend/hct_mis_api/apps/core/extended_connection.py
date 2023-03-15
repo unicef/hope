@@ -33,7 +33,6 @@ class DjangoFastConnectionField(DjangoConnectionField):
             important_args = {k: str(v) for k, v in args.items() if k not in excluded_args}
             hashed_args = hashlib.sha1(json.dumps(important_args).encode()).hexdigest()
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
-            print(cache_key)
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
         except Exception as e:
             logger.exception(e)
