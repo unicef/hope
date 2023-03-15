@@ -612,7 +612,7 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     cleared = models.BooleanField(default=False)
-    cleared_date = models.DateTimeField(default=timezone.now())
+    cleared_date = models.DateTimeField(default=timezone.now)
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
