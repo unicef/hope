@@ -109,6 +109,7 @@ SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
 GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
+FOSTER_CHILD = "FOSTER_CHILD"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
 
@@ -132,6 +133,7 @@ RELATIONSHIP_CHOICE = (
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
+    (FOSTER_CHILD, "Foster child"),
 )
 YES = "1"
 NO = "0"
@@ -176,6 +178,7 @@ IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
 IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
 IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
 IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE = "DISABILITY_CERTIFICATE"
+IDENTIFICATION_TYPE_FOSTER_CHILD = "FOSTER_CHILD"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -187,6 +190,7 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
     (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
     (IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE, _("Disability Certificate")),
+    (IDENTIFICATION_TYPE_FOSTER_CHILD, _("Foster Child")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -607,6 +611,9 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    cleared = models.BooleanField(default=False)
+    cleared_date = models.DateTimeField(default=timezone.now)
+    cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -826,6 +833,7 @@ class Individual(
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
+    relationship_confirmed = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
@@ -903,6 +911,10 @@ class Individual(
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()
+
+    def set_relationship_confirmed_flag(self, confirmed: bool) -> None:
+        self.relationship_confirmed = confirmed
+        self.save(update_fields=["relationship_confirmed"])
 
     def __str__(self) -> str:
         return self.unicef_id or ""
