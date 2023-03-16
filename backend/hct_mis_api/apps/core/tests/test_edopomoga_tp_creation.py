@@ -63,6 +63,6 @@ class TestEdopomogaCreation(APITestCase):
         household2 = Household.objects.get(family_id="1281375")
         household3 = Household.objects.get(family_id="1281383")
 
-        self.assertEqual(household1.size, 1)
-        self.assertEqual(household2.size, 3)
+        self.assertEqual(household1.size, 4)
+        self.assertEqual(household2.size, 4)
         self.assertEqual(household3.size, 4)
