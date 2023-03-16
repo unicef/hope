@@ -9,10 +9,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { RegistrationFilters } from '../../../components/rdi/RegistrationFilters';
-<<<<<<< HEAD
-=======
 import { getFilterFromQueryParams } from '../../../utils/utils';
->>>>>>> origin
 
 const initialFilter = {
   search: '',
@@ -25,21 +22,11 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-<<<<<<< HEAD
-  const [filter, setFilter] = useState({
-    search: '',
-    importedBy: '',
-    status: '',
-    size: { min: undefined, max: undefined },
-    importDateRange: { min: undefined, max: undefined },
-  });
-=======
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
 
->>>>>>> origin
   const debounceFilter = useDebounce(filter, 500);
   if (permissions === null) return null;
 

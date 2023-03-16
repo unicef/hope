@@ -21,10 +21,7 @@ import {
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
-<<<<<<< HEAD
-=======
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
->>>>>>> origin
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';

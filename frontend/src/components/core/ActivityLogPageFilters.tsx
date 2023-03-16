@@ -43,11 +43,7 @@ export function ActivityLogPageFilters({
           <SearchTextField
             label={t('Search')}
             value={filter.search}
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'search')}
-=======
             onChange={(e) => handleFilterChange('search', e.target.value)}
->>>>>>> origin
             data-cy='filters-search'
           />
         </Grid>

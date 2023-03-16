@@ -8,10 +8,6 @@ import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-<<<<<<< HEAD
-import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
-=======
->>>>>>> origin
 
 interface LookUpLinkedTicketsFiltersProps {
   onFilterChange;

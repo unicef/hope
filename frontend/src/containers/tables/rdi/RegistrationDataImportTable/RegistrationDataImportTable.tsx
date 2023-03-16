@@ -14,7 +14,6 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 
-<<<<<<< HEAD
 interface RegistrationDataImportProps {
   filter;
   canViewDetails: boolean;
@@ -41,12 +40,6 @@ export function RegistrationDataImportTable({
   noTableStyling,
   noTitle,
 }: RegistrationDataImportProps): ReactElement {
-=======
-export const RegistrationDataImportTable = ({
-  filter,
-  canViewDetails,
-}): ReactElement => {
->>>>>>> origin
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables = {
@@ -107,4 +100,4 @@ export const RegistrationDataImportTable = ({
   ) : (
     renderTable()
   );
-};
+}

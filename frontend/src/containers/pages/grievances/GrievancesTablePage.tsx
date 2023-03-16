@@ -1,9 +1,7 @@
 import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
-<<<<<<< HEAD
 import { useParams } from 'react-router-dom';
 import { hasPermissionInModule } from '../../../config/permissions';
-=======
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import {
@@ -11,7 +9,6 @@ import {
   hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
->>>>>>> origin
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -21,21 +18,16 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
-<<<<<<< HEAD
 import {
   GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
   GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
-
-export function GrievancesTablePage(): React.ReactElement {
-=======
 import { getFilterFromQueryParams } from '../../../utils/utils';
 
 export const GrievancesTablePage = (): React.ReactElement => {
   const { t } = useTranslation();
->>>>>>> origin
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
@@ -56,21 +48,21 @@ export const GrievancesTablePage = (): React.ReactElement => {
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
-<<<<<<< HEAD
     grievanceType: GrievanceTypes[0],
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
-  });
-  const [selectedTab, setSelectedTab] = useState(
-    GRIEVANCE_TICKETS_TYPES.userGenerated,
-=======
     preferredLanguage: '',
   };
+
+  const [selectedTab, setSelectedTab] = useState(
+    GRIEVANCE_TICKETS_TYPES.userGenerated,
+  );
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
->>>>>>> origin
   );
+
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: choicesData,

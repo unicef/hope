@@ -29,15 +29,7 @@ export const TargetPopulationFilters = ({
   onFilterChange,
   filter,
   programs,
-<<<<<<< HEAD
   addBorder = true,
-}: TargetPopulationFiltersProps): React.ReactElement {
-  const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
-  const renderTable = (): React.ReactElement => {
-    return (
-=======
 }: TargetPopulationFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -49,134 +41,55 @@ export const TargetPopulationFilters = ({
     history,
     location,
   );
-  return (
-    <ContainerWithBorder>
->>>>>>> origin
-      <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={3}>
-          <SearchTextField
-            label={t('Search')}
-            value={filter.name}
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'name')}
-=======
-            onChange={(e) => handleFilterChange('name', e.target.value)}
->>>>>>> origin
-            data-cy='filters-search'
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'status')}
-=======
-            onChange={(e) => handleFilterChange('status', e.target.value)}
->>>>>>> origin
-            value={filter.status}
-            label={t('Status')}
-            icon={<Person />}
-            fullWidth
-          >
-            <MenuItem value=''>None</MenuItem>
-            {Object.values(TargetPopulationStatus)
-              .sort()
-              .map((key) => (
-                <MenuItem key={key} value={key}>
-                  {targetPopulationStatusMapping(key)}
-                </MenuItem>
-              ))}
-          </SelectFilter>
-        </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            fullWidth
-          >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
+
+  const renderTable = (): React.ReactElement => (
+    <Grid container alignItems='flex-end' spacing={3}>
+      <Grid item xs={3}>
+        <SearchTextField
+          label={t('Search')}
+          value={filter.name}
+          onChange={(e) => handleFilterChange('name', e.target.value)}
+          data-cy='filters-search'
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <SelectFilter
+          onChange={(e) => handleFilterChange('status', e.target.value)}
+          value={filter.status}
+          label={t('Status')}
+          icon={<Person />}
+          fullWidth
+        >
+          <MenuItem value=''>None</MenuItem>
+          {Object.values(TargetPopulationStatus)
+            .sort()
+            .map((key) => (
+              <MenuItem key={key} value={key}>
+                {targetPopulationStatusMapping(key)}
               </MenuItem>
             ))}
-          </SelectFilter>
-        </Grid>
-<<<<<<< HEAD
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
-          <Grid item xs={6}>
-            <NumberTextField
-              id='minFilter'
-              topLabel={t('Number of Households')}
-              value={filter.numIndividuals.min}
-              placeholder={t('From')}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  numIndividuals: {
-                    ...filter.numIndividuals,
-                    min: e.target.value,
-                  },
-                })
-              }
-              icon={<Group />}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <NumberTextField
-              id='maxFilter'
-              value={filter.numIndividuals.max}
-              placeholder={t('To')}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  numIndividuals: {
-                    ...filter.numIndividuals,
-                    max: e.target.value,
-                  },
-                })
-              }
-              icon={<Group />}
-            />
-          </Grid>
-        </Grid>
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
-          <Grid item xs={6}>
-            <DatePickerFilter
-              topLabel={t('Date Created')}
-              placeholder={t('From')}
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    min: date ? moment(date).format('YYYY-MM-DD') : null,
-                  },
-                })
-              }
-              value={filter.createdAtRange.min}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <DatePickerFilter
-              placeholder={t('To')}
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    max: date ? moment(date).format('YYYY-MM-DD') : null,
-                  },
-                })
-              }
-              value={filter.createdAtRange.max}
-            />
-          </Grid>
-=======
+        </SelectFilter>
+      </Grid>
+      <Grid item xs={3}>
+        <SelectFilter
+          onChange={(e) => handleFilterChange('program', e.target.value)}
+          label={t('Programme')}
+          value={filter.program}
+          icon={<FlashOnIcon />}
+          fullWidth
+        >
+          <MenuItem value=''>
+            <em>{t('None')}</em>
+          </MenuItem>
+          {programs.map((program) => (
+            <MenuItem key={program.id} value={program.id}>
+              {program.name}
+            </MenuItem>
+          ))}
+        </SelectFilter>
+      </Grid>
+      <Grid container item xs={3} spacing={3} alignItems='flex-end'>
         <Grid item>
           <NumberTextField
             topLabel={t('Number of Households')}
@@ -197,11 +110,38 @@ export const TargetPopulationFilters = ({
             }
             icon={<Group />}
           />
->>>>>>> origin
         </Grid>
       </Grid>
-    );
-  };
+      <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+        <Grid item xs={6}>
+          <DatePickerFilter
+            topLabel={t('Date Created')}
+            placeholder={t('From')}
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMin',
+                moment(date).format('YYYY-MM-DD'),
+              )
+            }
+            value={filter.createdAtRangeMin}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <DatePickerFilter
+            placeholder={t('To')}
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMax',
+                moment(date).format('YYYY-MM-DD'),
+              )
+            }
+            value={filter.createdAtRangeMax}
+          />
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+
   return addBorder ? (
     <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
   ) : (

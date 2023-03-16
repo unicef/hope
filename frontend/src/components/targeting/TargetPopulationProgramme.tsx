@@ -60,10 +60,6 @@ export function TargetPopulationProgramme({
             choices={mappedPrograms}
             component={FormikSelectFieldConfirmProgram}
             allProgramsEdges={allProgramsEdges}
-<<<<<<< HEAD
-=======
-            data-cy='input-program'
->>>>>>> origin
             program={program}
             setFieldValue={setFieldValue}
             values={values}

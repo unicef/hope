@@ -55,13 +55,8 @@ export const HouseholdFilters = ({
           <SearchTextField
             label={t('Search')}
             value={filter.text}
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'text')}
-            data-cy='filters-search'
-=======
             onChange={(e) => handleFilterChange('text', e.target.value)}
             data-cy='hh-filters-search'
->>>>>>> origin
           />
         </Grid>
         <Grid item>
@@ -118,51 +113,23 @@ export const HouseholdFilters = ({
             placeholder={t('From')}
             icon={<GroupIcon />}
             onChange={(e) =>
-<<<<<<< HEAD
-              onFilterChange({
-                ...filter,
-                householdSize: {
-                  ...filter.householdSize,
-                  min: e.target.value,
-                },
-              })
-=======
               handleFilterChange('householdSizeMin', e.target.value)
->>>>>>> origin
             }
           />
         </Grid>
         <Grid item>
           <NumberTextField
-<<<<<<< HEAD
-            value={filter.householdSize.max}
-            placeholder={t('To')}
-            icon={<GroupIcon />}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                householdSize: {
-                  ...filter.householdSize,
-                  max: e.target.value,
-                },
-              })
-=======
             value={filter.householdSizeMax}
             placeholder={t('To')}
             icon={<GroupIcon />}
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
->>>>>>> origin
             }
           />
         </Grid>
         <Grid item>
           <SelectFilter
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'orderBy')}
-=======
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
->>>>>>> origin
             label={t('Sort by')}
             value={filter.orderBy}
           >

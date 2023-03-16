@@ -3,32 +3,14 @@ import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import {
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../../config/permissions';
+import { PERMISSIONS } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
-<<<<<<< HEAD
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
+  GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
-import { choicesToDict, decodeIdString } from '../../../utils/utils';
-=======
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { decodeIdString, choicesToDict } from '../../../utils/utils';
->>>>>>> origin
-import {
-  AllGrievanceTicketQuery,
-  AllGrievanceTicketQueryVariables,
-  useAllGrievanceTicketQuery,
-  useAllUsersForFiltersLazyQuery,
-  useGrievancesChoiceDataQuery,
-  useMeQuery,
-} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
 import { BulkAssignModal } from './BulkAssignModal';
@@ -64,14 +46,11 @@ export const GrievancesTable = ({
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
     scoreMax: filter.scoreMax,
-<<<<<<< HEAD
     grievanceType: filter.grievanceType,
     grievanceStatus: filter.grievanceStatus,
     priority: filter.priority,
     urgency: filter.urgency,
-=======
     preferredLanguage: filter.preferredLanguage,
->>>>>>> origin
   };
 
   const [inputValue, setInputValue] = useState('');
@@ -146,21 +125,19 @@ export const GrievancesTable = ({
     );
   };
 
-  const handleCheckboxClick = (event, name): void => {
+  const handleCheckboxClick = (
+    _event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    name: string,
+  ): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
+    let newSelected = [...selected];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+      newSelected.push(name);
+    } else {
+      newSelected.splice(selectedIndex, 1);
     }
 
     setSelected(newSelected);
@@ -178,6 +155,10 @@ export const GrievancesTable = ({
     }
     setSelected([]);
   };
+
+  function hasPermissions(GRIEVANCES_CREATE: any, permissions: any) {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <>
@@ -269,3 +250,42 @@ export const GrievancesTable = ({
     </>
   );
 };
+function decodeIdString(id: any) {
+  throw new Error('Function not implemented.');
+}
+
+function useAllUsersForFiltersLazyQuery(arg0: {
+  variables: {
+    businessArea: string;
+    first: number;
+    orderBy: string;
+    search: string;
+  };
+}): [any, { data: any }] {
+  throw new Error('Function not implemented.');
+}
+
+function useGrievancesChoiceDataQuery(): { data: any; loading: any } {
+  throw new Error('Function not implemented.');
+}
+
+function useMeQuery(): { data: any; loading: any } {
+  throw new Error('Function not implemented.');
+}
+
+function choicesToDict(
+  grievanceTicketStatusChoices: any,
+): { [id: number]: string } {
+  throw new Error('Function not implemented.');
+}
+
+function hasCreatorOrOwnerPermissions(
+  GRIEVANCES_VIEW_DETAILS_SENSITIVE: any,
+  isTicketCreator: boolean,
+  GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR: any,
+  isTicketOwner: boolean,
+  GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER: any,
+  permissions: any,
+): boolean {
+  throw new Error('Function not implemented.');
+}

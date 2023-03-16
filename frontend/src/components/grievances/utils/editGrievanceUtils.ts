@@ -4,14 +4,11 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import {
-  thingForSpecificGrievanceType,
-  camelizeArrayObjects,
-} from '../../../utils/utils';
+import { thingForSpecificGrievanceType } from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
+import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 
 interface EditValuesTypes {
   priority?: number;
@@ -27,10 +24,7 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
-<<<<<<< HEAD
   paymentRecord?: string;
-=======
->>>>>>> origin
   selectedLinkedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
@@ -43,7 +37,7 @@ interface EditValuesTypes {
 }
 
 function prepareInitialValueAddIndividual(
-  initialValuesArg,
+  initialValuesArg: EditValuesTypes,
   ticket: GrievanceTicketQuery['grievanceTicket'],
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
@@ -56,98 +50,117 @@ function prepareInitialValueAddIndividual(
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
-      previousValue[camelCase(currentValue[0])] = currentValue[1];
+      previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
-    {},
+    {} as EditValuesTypes['individualData'],
   );
   initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
-      previousValue[camelCase(currentValue[0])] = currentValue[1];
+      previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
-    {},
+    {} as EditValuesTypes['individualData']['flexFields'],
   );
   return initialValues;
 }
-function prepareInitialValueEditIndividual(
-  initialValuesArg,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
-): EditValuesTypes {
-  const initialValues = initialValuesArg;
-  initialValues.selectedIndividual = ticket.individual;
-  const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
-  };
-  const documents = individualData?.documents;
-  const documentsToRemove = individualData.documents_to_remove;
-  const documentsEdited = individualData?.documents_to_edit;
-  const identities = individualData?.identities;
-  const identitiesToRemove = individualData?.identities_to_remove;
-  const identitiesEdited = individualData?.identities_to_edit;
-  const paymentChannels = individualData?.payment_channels;
-  const paymentChannelsToRemove = individualData?.payment_channels_to_remove;
-  const paymentChannelsEdited = individualData?.payment_channels_to_edit;
-  const flexFields = individualData.flex_fields;
-  delete individualData.documents;
-  delete individualData.documents_to_remove;
-  delete individualData.documents_to_edit;
-  delete individualData.identities;
-  delete individualData.identities_to_remove;
-  delete individualData.identities_to_edit;
-  delete individualData.payment_channels;
-  delete individualData.payment_channels_to_remove;
-  delete individualData.payment_channels_to_edit;
-  delete individualData.previous_payment_channels;
-  delete individualData.previous_documents;
-  delete individualData.previous_identities;
-  delete individualData.flex_fields;
-  const individualDataArray = Object.entries(individualData).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1].value,
-    }),
-  );
-  const flexFieldsArray = Object.entries(flexFields).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1].value,
-    }),
-  );
+
+function prepareInitialValueEditIndividual(initialValues, ticket) {
+  const {
+    individual,
+    individualDataUpdateTicketDetails: { individualData },
+  } = ticket;
+
+  initialValues.selectedIndividual = individual;
+
+  const {
+    documents,
+    documents_to_remove,
+    documents_to_edit,
+    identities,
+    identities_to_remove,
+    identities_to_edit,
+    payment_channels,
+    payment_channels_to_remove,
+    payment_channels_to_edit,
+    ...rest
+  } = individualData;
+
+  delete rest.documents;
+  delete rest.documents_to_remove;
+  delete rest.documents_to_edit;
+  delete rest.identities;
+  delete rest.identities_to_remove;
+  delete rest.identities_to_edit;
+  delete rest.payment_channels;
+  delete rest.payment_channels_to_remove;
+  delete rest.payment_channels_to_edit;
+  delete rest.previous_payment_channels;
+  delete rest.previous_documents;
+  delete rest.previous_identities;
+  delete rest.flex_fields;
+
+  interface Field {
+    value: string;
+  }
+
+  const individualDataArray = Object.entries(rest)
+    .map(([fieldName, field]: [string, Field]) => {
+      if (field.value !== undefined) {
+        return { fieldName, fieldValue: field.value };
+      }
+      return null;
+    })
+    .filter((field) => field !== null);
+
+  const flexFieldsArray = Object.entries(individualData.flex_fields)
+    .map(([fieldName, field]: [string, Field]) => {
+      if (field.value !== undefined) {
+        return { fieldName, fieldValue: field.value };
+      }
+      return null;
+    })
+    .filter((field) => field !== null);
+
+  const camelizeArrayObjects = (arr) => arr?.map(({ value }) => value);
+
   initialValues.individualDataUpdateFields = [
     ...individualDataArray,
     ...flexFieldsArray,
   ];
-  initialValues.individualDataUpdateFieldsDocuments = (documents || []).map(
-    (item) => item.value,
+
+  initialValues.individualDataUpdateFieldsDocuments = camelizeArrayObjects(
+    documents,
   );
-  initialValues.individualDataUpdateDocumentsToRemove = (
-    documentsToRemove || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateFieldsIdentities = (identities || []).map(
-    (item) => item.value,
+  initialValues.individualDataUpdateDocumentsToRemove = camelizeArrayObjects(
+    documents_to_remove,
   );
-  initialValues.individualDataUpdateIdentitiesToRemove = (
-    identitiesToRemove || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateDocumentsToEdit = (
-    documentsEdited || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateIdentitiesToEdit = (
-    identitiesEdited || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdateFieldsPaymentChannels = (
-    camelizeArrayObjects(paymentChannels) || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdatePaymentChannelsToRemove = (
-    camelizeArrayObjects(paymentChannelsToRemove) || []
-  ).map((item) => item.value);
-  initialValues.individualDataUpdatePaymentChannelsToEdit = (
-    camelizeArrayObjects(paymentChannelsEdited) || []
-  ).map((item) => item.value);
+  initialValues.individualDataUpdateFieldsIdentities = camelizeArrayObjects(
+    identities,
+  );
+  initialValues.individualDataUpdateIdentitiesToRemove = camelizeArrayObjects(
+    identities_to_remove,
+  );
+  initialValues.individualDataUpdateDocumentsToEdit = camelizeArrayObjects(
+    documents_to_edit,
+  );
+  initialValues.individualDataUpdateIdentitiesToEdit = camelizeArrayObjects(
+    identities_to_edit,
+  );
+  initialValues.individualDataUpdateFieldsPaymentChannels = camelizeArrayObjects(
+    payment_channels,
+  );
+  initialValues.individualDataUpdatePaymentChannelsToRemove = camelizeArrayObjects(
+    payment_channels_to_remove,
+  );
+  initialValues.individualDataUpdatePaymentChannelsToEdit = camelizeArrayObjects(
+    payment_channels_to_edit,
+  );
+
   return initialValues;
 }
+
 function prepareInitialValueEditHousehold(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
@@ -303,10 +316,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-<<<<<<< HEAD
         issueType: values.issueType,
-=======
->>>>>>> origin
         linkedTickets: values.selectedLinkedTickets,
       },
     },

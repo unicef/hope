@@ -1,23 +1,16 @@
-<<<<<<< HEAD
 import camelCase from 'lodash/camelCase';
-=======
->>>>>>> origin
 import { GraphQLError } from 'graphql';
 import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
-import camelCase from 'lodash/camelCase';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-<<<<<<< HEAD
-=======
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   PaymentRecordStatus,
   PaymentStatus,
->>>>>>> origin
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -240,8 +233,6 @@ export function targetPopulationBuildStatusToColor(
   return theme.palette.error.main;
 }
 
-<<<<<<< HEAD
-=======
 export function paymentPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -286,7 +277,6 @@ export function paymentPlanBackgroundActionStatusToColor(
   return theme.palette.error.main;
 }
 
->>>>>>> origin
 export function userStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -719,10 +709,10 @@ export async function clearCache(apolloClient = null): Promise<void> {
   await localForage.clear();
 }
 
-<<<<<<< HEAD
 export const round = (value: number, decimals = 2): number => {
   return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
-=======
+};
+
 type Location = ReturnType<typeof useLocation>;
 type FilterValue = string | string[] | boolean | null | undefined;
 type Filter = { [key: string]: FilterValue };
@@ -838,5 +828,4 @@ export const createHandleFilterChange = (
   };
 
   return handleFilterChange;
->>>>>>> origin
 };
