@@ -55,6 +55,8 @@ export const targetPopulationDetailed = gql`
       id
       name
       status
+      startDate
+      endDate
     }
     createdBy {
       id

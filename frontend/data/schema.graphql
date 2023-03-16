@@ -771,6 +771,7 @@ enum DocumentTypeType {
   TAX_ID
   RESIDENCE_PERMIT_NO
   BANK_STATEMENT
+  DISABILITY_CERTIFICATE
   OTHER
 }
 
@@ -1403,6 +1404,7 @@ enum ImportedDocumentTypeType {
   TAX_ID
   RESIDENCE_PERMIT_NO
   BANK_STATEMENT
+  DISABILITY_CERTIFICATE
   OTHER
 }
 
@@ -3259,6 +3261,7 @@ type RegistrationDataImportNode implements Node {
   pullPictures: Boolean!
   businessArea: UserBusinessAreaNode
   screenBeneficiary: Boolean!
+  excluded: Boolean!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
