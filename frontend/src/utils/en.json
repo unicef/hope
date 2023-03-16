@@ -735,7 +735,6 @@
   "Confirm": "Confirm",
   "Household Id": "Household Id",
   "This household is a duplicate of a household ID": "This household is a duplicate of a household ID",
-<<<<<<< HEAD
   "Grievance Dashboard": "Grievance Dashboard",
   "SYSTEM-GENERATED": "SYSTEM-GENERATED",
   "USER-GENERATED": "USER-GENERATED",
@@ -755,7 +754,6 @@
   "Export Report": "Export Report",
   "Upload Tickets": "Upload Tickets",
   "Next": "Next",
-  "Back": "Back",
   "Not assigned": "Not assigned",
   "Comments": "Comments",
   "Create a Data Change ticket": "Create a Data Change ticket",
@@ -797,8 +795,6 @@
   "Survey will be sent to all households selected": "Survey will be sent to all households selected",
   "You have selected households as the recipients group": "You have selected households as the recipients group",
   "New message": "New message",
-  "Sort by": "Sort by"
-=======
   "Sort by": "Sort by",
   "Uploaded file should contain entitlement for each household": "Uploaded file should contain entitlement for each household",
   "Choose Delivery Mechanism": "Choose Delivery Mechanism",
@@ -806,5 +802,4 @@
   "Reconciliation Summary": "Reconciliation Summary",
   "Payment has been marked as failed.": "Payment has been marked as failed.",
   "Are you sure you would like to mark payment as failed?": "Are you sure you would like to mark payment as failed?"
->>>>>>> origin
 }

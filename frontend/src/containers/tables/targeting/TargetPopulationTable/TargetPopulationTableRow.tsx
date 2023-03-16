@@ -1,7 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-<<<<<<< HEAD
 import { Radio } from '@material-ui/core';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -12,8 +11,6 @@ import {
   targetPopulationStatusMapping,
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-=======
->>>>>>> origin
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';

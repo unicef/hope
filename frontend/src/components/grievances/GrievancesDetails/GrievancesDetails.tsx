@@ -2,14 +2,11 @@ import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-<<<<<<< HEAD
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
-=======
->>>>>>> origin
   choicesToDict,
   grievanceTicketStatusToColor,
   renderUserName,
@@ -46,12 +43,9 @@ export const GrievancesDetails = ({
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
-<<<<<<< HEAD
 
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
-=======
->>>>>>> origin
 
   const categoryChoices: {
     [id: number]: string;
@@ -65,7 +59,6 @@ export const GrievancesDetails = ({
         )[0].name
     : '-';
 
-<<<<<<< HEAD
   const showIssueType =
     ticket.category.toString() ===
       GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
@@ -102,7 +95,8 @@ export const GrievancesDetails = ({
           : '-'}
       </Box>
     );
-=======
+  };
+
   const renderPaymentUrl = (): React.ReactElement => {
     if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return (
@@ -124,7 +118,6 @@ export const GrievancesDetails = ({
     }
 
     return <>-</>;
->>>>>>> origin
   };
 
   return (
@@ -226,7 +219,6 @@ export const GrievancesDetails = ({
                 size: showIssueType ? 3 : 6,
               },
               {
-<<<<<<< HEAD
                 label: t('Payment ID'),
                 value: (
                   <span>
@@ -251,10 +243,6 @@ export const GrievancesDetails = ({
               showPartner && {
                 label: t('Partner'),
                 value: ticket.partner?.name,
-=======
-                label: t('PAYMENT ID'),
-                value: <span>{renderPaymentUrl()}</span>,
->>>>>>> origin
                 size: 6,
               },
               {

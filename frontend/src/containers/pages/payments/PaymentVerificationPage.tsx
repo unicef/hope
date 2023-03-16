@@ -12,11 +12,8 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
-<<<<<<< HEAD
   ProgramNode,
-=======
   ProgramNodeEdge,
->>>>>>> origin
   useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
@@ -38,21 +35,9 @@ export const PaymentVerificationPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
 
-<<<<<<< HEAD
-  const [filter, setFilter] = useState({
-    search: '',
-    verificationStatus: [],
-    program: '',
-    serviceProvider: '',
-    deliveryType: '',
-    startDate: null,
-    endDate: null,
-  });
-=======
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
->>>>>>> origin
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },

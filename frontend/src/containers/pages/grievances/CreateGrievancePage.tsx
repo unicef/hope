@@ -51,8 +51,6 @@ import {
   useGrievancesChoiceDataQuery,
   useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
-<<<<<<< HEAD
-=======
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -70,7 +68,6 @@ import { validate } from '../../../components/grievances/utils/validateGrievance
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
->>>>>>> origin
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -345,121 +342,11 @@ export const CreateGrievancePage = (): React.ReactElement => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <NewTicket>
-<<<<<<< HEAD
                   <InnerBoxPadding>
                     <ContainerColumnWithBorder>
                       <CreateGrievanceStepper
                         activeStep={activeStep}
                         steps={steps}
-=======
-                  <ContainerColumnWithBorder>
-                    <Grid container spacing={3}>
-                      <Grid item xs={6}>
-                        <Field
-                          name='category'
-                          label='Category*'
-                          onChange={(e) => {
-                            setFieldValue('category', e.target.value);
-                            setFieldValue('issueType', null);
-                          }}
-                          variant='outlined'
-                          choices={
-                            choicesData.grievanceTicketManualCategoryChoices
-                          }
-                          component={FormikSelectField}
-                        />
-                      </Grid>
-                      {values.category ===
-                        GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-                        <Grid item xs={6}>
-                          <Field
-                            name='issueType'
-                            label='Issue Type*'
-                            variant='outlined'
-                            choices={
-                              issueTypeDict[values.category].subCategories
-                            }
-                            component={FormikSelectField}
-                          />
-                        </Grid>
-                      ) : null}
-                    </Grid>
-                    <BoxWithBorders>
-                      <Box display='flex' flexDirection='column'>
-                        <Consent />
-                        <Field
-                          name='consent'
-                          label={t('Received Consent*')}
-                          color='primary'
-                          component={FormikCheckboxField}
-                        />
-                        <LookUpSection
-                          values={values}
-                          onValueChange={setFieldValue}
-                          errors={errors}
-                          touched={touched}
-                        />
-                      </Box>
-                    </BoxWithBorders>
-                    <BoxWithBorderBottom>
-                      <Grid container spacing={3}>
-                        <Grid item xs={6}>
-                          <Field
-                            name='assignedTo'
-                            label={t('Assigned to*')}
-                            variant='outlined'
-                            choices={mappedIndividuals}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
-                      </Grid>
-                    </BoxWithBorderBottom>
-                    <BoxPadding>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                          <Field
-                            name='description'
-                            multiline
-                            fullWidth
-                            variant='outlined'
-                            label='Description*'
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='admin'
-                            variant='outlined'
-                            component={FormikAdminAreaAutocomplete}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='area'
-                            fullWidth
-                            variant='outlined'
-                            label={t('Area / Village / Pay point')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='language'
-                            multiline
-                            fullWidth
-                            variant='outlined'
-                            label={t('Languages Spoken')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                      </Grid>
-                    </BoxPadding>
-                    <BoxPadding>
-                      <DatachangeComponent
-                        values={values}
-                        setFieldValue={setFieldValue}
->>>>>>> origin
                       />
                       {activeStep === GrievanceSteps.Selection && (
                         <Selection

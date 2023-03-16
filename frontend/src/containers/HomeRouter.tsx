@@ -18,11 +18,9 @@ import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
-<<<<<<< HEAD
 import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
 import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
 import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
-=======
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
 import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
@@ -30,7 +28,6 @@ import { PaymentDetailsPage } from './pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
 import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
->>>>>>> origin
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';

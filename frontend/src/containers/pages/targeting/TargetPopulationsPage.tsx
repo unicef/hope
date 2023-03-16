@@ -33,23 +33,10 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-<<<<<<< HEAD
-  const [filter, setFilter] = useState({
-    name: '',
-    status: '',
-    program: '',
-    numIndividuals: {
-      min: undefined,
-      max: undefined,
-    },
-    createdAtRange: { min: undefined, max: undefined },
-  });
-=======
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
->>>>>>> origin
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsForChoicesQuery({

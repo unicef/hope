@@ -15,10 +15,6 @@ import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-<<<<<<< HEAD
-import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
-=======
->>>>>>> origin
 
 interface LookUpIndividualFiltersProps {
   onFilterChange;
@@ -124,13 +120,8 @@ export function LookUpIndividualFilters({
             })}
           </SelectFilter>
         </Grid>
-<<<<<<< HEAD
-        <Grid item xs={5}>
-          <AdminAreaAutocomplete
-=======
         <Grid item>
           <LookUpAdminAreaAutocomplete
->>>>>>> origin
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}

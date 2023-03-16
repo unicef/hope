@@ -76,14 +76,10 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-<<<<<<< HEAD
-  const { data: grievancesChoices } = useGrievancesChoiceDataQuery();
-=======
   const {
     data: grievancesChoices,
     loading: grievancesChoicesLoading,
   } = useGrievancesChoiceDataQuery();
->>>>>>> origin
 
   if (
     loading ||
