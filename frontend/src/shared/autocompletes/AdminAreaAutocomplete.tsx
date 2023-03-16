@@ -8,11 +8,7 @@ import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-<<<<<<< HEAD:frontend/src/shared/autocompletes/AdminAreaAutocomplete.tsx
-import TextField from '../TextField';
-=======
 import { createHandleFilterChange } from '../../utils/utils';
->>>>>>> origin:frontend/src/components/population/AdminAreaAutocomplete.tsx
 import {
   AllAdminAreasQuery,
   useAllAdminAreasLazyQuery,

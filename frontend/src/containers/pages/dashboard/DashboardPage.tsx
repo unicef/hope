@@ -26,18 +26,11 @@ export const DashboardPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
-<<<<<<< HEAD
-  const [filter, setFilter] = useState({
-    program: '',
-    administrativeArea: '',
-  });
-=======
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
 
->>>>>>> origin
   const { data, loading } = useDashboardYearsChoiceDataQuery({
     variables: { businessArea },
   });

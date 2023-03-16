@@ -1,12 +1,5 @@
 import { InputAdornment } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-<<<<<<<< HEAD:frontend/src/shared/autocompletes/AssigneeAutocomplete.tsx
-import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../TextField';
-import { renderUserName } from '../../utils/utils';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-========
 import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
@@ -21,7 +14,6 @@ import {
   AreaNodeEdge,
   useAllAdminAreasLazyQuery,
 } from '../../__generated__/graphql';
->>>>>>>> origin:frontend/src/shared/LookUpAdminAreaAutocomplete/LookUpAdminAreaAutocomplete.tsx
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -36,20 +28,12 @@ export const LookUpAdminAreaAutocomplete = ({
   onFilterChange,
   name,
   value,
-  label,
 }: {
   disabled?: boolean;
   fullWidth?: boolean;
-<<<<<<<< HEAD:frontend/src/shared/autocompletes/AssigneeAutocomplete.tsx
-  onFilterChange?;
-  name?: string;
-  value?;
-  label?: string;
-========
   onFilterChange;
   name: string;
   value?: AreaNodeEdge;
->>>>>>>> origin:frontend/src/shared/LookUpAdminAreaAutocomplete/LookUpAdminAreaAutocomplete.tsx
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -107,11 +91,7 @@ export const LookUpAdminAreaAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
-<<<<<<<< HEAD:frontend/src/shared/autocompletes/AssigneeAutocomplete.tsx
-          label={label || t('Assignee')}
-========
           label={t('Admin Level 2')}
->>>>>>>> origin:frontend/src/shared/LookUpAdminAreaAutocomplete/LookUpAdminAreaAutocomplete.tsx
           variant='outlined'
           margin='dense'
           value={inputValue}

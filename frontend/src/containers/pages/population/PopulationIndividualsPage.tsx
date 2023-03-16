@@ -37,20 +37,10 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
     loading: householdChoicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-<<<<<<< HEAD
-  const [filter, setFilter] = useState({
-    text: '',
-    sex: [],
-    age: { min: '', max: '' },
-    flags: [],
-    orderBy: 'unicef_id',
-  });
-=======
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
 
->>>>>>> origin
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: individualChoicesData,

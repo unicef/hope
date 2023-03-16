@@ -111,12 +111,11 @@ export const REPORTING_STATES = {
 };
 
 export const COLLECT_TYPES_MAPPING = {
-<<<<<<< HEAD
-  "A_": "Unknown",
-  "A_0": "None",
-  "A_1": "Full",
-  "A_2": "Partial",
-}
+  A_: 'Unknown',
+  A_0: 'None',
+  A_1: 'Full',
+  A_2: 'Partial',
+};
 export const GRIEVANCE_TICKETS_TYPES = {
   userGenerated: 0,
   systemGenerated: 1,
@@ -181,10 +180,8 @@ export const SurveyTabsValues = {
   PROGRAM: 0,
   TARGET_POPULATION: 1,
   RDI: 2,
-=======
   A_: 'Unknown',
   A_0: 'None',
   A_1: 'Full',
   A_2: 'Partial',
->>>>>>> origin
 };

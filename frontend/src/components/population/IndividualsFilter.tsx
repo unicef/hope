@@ -64,11 +64,7 @@ export const IndividualsFilter = ({
         </Grid>
         <Grid item>
           <SelectFilter
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'sex')}
-=======
             onChange={(e) => handleFilterChange('sex', e.target.value)}
->>>>>>> origin
             value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
@@ -93,14 +89,7 @@ export const IndividualsFilter = ({
             value={filter.ageMin}
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
-<<<<<<< HEAD
-              onFilterChange({
-                ...filter,
-                age: { ...filter.age, min: e.target.value },
-              });
-=======
               handleFilterChange('ageMin', e.target.value);
->>>>>>> origin
             }}
             icon={<CakeIcon />}
           />
@@ -111,14 +100,7 @@ export const IndividualsFilter = ({
             value={filter.ageMax}
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
-<<<<<<< HEAD
-              onFilterChange({
-                ...filter,
-                age: { ...filter.age, max: e.target.value },
-              });
-=======
               handleFilterChange('ageMax', e.target.value);
->>>>>>> origin
             }}
             icon={<CakeIcon />}
           />
@@ -147,11 +129,7 @@ export const IndividualsFilter = ({
         </Grid>
         <Grid item>
           <SelectFilter
-<<<<<<< HEAD
-            onChange={(e) => handleFilterChange(e, 'orderBy')}
-=======
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
->>>>>>> origin
             label={t('Sort by')}
             value={filter.orderBy}
           >

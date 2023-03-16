@@ -63,11 +63,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Linked Tickets',
-<<<<<<< HEAD
     id: 'linked_tickets',
-=======
-    id: '',
->>>>>>> origin
     numeric: false,
     dataCy: 'linkedTickets',
   },

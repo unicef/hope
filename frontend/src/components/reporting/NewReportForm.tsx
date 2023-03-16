@@ -253,36 +253,6 @@ export const NewReportForm = (): React.ReactElement => {
           onSubmit={submitFormHandler}
           validationSchema={validationSchema}
         >
-<<<<<<< HEAD
-          {({ submitForm, values, setFieldValue }) => {
-            return (
-              <>
-                <DialogTitleWrapper>
-                  <DialogTitle disableTypography>
-                    <Typography variant='h6'>
-                      {t('Generate New Report')}
-                    </Typography>
-                  </DialogTitle>
-                </DialogTitleWrapper>
-                <DialogContent>
-                  <Form>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <Field
-                          name='reportType'
-                          label={t('Report Type')}
-                          fullWidth
-                          variant='outlined'
-                          required
-                          choices={choicesData.reportTypesChoices}
-                          component={FormikSelectField}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <FieldLabel>
-                          {renderTimeframeLabel(values.reportType)}
-                        </FieldLabel>
-=======
           {({ submitForm, values, setFieldValue }) => (
             <>
               {dialogOpen && <AutoSubmitFormOnEnter />}
@@ -311,7 +281,6 @@ export const NewReportForm = (): React.ReactElement => {
                       <FieldLabel>
                         {renderTimeframeLabel(values.reportType)}
                       </FieldLabel>
->>>>>>> origin
 
                       <Grid container spacing={3}>
                         <Grid item xs={6}>

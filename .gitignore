@@ -117,10 +117,6 @@ venv.bak/
 *.sql
 
 *.DS_Store
-<<<<<<< HEAD
 *.devcontainer
 /.vscode/settings.json
-=======
-**/.vscode/settings.json
->>>>>>> origin
 /HCT-MIS.code-workspace

@@ -136,11 +136,7 @@ export function VerificationRecordsFilters({
                   handleFilterChange(e, 'paymentVerificationPlan')
                 }
                 label={t('Verification Plan Id')}
-<<<<<<< HEAD
-                value={filter.cashPlanPaymentVerification}
-=======
                 value={filter.paymentVerificationPlan}
->>>>>>> origin
               >
                 <MenuItem value=''>
                   <em>None</em>

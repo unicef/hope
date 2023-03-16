@@ -47,13 +47,8 @@ export const PaymentFilters = ({
         <Grid item>
           <SearchTextField
             value={filter.search}
-<<<<<<< HEAD
-            label='Cash Plan ID'
-            onChange={(e) => handleFilterChange(e, 'search')}
-=======
             label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
->>>>>>> origin
           />
         </Grid>
         <Grid item>

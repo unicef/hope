@@ -2,10 +2,7 @@ import { Box } from '@material-ui/core';
 import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-<<<<<<< HEAD
-=======
 import { useLocation } from 'react-router-dom';
->>>>>>> origin
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -14,10 +11,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-<<<<<<< HEAD
-=======
 import { getFilterFromQueryParams } from '../../../utils/utils';
->>>>>>> origin
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
@@ -25,17 +19,6 @@ import {
 } from '../../../__generated__/graphql';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
-<<<<<<< HEAD
-export const PopulationHouseholdPage = (): React.ReactElement => {
-  const { t } = useTranslation();
-  const [filter, setFilter] = useState({
-    text: '',
-    program: '',
-    residenceStatus: '',
-    householdSize: { min: '', max: '' },
-    orderBy: 'unicef_id',
-  });
-=======
 const initialFilter = {
   text: '',
   program: '',
@@ -53,7 +36,6 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
->>>>>>> origin
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
