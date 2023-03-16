@@ -31,9 +31,11 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
 
 
 class JSONWidgetMixin:
+    json_enabled = False
+
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if isinstance(db_field, JSONField):
-            if is_root(request) or settings.DEBUG:
+            if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
             else:
                 kwargs = {"widget": JsonWidget}
