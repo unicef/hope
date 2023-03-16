@@ -1,5 +1,6 @@
 import { Paper } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -12,6 +13,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import { CreateProgram } from '../../dialogs/programs/CreateProgram';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
+<<<<<<< HEAD
 import { ProgrammesTable } from '../../tables/ProgrammesTable/ProgrammesTable';
 
 const Container = styled(Paper)`
@@ -44,6 +46,31 @@ export function ProgramsPage(): React.ReactElement {
       max: '',
     },
   });
+=======
+import { usePermissions } from '../../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { getFilterFromQueryParams } from '../../../utils/utils';
+
+const initialFilter = {
+  search: '',
+  startDate: undefined,
+  endDate: undefined,
+  status: '',
+  sector: [],
+  numberOfHouseholdsMin: '',
+  numberOfHouseholdsMax: '',
+  budgetMin: '',
+  budgetMax: '',
+};
+
+export const ProgramsPage = (): React.ReactElement => {
+  const location = useLocation();
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+>>>>>>> origin
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -86,4 +113,4 @@ export function ProgramsPage(): React.ReactElement {
       />
     </div>
   );
-}
+};

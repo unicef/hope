@@ -51,6 +51,7 @@ When running locally, you don't neet to provide AD credentials - you can go stra
 Go to cypress_testing_service catalog
 Create cypress.env.json file based on cypress.env.json.example file
 Run yarn install
+In seperate terminal tab run docker-compose run --rm backend ./manage.py initcypress
 Run yarn cy:open
 
 

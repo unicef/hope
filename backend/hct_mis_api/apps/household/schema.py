@@ -22,7 +22,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
-    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
     hopePermissionClass,
@@ -77,7 +77,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     programs_with_delivered_quantity,
 )
-from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
@@ -232,6 +232,11 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
     payment_channels = graphene.List(BankAccountInfoNode)
+    preferred_language = graphene.String()
+
+    @staticmethod
+    def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
+        return parent.preferred_language or None
 
     @staticmethod
     def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
@@ -333,8 +338,11 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
     )
+<<<<<<< HEAD
 
     admin_area_title = graphene.String(description="Admin area title")
+=======
+>>>>>>> origin
     total_cash_received = graphene.Decimal()
     total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
@@ -346,12 +354,20 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
+<<<<<<< HEAD
+=======
+    admin_area = graphene.Field(AreaNode)
+    admin_area_title = graphene.String(description="Admin area title")
+>>>>>>> origin
     admin1 = graphene.Field(AreaNode)
     admin2 = graphene.Field(AreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
     active_individuals_count = graphene.Int()
+<<<<<<< HEAD
     admin_area = graphene.Field(AreaNode)
+=======
+>>>>>>> origin
     individuals = DjangoFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
@@ -370,6 +386,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.sanction_list_confirmed_match
 
     @staticmethod
+<<<<<<< HEAD
     def resolve_admin1(parent: Household, info: Any) -> Area:
         return parent.admin1
 
@@ -382,6 +399,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.admin_area
 
     @staticmethod
+=======
+>>>>>>> origin
     def resolve_admin_area_title(parent: Household, info: Any) -> str:
         return getattr(parent.admin_area, "name", "")
 
@@ -466,7 +485,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoPermissionFilterConnectionField(
+    all_households = DjangoPermissionFilterFastConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
@@ -474,7 +493,7 @@ class Query(graphene.ObjectType):
         ),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoPermissionFilterConnectionField(
+    all_individuals = DjangoPermissionFilterFastConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(
@@ -626,10 +645,10 @@ class Query(graphene.ObjectType):
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
+        return {"total": payment_items_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
@@ -648,13 +667,13 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         individuals_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_individuals_params)
+            payment_items_qs.select_related("household")
             .distinct("household__id")
+            .values_list(*households_individuals_params)
         )
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
@@ -671,14 +690,12 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
         ]
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         household_child_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_child_params)
-            .distinct("household__id")
+            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_child_params)
         )
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
@@ -699,14 +716,13 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-
         household_child_counts = (
-            payment_records_qs.select_related("household").values_list(*households_params).distinct("household__id")
+            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_params)
         )
+
         return {
             "labels": INDIVIDUALS_CHART_LABELS,
             "datasets": [{"data": sum_lists_with_values(household_child_counts, len(households_params))}],
@@ -742,23 +758,22 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payment_records_for_dashboard(
+        payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
+
         # aggregate with distinct by household__id is not possible
         households_with_disability_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_with_disability)
+            payment_items_qs.select_related("household")
             .distinct("household__id")
+            .values_list(*households_params_with_disability)
         )
         sum_of_with_disability = sum_lists_with_values(
             households_with_disability_counts, len(households_params_with_disability)
         )
 
         households_totals_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_total)
-            .distinct("household__id")
+            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_params_total)
         )
         sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
 

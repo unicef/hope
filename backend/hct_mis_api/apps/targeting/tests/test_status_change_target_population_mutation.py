@@ -20,6 +20,7 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
+<<<<<<< HEAD
             mutation LockTargetPopulation($id: ID!) {
               lockTargetPopulation(id: $id) {
                 targetPopulation {
@@ -30,12 +31,24 @@ class TestApproveTargetPopulationMutation(APITestCase):
                       node {
                         size
                         residenceStatus
+=======
+                mutation LockTargetPopulation($id: ID!) {
+                  lockTargetPopulation(id: $id) {
+                    targetPopulation {
+                      status
+                      householdList(orderBy: "size") {
+                        totalCount
+                        edges {
+                          node {
+                            size
+                            residenceStatus
+                          }
+                        }
+>>>>>>> origin
                       }
                     }
                   }
                 }
-              }
-            }
             """
 
     @classmethod

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -10,25 +10,24 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 
-const Container = styled.div`
-  && {
-    display: flex;
-    flex-direction: column;
-    min-width: 100%;
-  }
-`;
+const initialFilter = {
+  search: '',
+  partner: '',
+  roles: '',
+  status: '',
+};
 
-export function UsersPage(): React.ReactElement {
+export const UsersPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const [filter, setFilter] = useState({
-    search: '',
-    partner: '',
-    roles: '',
-    status: '',
-  });
+  const location = useLocation();
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const debouncedFilter = useDebounce(filter, 500);
 
   if (permissions === null) return null;
@@ -37,7 +36,7 @@ export function UsersPage(): React.ReactElement {
     return <PermissionDenied />;
 
   return (
-    <div>
+    <>
       <PageHeader title={t('User Management')}>
         <>
           <Button
@@ -53,9 +52,7 @@ export function UsersPage(): React.ReactElement {
         </>
       </PageHeader>
       <UsersListFilters filter={filter} onFilterChange={setFilter} />
-      <Container>
-        <UsersTable filter={debouncedFilter} />
-      </Container>
-    </div>
+      <UsersTable filter={debouncedFilter} />
+    </>
   );
-}
+};

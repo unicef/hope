@@ -26,6 +26,5 @@ class TestPowerQueryCelery(TestCase):
         cls.report: Report = ReportFactory(formatter=cls.formatter, query=cls.query1)
 
     def test_query_queue(self) -> None:
-
         run_background_query.delay(self.query1.pk)
         assert self.query1.datasets.exists()

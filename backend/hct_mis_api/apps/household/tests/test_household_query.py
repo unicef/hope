@@ -10,6 +10,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -95,6 +96,16 @@ HOUSEHOLD_QUERY = """
         size
         countryOrigin
         address
+        adminArea {
+          pCode
+        }
+        adminAreaTitle
+        admin1 {
+          pCode
+        }
+        admin2 {
+          pCode
+        }
       }
     }
     """
@@ -129,6 +140,18 @@ class TestHouseholdQuery(APITestCase):
                 household.programs.add(cls.program_one)
             else:
                 household.programs.add(cls.program_two)
+
+            area_type_level_1 = AreaTypeFactory(
+                name="State1",
+                area_level=1,
+            )
+            area_type_level_2 = AreaTypeFactory(
+                name="State2",
+                area_level=2,
+            )
+            cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
+            cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
+            household.set_admin_areas(cls.area2)
 
             cls.households.append(household)
 

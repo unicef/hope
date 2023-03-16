@@ -1,10 +1,13 @@
 from typing import Dict, List, Union
 
 
-def humanize_errors(errors: List) -> Union[Dict, List]:
-    # TODO: refactor
+def humanize_errors(errors: Dict) -> Dict:
     try:
+<<<<<<< HEAD
         households = errors.pop("households")  # type: ignore
+=======
+        households = errors.pop("households", [])
+>>>>>>> origin
         errs = {}
         if len(households) == 1 and isinstance(households[0], str):
             hh_info = households

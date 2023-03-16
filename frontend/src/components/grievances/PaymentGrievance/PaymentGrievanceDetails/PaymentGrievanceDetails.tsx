@@ -50,12 +50,12 @@ export function PaymentGrievanceDetails({
   const confirm = useConfirmation();
   const {
     approveStatus,
+    oldReceivedAmount,
     newReceivedAmount,
-    paymentVerification: {
-      receivedAmount,
-      paymentRecord: { deliveredQuantity },
-    },
+    paymentVerification: { receivedAmount },
   } = ticket.paymentVerificationTicketDetails;
+
+  const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
 
   let dialogText = t('Are you sure you want to disapprove this payment?');
   if (!approveStatus) {
@@ -130,8 +130,10 @@ export function PaymentGrievanceDetails({
               ) : null}
             </TableCell>
             <TableCell align='right'>{deliveredQuantity}</TableCell>
-            <TableCell align='right'>{receivedAmount}</TableCell>
-            <TableCell align='right'>{newReceivedAmount}</TableCell>
+            <TableCell align='right'>
+              {oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}
+            </TableCell>
+            <TableCell align='right'>{newReceivedAmount ?? 0}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>

@@ -366,13 +366,13 @@ class Command(BaseCommand):
         """Return a string that describes a migration operation for --plan."""
         prefix = ""
         is_error = False
+        action = ""
         if hasattr(operation, "code"):
             code = operation.reverse_code if backwards else operation.code
-            action = (code.__doc__ or "") if code else None
+            action = (code.__doc__ or "") if code else ""
         elif hasattr(operation, "sql"):
             action = operation.reverse_sql if backwards else operation.sql
         else:
-            action = ""
             if backwards:
                 prefix = "Undo "
         if action is not None:

@@ -105,7 +105,7 @@ export function ActivateProgram({
               color='primary'
               variant='contained'
               onClick={activateProgram}
-              data-cy='button-activate-program'
+              data-cy='button-activate-program-modal'
             >
               {t('ACTIVATE')}
             </LoadingButton>

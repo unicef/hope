@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 from django.contrib.gis.geos import Point
 
 import factory.fuzzy
+from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
@@ -28,7 +29,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 faker = Faker()
 
 
-class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
+class RegistrationDataImportDatahubFactory(DjangoModelFactory):
     class Meta:
         model = RegistrationDataImportDatahub
 
@@ -42,7 +43,7 @@ class RegistrationDataImportDatahubFactory(factory.DjangoModelFactory):
     )
 
 
-class ImportedHouseholdFactory(factory.DjangoModelFactory):
+class ImportedHouseholdFactory(DjangoModelFactory):
     class Meta:
         model = ImportedHousehold
 
@@ -64,7 +65,13 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     admin1 = ""
     admin2 = ""
-    geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
+    admin3 = ""
+    admin4 = ""
+    admin1_title = ""
+    admin2_title = ""
+    admin3_title = ""
+    admin4_title = ""
+    geopoint = factory.LazyAttribute(lambda o: Point(faker.latlng()))
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
@@ -97,7 +104,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     village = factory.Faker("city")
 
 
-class ImportedIndividualFactory(factory.DjangoModelFactory):
+class ImportedIndividualFactory(DjangoModelFactory):
     class Meta:
         model = ImportedIndividual
 
@@ -156,7 +163,7 @@ def create_imported_household_and_individuals(
     return household, individuals
 
 
-class ImportedDocumentFactory(factory.DjangoModelFactory):
+class ImportedDocumentFactory(DjangoModelFactory):
     class Meta:
         model = ImportedDocument
 
@@ -165,7 +172,7 @@ class ImportedDocumentFactory(factory.DjangoModelFactory):
     individual = factory.SubFactory(ImportedIndividualFactory)
 
 
-class ImportedDocumentTypeFactory(factory.DjangoModelFactory):
+class ImportedDocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = ImportedDocumentType
 

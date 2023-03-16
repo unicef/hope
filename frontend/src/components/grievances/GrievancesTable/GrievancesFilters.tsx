@@ -1,7 +1,13 @@
 import { Box, Grid, MenuItem } from '@material-ui/core';
+<<<<<<< HEAD
 import { AccountBalance } from '@material-ui/icons';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+=======
+import moment from 'moment';
+import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+>>>>>>> origin
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
@@ -18,10 +24,20 @@ import {
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
+<<<<<<< HEAD
 import { FieldLabel } from '../../core/FieldLabel';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
+=======
+import { NumberTextField } from '../../core/NumberTextField';
+import { SearchTextField } from '../../core/SearchTextField';
+import { SelectFilter } from '../../core/SelectFilter';
+import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
+import { createHandleFilterChange } from '../../../utils/utils';
+>>>>>>> origin
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -29,10 +45,11 @@ interface GrievancesFiltersProps {
   choicesData: GrievancesChoiceDataQuery;
   selectedTab: number;
 }
-export function GrievancesFilters({
+export const GrievancesFilters = ({
   onFilterChange,
   filter,
   choicesData,
+<<<<<<< HEAD
   selectedTab,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
@@ -50,6 +67,19 @@ export function GrievancesFilters({
         }),
     });
   };
+=======
+}: GrievancesFiltersProps): React.ReactElement => {
+  const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+>>>>>>> origin
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -67,6 +97,7 @@ export function GrievancesFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
+<<<<<<< HEAD
         <Grid container item xs={5} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
@@ -95,10 +126,19 @@ export function GrievancesFilters({
               ))}
             </SelectFilter>
           </Grid>
+=======
+        <Grid item>
+          <SearchTextField
+            value={filter.search}
+            label='Search'
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy='filters-search'
+          />
+>>>>>>> origin
         </Grid>
         <Grid container item xs={2}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
           >
@@ -116,6 +156,7 @@ export function GrievancesFilters({
           <SearchTextField
             value={filter.fsp}
             label='FSP'
+<<<<<<< HEAD
             icon={<AccountBalance style={{ color: '#5f6368' }} />}
             onChange={(e) => handleFilterChange(e, 'fsp')}
             fullWidth
@@ -162,10 +203,43 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
+=======
+            onChange={(e) => handleFilterChange('fsp', e.target.value)}
+          />
+        </Grid>
+        <Grid item>
+          <DatePickerFilter
+            topLabel={t('Creation Date')}
+            placeholder='From'
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMin',
+                moment(date)
+                  .set({ hour: 0, minute: 0 })
+                  .toISOString(),
+              )
+            }
+            value={filter.createdAtRangeMin}
+          />
+        </Grid>
+        <Grid item>
+          <DatePickerFilter
+            placeholder='To'
+            onChange={(date) =>
+              handleFilterChange(
+                'createdAtRangeMax',
+                moment(date)
+                  .set({ hour: 23, minute: 59 })
+                  .toISOString(),
+              )
+            }
+            value={filter.createdAtRangeMax}
+          />
+>>>>>>> origin
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'category')}
+            onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
             value={filter.category}
           >
@@ -186,7 +260,7 @@ export function GrievancesFilters({
           filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT) && (
           <Grid item>
             <SelectFilter
-              onChange={(e) => handleFilterChange(e, 'issueType')}
+              onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label='Issue Type'
               value={filter.issueType}
             >
@@ -206,13 +280,37 @@ export function GrievancesFilters({
               })}
             </SelectFilter>
           </Grid>
+<<<<<<< HEAD
         )}
+=======
+        ) : null}
+
+        <Grid item>
+          <AdminAreaAutocomplete
+            onFilterChange={onFilterChange}
+            filter={filter}
+            name='admin'
+            value={filter.admin}
+          />
+        </Grid>
+>>>>>>> origin
         <Grid item>
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
+            filter={filter}
             name='assignedTo'
+            value={filter.assignedTo}
           />
         </Grid>
+        <Grid item>
+          <NumberTextField
+            topLabel={t('Similarity Score')}
+            value={filter.scoreMin}
+            placeholder={t('From')}
+            onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
+          />
+        </Grid>
+<<<<<<< HEAD
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid container item xs={3} spacing={3} alignItems='flex-end'>
             <Grid item xs={6}>
@@ -232,10 +330,31 @@ export function GrievancesFilters({
             </Grid>
           </Grid>
         )}
+=======
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <NumberTextField
+              value={filter.scoreMax}
+              placeholder='To'
+              onChange={(e) => handleFilterChange('scoreMax', e.target.value)}
+            />
+          </Box>
+        </Grid>
+>>>>>>> origin
         <Grid item>
           <RdiAutocomplete
             onFilterChange={onFilterChange}
+            filter={filter}
             name='registrationDataImport'
+            value={filter.registrationDataImport}
+          />
+        </Grid>
+        <Grid item>
+          <LanguageAutocomplete
+            onFilterChange={onFilterChange}
+            filter={filter}
+            name='preferredLanguage'
+            value={filter.preferredLanguage}
           />
         </Grid>
         <Grid item container xs={2}>
@@ -291,4 +410,4 @@ export function GrievancesFilters({
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

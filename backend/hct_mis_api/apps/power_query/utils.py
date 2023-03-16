@@ -2,6 +2,7 @@ import base64
 import hashlib
 import inspect
 import json
+from datetime import datetime
 from typing import Any, Callable, Dict
 
 from django.conf import settings
@@ -107,3 +108,21 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
     encoded = json.dumps(dictionary, sort_keys=True).encode()
     dhash.update(encoded)
     return dhash.hexdigest()
+
+
+def should_run(expression: str) -> bool:
+    match_expressions = expression.split(",")
+    today = datetime.today()
+
+    for exp in match_expressions:
+        if exp.lower() in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]:
+            if exp.lower() == datetime.today().strftime("%a").lower():
+                return True
+        elif exp.isnumeric():
+            if today.day == int(exp):
+                return True
+        elif exp.count("/") == 1:
+            day, month = exp.split("/")
+            if day.isnumeric() and month.isnumeric() and int(day) == today.day and int(month) == today.month:
+                return True
+    return False

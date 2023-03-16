@@ -82,11 +82,19 @@ export const FormikSelectFieldConfirmProgram = ({
           MenuListProps: { 'data-cy': 'select-options-container' },
         }}
       >
+<<<<<<< HEAD
         {otherProps.choices.map((each, index) => (
           <MenuItem
             key={each.value ? each.value : each.name}
             value={each.value ? each.value : each.name}
             data-cy={`select-option-${index}`}
+=======
+        {otherProps.choices.map((each) => (
+          <MenuItem
+            key={each.value ? each.value : each.name}
+            value={each.value ? each.value : each.name}
+            data-cy={`select-option-${each.name}`}
+>>>>>>> origin
           >
             {each.labelEn || each.name || each.label}
           </MenuItem>

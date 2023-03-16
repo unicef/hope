@@ -1,6 +1,10 @@
 {
   "name": "frontend",
+<<<<<<< HEAD
   "version": "2023.1.2",
+=======
+  "version": "2023.3.4",
+>>>>>>> origin
   "private": true,
   "dependencies": {
     "@apollo/react-hooks": "^3.1.3",

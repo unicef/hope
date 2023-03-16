@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from dateutil.parser import parse
 
@@ -35,10 +35,10 @@ def reduce_asset(asset: Dict, *args: Any, **kwargs: Any) -> Dict:
     sector = None
 
     if settings:
-        if settings.get("sector"):
-            sector = settings["sector"].get("label")
-        if settings.get("country"):
-            country = settings["country"].get("label")
+        if sector := settings.get("sector"):
+            sector = sector.get("label")
+        if country := settings.get("country"):
+            country = next(iter(country)).get("label") if isinstance(country, list) else country.get("label")
 
     return {
         "id": asset["uid"],
@@ -60,7 +60,7 @@ def get_field_name(field_name: str) -> str:
         return field_name
 
 
-def reduce_assets_list(assets: list, deployed: bool = True, *args: Any, **kwarg: Any) -> List:
+def reduce_assets_list(assets: List, deployed: bool = True, *args: Any, **kwarg: Any) -> List:
     if deployed:
         return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]
@@ -114,10 +114,8 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data: Union[List, Dict], business_area: BusinessArea) -> Optional[Union[List, Dict]]:
+def filter_by_owner(data: List, business_area: BusinessArea) -> List:
     kobo_username = business_area.kobo_username
-    if isinstance(data, list):
+    if data:
         return [element for element in data if element["owner__username"] == kobo_username]
-    if data["owner__username"] == kobo_username:
-        return data
-    return None
+    return []
