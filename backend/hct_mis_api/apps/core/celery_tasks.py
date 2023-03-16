@@ -7,7 +7,6 @@ from functools import wraps
 from typing import Any, Callable
 
 from django.db import transaction
-from django.db.models import Count, OuterRef
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
@@ -16,7 +15,6 @@ from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields impo
     KoboRetriableError,
 )
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_NONE,
     COLLECT_TYPE_SIZE_ONLY,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_TAX_ID,
@@ -144,8 +142,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                     iban = row["IBAN"]
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
-                    collect_type = row.get("COLLECT_TYPE", COLLECT_TYPE_NONE)
-                    size = row["FAM_NUM"] if collect_type == COLLECT_TYPE_SIZE_ONLY else 1
+                    size = row["FAM_NUM"]
 
                     individual_data = {
                         "given_name": row.get("NAME", ""),
@@ -175,7 +172,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                             size=size,
                             family_id=family_id,
                             storage_obj=storage_obj,
-                            collect_individual_data=collect_type,
+                            collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
                         )
 
                         individual.household = household
@@ -216,15 +213,6 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
             Individual.objects.bulk_create(individuals)
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
-
-            Household.objects.filter(family_id__in=list(families.keys())).exclude(
-                collect_individual_data=COLLECT_TYPE_SIZE_ONLY
-            ).update(
-                size=Individual.objects.filter(household=OuterRef("pk"))
-                .values("household")
-                .annotate(count=Count("pk"))
-                .values("count")[:1]
-            )
 
             households = Household.objects.filter(family_id__in=list(families.keys()))
             households.update(withdrawn=True, withdrawn_date=timezone.now())
