@@ -1,15 +1,19 @@
+import { InputAdornment } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleFilterChange } from '../../utils/utils';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
+import {
+  AllAdminAreasQuery,
+  AreaNodeEdge,
+  useAllAdminAreasLazyQuery,
+} from '../../__generated__/graphql';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -18,67 +22,52 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export const AssigneeAutocomplete = ({
+export const LookUpAdminAreaAutocomplete = ({
   disabled,
   fullWidth,
-  name,
   onFilterChange,
-  filter,
+  name,
   value,
-  label,
 }: {
   disabled?;
   fullWidth?: boolean;
+  onFilterChange;
   name: string;
-  onFilterChange: (filters: { [key: string]: string }) => void;
-  filter;
-  value: string;
-  label?: string;
+  value?: AreaNodeEdge;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
+
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
-
-  const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
+  const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
-      businessArea,
       first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: debouncedInputText,
+      name: debouncedInputText,
+      businessArea,
+      level: 2,
     },
   });
-
   useEffect(() => {
     if (open) {
-      loadData();
+      loadAdminAreas();
     }
-  }, [open, debouncedInputText, loadData]);
+  }, [open, debouncedInputText, loadAdminAreas]);
 
-  // load all users on mount to match the value from the url
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleFilterChange = createHandleFilterChange(
-    onFilterChange,
-    filter,
-    useHistory<LocationState>(),
-    useLocation(),
-  );
-
-  if (!data) return null;
-
+  const onChangeMiddleware = (e, selectedValue): void => {
+    onFilterChange((filters) => ({
+      ...filters,
+      [name]: selectedValue || undefined,
+    }));
+  };
   return (
-    <StyledAutocomplete
+    <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       value={value}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
+      onChange={onChangeMiddleware}
       onOpen={() => {
         setOpen(true);
       }}
@@ -88,32 +77,32 @@ export const AssigneeAutocomplete = ({
         onInputTextChange('');
       }}
       getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
+        return value1?.node?.id === option.node.id;
       }}
       getOptionLabel={(option) => {
-        let optionLabel;
-        if (option.node) {
-          optionLabel = `${option.node.email}`;
-        } else {
-          optionLabel =
-            data?.allUsers?.edges?.find((el) => el.node.id === option)?.node
-              .email || '';
+        if (!option.node) {
+          return '';
         }
-        return `${optionLabel}`;
+        return `${option.node.name}`;
       }}
       disabled={disabled}
-      options={get(data, 'allUsers.edges', [])}
+      options={get(data, 'allAdminAreas.edges', [])}
       loading={loading}
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label || t('Assignee')}
+          label={t('Admin Level 2')}
           variant='outlined'
           margin='dense'
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position='start'>
+                <RoomRoundedIcon style={{ color: '#5f6368' }} />
+              </InputAdornment>
+            ),
             endAdornment: (
               <>
                 {loading ? (
