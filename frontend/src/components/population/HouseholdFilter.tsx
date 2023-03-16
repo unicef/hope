@@ -1,9 +1,11 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import GroupIcon from '@material-ui/icons/Group';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { createHandleFilterChange } from '../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -36,8 +38,16 @@ export const HouseholdFilters = ({
   choicesData,
 }: HouseholdFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -45,13 +55,18 @@ export const HouseholdFilters = ({
           <SearchTextField
             label={t('Search')}
             value={filter.text}
+<<<<<<< HEAD
             onChange={(e) => handleFilterChange(e, 'text')}
             data-cy='filters-search'
+=======
+            onChange={(e) => handleFilterChange('text', e.target.value)}
+            data-cy='hh-filters-search'
+>>>>>>> origin
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'program')}
+            onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
@@ -68,7 +83,9 @@ export const HouseholdFilters = ({
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'residenceStatus')}
+            onChange={(e) =>
+              handleFilterChange('residenceStatus', e.target.value)
+            }
             label={t('Residence Status')}
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
@@ -88,17 +105,20 @@ export const HouseholdFilters = ({
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete
-            onFilterChange={onFilterChange}
             name='adminArea'
+            value={filter.adminArea}
+            onFilterChange={onFilterChange}
+            filter={filter}
           />
         </Grid>
         <Grid item>
           <NumberTextField
             topLabel={t('Household Size')}
-            value={filter.householdSize.min}
+            value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
             onChange={(e) =>
+<<<<<<< HEAD
               onFilterChange({
                 ...filter,
                 householdSize: {
@@ -106,11 +126,15 @@ export const HouseholdFilters = ({
                   min: e.target.value,
                 },
               })
+=======
+              handleFilterChange('householdSizeMin', e.target.value)
+>>>>>>> origin
             }
           />
         </Grid>
         <Grid item>
           <NumberTextField
+<<<<<<< HEAD
             value={filter.householdSize.max}
             placeholder={t('To')}
             icon={<GroupIcon />}
@@ -122,12 +146,23 @@ export const HouseholdFilters = ({
                   max: e.target.value,
                 },
               })
+=======
+            value={filter.householdSizeMax}
+            placeholder={t('To')}
+            icon={<GroupIcon />}
+            onChange={(e) =>
+              handleFilterChange('householdSizeMax', e.target.value)
+>>>>>>> origin
             }
           />
         </Grid>
         <Grid item>
           <SelectFilter
+<<<<<<< HEAD
             onChange={(e) => handleFilterChange(e, 'orderBy')}
+=======
+            onChange={(e) => handleFilterChange('orderBy', e.target.value)}
+>>>>>>> origin
             label={t('Sort by')}
             value={filter.orderBy}
           >

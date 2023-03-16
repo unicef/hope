@@ -29,9 +29,12 @@ export const HouseholdTable = ({
   const { t } = useTranslation();
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-    familySize: JSON.stringify(filter.householdSize),
+    familySize: JSON.stringify({
+      min: filter.householdSizeMin,
+      max: filter.householdSizeMax,
+    }),
     search: filter.text,
-    adminArea: filter.adminArea?.node?.id,
+    adminArea: filter.adminArea,
     residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {
@@ -48,7 +51,11 @@ export const HouseholdTable = ({
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
         allowSort={false}
+<<<<<<< HEAD
         filterOrderBy={filterOrderBy}
+=======
+        filterOrderBy={filter.orderBy}
+>>>>>>> origin
         renderRow={(row) => (
           <HouseHoldTableRow
             key={row.id}

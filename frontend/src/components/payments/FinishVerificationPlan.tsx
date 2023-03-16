@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
@@ -17,50 +16,35 @@ import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
-  useCashPlanQuery,
-  useFinishCashPlanPaymentVerificationMutation,
+  PaymentPlanQuery,
+  useFinishPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
 
 export interface FinishVerificationPlanProps {
-  cashPlanVerificationId: string;
-  cashPlanId: string;
+  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
-  cashPlanVerificationId,
-  cashPlanId,
+  verificationPlan,
+  cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useFinishCashPlanPaymentVerificationMutation();
-  const { id } = useParams();
-  const { data, loading } = useCashPlanQuery({
-    variables: { id },
-  });
-  if (loading) {
-    return <LoadingComponent />;
-  }
-  if (!data) {
-    return null;
-  }
-  const { cashPlan } = data;
-  const verificationPlan = cashPlan?.verifications?.edges?.length
-    ? cashPlan.verifications.edges[0].node
-    : null;
+  const [mutate] = useFinishPaymentVerificationPlanMutation();
 
   const finish = async (): Promise<void> => {
-    const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
-      refetchQueries,
-    });
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
+    try {
+      await mutate({
+        variables: { paymentVerificationPlanId: verificationPlan.id },
+        refetchQueries,
+      });
+      showMessage(t('Verification plan has been finished'));
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
-    showMessage(t('Verification plan has been finished'));
   };
 
   const beneficiariesPercent = (): string => {

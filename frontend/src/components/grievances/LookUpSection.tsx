@@ -59,7 +59,11 @@ export const LookUpSection = ({
   const allThree = (
     <Grid container alignItems='center'>
       {renderedLookupHouseholdIndividual}
+<<<<<<< HEAD
       {showPaymentRecords && renderedLookupPaymentRecords}
+=======
+      {renderedLookupPaymentRecords}
+>>>>>>> origin
       {renderedLookupLinkedTickets}
     </Grid>
   );

@@ -97,7 +97,11 @@ export const IndividualBioData = ({
   const mappedRoles = (
     <Grid item xs={3}>
       <LabelizedField label={t('Linked Households')}>
+<<<<<<< HEAD
         {individual?.householdsAndRoles.length
+=======
+        {individual?.householdsAndRoles?.length
+>>>>>>> origin
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} - {roleChoicesDict[item.role]}
@@ -213,6 +217,14 @@ export const IndividualBioData = ({
         <Grid item xs={3}>
           <LabelizedField label={t('Relationship to HOH')}>
             {relationshipChoicesDict[individual?.relationship]}
+<<<<<<< HEAD
+=======
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Preferred language')}>
+            {individual?.preferredLanguage}
+>>>>>>> origin
           </LabelizedField>
         </Grid>
         {mappedRoles}
@@ -265,8 +277,8 @@ export const IndividualBioData = ({
               : 'Not Disabled'}
           </LabelizedField>
         </Grid>
-        {!mappedIndividualDocuments.length &&
-        !mappedIdentities.length ? null : (
+        {!mappedIndividualDocuments?.length &&
+        !mappedIdentities?.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>

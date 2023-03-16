@@ -31,9 +31,11 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
 
 
 class JSONWidgetMixin:
+    json_enabled = False
+
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if isinstance(db_field, JSONField):
-            if is_root(request) or settings.DEBUG:
+            if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
             else:
                 kwargs = {"widget": JsonWidget}
@@ -105,5 +107,5 @@ class HUBBusinessAreaFilter(SimpleListFilter):
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value():
-            return queryset.filter(business_area=self.value()).distinct()
+            return queryset.filter(session__business_area=self.value()).distinct()
         return queryset

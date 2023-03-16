@@ -1,4 +1,8 @@
 import factory
+<<<<<<< HEAD
+=======
+from factory.django import DjangoModelFactory
+>>>>>>> origin
 from faker import Faker
 
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
@@ -6,7 +10,9 @@ from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 faker = Faker()
 
 
-def create_afghanistan() -> BusinessArea:
+def create_afghanistan(
+    is_payment_plan_applicable: bool = False,
+) -> BusinessArea:
     return BusinessArea.objects.create(
         **{
             "code": "0060",
@@ -16,11 +22,17 @@ def create_afghanistan() -> BusinessArea:
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
+            "is_payment_plan_applicable": is_payment_plan_applicable,
+            "kobo_token": "XXX",
         },
     )
 
 
+<<<<<<< HEAD
 class StorageFileFactory(factory.DjangoModelFactory):
+=======
+class StorageFileFactory(DjangoModelFactory):
+>>>>>>> origin
     class Meta:
         model = StorageFile
 

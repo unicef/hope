@@ -19,21 +19,16 @@ from hct_mis_api.apps.reporting.celery_tasks import (
     dashboard_report_export_task,
     report_export_task,
 )
+from hct_mis_api.apps.reporting.inputs import (
+    CreateDashboardReportInput,
+    CreateReportInput,
+    RestartCreateReportInput,
+)
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.validators import ReportValidator
 
 logger = logging.getLogger(__name__)
-
-
-class CreateReportInput(graphene.InputObjectType):
-    report_type = graphene.Int(required=True)
-    business_area_slug = graphene.String(required=True)
-    date_from = graphene.Date(required=True)
-    date_to = graphene.Date(required=True)
-    program = graphene.ID()
-    admin_area_1 = graphene.ID()
-    admin_area_2 = graphene.List(graphene.ID)
 
 
 class CreateReport(ReportValidator, PermissionMutation):
@@ -93,11 +88,6 @@ class CreateReport(ReportValidator, PermissionMutation):
         return CreateReport(report)
 
 
-class RestartCreateReportInput(graphene.InputObjectType):
-    report_id = graphene.ID(required=True)
-    business_area_slug = graphene.String(required=True)
-
-
 class RestartCreateReport(PermissionMutation):
     report = graphene.Field(ReportNode)
 
@@ -120,14 +110,6 @@ class RestartCreateReport(PermissionMutation):
             report_export_task.delay(report_id=str(report.id))
             report.refresh_from_db()
         return RestartCreateReport(report)
-
-
-class CreateDashboardReportInput(graphene.InputObjectType):
-    report_types = graphene.List(graphene.String, required=True)
-    business_area_slug = graphene.String(required=True)
-    year = graphene.Int(required=True)
-    admin_area = graphene.ID()
-    program = graphene.ID()
 
 
 class CreateDashboardReport(PermissionMutation):

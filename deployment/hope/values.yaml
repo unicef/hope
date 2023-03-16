@@ -30,8 +30,26 @@ backend:
 
   tolerations: []
 
-  affinity: {}
+  resources:
+    requests:
+      cpu: 300m
+      memory: 1G
+    limits:
+      cpu: 1100m
+      memory: 1.5G
 
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: hope/service
+              operator: In
+              values:
+              - backend
+          topologyKey: "kubernetes.io/hostname"
 
   service:
     type: ClusterIP
@@ -72,8 +90,25 @@ frontend:
 
   tolerations: []
 
-  affinity: {}
-  resources: {}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: hope/service
+              operator: In
+              values:
+              - frontend
+          topologyKey: "kubernetes.io/hostname"
+  resources:
+    requests:
+      cpu: 5m
+      memory: 3M
+    limits:
+      cpu: 10m
+      memory: 40M
   nodeSelector: {}
 
   service:
@@ -186,6 +221,32 @@ elasticsearch:
   enabled: true
   master:
     replicas: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 1500Mi
+      requests:
+        cpu: 25m
+        memory: 256Mi
+  coordinating:
+    replicas: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 2000Mi
+      requests:
+        cpu: 25m
+        memory: 1000Mi
+  data:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 2500Mi
+      requests:
+        cpu: 25m
+        memory: 2048Mi
+
+
   sysctlImage:
     replicas: 1
   plugins: "analysis-phonetic"
@@ -199,9 +260,27 @@ celery:
   podSecurityContext: {}
 
   securityContext: {}
+  resources:
+    requests:
+      cpu: 300m
+      memory: 500Mi
+    limits:
+      cpu: 1100m
+      memory: 1Gi
 
   tolerations: []
-  affinity: {}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: hope/service
+              operator: In
+              values:
+              - celery-worker
+          topologyKey: "kubernetes.io/hostname"
 
 celeryflower:
   image: saxix/flower:1.6
@@ -213,7 +292,6 @@ celeryflower:
 
   tolerations: []
   affinity: {}
-
   service:
     type: ClusterIP
     port: 8000

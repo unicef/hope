@@ -156,13 +156,12 @@ class TestXLSXValidatorsMethods(APITestCase):
             {
                 "row_number": 0,
                 "header": "relationship_i_c",
-                "message": "Sheet: Individuals, There are multiple head of " "households for household with id: 3",
+                "message": "Sheet: Individuals, There are multiple head of households for household with id: 3",
             }
         ]
         self.assertEqual(expected, result)
 
     def test_rows_validator(self) -> None:
-
         wb = openpyxl.load_workbook(
             f"{self.FILES_DIR_PATH}/invalid_rows.xlsx",
             data_only=True,
@@ -296,6 +295,12 @@ class TestXLSXValidatorsMethods(APITestCase):
             (
                 wb["Individuals"],
                 [
+                    # TODO: fix this? (rebase issue?)
+                    # {
+                    #     "row_number": 4,
+                    #     "header": "preferred_language_i_c",
+                    #     "message": "Sheet: 'Individuals', Unexpected value: Test for type select one of field preferred_language_i_c",
+                    # },
                     {
                         "row_number": 8,
                         "header": "relationship_i_c",

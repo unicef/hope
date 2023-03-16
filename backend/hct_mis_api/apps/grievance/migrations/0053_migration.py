@@ -25,3 +25,7 @@ class Migration(migrations.Migration):
             ),
         ),
     ]
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin

@@ -92,8 +92,12 @@ function prepareSesitiveVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+<<<<<<< HEAD
         issueType: parseInt(values.issueType, 10),
         partner: parseInt(values.partner, 10),
+=======
+        issueType: values.issueType,
+>>>>>>> origin
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {

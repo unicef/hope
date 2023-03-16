@@ -27,7 +27,10 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
+<<<<<<< HEAD
   paymentRecord?: string;
+=======
+>>>>>>> origin
   selectedLinkedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
@@ -300,7 +303,10 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+<<<<<<< HEAD
         issueType: values.issueType,
+=======
+>>>>>>> origin
         linkedTickets: values.selectedLinkedTickets,
       },
     },

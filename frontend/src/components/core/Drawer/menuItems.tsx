@@ -6,9 +6,12 @@ import BallotIcon from '@material-ui/icons/Ballot';
 import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
+<<<<<<< HEAD
 import ForumIcon from '@material-ui/icons/Forum';
 import InfoIcon from '@material-ui/icons/Info';
 import ListIcon from '@material-ui/icons/List';
+=======
+>>>>>>> origin
 import NewReleases from '@material-ui/icons/NewReleases';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
@@ -88,6 +91,14 @@ export const menuItems = [
     selectedRegexp: /^\/unique.*$/,
     icon: <PaymentIcon />,
     external: true,
+  },
+  {
+    name: 'Payment Module',
+    href: '/payment-module',
+    selectedRegexp: /^\/payment-module.*$/,
+    icon: <PaymentIcon />,
+    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+    flag: 'isPaymentPlanApplicable',
   },
   {
     name: 'Payment Verification',
@@ -188,7 +199,7 @@ export const resourcesItems = [
   {
     name: 'Conversations',
     href:
-      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiI2NDk1MDA4In0',
+      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIxMzAzMTkwMDc3NDQifQ/all',
     icon: <QuestionAnswerIcon />,
   },
   {
