@@ -13,6 +13,10 @@ from django.utils import timezone
 
 from admin_extra_buttons.decorators import button
 
+<<<<<<< HEAD
+=======
+from ...targeting.services.targeting_stats_refresher import refresh_stats
+>>>>>>> origin
 from ..forms import (
     AddToTargetPopulationForm,
     CreateTargetPopulationForm,
@@ -216,7 +220,11 @@ class CustomTargetPopulationMixin:
                 population = qs.filter(business_area=ba)
                 with atomic():
                     tp.households.add(*population)
+<<<<<<< HEAD
                     tp.refresh_stats()
+=======
+                    refresh_stats(tp)
+>>>>>>> origin
                     tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
@@ -262,7 +270,11 @@ class CustomTargetPopulationMixin:
                         program=program,
                     )
                     tp.households.set(population)
+<<<<<<< HEAD
                     tp.refresh_stats()
+=======
+                    refresh_stats(tp)
+>>>>>>> origin
                     tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)

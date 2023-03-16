@@ -4,7 +4,14 @@ from django.utils import timezone
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentVerification
+<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/payment_verification_services.py
 from hct_mis_api.apps.utils.exceptions import log_and_raise
+=======
+from hct_mis_api.apps.payment.utils import calculate_counts
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+>>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/payment_verification.py
 
 
 def update_payment_verification_service(
@@ -17,6 +24,7 @@ def update_payment_verification_service(
         and payment_verification
         and not payment_verification_details.has_multiple_payment_verifications
     ):
+<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/payment_verification_services.py
         return [grievance_ticket]
     # update PaymentVerification status
     if (
@@ -29,13 +37,25 @@ def update_payment_verification_service(
             status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     else:
         # set 'NOT_RECEIVED' status
+=======
+        return
+
+    if payment_verification_details.new_status == PaymentVerification.STATUS_NOT_RECEIVED:
+>>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/payment_verification.py
         status = payment_verification_details.new_status
+    elif (
+        payment_verification.payment_obj
+        and payment_verification_details.new_received_amount == payment_verification.payment_obj.delivered_quantity
+    ):
+        status = PaymentVerification.STATUS_RECEIVED
+    else:
+        status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
 
     payment_verification.status = status
     payment_verification.status_date = timezone.now()
     payment_verification.received_amount = payment_verification_details.new_received_amount
-
     payment_verification.save()
+<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/payment_verification_services.py
     return [grievance_ticket]
 
 
@@ -58,3 +78,8 @@ def update_ticket_payment_verification_service(
 
         payment_details.save()
     return grievance_ticket
+=======
+
+    calculate_counts(payment_verification.payment_verification_plan)
+    payment_verification.payment_verification_plan.save()
+>>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/payment_verification.py

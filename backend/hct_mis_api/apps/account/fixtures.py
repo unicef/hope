@@ -4,12 +4,13 @@ from typing import Any
 from django.contrib.auth import get_user_model
 
 import factory
+from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 
-class PartnerFactory(factory.DjangoModelFactory):
+class PartnerFactory(DjangoModelFactory):
     name = "UNICEF"
 
     class Meta:
@@ -17,8 +18,9 @@ class PartnerFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class BusinessAreaFactory(factory.DjangoModelFactory):
+class BusinessAreaFactory(DjangoModelFactory):
     name = factory.Sequence(lambda x: "BusinessArea{}".format(x))
+    code = factory.Sequence(lambda x: "BA{}".format(x))
     active = True
 
     class Meta:
@@ -26,7 +28,7 @@ class BusinessAreaFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name",)
 
 
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
         django_get_or_create = ("username",)
@@ -46,7 +48,7 @@ class UserFactory(factory.DjangoModelFactory):
         return manager.create_user(*args, **keyword_arguments)
 
 
-class RoleFactory(factory.DjangoModelFactory):
+class RoleFactory(DjangoModelFactory):
     subsystem = "HOPE"
     name = factory.Sequence(lambda o: f"name{o}")
 
@@ -55,7 +57,7 @@ class RoleFactory(factory.DjangoModelFactory):
         django_get_or_create = ("name", "subsystem")
 
 
-class UserRoleFactory(factory.DjangoModelFactory):
+class UserRoleFactory(DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     role = factory.SubFactory(RoleFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)

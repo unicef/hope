@@ -1,6 +1,7 @@
 import time
 
 import factory.fuzzy
+from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
@@ -11,7 +12,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 faker = Faker()
 
 
-class RegistrationDataImportFactory(factory.DjangoModelFactory):
+class RegistrationDataImportFactory(DjangoModelFactory):
     class Meta:
         model = RegistrationDataImport
 

@@ -28,6 +28,11 @@ class PowerQueryBackend(ModelBackend):
         return getattr(user_obj, key)
 
     def has_perm(self, user_obj: Union["AbstractBaseUser", "AnonymousUser"], perm: Any, obj: Any = None) -> bool:
+<<<<<<< HEAD
+=======
+        if not isinstance(user_obj, User):
+            return False
+>>>>>>> origin
         if isinstance(obj, Report):
             if obj.owner == user_obj:
                 return True
@@ -38,5 +43,9 @@ class PowerQueryBackend(ModelBackend):
                 return False
             if "business_area" in obj.arguments:
                 ba = obj.arguments["business_area"]
+<<<<<<< HEAD
                 return user_obj.is_active and perm in self.get_office_permissions(user_obj, ba)  # type: ignore # FIXME: Incompatible return value type (got "Union[BooleanField[Union[bool, Combinable], bool], bool]", expected "bool")
+=======
+                return user_obj.is_active and perm in self.get_office_permissions(user_obj, ba)
+>>>>>>> origin
         return False

@@ -1,5 +1,6 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useRdiAutocompleteLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
+import { createHandleFilterChange } from '../../utils/utils';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -16,19 +18,21 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function RdiAutocomplete({
+export const RdiAutocomplete = ({
   disabled,
   fullWidth,
-  onFilterChange,
   name,
+  onFilterChange,
+  filter,
   value,
 }: {
   disabled?;
   fullWidth?: boolean;
-  onFilterChange?;
-  name?;
-  value?;
-}): React.ReactElement {
+  name: string;
+  onFilterChange: (filters: { [key: string]: string }) => void;
+  filter?;
+  value?: string;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -48,19 +52,29 @@ export function RdiAutocomplete({
     }
   }, [open, debouncedInputText, loadData]);
 
-  const onChangeMiddleware = (e, selectedValue): void => {
-    onFilterChange((filters) => ({
-      ...filters,
-      [name]: selectedValue?.node?.id || undefined,
-    }));
-  };
+  // load all rdi on mount to match the value from the url
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    useHistory<LocationState>(),
+    useLocation(),
+  );
+
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={onChangeMiddleware}
+      onChange={(_, selectedValue) =>
+        handleFilterChange(name, selectedValue?.node?.id)
+      }
       onOpen={() => {
         setOpen(true);
       }}
@@ -70,13 +84,19 @@ export function RdiAutocomplete({
         onInputTextChange('');
       }}
       getOptionSelected={(option, value1) => {
-        return value1?.node?.id === option.node.id;
+        return value1 === option.node.id;
       }}
       getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
+        let label;
+        if (option.node) {
+          label = `${option.node.name}`;
+        } else {
+          label =
+            data?.allRegistrationDataImports?.edges?.find(
+              (el) => el.node.id === option,
+            )?.node.name || '';
         }
-        return `${option.node.name}`;
+        return `${label}`;
       }}
       disabled={disabled}
       options={get(data, 'allRegistrationDataImports.edges', [])}
@@ -104,4 +124,4 @@ export function RdiAutocomplete({
       )}
     />
   );
-}
+};

@@ -10,13 +10,19 @@ const StyledFlag = styled(FlagIcon)`
 interface FlagTooltipProps {
   confirmed?: boolean;
   message?: string;
+  handleClick?: () => void;
 }
 export const FlagTooltip = ({
   confirmed,
   message = '',
+  handleClick,
 }: FlagTooltipProps): React.ReactElement => {
   return (
+<<<<<<< HEAD
     <Tooltip title={message}>
+=======
+    <Tooltip onClick={handleClick} title={message}>
+>>>>>>> origin
       <StyledFlag confirmed={confirmed ? 1 : 0} />
     </Tooltip>
   );

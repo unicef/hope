@@ -28,6 +28,7 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household import models as people
+from hct_mis_api.apps.payment import models as payment
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -153,7 +154,6 @@ class SessionAdmin(HOPEModelAdminBase):
         context["data"] = {}
         warnings: List[List] = []
         errors = 0
-        errors = 0
         has_content: bool = False
         if settings.SENTRY_URL and obj.sentry_id:
             context["sentry_url"] = f"{settings.SENTRY_URL}?query={obj.sentry_id}"
@@ -188,11 +188,11 @@ class SessionAdmin(HOPEModelAdminBase):
         for sv in ServiceProvider.objects.filter(session=pk):
             svs.append(sv.ca_id)
 
-        session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
-        hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
+        session_cash_plans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
+        hope_cash_plans = payment.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
             "ca_id", flat=True
         )
-        known_cacheplans = list(session_cacheplans) + list(hope_cacheplans)
+        known_cash_plans = list(session_cash_plans) + list(hope_cash_plans)
 
         for pr in PaymentRecord.objects.filter(session=pk):
             if pr.service_provider_ca_id not in svs:
@@ -200,7 +200,7 @@ class SessionAdmin(HOPEModelAdminBase):
                 context["data"][PaymentRecord]["errors"].append(
                     f"PaymentRecord uses ServiceProvider {pr.service_provider_ca_id} that is not present in the Session"
                 )
-            if pr.cash_plan_ca_id not in known_cacheplans:
+            if pr.cash_plan_ca_id not in known_cash_plans:
                 errors += 1
                 context["data"][PaymentRecord]["errors"].append(
                     f"PaymentRecord is part of an  unknown CashPlan {pr.cash_plan_ca_id}"

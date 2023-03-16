@@ -22,10 +22,9 @@ class TestPowerQuery(TestCase):
     def setUpTestData(cls) -> None:
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
 
+        # code should be unique but the test depends on both BAs having the same, empty code
         cls.ba1 = BusinessAreaFactory()
-        cls.ba2 = BusinessAreaFactory()
         cls.hh1 = create_household({"business_area": cls.ba1})
-        cls.hh2 = create_household({"business_area": cls.ba2})
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user2 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user3 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
@@ -45,12 +44,11 @@ class TestPowerQuery(TestCase):
             self.client.login(username=self.user1.username, password="password")
             with user_grant_office_permission(self.user1, self.ba1, "power_query.view_reportdocument"):
                 response = self.client.get(url)
-                self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_access_forbidden(self) -> None:
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:document", args=[self.report1.pk, self.report1.documents.first().pk])
             self.client.login(username=self.user2.username, password="password")
-
             response = self.client.get(url)
             self.assertEqual(response.status_code, 403)

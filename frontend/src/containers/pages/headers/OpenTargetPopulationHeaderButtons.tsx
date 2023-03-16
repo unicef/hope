@@ -31,7 +31,7 @@ export const OpenTargetPopulationHeaderButtons = ({
   canLock,
   canRemove,
 }: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
-  const [openApprove, setOpenApprove] = useState(false);
+  const [openLock, setOpenLock] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const businessArea = useBusinessArea();
@@ -90,8 +90,8 @@ export const OpenTargetPopulationHeaderButtons = ({
           <Button
             variant='contained'
             color='primary'
-            onClick={() => setOpenApprove(true)}
-            data-cy='button-target-population-close'
+            onClick={() => setOpenLock(true)}
+            data-cy='button-target-population-lock'
           >
             Lock
           </Button>
@@ -108,8 +108,8 @@ export const OpenTargetPopulationHeaderButtons = ({
         targetPopulationId={targetPopulation.id}
       />
       <LockTargetPopulationDialog
-        open={openApprove}
-        setOpen={setOpenApprove}
+        open={openLock}
+        setOpen={setOpenLock}
         targetPopulationId={targetPopulation.id}
       />
     </Box>

@@ -14,6 +14,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 
+<<<<<<< HEAD
 interface RegistrationDataImportProps {
   filter;
   canViewDetails: boolean;
@@ -40,16 +41,20 @@ export function RegistrationDataImportTable({
   noTableStyling,
   noTitle,
 }: RegistrationDataImportProps): ReactElement {
+=======
+export const RegistrationDataImportTable = ({
+  filter,
+  canViewDetails,
+}): ReactElement => {
+>>>>>>> origin
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables = {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    name_Icontains: filter.search,
+    search: filter.search,
     importDate: filter.importDate
       ? moment(filter.importDate).format('YYYY-MM-DD')
       : null,
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    importedBy_Id: filter.importedBy
+    importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
@@ -102,4 +107,4 @@ export function RegistrationDataImportTable({
   ) : (
     renderTable()
   );
-}
+};

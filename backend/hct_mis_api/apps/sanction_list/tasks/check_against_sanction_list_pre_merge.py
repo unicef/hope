@@ -152,7 +152,9 @@ class CheckAgainstSanctionListPreMergeTask:
         cache.set("sanction_list_last_check", timezone.now(), None)
 
         possible_matches_individuals = evaluate_qs(
-            Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).select_for_update()
+            Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False)
+            .select_for_update()
+            .order_by("pk")
         )
         possible_matches_individuals.update(sanction_list_possible_match=True)
 
@@ -160,6 +162,7 @@ class CheckAgainstSanctionListPreMergeTask:
             Individual.objects.exclude(id__in=possible_matches)
             .filter(sanction_list_possible_match=True)
             .select_for_update()
+            .order_by("pk")
         )
         not_possible_matches_individuals.update(sanction_list_possible_match=False)
 

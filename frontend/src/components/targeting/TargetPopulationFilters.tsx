@@ -4,6 +4,11 @@ import FlashOnIcon from '@material-ui/icons/FlashOn';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import {
+  createHandleFilterChange,
+  targetPopulationStatusMapping,
+} from '../../utils/utils';
 import {
   ProgramNode,
   TargetPopulationStatus,
@@ -13,7 +18,6 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { targetPopulationStatusMapping } from '../../utils/utils';
 
 interface TargetPopulationFiltersProps {
   onFilterChange;
@@ -21,10 +25,11 @@ interface TargetPopulationFiltersProps {
   programs: ProgramNode[];
   addBorder?: boolean;
 }
-export function TargetPopulationFilters({
+export const TargetPopulationFilters = ({
   onFilterChange,
   filter,
   programs,
+<<<<<<< HEAD
   addBorder = true,
 }: TargetPopulationFiltersProps): React.ReactElement {
   const { t } = useTranslation();
@@ -32,19 +37,42 @@ export function TargetPopulationFilters({
     onFilterChange({ ...filter, [name]: e.target.value });
   const renderTable = (): React.ReactElement => {
     return (
+=======
+}: TargetPopulationFiltersProps): React.ReactElement => {
+  const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+  return (
+    <ContainerWithBorder>
+>>>>>>> origin
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
+<<<<<<< HEAD
             onChange={(e) => handleFilterChange(e, 'name')}
+=======
+            onChange={(e) => handleFilterChange('name', e.target.value)}
+>>>>>>> origin
             data-cy='filters-search'
             fullWidth
           />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
+<<<<<<< HEAD
             onChange={(e) => handleFilterChange(e, 'status')}
+=======
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+>>>>>>> origin
             value={filter.status}
             label={t('Status')}
             icon={<Person />}
@@ -62,7 +90,7 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'program')}
+            onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
@@ -78,6 +106,7 @@ export function TargetPopulationFilters({
             ))}
           </SelectFilter>
         </Grid>
+<<<<<<< HEAD
         <Grid container item xs={3} spacing={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <NumberTextField
@@ -147,6 +176,28 @@ export function TargetPopulationFilters({
               value={filter.createdAtRange.max}
             />
           </Grid>
+=======
+        <Grid item>
+          <NumberTextField
+            topLabel={t('Number of Households')}
+            value={filter.numIndividualsMin}
+            placeholder={t('From')}
+            onChange={(e) =>
+              handleFilterChange('numIndividualsMin', e.target.value)
+            }
+            icon={<Group />}
+          />
+        </Grid>
+        <Grid item>
+          <NumberTextField
+            value={filter.numIndividualsMax}
+            placeholder={t('To')}
+            onChange={(e) =>
+              handleFilterChange('numIndividualsMax', e.target.value)
+            }
+            icon={<Group />}
+          />
+>>>>>>> origin
         </Grid>
       </Grid>
     );
@@ -156,4 +207,4 @@ export function TargetPopulationFilters({
   ) : (
     renderTable()
   );
-}
+};

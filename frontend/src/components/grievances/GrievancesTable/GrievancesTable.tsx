@@ -10,12 +10,17 @@ import {
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
+<<<<<<< HEAD
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import { choicesToDict, decodeIdString } from '../../../utils/utils';
+=======
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import { decodeIdString, choicesToDict } from '../../../utils/utils';
+>>>>>>> origin
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -47,7 +52,10 @@ export const GrievancesTable = ({
     search: `${filter.search && filter.searchType} ${filter.search}`,
     status: [filter.status],
     fsp: filter.fsp,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
+    createdAtRange: JSON.stringify({
+      min: filter.createdAtRangeMin,
+      max: filter.createdAtRangeMax,
+    }),
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
@@ -56,10 +64,14 @@ export const GrievancesTable = ({
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
     scoreMax: filter.scoreMax,
+<<<<<<< HEAD
     grievanceType: filter.grievanceType,
     grievanceStatus: filter.grievanceStatus,
     priority: filter.priority,
     urgency: filter.urgency,
+=======
+    preferredLanguage: filter.preferredLanguage,
+>>>>>>> origin
   };
 
   const [inputValue, setInputValue] = useState('');

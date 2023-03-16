@@ -7,17 +7,18 @@ import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { TargetPopulationTable } from '.';
 
 describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', () => {
+  const initialFilter = {
+    name: '',
+    status: '',
+    program: '',
+    numIndividualsMin: null,
+    numIndividualsMax: null,
+  };
+
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllTargetPopulation}>
-        <TargetPopulationTable
-          filter={{
-            name: null,
-            numIndividuals: { min: 0, max: 100 },
-            status: null,
-          }}
-          canViewDetails
-        />
+        <TargetPopulationTable filter={initialFilter} canViewDetails />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
@@ -32,14 +33,7 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
         addTypename={false}
         mocks={fakeApolloAllTargetPopulation}
       >
-        <TargetPopulationTable
-          filter={{
-            name: null,
-            numIndividuals: { min: 0, max: 100 },
-            status: null,
-          }}
-          canViewDetails
-        />
+        <TargetPopulationTable filter={initialFilter} canViewDetails />
       </MockedProvider>,
     );
 

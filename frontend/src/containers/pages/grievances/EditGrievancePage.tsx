@@ -32,6 +32,7 @@ import {
 } from '../../../components/grievances/utils/editGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+<<<<<<< HEAD
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
@@ -68,6 +69,10 @@ import {
   useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
+=======
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+>>>>>>> origin
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -305,6 +310,7 @@ export const EditGrievancePage = (): React.ReactElement => {
         );
         return (
           <>
+            <AutoSubmitFormOnEnter />
             <PageHeader
               title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}

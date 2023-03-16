@@ -18,10 +18,10 @@ import {
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../core/BreadCrumbs';
-import { PageHeader } from '../core/PageHeader';
-import { useConfirmation } from '../core/ConfirmationDialog';
 import { ButtonDialog } from '../core/ButtonDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { LoadingButton } from '../core/LoadingButton';
+import { PageHeader } from '../core/PageHeader';
 
 const Separator = styled.div`
   width: 1px;
@@ -107,8 +107,13 @@ export const GrievanceDetailsToolbar = ({
     };
     delete allData.previous_documents;
     delete allData.previous_identities;
+<<<<<<< HEAD
     delete allData.previous_payment_channels;
     delete allData.flex_fields;
+=======
+    delete allData.flex_fields;
+    delete allData.previous_payment_channels;
+>>>>>>> origin
 
     const { approved, notApproved } = countApprovedAndUnapproved(
       Object.values(allData),

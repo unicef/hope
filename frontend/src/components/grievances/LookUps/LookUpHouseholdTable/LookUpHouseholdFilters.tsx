@@ -4,6 +4,7 @@ import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LookUpAdminAreaAutocomplete } from '../../../../shared/LookUpAdminAreaAutocomplete';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -13,7 +14,10 @@ import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
+<<<<<<< HEAD
 import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
+=======
+>>>>>>> origin
 
 interface LookUpHouseholdFiltersProps {
   onFilterChange;
@@ -113,8 +117,13 @@ export function LookUpHouseholdFilters({
             })}
           </SelectFilter>
         </Grid>
+<<<<<<< HEAD
         <Grid item xs={5}>
           <AdminAreaAutocomplete
+=======
+        <Grid item>
+          <LookUpAdminAreaAutocomplete
+>>>>>>> origin
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}

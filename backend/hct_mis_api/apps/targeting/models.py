@@ -16,9 +16,11 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
@@ -87,6 +89,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
     STATUS_STEFICON_ERROR = "STEFICON_ERROR"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
+    STATUS_READY_FOR_PAYMENT_MODULE = "READY_FOR_PAYMENT_MODULE"
+    STATUS_ASSIGNED = "ASSIGNED"
 
     STATUS_CHOICES = (
         (STATUS_OPEN, _("Open")),
@@ -97,6 +101,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
+        (STATUS_READY_FOR_PAYMENT_MODULE, _("Ready for payment module")),
+        (STATUS_ASSIGNED, _("Assigned")),
     )
 
     BUILD_STATUS_PENDING = "PENDING"
@@ -239,14 +245,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def household_list(self) -> "QuerySet":
-        queryset = self.households
         if self.status == TargetPopulation.STATUS_OPEN:
-            return queryset
+            return self.households.all()
+        params = {
+            "target_population": self,
+        }
         if self.vulnerability_score_max is not None:
-            queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
+            params["vulnerability_score__lte"] = self.vulnerability_score_max
         if self.vulnerability_score_min is not None:
-            queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
-        return queryset.distinct()
+            params["vulnerability_score__gte"] = self.vulnerability_score_min
+        return Household.objects.filter(selections__in=HouseholdSelection.objects.filter(**params))
 
     def get_criteria_string(self) -> str:
         try:
@@ -284,7 +292,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
     def is_locked(self) -> bool:
-        return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
+        return self.status in (
+            self.STATUS_LOCKED,
+            self.STATUS_STEFICON_COMPLETED,
+            self.STATUS_STEFICON_ERROR,
+            self.STATUS_STEFICON_RUN,
+        )
 
     def is_open(self) -> bool:
         return self.status in (self.STATUS_OPEN,)
