@@ -147,11 +147,13 @@ COLLECT_TYPE_UNKNOWN = ""
 COLLECT_TYPE_NONE = "0"
 COLLECT_TYPE_FULL = "1"
 COLLECT_TYPE_PARTIAL = "2"
+COLLECT_TYPE_SIZE_ONLY = "3"
 
 COLLECT_TYPES = (
     (COLLECT_TYPE_UNKNOWN, _("Unknown")),
     (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
     (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
     (COLLECT_TYPE_NONE, _("No individual data")),
 )
 
