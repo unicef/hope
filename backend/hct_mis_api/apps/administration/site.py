@@ -48,10 +48,10 @@ def get_bookmarks(request: Any) -> List:
 
 
 # admin view
-def clean_cache_view(request: "HttpRequest") -> "HttpResponse":
-    template = "admin/clean_cache.html"
+def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
+    template = "admin/clear_cache.html"
     ctx = {
-        "title": "Clean Cache",
+        "title": "Clear Cache",
         "cache_keys": [],
         "is_root": False,
         "form": ClearCacheForm(),
@@ -71,13 +71,13 @@ def clean_cache_view(request: "HttpRequest") -> "HttpResponse":
                         dj_cache.delete(k)
 
                     ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
-                    add_message(request, messages.SUCCESS, f"Finished clean cache for: {selected_keys}")
+                    add_message(request, messages.SUCCESS, f"Finished remove cache for: {selected_keys}")
             return render(request, template, ctx)
         else:
-            add_message(request, messages.ERROR, "Access Not Allowed. Only superuser have access to clean cache")
+            add_message(request, messages.ERROR, "Access Not Allowed. Only superuser have access to clear cache")
             return render(request, template, ctx)
     else:
-        add_message(request, messages.ERROR, "Not Possible Clean Cache For Test Settings")
+        add_message(request, messages.ERROR, "Not Possible Clear Cache For Test Settings")
         return render(request, template, ctx)
 
 
@@ -89,7 +89,7 @@ class HopeAdminSite(SmartAdminSite):
     def get_urls(self) -> List:
         urls = super().get_urls()
         custom_urls = [
-            path("clean-cache/", self.admin_view(clean_cache_view), name="clean_cache"),
+            path("clean-cache/", self.admin_view(clear_cache_view), name="clear_cache"),
         ]
         return custom_urls + urls
 
