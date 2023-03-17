@@ -439,7 +439,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
-    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    key = models.CharField(max_length=50, unique=True)
     is_identity_document = models.BooleanField(default=True)
 
     def __str__(self) -> str:
