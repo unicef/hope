@@ -5,10 +5,8 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
 import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
-import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
 import {
   GrievanceTypes,
   GRIEVANCE_TICKETS_TYPES,
@@ -22,6 +20,10 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
+import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
+import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
+import { createHandleFilterChange } from '../../../utils/utils';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 
 interface GrievancesFiltersProps {
   onFilterChange;

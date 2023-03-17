@@ -111,12 +111,16 @@ export const GrievanceDetailsToolbar = ({
       'previous_payment_channels',
       'flex_fields',
     ];
+
     const filteredData = Object.keys(allData)
       .filter((key) => !excludedKeys.includes(key))
       .reduce((obj, key) => {
-        obj[key] = allData[key];
-        return obj;
+        return {
+          ...obj,
+          [key]: allData[key],
+        };
       }, {});
+
     const { approved, notApproved } = countApprovedAndUnapproved(
       Object.values(filteredData),
     );
@@ -139,61 +143,58 @@ export const GrievanceDetailsToolbar = ({
   };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
-    const category = ticket.category?.toString();
-    const issueType = ticket.issueType?.toString();
-    const details =
-      ticket.systemFlaggingTicketDetails ||
-      ticket.addIndividualTicketDetails ||
-      ticket.deleteIndividualTicketDetails ||
-      ticket.needsAdjudicationTicketDetails;
+    const hasApproveOption =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION ||
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
 
-    if (!category || !details) {
+    if (!hasApproveOption) {
       return '';
     }
 
-    if (
-      ![
-        GRIEVANCE_CATEGORIES.DATA_CHANGE,
-        GRIEVANCE_CATEGORIES.DEDUPLICATION,
-        GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
-      ].includes(category)
-    ) {
-      return '';
-    }
+    const notApprovedDeleteIndividualChanges =
+      ticket.issueType?.toString() ===
+        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.deleteIndividualTicketDetails?.approveStatus === false;
 
-    if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
-      if (details.approveStatus === true) {
-        return '';
-      } else if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-        return t(
-          'You did not approve any changes. Are you sure you want to close the ticket?',
-        );
-      } else if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
-        return t('You did not approve any changes.');
-      }
-    } else if (
-      category === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-      details.approveStatus === false
-    ) {
-      return '';
-    } else if (category === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
-      if (details.selectedIndividual) {
-        return '';
-      } else if (
-        details.isMultipleDuplicatesVersion &&
-        !details.selectedIndividuals?.length
-      ) {
-        return t(
-          'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
-        );
-      } else if (!details.isMultipleDuplicatesVersion) {
-        return t(
-          'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
-        );
-      }
-    }
+    const notApprovedAddIndividualChanges =
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
+      ticket.addIndividualTicketDetails?.approveStatus === false;
 
-    return '';
+    const notApprovedSystemFlaggingChanges =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+
+    const noDuplicatesFound =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividual &&
+      !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
+
+    const noDuplicatesFoundMultiple =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+
+    // added msg handling for
+    let confirmationMessage = '';
+    if (notApprovedDeleteIndividualChanges) {
+      confirmationMessage = t(
+        'You did not approve any changes. Are you sure you want to close the ticket?',
+      );
+    } else if (notApprovedAddIndividualChanges) {
+      confirmationMessage = t('You did not approve any changes.');
+    } else if (notApprovedSystemFlaggingChanges) {
+      confirmationMessage = '';
+    } else if (noDuplicatesFound) {
+      confirmationMessage = t(
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
+      );
+    } else if (noDuplicatesFoundMultiple) {
+      confirmationMessage = t(
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
+      );
+    }
+    return confirmationMessage;
   };
 
   const getClosingConfirmationExtraText = (): string => {
@@ -263,83 +264,60 @@ export const GrievanceDetailsToolbar = ({
     return `${closingConfirmationText}${additionalContent}`;
   };
 
-  const closeTicket = () => {
-    confirm({
-      title: t('Close ticket'),
-      extraContent:
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
-          ? closingConfirmationText
-          : getClosingConfirmationExtraText(),
-      content: getClosingConfirmationText(),
-      warningContent: closingWarningText,
-      continueText: t('close ticket'),
-    }).then(() => {
-      changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-    });
-  };
-
-  let closeButton;
-
-  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
-    const hasDuplicatedDocument =
-      ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument;
-    const isMultipleDuplicatesVersion =
-      ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-    const selectedIndividual =
-      ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
-    const selectedIndividuals =
-      ticket?.needsAdjudicationTicketDetails?.selectedIndividuals;
-
-    if (
-      hasDuplicatedDocument &&
-      !isMultipleDuplicatesVersion &&
-      !!selectedIndividual
-    ) {
-      closeButton = (
-        <ButtonDialog
-          title={t('Duplicate Document Conflict')}
-          buttonText={t('Close Ticket')}
-          message={t(
-            'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
-          )}
-        />
-      );
-    } else if (
-      hasDuplicatedDocument &&
-      isMultipleDuplicatesVersion &&
-      !!selectedIndividuals.length
-    ) {
-      closeButton = (
-        <ButtonDialog
-          title={t('Duplicate Document Conflict')}
-          buttonText={t('Close Ticket')}
-          message={t(
-            'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
-          )}
-        />
-      );
-    } else {
-      closeButton = (
-        <Button
-          color='primary'
-          variant='contained'
-          onClick={closeTicket}
-          data-cy='button-close-ticket'
-        >
-          {t('Close Ticket')}
-        </Button>
-      );
-    }
-  } else {
+  let closeButton = (
+    <Button
+      color='primary'
+      variant='contained'
+      onClick={() =>
+        confirm({
+          title: t('Close ticket'),
+          extraContent:
+            ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+              ? closingConfirmationText
+              : getClosingConfirmationExtraText(),
+          content: getClosingConfirmationText(),
+          warningContent: closingWarningText,
+          continueText: t('close ticket'),
+        }).then(() => {
+          changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+        })
+      }
+      data-cy='button-close-ticket'
+    >
+      {t('Close Ticket')}
+    </Button>
+  );
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
+    !ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividual
+  ) {
     closeButton = (
-      <Button
-        color='primary'
-        variant='contained'
-        onClick={closeTicket}
-        data-cy='button-close-ticket'
-      >
-        {t('Close Ticket')}
-      </Button>
+      <ButtonDialog
+        title={t('Duplicate Document Conflict')}
+        buttonText={t('Close Ticket')}
+        message={t(
+          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+        )}
+      />
+    );
+  }
+
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
+    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length
+  ) {
+    closeButton = (
+      <ButtonDialog
+        title={t('Duplicate Document Conflict')}
+        buttonText={t('Close Ticket')}
+        message={t(
+          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+        )}
+      />
     );
   }
 

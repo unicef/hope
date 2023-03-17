@@ -1,12 +1,10 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
-import { default as React, default as React } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
-import TextField from '../../shared/TextField';
 import { createHandleFilterChange } from '../../utils/utils';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
@@ -14,13 +12,6 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-
-const StyledTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
 
 interface RegistrationFiltersProps {
   onFilterChange;
@@ -67,6 +58,8 @@ export const RegistrationFilters = ({
             name='importedBy'
             label={t('Imported By')}
             fullWidth
+            filter={filter}
+            value={filter.impo}
           />
         </Grid>
         <Grid item xs={3}>
