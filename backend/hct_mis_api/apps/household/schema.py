@@ -12,6 +12,7 @@ from django.db.models import (
     Value,
     When,
 )
+from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
@@ -627,24 +628,11 @@ class Query(graphene.ObjectType):
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
-        households_individuals_params = [
-            "female_age_group_0_5_count",
-            "female_age_group_6_11_count",
-            "female_age_group_12_17_count",
-            "female_age_group_18_59_count",
-            "female_age_group_60_count",
-            "male_age_group_0_5_count",
-            "male_age_group_6_11_count",
-            "male_age_group_12_17_count",
-            "male_age_group_18_59_count",
-            "male_age_group_60_count",
-        ]
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         households_ids = payment_items_qs.values_list("household", flat=True).distinct()
-        individuals_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_individuals_params)
-        return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
+        return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)

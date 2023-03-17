@@ -11,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import JSONField, QuerySet
+from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -147,11 +147,13 @@ COLLECT_TYPE_UNKNOWN = ""
 COLLECT_TYPE_NONE = "0"
 COLLECT_TYPE_FULL = "1"
 COLLECT_TYPE_PARTIAL = "2"
+COLLECT_TYPE_SIZE_ONLY = "3"
 
 COLLECT_TYPES = (
     (COLLECT_TYPE_UNKNOWN, _("Unknown")),
     (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
     (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
     (COLLECT_TYPE_NONE, _("No individual data")),
 )
 
@@ -583,6 +585,7 @@ class DocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
     is_identity_document = models.BooleanField(default=True)
+    unique_for_individual = models.BooleanField(default=False)
 
     class Meta:
         ordering = [
@@ -626,10 +629,33 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
+                fields=["type", "country"],
+                condition=Q(
+                    Q(is_removed=False)
+                    & Q(status="VALID")
+                    & Func(
+                        F("type_id"),
+                        Value(True),
+                        function="check_unique_document_for_individual",
+                        output_field=BooleanField(),
+                    )
+                ),
+                name="unique_for_individual_if_not_removed_and_valid",
+            ),
+            UniqueConstraint(
                 fields=["document_number", "type", "country"],
-                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                condition=Q(
+                    Q(is_removed=False)
+                    & Q(status="VALID")
+                    & Func(
+                        F("type_id"),
+                        Value(False),
+                        function="check_unique_document_for_individual",
+                        output_field=BooleanField(),
+                    )
+                ),
                 name="unique_if_not_removed_and_valid",
-            )
+            ),
         ]
 
     def __str__(self) -> str:
