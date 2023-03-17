@@ -178,7 +178,6 @@ class TestGenerateReportService(TestCase):
     def test_report_types(
         self, _: Any, report_type: str, should_set_admin_area: bool, should_set_program: bool, number_of_records: int
     ) -> None:
-
         report = ReportFactory.create(
             created_by=self.user,
             business_area=self.business_area,
