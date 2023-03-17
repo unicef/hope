@@ -1,4 +1,3 @@
-import logging
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -28,7 +27,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     process_flex_records_task,
     process_sri_lanka_flex_records_task,
@@ -53,8 +51,6 @@ if TYPE_CHECKING:
     from django.db.models.query import QuerySet
 
     from hct_mis_api.apps.account.models import Role
-
-logger = logging.getLogger(__name__)
 
 
 class FlexRegistrationService(BaseRegistrationService):
@@ -170,7 +166,7 @@ class FlexRegistrationService(BaseRegistrationService):
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
+        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
@@ -446,7 +442,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         collector_dict = record_data_dict.get("collector-info", [])[0]
         individuals_list = record_data_dict.get("children-info", [])
         id_enumerator = record_data_dict.get("id_enumerator")
-        preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact")
+        preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact", None)
         should_use_hoh_as_collector = (
             collector_dict.get("does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi") == "y"
         )
@@ -487,6 +483,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
         individuals_to_create = []
         for individual_data_dict in individuals_list:
+            if not bool(individual_data_dict):
+                continue
             individuals_to_create.append(
                 ImportedIndividual(
                     **{
