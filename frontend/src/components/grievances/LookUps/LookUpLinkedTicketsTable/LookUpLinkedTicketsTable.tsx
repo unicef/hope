@@ -55,7 +55,7 @@ export const LookUpLinkedTicketsTable = ({
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [...selected];
+    const newSelected = [...selected];
 
     if (selectedIndex === -1) {
       newSelected.push(name);

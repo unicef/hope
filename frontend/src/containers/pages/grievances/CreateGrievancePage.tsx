@@ -4,6 +4,7 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -51,23 +52,6 @@ import {
   useGrievancesChoiceDataQuery,
   useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { AddIndividualDataChange } from '../../../components/grievances/AddIndividualDataChange';
-import { Consent } from '../../../components/grievances/Consent';
-import { EditHouseholdDataChange } from '../../../components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../../../components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import { LookUpSection } from '../../../components/grievances/LookUpSection';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
-import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
-import { validate } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchema } from '../../../components/grievances/utils/validationSchema';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
