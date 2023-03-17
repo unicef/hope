@@ -13836,6 +13836,22 @@
             "deprecationReason": null
           },
           {
+            "name": "excluded",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -38873,6 +38889,12 @@
             "deprecationReason": null
           },
           {
+            "name": "DISABILITY_CERTIFICATE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "OTHER",
             "description": null,
             "isDeprecated": false,
@@ -48334,6 +48356,12 @@
             "deprecationReason": null
           },
           {
+            "name": "DISABILITY_CERTIFICATE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "OTHER",
             "description": null,
             "isDeprecated": false,
@@ -51478,7 +51506,89 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "RevertMarkAsFailedMutation",
+              "name": "RevertMarkPaymentRecordAsFailedMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "markPaymentAsFailed",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "MarkPaymentAsFailedMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "revertMarkPaymentAsFailed",
+            "description": null,
+            "args": [
+              {
+                "name": "deliveredQuantity",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Decimal",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "deliveryDate",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Date",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "paymentId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "RevertMarkPaymentAsFailedMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -56863,7 +56973,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "RevertMarkAsFailedMutation",
+        "name": "RevertMarkPaymentRecordAsFailedMutation",
         "description": null,
         "fields": [
           {
@@ -56873,6 +56983,52 @@
             "type": {
               "kind": "OBJECT",
               "name": "PaymentRecordNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MarkPaymentAsFailedMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "payment",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "RevertMarkPaymentAsFailedMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "payment",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentNode",
               "ofType": null
             },
             "isDeprecated": false,

@@ -1,16 +1,15 @@
-import { InputAdornment } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { CircularProgress, InputAdornment, TextField } from '@material-ui/core';
 import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import get from 'lodash/get';
+import { get } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../../shared/TextField';
+import { createHandleFilterChange } from '../../utils/utils';
 import {
-  AreaNodeEdge,
   AllAdminAreasQuery,
   useAllAdminAreasLazyQuery,
 } from '../../__generated__/graphql';
@@ -22,25 +21,27 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AdminAreaAutocomplete({
+export const AdminAreaAutocomplete = ({
   disabled,
   fullWidth,
-  onFilterChange,
   name,
+  onFilterChange,
+  filter,
   value,
 }: {
-  disabled?;
+  disabled?: boolean;
   fullWidth?: boolean;
-  onFilterChange;
   name: string;
-  value?: AreaNodeEdge;
-}): React.ReactElement {
+  onFilterChange: (filters: { [key: string]: string }) => void;
+  filter?;
+  value?: string;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
+
   const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
       first: 20,
@@ -49,25 +50,36 @@ export function AdminAreaAutocomplete({
       level: 2,
     },
   });
+
   useEffect(() => {
     if (open) {
       loadAdminAreas();
     }
   }, [open, debouncedInputText, loadAdminAreas]);
 
-  const onChangeMiddleware = (e, selectedValue): void => {
-    onFilterChange((filters) => ({
-      ...filters,
-      [name]: selectedValue || undefined,
-    }));
-  };
+  // load all admin areas on mount to match the value from the url
+  useEffect(() => {
+    loadAdminAreas();
+  }, [loadAdminAreas]);
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    useHistory<LocationState>(),
+    useLocation(),
+  );
+
+  if (!data) return null;
+
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       value={value}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
-      onChange={onChangeMiddleware}
+      onChange={(_, selectedValue) =>
+        handleFilterChange(name, selectedValue?.node?.id)
+      }
       onOpen={() => {
         setOpen(true);
       }}
@@ -77,13 +89,18 @@ export function AdminAreaAutocomplete({
         onInputTextChange('');
       }}
       getOptionSelected={(option, value1) => {
-        return value1?.node?.id === option.node.id;
+        return option.node.id === value1;
       }}
       getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
+        let label;
+        if (option.node) {
+          label = `${option.node.name}`;
+        } else {
+          label =
+            data?.allAdminAreas?.edges?.find((el) => el.node.id === option)
+              ?.node.name || '';
         }
-        return `${option.node.name}`;
+        return `${label}`;
       }}
       disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}
@@ -116,4 +133,4 @@ export function AdminAreaAutocomplete({
       )}
     />
   );
-}
+};
