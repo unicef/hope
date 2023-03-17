@@ -11,17 +11,28 @@ import {
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { useHistory, useLocation } from 'react-router-dom';
+import { createHandleFilterChange } from '../../../../utils/utils';
 import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 
 interface CommunicationFiltersProps {
   onFilterChange;
   filter;
 }
-export function CommunicationFilters({
+export const CommunicationFilters = ({
   onFilterChange,
   filter,
-}: CommunicationFiltersProps): React.ReactElement {
+}: CommunicationFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
   const businessArea = useBusinessArea();
   const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
@@ -42,8 +53,6 @@ export function CommunicationFilters({
   const allTargetPopulations =
     allTargetPopulationForChoices?.allTargetPopulation?.edges || [];
   const targetPopulations = allTargetPopulations.map((edge) => edge.node);
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
 
   if (programsLoading || targetPopulationsLoading) return <LoadingComponent />;
 
@@ -52,7 +61,7 @@ export function CommunicationFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'program')}
+            onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             fullWidth
@@ -69,7 +78,9 @@ export function CommunicationFilters({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'targetPopulation')}
+            onChange={(e) =>
+              handleFilterChange('targetPopulation', e.target.value)
+            }
             label={t('Target Population')}
             value={filter.targetPopulation}
             fullWidth
@@ -88,6 +99,8 @@ export function CommunicationFilters({
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
             name='createdBy'
+            value={filter.createdBy}
+            filter={filter}
             label={t('Created by')}
             fullWidth
           />
@@ -98,38 +111,32 @@ export function CommunicationFilters({
               topLabel={t('Creation Date')}
               label='From'
               onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    min: moment(date)
-                      .startOf('day')
-                      .toISOString(),
-                  },
-                })
+                handleFilterChange(
+                  'createdAtRangeMin',
+                  moment(date)
+                    .startOf('day')
+                    .toISOString(),
+                )
               }
-              value={filter.createdAtRange.min}
+              value={filter.createdAtRangeMin}
             />
           </Grid>
           <Grid item xs={6}>
             <DatePickerFilter
               label={t('To')}
               onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    max: moment(date)
-                      .endOf('day')
-                      .toISOString(),
-                  },
-                })
+                handleFilterChange(
+                  'createdAtRangeMax',
+                  moment(date)
+                    .endOf('day')
+                    .toISOString(),
+                )
               }
-              value={filter.createdAtRange.max}
+              value={filter.createdAtRangeMax}
             />
           </Grid>
         </Grid>
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

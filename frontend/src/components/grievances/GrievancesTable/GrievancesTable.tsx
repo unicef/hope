@@ -3,14 +3,27 @@ import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PERMISSIONS } from '../../../config/permissions';
+import {
+  hasCreatorOrOwnerPermissions,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKET_STATES,
   GRIEVANCE_TICKETS_TYPES,
+  GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
+import { decodeIdString, choicesToDict } from '../../../utils/utils';
+import {
+  AllGrievanceTicketQueryVariables,
+  useAllUsersForFiltersLazyQuery,
+  useGrievancesChoiceDataQuery,
+  useMeQuery,
+  AllGrievanceTicketQuery,
+  useAllGrievanceTicketQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
 import { BulkAssignModal } from './BulkAssignModal';
@@ -132,7 +145,7 @@ export const GrievancesTable = ({
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [...selected];
+    const newSelected = [...selected];
 
     if (selectedIndex === -1) {
       newSelected.push(name);
@@ -155,10 +168,6 @@ export const GrievancesTable = ({
     }
     setSelected([]);
   };
-
-  function hasPermissions(GRIEVANCES_CREATE: any, permissions: any) {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <>
@@ -212,80 +221,41 @@ export const GrievancesTable = ({
               </Button>
             )}
         </Box>
+        <TableWrapper>
+          <UniversalTable<
+            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+            AllGrievanceTicketQueryVariables
+          >
+            headCells={headCells}
+            title={t('Grievance and Feedback List')}
+            rowsPerPageOptions={[10, 15, 20]}
+            query={useAllGrievanceTicketQuery}
+            onSelectAllClick={handleSelectAllCheckboxesClick}
+            numSelected={selected.length}
+            queriedObjectName='allGrievanceTicket'
+            initialVariables={initialVariables}
+            defaultOrderBy='created_at'
+            defaultOrderDirection='desc'
+            renderRow={(row) => (
+              <GrievancesTableRow
+                key={row.id}
+                ticket={row}
+                statusChoices={statusChoices}
+                categoryChoices={categoryChoices}
+                issueTypeChoicesData={issueTypeChoicesData}
+                priorityChoicesData={priorityChoicesData}
+                urgencyChoicesData={urgencyChoicesData}
+                canViewDetails={getCanViewDetailsOfTicket(row)}
+                checkboxClickHandler={handleCheckboxClick}
+                selected={selected}
+                optionsData={optionsData}
+                setInputValue={setInputValue}
+                initialVariables={initialVariables}
+              />
+            )}
+          />
+        </TableWrapper>
       </Box>
-      <TableWrapper>
-        <UniversalTable<
-          AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-          AllGrievanceTicketQueryVariables
-        >
-          headCells={headCells}
-          title={t('Grievance and Feedback List')}
-          rowsPerPageOptions={[10, 15, 20]}
-          query={useAllGrievanceTicketQuery}
-          onSelectAllClick={handleSelectAllCheckboxesClick}
-          numSelected={selected.length}
-          queriedObjectName='allGrievanceTicket'
-          initialVariables={initialVariables}
-          defaultOrderBy='created_at'
-          defaultOrderDirection='desc'
-          renderRow={(row) => (
-            <GrievancesTableRow
-              key={row.id}
-              ticket={row}
-              statusChoices={statusChoices}
-              categoryChoices={categoryChoices}
-              issueTypeChoicesData={issueTypeChoicesData}
-              priorityChoicesData={priorityChoicesData}
-              urgencyChoicesData={urgencyChoicesData}
-              canViewDetails={getCanViewDetailsOfTicket(row)}
-              checkboxClickHandler={handleCheckboxClick}
-              selected={selected}
-              optionsData={optionsData}
-              setInputValue={setInputValue}
-              initialVariables={initialVariables}
-            />
-          )}
-        />
-      </TableWrapper>
     </>
   );
 };
-function decodeIdString(id: any) {
-  throw new Error('Function not implemented.');
-}
-
-function useAllUsersForFiltersLazyQuery(arg0: {
-  variables: {
-    businessArea: string;
-    first: number;
-    orderBy: string;
-    search: string;
-  };
-}): [any, { data: any }] {
-  throw new Error('Function not implemented.');
-}
-
-function useGrievancesChoiceDataQuery(): { data: any; loading: any } {
-  throw new Error('Function not implemented.');
-}
-
-function useMeQuery(): { data: any; loading: any } {
-  throw new Error('Function not implemented.');
-}
-
-function choicesToDict(
-  grievanceTicketStatusChoices: any,
-): { [id: number]: string } {
-  throw new Error('Function not implemented.');
-}
-
-function hasCreatorOrOwnerPermissions(
-  GRIEVANCES_VIEW_DETAILS_SENSITIVE: any,
-  isTicketCreator: boolean,
-  GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR: any,
-  isTicketOwner: boolean,
-  GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER: any,
-  permissions: any,
-): boolean {
-  throw new Error('Function not implemented.');
-}
