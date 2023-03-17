@@ -1,11 +1,14 @@
 from typing import Any, List
 
 from django.core.cache import caches
+from django.urls import path
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from constance import config
 from smart_admin.site import SmartAdminSite
+
+from hct_mis_api.apps.core.views import clear_cache_view
 
 cache = caches["default"]
 
@@ -42,6 +45,13 @@ class HopeAdminSite(SmartAdminSite):
     site_title = "HOPE"
     site_header = "HOPE Administration"
     index_title = "Index"
+
+    def get_urls(self) -> List:
+        urls = super().get_urls()
+        custom_urls = [
+            path("core/clear-cache/", self.admin_view(clear_cache_view), name="core_clear_cache"),
+        ]
+        return custom_urls + urls
 
 
 site = HopeAdminSite()
