@@ -59,6 +59,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
 class PaymentGFKFactory(factory.django.DjangoModelFactory):
@@ -690,7 +691,7 @@ def generate_real_cash_plans() -> None:
             status=TargetPopulation.STATUS_OPEN,
             targeting_criteria=targeting_criteria,
         )
-        target_population.full_rebuild()
+        full_rebuild(target_population)
         target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
         target_population.save()
         RealPaymentRecordFactory.create_batch(
@@ -894,7 +895,7 @@ def generate_payment_plan() -> None:
         program=program,
         created_by=root,
     )[0]
-    target_population.full_rebuild()
+    full_rebuild(target_population)
     target_population.save()
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")

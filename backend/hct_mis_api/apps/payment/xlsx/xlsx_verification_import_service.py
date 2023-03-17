@@ -203,7 +203,6 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             self._validate_received_to_received_amount(row)
 
     def _import_row(self, row: Row) -> None:
-
         payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
         received = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX].value
         received_amount = row[XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_INDEX].value

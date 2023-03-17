@@ -6,6 +6,7 @@ from uuid import UUID
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.contrib.admin.views.main import ChangeList
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
@@ -16,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.decorators import button, link
@@ -59,6 +61,32 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
+
+
+class StatusFilter(ChoicesFieldComboFilter):
+    def choices(self, changelist: ChangeList) -> Generator:
+        yield {
+            "selected": self.lookup_val is None,
+            "query_string": changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull]),
+            "display": _("All"),
+        }
+        for lookup, title in self.field.flatchoices:
+            if lookup == Record.STATUS_TO_IMPORT:
+                yield {
+                    "selected": bool(self.lookup_val_isnull),
+                    "query_string": changelist.get_query_string(
+                        {self.lookup_kwarg_isnull: "True"}, [self.lookup_kwarg]
+                    ),
+                    "display": title,
+                }
+            else:
+                yield {
+                    "selected": str(lookup) == self.lookup_val,
+                    "query_string": changelist.get_query_string(
+                        {self.lookup_kwarg: lookup}, [self.lookup_kwarg_isnull]
+                    ),
+                    "display": title,
+                }
 
 
 @admin.register(RegistrationDataImportDatahub)
@@ -348,7 +376,6 @@ class AlexisFilter(SimpleListFilter):
 
 
 class CreateRDIForm(forms.Form):
-
     STATUS_TO_IMPORT = "TO_IMPORT"
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
@@ -362,7 +389,7 @@ class CreateRDIForm(forms.Form):
         (STATUS_IMPORTED, "Imported"),
         (ANY, "Any"),
     )
-
+    name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
     registration = forms.IntegerField(required=True)
     filters = forms.CharField(
         widget=forms.Textarea,
@@ -380,7 +407,7 @@ class CreateRDIForm(forms.Form):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         if request := kwargs.pop("request", None):
             if is_root(request):
-                self.base_fields["status"].choices += self.STATUSES_ROOT_CHOICES
+                self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
     def clean_filters(self) -> QueryStringFilter:
@@ -403,7 +430,7 @@ class CreateRDIForm(forms.Form):
     def clean(self) -> None:
         super().clean()
         filters, excludes = self.cleaned_data["filters"]
-        if filters.get("registration"):
+        if "registration" in self.cleaned_data:
             filters["registration"] = self.cleaned_data["registration"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
             filters["status__isnull"] = True
@@ -431,7 +458,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("registration_data_import", AutoCompleteFilter),
-        "status",
+        ("status", StatusFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         ("data", JsonFieldFilter),
@@ -452,7 +479,6 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
 
     @admin.action(description="Create RDI")
     def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-
         if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
             self.message_user(
                 request,
@@ -560,7 +586,6 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                                 rdi = service().create_rdi(
                                     request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
                                 )
-
                             create_task_for_processing_records(service, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(

@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 class GenerateDashboardReportContentHelpers:
     @classmethod
     def get_beneficiaries(cls, report: DashboardReport) -> Tuple[Any, Dict]:
-
         children_count_fields = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -82,7 +81,6 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_individuals(cls, report: DashboardReport) -> Tuple[Any, Dict]:
-
         valid_payment_records = cls._get_payment_records_for_report(report)
         individual_count_fields = cls._get_all_with_disabled_individual_count_fields()
         (
@@ -110,7 +108,6 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_volumes_by_delivery(cls, report: DashboardReport) -> Tuple[Any, Dict]:
-
         valid_payment_records = cls._get_payment_records_for_report(report)
         (
             instances,
@@ -140,7 +137,6 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_programs(cls, report: DashboardReport) -> Tuple[QuerySet, Optional[Dict]]:
-
         filter_vars = cls._format_filters(
             report,
             {},
