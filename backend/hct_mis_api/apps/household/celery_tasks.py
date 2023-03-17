@@ -45,7 +45,8 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
                     households_to_update.append(household)
                     fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
 
-                Household.objects.bulk_update(households_to_update, fields_to_update)
+                if fields_to_update:
+                    Household.objects.bulk_update(households_to_update, fields_to_update)
 
 
 @app.task()

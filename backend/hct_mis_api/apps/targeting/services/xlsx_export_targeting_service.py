@@ -132,7 +132,6 @@ class XlsxExportTargetingService:
             for cell in col:
                 value = cell.value
                 if value:
-
                     if isinstance(value, str) is False:
                         value = str(value)
 
