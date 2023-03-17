@@ -2,7 +2,7 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-  &rsaquo; Clean Cache
+  &rsaquo; Clear Cache
 </div>
 {% endblock %}
 {% block content %}
@@ -13,7 +13,7 @@
   {% csrf_token %} {{form.as_p}}
   <br>
   <a href="../"><input type="button" value="Back" class="btn btn-primary" /></a>
-  <input type="submit" value="CLEAN" />
+  <input type="submit" value="CLEAR" />
   </form>
 {% endif %}
 <br>
