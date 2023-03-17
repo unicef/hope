@@ -326,12 +326,12 @@ class TestGrievanceQuery(APITestCase):
     @parameterized.expand(
         [
             (
-                "category_negative_feedback",
-                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-            ),
-            (
                 "category_positive_feedback",
                 GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            ),
+            (
+                "category_negative_feedback",
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             ),
         ]
     )
