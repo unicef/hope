@@ -61,6 +61,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.household.services.household_recalculate_data import (
+    RECALCULATION_INDIVIDUAL_FIELDS,
     recalculate_data,
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
@@ -760,6 +761,7 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
 
     individual = ticket_details.individual
     household = individual.household
+    should_recalculate_household = False
     individual_data = ticket_details.individual_data
     role_data = individual_data.pop("role", {})
     flex_fields_with_additional_data = individual_data.pop("flex_fields", {})
@@ -809,6 +811,9 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
         flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
     )
 
+    if set(only_approved_data.keys()).intersection(RECALCULATION_INDIVIDUAL_FIELDS):
+        should_recalculate_household = True
+
     relationship_to_head_of_household = individual_data.get("relationship")
     if (
         household
@@ -822,6 +827,7 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
         household = Household.objects.select_for_update().get(id=household.id)
         household.head_of_household = new_individual
         household.save()
+        should_recalculate_household = True
 
     reassign_roles_on_update(new_individual, ticket_details.role_reassign_data, info)
     if is_approved(role_data):
@@ -871,7 +877,7 @@ def close_update_individual_grievance_ticket(grievance_ticket: GrievanceTicket, 
     BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])
     BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
 
-    if new_individual.household:
+    if new_individual.household and should_recalculate_household:
         recalculate_data(new_individual.household)
     else:
         new_individual.recalculate_data()

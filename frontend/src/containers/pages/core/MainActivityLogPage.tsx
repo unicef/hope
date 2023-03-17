@@ -1,5 +1,6 @@
 import { Paper } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ActivityLogPageFilters } from '../../../components/core/ActivityLogPageFilters';
@@ -11,6 +12,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   LogEntryNode,
   useAllLogEntriesQuery,
@@ -40,14 +42,20 @@ function filtersToVariables(filters) {
   return variables;
 }
 
+const initialFilter = { search: '', module: '' };
+
 export const ActivityLogPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [filters, setFilters] = useState({ search: '', module: '' });
-  const debouncedFilters = useDebounce(filters, 700);
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const debouncedFilter = useDebounce(filter, 700);
 
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
@@ -56,7 +64,7 @@ export const ActivityLogPage = (): React.ReactElement => {
       last: undefined,
       after: undefined,
       before: undefined,
-      ...filtersToVariables(debouncedFilters),
+      ...filtersToVariables(debouncedFilter),
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
@@ -76,11 +84,10 @@ export const ActivityLogPage = (): React.ReactElement => {
         last: undefined,
         after: undefined,
         before: undefined,
-        ...filtersToVariables(debouncedFilters),
+        ...filtersToVariables(debouncedFilter),
       });
     }
-    // eslint-disable-next-line
-  }, [debouncedFilters]);
+  }, [debouncedFilter, businessArea, refetch, permissions, rowsPerPage]);
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
@@ -96,7 +103,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Activity Log')} />
-      <ActivityLogPageFilters filter={filters} onFilterChange={setFilters} />
+      <ActivityLogPageFilters filter={filter} onFilterChange={setFilter} />
       <StyledPaper>
         <MainActivityLogTable
           totalCount={data.allLogEntries.totalCount}
@@ -112,7 +119,7 @@ export const ActivityLogPage = (): React.ReactElement => {
               last: undefined,
               after: undefined,
               before: undefined,
-              ...filtersToVariables(debouncedFilters),
+              ...filtersToVariables(debouncedFilter),
             };
             if (newPage < page) {
               variables.last = rowsPerPage;
@@ -134,7 +141,7 @@ export const ActivityLogPage = (): React.ReactElement => {
               after: undefined,
               last: undefined,
               before: undefined,
-              ...filtersToVariables(debouncedFilters),
+              ...filtersToVariables(debouncedFilter),
             };
             refetch(variables);
           }}

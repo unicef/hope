@@ -1,13 +1,16 @@
-import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
+import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus, PaymentRecordStatus, PaymentStatus,
+  PaymentPlanStatus,
+  PaymentRecordStatus,
+  PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
@@ -686,3 +689,120 @@ export async function clearCache(apolloClient = null): Promise<void> {
   localStorage.clear();
   await localForage.clear();
 }
+
+type Location = ReturnType<typeof useLocation>;
+type FilterValue = string | string[] | boolean | null | undefined;
+type Filter = { [key: string]: FilterValue };
+
+export const getFilterFromQueryParams = (
+  location: Location,
+  initialFilter: Filter = {},
+): Filter => {
+  const filter: Filter = { ...initialFilter };
+  const searchParams = new URLSearchParams(location.search);
+  for (const [key, value] of searchParams.entries()) {
+    if (key in filter) {
+      const existingValue = filter[key];
+      if (Array.isArray(existingValue)) {
+        const values = value.split(',');
+        filter[key] = [...existingValue, ...values];
+      } else {
+        filter[key] =
+          value !== 'true' && value !== 'false' ? value : value === 'true';
+      }
+    }
+  }
+  return filter;
+};
+
+export const setQueryParam = (
+  key: string,
+  value: string,
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  const params = new URLSearchParams(location.search);
+
+  // Remove all existing values for the given key
+  params.delete(key);
+
+  // Add the new value for the given key
+  params.append(key, value);
+
+  history.push({ search: params.toString() });
+};
+
+export const setFilterToQueryParams = (
+  filter: { [key: string]: FilterValue },
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  const params = new URLSearchParams(location.search);
+  Object.entries(filter).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        // remove all existing params for this key
+        params.delete(key);
+
+        // add each value as a separate param
+        value.forEach((val) => {
+          if (val !== null && val !== undefined) {
+            params.append(key, val);
+          }
+        });
+      } else {
+        const paramValue =
+          typeof value === 'boolean' ? value.toString() : value;
+        params.set(key, paramValue);
+      }
+    } else {
+      params.delete(key);
+    }
+  });
+  const search = params.toString();
+  history.push({ search });
+};
+
+export const createHandleFilterChange = (
+  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
+  initialFilter: Filter,
+  history: useHistory<LocationState>,
+  location: Location,
+): ((key: string, value: FilterValue) => void) => {
+  let filterFromQueryParams = getFilterFromQueryParams(location, initialFilter);
+
+  const handleFilterChange = (key: string, value: FilterValue): void => {
+    const newFilter = {
+      ...filterFromQueryParams,
+      [key]: value,
+    };
+
+    filterFromQueryParams = newFilter;
+    onFilterChange(newFilter);
+
+    const params = new URLSearchParams(location.search);
+    const isEmpty = (v: FilterValue): boolean =>
+      v === '' ||
+      v === null ||
+      v === undefined ||
+      (Array.isArray(v) && v.length === 0);
+
+    if (isEmpty(value)) {
+      params.delete(key);
+    } else if (Array.isArray(value)) {
+      const filteredValues = value.filter((v) => !isEmpty(v));
+      if (filteredValues.length > 0) {
+        params.set(key, filteredValues.join(','));
+      } else {
+        params.delete(key);
+      }
+    } else {
+      params.set(key, value.toString());
+    }
+
+    const search = params.toString();
+    history.push({ search });
+  };
+
+  return handleFilterChange;
+};

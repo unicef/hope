@@ -5,17 +5,28 @@ import wait from 'waait';
 import { HouseholdTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
-import {
-  fakeApolloAllHouseholdsForPopulationTable
-} from "../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable";
+import { fakeApolloAllHouseholdsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable';
 
 describe('containers/tables/population/HouseholdTable', () => {
+  const initialFilter = {
+    text: '',
+    program: '',
+    residenceStatus: '',
+    adminArea: '',
+    householdSizeMin: '',
+    householdSizeMax: '',
+    orderBy: 'unicef_id',
+  };
+
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider addTypename={false} mocks={fakeApolloAllHouseholdsForPopulationTable}>
+      <MockedProvider
+        addTypename={false}
+        mocks={fakeApolloAllHouseholdsForPopulationTable}
+      >
         <HouseholdTable
           businessArea='afghanistan'
-          filter={{}}
+          filter={initialFilter}
           canViewDetails={true}
           choicesData={fakeHouseholdChoices}
         />
@@ -35,7 +46,7 @@ describe('containers/tables/population/HouseholdTable', () => {
       >
         <HouseholdTable
           businessArea='afghanistan'
-          filter={{}}
+          filter={initialFilter}
           canViewDetails={true}
           choicesData={fakeHouseholdChoices}
         />
