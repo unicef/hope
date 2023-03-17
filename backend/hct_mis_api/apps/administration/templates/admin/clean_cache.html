@@ -2,21 +2,17 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-  &rsaquo;
-  <a href="{% url 'admin:app_list' app_label=opts_app_label %}"
-    >{{ opts_app_config_verbose_name }}</a
-  >
-  &rsaquo; Clear Cache
+  &rsaquo; Clean Cache
 </div>
 {% endblock %} {% block content %}
 
 {% if form and is_root %}
-<h2>Please select which cached key you would like to clear:</h2>
+<h2>Please select which cached key you would like to remove:</h2>
 <br>
 <form method="post" action=".">
   {% csrf_token %} {{form.as_p}}
   <br>
-  <a href="{% url 'admin:app_list' app_label=opts_app_label %}"><input type="button" value="Back" class="btn btn-primary" /></a>
+  <a href="../"><input type="button" value="Back" class="btn btn-primary" /></a>
   <input type="submit" value="CLEAN" />
   </form>
 {% endif %}
