@@ -637,7 +637,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     obj_type = graphene.String()
     id = graphene.String()
     ca_id = graphene.String(source="unicef_id")
-    status = graphene.String(source="status")
+    status = graphene.String()
     full_name = graphene.String(source="full_name")
     parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
     entitlement_quantity = graphene.Float(source="entitlement_quantity")
@@ -651,6 +651,9 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     def resolve_id(self, info: Any, **kwargs: Any) -> str:
         return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+    def resolve_status(self, info: Any, **kwargs: Any) -> str:
+        return self.status.replace(" ", "_").upper()
 
 
 class PageInfoNode(graphene.ObjectType):
@@ -1028,7 +1031,7 @@ class Query(graphene.ObjectType):
         additional_filters: Q = chart_create_filter_query_for_payment_verification_gfk(
             filters,
             program_id_path="payment__parent__program__id,payment_record__parent__program__id",
-            administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
+            administrative_area_path="payment__household__admin_area,payment_record__household__admin_area",
         )
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,

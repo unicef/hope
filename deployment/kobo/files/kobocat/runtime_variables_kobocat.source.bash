@@ -17,8 +17,8 @@ if [[ ! -z "${PUBLIC_DOMAIN_NAME}" ]]; then
     export KC_DATABASE_URL="postgis://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${KOBOCAT_POSTGRES_DB}"
     export KOBOCAT_BROKER_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/2"
     export CACHE_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/2"
+    export REDIS_SESSION_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/2"
     export SERVICE_ACCOUNT_BACKEND_URL="redis://:${REDIS_PASSWORD}@redis-main-master:6379/6"
-
     
     # DATABASE
     export DATABASE_URL="${KC_DATABASE_URL}"

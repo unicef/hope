@@ -91,9 +91,6 @@ data:
   KPI_POSTGRES_DB: "{{ .Values.postgresql.externalDatabase.kpiDatabase }}"
   KOBOCAT_POSTGRES_DB: "{{ .Values.postgresql.externalDatabase.kobocatDatabase }}"
   {{- end  }}
-  {{-  if .Values.ingress.tls }}
-  SECURE_PROXY_SSL_HEADER: "HTTP_X_FORWARDED_PROTO, https"
-  {{- end }}
   SYNC_KOBOCAT_XFORMS: "True"
 
   EMAIL_HOST: "{{ .Values.smtp.host }}"

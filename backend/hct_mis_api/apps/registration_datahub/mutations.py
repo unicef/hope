@@ -31,6 +31,10 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
+from hct_mis_api.apps.registration_datahub.inputs import (
+    RegistrationKoboImportMutationInput,
+    RegistrationXlsxImportMutationInput,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedIndividual,
@@ -98,21 +102,6 @@ def create_registration_data_import_objects(
         import_data_obj,
         business_area,
     )
-
-
-class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
-    import_data_id = graphene.ID()
-    name = graphene.String()
-    business_area_slug = graphene.String()
-    screen_beneficiary = graphene.Boolean()
-
-
-class RegistrationKoboImportMutationInput(graphene.InputObjectType):
-    import_data_id = graphene.String()
-    name = graphene.String()
-    pull_pictures = graphene.Boolean()
-    business_area_slug = graphene.String()
-    screen_beneficiary = graphene.Boolean()
 
 
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):

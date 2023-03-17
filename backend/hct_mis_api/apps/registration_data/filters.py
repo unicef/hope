@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, DateFilter, FilterSet
@@ -31,3 +32,7 @@ class RegistrationDataImportFilter(FilterSet):
             Lower("imported_by__first_name"),
         )
     )
+
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        qs = super().filter_queryset(queryset)
+        return qs.exclude(excluded=True)

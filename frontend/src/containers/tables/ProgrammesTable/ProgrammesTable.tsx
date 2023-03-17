@@ -30,8 +30,11 @@ export function ProgrammesTable({
     endDate: filter.endDate,
     status: filter.status,
     sector: filter.sector,
-    numberOfHouseholds: JSON.stringify(filter.numberOfHouseholds),
-    budget: JSON.stringify(filter.budget),
+    numberOfHouseholds: JSON.stringify({
+      min: filter.numberOfHouseholdsMin,
+      max: filter.numberOfHouseholdsMax,
+    }),
+    budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
   };
   return (
     <TableWrapper>

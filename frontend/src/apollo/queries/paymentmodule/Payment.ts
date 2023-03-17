@@ -48,6 +48,7 @@ export const Payment = gql`
       }
       parent {
         id
+        status
         unicefId
         program {
           id

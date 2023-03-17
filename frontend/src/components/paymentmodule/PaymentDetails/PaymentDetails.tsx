@@ -181,7 +181,7 @@ export function PaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('FSP')}
-              value={payment.serviceProvider.fullName}
+              value={payment.serviceProvider?.fullName}
             />
           </Grid>
         </Grid>

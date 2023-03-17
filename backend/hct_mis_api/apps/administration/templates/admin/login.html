@@ -1,0 +1,9 @@
+{% extends "admin/login.html" %}
+
+{% block footer %}
+    <div class="module">
+        <blockquote>
+            <a class="button" href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ next }}">Login with Azure</a>
+        </blockquote>
+    </div>
+{% endblock %}
