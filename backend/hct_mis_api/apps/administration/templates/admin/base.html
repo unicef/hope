@@ -1,9 +1,8 @@
 {% extends "admin/base.html" %} {% load i18n %}
 
 {% block userlinks %}
-{{ block.super }}
-{% if user.is_staff %}
-   / <a href="{% url 'admin:clean_cache' %}">{% translate 'Clean Cache' %}</a>
-{% endif %}
-
+    {{ block.super }}
+    {% if user.is_staff %}
+        / <a href="{% url 'admin:clean_cache' %}">{% translate 'Clean Cache' %}</a>
+    {% endif %}
 {% endblock %}

@@ -1,21 +1,20 @@
 from typing import Any, List
 
-from django.core.cache import caches, cache as dj_cache
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.messages import add_message
+from django.core.cache import cache as dj_cache
+from django.core.cache import caches
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 from django.urls import path
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
-
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.messages import add_message
-
-from hct_mis_api.apps.administration.forms import ClearCacheForm
-
 from constance import config
 from smart_admin.site import SmartAdminSite
+
+from hct_mis_api.apps.administration.forms import ClearCacheForm
 
 cache = caches["default"]
 
