@@ -4,8 +4,8 @@
   <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
   &rsaquo; Clean Cache
 </div>
-{% endblock %} {% block content %}
-
+{% endblock %}
+{% block content %}
 {% if form and is_root %}
 <h2>Please select which cached key you would like to remove:</h2>
 <br>
@@ -16,17 +16,15 @@
   <input type="submit" value="CLEAN" />
   </form>
 {% endif %}
-
 <br>
 <br>
 <div>
 <p>Cached keys:</p>
-    {% for key in cache_keys %}
-        <li>{{ key }}</li>
-    {% endfor %}
-    {% if not cache_keys %}
-        <i>--empty--</i>
-    {% endif %}
+  {% for key in cache_keys %}
+    <li>{{ key }}</li>
+  {% endfor %}
+  {% if not cache_keys %}
+    <i>--empty--</i>
+  {% endif %}
 </div>
-
 {% endblock %}

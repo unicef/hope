@@ -39,4 +39,3 @@ class ClearCacheForm(forms.Form):
     resolve_chart_total_transferred_cash_by_country = forms.BooleanField(
         label="Payment: chart_total_transferred_cash_by_country", required=False
     )
-
