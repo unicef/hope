@@ -24,7 +24,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 if TYPE_CHECKING:
     from uuid import UUID
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -89,48 +88,69 @@ class BaseRegistrationService(abc.ABC):
             .values_list("id", flat=True)
         )
         imported_records_ids = []
+        records_with_error = []
+
         try:
-            for record_id in records_ids_to_import:
-                try:
-                    with atomic("default"), atomic("registration_datahub"):
-                        record = Record.objects.defer("data").get(id=record_id)
+            with atomic("registration_datahub"):
+                for record_id in records_ids_to_import:
+                    record = Record.objects.defer("data").get(id=record_id)
+                    try:
                         self.create_household_for_rdi_household(record, rdi_datahub)
                         imported_records_ids.append(record_id)
-                except ValidationError as e:
-                    logger.exception(e)
-                    record.mark_as_invalid(str(e))
+                    except ValidationError as e:
+                        logger.exception(e)
+                        records_with_error.append((record, str(e)))
 
-            number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
-            number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
+                # rollback if at least one Record is invalid
+                if records_with_error:
+                    transaction.set_rollback(True, using="registration_datahub")
 
-            import_data.number_of_individuals = number_of_individuals
-            rdi.number_of_individuals = number_of_individuals
-            import_data.number_of_households = number_of_households
-            rdi.number_of_households = number_of_households
-            rdi.status = RegistrationDataImport.DEDUPLICATION
+            if not records_with_error:
+                number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
+                number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
 
-            rdi.save(
-                update_fields=(
-                    "number_of_individuals",
-                    "number_of_households",
-                    "status",
+                import_data.number_of_individuals = number_of_individuals
+                rdi.number_of_individuals = number_of_individuals
+                import_data.number_of_households = number_of_households
+                rdi.number_of_households = number_of_households
+                rdi.status = RegistrationDataImport.DEDUPLICATION
+
+                rdi.save(
+                    update_fields=(
+                        "number_of_individuals",
+                        "number_of_households",
+                        "status",
+                    )
                 )
-            )
-            import_data.save(
-                update_fields=(
-                    "number_of_individuals",
-                    "number_of_households",
+                import_data.save(
+                    update_fields=(
+                        "number_of_individuals",
+                        "number_of_households",
+                    )
                 )
-            )
+                Record.objects.filter(id__in=imported_records_ids).update(
+                    status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
+                )
+                if not rdi.business_area.postpone_deduplication:
+                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
+                else:
+                    rdi.status = RegistrationDataImport.IN_REVIEW
+                    rdi.save()
 
-            Record.objects.filter(id__in=imported_records_ids).update(
-                status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
-            )
-            if not rdi.business_area.postpone_deduplication:
-                transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
             else:
-                rdi.status = RegistrationDataImport.IN_REVIEW
-                rdi.save()
+                # at least one Record from records_ids_to_import has error
+                rdi.status = RegistrationDataImport.IMPORT_ERROR
+                rdi.error_message = "Records with errors were found during processing"
+                rdi.save(
+                    update_fields=(
+                        "status",
+                        "error_message",
+                    )
+                )
+                # mark invalid Records
+                for record, error in records_with_error:
+                    record.mark_as_invalid(error)
+
         except Exception as e:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
