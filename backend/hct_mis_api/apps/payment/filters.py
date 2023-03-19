@@ -3,7 +3,7 @@ from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, CharField, Count, Q, QuerySet, Value, When
+from django.db.models import Case, CharField, Count, Func, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -355,6 +355,8 @@ class PaymentFilter(FilterSet):
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",
+            "parent__program__name",
+            "delivery_date",
         )
     )
 
@@ -465,8 +467,15 @@ def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, orde
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
-    if order_by == "unicef_id":
+    if order_by == "ca_id":
         qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+    elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
+        order_by_dict = {f"{order_by}__isnull": True}
+        qs_null = list(queryset.filter(**order_by_dict))
+        if reverse:
+            qs = list(queryset.exclude(**order_by_dict).order_by(f"-{order_by}")) + qs_null
+        else:
+            qs = qs_null + list(queryset.exclude(**order_by_dict).order_by(order_by))
     else:
         qs = queryset.order_by(reverse + order_by)
 
