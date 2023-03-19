@@ -1236,6 +1236,21 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     def full_name(self) -> str:
         return self.collector.full_name
 
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        if delivered_quantity == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED
+
+        elif delivered_quantity < self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL
+
+        elif delivered_quantity == self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS
+
+        else:
+            raise ValidationError(
+                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
+            )
+
     objects = PaymentManager()
 
     class Meta:
