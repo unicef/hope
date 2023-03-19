@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 import factory
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -62,7 +63,7 @@ from hct_mis_api.apps.targeting.models import (
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
-class PaymentGFKFactory(factory.django.DjangoModelFactory):
+class PaymentGFKFactory(DjangoModelFactory):
     payment_object_id = factory.SelfAttribute("generic_fk_obj.id")
     payment_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
 
@@ -71,7 +72,7 @@ class PaymentGFKFactory(factory.django.DjangoModelFactory):
         abstract = True
 
 
-class PaymentPlanGFKFactory(factory.django.DjangoModelFactory):
+class PaymentPlanGFKFactory(DjangoModelFactory):
     payment_plan_object_id = factory.SelfAttribute("generic_fk_obj.id")
     payment_plan_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
 
@@ -87,7 +88,7 @@ class PaymentVerificationSummaryFactory(PaymentPlanGFKFactory):
         model = PaymentVerificationSummary
 
 
-class CashPlanFactory(factory.DjangoModelFactory):
+class CashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
@@ -161,7 +162,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
-class ServiceProviderFactory(factory.DjangoModelFactory):
+class ServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = ServiceProvider
 
@@ -173,7 +174,7 @@ class ServiceProviderFactory(factory.DjangoModelFactory):
     vision_id = factory.fuzzy.FuzzyInteger(1342342, 9999999932)
 
 
-class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
+class FinancialServiceProviderXlsxTemplateFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
 
@@ -181,7 +182,7 @@ class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
     columns = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
 
 
-class FinancialServiceProviderFactory(factory.DjangoModelFactory):
+class FinancialServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProvider
 
@@ -202,7 +203,7 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     data_transfer_configuration = factory.Faker("json")
 
 
-class FspXlsxTemplatePerDeliveryMechanismFactory(factory.DjangoModelFactory):
+class FspXlsxTemplatePerDeliveryMechanismFactory(DjangoModelFactory):
     class Meta:
         model = FspXlsxTemplatePerDeliveryMechanism
 
@@ -214,14 +215,14 @@ class FspXlsxTemplatePerDeliveryMechanismFactory(factory.DjangoModelFactory):
     xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
-class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
+class FinancialServiceProviderXlsxReportFactory(DjangoModelFactory):
     class Meta:
         model = FinancialServiceProviderXlsxReport
 
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
 
 
-class PaymentRecordFactory(factory.DjangoModelFactory):
+class PaymentRecordFactory(DjangoModelFactory):
     class Meta:
         model = PaymentRecord
 
@@ -316,7 +317,7 @@ class PaymentVerificationFactory(PaymentGFKFactory):
         model = PaymentVerification
 
 
-class RealProgramFactory(factory.DjangoModelFactory):
+class RealProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
 
@@ -369,7 +370,7 @@ class RealProgramFactory(factory.DjangoModelFactory):
     individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
 
 
-class RealCashPlanFactory(factory.DjangoModelFactory):
+class RealCashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
@@ -442,7 +443,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
-class RealPaymentRecordFactory(factory.DjangoModelFactory):
+class RealPaymentRecordFactory(DjangoModelFactory):
     class Meta:
         model = PaymentRecord
 
@@ -499,7 +500,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-class PaymentPlanFactory(factory.DjangoModelFactory):
+class PaymentPlanFactory(DjangoModelFactory):
     class Meta:
         model = PaymentPlan
 
@@ -550,7 +551,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
 
 
-class PaymentFactory(factory.DjangoModelFactory):
+class PaymentFactory(DjangoModelFactory):
     class Meta:
         model = Payment
 
@@ -599,7 +600,7 @@ class PaymentFactory(factory.DjangoModelFactory):
     excluded = False
 
 
-class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
+class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
     class Meta:
         model = DeliveryMechanismPerPaymentPlan
 

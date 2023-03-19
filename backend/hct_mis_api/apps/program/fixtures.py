@@ -4,6 +4,7 @@ from typing import Any
 
 import factory
 from factory import fuzzy
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -11,7 +12,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.models import Program
 
 
-class ProgramFactory(factory.DjangoModelFactory):
+class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
 

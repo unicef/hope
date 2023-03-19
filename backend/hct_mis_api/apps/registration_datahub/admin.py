@@ -30,6 +30,7 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from requests.auth import HTTPBasicAuth
 
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fresh_extract_records_task,
 )
@@ -375,7 +376,6 @@ class AlexisFilter(SimpleListFilter):
 
 
 class CreateRDIForm(forms.Form):
-
     STATUS_TO_IMPORT = "TO_IMPORT"
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
@@ -396,7 +396,13 @@ class CreateRDIForm(forms.Form):
         required=False,
         help_text="filters to use to select the records (Uses Django filtering syntax)",
     )
-    status = forms.ChoiceField(required=True, choices=STATUSES_CHOICES)
+    status = forms.ChoiceField(label="Record status", required=True, choices=STATUSES_CHOICES)
+    rdi = forms.ModelChoiceField(
+        label="RDI",
+        required=False,
+        queryset=RegistrationDataImport.objects.filter(status=RegistrationDataImport.IN_REVIEW),
+        help_text="can select and update existing RDI within status 'In Review'",
+    )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         if request := kwargs.pop("request", None):
@@ -415,6 +421,11 @@ class CreateRDIForm(forms.Form):
                 "17 - Sri Lanka; 2, 3 - Ukraine;"
             )
         return self.cleaned_data["registration"]
+
+    def clean_rdi(self) -> dict:
+        if self.cleaned_data.get("rdi") and self.cleaned_data["rdi"].status != RegistrationDataImport.IN_REVIEW:
+            raise ValidationError("Only RDI within status 'In Review' can be processed")
+        return self.cleaned_data["rdi"]
 
     def clean(self) -> None:
         super().clean()
@@ -468,7 +479,6 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
 
     @admin.action(description="Create RDI")
     def create_rdi(self, request: HttpRequest, queryset: QuerySet) -> None:
-
         if queryset.exclude(registration__in=list(get_registration_to_rdi_service_map().keys())).exists():
             self.message_user(
                 request,
@@ -559,6 +569,8 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
             if form.is_valid():
                 registration_id = form.cleaned_data["registration"]
                 filters, exclude = form.cleaned_data["filters"]
+                rdi = form.cleaned_data.get("rdi")
+                update_rdi = "update " if rdi else ""
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
 
@@ -570,13 +582,15 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                     )
                     if records_ids := qs.values_list("id", flat=True):
                         try:
-                            rdi_name = form.cleaned_data["name"] or f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
-                            rdi = service().create_rdi(request.user, rdi_name)
+                            if not rdi:
+                                rdi = service().create_rdi(
+                                    request.user, f"{service.BUSINESS_AREA_SLUG} rdi {timezone.now()}"
+                                )
                             create_task_for_processing_records(service, rdi.pk, list(records_ids))
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
                                 request,
-                                mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                                mark_safe(f"Started {update_rdi}RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
                                 messages.SUCCESS,
                             )
                         except Exception as e:
@@ -587,7 +601,8 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
                 else:
                     self.message_user(
                         request,
-                        "Invalid registration number. Data can be processed only for registration(s): 17 - Sri Lanka; 2, 3 - Ukraine;",
+                        "Invalid registration number. Data can be processed only for registration(s): "
+                        "17 - Sri Lanka; 2, 3 - Ukraine;",
                         messages.ERROR,
                     )
         else:

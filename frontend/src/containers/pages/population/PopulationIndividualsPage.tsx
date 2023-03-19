@@ -1,5 +1,6 @@
 import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -9,14 +10,26 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
-export function PopulationIndividualsPage(): React.ReactElement {
+const initialFilter = {
+  text: '',
+  adminArea: '',
+  sex: '',
+  ageMin: '',
+  ageMax: '',
+  flags: [],
+  orderBy: 'unicef_id',
+};
+
+export const PopulationIndividualsPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const {
@@ -24,13 +37,10 @@ export function PopulationIndividualsPage(): React.ReactElement {
     loading: householdChoicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  const [filter, setFilter] = useState({
-    text: '',
-    sex: [],
-    age: { min: '', max: '' },
-    flags: [],
-    orderBy: 'unicef_id',
-  });
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: individualChoicesData,
@@ -69,9 +79,8 @@ export function PopulationIndividualsPage(): React.ReactElement {
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
           )}
-          filterOrderBy={filter.orderBy}
         />
       </Box>
     </>
   );
-}
+};

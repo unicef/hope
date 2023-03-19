@@ -9,7 +9,6 @@ import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
-  paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import {
@@ -62,7 +61,6 @@ export const PaymentPlanTableRow = ({
           <StatusBox
             status={plan.status}
             statusToColor={paymentPlanStatusToColor}
-            statusNameMapping={paymentPlanStatusMapping}
           />
         </StatusContainer>
       </TableCell>

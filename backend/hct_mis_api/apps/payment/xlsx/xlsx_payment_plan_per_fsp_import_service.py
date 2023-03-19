@@ -98,10 +98,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         cell = row[self.xlsx_headers.index("delivered_quantity")]
         delivered_quantity = cell.value
         if delivered_quantity is not None and delivered_quantity != "":
-
             delivered_quantity = to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:  # update value
-
                 if delivered_quantity > payment.entitlement_quantity:
                     self.errors.append(
                         XlsxError(

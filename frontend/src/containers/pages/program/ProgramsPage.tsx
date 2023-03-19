@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
@@ -11,23 +12,26 @@ import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 
-export function ProgramsPage(): React.ReactElement {
-  const [filter, setFilter] = useState({
-    search: '',
-    startDate: undefined,
-    endDate: undefined,
-    status: [],
-    sector: [],
-    numberOfHouseholds: {
-      min: '',
-      max: '',
-    },
-    budget: {
-      min: '',
-      max: '',
-    },
-  });
+const initialFilter = {
+  search: '',
+  startDate: undefined,
+  endDate: undefined,
+  status: '',
+  sector: [],
+  numberOfHouseholdsMin: '',
+  numberOfHouseholdsMax: '',
+  budgetMin: '',
+  budgetMax: '',
+};
+
+export const ProgramsPage = (): React.ReactElement => {
+  const location = useLocation();
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -68,4 +72,4 @@ export function ProgramsPage(): React.ReactElement {
       />
     </div>
   );
-}
+};

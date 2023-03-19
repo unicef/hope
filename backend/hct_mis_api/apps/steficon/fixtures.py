@@ -1,9 +1,10 @@
 import factory
+from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
 
-class RuleFactory(factory.django.DjangoModelFactory):
+class RuleFactory(DjangoModelFactory):
     class Meta:
         model = Rule
 
@@ -13,7 +14,7 @@ class RuleFactory(factory.django.DjangoModelFactory):
     deprecated = False
 
 
-class RuleCommitFactory(factory.django.DjangoModelFactory):
+class RuleCommitFactory(DjangoModelFactory):
     class Meta:
         model = RuleCommit
 

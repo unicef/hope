@@ -1141,6 +1141,7 @@ export enum DocumentTypeType {
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
+  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
   Other = 'OTHER'
 }
 
@@ -2029,6 +2030,7 @@ export enum ImportedDocumentTypeType {
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
+  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
   Other = 'OTHER'
 }
 
@@ -3038,6 +3040,11 @@ export type LogEntryNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type MarkPaymentAsFailedMutation = {
+   __typename?: 'MarkPaymentAsFailedMutation',
+  payment?: Maybe<PaymentNode>,
+};
+
 export type MarkPaymentRecordAsFailedMutation = {
    __typename?: 'MarkPaymentRecordAsFailedMutation',
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -3081,7 +3088,9 @@ export type Mutations = {
   assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   markPaymentRecordAsFailed?: Maybe<MarkPaymentRecordAsFailedMutation>,
-  revertMarkPaymentRecordAsFailed?: Maybe<RevertMarkAsFailedMutation>,
+  revertMarkPaymentRecordAsFailed?: Maybe<RevertMarkPaymentRecordAsFailedMutation>,
+  markPaymentAsFailed?: Maybe<MarkPaymentAsFailedMutation>,
+  revertMarkPaymentAsFailed?: Maybe<RevertMarkPaymentAsFailedMutation>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   actionPaymentPlanMutation?: Maybe<ActionPaymentPlanMutation>,
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>,
@@ -3328,6 +3337,18 @@ export type MutationsRevertMarkPaymentRecordAsFailedArgs = {
   deliveredQuantity: Scalars['Decimal'],
   deliveryDate: Scalars['Date'],
   paymentRecordId: Scalars['ID']
+};
+
+
+export type MutationsMarkPaymentAsFailedArgs = {
+  paymentId: Scalars['ID']
+};
+
+
+export type MutationsRevertMarkPaymentAsFailedArgs = {
+  deliveredQuantity: Scalars['Decimal'],
+  deliveryDate: Scalars['Date'],
+  paymentId: Scalars['ID']
 };
 
 
@@ -5498,6 +5519,7 @@ export type RegistrationDataImportNode = Node & {
   pullPictures: Scalars['Boolean'],
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
+  excluded: Scalars['Boolean'],
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -5669,8 +5691,13 @@ export type RestartCreateReportInput = {
   businessAreaSlug: Scalars['String'],
 };
 
-export type RevertMarkAsFailedMutation = {
-   __typename?: 'RevertMarkAsFailedMutation',
+export type RevertMarkPaymentAsFailedMutation = {
+   __typename?: 'RevertMarkPaymentAsFailedMutation',
+  payment?: Maybe<PaymentNode>,
+};
+
+export type RevertMarkPaymentRecordAsFailedMutation = {
+   __typename?: 'RevertMarkPaymentRecordAsFailedMutation',
   paymentRecord?: Maybe<PaymentRecordNode>,
 };
 
@@ -7648,7 +7675,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'status'>
+    & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
@@ -8152,6 +8179,40 @@ export type ImportXlsxPpListPerFspMutation = (
   )> }
 );
 
+export type MarkPayAsFailedMutationVariables = {
+  paymentId: Scalars['ID']
+};
+
+
+export type MarkPayAsFailedMutation = (
+  { __typename?: 'Mutations' }
+  & { markPaymentAsFailed: Maybe<(
+    { __typename?: 'MarkPaymentAsFailedMutation' }
+    & { payment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'deliveredQuantity' | 'deliveryDate'>
+    )> }
+  )> }
+);
+
+export type RevertMarkPayAsFailedMutationVariables = {
+  paymentId: Scalars['ID'],
+  deliveredQuantity: Scalars['Decimal'],
+  deliveryDate: Scalars['Date']
+};
+
+
+export type RevertMarkPayAsFailedMutation = (
+  { __typename?: 'Mutations' }
+  & { revertMarkPaymentAsFailed: Maybe<(
+    { __typename?: 'RevertMarkPaymentAsFailedMutation' }
+    & { payment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'deliveredQuantity' | 'deliveryDate'>
+    )> }
+  )> }
+);
+
 export type SetSteficonRuleOnPpListMutationVariables = {
   paymentPlanId: Scalars['ID'],
   steficonRuleId: Scalars['ID']
@@ -8408,7 +8469,7 @@ export type RevertMarkPrAsFailedMutationVariables = {
 export type RevertMarkPrAsFailedMutation = (
   { __typename?: 'Mutations' }
   & { revertMarkPaymentRecordAsFailed: Maybe<(
-    { __typename?: 'RevertMarkAsFailedMutation' }
+    { __typename?: 'RevertMarkPaymentRecordAsFailedMutation' }
     & { paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & PaymentRecordDetailsFragment
@@ -9873,7 +9934,7 @@ export type PaymentQuery = (
       & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'unicefId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -11146,8 +11207,8 @@ export type AllRegistrationDataImportsQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
-  name_Icontains?: Maybe<Scalars['String']>,
-  importedBy_Id?: Maybe<Scalars['UUID']>,
+  search?: Maybe<Scalars['String']>,
+  importedBy?: Maybe<Scalars['UUID']>,
   status?: Maybe<Scalars['String']>,
   importDate?: Maybe<Scalars['Date']>,
   businessArea?: Maybe<Scalars['String']>
@@ -12281,6 +12342,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     id
     name
     status
+    startDate
+    endDate
   }
   createdBy {
     id
@@ -13661,6 +13724,120 @@ export function useImportXlsxPpListPerFspMutation(baseOptions?: ApolloReactHooks
 export type ImportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useImportXlsxPpListPerFspMutation>;
 export type ImportXlsxPpListPerFspMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListPerFspMutation>;
 export type ImportXlsxPpListPerFspMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
+export const MarkPayAsFailedDocument = gql`
+    mutation markPayAsFailed($paymentId: ID!) {
+  markPaymentAsFailed(paymentId: $paymentId) {
+    payment {
+      id
+      unicefId
+      status
+      statusDate
+      deliveredQuantity
+      deliveryDate
+    }
+  }
+}
+    `;
+export type MarkPayAsFailedMutationFn = ApolloReactCommon.MutationFunction<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
+export type MarkPayAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>, 'mutation'>;
+
+    export const MarkPayAsFailedComponent = (props: MarkPayAsFailedComponentProps) => (
+      <ApolloReactComponents.Mutation<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables> mutation={MarkPayAsFailedDocument} {...props} />
+    );
+    
+export type MarkPayAsFailedProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables> & TChildProps;
+export function withMarkPayAsFailed<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MarkPayAsFailedMutation,
+  MarkPayAsFailedMutationVariables,
+  MarkPayAsFailedProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables, MarkPayAsFailedProps<TChildProps>>(MarkPayAsFailedDocument, {
+      alias: 'markPayAsFailed',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMarkPayAsFailedMutation__
+ *
+ * To run a mutation, you first call `useMarkPayAsFailedMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkPayAsFailedMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markPayAsFailedMutation, { data, loading, error }] = useMarkPayAsFailedMutation({
+ *   variables: {
+ *      paymentId: // value for 'paymentId'
+ *   },
+ * });
+ */
+export function useMarkPayAsFailedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>) {
+        return ApolloReactHooks.useMutation<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>(MarkPayAsFailedDocument, baseOptions);
+      }
+export type MarkPayAsFailedMutationHookResult = ReturnType<typeof useMarkPayAsFailedMutation>;
+export type MarkPayAsFailedMutationResult = ApolloReactCommon.MutationResult<MarkPayAsFailedMutation>;
+export type MarkPayAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
+export const RevertMarkPayAsFailedDocument = gql`
+    mutation revertMarkPayAsFailed($paymentId: ID!, $deliveredQuantity: Decimal!, $deliveryDate: Date!) {
+  revertMarkPaymentAsFailed(paymentId: $paymentId, deliveredQuantity: $deliveredQuantity, deliveryDate: $deliveryDate) {
+    payment {
+      id
+      unicefId
+      status
+      statusDate
+      deliveredQuantity
+      deliveryDate
+    }
+  }
+}
+    `;
+export type RevertMarkPayAsFailedMutationFn = ApolloReactCommon.MutationFunction<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
+export type RevertMarkPayAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>, 'mutation'>;
+
+    export const RevertMarkPayAsFailedComponent = (props: RevertMarkPayAsFailedComponentProps) => (
+      <ApolloReactComponents.Mutation<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables> mutation={RevertMarkPayAsFailedDocument} {...props} />
+    );
+    
+export type RevertMarkPayAsFailedProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables> & TChildProps;
+export function withRevertMarkPayAsFailed<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RevertMarkPayAsFailedMutation,
+  RevertMarkPayAsFailedMutationVariables,
+  RevertMarkPayAsFailedProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables, RevertMarkPayAsFailedProps<TChildProps>>(RevertMarkPayAsFailedDocument, {
+      alias: 'revertMarkPayAsFailed',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRevertMarkPayAsFailedMutation__
+ *
+ * To run a mutation, you first call `useRevertMarkPayAsFailedMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRevertMarkPayAsFailedMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [revertMarkPayAsFailedMutation, { data, loading, error }] = useRevertMarkPayAsFailedMutation({
+ *   variables: {
+ *      paymentId: // value for 'paymentId'
+ *      deliveredQuantity: // value for 'deliveredQuantity'
+ *      deliveryDate: // value for 'deliveryDate'
+ *   },
+ * });
+ */
+export function useRevertMarkPayAsFailedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>) {
+        return ApolloReactHooks.useMutation<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>(RevertMarkPayAsFailedDocument, baseOptions);
+      }
+export type RevertMarkPayAsFailedMutationHookResult = ReturnType<typeof useRevertMarkPayAsFailedMutation>;
+export type RevertMarkPayAsFailedMutationResult = ApolloReactCommon.MutationResult<RevertMarkPayAsFailedMutation>;
+export type RevertMarkPayAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
     mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
@@ -18048,6 +18225,7 @@ export const PaymentDocument = gql`
     }
     parent {
       id
+      status
       unicefId
       program {
         id
@@ -21172,8 +21350,8 @@ export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProject
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -21225,8 +21403,8 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
- *      name_Icontains: // value for 'name_Icontains'
- *      importedBy_Id: // value for 'importedBy_Id'
+ *      search: // value for 'search'
+ *      importedBy: // value for 'importedBy'
  *      status: // value for 'status'
  *      importDate: // value for 'importDate'
  *      businessArea: // value for 'businessArea'
@@ -23050,7 +23228,9 @@ export type ResolversTypes = {
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   MarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<MarkPaymentRecordAsFailedMutation>,
-  RevertMarkAsFailedMutation: ResolverTypeWrapper<RevertMarkAsFailedMutation>,
+  RevertMarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<RevertMarkPaymentRecordAsFailedMutation>,
+  MarkPaymentAsFailedMutation: ResolverTypeWrapper<MarkPaymentAsFailedMutation>,
+  RevertMarkPaymentAsFailedMutation: ResolverTypeWrapper<RevertMarkPaymentAsFailedMutation>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
   Action: Action,
@@ -23499,7 +23679,9 @@ export type ResolversParentTypes = {
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   MarkPaymentRecordAsFailedMutation: MarkPaymentRecordAsFailedMutation,
-  RevertMarkAsFailedMutation: RevertMarkAsFailedMutation,
+  RevertMarkPaymentRecordAsFailedMutation: RevertMarkPaymentRecordAsFailedMutation,
+  MarkPaymentAsFailedMutation: MarkPaymentAsFailedMutation,
+  RevertMarkPaymentAsFailedMutation: RevertMarkPaymentAsFailedMutation,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
   Action: Action,
@@ -24958,6 +25140,10 @@ export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends Reso
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type MarkPaymentAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarkPaymentAsFailedMutation'] = ResolversParentTypes['MarkPaymentAsFailedMutation']> = {
+  payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
+};
+
 export type MarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['MarkPaymentRecordAsFailedMutation']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
 };
@@ -24998,7 +25184,9 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   markPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
-  revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>,
+  revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>,
+  markPaymentAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentAsFailedArgs, 'paymentId'>>,
+  revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
@@ -25675,6 +25863,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
@@ -25747,7 +25936,11 @@ export type RestartCreateReportResolvers<ContextType = any, ParentType extends R
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
 };
 
-export type RevertMarkAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkAsFailedMutation'] = ResolversParentTypes['RevertMarkAsFailedMutation']> = {
+export type RevertMarkPaymentAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkPaymentAsFailedMutation'] = ResolversParentTypes['RevertMarkPaymentAsFailedMutation']> = {
+  payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
+};
+
+export type RevertMarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['RevertMarkPaymentRecordAsFailedMutation']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
 };
 
@@ -26752,6 +26945,7 @@ export type Resolvers<ContextType = any> = {
   LogEntryNode?: LogEntryNodeResolvers<ContextType>,
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
   LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
+  MarkPaymentAsFailedMutation?: MarkPaymentAsFailedMutationResolvers<ContextType>,
   MarkPaymentRecordAsFailedMutation?: MarkPaymentRecordAsFailedMutationResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
@@ -26812,7 +27006,8 @@ export type Resolvers<ContextType = any> = {
   ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>,
   ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>,
   RestartCreateReport?: RestartCreateReportResolvers<ContextType>,
-  RevertMarkAsFailedMutation?: RevertMarkAsFailedMutationResolvers<ContextType>,
+  RevertMarkPaymentAsFailedMutation?: RevertMarkPaymentAsFailedMutationResolvers<ContextType>,
+  RevertMarkPaymentRecordAsFailedMutation?: RevertMarkPaymentRecordAsFailedMutationResolvers<ContextType>,
   RoleNode?: RoleNodeResolvers<ContextType>,
   RuleCommitNode?: RuleCommitNodeResolvers<ContextType>,
   RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>,

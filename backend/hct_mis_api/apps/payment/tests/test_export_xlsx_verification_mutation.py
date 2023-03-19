@@ -17,7 +17,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestXlsxVerificationExport(APITestCase):
-
     EXPORT_MUTATION = """
         mutation exportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
           exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {

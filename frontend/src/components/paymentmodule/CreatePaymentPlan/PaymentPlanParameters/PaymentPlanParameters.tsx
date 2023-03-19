@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@material-ui/core';
 import { Field } from 'formik';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
@@ -8,6 +8,7 @@ import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { Title } from '../../../core/Title';
 import { FormikCurrencyAutocomplete } from '../../../../shared/FormikCurrencyAutocomplete';
+import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
 
 interface PaymentPlanParametersProps {
   values;
@@ -18,6 +19,20 @@ export const PaymentPlanParameters = ({
   values,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
+  const [
+    loadTargetPopulation,
+    { data, loading },
+  ] = useTargetPopulationLazyQuery();
+
+  useEffect(() => {
+    if (values.targetingId) {
+      loadTargetPopulation({
+        variables: {
+          id: values.targetingId,
+        },
+      });
+    }
+  }, [values.targetingId, loadTargetPopulation]);
 
   return (
     <PaperContainer>
@@ -32,6 +47,11 @@ export const PaymentPlanParameters = ({
               label={t('Start Date')}
               component={FormikDateField}
               required
+              minDate={data?.targetPopulation?.program?.startDate}
+              maxDate={
+                values.endDate || data?.targetPopulation?.program?.endDate
+              }
+              disabled={!data || loading}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-start-date'
@@ -44,6 +64,7 @@ export const PaymentPlanParameters = ({
               component={FormikDateField}
               required
               minDate={values.startDate}
+              maxDate={data?.targetPopulation?.program?.endDate}
               disabled={!values.startDate}
               initialFocusedDate={values.startDate}
               fullWidth
@@ -65,6 +86,7 @@ export const PaymentPlanParameters = ({
               label={t('Dispersion Start Date')}
               component={FormikDateField}
               required
+              disabled={!data || loading}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-dispersion-start-date'

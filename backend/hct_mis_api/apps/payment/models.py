@@ -314,6 +314,29 @@ class GenericPayment(TimeStampedUUIDModel):
             return None
         return verification
 
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        raise NotImplementedError()
+
+    def mark_as_failed(self) -> None:
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
+
     @property
     def get_unicef_id(self) -> str:
         return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id

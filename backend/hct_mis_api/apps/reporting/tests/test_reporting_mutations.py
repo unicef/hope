@@ -23,7 +23,6 @@ from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
 class TestReportingMutation(APITestCase):
-
     CREATE_REPORT = """
     mutation CreateReport($reportData: CreateReportInput!) {
         createReport(reportData: $reportData) {
@@ -153,7 +152,6 @@ class TestReportingMutation(APITestCase):
     def test_create_report_validator(
         self, _: Any, report_type: str, should_exist_field: str, should_not_exist_field: str
     ) -> None:
-
         report_data = {
             "report_type": report_type,
             "business_area_slug": self.business_area_slug,

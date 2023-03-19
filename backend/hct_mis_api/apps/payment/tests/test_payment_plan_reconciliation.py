@@ -11,6 +11,7 @@ from zipfile import ZipFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
+from aniso8601 import parse_date
 from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
@@ -358,8 +359,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "input": {
                     "businessAreaSlug": self.business_area.slug,
                     "targetingId": target_population_id,
-                    "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
-                    "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
+                    "startDate": parse_date("2022-08-24"),
+                    "endDate": parse_date("2022-08-31"),
                     "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                     "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "currency": "USD",

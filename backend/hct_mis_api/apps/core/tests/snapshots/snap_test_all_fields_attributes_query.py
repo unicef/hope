@@ -47120,6 +47120,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'DAUGHTERINLAW_SONINLAW'
                     },
                     {
+                        'labelEn': 'Foster child',
+                        'labels': [
+                            {
+                                'label': 'Foster child',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FOSTER_CHILD'
+                    },
+                    {
                         'labelEn': 'Granddaughter / Grandson',
                         'labels': [
                             {
