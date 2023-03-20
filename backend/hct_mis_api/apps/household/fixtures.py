@@ -200,11 +200,7 @@ class DocumentFactory(DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
-<<<<<<< HEAD
-class DocumentAllowDuplicatesFactory(factory.DjangoModelFactory):
-=======
 class DocumentAllowDuplicatesFactory(DjangoModelFactory):
->>>>>>> origin
     class Meta:
         model = Document
 
@@ -214,11 +210,7 @@ class DocumentAllowDuplicatesFactory(DjangoModelFactory):
     country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
-<<<<<<< HEAD
-class EntitlementCardFactory(factory.DjangoModelFactory):
-=======
 class EntitlementCardFactory(DjangoModelFactory):
->>>>>>> origin
     class Meta:
         model = EntitlementCard
 

@@ -1,14 +1,11 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
-<<<<<<< HEAD
 from django.contrib.auth import get_user_model
-=======
 from django.core.cache import cache
->>>>>>> origin
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
@@ -370,7 +367,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def _related_tickets(self) -> QuerySet["GrievanceTicket"]:
         """Distinct linked + existing tickets"""
         return self._linked_tickets.union(self._existing_tickets)
-<<<<<<< HEAD
 
     @property
     def existing_tickets(self) -> QuerySet["GrievanceTicket"]:  # temporarily linked tickets
@@ -380,8 +376,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         ids = set(self.flatten(all_through_objects))
         ids.discard(self.id)
         return GrievanceTicket.objects.filter(id__in=ids)
-=======
->>>>>>> origin
 
     @property
     def is_feedback(self) -> bool:
@@ -400,11 +394,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
                 return None
             return getattr(self, value, None)
 
-<<<<<<< HEAD
-        return getattr(self, details_name, None)  # type: ignore # FIXME: Argument 2 to "getattr" has incompatible type "Optional[Any]"; expected "str"
-=======
         return getattr(self, nested_dict_or_value, None)
->>>>>>> origin
 
     @property
     def status_log(self) -> str:
@@ -431,16 +421,10 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         verbose_name = "Grievance Ticket"
 
     def clean(self) -> None:
-<<<<<<< HEAD
-        issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
+        issue_types: Optional[Dict[int, str]] = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
-=======
-        issue_types: Optional[Dict[int, str]] = self.ISSUE_TYPES_CHOICES.get(self.category)
-        has_invalid_issue_type = issue_types and self.issue_type not in issue_types
-        has_issue_type_for_category_without_issue_types = bool(not issue_types and self.issue_type)
->>>>>>> origin
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})

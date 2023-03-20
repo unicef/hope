@@ -20,13 +20,9 @@ from typing import (
     Union,
 )
 
-<<<<<<< HEAD
-from django.core.cache import cache
-=======
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
->>>>>>> origin
 from django.utils import timezone
 
 import pytz
@@ -59,10 +55,6 @@ def decode_id_string_required(id_string: str) -> str:
 def decode_id_string(id_string: Optional[str]) -> Optional[str]:
     if not id_string:
         return None
-<<<<<<< HEAD
-
-=======
->>>>>>> origin
     return decode_id_string_required(id_string)
 
 
@@ -148,11 +140,7 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-<<<<<<< HEAD
-        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523 # FIXME
-=======
         value = re.sub("{}+".format(re_sep), separator, value)
->>>>>>> origin
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -246,11 +234,7 @@ def get_combined_attributes() -> Dict:
     flex_attrs = serialize_flex_attributes()
     return {
         **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
-<<<<<<< HEAD
-        .apply_business_area(None)  # type: ignore # TODO: none business area?
-=======
         .apply_business_area()
->>>>>>> origin
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
         **flex_attrs["households"],
@@ -294,11 +278,7 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     import functools
 
     return functools.reduce(
-<<<<<<< HEAD
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME
-=======
         lambda d, key: d.get(key, None) if isinstance(d, dict) else None,  # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
->>>>>>> origin
         path.split("."),
         dictionary,
     )
@@ -454,11 +434,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-<<<<<<< HEAD
-def decode_and_get_object(encoded_id: Optional[str], model: Any, required: bool = False) -> Optional[Any]:
-=======
 def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optional[Any]:
->>>>>>> origin
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -468,11 +444,7 @@ def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optio
     return None
 
 
-<<<<<<< HEAD
-def decode_and_get_object_required(encoded_id: str, model: Any) -> Any:
-=======
 def decode_and_get_object_required(encoded_id: str, model: Type) -> Any:
->>>>>>> origin
     return decode_and_get_object(encoded_id, model, required=True)
 
 
@@ -520,11 +492,7 @@ def update_labels_mapping(csv_file: str) -> None:
     )
     from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
-<<<<<<< HEAD
-    with open(csv_file, newline="") as csv_file_ptr:  # type: ignore # FIXME: No overload variant of "open" matches argument types "BytesIO", "str"
-=======
     with open(csv_file, newline="") as csv_file_ptr:
->>>>>>> origin
         reader = csv.reader(csv_file_ptr)
         next(reader, None)
         fields_mapping = dict(reader)
@@ -816,8 +784,6 @@ def save_data_in_cache(
             return cache_data
         cache.set(cache_key, cache_data, timeout=timeout)
     return cache_data
-<<<<<<< HEAD
-=======
 
 
 def clear_cache_for_dashboard_totals() -> None:
@@ -840,4 +806,3 @@ def clear_cache_for_dashboard_totals() -> None:
         all_cache_keys = cache.keys("*")
         for k in [key for key in all_cache_keys if key.startswith(keys)]:
             cache.delete(k)
->>>>>>> origin

@@ -37,10 +37,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
-<<<<<<< HEAD
-=======
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
->>>>>>> origin
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
@@ -962,15 +959,9 @@ class Query(graphene.ObjectType):
         )
 
         def get_payment_records(
-<<<<<<< HEAD
-            cash_plan: CashPlan,
-            payment_verification_plan: Optional[CashPlanPaymentVerification],
-            verification_channel: Any,
-=======
             obj: Union["PaymentPlan", "CashPlan"],
             payment_verification_plan: Optional[PaymentVerificationPlan],
             verification_channel: str,
->>>>>>> origin
         ) -> QuerySet:
             kw: Dict = {}
             if payment_verification_plan:

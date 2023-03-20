@@ -38,12 +38,7 @@ class KoboRequestsSession(requests.Session):
 
 
 class KoboAPI:
-<<<<<<< HEAD
-    def __init__(self, business_area_slug: Optional[str] = None, kpi_url: Optional[str] = None):
-        self.KPI_URL = kpi_url or settings.KOBO_KF_URL
-=======
     def __init__(self, business_area_slug: Optional[str] = None):
->>>>>>> origin
         if business_area_slug is not None:
             self.business_area = BusinessArea.objects.get(slug=business_area_slug)
             self.KPI_URL = self.business_area.kobo_url or settings.KOBO_KF_URL

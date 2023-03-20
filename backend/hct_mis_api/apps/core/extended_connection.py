@@ -23,11 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 class DjangoFastConnectionField(DjangoConnectionField):
-<<<<<<< HEAD
-=======
     use_cached_count = True
 
->>>>>>> origin
     @classmethod
     def cache_count(cls, connection: Connection, args: Dict, iterable: QuerySet) -> int:
         try:
@@ -36,10 +33,6 @@ class DjangoFastConnectionField(DjangoConnectionField):
             important_args = {k: str(v) for k, v in args.items() if k not in excluded_args}
             hashed_args = hashlib.sha1(json.dumps(important_args).encode()).hexdigest()
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
-<<<<<<< HEAD
-=======
-            print(cache_key)
->>>>>>> origin
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
         except Exception as e:
             logger.exception(e)
@@ -61,14 +54,10 @@ class DjangoFastConnectionField(DjangoConnectionField):
         iterable = maybe_queryset(iterable)
 
         if isinstance(iterable, QuerySet):
-<<<<<<< HEAD
-            list_length = DjangoFastConnectionField.cache_count(connection, args, iterable)
-=======
             if cls.use_cached_count:
                 list_length = DjangoFastConnectionField.cache_count(connection, args, iterable)
             else:
                 list_length = iterable.count()
->>>>>>> origin
         else:
             list_length = len(iterable)
         list_slice_length = min(max_limit, list_length) if max_limit is not None else list_length

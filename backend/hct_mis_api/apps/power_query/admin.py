@@ -80,11 +80,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-<<<<<<< HEAD
-        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore # FIXME
-=======
         return request.user.is_superuser or bool(obj and obj.owner == request.user)
->>>>>>> origin
 
     @button()
     def datasets(self, request: HttpRequest, pk: "UUID") -> Optional[HttpResponseRedirect]:
@@ -255,11 +251,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     search_fields = ("name",)
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-<<<<<<< HEAD
-        return request.user.is_superuser or (obj and obj.owner == request.user)  # type: ignore # FIXME
-=======
         return request.user.is_superuser or bool(obj and obj.owner == request.user)
->>>>>>> origin
 
     def get_changeform_initial_data(self, request: HttpRequest) -> Dict:
         kwargs: Dict = {"owner": request.user}

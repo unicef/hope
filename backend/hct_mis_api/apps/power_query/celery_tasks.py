@@ -40,17 +40,8 @@ def run_background_query(query_id: int, **kwargs: Any) -> Union[str, bool, None]
 @sentry_tags
 def refresh_reports() -> None:
     try:
-<<<<<<< HEAD
-        for report in Report.objects.filter(active=True, refresh_daily=True):
-            run_background_query.delay(report.query.id)
-            with atomic():
-                report.last_run = timezone.now()
-                report.execute()
-    except Exception as e:
-=======
         for report in Report.objects.filter(active=True, frequence__isnull=False):
             if should_run(report.frequence):
                 report.execute(run_query=True)
     except BaseException as e:
->>>>>>> origin
         logger.exception(e)

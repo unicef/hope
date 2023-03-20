@@ -3,18 +3,13 @@ from typing import Any, Dict, List, Optional
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import HiddenInput
-<<<<<<< HEAD
-=======
 from django.utils.translation import gettext_lazy as _
->>>>>>> origin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, XlsxUpdateFile
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
-<<<<<<< HEAD
-=======
+from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
 def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Optional[List]:
@@ -37,7 +32,6 @@ def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, sep
             id__in=list_of_households,
         )
     return []
->>>>>>> origin
 
 
 class UpdateByXlsxStage1Form(forms.Form):
@@ -149,14 +143,13 @@ class CreateTargetPopulationForm(forms.Form):
         if read_only:
             self.fields["program"].widget = HiddenInput()
             self.fields["name"].widget = HiddenInput()
-<<<<<<< HEAD
-=======
 
 
 class CreateTargetPopulationTextForm(forms.Form):
     action = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField()
     target_field = forms.ChoiceField(choices=(("unicef_id", _("Unicef ID")), ("unique_id", _("UUID"))))
+    targeting_criteria = forms.ModelChoiceField(widget=forms.HiddenInput, queryset=TargetingCriteria.objects.all())
     separator = forms.ChoiceField(
         choices=(
             (",", _("Comma")),
@@ -185,6 +178,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["criteria"].widget = HiddenInput()
             self.fields["target_field"].widget = HiddenInput()
             self.fields["separator"].widget = HiddenInput()
+            self.fields["targeting_criteria"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
         try:
@@ -196,4 +190,3 @@ class CreateTargetPopulationTextForm(forms.Form):
             )
         except Exception as e:
             raise ValidationError(str(e))
->>>>>>> origin

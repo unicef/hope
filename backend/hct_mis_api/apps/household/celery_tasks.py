@@ -26,52 +26,6 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None:
     from hct_mis_api.apps.household.models import Household, Individual
-<<<<<<< HEAD
-
-    households_to_update = []
-    fields_to_update = []
-
-    with configure_scope() as scope:
-        with disable_concurrency(Household), disable_concurrency(Individual):
-            with transaction.atomic():
-                for hh in (
-                    Household.objects.filter(pk__in=households_ids)
-                    .only("id", "collect_individual_data")
-                    .prefetch_related("individuals")
-                    .select_for_update(of=("self",))
-                ):
-                    scope.set_tag("business_area", hh.business_area)
-                    household, updated_fields = recalculate_data(hh, save=False)
-                    households_to_update.append(household)
-                    fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
-
-                Household.objects.bulk_update(households_to_update, fields_to_update)
-
-
-@app.task()
-@log_start_and_end
-@sentry_tags
-def recalculate_population_fields_task(household_ids: Optional[List[UUID]] = None) -> None:
-    from hct_mis_api.apps.household.models import Household
-
-    params = {}
-    if household_ids:
-        params["pk__in"] = household_ids
-
-    queryset = (
-        Household.objects.filter(**params)
-        .only("pk")
-        .filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
-        .order_by("pk")
-    )
-    paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
-
-    for page_number in paginator.page_range:
-        page = paginator.page(page_number)
-        recalculate_population_fields_chunk_task.delay(
-            households_ids=list(page.object_list.values_list("pk", flat=True))
-        )
-=======
 
     households_to_update = []
     fields_to_update = []
@@ -119,7 +73,6 @@ def recalculate_population_fields_task(household_ids: Optional[List[str]] = None
             recalculate_population_fields_chunk_task.delay(
                 households_ids=list(page.object_list.values_list("pk", flat=True))
             )
->>>>>>> origin
 
 
 @app.task()
@@ -137,11 +90,7 @@ def interval_recalculate_population_fields_task() -> None:
         .distinct()
     )
 
-<<<<<<< HEAD
-    recalculate_population_fields_task.delay(households_ids=list(households))
-=======
     recalculate_population_fields_task.delay(household_ids=list(households))
->>>>>>> origin
 
 
 @app.task()

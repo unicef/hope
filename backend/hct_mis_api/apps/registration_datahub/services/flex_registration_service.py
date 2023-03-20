@@ -1,17 +1,7 @@
-import logging
 import uuid
-<<<<<<< HEAD
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Type, Union
-
-from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
-from django.db import transaction
-from django.db.transaction import atomic
-=======
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
->>>>>>> origin
 from django.forms import modelform_factory
 
 from django_countries.fields import Country
@@ -37,7 +27,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     process_flex_records_task,
     process_sri_lanka_flex_records_task,
@@ -62,8 +51,6 @@ if TYPE_CHECKING:
     from django.db.models.query import QuerySet
 
     from hct_mis_api.apps.account.models import Role
-
-logger = logging.getLogger(__name__)
 
 
 class FlexRegistrationService(BaseRegistrationService):
@@ -99,114 +86,6 @@ class FlexRegistrationService(BaseRegistrationService):
         IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-<<<<<<< HEAD
-    @atomic("default")
-    @atomic("registration_datahub")
-    def create_rdi(self, imported_by: Optional[Any], rdi_name: str = "rdi_name") -> RegistrationDataImport:
-        business_area = BusinessArea.objects.get(slug="ukraine")
-        number_of_individuals = 0
-        number_of_households = 0
-
-        rdi = RegistrationDataImport.objects.create(
-            name=rdi_name,
-            data_source=RegistrationDataImport.FLEX_REGISTRATION,
-            imported_by=imported_by,
-            number_of_individuals=number_of_individuals,
-            number_of_households=number_of_households,
-            business_area=business_area,
-            status=RegistrationDataImport.IMPORTING,
-        )
-
-        import_data = ImportData.objects.create(
-            status=ImportData.STATUS_PENDING,
-            business_area_slug=business_area.slug,
-            data_type=ImportData.FLEX_REGISTRATION,
-            number_of_individuals=number_of_individuals,
-            number_of_households=number_of_households,
-            created_by_id=imported_by.id if imported_by else None,
-        )
-        rdi_datahub = RegistrationDataImportDatahub.objects.create(
-            name=rdi_name,
-            hct_id=rdi.id,
-            import_data=import_data,
-            import_done=RegistrationDataImportDatahub.NOT_STARTED,
-            business_area_slug=business_area.slug,
-        )
-        rdi.datahub_id = rdi_datahub.id
-        rdi.save(update_fields=("datahub_id",))
-        return rdi
-
-    def process_records(
-        self,
-        rdi_id: "UUID",
-        records_ids: Iterable,
-    ) -> None:
-        rdi = RegistrationDataImport.objects.get(id=rdi_id)
-        rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
-        import_data = rdi_datahub.import_data
-
-        records_ids_to_import = (
-            Record.objects.filter(id__in=records_ids)
-            .exclude(status=Record.STATUS_IMPORTED)
-            .exclude(ignored=True)
-            .values_list("id", flat=True)
-        )
-        imported_records_ids = []
-        try:
-            for record_id in records_ids_to_import:
-                try:
-                    with atomic("default"), atomic("registration_datahub"):
-                        record = Record.objects.defer("data").get(id=record_id)
-                        self.create_household_for_rdi_household(record, rdi_datahub)
-                        imported_records_ids.append(record_id)
-                except ValidationError as e:
-                    logger.exception(e)
-                    record.mark_as_invalid(str(e))
-
-            number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
-            number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
-
-            import_data.number_of_individuals = number_of_individuals
-            rdi.number_of_individuals = number_of_individuals
-            import_data.number_of_households = number_of_households
-            rdi.number_of_households = number_of_households
-            rdi.status = RegistrationDataImport.DEDUPLICATION
-
-            rdi.save(
-                update_fields=(
-                    "number_of_individuals",
-                    "number_of_households",
-                    "status",
-                )
-            )
-            import_data.save(
-                update_fields=(
-                    "number_of_individuals",
-                    "number_of_households",
-                )
-            )
-
-            Record.objects.filter(id__in=imported_records_ids).update(
-                status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
-            )
-            if not rdi.business_area.postpone_deduplication:
-                transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
-            else:
-                rdi.status = RegistrationDataImport.IN_REVIEW
-                rdi.save()
-        except Exception as e:
-            rdi.status = RegistrationDataImport.IMPORT_ERROR
-            rdi.error_message = str(e)
-            rdi.save(
-                update_fields=(
-                    "status",
-                    "error_message",
-                )
-            )
-            raise
-
-=======
->>>>>>> origin
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
@@ -225,19 +104,9 @@ class FlexRegistrationService(BaseRegistrationService):
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
-<<<<<<< HEAD
-        household: ImportedHousehold = self._create_object_and_validate(household_data, ImportedHousehold)
-        admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
-        admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
-        if admin_area1:
-            household.admin1_title = admin_area1.name
-        if admin_area2:
-            household.admin2_title = admin_area2.name
-=======
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
->>>>>>> origin
         household.kobo_asset_id = record.source_id
         household.save(
             update_fields=(
@@ -296,18 +165,8 @@ class FlexRegistrationService(BaseRegistrationService):
             else:
                 raise ValidationError("There should be only two collectors!")
 
-<<<<<<< HEAD
-    def _create_object_and_validate(self, data: Dict, model_class: Type) -> Any:
-        ModelClassForm = modelform_factory(model_class, fields=list(data.keys()))
-        form = ModelClassForm(data)
-        if not form.is_valid():
-            raise ValidationError(form.errors)
-        return form.save()
-
-=======
->>>>>>> origin
     def _prepare_household_data(
-        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImport
+        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
@@ -583,7 +442,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         collector_dict = record_data_dict.get("collector-info", [])[0]
         individuals_list = record_data_dict.get("children-info", [])
         id_enumerator = record_data_dict.get("id_enumerator")
-        preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact")
+        preferred_language_of_contact = record_data_dict.pop("prefered_language_of_contact", None)
         should_use_hoh_as_collector = (
             collector_dict.get("does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi") == "y"
         )
@@ -624,6 +483,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
         individuals_to_create = []
         for individual_data_dict in individuals_list:
+            if not bool(individual_data_dict):
+                continue
             individuals_to_create.append(
                 ImportedIndividual(
                     **{

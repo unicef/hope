@@ -78,10 +78,6 @@ class RdiDiiaCreateTask:
     def create_rdi(
         self, imported_by: Optional[ImportedIndividual], rdi_name: str = "rdi_name"
     ) -> RegistrationDataImport:
-<<<<<<< HEAD
-
-=======
->>>>>>> origin
         number_of_individuals = 0
         number_of_households = 0
 

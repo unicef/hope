@@ -1,13 +1,7 @@
 import copy
 import logging
 from functools import reduce
-<<<<<<< HEAD:backend/hct_mis_api/apps/core/core_fields_attributes.py
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
-
-from django.core.files.uploadedfile import InMemoryUploadedFile
-=======
 from typing import Any, Dict, Iterable, List, Optional
->>>>>>> origin:backend/hct_mis_api/apps/core/field_attributes/core_fields_attributes.py
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -76,56 +70,6 @@ from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD:backend/hct_mis_api/apps/core/core_fields_attributes.py
-TYPE_ID = "ID"
-TYPE_INTEGER = "INTEGER"
-TYPE_STRING = "STRING"
-TYPE_LIST_OF_IDS = "LIST_OF_IDS"
-TYPE_BOOL = "BOOL"
-TYPE_DATE = "DATE"
-TYPE_IMAGE = "IMAGE"
-TYPE_SELECT_ONE = "SELECT_ONE"
-TYPE_SELECT_MANY = "SELECT_MANY"
-TYPE_GEOPOINT = "GEOPOINT"
-TYPE_DECIMAL = "DECIMAL"
-
-FIELD_TYPES_TO_INTERNAL_TYPE: Dict[str, Union[Type, Tuple]] = {
-    TYPE_ID: str,
-    TYPE_INTEGER: int,
-    TYPE_STRING: str,
-    TYPE_LIST_OF_IDS: list,
-    TYPE_BOOL: bool,
-    TYPE_DATE: datetime,
-    TYPE_IMAGE: (
-        str,
-        InMemoryUploadedFile,
-    ),
-    TYPE_SELECT_ONE: str,
-    TYPE_SELECT_MANY: list,
-    TYPE_GEOPOINT: str,
-    TYPE_DECIMAL: str,
-}
-
-_INDIVIDUAL = "Individual"
-_HOUSEHOLD = "Household"
-
-FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE, TYPE_BOOL]
-
-
-class Scope(str, enum.Enum):
-    KOBO_IMPORT = "KOBO_IMPORT"
-    HOUSEHOLD_ID = "HOUSEHOLD_ID"
-    COLLECTOR = "COLLECTOR"
-    HOUSEHOLD_UPDATE = "HOUSEHOLD_UPDATE"
-    INDIVIDUAL_UPDATE = "INDIVIDUAL_UPDATE"
-    INDIVIDUAL_XLSX_UPDATE = "INDIVIDUAL_XLSX_UPDATE"
-    TARGETING = "TARGETING"
-    GLOBAL = "GLOBAL"
-    XLSX = "XLSX"
-
-
-=======
->>>>>>> origin:backend/hct_mis_api/apps/core/field_attributes/core_fields_attributes.py
 CORE_FIELDS_ATTRIBUTES = [
     {
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",

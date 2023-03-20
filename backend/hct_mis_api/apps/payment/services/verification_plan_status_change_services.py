@@ -97,13 +97,6 @@ class VerificationPlanStatusChangeServices:
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
-<<<<<<< HEAD
-        successful_flows, error = api.start_flows(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
-        for successful_flow in successful_flows:
-            self.cash_plan_verification.rapid_pro_flow_start_uuids.append(successful_flow.response.get("uuid"))
-
-        all_urns = [urn.split(":")[-1] for successful_flow in successful_flows for urn in successful_flow.urns]
-=======
         flow_start_info_list, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
         for flow_start_info, _ in flow_start_info_list:
             self.payment_verification_plan.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))
@@ -111,7 +104,6 @@ class VerificationPlanStatusChangeServices:
         all_urns = []
         for _, urns in flow_start_info_list:
             all_urns.extend(urn.split(":")[-1] for urn in urns)
->>>>>>> origin
         processed_individuals = individuals.filter(phone_no__in=all_urns)
 
         payment_verifications_to_upd = []
@@ -146,7 +138,7 @@ class VerificationPlanStatusChangeServices:
         if verifications.count() == 0:
             return
 
-        business_area = cashplan_payment_verification.cash_plan.business_area
+        business_area = payment_verification_plan.payment_plan_obj.business_area
         priority = TicketPriority.priority_by_business_area_and_ticket_type(
             business_area.id, TicketPriority.PAYMENT_VERIFICATION
         )
@@ -156,13 +148,9 @@ class VerificationPlanStatusChangeServices:
         grievance_ticket_list = [
             GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-<<<<<<< HEAD
                 business_area=business_area,
                 priority=priority,
                 urgency=urgency,
-=======
-                business_area=payment_verification_plan.payment_plan_obj.business_area,
->>>>>>> origin
             )
             for _ in list(range(verifications.count()))
         ]

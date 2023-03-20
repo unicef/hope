@@ -215,10 +215,6 @@ def merge_registration_data_import_task(registration_data_import_id: str) -> boo
 @log_start_and_end
 @sentry_tags
 def rdi_deduplication_task(registration_data_import_id: str) -> None:
-<<<<<<< HEAD
-
-=======
->>>>>>> origin
     try:
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
@@ -291,8 +287,6 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
         FlexRegistrationService().process_records(rdi_id, records_ids)
     except Exception:
         logger.exception("Process Flex Records Task error")
-<<<<<<< HEAD
-=======
 
 
 @app.task
@@ -307,7 +301,6 @@ def process_sri_lanka_flex_records_task(rdi_id: "UUID", records_ids: List) -> No
         SriLankaRegistrationService().process_records(rdi_id, records_ids)
     except Exception:
         logger.exception("Process Flex Records Task for Sri-Lanka caused error")
->>>>>>> origin
 
 
 @app.task

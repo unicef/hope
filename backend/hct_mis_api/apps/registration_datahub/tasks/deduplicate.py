@@ -79,13 +79,9 @@ class DeduplicateTask:
     thresholds: Optional[Thresholds] = None
 
     @classmethod
-<<<<<<< HEAD
-    def _prepare_query_dict(cls, individual: Individual, fields: Dict, min_score: Union[int, float]) -> Dict[str, Any]:
-=======
     def _prepare_query_dict(
         cls, individual: Union[Individual, ImportedIndividual], fields: Dict, min_score: Union[int, float]
     ) -> Dict[str, Any]:
->>>>>>> origin
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -518,16 +514,10 @@ class DeduplicateTask:
         ]
 
         if isinstance(individual, ImportedIndividual):
-<<<<<<< HEAD
-            document = get_imported_individual_doc(individual.registration_data_import.business_area)
-        else:
-            document = get_individual_doc(individual.business_area.slug)
-=======
             business_area_slug = individual.registration_data_import.business_area
         else:
             business_area_slug = individual.business_area.slug
         document = get_individual_doc(business_area_slug)
->>>>>>> origin
 
         return cls._get_duplicates_tuple(
             query_dict,

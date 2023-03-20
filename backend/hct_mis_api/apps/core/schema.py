@@ -37,10 +37,6 @@ from hct_mis_api.apps.core.models import (
 )
 
 if TYPE_CHECKING:
-<<<<<<< HEAD
-
-=======
->>>>>>> origin
     from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
@@ -87,16 +83,9 @@ class FlexibleAttributeNode(DjangoObjectType):
     def resolve_choices(parent: FlexibleAttribute, info: Any) -> "QuerySet":
         return parent.choices.all()
 
-<<<<<<< HEAD
-    def resolve_associated_with(self, info: Any) -> str:
-        associated_number: int = int(self.associated_with)  # type: ignore # FIXME: need some stubs for graphene-django
-        choice: Tuple[int, str] = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[associated_number]
-        return str(choice[1])
-=======
     @staticmethod
     def resolve_associated_with(parent: FlexibleAttribute, info: Any) -> str:
         return parent.get_associated_with_display()
->>>>>>> origin
 
     class Meta:
         model = FlexibleAttribute
@@ -138,13 +127,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-<<<<<<< HEAD
-def _custom_dict_or_attr_resolver(
-    attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any
-) -> Callable:
-=======
 def _custom_dict_or_attr_resolver(attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any) -> Any:
->>>>>>> origin
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
@@ -194,15 +177,6 @@ class FieldAttributeNode(graphene.ObjectType):
         return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))  # type: ignore # FIXME: Argument 1 to "resolve_label" has incompatible type "Callable[..., Any]"; expected "Dict[Any, Any]"
 
     def resolve_label_en(parent, info: Any) -> Any:
-<<<<<<< HEAD
-        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]  # type: ignore # FIXME: Value of type "Callable[..., Any]" is not indexable
-
-    def resolve_associated_with(self, info: Any) -> Any:
-        resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
-        if resolved == 0:  # type: ignore # FIXME: Non-overlapping equality check (left operand type: "Callable[..., Any]", right operand type: "Literal[0]")
-            return "Household"
-        elif resolved == 1:  # type: ignore # FIXME: Non-overlapping equality check (left operand type: "Callable[..., Any]", right operand type: "Literal[1]")
-=======
         return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
     def resolve_associated_with(self, info: Any) -> Any:
@@ -210,7 +184,6 @@ class FieldAttributeNode(graphene.ObjectType):
         if resolved == 0:
             return "Household"
         elif resolved == 1:
->>>>>>> origin
             return "Individual"
         else:
             return resolved
@@ -228,14 +201,9 @@ class GroupAttributeNode(DjangoObjectType):
         model = FlexibleAttributeGroup
         fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
-<<<<<<< HEAD
-    def resolve_label_en(self, info: Any) -> Any:
-        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]  # type: ignore # FIXME: Value of type "Callable[..., Any]" is not indexable
-=======
     @staticmethod
     def resolve_label_en(parent: FlexibleAttributeGroup, info: Any) -> Any:
         return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
->>>>>>> origin
 
     @staticmethod
     def resolve_flex_attributes(parent: FlexibleAttributeGroup, info: Any) -> "QuerySet":
@@ -290,24 +258,7 @@ def get_fields_attr_generators(
         )
 
 
-<<<<<<< HEAD
-def resolve_assets(business_area_slug: str, uid: Optional[str] = None, *args: Any, **kwargs: Any) -> Tuple:
-    method: Optional[Union[List[Any], Dict[Any, Any]]]
-    return_method: Callable
-    method, return_method = (
-        (  # type: ignore # FIXME: Incompatible types in assignment (expression has type "function", variable has type "Callable[..., Any]")
-            KoboAPI(business_area_slug).get_single_project_data(uid),
-            reduce_asset,
-        )
-        if uid is not None
-        else (
-            KoboAPI(business_area_slug).get_all_projects_data(),
-            reduce_assets_list,
-        )
-    )
-=======
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
->>>>>>> origin
     try:
         assets = KoboAPI(business_area_slug).get_single_project_data(uid)
     except ObjectDoesNotExist as e:
@@ -409,13 +360,8 @@ class Query(graphene.ObjectType):
             "label.English(EN)",
         )
 
-<<<<<<< HEAD
-    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Tuple:
-        return resolve_assets(business_area_slug=business_area_slug, uid=uid)
-=======
     def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Dict:
         return resolve_asset(business_area_slug=business_area_slug, uid=uid)
->>>>>>> origin
 
     def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> List:
         return resolve_assets_list(

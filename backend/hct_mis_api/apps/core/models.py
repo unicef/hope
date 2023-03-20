@@ -399,7 +399,19 @@ class StorageFile(models.Model):
         return self.file.name
 
 
-<<<<<<< HEAD
+class FileTemp(TimeStampedModel):
+    """Use this model for temporary store files"""
+
+    object_id = models.CharField(max_length=120, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    file = models.FileField()
+    was_downloaded = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.file.name} - {self.created}"
+
+
 class TicketPriority(models.Model):
     NEEDS_ADJUDICATION = 1
     PAYMENT_VERIFICATION = 2
@@ -452,16 +464,3 @@ class TicketPriority(models.Model):
             cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_URGENCY,
             cls.SYSTEM_FLAGGING: config.SYSTEM_FLAGGING_URGENCY,
         }[ticket_type]
-=======
-class FileTemp(TimeStampedModel):
-    """Use this model for temporary store files"""
-
-    object_id = models.CharField(max_length=120, null=True)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
-    file = models.FileField()
-    was_downloaded = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        return f"{self.file.name} - {self.created}"
->>>>>>> origin

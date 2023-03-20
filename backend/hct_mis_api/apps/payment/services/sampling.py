@@ -19,11 +19,7 @@ class Sampling:
         self, input_data: Dict, payment_plan: Union["CashPlan", "PaymentPlan"], payment_records: QuerySet
     ) -> None:
         self.input_data = input_data
-<<<<<<< HEAD
-        self.cash_plan = cash_plan
-=======
         self.payment_plan = payment_plan
->>>>>>> origin
         self.payment_records: QuerySet = payment_records
 
     def process_sampling(
@@ -58,12 +54,6 @@ class Sampling:
         return payment_record_count, sampling.sample_size
 
     def _get_sampling(self) -> "BaseSampling":
-<<<<<<< HEAD
-        sampling_type = self.input_data["sampling"]
-        if sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            return FullListSampling(self.input_data.get("full_list_arguments", {}), sampling_type)
-        return RandomSampling(self.input_data.get("random_sampling_arguments", {}), sampling_type)
-=======
         sampling_type: str = self.input_data.get("sampling", "")
         if sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             arguments = self.input_data["full_list_arguments"]
@@ -71,7 +61,6 @@ class Sampling:
         else:
             arguments = self.input_data["random_sampling_arguments"]
             return RandomSampling(arguments, sampling_type)
->>>>>>> origin
 
 
 class BaseSampling(abc.ABC):

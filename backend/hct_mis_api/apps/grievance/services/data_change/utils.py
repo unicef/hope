@@ -2,12 +2,8 @@ import logging
 import random
 import string
 import urllib.parse
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-from typing import Any, Dict, List, Optional, Union
-=======
 from collections import Counter
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -16,7 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_IMAGE,
     TYPE_SELECT_MANY,
@@ -31,6 +28,8 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
+    HEAD,
+    RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
@@ -39,16 +38,12 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualIdentity,
-    IndividualRoleInHousehold,
 )
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-=======
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.grievance.models import GrievanceTicket
     from hct_mis_api.apps.household.models import IndividualRoleInHousehold
 
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
 
 logger = logging.getLogger(__name__)
 
@@ -120,13 +115,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
             IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-def handle_add_document(document: Dict, individual: Individual) -> Document:
-=======
 def handle_add_document(document: Document, individual: Individual) -> Document:
-    from hct_mis_api.apps.household.models import Document, DocumentType
-
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
     type_name = document.get("type")
     country_code = document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
@@ -147,14 +136,6 @@ def handle_add_document(document: Document, individual: Individual) -> Document:
 
 
 def handle_edit_document(document_data: Dict) -> Document:
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-=======
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Document, DocumentType
-
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
     updated_document = document_data.get("value", {})
 
     type_name = updated_document.get("type")
@@ -251,18 +232,6 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
 
 
 def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-=======
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import (
-        decode_id_string,
-        encode_id_base64,
-        encode_id_base64_required,
-    )
-    from hct_mis_api.apps.household.models import Document
-
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
     previous_documents: Dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = decode_id_string(document_data.get("value"))
@@ -278,16 +247,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dic
     return previous_documents
 
 
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[int, Any]:
-    previous_identities = {}
-=======
 def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Document
-
     edited_documents = []
 
     for document_to_edit in documents_to_edit:
@@ -329,17 +289,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
 
 
 def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import (
-        decode_id_string,
-        encode_id_base64,
-        encode_id_base64_required,
-    )
-    from hct_mis_api.apps.household.models import IndividualIdentity
-
     previous_identities: Dict[str, Any] = {}
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
@@ -412,14 +362,9 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     }
 
     for pc in payment_channels:
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
-        handler = handlers.get(pc.get("type"))  # type: ignore # FIXME: Argument 1 to "get" of "dict" has incompatible type "Optional[Any]"; expected "str"
-        items.append(handler(pc))
-=======
         if type_ := pc.get("type"):
             if handler := handlers.get(type_):
                 items.append(handler(pc))
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
     return items
 
 
@@ -448,7 +393,6 @@ def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
     }
 
 
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/data_change/utils.py
 def generate_filename() -> str:
     file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
     return f"{file_name}-{timezone.now()}"
@@ -474,8 +418,6 @@ def handle_documents(documents: List[Dict]) -> List[Dict]:
     return [handle_document(document) for document in documents]
 
 
-def save_images(flex_fields: Dict, associated_with: str) -> None:
-=======
 def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) -> None:
     from hct_mis_api.apps.core.utils import nested_dict_get
 
@@ -495,47 +437,9 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> No
         data_dict.pop(field, None)
 
 
-def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
-    from hct_mis_api.apps.core.field_attributes.fields_types import (
-        FIELD_TYPES_TO_INTERNAL_TYPE,
-        TYPE_SELECT_MANY,
-        TYPE_SELECT_ONE,
-    )
-    from hct_mis_api.apps.core.utils import serialize_flex_attributes
-
-    if associated_with not in ("households", "individuals"):
-        logger.error("associated_with argument must be one of ['household', 'individual']")
-        raise ValueError("associated_with argument must be one of ['household', 'individual']")
-
-    all_flex_fields = serialize_flex_attributes().get(associated_with, {})
-
-    for name, value in flex_fields_to_verify.items():
-        flex_field = all_flex_fields.get(name)
-        if flex_field is None:
-            logger.error(f"{name} is not a correct `flex field")
-            raise ValueError(f"{name} is not a correct `flex field")
-        field_type = flex_field["type"]
-        field_choices = {f.get("value") for f in flex_field["choices"]}
-        if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
-            logger.error(f"invalid value type for a field {name}")
-            raise ValueError(f"invalid value type for a field {name}")
-
-        if field_type == TYPE_SELECT_ONE and value not in field_choices:
-            logger.error(f"invalid value: {value} for a field {name}")
-            raise ValueError(f"invalid value: {value} for a field {name}")
-
-        if field_type == TYPE_SELECT_MANY:
-            values = set(value)
-            if values.issubset(field_choices) is False:
-                logger.error(f"invalid value: {value} for a field {name}")
-                raise ValueError(f"invalid value: {value} for a field {name}")
-
-
 def withdraw_individual_and_reassign_roles(
     ticket_details: List["GrievanceTicket"], individual_to_remove: Individual, info: Any
 ) -> None:
-    from hct_mis_api.apps.household.models import Individual
-
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     withdraw_individual(individual_to_remove, info, old_individual, household)
@@ -544,8 +448,6 @@ def withdraw_individual_and_reassign_roles(
 def mark_as_duplicate_individual_and_reassign_roles(
     ticket_details: Any, individual_to_remove: Individual, info: Any, unique_individual: Individual
 ) -> None:
-    from hct_mis_api.apps.household.models import Individual
-
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     if ticket_details.is_multiple_duplicates_version:
         household = reassign_roles_on_disable_individual(
@@ -557,11 +459,6 @@ def mark_as_duplicate_individual_and_reassign_roles(
 
 
 def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Household, Individual
-
     role_name = role_data.get("role")
 
     individual_id = decode_id_string(role_data.get("individual"))
@@ -575,11 +472,6 @@ def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual,
 
 
 def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Individual
-
     role_name, old_individual, _, household = get_data_from_role_data(role_data)
     new_individual_id = decode_id_string(role_data.get("new_individual"))
     new_individual = get_object_or_404(Individual, id=new_individual_id)
@@ -590,16 +482,6 @@ def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], 
 def reassign_roles_on_disable_individual(
     individual_to_remove: Individual, role_reassign_data: Dict, info: Optional[Any] = None, is_new_ticket: bool = False
 ) -> Household:
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.household.models import (
-        HEAD,
-        ROLE_ALTERNATE,
-        ROLE_PRIMARY,
-        Individual,
-        IndividualRoleInHousehold,
-    )
-
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
         if is_new_ticket:
@@ -670,16 +552,6 @@ def reassign_roles_on_disable_individual(
 
 
 def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, info: Optional[Any] = None) -> None:
-    from django.shortcuts import get_object_or_404
-
-    from hct_mis_api.apps.household.models import (
-        HEAD,
-        ROLE_ALTERNATE,
-        ROLE_PRIMARY,
-        Individual,
-        IndividualRoleInHousehold,
-    )
-
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
         (
@@ -726,8 +598,6 @@ def withdraw_individual(
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
 ) -> None:
-    from hct_mis_api.apps.household.models import Document
-
     individual_to_remove.withdraw()
 
     Document.objects.filter(status=Document.STATUS_VALID, individual=individual_to_remove).update(
@@ -763,8 +633,6 @@ def log_and_withdraw_household_if_needed(
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
 ) -> None:
-    from hct_mis_api.apps.household.models import Individual
-
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
@@ -778,10 +646,6 @@ def log_and_withdraw_household_if_needed(
 
 
 def save_images(flex_fields: Dict, associated_with: str) -> None:
-    from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE
-    from hct_mis_api.apps.core.utils import serialize_flex_attributes
-
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/utils.py
     if associated_with not in ("households", "individuals"):
         logger.error("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
@@ -802,44 +666,3 @@ def save_images(flex_fields: Dict, associated_with: str) -> None:
                 file_name = value.replace(default_storage.base_url, "")
                 unquoted_value = urllib.parse.unquote(file_name)
                 flex_fields[name] = unquoted_value
-
-
-def prepare_edit_documents(documents_to_edit: List[Dict]) -> List[Dict]:
-    edited_documents = []
-
-    for document_to_edit in documents_to_edit:
-        encoded_id = document_to_edit.get("id")
-        document_type = document_to_edit.get("type")
-        country = document_to_edit.get("country")
-        document_number = document_to_edit.get("number")
-        document_photo = document_to_edit.get("photo")
-        document_photoraw = document_to_edit.get("photoraw")
-
-        document_photo = handle_photo(document_photo, document_photoraw)
-
-        document_id = decode_id_string(encoded_id)
-        document = get_object_or_404(Document, id=document_id)
-
-        edited_documents.append(
-            {
-                "approve_status": False,
-                "value": {
-                    "id": encoded_id,
-                    "type": document_type,
-                    "country": country,
-                    "number": document_number,
-                    "photo": document_photo,
-                    "photoraw": document_photo,
-                },
-                "previous_value": {
-                    "id": encoded_id,
-                    "type": document.type.type,
-                    "country": document.country.iso_code3,
-                    "number": document.document_number,
-                    "photo": document.photo.name,
-                    "photoraw": document.photo.name,
-                },
-            }
-        )
-
-    return edited_documents

@@ -131,15 +131,6 @@ class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
     def validate_ranges(cls, ranges: List[List[Optional[int]]]) -> None:
         ranges = sorted(ranges)  # sorted by range min value
 
-<<<<<<< HEAD
-    def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
-        super().__init__(
-            expression,
-            distinct="DISTINCT " if distinct else "",  # type: ignore # FIXME: Argument "distinct" to "__init__" of "Aggregate" has incompatible type "str"; expected "bool"
-            output_field=CharField(),
-            **extra,
-        )
-=======
         if ranges[0][0] != 0:
             raise forms.ValidationError("Ranges need to start from 0")
 
@@ -199,7 +190,6 @@ class AcceptanceProcessThresholdInline(TabularInline):
         "Please leave empty value to set max range as ∞, whole range [0, ∞) need to be covered. "
         "Example: [0, 100000) [100000, )"
     )
->>>>>>> origin
 
 
 class TicketPriorityInline(admin.TabularInline):
@@ -215,13 +205,10 @@ class TicketPriorityInline(admin.TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
-<<<<<<< HEAD
-    inlines = (TicketPriorityInline,)
-=======
     inlines = [
         AcceptanceProcessThresholdInline,
+        TicketPriorityInline,
     ]
->>>>>>> origin
     list_display = (
         "name",
         "slug",
@@ -666,17 +653,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
-<<<<<<< HEAD
-        has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False  # type: ignore # intentional
-        template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission  # type: ignore # intentional
-=======
         has_add_permission: Callable = self.has_add_permission
         self.has_add_permission: Callable = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)
         self.has_add_permission = has_add_permission
->>>>>>> origin
 
         return template_response
 

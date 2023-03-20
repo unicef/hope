@@ -136,6 +136,7 @@ class RdiMergeTask:
         "kobo_asset_id",
         "row_id",
         "disability_certificate_picture",
+        "preferred_language",
     )
 
     def merge_admin_areas(

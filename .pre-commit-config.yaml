@@ -5,34 +5,19 @@ repos:
       - id: isort
         stages: [commit]
   - repo: https://github.com/ambv/black
-    rev: 23.1.0
+    rev: 22.3.0
     hooks:
       - id: black
         args: [--config=backend/pyproject.toml]
         exclude: "migrations|snapshots"
         stages: [commit]
   - repo: https://github.com/PyCQA/flake8
-<<<<<<< HEAD
-    rev: 4.0.1
-=======
     rev: 6.0.0
->>>>>>> origin
     hooks:
       - id: flake8
         args: [--config=backend/.flake8]
         additional_dependencies: [flake8-bugbear==22.9.23]
         stages: [ commit ]
-<<<<<<< HEAD
-  # mypy precomit hook
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.910
-    hooks:
-      - id: mypy
-        args: [--config-file=backend/pyproject.toml, --follow-imports=skip]
-        pass_filenames: true
-        stages: [commit]
-        additional_dependencies: [types-python-dateutil==2.8.19.5]
-=======
   # mypy precommit hook
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.982
@@ -53,4 +38,3 @@ repos:
           django-stubs-ext==0.7.0,
           openpyxl-stubs==0.1.25
         ]
->>>>>>> origin

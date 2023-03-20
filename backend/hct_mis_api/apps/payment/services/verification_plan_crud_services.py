@@ -41,17 +41,6 @@ class VerificationPlanCrudServices:
         payment_verification_plan.payment_plan_content_type = get_content_type_for_model(payment_plan)
         payment_verification_plan.payment_plan_object_id = payment_plan.pk
 
-<<<<<<< HEAD
-        payment_records = get_payment_records(
-            cash_plan_verification.cash_plan, cash_plan_verification.verification_channel  # type: ignore # FIXME: Argument 2 to "get_payment_records" has incompatible type "Optional[Any]"; expected "str"
-        )
-        sampling = Sampling(input_data, cash_plan, payment_records)
-        cash_plan_verification, processed_payment_records = sampling.process_sampling(cash_plan_verification)
-        ProcessVerification(input_data, cash_plan_verification).process()
-        cash_plan_verification.save()
-
-        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()  # type: ignore # FIXME: Argument 2 to "CreatePaymentVerifications" has incompatible type "Optional[_QuerySet[Any, Any]]"; expected "List[PaymentRecord]"
-=======
         payment_verification_plan.verification_channel = input_data.get("verification_channel")
 
         payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
@@ -59,7 +48,6 @@ class VerificationPlanCrudServices:
         payment_verification_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()
->>>>>>> origin
 
         CreatePaymentVerifications(payment_verification_plan, payment_records_qs).create()
 
@@ -82,11 +70,7 @@ class VerificationPlanCrudServices:
         ProcessVerification(input_data, pv_plan).process()
         pv_plan.save()
 
-<<<<<<< HEAD
-        CreatePaymentVerifications(cash_plan_verification, processed_payment_records).create()  # type: ignore # FIXME: Argument 2 to "CreatePaymentVerifications" has incompatible type "Optional[_QuerySet[Any, Any]]"; expected "List[PaymentRecord]"
-=======
         CreatePaymentVerifications(pv_plan, payment_records_qs).create()
->>>>>>> origin
 
         return pv_plan
 
