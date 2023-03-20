@@ -4,7 +4,10 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import {
+  camelizeArrayObjects,
+  thingForSpecificGrievanceType,
+} from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
@@ -72,34 +75,27 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     individualDataUpdateTicketDetails: { individualData },
   } = ticket;
 
-  initialValues.selectedIndividual = individual;
+  const initialValuesCopy = { ...initialValues }; // make a copy to avoid modifying the original object
+  initialValuesCopy.selectedIndividual = individual;
 
   const {
     documents,
-    documents_to_remove,
-    documents_to_edit,
+    documents_to_remove: documentsToRemove,
+    documents_to_edit: documentsToEdit,
     identities,
-    identities_to_remove,
-    identities_to_edit,
-    payment_channels,
-    payment_channels_to_remove,
-    payment_channels_to_edit,
+    identities_to_remove: identitiesToRemove,
+    identities_to_edit: identitiesToEdit,
+    payment_channels: paymentChannels,
+    payment_channels_to_remove: paymentChannelsToRemove,
+    payment_channels_to_edit: paymentChannelsToEdit,
     ...rest
   } = individualData;
 
   delete rest.documents;
-  delete rest.documents_to_remove;
-  delete rest.documents_to_edit;
-  delete rest.identities;
-  delete rest.identities_to_remove;
-  delete rest.identities_to_edit;
-  delete rest.payment_channels;
-  delete rest.payment_channels_to_remove;
-  delete rest.payment_channels_to_edit;
+  delete rest.flex_fields;
   delete rest.previous_payment_channels;
   delete rest.previous_documents;
   delete rest.previous_identities;
-  delete rest.flex_fields;
 
   interface Field {
     value: string;
@@ -123,42 +119,40 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     })
     .filter((field) => field !== null);
 
-  const camelizeArrayObjects = (arr) => arr?.map(({ value }) => value);
-
-  initialValues.individualDataUpdateFields = [
+  initialValuesCopy.individualDataUpdateFields = [
     ...individualDataArray,
     ...flexFieldsArray,
   ];
 
-  initialValues.individualDataUpdateFieldsDocuments = camelizeArrayObjects(
+  initialValuesCopy.individualDataUpdateFieldsDocuments = camelizeArrayObjects(
     documents,
   );
-  initialValues.individualDataUpdateDocumentsToRemove = camelizeArrayObjects(
-    documents_to_remove,
+  initialValuesCopy.individualDataUpdateDocumentsToRemove = camelizeArrayObjects(
+    documentsToRemove,
   );
-  initialValues.individualDataUpdateFieldsIdentities = camelizeArrayObjects(
+  initialValuesCopy.individualDataUpdateFieldsIdentities = camelizeArrayObjects(
     identities,
   );
-  initialValues.individualDataUpdateIdentitiesToRemove = camelizeArrayObjects(
-    identities_to_remove,
+  initialValuesCopy.individualDataUpdateIdentitiesToRemove = camelizeArrayObjects(
+    identitiesToRemove,
   );
-  initialValues.individualDataUpdateDocumentsToEdit = camelizeArrayObjects(
-    documents_to_edit,
+  initialValuesCopy.individualDataUpdateDocumentsToEdit = camelizeArrayObjects(
+    documentsToEdit,
   );
-  initialValues.individualDataUpdateIdentitiesToEdit = camelizeArrayObjects(
-    identities_to_edit,
+  initialValuesCopy.individualDataUpdateIdentitiesToEdit = camelizeArrayObjects(
+    identitiesToEdit,
   );
-  initialValues.individualDataUpdateFieldsPaymentChannels = camelizeArrayObjects(
-    payment_channels,
+  initialValuesCopy.individualDataUpdateFieldsPaymentChannels = camelizeArrayObjects(
+    paymentChannels,
   );
-  initialValues.individualDataUpdatePaymentChannelsToRemove = camelizeArrayObjects(
-    payment_channels_to_remove,
+  initialValuesCopy.individualDataUpdatePaymentChannelsToRemove = camelizeArrayObjects(
+    paymentChannelsToRemove,
   );
-  initialValues.individualDataUpdatePaymentChannelsToEdit = camelizeArrayObjects(
-    payment_channels_to_edit,
+  initialValuesCopy.individualDataUpdatePaymentChannelsToEdit = camelizeArrayObjects(
+    paymentChannelsToEdit,
   );
 
-  return initialValues;
+  return initialValuesCopy;
 }
 
 function prepareInitialValueEditHousehold(
