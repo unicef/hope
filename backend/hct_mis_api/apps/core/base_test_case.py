@@ -4,13 +4,9 @@ import random
 import shutil
 import sys
 import time
-<<<<<<< HEAD
 from functools import reduce
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
-=======
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
->>>>>>> origin
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -94,13 +90,9 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-<<<<<<< HEAD
     def generate_context(
         self, user: Optional["User"] = None, files: Optional[Dict] = None, headers: Optional[Dict[str, str]] = None
     ) -> WSGIRequest:
-=======
-    def generate_context(self, user: Optional["User"] = None, files: Optional[Dict] = None) -> WSGIRequest:
->>>>>>> origin
         request = RequestFactory()
         prepared_headers: Dict = reduce(
             lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},

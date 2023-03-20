@@ -18,11 +18,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-<<<<<<< HEAD
 from hct_mis_api.apps.account.schema import PartnerType
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
-=======
->>>>>>> origin
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
@@ -68,13 +64,9 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-<<<<<<< HEAD
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
-=======
-from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
->>>>>>> origin
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
@@ -103,25 +95,18 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-<<<<<<< HEAD
-    payment_record = graphene.Field(PaymentRecordNode)
-=======
     payment_record = graphene.Field(PaymentRecordAndPaymentNode)
->>>>>>> origin
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
-<<<<<<< HEAD
+    related_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
     urgency = graphene.Int()
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
-=======
->>>>>>> origin
-    related_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
@@ -151,10 +136,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-<<<<<<< HEAD
-=======
     @staticmethod
->>>>>>> origin
     def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "household", None)
 
@@ -174,24 +156,17 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_admin2(grievance_ticket: GrievanceTicket, info: Any) -> Area:
         return grievance_ticket.admin2
 
+    @staticmethod
     def resolve_linked_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._linked_tickets
 
     @staticmethod
-<<<<<<< HEAD
-=======
-    def resolve_linked_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
-        return grievance_ticket._linked_tickets
-
-    @staticmethod
->>>>>>> origin
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._existing_tickets
 
     @staticmethod
     def resolve_related_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._related_tickets
-<<<<<<< HEAD
 
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info: Any) -> int:
@@ -212,8 +187,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_documentation(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet[GrievanceDocument]":
         return grievance_ticket.support_documents.order_by("-created_at")
-=======
->>>>>>> origin
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -250,11 +223,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-<<<<<<< HEAD
-        individual_data: Dict = self.individual_data  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Arg", variable has type "Dict[Any, Any]")
-=======
         individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
->>>>>>> origin
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -311,11 +280,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-<<<<<<< HEAD
-        individual_data: Dict = self.individual_data  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Arg", variable has type "Dict[Any, Any]")
-=======
         individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
->>>>>>> origin
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)

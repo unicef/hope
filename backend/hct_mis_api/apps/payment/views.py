@@ -23,11 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-<<<<<<< HEAD
-def download_cash_plan_payment_verification(  # type: ignore # FIXME
-=======
 def download_payment_verification_plan(  # type: ignore
->>>>>>> origin
     request: "HttpRequest", verification_id: str
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
@@ -41,15 +37,6 @@ def download_payment_verification_plan(  # type: ignore
     if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
         raise GraphQLError("You can only download verification file when XLSX channel is selected")
 
-<<<<<<< HEAD
-    if cash_plan_payment_verification.has_xlsx_cash_plan_payment_verification_file:
-        if not cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded:
-            cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded = True
-            cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.save()
-        return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)  # type: ignore # FIXME: Argument 1 to "redirect" has incompatible type "Optional[str]"; expected "Union[Callable[..., Any], str, SupportsGetAbsoluteUrl]"
-    else:
-        log_and_raise(f"File not found. CashPlanPaymentVerification ID: {verification_id}")
-=======
     if payment_verification_plan.has_xlsx_payment_verification_plan_file:
         if not payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded:
             xlsx_file = payment_verification_plan.get_xlsx_verification_file
@@ -78,4 +65,3 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
         return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
 
     log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id_str}")
->>>>>>> origin

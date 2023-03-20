@@ -184,15 +184,12 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
     household = CharFilter(field_name="household_unicef_id")
-<<<<<<< HEAD
+    preferred_language = CharFilter(method="preferred_language_filter")
     priority = ChoiceFilter(field_name="priority", choices=PRIORITY_CHOICES)
     urgency = ChoiceFilter(field_name="urgency", choices=URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
     total_days = IntegerFilter(field_name="total_days")
-=======
-    preferred_language = CharFilter(method="preferred_language_filter")
->>>>>>> origin
 
     class Meta:
         fields = {
@@ -259,15 +256,6 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
-<<<<<<< HEAD
-    def permissions_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
-        can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
-        can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
-        can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
-        can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in value
-        can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in value
-        can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in value
-=======
     def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in values
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in values
@@ -275,7 +263,6 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in values
         can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in values
         can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in values
->>>>>>> origin
 
         # can view all
         if can_view_ex_sensitive_all and can_view_sensitive_all:
@@ -399,13 +386,8 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
         return queryset
 
-<<<<<<< HEAD
-    def permissions_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)  # type: ignore # FIXME: Argument 4 to "permissions_filter" of "GrievanceTicketFilter" has incompatible type "str"; expected "List[Permissions]"
-=======
     def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
         return GrievanceTicketFilter.permissions_filter(self, qs, name, values)
->>>>>>> origin
 
 
 class TicketNoteFilter(FilterSet):

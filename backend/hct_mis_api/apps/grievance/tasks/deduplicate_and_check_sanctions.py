@@ -2,13 +2,9 @@ from typing import List
 
 from django.db import transaction
 
-<<<<<<< HEAD
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
-=======
-from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
->>>>>>> origin
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,

@@ -55,10 +55,6 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-<<<<<<< HEAD
-        cls.client: Client = Client()  # type: ignore # FIXME: Incompatible types in assignment (expression has type "django.test.client.Client", variable has type "graphene.test.Client")
-=======
->>>>>>> origin
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
@@ -127,11 +123,7 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self) -> None:
         request = self.prepare_request("kobo-template-valid.xlsx")
-<<<<<<< HEAD
-        request.session = "session"  # type: ignore # FIXME: expression has type "str", variable has type "SessionBase"
-=======
         request.session = SessionBase()
->>>>>>> origin
         messages = FallbackStorage(request)
         request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)

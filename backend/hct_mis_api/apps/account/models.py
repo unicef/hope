@@ -19,10 +19,7 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
-<<<<<<< HEAD
-=======
 from hct_mis_api.apps.account.fields import ChoiceArrayField
->>>>>>> origin
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (

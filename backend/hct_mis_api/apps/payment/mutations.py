@@ -452,11 +452,6 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         received: bool,
         **kwargs: Any,
     ) -> "UpdatePaymentVerificationReceivedAndReceivedAmount":
-<<<<<<< HEAD
-        if received_amount is not None and math.isnan(received_amount):
-            received_amount = None
-=======
->>>>>>> origin
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
@@ -500,11 +495,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-<<<<<<< HEAD
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore # FIXME
-=======
         return UpdatePaymentVerificationReceivedAndReceivedAmount(payment_verification)
->>>>>>> origin
 
 
 class XlsxErrorNode(graphene.ObjectType):
@@ -512,16 +503,6 @@ class XlsxErrorNode(graphene.ObjectType):
     coordinates = graphene.String()
     message = graphene.String()
 
-<<<<<<< HEAD
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[0]  # type: ignore # FIXME
-
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[1]  # type: ignore # FIXME
-
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[2]  # type: ignore # FIXME
-=======
     @staticmethod
     def resolve_sheet(parent: XlsxError, info: Any) -> str:
         return parent.sheet
@@ -533,7 +514,6 @@ class XlsxErrorNode(graphene.ObjectType):
     @staticmethod
     def resolve_message(parent: XlsxError, info: Any) -> str:
         return parent.message
->>>>>>> origin
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):

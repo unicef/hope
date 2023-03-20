@@ -66,6 +66,8 @@ class TargetPopulationFilter(FilterSet):
 
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
 
+    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
+
     @staticmethod
     def filter_created_by_name(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         """Gets full name of the associated user from query."""

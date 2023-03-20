@@ -32,13 +32,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             id=xlsx_kobo_template_id
         ).first()
         if not xlsx_kobo_template_object:
-<<<<<<< HEAD
-            self._save_message_status_template_id(
-                xlsx_kobo_template_object, "Uploaded file is not found on the server", XLSXKoboTemplate.UNSUCCESSFUL  # type: ignore # FIXME: Argument 1 to "_save_message_status_template_id" of "UploadNewKoboTemplateAndUpdateFlexFieldsTask" has incompatible type "Optional[XLSXKoboTemplate]"; expected "XLSXKoboTemplate"
-            )
-=======
             # Record not found, we can stop here
->>>>>>> origin
             return
 
         last_valid_template = XLSXKoboTemplate.objects.latest_valid()

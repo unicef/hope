@@ -1,9 +1,6 @@
 import datetime
 import logging
-<<<<<<< HEAD
-=======
 from typing import Dict
->>>>>>> origin
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -65,11 +62,7 @@ def fsp_generate_xlsx_report_task(fsp_id: str) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-<<<<<<< HEAD
-def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id: str, user_id: str) -> None:
-=======
 def create_payment_verification_plan_xlsx(payment_verification_plan_id: str, user_id: str) -> None:
->>>>>>> origin
     try:
         user = get_user_model().objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)

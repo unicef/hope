@@ -2,12 +2,8 @@ venv
 test_times.txt
 ./generated
 ./test-results
-<<<<<<< HEAD
-./lint-results
-=======
 ./lint-results
 
 **/*.pyc
 **/*__pycache__*
 **/.mypy_cache
->>>>>>> origin

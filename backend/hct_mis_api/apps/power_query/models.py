@@ -285,11 +285,7 @@ class Report(NaturalKeyModel, models.Model):
                 if dataset.extra:
                     context.update(pickle.loads(dataset.extra) or {})
 
-<<<<<<< HEAD
-                title = self.document_title % context
-=======
                 title = (self.document_title % context) if self.document_title else self.document_title
->>>>>>> origin
                 output = self.formatter.render({"dataset": dataset, "report": self, "title": title, "context": context})
                 res, __ = ReportDocument.objects.update_or_create(
                     report=self,

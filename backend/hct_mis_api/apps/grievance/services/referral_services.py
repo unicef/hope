@@ -8,24 +8,21 @@ from hct_mis_api.apps.household.models import Household, Individual
 def save_referral_service(grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
 
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/referral_services.py
-=======
     update_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
-    return grievance_ticket
+    return [grievance_ticket]
 
 
 def create_new_ticket(
     grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
-) -> None:
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/referral.py
+) -> GrievanceTicket:
     TicketReferralDetails.objects.create(
         individual=individual,
         household=household,
         ticket=grievance_ticket,
     )
     grievance_ticket.refresh_from_db()
-    return [grievance_ticket]
+    return grievance_ticket
 
 
 def update_referral_service(grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict) -> GrievanceTicket:
@@ -49,8 +46,6 @@ def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], O
     household_encoded_id = feedback_ticket_extras.get("household")
     household = decode_and_get_object(household_encoded_id, Household, False)
     return household, individual
-<<<<<<< HEAD:backend/hct_mis_api/apps/grievance/services/referral_services.py
-=======
 
 
 def update_ticket(
@@ -62,4 +57,3 @@ def update_ticket(
     if household:
         ticket_details.household = household
     ticket_details.save()
->>>>>>> origin:backend/hct_mis_api/apps/grievance/mutations_extras/referral.py
