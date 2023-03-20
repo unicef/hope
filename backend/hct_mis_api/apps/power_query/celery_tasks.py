@@ -26,7 +26,7 @@ def complete(query_id: int, **kwargs: Any) -> None:
 
 @app.task()
 @sentry_tags
-def run_background_query(query_id: int, **kwargs: Any) -> Union[str, bool, None]:
+def run_background_query(query_id: int) -> Union[str, bool, None]:
     try:
         query = Query.objects.get(pk=query_id)
         query.execute_matrix()
@@ -36,12 +36,13 @@ def run_background_query(query_id: int, **kwargs: Any) -> Union[str, bool, None]
     return "Ok"
 
 
-@app.task()
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
-def refresh_reports() -> None:
+def refresh_reports(self: Any) -> None:
     try:
         for report in Report.objects.filter(active=True, frequence__isnull=False):
             if should_run(report.frequence):
                 report.execute(run_query=True)
     except BaseException as e:
         logger.exception(e)
+        raise self.retry(exc=e)
