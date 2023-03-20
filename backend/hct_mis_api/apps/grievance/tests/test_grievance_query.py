@@ -111,7 +111,7 @@ class TestGrievanceQuery(APITestCase):
 
     FILTER_BY_CATEGORY = """
     query AllGrievanceTickets($category: String) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", category: $category) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "-created_at", category: $category) {
         edges {
           node {
             status
@@ -202,7 +202,7 @@ class TestGrievanceQuery(APITestCase):
                     "admin2": cls.admin_area_1,
                     "language": "Polish",
                     "consent": True,
-                    "description": "Just random description",
+                    "description": "Just random description 111",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": cls.user,
@@ -215,7 +215,7 @@ class TestGrievanceQuery(APITestCase):
                     "admin2": cls.admin_area_2,
                     "language": "English",
                     "consent": True,
-                    "description": "Just random description",
+                    "description": "Just random description 222",
                     "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_ON_HOLD,
                     "created_by": cls.user,
@@ -228,7 +228,7 @@ class TestGrievanceQuery(APITestCase):
                     "admin2": cls.admin_area_2,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Just random description",
+                    "description": "Just random description 333",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": cls.user,
@@ -326,12 +326,12 @@ class TestGrievanceQuery(APITestCase):
     @parameterized.expand(
         [
             (
-                "category_negative_feedback",
-                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-            ),
-            (
                 "category_positive_feedback",
                 GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            ),
+            (
+                "category_negative_feedback",
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             ),
         ]
     )
