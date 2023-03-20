@@ -1,23 +1,15 @@
 import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
-import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { useLocation, useParams } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
+import { hasPermissionInModule } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GrievanceSearchTypes,
   GrievanceStatuses,
@@ -25,9 +17,9 @@ import {
   GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
+import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 
 export const GrievancesTablePage = (): React.ReactElement => {
-  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
