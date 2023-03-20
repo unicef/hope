@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 import factory.fuzzy
-=======
-import factory
 from factory.django import DjangoModelFactory
->>>>>>> origin
 from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea

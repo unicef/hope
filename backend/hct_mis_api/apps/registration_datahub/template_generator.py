@@ -68,13 +68,7 @@ class TemplateFileGenerator:
 
         fields = FieldFactory.from_scopes(
             [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
-<<<<<<< HEAD
-        ).apply_business_area(
-            None  # type: ignore # TODO: none business area?
-        )
-=======
         ).apply_business_area()
->>>>>>> origin
         households_fields = {
             **fields.associated_with_household().to_dict_by("xlsx_field"),
             **flex_fields[households_sheet_title.lower()],

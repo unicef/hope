@@ -95,13 +95,9 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         with self.assertRaises(ValidationError) as context:
-<<<<<<< HEAD
             reassign_roles_on_disable_individual_service(
                 self.alternate_collector_individual, role_reassign_data, UserFactory()
             )
-=======
-            reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
->>>>>>> origin
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 

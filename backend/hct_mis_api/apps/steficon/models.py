@@ -24,9 +24,6 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
-<<<<<<< HEAD
-    LANGUAGES: List = [[a.label.lower(), a.label] for a in interpreters]
-=======
     TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
     TYPE_TARGETING = "TARGETING"
 
@@ -36,7 +33,6 @@ class Rule(models.Model):
     )
 
     LANGUAGES: Sequence[Tuple] = [(a.label.lower(), a.label) for a in interpreters]
->>>>>>> origin
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,

@@ -1,40 +1,18 @@
 from collections import defaultdict
 from decimal import Decimal
-<<<<<<< HEAD
-from typing import Any, Dict, List, TypedDict
-=======
 from typing import Any, Dict, List
->>>>>>> origin
 
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Coalesce
 
-<<<<<<< HEAD
-=======
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
->>>>>>> origin
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-<<<<<<< HEAD
-class QuantityType(TypedDict):
-    total_delivered_quantity: Decimal
-    currency: str
-
-
-class ProgramType(TypedDict):
-    id: str
-    name: str
-    quantity: List[QuantityType]
-
-
-def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any]]:
-=======
 def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any]]:
     payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.all())
->>>>>>> origin
     programs = (
         payment_items.select_related("parent__program")
         .exclude(status=PaymentRecord.STATUS_FORCE_FAILED)
@@ -79,8 +57,5 @@ def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any
                     "currency": program["currency"],
                 }
             )
-<<<<<<< HEAD
-=======
 
->>>>>>> origin
     return list(programs_dict.values())

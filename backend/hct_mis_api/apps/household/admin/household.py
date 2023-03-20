@@ -6,25 +6,16 @@ from uuid import UUID
 from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
-<<<<<<< HEAD
-=======
 from django.db import transaction
->>>>>>> origin
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-<<<<<<< HEAD
-
-from admin_cursor_paginator import CursorPaginatorAdmin
-from admin_extra_buttons.decorators import button
-=======
 from django.utils.safestring import mark_safe
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
->>>>>>> origin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
@@ -38,10 +29,7 @@ from hct_mis_api.apps.utils.admin import (
     SoftDeletableAdminMixin,
 )
 
-<<<<<<< HEAD
-=======
 from ...utils.security import is_root
->>>>>>> origin
 from ..models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -226,8 +214,6 @@ class HouseholdAdmin(
             "warnings": [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings],
         }
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
-<<<<<<< HEAD
-=======
 
     @button(permission=lambda request, obj, handler: is_root(request, obj, handler) and obj.can_be_erase())
     def gdpr_remove(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
@@ -274,4 +260,3 @@ class HouseholdAdmin(
             ),
             "Successfully executed",
         )
->>>>>>> origin

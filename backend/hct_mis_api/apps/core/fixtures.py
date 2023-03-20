@@ -1,8 +1,5 @@
 import factory
-<<<<<<< HEAD
-=======
 from factory.django import DjangoModelFactory
->>>>>>> origin
 from faker import Faker
 
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
@@ -28,11 +25,7 @@ def create_afghanistan(
     )
 
 
-<<<<<<< HEAD
-class StorageFileFactory(factory.DjangoModelFactory):
-=======
 class StorageFileFactory(DjangoModelFactory):
->>>>>>> origin
     class Meta:
         model = StorageFile
 

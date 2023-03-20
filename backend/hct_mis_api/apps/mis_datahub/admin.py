@@ -52,11 +52,7 @@ class HUBAdminMixin(HOPEModelAdminBase):
                 LogEntry.objects.log_action(
                     user_id=request.user.pk,
                     content_type_id=ContentType.objects.get_for_model(self.model).pk,
-<<<<<<< HEAD
-                    object_id=None,  # type: ignore # FIXME: Argument "object_id" to "log_action" of "LogEntryManager" has incompatible type "None"; expected "Union[int, str, UUID]"
-=======
                     object_id=None,  # type: ignore # None is not a valid object_id but for quite some time noone raised an issue with that so I guess it's intentional somehow
->>>>>>> origin
                     object_repr=f"TRUNCATE TABLE {self.model._meta.verbose_name}",
                     action_flag=DELETION,
                     change_message="truncate table",

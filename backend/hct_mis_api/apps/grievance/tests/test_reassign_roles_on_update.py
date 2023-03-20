@@ -1,10 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 
-<<<<<<< HEAD
 from hct_mis_api.apps.account.fixtures import UserFactory
-=======
->>>>>>> origin
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
@@ -97,11 +94,7 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         with self.assertRaises(ValidationError) as context:
-<<<<<<< HEAD
             reassign_roles_on_update_service(self.alternate_collector_individual, role_reassign_data, UserFactory())
-=======
-            reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
->>>>>>> origin
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 

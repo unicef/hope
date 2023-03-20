@@ -315,11 +315,7 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
 
-<<<<<<< HEAD
-class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
-=======
 class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
->>>>>>> origin
     def __init__(
         self,
         type: Type,
@@ -408,13 +404,9 @@ class BaseMutationPermissionMixin:
         return True
 
     @classmethod
-<<<<<<< HEAD
-    def has_permission(cls, info: Any, permission: Any, business_area_arg: str, raise_error: bool = True) -> bool:
-=======
     def has_permission(
         cls, info: Any, permission: Any, business_area_arg: Union[str, BusinessArea], raise_error: bool = True
     ) -> bool:
->>>>>>> origin
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):

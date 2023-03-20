@@ -1,27 +1,17 @@
 import logging
-<<<<<<< HEAD
-=======
 from typing import Any
->>>>>>> origin
 
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-<<<<<<< HEAD
-=======
 from django.utils import timezone
->>>>>>> origin
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
-<<<<<<< HEAD
-from ..models import Document, DocumentType
-=======
 from ..models import FOSTER_CHILD, Document, DocumentType
->>>>>>> origin
 
 logger = logging.getLogger(__name__)
 
@@ -37,16 +27,11 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     autocomplete_fields = ["type"]
-<<<<<<< HEAD
-=======
     exclude = ("cleared_date", "cleared_by")
->>>>>>> origin
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "type", "country")
 
-<<<<<<< HEAD
-=======
     def save_model(self, request: HttpRequest, obj: "Document", form: Any, change: bool) -> None:
         if "cleared" in form.changed_data and obj.type.type == FOSTER_CHILD:
             cleared = form.cleaned_data["cleared"]
@@ -55,7 +40,6 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.cleared_date = timezone.now()
         return super(DocumentAdmin, self).save_model(request, obj, form, change)
 
->>>>>>> origin
 
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):

@@ -1,5 +1,4 @@
 import graphene
-<<<<<<< HEAD
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.schema import PartnerType, UserNode
@@ -289,26 +288,11 @@ class GrievanceDocumentUpdateInput(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
     name = graphene.String(required=False)
     file = Upload(required=False)
-=======
-
-from hct_mis_api.apps.account.schema import UserNode
-from hct_mis_api.apps.core.schema import BusinessAreaNode
-from hct_mis_api.apps.grievance.mutations_extras.main import (
-    CreateGrievanceTicketExtrasInput,
-    UpdateGrievanceTicketExtrasInput,
-)
-from hct_mis_api.apps.grievance.schema import GrievanceTicketNode
-from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
->>>>>>> origin
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
     description = graphene.String(required=True)
-<<<<<<< HEAD
-    assigned_to = graphene.GlobalID(node=UserNode, required=False)
-=======
     assigned_to = graphene.GlobalID(node=UserNode, required=True)
->>>>>>> origin
     category = graphene.Int(required=True)
     issue_type = graphene.Int()
     admin = graphene.String()
@@ -318,7 +302,6 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     business_area = graphene.GlobalID(node=BusinessAreaNode, required=True)
     linked_tickets = graphene.List(graphene.ID)
     extras = CreateGrievanceTicketExtrasInput()
-<<<<<<< HEAD
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
     partner = graphene.Int(node=PartnerType, required=False)
@@ -326,8 +309,6 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     comments = graphene.String()
     linked_feedback_id = graphene.ID()
     documentation = graphene.List(GrievanceDocumentInput)
-=======
->>>>>>> origin
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -340,7 +321,6 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     linked_tickets = graphene.List(graphene.ID)
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
-<<<<<<< HEAD
     payment_record = graphene.GlobalID(node=PaymentRecordNode, required=False)
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
@@ -351,11 +331,4 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     documentation = graphene.List(GrievanceDocumentInput)
     documentation_to_update = graphene.List(GrievanceDocumentUpdateInput)
     documentation_to_delete = graphene.List(graphene.ID)
-=======
     extras = UpdateGrievanceTicketExtrasInput()
-
-
-class CreateTicketNoteInput(graphene.InputObjectType):
-    description = graphene.String(required=True)
-    ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
->>>>>>> origin

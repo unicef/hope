@@ -1,14 +1,9 @@
 import logging
-<<<<<<< HEAD
 import os
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from django.contrib.auth.models import AbstractUser
-=======
-from typing import List, Union
-
 from django.core.cache import cache
->>>>>>> origin
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -61,7 +56,26 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
 
 
-<<<<<<< HEAD
+def clear_cache(
+    ticket_details: Union[
+        TicketHouseholdDataUpdateDetails,
+        TicketDeleteHouseholdDetails,
+        TicketAddIndividualDetails,
+        TicketIndividualDataUpdateDetails,
+        TicketDeleteIndividualDetails,
+    ],
+    business_area_slug: str,
+) -> None:
+    if isinstance(ticket_details, (TicketHouseholdDataUpdateDetails, TicketDeleteHouseholdDetails)):
+        cache.delete_pattern(f"count_{business_area_slug}_HouseholdNodeConnection_*")
+
+    if isinstance(
+        ticket_details,
+        (TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketDeleteIndividualDetails),
+    ):
+        cache.delete_pattern(f"count_{business_area_slug}_IndividualNodeConnection_*")
+
+
 def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTicket, documents: List[Dict]) -> None:
     grievance_documents = []
     for document in documents:
@@ -105,23 +119,3 @@ def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None
         os.remove(document.file.path)
 
     documents_to_delete.delete()
-=======
-def clear_cache(
-    ticket_details: Union[
-        TicketHouseholdDataUpdateDetails,
-        TicketDeleteHouseholdDetails,
-        TicketAddIndividualDetails,
-        TicketIndividualDataUpdateDetails,
-        TicketDeleteIndividualDetails,
-    ],
-    business_area_slug: str,
-) -> None:
-    if isinstance(ticket_details, (TicketHouseholdDataUpdateDetails, TicketDeleteHouseholdDetails)):
-        cache.delete_pattern(f"count_{business_area_slug}_HouseholdNodeConnection_*")
-
-    if isinstance(
-        ticket_details,
-        (TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketDeleteIndividualDetails),
-    ):
-        cache.delete_pattern(f"count_{business_area_slug}_IndividualNodeConnection_*")
->>>>>>> origin

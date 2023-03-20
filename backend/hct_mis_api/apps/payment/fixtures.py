@@ -640,31 +640,17 @@ def create_payment_verification_plan_with_status(
         payment_verification_plan.verification_channel = verification_channel
     payment_verification_plan.save(update_fields=("status", "verification_channel"))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    household, _ = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
-        },
-        {"registration_data_import": registration_data_import},
-    )
+    for _ in range(5):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
 
-    household.programs.add(program)
+        household.programs.add(program)
 
-<<<<<<< HEAD
-    payment_record = PaymentRecordFactory(
-        cash_plan=cash_plan,
-        household=household,
-        target_population=target_population,
-    )
-
-    PaymentVerificationFactory(
-        cash_plan_payment_verification=cash_plan_payment_verification,
-        payment_record=payment_record,
-        status=PaymentVerification.STATUS_PENDING,
-    )
-    EntitlementCardFactory(household=household)
-    return cash_plan_payment_verification
-=======
         if isinstance(cash_plan, CashPlan):
             payment_record = PaymentRecordFactory(
                 parent=cash_plan,
@@ -974,4 +960,3 @@ def generate_payment_plan() -> None:
     )
 
     payment_plan.update_population_count_fields()
->>>>>>> origin
