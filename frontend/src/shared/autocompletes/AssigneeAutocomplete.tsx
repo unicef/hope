@@ -3,7 +3,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LocationState, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -36,6 +36,8 @@ export const AssigneeAutocomplete = ({
   label?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
@@ -64,8 +66,8 @@ export const AssigneeAutocomplete = ({
   const handleFilterChange = createHandleFilterChange(
     onFilterChange,
     filter,
-    useHistory<LocationState>(),
-    useLocation(),
+    history,
+    location,
   );
 
   if (!data) return null;
