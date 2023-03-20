@@ -188,6 +188,8 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
+        if not business_area_slug:
+            return qs
         ba = BusinessArea.objects.only("id").get(slug=business_area_slug)
         if business_area_slug:
             return qs.filter(business_area_id=ba.id)
