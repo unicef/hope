@@ -132,6 +132,7 @@ django-silk = "^5.0.1"
 django-smart-admin = "^2"
 django-sql-explorer = {extras = ["xls"], version = "^3"}
 django-storages = { version = "^1.12.3", extras = ["azure"] }
+django-strategy-field = "^3.0.0"
 django-sysinfo = "^2.6.0"
 django_compressor = "^4.0"
 django-querysetsequence = "^0.16"
