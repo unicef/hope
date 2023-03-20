@@ -16,6 +16,8 @@ from django.utils import timezone
 from dateutil.parser import parse
 from django_filters import Filter
 
+from hct_mis_api.apps.core.models import BusinessArea
+
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
     if value:
@@ -186,6 +188,7 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs: QuerySet, business_area_slug: str) -> QuerySet:
+        ba = BusinessArea.objects.only("id").get(slug=business_area_slug)
         if business_area_slug:
-            return qs.filter(business_area__slug=business_area_slug)
+            return qs.filter(business_area_id=ba.id)
         return qs
