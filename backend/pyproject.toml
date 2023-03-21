@@ -132,13 +132,13 @@ django-silk = "^5.0.1"
 django-smart-admin = "^2"
 django-sql-explorer = {extras = ["xls"], version = "^3"}
 django-storages = { version = "^1.12.3", extras = ["azure"] }
-django-strategy-field = "^3.0.0"
+django-strategy-field = "^3.0"
 django-sysinfo = "^2.6.0"
 django_compressor = "^4.0"
 django-querysetsequence = "^0.16"
 djangorestframework = "^3.13.1"
 drf-jwt = "^1.19.2"
-drf-yasg = "^1.21.3"
+drf-yasg = "^1"
 elasticsearch-dsl ="^7.0.0"
 factory-boy = "^3"
 gevent = "^21.12"  # error installing
