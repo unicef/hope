@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   hasPermissionInModule,
@@ -15,18 +15,25 @@ import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
 
-export function CommunicationPage(): React.ReactElement {
+const initialFilter = {
+  createdBy: '',
+  createdAtRangeMin: null,
+  createdAtRangeMax: null,
+  program: '',
+  targetPopulation: '',
+};
+
+export const CommunicationPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const location = useLocation();
   const { t } = useTranslation();
 
-  const [filter, setFilter] = useState({
-    createdAtRange: '',
-    program: '',
-    targetPopulation: '',
-  });
-
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: choicesData,
@@ -67,4 +74,4 @@ export function CommunicationPage(): React.ReactElement {
       />
     </>
   );
-}
+};
