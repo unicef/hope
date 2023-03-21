@@ -69,6 +69,7 @@ function prepareInitialValueAddIndividual(
   return initialValues;
 }
 
+//eslint-disable-next-line
 function prepareInitialValueEditIndividual(initialValues, ticket) {
   const {
     individual,

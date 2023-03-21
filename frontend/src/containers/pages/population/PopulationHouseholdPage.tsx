@@ -85,7 +85,6 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             permissions,
           )}
-          filterOrderBy={filter.orderBy}
         />
       </Box>
     </>
