@@ -6,10 +6,7 @@ backend:
   image: #from-pipeline
   replicaCount: 1
   config:
-<<<<<<< HEAD
-=======
     POSTGRES_SSL: "true"
->>>>>>> origin
     STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
     EMAIL_HOST: "extmail01.unicef.org"
     EMAIL_USE_TLS: "false"
@@ -46,16 +43,6 @@ ingress:
 
 
 postgresql:
-<<<<<<< HEAD
-  postgresqlPassword: #secret-variables: POSTGRES_PASSWORD
-registrationdatahubpostgresql:
-  postgresqlPassword: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
-cashassistdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-10-reserved-hctmis-tstuat.postgres.database.azure.com 
-    user: devcahubusr@pgsql-10-reserved-hctmis-tstuat
-=======
   enabled: false
   externalDatabase:
     host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
@@ -74,6 +61,5 @@ cashassistdatahubpostgresql:
   externalDatabase:
     host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
     user: devcashubusr
->>>>>>> origin
     password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
     db: dev_cashassist_datahubdb

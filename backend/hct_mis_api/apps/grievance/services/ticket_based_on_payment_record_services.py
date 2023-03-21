@@ -15,17 +15,17 @@ def create_tickets_based_on_payment_records_service(
     grievance_ticket: GrievanceTicket, details: Dict, model: Type
 ) -> List[GrievanceTicket]:
     individual_encoded_id = details.get("individual")
-    individual = decode_and_get_object(individual_encoded_id, Individual)
+    individual = decode_and_get_object(individual_encoded_id, Individual, False)
 
     household_encoded_id = details.get("household")
-    household = decode_and_get_object(household_encoded_id, Household)
+    household = decode_and_get_object(household_encoded_id, Household, False)
 
     payment_record_encoded_ids_list = details.get("payment_record") or []
 
     payment_record = None
     if payment_record_encoded_ids_list:
         payment_record_encoded_id = payment_record_encoded_ids_list.pop(0)
-        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord)
+        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
 
     model.objects.create(
         individual=individual,
@@ -37,7 +37,7 @@ def create_tickets_based_on_payment_records_service(
     grievance_tickets_to_return = [grievance_ticket]
 
     for payment_record_encoded_id in payment_record_encoded_ids_list:
-        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord)
+        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
 
         # copy GrievanceTicket object and assign linked tickets
         ticket = grievance_ticket

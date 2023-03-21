@@ -2,8 +2,8 @@ import random
 from random import choice
 from typing import Any
 
-import factory
 import factory.fuzzy
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -18,7 +18,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import Household
 
 
-class FeedbackFactory(factory.DjangoModelFactory):
+class FeedbackFactory(DjangoModelFactory):
     class Meta:
         model = Feedback
 
@@ -38,7 +38,7 @@ class FeedbackFactory(factory.DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
 
 
-class FeedbackMessageFactory(factory.DjangoModelFactory):
+class FeedbackMessageFactory(DjangoModelFactory):
     class Meta:
         model = FeedbackMessage
 
@@ -55,7 +55,7 @@ class FeedbackMessageFactory(factory.DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
 
 
-class SurveyFactory(factory.DjangoModelFactory):
+class SurveyFactory(DjangoModelFactory):
     class Meta:
         model = Survey
 
@@ -67,7 +67,7 @@ class SurveyFactory(factory.DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
 
 
-class CommunicationMessageFactory(factory.DjangoModelFactory):
+class CommunicationMessageFactory(DjangoModelFactory):
     class Meta:
         model = Message
 
