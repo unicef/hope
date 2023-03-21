@@ -434,7 +434,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id: Optional[str], model: Type, required: bool) -> Optional[Any]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:

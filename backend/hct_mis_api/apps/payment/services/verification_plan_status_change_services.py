@@ -97,13 +97,13 @@ class VerificationPlanStatusChangeServices:
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
-        flow_start_info_list, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
-        for flow_start_info, _ in flow_start_info_list:
-            self.payment_verification_plan.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))  # type: ignore
+        successful_flows, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
+        for successful_flow in successful_flows:
+            self.payment_verification_plan.rapid_pro_flow_start_uuids.append(successful_flow.response["uuid"])
 
         all_urns = []
-        for _, urns in flow_start_info_list:
-            all_urns.extend(urn.split(":")[-1] for urn in urns)  # type: ignore
+        for successful_flow in successful_flows:
+            all_urns.extend(urn.split(":")[-1] for urn in successful_flow.urns)
         processed_individuals = individuals.filter(phone_no__in=all_urns)
 
         payment_verifications_to_upd = []

@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Any, List
-from unittest import skip
 
 from django.core.management import call_command
 
@@ -177,7 +176,6 @@ class TestGrievanceDashboardQuery(APITestCase):
             variables={"businessAreaSlug": "afghanistan"},
         )
 
-    @skip("to fix")
     @parameterized.expand(
         [
             (

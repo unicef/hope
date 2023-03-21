@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -27,6 +27,7 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
@@ -38,12 +39,8 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualIdentity,
+    IndividualRoleInHousehold,
 )
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.grievance.models import GrievanceTicket
-    from hct_mis_api.apps.household.models import IndividualRoleInHousehold
-
 
 logger = logging.getLogger(__name__)
 

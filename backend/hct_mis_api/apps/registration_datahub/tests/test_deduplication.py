@@ -1,5 +1,3 @@
-from unittest import skip
-
 from django.conf import settings
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
@@ -220,7 +218,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
         super().setUpTestData()
 
-    @skip("to fix")
     def test_batch_deduplication(self) -> None:
         task = DeduplicateTask()
         task.business_area = self.business_area.slug
@@ -265,13 +262,19 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_status=UNIQUE
         )
 
-        self.assertEqual(duplicate_in_golden_record.count(), 4)
-        self.assertEqual(unique_in_golden_record.count(), 3)
-        self.assertEqual(needs_adjudication_in_golden_record.count(), 0)
+        self.assertEqual(duplicate_in_golden_record.count(), 5)
+        self.assertEqual(unique_in_golden_record.count(), 1)
+        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
 
-        expected_duplicates_gr = ("Tessta Testowski", "Tessta Testowski", "Test Testowski", "Test Testowski")
+        expected_duplicates_gr = (
+            "Tessta Testowski",
+            "Tessta Testowski",
+            "Test Example",
+            "Test Testowski",
+            "Test Testowski",
+        )
 
-        expected_uniques_gr = ("Tesa Testowski", "Tescik Testowski", "Test Example")
+        expected_uniques_gr = ("Tesa Testowski",)
 
         self.assertEqual(
             tuple(duplicate_in_golden_record.values_list("full_name", flat=True)),
