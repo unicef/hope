@@ -1,19 +1,19 @@
 import { Grid, MenuItem } from '@material-ui/core';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import moment from 'moment';
-import { SelectFilter } from '../../../core/SelectFilter';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { createHandleFilterChange } from '../../../../utils/utils';
 import {
   useAllProgramsForChoicesQuery,
-  useAllTargetPopulationForChoicesQuery,
+  useAllTargetPopulationForChoicesQuery
 } from '../../../../__generated__/graphql';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { useHistory, useLocation } from 'react-router-dom';
-import { createHandleFilterChange } from '../../../../utils/utils';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
+import { LoadingComponent } from '../../../core/LoadingComponent';
+import { SelectFilter } from '../../../core/SelectFilter';
 
 interface CommunicationFiltersProps {
   onFilterChange;
