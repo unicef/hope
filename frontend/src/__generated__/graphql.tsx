@@ -1025,7 +1025,7 @@ export type CreateGrievanceTicketExtrasInput = {
 
 export type CreateGrievanceTicketInput = {
   description: Scalars['String'],
-  assignedTo: Scalars['ID'],
+  assignedTo?: Maybe<Scalars['ID']>,
   category: Scalars['Int'],
   issueType?: Maybe<Scalars['Int']>,
   admin?: Maybe<Scalars['String']>,
@@ -7609,6 +7609,7 @@ export type UpdateGrievanceTicketInput = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
   paymentRecord?: Maybe<Scalars['ID']>,
+  extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<Scalars['Int']>,
@@ -7617,7 +7618,6 @@ export type UpdateGrievanceTicketInput = {
   documentation?: Maybe<Array<Maybe<GrievanceDocumentInput>>>,
   documentationToUpdate?: Maybe<Array<Maybe<GrievanceDocumentUpdateInput>>>,
   documentationToDelete?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
 };
 
 export type UpdateGrievanceTicketMutation = {
@@ -26572,12 +26572,12 @@ export type ResolversTypes = {
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
   UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
-  GrievanceDocumentUpdateInput: GrievanceDocumentUpdateInput,
   UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
   UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
   UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
   UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
   TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras,
+  GrievanceDocumentUpdateInput: GrievanceDocumentUpdateInput,
   UpdateGrievanceTicketMutation: ResolverTypeWrapper<UpdateGrievanceTicketMutation>,
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   BulkUpdateGrievanceTicketsAssigneesMutation: ResolverTypeWrapper<BulkUpdateGrievanceTicketsAssigneesMutation>,
@@ -27073,12 +27073,12 @@ export type ResolversParentTypes = {
   Upload: Scalars['Upload'],
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
   UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
-  GrievanceDocumentUpdateInput: GrievanceDocumentUpdateInput,
   UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
   UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
   UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
   UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
   TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras,
+  GrievanceDocumentUpdateInput: GrievanceDocumentUpdateInput,
   UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation,
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   BulkUpdateGrievanceTicketsAssigneesMutation: BulkUpdateGrievanceTicketsAssigneesMutation,
