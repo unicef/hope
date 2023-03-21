@@ -68,7 +68,10 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         cls.registration_data_import_datahub.save()
 
         registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
-        (cls.household, cls.individuals,) = create_imported_household_and_individuals(
+        (
+            cls.household,
+            cls.individuals,
+        ) = create_imported_household_and_individuals(
             household_data={"registration_data_import": cls.registration_data_import_datahub},
             individuals_data=[
                 {
