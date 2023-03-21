@@ -476,19 +476,6 @@ input CreateDashboardReportInput {
   program: ID
 }
 
-input CreateFinancialServiceProviderInput {
-  name: String!
-  visionVendorNumber: String!
-  deliveryMechanisms: [String]!
-  distributionLimit: Decimal
-  communicationChannel: String!
-  fspXlsxTemplateId: ID!
-}
-
-type CreateFinancialServiceProviderMutation {
-  financialServiceProvider: FinancialServiceProviderNode
-}
-
 input CreateGrievanceTicketExtrasInput {
   category: CategoryExtrasInput
   issueType: IssueTypeExtrasInput
@@ -730,6 +717,9 @@ type DocumentNode implements Node {
   type: DocumentTypeNode!
   country: String
   status: DocumentStatus!
+  cleared: Boolean!
+  clearedDate: DateTime!
+  clearedBy: UserNode
   countryIso3: String
 }
 
@@ -759,6 +749,7 @@ type DocumentTypeNode {
   label: String!
   type: DocumentTypeType!
   isIdentityDocument: Boolean!
+  uniqueForIndividual: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
@@ -772,6 +763,7 @@ enum DocumentTypeType {
   RESIDENCE_PERMIT_NO
   BANK_STATEMENT
   DISABILITY_CERTIFICATE
+  FOSTER_CHILD
   OTHER
 }
 
@@ -780,10 +772,6 @@ input EditBankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
-}
-
-type EditFinancialServiceProviderMutation {
-  financialServiceProvider: FinancialServiceProviderNode
 }
 
 input EditIndividualDocumentObjectType {
@@ -1104,6 +1092,7 @@ enum HouseholdCollectIndividualData {
   A_
   A_2
   A_1
+  A_3
   A_0
 }
 
@@ -1405,6 +1394,7 @@ enum ImportedDocumentTypeType {
   RESIDENCE_PERMIT_NO
   BANK_STATEMENT
   DISABILITY_CERTIFICATE
+  FOSTER_CHILD
   OTHER
 }
 
@@ -1952,6 +1942,7 @@ type IndividualNode implements Node {
   rowId: Int
   disabilityCertificatePicture: String
   preferredLanguage: String
+  relationshipConfirmed: Boolean!
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2007,6 +1998,7 @@ enum IndividualRelationship {
   SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
+  FOSTER_CHILD
 }
 
 type IndividualRoleInHouseholdNode {
@@ -2225,8 +2217,6 @@ type Mutations {
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   createPaymentVerificationPlan(input: CreatePaymentVerificationInput!): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
-  createFinancialServiceProvider(businessAreaSlug: String!, inputs: CreateFinancialServiceProviderInput!): CreateFinancialServiceProviderMutation
-  editFinancialServiceProvider(businessAreaSlug: String!, financialServiceProviderId: ID!, inputs: CreateFinancialServiceProviderInput!): EditFinancialServiceProviderMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
   importXlsxPaymentVerificationPlanFile(file: Upload!, paymentVerificationPlanId: ID!): ImportXlsxPaymentVerificationPlanFile
   activatePaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): ActivatePaymentVerificationPlan
@@ -2234,8 +2224,6 @@ type Mutations {
   discardPaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): DiscardPaymentVerificationPlan
   invalidPaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): InvalidPaymentVerificationPlan
   deletePaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): DeletePaymentVerificationPlan
-  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
-  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
   revertMarkPaymentRecordAsFailed(deliveredQuantity: Decimal!, deliveryDate: Date!, paymentRecordId: ID!): RevertMarkPaymentRecordAsFailedMutation
@@ -2246,6 +2234,8 @@ type Mutations {
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
   updatePaymentPlan(input: UpdatePaymentPlanInput!): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
+  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
+  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
@@ -4367,6 +4357,7 @@ type UserNode implements Node {
   lastDoapSync: DateTime
   doapHash: String!
   userRoles: [UserRoleNode!]!
+  documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
