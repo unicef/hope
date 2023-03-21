@@ -3,7 +3,7 @@ from typing import Any, List
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Case, CharField, Count, Func, Q, QuerySet, Value, When
+from django.db.models import Case, CharField, Count, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
