@@ -1,5 +1,3 @@
-from unittest import skip
-
 from django.core.management import call_command
 from django.db.models import Sum
 from django.utils import timezone
@@ -104,8 +102,8 @@ class TestDashboardQueries(APITestCase):
         call_command("loadcountries")
         cls.user = UserFactory()
 
-        chosen_business_areas = ("afghanistan", "botswana", "angola")
-        for idx, business_area_slug in enumerate(chosen_business_areas):
+        chosen_business_areas = (("afghanistan", 100), ("botswana", 200), ("angola", 300))
+        for business_area_slug, num in chosen_business_areas:
             country = geo_models.Country.objects.get(name=business_area_slug.capitalize())
             area_type = AreaTypeFactory(
                 name="City",
@@ -151,7 +149,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household1,
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                delivered_quantity_usd=10 + idx,
+                delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
             )
@@ -160,7 +158,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household2,
                 delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
-                delivered_quantity_usd=20 + idx,
+                delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
             )
@@ -169,7 +167,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 household=household3,
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                delivered_quantity_usd=30 + idx,
+                delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
                 business_area=business_area,
             )
@@ -179,7 +177,7 @@ class TestDashboardQueries(APITestCase):
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                delivered_quantity_usd=10 + idx,
+                delivered_quantity_usd=10 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household4,
@@ -188,7 +186,7 @@ class TestDashboardQueries(APITestCase):
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
-                delivered_quantity_usd=20 + idx,
+                delivered_quantity_usd=20 + num,
                 status=GenericPayment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household5,
@@ -197,7 +195,7 @@ class TestDashboardQueries(APITestCase):
                 parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-                delivered_quantity_usd=30 + idx,
+                delivered_quantity_usd=30 + num,
                 status=GenericPayment.STATUS_ERROR,
                 business_area=business_area,
                 household=household6,
@@ -216,7 +214,6 @@ class TestDashboardQueries(APITestCase):
             context={"user": self.user},
         )
 
-    @skip("Sometimes failed")
     def test_chart_total_transferred_by_country(self) -> None:
         business_area = BusinessArea.objects.get(slug="global")
         self.create_user_role_with_permissions(self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area)
