@@ -8,7 +8,7 @@ from hct_mis_api.apps.household.models import Household, Individual
 def save_referral_service(grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
 
-    update_ticket(grievance_ticket, household, individual)
+    create_new_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 

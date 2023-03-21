@@ -18,12 +18,8 @@ backend:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
     AZURE_TENANT_KEY: #secret-variables: AZURE_TENANT_KEY
-<<<<<<< HEAD
-    STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
-=======
     STATIC_STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STATIC_STORAGE_AZURE_ACCOUNT_KEY
     MEDIA_STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: MEDIA_STORAGE_AZURE_ACCOUNT_KEY
->>>>>>> origin
     SECRET_KEY: #secret-variables: SECRET_KEY
     SENTRY_DSN: #secret-variables: SENTRY_DSN
     KOBO_APP_API_TOKEN: #secret-variables: KOBO_APP_API_TOKEN
@@ -54,36 +50,21 @@ ingress:
 postgresql:
   enabled: false
   externalDatabase:
-<<<<<<< HEAD
-    host: pgsql-10-reserved-hctmis-prd.postgres.database.azure.com
-    user: hctappprdusr@pgsql-10-reserved-hctmis-prd
-=======
     host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
     user: hctappprdusr
->>>>>>> origin
     password: #secret-variables: POSTGRES_PASSWORD
     db: prd_hctmis_appdb
 registrationdatahubpostgresql:
   enabled: false
   externalDatabase:
-<<<<<<< HEAD
-    host: pgsql-10-reserved-hctmis-prd.postgres.database.azure.com
-    user: reghubprdusr@pgsql-10-reserved-hctmis-prd
-=======
     host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
     user: reghubprdusr
->>>>>>> origin
     password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
     db: prd_registration_datahubdb
 cashassistdatahubpostgresql:
   enabled: false
   externalDatabase:
-<<<<<<< HEAD
-    host: pgsql-10-reserved-hctmis-prd.postgres.database.azure.com
-    user: cahubprdusr@pgsql-10-reserved-hctmis-prd
-=======
     host: pgsql-14-reserved-hctmis-prd.postgres.database.azure.com
     user: cahubprdusr
->>>>>>> origin
     password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
     db: prd_cashassist_datahubdb

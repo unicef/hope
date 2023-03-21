@@ -15,7 +15,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
         {
             'locations': [
                 {
-                    'column': 19,
+                    'column': 11,
                     'line': 3
                 }
             ],
@@ -62,7 +62,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1
         {
             'locations': [
                 {
-                    'column': 19,
+                    'column': 11,
                     'line': 3
                 }
             ],

@@ -4602,16 +4602,3 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 lock-version = "2.0"
 python-versions = "3.9.*"
 content-hash = "2d1c445b478530c8655a4cea33cc3c8bde83c6503ee850580a5a204b30e26a91"
-
-[package.dependencies]
-setuptools = "*"
-
-[package.extras]
-docs = ["Sphinx", "repoze.sphinx.autointerface"]
-test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
-testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
-
-[metadata]
-lock-version = "2.0"
-python-versions = "3.9.*"
-content-hash = "2d1c445b478530c8655a4cea33cc3c8bde83c6503ee850580a5a204b30e26a91"

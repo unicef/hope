@@ -2,11 +2,8 @@ trigger: none
 pr:
   - master
   - develop
-<<<<<<< HEAD
   - new_gf # TODO remove this line after merge to develop
-=======
   - feature/*
->>>>>>> origin
 resources:
   - repo: self
 
@@ -174,11 +171,7 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-<<<<<<< HEAD
-              containerRegistry: $(Docker.registry)
-=======
               containerRegistry: $(Docker.registryConnection)
->>>>>>> origin
 
           - task: DockerCompose@0
             displayName: "Run tests"
@@ -215,11 +208,7 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-<<<<<<< HEAD
-              containerRegistry: $(Docker.registry)
-=======
               containerRegistry: $(Docker.registryConnection)
->>>>>>> origin
 
           - task: DockerCompose@0
             displayName: "Run tests"
@@ -256,11 +245,7 @@ stages:
             displayName: "[ACR] Login"
             inputs:
               command: login
-<<<<<<< HEAD
-              containerRegistry: $(Docker.registry)
-=======
               containerRegistry: $(Docker.registryConnection)
->>>>>>> origin
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
@@ -282,8 +267,6 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
-<<<<<<< HEAD
-=======
 
   - stage: e2e_tests
     dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
@@ -323,4 +306,3 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
->>>>>>> origin
