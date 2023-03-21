@@ -2,12 +2,12 @@ import { Button, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LookUpAdminAreaAutocomplete } from '../../../../shared/autocompletes/LookUpAdminAreaAutocomplete';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
 
 interface LookUpLinkedTicketsFiltersProps {
   onFilterChange;
@@ -98,7 +98,10 @@ export function LookUpLinkedTicketsFilters({
           />
         </Grid>
         <Grid item>
-          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
+          <LookUpAdminAreaAutocomplete
+            onFilterChange={onFilterChange}
+            name='admin'
+          />
         </Grid>
         <Grid container justify='flex-end'>
           <Button

@@ -11,6 +11,7 @@ volumes:
   data_es_test:
   ipython_data_local:
 
+
 services:
   proxy:
     image: unicef/hct-mis-proxy
@@ -45,6 +46,7 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
+      target: dev
       args:
         APP_ENV: DEV
     ports:
@@ -98,7 +100,7 @@ services:
       - elasticsearch
 
   db:
-    image: johniak/postgis:11-alpine
+    image: kartoza/postgis:14-3
     volumes:
       - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
@@ -130,14 +132,3 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
-  kibana:
-    container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.4.0
-    restart: always
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - 5601:5601
-    depends_on:
-      - elasticsearch

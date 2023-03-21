@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestCopyTargetPopulationMutation::test_copy_empty_target_1_0_with_permission 1'] = {

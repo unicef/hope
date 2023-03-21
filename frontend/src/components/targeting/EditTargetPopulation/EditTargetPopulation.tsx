@@ -22,6 +22,7 @@ import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
+import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
 const Label = styled.p`
@@ -136,6 +137,7 @@ export const EditTargetPopulation = ({
       {({ values, submitForm, setFieldValue }) => {
         return (
           <Form>
+            <AutoSubmitFormOnEnter />
             <EditTargetPopulationHeader
               handleSubmit={submitForm}
               values={values}

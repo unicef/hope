@@ -15,7 +15,10 @@ import {
 } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { useCashAssistUrlPrefixQuery } from '../../../__generated__/graphql';
+import {
+  useBusinessAreaDataQuery,
+  useCashAssistUrlPrefixQuery,
+} from '../../../__generated__/graphql';
 import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -55,6 +58,9 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   });
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
@@ -70,13 +76,18 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
-  if (permissions === null) return null;
+  if (permissions === null || !businessAreaData) return null;
 
   const cashAssistIndex = menuItems.findIndex(
     (item) => item.name === 'Cash Assist',
   );
 
   menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+
+  const { isPaymentPlanApplicable } = businessAreaData.businessArea;
+  const flags = {
+    isPaymentPlanApplicable,
+  };
 
   const getInitialHrefForCollapsible = (secondaryActions): string => {
     let resultHref = '';
@@ -103,6 +114,11 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
 
         if (item.permissions && !hasPermissions(item.permissions, permissions))
           return null;
+
+        if (item.flag && !flags[item.flag]) {
+          return null;
+        }
+
         if (item.collapsable) {
           const hrefForCollapsibleItem = getInitialHrefForCollapsible(
             item.secondaryActions,

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestHouseholdQuery::test_household_filter_by_programme_0_with_permission 1'] = {
@@ -303,6 +304,16 @@ snapshots['TestHouseholdQuery::test_household_query_single_0_with_permission 1']
     'data': {
         'household': {
             'address': 'Lorem Ipsum',
+            'admin1': {
+                'pCode': 'area1'
+            },
+            'admin2': {
+                'pCode': 'area2'
+            },
+            'adminArea': {
+                'pCode': 'area2'
+            },
+            'adminAreaTitle': 'City Test2',
             'countryOrigin': 'Poland',
             'size': 2
         }

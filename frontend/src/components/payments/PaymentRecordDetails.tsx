@@ -56,7 +56,7 @@ export function PaymentRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('REGISTRATION GROUP')}
+              label={t('Household')}
               value={paymentRecord.registrationCaId}
             />
           </Grid>

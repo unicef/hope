@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoCard should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <div
+      class="MuiBox-root MuiBox-root-2"
+    >
+      <div
+        class="sc-htoDjs epmobj"
+      >
+        Test top message
+         on 
+        <time
+          datetime="1640995200000"
+        >
+          1 Jan 2022
+        </time>
+      </div>
+    </div>
+    <div
+      class="MuiBox-root MuiBox-root-3 sc-iwsKbI jkUKDG"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-4"
+      >
+        Approved by Root Rootkowski
+        <div
+          class="MuiBox-root MuiBox-root-5"
+        >
+          <div
+            class="sc-gzVnrw hhgPWL"
+          >
+            on 
+            <time
+              datetime="1661843741787"
+            >
+              30 Aug 2022
+            </time>
+          </div>
+        </div>
+        <div
+          class="MuiBox-root MuiBox-root-6"
+        >
+          <div
+            class="sc-dnqmqq fnJivi"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

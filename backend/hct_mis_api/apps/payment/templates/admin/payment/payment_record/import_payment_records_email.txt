@@ -1,0 +1,5 @@
+Dear {{first_name}} {{last_name}},
+
+{{message}}
+
+Please do not reply to this email

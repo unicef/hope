@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 class GenerateDashboardReportContentHelpers:
     @classmethod
     def get_beneficiaries(cls, report: DashboardReport) -> Tuple[Any, Dict]:
-
         children_count_fields = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -82,7 +81,6 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_individuals(cls, report: DashboardReport) -> Tuple[Any, Dict]:
-
         valid_payment_records = cls._get_payment_records_for_report(report)
         individual_count_fields = cls._get_all_with_disabled_individual_count_fields()
         (
@@ -110,7 +108,6 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_volumes_by_delivery(cls, report: DashboardReport) -> Tuple[Any, Dict]:
-
         valid_payment_records = cls._get_payment_records_for_report(report)
         (
             instances,
@@ -140,11 +137,10 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_programs(cls, report: DashboardReport) -> Tuple[QuerySet, Optional[Dict]]:
-
         filter_vars = cls._format_filters(
             report,
             {},
-            "cash_plans__payment_records__delivery_date",
+            "cashplan__payment_items__delivery_date",
             "admin_areas",
             "id",
             "business_area",
@@ -154,13 +150,13 @@ class GenerateDashboardReportContentHelpers:
         def get_filter_query(cash: bool, month: int) -> Q:
             if cash:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
-                    cash_plans__payment_records__delivery_date__month=month,
+                    cashplan__payment_items__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
+                    cashplan__payment_items__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
-                    cash_plans__payment_records__delivery_date__month=month,
+                    cashplan__payment_items__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
+                    cashplan__payment_items__delivery_date__month=month,
                 )
 
         def get_annotation(index_number: int, cash: bool = True) -> Dict:
@@ -168,7 +164,7 @@ class GenerateDashboardReportContentHelpers:
             label = f"{key_label}_cash" if cash else f"{key_label}_voucher"
             return {
                 label: Sum(
-                    "cash_plans__payment_records__delivered_quantity_usd",
+                    "cashplan__payment_items__delivered_quantity_usd",
                     filter=get_filter_query(cash, index_number + 1),
                     output_field=DecimalField(),
                 )
@@ -179,14 +175,14 @@ class GenerateDashboardReportContentHelpers:
             .distinct()
             .annotate(
                 successful_payments=Count(
-                    "cash_plans__payment_records",
-                    filter=Q(cash_plans__payment_records__delivered_quantity_usd__gt=0),
+                    "cashplan__payment_items",
+                    filter=Q(cashplan__payment_items__delivered_quantity_usd__gt=0),
                 )
             )
             .annotate(
                 unsuccessful_payments=Count(
-                    "cash_plans__payment_records",
-                    filter=Q(cash_plans__payment_records__delivered_quantity_usd=0),
+                    "cashplan__payment_items",
+                    filter=Q(cashplan__payment_items__delivered_quantity_usd=0),
                 )
             )
         )
@@ -274,11 +270,11 @@ class GenerateDashboardReportContentHelpers:
         if report.admin_area:
             filter_vars["payment_record__household__admin_area"] = report.admin_area
         if report.program:
-            filter_vars["payment_record__cash_plan__program"] = report.program
+            filter_vars["payment_record__parent__program"] = report.program
         if not cls._is_report_global(report):
             filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
-        path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
+        path_to_payment_record_verifications = "cashplan__verifications__payment_record_verifications"
 
         def format_status_filter(status: str) -> Q:
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
@@ -286,7 +282,7 @@ class GenerateDashboardReportContentHelpers:
         programs = (
             Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
             .distinct()
-            .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
+            .annotate(total_cash_plan_verifications=Count("cashplan__verifications", distinct=True))
             .annotate(
                 total_households=Count(
                     f"{path_to_payment_record_verifications}__payment_record__household",
@@ -295,18 +291,18 @@ class GenerateDashboardReportContentHelpers:
             )
             .annotate(
                 total_payment_records=Count(
-                    "cash_plans__payment_records",
+                    "cashplan__payment_items",
                     distinct=True,
                 )
             )
             .annotate(
                 all_possible_payment_records=Count(
-                    "cash_plans__payment_records",
+                    "cashplan__payment_items",
                     distinct=True,
                     filter=Q(
-                        cash_plans__verifications__isnull=False,
-                        cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
-                        cash_plans__payment_records__delivered_quantity__gt=0,
+                        cashplan__verifications__isnull=False,
+                        cashplan__payment_items__status=PaymentRecord.STATUS_SUCCESS,
+                        cashplan__payment_items__delivered_quantity__gt=0,
                     ),
                 )
             )
@@ -380,11 +376,11 @@ class GenerateDashboardReportContentHelpers:
         admin_areas = (
             Area.objects.filter(
                 area_type__area_level=2,
-                household__payment_records__in=valid_payment_records,
+                household__paymentrecord__in=valid_payment_records,
             )
             .distinct()
             .annotate(
-                total_transferred=Sum("household__payment_records__delivered_quantity_usd", output_field=DecimalField())
+                total_transferred=Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField())
             )
             .annotate(num_households=Count("household", distinct=True))
         )
@@ -602,7 +598,7 @@ class GenerateDashboardReportContentHelpers:
             valid_payment_records_in_instance_filter_key = "business_area"
         else:
             business_area_code_path = "business_area__code"
-            instances = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
+            instances = Program.objects.filter(cashplan__payment_items__in=valid_payment_records)
             valid_payment_records_in_instance_filter_key = "cash_plan__program"
 
         instances = (
@@ -926,7 +922,7 @@ class GenerateDashboardReportService:
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
             sheet_title = self._report_type_to_str(report_type)
-            active_sheet = self.wb.create_sheet(sheet_title, -1)  # type: ignore # Argument 2 to "create_sheet" of "Workbook" has incompatible type "int"; expected "None"
+            active_sheet = self.wb.create_sheet(sheet_title, -1)
             number_of_columns = self._add_headers(active_sheet, report_type)
             number_of_rows = self._add_rows(active_sheet, report_type)
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)

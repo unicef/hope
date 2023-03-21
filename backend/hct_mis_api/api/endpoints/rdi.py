@@ -95,7 +95,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data)
             return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
-        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)  # type: ignore # FIXME
+        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
 class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
@@ -125,7 +125,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             else:
                 out.append(serializer.errors)
                 total_errors += 1
-        results = humanize_errors({"households": out})  # type: ignore # FIXME
+        results = humanize_errors({"households": out})
         return Response(
             {
                 "id": self.selected_rdi.id,

@@ -1,9 +1,11 @@
 import { Grid, MenuItem, Paper } from '@material-ui/core';
+import { useHistory, useLocation } from 'react-router-dom';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { createHandleFilterChange } from '../../utils/utils';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
@@ -34,6 +36,8 @@ export const DashboardFilters = ({
 }: DashboardFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const history = useHistory();
+  const location = useLocation();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
@@ -42,14 +46,19 @@ export const DashboardFilters = ({
 
   const allPrograms = data?.allPrograms?.edges || [];
   const programs = allPrograms.map((edge) => edge.node);
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
   return (
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'program')}
+            onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
@@ -67,8 +76,10 @@ export const DashboardFilters = ({
         <Grid item xs={3}>
           <AdminAreaAutocomplete
             fullWidth
-            onFilterChange={onFilterChange}
             name='administrativeArea'
+            value={filter.administrativeArea}
+            onFilterChange={onFilterChange}
+            filter={filter}
           />
         </Grid>
       </Grid>

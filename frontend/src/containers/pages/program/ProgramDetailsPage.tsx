@@ -67,7 +67,7 @@ export function ProgramDetailsPage(): React.ReactElement {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choices || permissions === null) return null;
+  if (!data?.program || !choices || permissions === null) return null;
 
   const program = data.program as ProgramNode;
   return (

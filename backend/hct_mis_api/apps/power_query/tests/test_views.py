@@ -50,10 +50,8 @@ class TestPowerQueryViews(TestCase):
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:data", args=[self.report2.documents.first().pk])
             username, password = self.report2.owner.username, "password"
-            headers = {
-                "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
-            }
-            response = self.client.get(url, **headers)  # type: ignore # FIXME: Argument 2 to "get" of "Client" has incompatible type "**Dict[str, str]"; expected "bool"
+            token = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
+            response = self.client.get(url, HTTP_AUTHORIZATION=token)
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, b">Report2<")
 
@@ -94,10 +92,8 @@ class TestPowerQueryBasicAuth(TestCase):
     def test_valid_fetch(self) -> None:
         url = reverse("power_query:data", args=[self.report2.documents.first().pk])
         username, password = self.report2.owner.username, "password"
-        headers = {
-            "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
-        }
-        response = self.client.get(url, **headers)  # type: ignore # FIXME: Argument 2 to "get" of "Client" has incompatible type "**Dict[str, str]"; expected "bool"
+        token = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
+        response = self.client.get(url, HTTP_AUTHORIZATION=token)
         self.assertEqual(response.status_code, 200)
 
 

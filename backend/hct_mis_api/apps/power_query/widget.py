@@ -1,8 +1,12 @@
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django.templatetags.static import static
+
+if TYPE_CHECKING:
+    from django.db.models.fields import _ChoicesCallable
 
 
 class FormatterEditor(forms.Textarea):
@@ -47,7 +51,7 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
         initial: Optional[Any] = None,
         help_text: str = "",
         to_field_name: Optional[str] = None,
-        limit_choices_to: Optional[int] = None,
+        limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ):
         queryset = ContentType.objects.order_by("model", "app_label")
@@ -60,7 +64,7 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
             initial=initial,
             help_text=help_text,
             to_field_name=to_field_name,
-            limit_choices_to=limit_choices_to,  # type: ignore # FIXME
+            limit_choices_to=limit_choices_to,
             **kwargs,
         )
 

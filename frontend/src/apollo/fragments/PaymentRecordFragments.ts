@@ -34,14 +34,14 @@ export const paymentRecordDetails = gql`
       id
       name
     }
-    cashPlan {
+    parent {
       id
       caId
       program {
         id
         name
       }
-      verifications {
+      verificationPlans {
         edges {
           node {
             id

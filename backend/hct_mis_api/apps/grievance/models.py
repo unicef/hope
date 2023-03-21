@@ -1,10 +1,11 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
@@ -247,7 +248,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         },
     }
 
-    TICKET_DETAILS_NAME_MAPPING = {
+    TICKET_DETAILS_NAME_MAPPING: Dict[int, Union[str, Dict[int, str]]] = {
         CATEGORY_DATA_CHANGE: {
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: "household_data_update_ticket_details",
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: "individual_data_update_ticket_details",
@@ -386,13 +387,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     @property
     def ticket_details(self) -> Any:
-        nested_dict_or_value = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
+        nested_dict_or_value: Union[str, Dict[int, str]] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
         if isinstance(nested_dict_or_value, dict):
-            details_name = nested_dict_or_value.get(self.issue_type)
-        else:
-            details_name = nested_dict_or_value
+            value: Optional[str] = nested_dict_or_value.get(self.issue_type)
+            if value is None:
+                return None
+            return getattr(self, value, None)
 
-        return getattr(self, details_name, None)  # type: ignore # FIXME: Argument 2 to "getattr" has incompatible type "Optional[Any]"; expected "str"
+        return getattr(self, nested_dict_or_value, None)
 
     @property
     def status_log(self) -> str:
@@ -419,7 +421,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         verbose_name = "Grievance Ticket"
 
     def clean(self) -> None:
-        issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
+        issue_types: Optional[Dict[int, str]] = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
@@ -429,6 +431,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
+        cache.delete_pattern(f"count_{self.business_area.slug}_GrievanceTicketNodeConnection_*")
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
@@ -786,6 +789,12 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
     )
     new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
+    old_received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+    )
     new_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -808,7 +817,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional["PaymentRecord"]:
-        return getattr(self.payment_verification, "payment_record", None)
+        return getattr(self.payment_verification, "payment_obj", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

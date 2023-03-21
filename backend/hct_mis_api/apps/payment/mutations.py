@@ -1,9 +1,10 @@
+import io
 import logging
-import math
+from base64 import b64decode
+from datetime import date, datetime
 from decimal import Decimal
-from typing import IO, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -20,17 +21,47 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    decode_id_string_required,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
-    create_cash_plan_payment_verification_xls,
+    create_payment_verification_plan_xlsx,
+    fsp_generate_xlsx_report_task,
+    import_payment_plan_payment_list_from_xlsx,
+    payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.inputs import (
+    ActionPaymentPlanInput,
+    CreateFinancialServiceProviderInput,
+    CreatePaymentPlanInput,
     CreatePaymentVerificationInput,
-    EditCashPlanPaymentVerificationInput,
+    EditPaymentVerificationInput,
+    UpdatePaymentPlanInput,
 )
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
-from hct_mis_api.apps.payment.schema import PaymentRecordNode, PaymentVerificationNode
-from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed
+from hct_mis_api.apps.payment.models import (
+    CashPlan,
+    DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProvider,
+    GenericPayment,
+    Payment,
+    PaymentPlan,
+    PaymentRecord,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
+from hct_mis_api.apps.payment.schema import (
+    FinancialServiceProviderNode,
+    GenericPaymentPlanNode,
+    PaymentNode,
+    PaymentPlanNode,
+    PaymentRecordNode,
+    PaymentVerificationNode,
+)
+from hct_mis_api.apps.payment.services.fsp_service import FSPService
+from hct_mis_api.apps.payment.services.mark_as_failed import (
+    mark_as_failed,
+    revert_mark_as_failed,
+)
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
@@ -38,19 +69,29 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
+    XlsxPaymentPlanImportService,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
+    XlsxPaymentPlanImportPerFspService,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.models import CashPlan
-from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
 
-class CreatePaymentVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class CreateVerificationPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         input = CreatePaymentVerificationInput(required=True)
@@ -58,232 +99,237 @@ class CreatePaymentVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentVerificationMutation":
-        cash_plan_id = decode_id_string(input.get("cash_plan_id"))
-        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
+        cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
+        node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")  # type: ignore # FIXME
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
+        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_object_or_404(  # type: ignore
+            CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id
+        )
 
-        cash_plan_verification = VerificationPlanCrudServices.create(cash_plan, input)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
+
+        verification_plan = VerificationPlanCrudServices.create(payment_plan_object, input)
 
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
             None,
-            cash_plan_verification,
+            verification_plan,
         )
-        cash_plan.refresh_from_db()
-        return cls(cash_plan=cash_plan)
+        payment_plan_object.refresh_from_db()
+
+        return cls(payment_plan=payment_plan_object)
 
 
 class EditPaymentVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        input = EditCashPlanPaymentVerificationInput(required=True)
+        input = EditPaymentVerificationInput(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "EditPaymentVerificationMutation":
-        cash_plan_verification_id = decode_id_string(input.get("cash_plan_payment_verification_id"))
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+        payment_verification_id = decode_id_string(input.get("payment_verification_plan_id"))
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_id)
 
-        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, payment_verification_plan.business_area)
 
-        old_cash_plan_verification = copy_model_object(cash_plan_verification)
-        cash_plan_verification.verification_channel = input.get("verification_channel")
-        cash_plan_verification.payment_record_verifications.all().delete()
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+        payment_verification_plan.verification_channel = input.get("verification_channel")
+        payment_verification_plan.payment_record_verifications.all().delete()
 
-        cash_plan_verification = VerificationPlanCrudServices.update(cash_plan_verification, input)
+        payment_verification_plan = VerificationPlanCrudServices.update(payment_verification_plan, input)
 
-        cash_plan_verification.cash_plan.refresh_from_db()
+        payment_verification_plan.payment_plan_obj.refresh_from_db()
+
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cash_plan_verification,
-            cash_plan_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        return cls(cash_plan=cash_plan_verification.cash_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
-class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMutationMixin):
-    cash_plan = graphene.Field(CashPlanNode)
+class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutationMixin):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def processed_mutate(
-        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
-    ) -> "ActivateCashPlanVerificationMutation":
-        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "ActivatePaymentVerificationPlan":
+        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        old_cash_plan_verification = copy_model_object(cash_plan_verification)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, cash_plan_verification.business_area)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, payment_verification_plan.business_area)
 
-        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).activate()
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).activate()
 
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cash_plan_verification,
-            cash_plan_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        return ActivateCashPlanVerificationMutation(cash_plan=cash_plan_verification.cash_plan)
+        return ActivatePaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
-class FinishCashPlanVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class FinishPaymentVerificationPlan(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, cash_plan_verification_id: str, **kwargs: Any
-    ) -> "FinishCashPlanVerificationMutation":
-        id = decode_id_string(cash_plan_verification_id)
-        cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
-        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, cashplan_payment_verification.business_area)
+        cls, root: Any, info: Any, payment_verification_plan_id: str, **kwargs: Any
+    ) -> "FinishPaymentVerificationPlan":
+        payment_verification_plan_id = decode_id_string_required(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, payment_verification_plan.business_area)
 
-        if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             log_and_raise("You can finish only ACTIVE verification")
-        VerificationPlanStatusChangeServices(cashplan_payment_verification).finish()
-        cashplan_payment_verification.refresh_from_db()
+        VerificationPlanStatusChangeServices(payment_verification_plan).finish()
+        payment_verification_plan.refresh_from_db()
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cashplan_payment_verification,
-            cashplan_payment_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        return FinishCashPlanVerificationMutation(cash_plan=cashplan_payment_verification.cash_plan)
+        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
-class DiscardCashPlanVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class DiscardPaymentVerificationPlan(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
-    ) -> "DiscardCashPlanVerificationMutation":
-        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "DiscardPaymentVerificationPlan":
+        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cash_plan_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, payment_verification_plan.business_area)
 
-        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).discard()
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).discard()
 
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cash_plan_verification,
-            cash_plan_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        return cls(cash_plan=cash_plan_verification.cash_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
-class InvalidCashPlanVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class InvalidPaymentVerificationPlan(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
-    ) -> "InvalidCashPlanVerificationMutation":
-        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "InvalidPaymentVerificationPlan":
+        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_INVALID, cash_plan_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_INVALID, payment_verification_plan.business_area)
 
-        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).mark_invalid()
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).mark_invalid()
 
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cash_plan_verification,
-            cash_plan_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        return cls(cash_plan=cash_plan_verification.cash_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
-class DeleteCashPlanVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class DeletePaymentVerificationPlan(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, cash_plan_verification_id: Optional[str], **kwargs: Any
-    ) -> "DeleteCashPlanVerificationMutation":
-        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
-        cash_plan = cash_plan_verification.cash_plan
+        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+    ) -> "DeletePaymentVerificationPlan":
+        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
+        payment_plan = payment_verification_plan.payment_plan_obj
 
-        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DELETE, cash_plan_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DELETE, payment_verification_plan.business_area)
 
-        VerificationPlanCrudServices.delete(cash_plan_verification)
+        VerificationPlanCrudServices.delete(payment_verification_plan)
 
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cash_plan_verification,
+            old_payment_verification_plan,
             None,
         )
-        return cls(cash_plan=cash_plan)
+        return cls(payment_plan=payment_plan)
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
     # TODO I don't think this is being used now, add permission if in use
-
     payment_verification = graphene.Field(PaymentVerificationNode)
 
     class Arguments:
@@ -313,18 +359,18 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
         if (
-            payment_verification.cash_plan_payment_verification.verification_channel
-            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+            payment_verification.payment_verification_plan.verification_channel
+            != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         ):
             log_and_raise("You can only update status of payment verification for MANUAL verification method")
-        if payment_verification.cash_plan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+        if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             logger.error(
-                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
             raise GraphQLError(
-                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
-        delivered_amount = payment_verification.payment_record.delivered_quantity
+        delivered_amount = payment_verification.payment_obj.delivered_quantity
         if status == PaymentVerification.STATUS_PENDING and received_amount is not None:
             logger.error(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
@@ -363,17 +409,17 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification.status = status
         payment_verification.received_amount = received_amount
         payment_verification.save()
-        cashplan_payment_verification = payment_verification.cash_plan_payment_verification
-        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
-        calculate_counts(cashplan_payment_verification)
-        cashplan_payment_verification.save()
+        payment_verification_plan = payment_verification.payment_verification_plan
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.save()
 
         log_create(
-            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cashplan_payment_verification,
-            cashplan_payment_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
         log_create(
             PaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -402,53 +448,46 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         root: Any,
         info: Any,
         payment_verification_id: str,
-        received_amount: Optional[int],
-        received: Optional[int],
+        received_amount: Decimal,
+        received: bool,
         **kwargs: Any,
     ) -> "UpdatePaymentVerificationReceivedAndReceivedAmount":
-        if received_amount is not None and math.isnan(received_amount):
-            received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
-            payment_verification.cash_plan_payment_verification.verification_channel
-            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+            payment_verification.payment_verification_plan.verification_channel
+            != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         ):
             log_and_raise("You can only update status of payment verification for MANUAL verification method")
-        if payment_verification.cash_plan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+        if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             logger.error(
-                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
             raise GraphQLError(
-                f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
+                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
         if not payment_verification.is_manually_editable:
             log_and_raise("You can only edit payment verification in first 10 minutes")
-        delivered_amount = payment_verification.payment_record.delivered_quantity
+        delivered_amount = payment_verification.payment_obj.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
             log_and_raise("You can't set received_amount {received_amount} and not set received to NO")
         if received is None and received_amount is not None:
             log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
-            logger.error(
-                "If received_amount is 0, you should set received to NO",
-            )
-            raise GraphQLError(
-                "If received_amount is 0, you should set received to NO",
-            )
+            log_and_raise("If received_amount is 0, you should set received to NO")
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)  # type: ignore # FIXME
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()
-        cashplan_payment_verification = payment_verification.cash_plan_payment_verification
-        calculate_counts(cashplan_payment_verification)
-        cashplan_payment_verification.save()
+        payment_verification_plan = payment_verification.payment_verification_plan
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.save()
         log_create(
             PaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -456,84 +495,88 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             old_payment_verification,
             payment_verification,
         )
-        return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)  # type: ignore # FIXME
+        return UpdatePaymentVerificationReceivedAndReceivedAmount(payment_verification)
 
 
-# TODO: what about typing [0] on XlsxErrorNode
 class XlsxErrorNode(graphene.ObjectType):
     sheet = graphene.String()
     coordinates = graphene.String()
     message = graphene.String()
 
-    def resolve_sheet(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[0]  # type: ignore # FIXME
+    @staticmethod
+    def resolve_sheet(parent: XlsxError, info: Any) -> str:
+        return parent.sheet
 
-    def resolve_coordinates(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[1]  # type: ignore # FIXME
+    @staticmethod
+    def resolve_coordinates(parent: XlsxError, info: Any) -> Optional[str]:
+        return parent.coordinates
 
-    def resolve_message(parent: "XlsxErrorNode", info: Any) -> str:
-        return parent[2]  # type: ignore # FIXME
+    @staticmethod
+    def resolve_message(parent: XlsxError, info: Any) -> str:
+        return parent.message
 
 
-class ExportXlsxCashPlanVerification(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, cash_plan_verification_id: str) -> "ExportXlsxCashPlanVerification":
-        pk = decode_id_string(cash_plan_verification_id)
-        cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=pk)
+    def mutate(cls, root: Any, info: Any, payment_verification_plan_id: str) -> "ExportXlsxPaymentVerificationPlanFile":
+        payment_verification_plan_id = decode_id_string_required(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, cashplan_payment_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, payment_verification_plan.business_area)
 
-        if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             log_and_raise("You can only export verification for active CashPlan verification")
-        if cashplan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             log_and_raise("You can only export verification when XLSX channel is selected")
-        if cashplan_payment_verification.xlsx_file_exporting:
+        if payment_verification_plan.xlsx_file_exporting:
             log_and_raise("Exporting xlsx file is already started. Please wait")
-        if cashplan_payment_verification.has_xlsx_cash_plan_payment_verification_file:
+        if payment_verification_plan.has_xlsx_payment_verification_plan_file:
             log_and_raise("Xlsx file is already created")
 
-        cashplan_payment_verification.xlsx_file_exporting = True
-        cashplan_payment_verification.save()
-        create_cash_plan_payment_verification_xls.delay(pk, info.context.user.pk)
-        return cls(cash_plan=cashplan_payment_verification.cash_plan)
+        payment_verification_plan.xlsx_file_exporting = True
+        payment_verification_plan.save()
+        create_payment_verification_plan_xlsx.delay(payment_verification_plan_id, info.context.user.pk)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
-class ImportXlsxCashPlanVerification(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
     errors = graphene.List(XlsxErrorNode)
 
     class Arguments:
         file = Upload(required=True)
-        cash_plan_verification_id = graphene.ID(required=True)
+        payment_verification_plan_id = graphene.ID(required=True)
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, file: IO, cash_plan_verification_id: str) -> "ImportXlsxCashPlanVerification":
-        id = decode_id_string(cash_plan_verification_id)
-        cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+    def mutate(
+        cls, root: Any, info: Any, file: io.BytesIO, payment_verification_plan_id: str
+    ) -> "ImportXlsxPaymentVerificationPlanFile":
+        id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, cashplan_payment_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, payment_verification_plan.business_area)
 
-        if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             log_and_raise("You can only import verification for active CashPlan verification")
-        if cashplan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             log_and_raise("You can only import verification when XLSX channel is selected")
-        import_service = XlsxVerificationImportService(cashplan_payment_verification, file)
+        import_service = XlsxVerificationImportService(payment_verification_plan, file)
         import_service.open_workbook()
         import_service.validate()
         if len(import_service.errors):
-            return ImportXlsxCashPlanVerification(None, import_service.errors)
+            return ImportXlsxPaymentVerificationPlanFile(None, import_service.errors)
         import_service.import_verifications()
-        calculate_counts(cashplan_payment_verification)
-        cashplan_payment_verification.xlsx_file_imported = True
-        cashplan_payment_verification.save()
-        return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.xlsx_file_imported = True
+        payment_verification_plan.save()
+        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan_obj, import_service.errors)
 
 
 class MarkPaymentRecordAsFailedMutation(PermissionMutation):
@@ -553,29 +596,614 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
         **kwargs: Any,
     ) -> "MarkPaymentRecordAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
-
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
+        mark_as_failed(payment_record)
+        return cls(payment_record)
 
-        try:
-            mark_as_failed(payment_record)
-        except ValidationError as e:
-            log_and_raise(e.message, e)
 
-        return MarkPaymentRecordAsFailedMutation(payment_record)
+class MarkPaymentAsFailedMutation(PermissionMutation):
+    payment = graphene.Field(PaymentNode)
+
+    class Arguments:
+        payment_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_id: str,
+        **kwargs: Any,
+    ) -> "MarkPaymentAsFailedMutation":
+        payment = get_object_or_404(Payment, id=decode_id_string(payment_id))
+        cls.has_permission(info, Permissions.PM_MARK_PAYMENT_AS_FAILED, payment.business_area)
+        mark_as_failed(payment)
+        return cls(payment)
+
+
+class RevertMarkPaymentRecordAsFailedMutation(PermissionMutation):
+    payment_record = graphene.Field(PaymentRecordNode)
+
+    class Arguments:
+        payment_record_id = graphene.ID(required=True)
+        delivered_quantity = graphene.Decimal(required=True)
+        delivery_date = graphene.Date(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_record_id: str,
+        delivered_quantity: Decimal,
+        delivery_date: date,
+        **kwargs: Any,
+    ) -> "RevertMarkPaymentRecordAsFailedMutation":
+        payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
+        delivery_date = datetime.combine(delivery_date, datetime.min.time())
+        revert_mark_as_failed(payment_record, delivered_quantity, delivery_date)
+        return cls(payment_record)
+
+
+class RevertMarkPaymentAsFailedMutation(PermissionMutation):
+    payment = graphene.Field(PaymentNode)
+
+    class Arguments:
+        payment_id = graphene.ID(required=True)
+        delivered_quantity = graphene.Decimal(required=True)
+        delivery_date = graphene.Date(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_id: str,
+        delivered_quantity: Decimal,
+        delivery_date: date,
+        **kwargs: Any,
+    ) -> "RevertMarkPaymentAsFailedMutation":
+        payment = get_object_or_404(Payment, id=decode_id_string(payment_id))
+        cls.has_permission(info, Permissions.PM_MARK_PAYMENT_AS_FAILED, payment.business_area)
+        delivery_date = datetime.combine(delivery_date, datetime.min.time())
+        revert_mark_as_failed(payment, delivered_quantity, delivery_date)
+        return cls(payment)
+
+
+class CreateFinancialServiceProviderMutation(PermissionMutation):
+    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
+
+    class Arguments:
+        business_area_slug = graphene.String(required=True)
+        inputs = CreateFinancialServiceProviderInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
+    ) -> "CreateFinancialServiceProviderMutation":
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
+
+        fsp = FSPService.create(inputs, info.context.user)
+        # Schedule task to generate downloadable report
+        fsp_generate_xlsx_report_task.delay(fsp.id)
+
+        return cls(financial_service_provider=fsp)
+
+
+class EditFinancialServiceProviderMutation(PermissionMutation):
+    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
+
+    class Arguments:
+        business_area_slug = graphene.String(required=True)
+        financial_service_provider_id = graphene.ID(required=True)
+        inputs = CreateFinancialServiceProviderInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
+    ) -> "EditFinancialServiceProviderMutation":
+        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
+
+        fsp_id = decode_id_string(financial_service_provider_id)
+        fsp = FSPService.update(fsp_id, inputs)
+        fsp_generate_xlsx_report_task.delay(fsp_id)
+
+        return cls(financial_service_provider=fsp)
+
+
+class ActionPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = ActionPaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "ActionPaymentPlanMutation":
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+
+        old_payment_plan = copy_model_object(payment_plan)
+        if old_payment_plan.imported_file:
+            old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
+        if old_payment_plan.export_file:
+            old_payment_plan.export_file = copy_model_object(payment_plan.export_file)
+
+        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
+
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data=input, user=info.context.user
+        )
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+    @classmethod
+    def check_permissions(cls, info: Any, business_area: "BusinessArea", action: str, pp_status: str) -> None:
+        def _get_reject_permission(status: str) -> Any:
+            status_to_perm_map = {
+                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            }
+            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
+
+        action_to_permissions_map = {
+            PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
+            PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.UNLOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name: Permissions.PM_SEND_FOR_APPROVAL,
+            PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
+            PaymentPlan.Action.FINISH.name: [],
+        }
+        cls.has_permission(info, action_to_permissions_map[action], business_area)
+
+
+class CreatePaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = CreatePaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
+        cls.has_permission(info, Permissions.PM_CREATE, input["business_area_slug"])
+
+        payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            new_object=payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
+class UpdatePaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = UpdatePaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "UpdatePaymentPlanMutation":
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
+class DeletePaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root: Any, info: Any, payment_plan_id: str, **kwargs: Any) -> "DeletePaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
+class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    delivery_mechanisms = graphene.List(graphene.String, required=True)
+
+
+class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
+        if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
+            msg = "You can only export Payment List for LOCKED Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        return PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=user)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, **kwargs: Any
+    ) -> "ExportXLSXPaymentPlanPaymentListMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = cls.export_action(payment_plan=payment_plan, user=info.context.user)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
+class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
+    @classmethod
+    def export_action(cls, payment_plan: PaymentPlan, user: "User") -> PaymentPlan:
+        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            msg = "You can only export Payment List Per FSP for ACCEPTED or FINISHED Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if not payment_plan.not_excluded_payments:
+            msg = "Export is not impossible because Payment list is empty"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
+
+
+class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = ChooseDeliveryMechanismsForPaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, input: Dict, **kwargs: Any
+    ) -> "ChooseDeliveryMechanismsForPaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
+        delivery_mechanisms_in_order = input.get("delivery_mechanisms", [])
+        for delivery_mechanism in delivery_mechanisms_in_order:
+            if delivery_mechanism == "":
+                raise GraphQLError("Delivery mechanism cannot be empty.")
+            if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
+                raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
+
+        DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
+        current_time = timezone.now()
+        for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
+            DeliveryMechanismPerPaymentPlan.objects.update_or_create(
+                payment_plan=payment_plan,
+                delivery_mechanism=delivery_mechanism,
+                sent_date=current_time,
+                delivery_mechanism_order=index + 1,
+                created_by=info.context.user,
+            )
+
+        return cls(payment_plan=payment_plan)
+
+
+class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
+    fsp_id = graphene.ID(required=True)
+    delivery_mechanism = graphene.String(required=True)
+    order = graphene.Int(required=True)
+
+
+class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
+
+
+class AssignFspToDeliveryMechanismMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = AssignFspToDeliveryMechanismInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "AssignFspToDeliveryMechanismMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
+
+        mappings = input.get("mappings", [])
+
+        if len(mappings) != payment_plan.delivery_mechanisms.count():
+            raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
+
+        existing_pairs = set()
+        for mapping in mappings:
+            key = (mapping["fsp_id"], mapping["delivery_mechanism"])
+            if key in existing_pairs:
+                raise GraphQLError("You can't assign the same FSP to the same delivery mechanism more than once")
+            existing_pairs.add(key)
+
+        dm_to_fsp_mapping = [
+            {
+                "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping["fsp_id"])),
+                "delivery_mechanism_per_payment_plan": get_object_or_404(
+                    DeliveryMechanismPerPaymentPlan,
+                    payment_plan=payment_plan,
+                    delivery_mechanism=mapping["delivery_mechanism"],
+                    delivery_mechanism_order=mapping["order"],
+                ),
+            }
+            for mapping in mappings
+        ]
+
+        with transaction.atomic():
+            payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
+
+            payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
+            payment_plan_service.validate_fsps_per_delivery_mechanisms(
+                dm_to_fsp_mapping, update_dms=True, update_payments=True
+            )
+
+        return cls(payment_plan=payment_plan)
+
+
+class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+    errors = graphene.List(XlsxErrorNode)
+
+    class Arguments:
+        file = Upload(required=True)
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, file: io.BytesIO, payment_plan_id: str
+    ) -> "ImportXLSXPaymentPlanPaymentListMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            msg = "You can only import for LOCKED Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
+            msg = "Import in progress"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        with transaction.atomic():
+            import_service = XlsxPaymentPlanImportService(payment_plan, file)
+            import_service.open_workbook()
+            import_service.validate()
+            if import_service.errors:
+                return cls(None, import_service.errors)
+
+            old_payment_plan = copy_model_object(payment_plan)
+            if old_payment_plan.imported_file:
+                old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
+
+            payment_plan.background_action_status_xlsx_importing_entitlements()
+            payment_plan.save()
+
+            payment_plan = import_service.create_import_xlsx_file(info.context.user)
+
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
+
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=info.context.user,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
+
+        return cls(payment_plan, None)
+
+
+class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
+    # PaymentPlan Reconciliation
+    payment_plan = graphene.Field(PaymentPlanNode)
+    errors = graphene.List(XlsxErrorNode)
+
+    class Arguments:
+        file = Upload(required=True)
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, file: io.BytesIO, payment_plan_id: str
+    ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
+
+        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
+        import_service.open_workbook()
+        import_service.validate()
+        if import_service.errors:
+            return cls(payment_plan=None, errors=import_service.errors)
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
+            user=info.context.user, file=file
+        )
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan, errors=None)
+
+
+class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        steficon_rule_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, steficon_rule_id: str
+    ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            msg = "You can run formula only for 'Locked' status of Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
+            msg = "Rule Engine run in progress"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
+        if not engine_rule.enabled or engine_rule.deprecated:
+            msg = "This engine rule is not enabled or is deprecated."
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        payment_plan.background_action_status_steficon_run()
+        payment_plan.save()
+
+        payment_plan_apply_engine_rule.delay(payment_plan.pk, engine_rule.pk)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
 
 
 class Mutations(graphene.ObjectType):
-    create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
-    edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
-    export_xlsx_cash_plan_verification = ExportXlsxCashPlanVerification.Field()
-    import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
-    activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
-    finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()
-    discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
-    invalid_cash_plan_payment_verification = InvalidCashPlanVerificationMutation.Field()
-    delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
+    create_payment_verification_plan = CreateVerificationPlanMutation.Field()
+    edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
+
+    create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
+    edit_financial_service_provider = EditFinancialServiceProviderMutation.Field()
+    export_xlsx_payment_verification_plan_file = ExportXlsxPaymentVerificationPlanFile.Field()
+    import_xlsx_payment_verification_plan_file = ImportXlsxPaymentVerificationPlanFile.Field()
+    activate_payment_verification_plan = ActivatePaymentVerificationPlan.Field()
+    finish_payment_verification_plan = FinishPaymentVerificationPlan.Field()
+    discard_payment_verification_plan = DiscardPaymentVerificationPlan.Field()
+    invalid_payment_verification_plan = InvalidPaymentVerificationPlan.Field()
+    delete_payment_verification_plan = DeletePaymentVerificationPlan.Field()
+    choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
+    assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
+    revert_mark_payment_record_as_failed = RevertMarkPaymentRecordAsFailedMutation.Field()
+    mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
+    revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )
+    action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
+    create_payment_plan = CreatePaymentPlanMutation.Field()
+    update_payment_plan = UpdatePaymentPlanMutation.Field()
+    delete_payment_plan = DeletePaymentPlanMutation.Field()
+
+    export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
+    export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
+    import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
+    import_xlsx_payment_plan_payment_list_per_fsp = ImportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
+    set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()

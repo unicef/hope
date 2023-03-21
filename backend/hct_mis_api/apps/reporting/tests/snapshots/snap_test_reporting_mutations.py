@@ -4,13 +4,14 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestReportingMutation::test_create_report_with_no_extra_filters_0_with_permission_individuals_report_with_earlier_dateTo 1'] = {
     'data': {
         'createReport': {
             'report': {
-                'dateFrom': '2019-01-01',
+                'dateFrom': '2018-01-01',
                 'dateTo': '2020-01-02',
                 'reportType': 1,
                 'status': 1
@@ -23,7 +24,7 @@ snapshots['TestReportingMutation::test_create_report_with_no_extra_filters_1_wit
     'data': {
         'createReport': {
             'report': {
-                'dateFrom': '2019-01-01',
+                'dateFrom': '2018-01-01',
                 'dateTo': '2022-01-02',
                 'reportType': 1,
                 'status': 1
@@ -36,7 +37,7 @@ snapshots['TestReportingMutation::test_create_report_with_no_extra_filters_2_wit
     'data': {
         'createReport': {
             'report': {
-                'dateFrom': '2019-01-01',
+                'dateFrom': '2018-01-01',
                 'dateTo': '2020-01-02',
                 'reportType': 2,
                 'status': 1
@@ -49,7 +50,7 @@ snapshots['TestReportingMutation::test_create_report_with_no_extra_filters_3_wit
     'data': {
         'createReport': {
             'report': {
-                'dateFrom': '2019-01-01',
+                'dateFrom': '2018-01-01',
                 'dateTo': '2022-01-02',
                 'reportType': 2,
                 'status': 1
@@ -83,7 +84,7 @@ snapshots['TestReportingMutation::test_restart_create_report_0_with_permission 1
         'restartCreateReport': {
             'report': {
                 'reportType': 1,
-                'status': 1
+                'status': 2
             }
         }
     }

@@ -20,7 +20,7 @@ interface LookUpPaymentRecordTableRowProps {
     event:
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
       | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    number,
+    number: string,
   ) => void;
 }
 
@@ -74,7 +74,7 @@ export function LookUpPaymentRecordTableRow({
           '-'
         )}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.cashPlan.name}</TableCell>
+      <TableCell align='left'>{paymentRecord.parent.name}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,

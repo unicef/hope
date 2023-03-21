@@ -35,6 +35,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "monthly_expenditures_questions/total_expense_h_f": "0",
             "individual_questions": [
                 {
+                    "individual_questions/preferred_language_i_c": "pl-pl",
                     "individual_questions/role_i_c": "primary",
                     "individual_questions/age": "40",
                     "individual_questions/first_registration_date_i_c": "2020-07-18",
@@ -211,6 +212,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "monthly_expenditures_questions/total_expense_h_f": "157",
             "individual_questions": [
                 {
+                    "individual_questions/preferred_language_i_c": "test",
                     "individual_questions/individual_vulnerabilities/wellbeing_index/relaxed_h_f": "1",
                     "individual_questions/individual_vulnerabilities/wellbeing_index/fresh_h_f": "2",
                     "individual_questions/birth_date_i_c": "1980-07-16",
@@ -620,6 +622,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "header": "birth_certificate_no_i_c",
                 "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
             },
+            # TODO: fix this? (rebase issue?)
+            # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]

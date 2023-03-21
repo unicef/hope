@@ -18,6 +18,7 @@ import {
   usePaymentRecordQuery,
 } from '../../../__generated__/graphql';
 import { ForceFailedButton } from '../../../components/payments/ForceFailedButton';
+import { RevertForceFailedButton } from '../../../components/payments/RevertForceFailedButton';
 
 export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -49,45 +50,56 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       to: `/${businessArea}/programs/`,
     },
     {
-      title: data.paymentRecord.cashPlan.program.name,
-      to: `/${businessArea}/programs/${data.paymentRecord.cashPlan.program.id}/`,
+      title: data.paymentRecord.parent.program.name,
+      to: `/${businessArea}/programs/${data.paymentRecord.parent.program.id}/`,
     },
     {
-      title: `Cash Plan #${data.paymentRecord.cashPlan.caId}`,
-      to: `/${businessArea}/cashplans/${data.paymentRecord.cashPlan.id}`,
+      title: `Cash Plan #${data.paymentRecord.parent.caId}`,
+      to: `/${businessArea}/cashplans/${data.paymentRecord.parent.id}`,
     },
   ];
   const paymentRecord = data.paymentRecord as PaymentRecordNode;
+
+  const renderButtons = (): Array<React.ReactElement> => {
+    const buttons: Array<React.ReactElement> = [];
+
+    if (
+      hasPermissions(
+        PERMISSIONS.PAYMENT_VERIFICATION_MARK_AS_FAILED,
+        permissions,
+      )
+    ) {
+      const ButtonComponent =
+        paymentRecord.status === PaymentRecordStatus.ForceFailed
+          ? RevertForceFailedButton
+          : ForceFailedButton;
+      buttons.push(<ButtonComponent paymentRecordId={paymentRecord.id} />);
+    }
+
+    buttons.push(
+      <Button
+        variant='contained'
+        color='primary'
+        component='a'
+        disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
+        target='_blank'
+        href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
+        startIcon={<OpenInNewRoundedIcon />}
+      >
+        {t('Open in CashAssist')}
+      </Button>,
+    );
+
+    return buttons;
+  };
+
   return (
     <>
       <PageHeader
         title={`Payment ID ${paymentRecord.caId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        <>
-          {hasPermissions(
-            PERMISSIONS.PAYMENT_VERIFICATION_MARK_AS_FAILED,
-            permissions,
-          ) && (
-            <ForceFailedButton
-              paymentRecordId={paymentRecord.id}
-              disabled={
-                paymentRecord.status === PaymentRecordStatus.ForceFailed
-              }
-            />
-          )}
-          <Button
-            variant='contained'
-            color='primary'
-            component='a'
-            disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
-            target='_blank'
-            href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
-            startIcon={<OpenInNewRoundedIcon />}
-          >
-            {t('Open in CashAssist')}
-          </Button>
-        </>
+        <>{renderButtons()}</>
       </PageHeader>
       <Box display='flex' flexDirection='column'>
         <PaymentRecordDetails

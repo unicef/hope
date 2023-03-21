@@ -1,14 +1,20 @@
 import logging
 import os
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
+    TicketAddIndividualDetails,
+    TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.grievance.validators import validate_file
@@ -36,9 +42,11 @@ def select_individual(
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individual: Individual) -> None:
-    sibling_tickets = GrievanceTicket.objects.filter(
-        registration_data_import_id=grievance_ticket.registration_data_import.id
-    )
+    rdi = grievance_ticket.registration_data_import
+    if not rdi:
+        return
+
+    sibling_tickets = GrievanceTicket.objects.filter(registration_data_import_id=rdi.id)
 
     for ticket in sibling_tickets:
         ticket_details = ticket.ticket_details
@@ -46,6 +54,26 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         ticket_individuals = ticket_details.selected_individuals.all()
 
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
+
+
+def clear_cache(
+    ticket_details: Union[
+        TicketHouseholdDataUpdateDetails,
+        TicketDeleteHouseholdDetails,
+        TicketAddIndividualDetails,
+        TicketIndividualDataUpdateDetails,
+        TicketDeleteIndividualDetails,
+    ],
+    business_area_slug: str,
+) -> None:
+    if isinstance(ticket_details, (TicketHouseholdDataUpdateDetails, TicketDeleteHouseholdDetails)):
+        cache.delete_pattern(f"count_{business_area_slug}_HouseholdNodeConnection_*")
+
+    if isinstance(
+        ticket_details,
+        (TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketDeleteIndividualDetails),
+    ):
+        cache.delete_pattern(f"count_{business_area_slug}_IndividualNodeConnection_*")
 
 
 def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTicket, documents: List[Dict]) -> None:

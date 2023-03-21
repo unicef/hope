@@ -2,6 +2,8 @@ import { Grid } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { TabPanel } from '../../../components/core/TabPanel';
 import { PaymentsChart } from '../../../components/dashboard/charts/PaymentsChart';
 import { ProgrammesBySector } from '../../../components/dashboard/charts/ProgrammesBySector';
 import { TotalTransferredByMonth } from '../../../components/dashboard/charts/TotalTransferredByMonth';
@@ -10,18 +12,16 @@ import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
 import { GrievancesSection } from '../../../components/dashboard/sections/GrievancesSection/GrievancesSection';
 import { PaymentVerificationSection } from '../../../components/dashboard/sections/PaymentVerificationSection/PaymentVerificationSection';
 import { TotalAmountTransferredSectionByAdminAreaSection } from '../../../components/dashboard/sections/TotalAmountTransferredByAdminAreaSection/TotalAmountTransferredByAdminAreaSection';
+import { TotalAmountTransferredByCountrySection } from '../../../components/dashboard/sections/TotalAmountTransferredByCountrySection';
 import { TotalAmountTransferredSection } from '../../../components/dashboard/sections/TotalAmountTransferredSection/TotalAmountTransferredSection';
 import { TotalNumberOfChildrenReachedSection } from '../../../components/dashboard/sections/TotalNumberOfChildrenReachedSection/TotalNumberOfChildrenReachedSection';
 import { TotalNumberOfHouseholdsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
 import { TotalNumberOfIndividualsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { TabPanel } from '../../../components/core/TabPanel';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   useAllChartsQuery,
   useGlobalAreaChartsLazyQuery,
 } from '../../../__generated__/graphql';
-import { TotalAmountTransferredByCountrySection } from '../../../components/dashboard/sections/TotalAmountTransferredByCountrySection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -63,7 +63,7 @@ export function DashboardYearPage({
       businessAreaSlug: businessArea,
       ...(!isGlobal && {
         program: filter.program,
-        administrativeArea: filter.administrativeArea?.node?.id,
+        administrativeArea: filter.administrativeArea,
       }),
     },
     fetchPolicy: 'cache-and-network',

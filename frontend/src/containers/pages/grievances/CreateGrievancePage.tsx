@@ -4,6 +4,7 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -313,6 +314,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
         );
         return (
           <>
+            <AutoSubmitFormOnEnter />
             <PageHeader
               title='New Ticket'
               breadCrumbs={

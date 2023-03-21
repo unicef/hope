@@ -1,11 +1,11 @@
 import csv
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter
+from django.contrib.admin import SimpleListFilter, TabularInline
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
-from django.db.models import Aggregate, CharField
+from django.forms import inlineformset_factory
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -59,6 +59,8 @@ from hct_mis_api.apps.core.models import (
     XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
+from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
+from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import (
@@ -124,17 +126,70 @@ class BusinessofficeFilter(SimpleListFilter):
         return queryset
 
 
-class GroupConcat(Aggregate):
-    function = "GROUP_CONCAT"
-    template = "%(function)s(%(distinct)s%(expressions)s)"
+class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
+    @classmethod
+    def validate_ranges(cls, ranges: List[List[Optional[int]]]) -> None:
+        ranges = sorted(ranges)  # sorted by range min value
 
-    def __init__(self, expression: str, distinct: bool = False, **extra: Any) -> None:
-        super().__init__(
-            expression,
-            distinct="DISTINCT " if distinct else "",  # type: ignore # FIXME: Argument "distinct" to "__init__" of "Aggregate" has incompatible type "str"; expected "bool"
-            output_field=CharField(),
-            **extra,
-        )
+        if ranges[0][0] != 0:
+            raise forms.ValidationError("Ranges need to start from 0")
+
+        for r1, r2 in zip(ranges, ranges[1:]):
+            if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
+                raise forms.ValidationError(
+                    f"Provided ranges overlap [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
+                )
+
+            if r1[1] != r2[0]:
+                raise forms.ValidationError(
+                    f"Whole range of [0 , ∞] is not covered, please cover range between [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
+                )
+
+        if ranges[-1][1] is not None:
+            raise forms.ValidationError("Last range should cover ∞ (please leave empty value)")
+
+    def clean(self) -> None:
+        super().clean()
+        ranges = []
+        for idx, form in enumerate(self.forms):
+            data = form.data.dict()
+            _min = data[f"acceptance_process_thresholds-{idx}-payments_range_usd_0"]
+            _max = data[f"acceptance_process_thresholds-{idx}-payments_range_usd_1"]
+            _deleted = data.get(f"acceptance_process_thresholds-{idx}-DELETE") == "on"
+            if not _deleted:
+                ranges.append(
+                    [
+                        int(_min),
+                        int(_max) if _max else None,
+                    ]
+                )
+
+        if not ranges:
+            return
+
+        self.validate_ranges(ranges)
+
+
+AcceptanceProcessThresholdInlineFormSet = inlineformset_factory(
+    BusinessArea,
+    AcceptanceProcessThreshold,
+    form=AcceptanceProcessThresholdForm,
+    formset=AcceptanceProcessThresholdFormset,
+)
+
+
+class AcceptanceProcessThresholdInline(TabularInline):
+    model = AcceptanceProcessThreshold
+    extra = 0
+    formset = AcceptanceProcessThresholdInlineFormSet  # type: ignore
+    ordering = [
+        "payments_range_usd",
+    ]
+    verbose_name_plural = (
+        "Acceptance Process Thresholds in USD- "
+        "Please leave empty value to set max range as ∞, whole range [0, ∞) need to be covered. "
+        "Example: [0, 100000) [100000, )"
+    )
 
 
 class TicketPriorityInline(admin.TabularInline):
@@ -150,7 +205,10 @@ class TicketPriorityInline(admin.TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
-    inlines = (TicketPriorityInline,)
+    inlines = [
+        AcceptanceProcessThresholdInline,
+        TicketPriorityInline,
+    ]
     list_display = (
         "name",
         "slug",
@@ -595,10 +653,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
-        has_add_permission = self.has_add_permission
-        self.has_add_permission = lambda __: False  # type: ignore # intentional
+        has_add_permission: Callable = self.has_add_permission
+        self.has_add_permission: Callable = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)
-        self.has_add_permission = has_add_permission  # type: ignore # intentional
+        self.has_add_permission = has_add_permission
 
         return template_response
 

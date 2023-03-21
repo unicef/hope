@@ -3,15 +3,13 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.hope_redirect import HopeRedirect, get_hope_redirect
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -63,8 +61,8 @@ class TestHopeRedirect(APITestCase):
             program=program,
             business_area=business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan, status=CashPlanPaymentVerification.STATUS_ACTIVE
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            generic_fk_obj=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(
@@ -74,15 +72,15 @@ class TestHopeRedirect(APITestCase):
             business_area=business_area,
         )
         payment_record = PaymentRecordFactory(
-            cash_plan=cash_plan,
+            parent=cash_plan,
             household=household,
             target_population=target_population,
             ca_id="P8F-21-CSH-00031-0000006",
         )
         PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
-            cash_plan_payment_verification=cash_plan_payment_verification,
-            payment_record=payment_record,
+            payment_verification_plan=payment_verification_plan,
+            generic_fk_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
 

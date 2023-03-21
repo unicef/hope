@@ -272,6 +272,23 @@ exports[`components/population/IndividualBioData should render 1`] = `
             class="sc-bwzfXH eoWrid"
             color="textSecondary"
           >
+            Preferred language
+          </span>
+          <div
+            data-cy="label-Preferred language"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+      >
+        <div>
+          <span
+            class="sc-bwzfXH eoWrid"
+            color="textSecondary"
+          >
             Linked Households
           </span>
           <div

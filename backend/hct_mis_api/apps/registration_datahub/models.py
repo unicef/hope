@@ -22,7 +22,9 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -93,10 +95,17 @@ class ImportedHousehold(TimeStampedUUIDModel):
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
+    """location contains lowest administrative area info"""
+    admin_area = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin_area_title = models.CharField(max_length=255, blank=True, default=BLANK)
     admin1 = models.CharField(max_length=255, blank=True, default=BLANK)
     admin1_title = models.CharField(max_length=255, blank=True, default=BLANK)
     admin2 = models.CharField(max_length=255, blank=True, default=BLANK)
     admin2_title = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin3 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin3_title = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin4 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin4_title = models.CharField(max_length=255, blank=True, default=BLANK)
     geopoint = PointField(null=True, default=None)
     female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
@@ -168,6 +177,22 @@ class ImportedHousehold(TimeStampedUUIDModel):
             return self.individuals_and_roles.filter(role=ROLE_ALTERNATE).first().individual
         except AttributeError:
             return None
+
+    def set_admin_areas(self) -> None:
+        admins = {
+            "admin1": self.admin1,
+            "admin2": self.admin2,
+            "admin3": self.admin3,
+            "admin4": self.admin4,
+        }
+
+        for admin_key, admin_value in admins.items():
+            if admin_value:
+                admin_area = Area.objects.filter(p_code=admin_value).first()
+                if admin_area:
+                    self.admin_area = admin_value
+                    self.admin_area_title = admin_area.name
+                    setattr(self, f"{admin_key}_title", admin_area.name)
 
     def __str__(self) -> str:
         return f"Household ID: {self.id}"
@@ -251,6 +276,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
@@ -414,6 +440,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    is_identity_document = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return f"{self.label}"
@@ -487,7 +514,7 @@ class Record(models.Model):
         (STATUS_ERROR, "Error"),
     )
 
-    registration = models.IntegerField()
+    registration = models.IntegerField(db_index=True)
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
     registration_data_import = models.ForeignKey(
@@ -525,6 +552,8 @@ class Record(models.Model):
     def get_data(self) -> Dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
+        if not self.files:
+            return self.fields
         files = json.loads(self.files.tobytes().decode())
         return combine_collections(files, self.fields)
 

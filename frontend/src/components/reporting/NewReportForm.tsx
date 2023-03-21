@@ -30,6 +30,7 @@ import {
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FieldLabel } from '../core/FieldLabel';
 import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
@@ -252,126 +253,125 @@ export const NewReportForm = (): React.ReactElement => {
           onSubmit={submitFormHandler}
           validationSchema={validationSchema}
         >
-          {({ submitForm, values, setFieldValue }) => {
-            return (
-              <>
-                <DialogTitleWrapper>
-                  <DialogTitle disableTypography>
-                    <Typography variant='h6'>
-                      {t('Generate New Report')}
-                    </Typography>
-                  </DialogTitle>
-                </DialogTitleWrapper>
-                <DialogContent>
-                  <Form>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <Field
-                          name='reportType'
-                          label={t('Report Type')}
-                          fullWidth
-                          variant='outlined'
-                          required
-                          choices={choicesData.reportTypesChoices}
-                          component={FormikSelectField}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <FieldLabel>
-                          {renderTimeframeLabel(values.reportType)}
-                        </FieldLabel>
+          {({ submitForm, values, setFieldValue }) => (
+            <>
+              {dialogOpen && <AutoSubmitFormOnEnter />}
+              <DialogTitleWrapper>
+                <DialogTitle disableTypography>
+                  <Typography variant='h6'>
+                    {t('Generate New Report')}
+                  </Typography>
+                </DialogTitle>
+              </DialogTitleWrapper>
+              <DialogContent>
+                <Form>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <Field
+                        name='reportType'
+                        label={t('Report Type')}
+                        fullWidth
+                        variant='outlined'
+                        required
+                        choices={choicesData.reportTypesChoices}
+                        component={FormikSelectField}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FieldLabel>
+                        {renderTimeframeLabel(values.reportType)}
+                      </FieldLabel>
 
-                        <Grid container spacing={3}>
-                          <Grid item xs={6}>
-                            <Field
-                              name='dateFrom'
-                              label={t('From Date')}
-                              component={FormikDateField}
-                              required
-                              fullWidth
-                              decoratorEnd={
-                                <CalendarTodayRoundedIcon color='disabled' />
-                              }
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name='dateTo'
-                              label={t('To Date')}
-                              component={FormikDateField}
-                              required
-                              disabled={!values.dateFrom}
-                              initialFocusedDate={values.dateFrom}
-                              fullWidth
-                              decoratorEnd={
-                                <CalendarTodayRoundedIcon color='disabled' />
-                              }
-                              minDate={values.dateFrom}
-                            />
-                          </Grid>
+                      <Grid container spacing={3}>
+                        <Grid item xs={6}>
+                          <Field
+                            name='dateFrom'
+                            label={t('From Date')}
+                            component={FormikDateField}
+                            required
+                            fullWidth
+                            decoratorEnd={
+                              <CalendarTodayRoundedIcon color='disabled' />
+                            }
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='dateTo'
+                            label={t('To Date')}
+                            component={FormikDateField}
+                            required
+                            disabled={!values.dateFrom}
+                            initialFocusedDate={values.dateFrom}
+                            fullWidth
+                            decoratorEnd={
+                              <CalendarTodayRoundedIcon color='disabled' />
+                            }
+                            minDate={values.dateFrom}
+                          />
                         </Grid>
                       </Grid>
-                      {renderConditionalFields(values)}
-                      {values.reportType ===
-                        REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
-                        <>
-                          <Grid item xs={12}>
-                            <Field
-                              name='adminArea1'
-                              label={t('Administrative Level 1')}
-                              variant='outlined'
-                              level={1}
-                              component={FormikAdminAreaAutocomplete}
-                              onClear={() => setFieldValue('adminArea2', [])}
-                              additionalOnChange={() =>
-                                setFieldValue('adminArea2', [])
-                              }
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Field
-                              name='adminArea2'
-                              label={t('Administrative Level 2')}
-                              variant='outlined'
-                              component={FormikAdminAreaAutocompleteMultiple}
-                              parentId={values.adminArea1?.node?.id}
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Field
-                              name='program'
-                              label={t('Programme')}
-                              fullWidth
-                              variant='outlined'
-                              choices={mappedPrograms}
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                        </>
-                      )}
                     </Grid>
-                  </Form>
-                </DialogContent>
-                <DialogFooter>
-                  <DialogActions>
-                    <Button onClick={() => setDialogOpen(false)}>
-                      {t('CANCEL')}
-                    </Button>
-                    <LoadingButton
-                      loading={loading}
-                      type='submit'
-                      color='primary'
-                      variant='contained'
-                      onClick={submitForm}
-                      data-cy='button-submit'
-                    >
-                      {t('GENERATE')}
-                    </LoadingButton>
-                  </DialogActions>
-                </DialogFooter>
-              </>
-            );
-          }}
+                    {renderConditionalFields(values)}
+                    {values.reportType ===
+                      REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
+                      <>
+                        <Grid item xs={12}>
+                          <Field
+                            name='adminArea1'
+                            label={t('Administrative Level 1')}
+                            variant='outlined'
+                            level={1}
+                            component={FormikAdminAreaAutocomplete}
+                            onClear={() => setFieldValue('adminArea2', [])}
+                            additionalOnChange={() =>
+                              setFieldValue('adminArea2', [])
+                            }
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Field
+                            name='adminArea2'
+                            label={t('Administrative Level 2')}
+                            variant='outlined'
+                            component={FormikAdminAreaAutocompleteMultiple}
+                            parentId={values.adminArea1?.node?.id}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Field
+                            name='program'
+                            label={t('Programme')}
+                            fullWidth
+                            variant='outlined'
+                            choices={mappedPrograms}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      </>
+                    )}
+                  </Grid>
+                </Form>
+              </DialogContent>
+              <DialogFooter>
+                <DialogActions>
+                  <Button onClick={() => setDialogOpen(false)}>
+                    {t('CANCEL')}
+                  </Button>
+                  <LoadingButton
+                    loading={loading}
+                    type='submit'
+                    color='primary'
+                    variant='contained'
+                    onClick={submitForm}
+                    data-cy='button-submit'
+                  >
+                    {t('GENERATE')}
+                  </LoadingButton>
+                </DialogActions>
+              </DialogFooter>
+            </>
+          )}
         </Formik>
       </Dialog>
     </>

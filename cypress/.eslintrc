@@ -1,0 +1,15 @@
+{
+    "env": {
+      "browser": true,
+      "cypress/globals": true
+    },
+    "extends": [
+      "plugin:cypress/recommended",
+      "plugin:mocha/recommended"
+    ],
+    "rules": {
+      "mocha/no-mocha-arrows": "off",
+      "cypress/no-unnecessary-waiting": "off" // TODO
+    }
+}
+  

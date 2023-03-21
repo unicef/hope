@@ -9,7 +9,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -23,27 +23,45 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def download_cash_plan_payment_verification(  # type: ignore # FIXME
+def download_payment_verification_plan(  # type: ignore
     request: "HttpRequest", verification_id: str
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
 ]:
-    cash_plan_payment_verification_id = decode_id_string(verification_id)
-    cash_plan_payment_verification = get_object_or_404(
-        CashPlanPaymentVerification, id=cash_plan_payment_verification_id
-    )
+    payment_verification_plan_id = decode_id_string(verification_id)
+    payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
     if not request.user.has_permission(
-        Permissions.PAYMENT_VERIFICATION_EXPORT.value, cash_plan_payment_verification.business_area
+        Permissions.PAYMENT_VERIFICATION_EXPORT.value, payment_verification_plan.business_area
     ):
-        logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
-    if cash_plan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+    if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
         raise GraphQLError("You can only download verification file when XLSX channel is selected")
 
-    if cash_plan_payment_verification.has_xlsx_cash_plan_payment_verification_file:
-        if not cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded:
-            cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.was_downloaded = True
-            cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.save()
-        return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)  # type: ignore # FIXME: Argument 1 to "redirect" has incompatible type "Optional[str]"; expected "Union[Callable[..., Any], str, SupportsGetAbsoluteUrl]"
-    else:
-        log_and_raise(f"File not found. CashPlanPaymentVerification ID: {verification_id}")
+    if payment_verification_plan.has_xlsx_payment_verification_plan_file:
+        if not payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded:
+            xlsx_file = payment_verification_plan.get_xlsx_verification_file
+            xlsx_file.was_downloaded = True
+            xlsx_file.save()
+        return redirect(payment_verification_plan.xlsx_payment_verification_plan_file_link)  # type: ignore # FIXME
+    log_and_raise(f"File not found. PaymentVerificationPlan ID: {verification_id}")
+
+
+@login_required
+def download_payment_plan_payment_list(  # type: ignore # missing return
+    request: "HttpRequest", payment_plan_id: str
+) -> Union[
+    "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
+]:
+    payment_plan_id_str = decode_id_string(payment_plan_id)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
+
+    if not request.user.has_permission(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
+        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+        raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
+
+    if payment_plan.has_export_file:
+        return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
+
+    log_and_raise(f"File not found. PaymentPlan ID: {payment_plan_id_str}")

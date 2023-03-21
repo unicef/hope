@@ -186,14 +186,6 @@ def country_origin_query(comparison_method: str, args: Any) -> Q:
     return country_generic_query(comparison_method, args, "country_origin")
 
 
-def admin_area1_query(comparison_method: str, args: Any) -> Q:
-    from django.db.models import Q
-
-    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__area_type__area_level=1)) | Q(
-        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__area_type__area_level=1)
-    )
-
-
 def registration_data_import_query(comparison_method: str, args: Any) -> Q:
     from django.db.models import Q
 

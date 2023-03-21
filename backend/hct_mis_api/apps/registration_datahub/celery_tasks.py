@@ -215,7 +215,6 @@ def merge_registration_data_import_task(registration_data_import_id: str) -> boo
 @log_start_and_end
 @sentry_tags
 def rdi_deduplication_task(registration_data_import_id: str) -> None:
-
     try:
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
@@ -293,6 +292,20 @@ def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
+def process_sri_lanka_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        SriLankaRegistrationService,
+    )
+
+    try:
+        SriLankaRegistrationService().process_records(rdi_id, records_ids)
+    except Exception:
+        logger.exception("Process Flex Records Task for Sri-Lanka caused error")
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
 def extract_records_task(max_records: int = 500) -> None:
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
@@ -313,13 +326,13 @@ def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = No
 def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,
-    template: str = "ukraine rdi {date}",
+    template: str = "{business_area_name} rdi {date}",
     auto_merge: bool = False,
     fix_tax_id: bool = False,
     **filters: Any,
 ) -> List:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        FlexRegistrationService,
+        get_registration_to_rdi_service_map,
     )
 
     try:
@@ -327,7 +340,10 @@ def automate_rdi_creation_task(
             if not locked:
                 return []
             output = []
-            service = FlexRegistrationService()
+
+            service: Optional[Any] = get_registration_to_rdi_service_map().get(registration_id)
+            if service is None:
+                raise NotImplementedError
 
             qs = Record.objects.filter(registration=registration_id, **filters).exclude(
                 status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
@@ -348,9 +364,10 @@ def automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
                     records=len(records_ids),
+                    business_area_name=service.BUSINESS_AREA_SLUG,
                 )
-                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
-                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                rdi = service().create_rdi(imported_by=None, rdi_name=rdi_name)
+                service().process_records(rdi_id=rdi.id, records_ids=records_ids)
                 output.append([rdi_name, len(records_ids)])
                 if auto_merge:
                     merge_registration_data_import_task.delay(rdi.id)
