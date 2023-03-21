@@ -3,13 +3,14 @@ import {
   Button,
   FormHelperText,
   Grid,
-  Typography,
+  Typography
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { ContentLink } from '../../../components/core/ContentLink';
@@ -28,14 +29,14 @@ import {
   dataChangeComponentDict,
   EmptyComponent,
   prepareInitialValues,
-  prepareVariables,
+  prepareVariables
 } from '../../../components/grievances/utils/editGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
-  PERMISSIONS,
+  PERMISSIONS
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -47,13 +48,13 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
+  GRIEVANCE_TICKET_STATES
 } from '../../../utils/constants';
 import {
   choicesToDict,
   isInvalid,
   isPermissionDeniedError,
-  thingForSpecificGrievanceType,
+  thingForSpecificGrievanceType
 } from '../../../utils/utils';
 import {
   GrievanceTicketDocument,
@@ -65,10 +66,9 @@ import {
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
   useMeQuery,
-  useUpdateGrievanceMutation,
+  useUpdateGrievanceMutation
 } from '../../../__generated__/graphql';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const BoxPadding = styled.div`
   padding: 15px 0;

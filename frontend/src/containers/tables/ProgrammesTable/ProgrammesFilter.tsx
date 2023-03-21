@@ -1,14 +1,14 @@
-import { Grid, MenuItem, Paper } from '@material-ui/core';
-import { useHistory, useLocation } from 'react-router-dom';
+import { Grid, MenuItem } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
-import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import { createHandleFilterChange } from '../../../utils/utils';
+import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 
 interface ProgrammesFilterProps {
   onFilterChange;

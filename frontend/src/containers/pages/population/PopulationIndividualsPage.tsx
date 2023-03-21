@@ -79,7 +79,6 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
           )}
-          filterOrderBy={filter.orderBy}
         />
       </Box>
     </>
