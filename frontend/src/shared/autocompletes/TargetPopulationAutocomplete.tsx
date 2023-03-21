@@ -95,7 +95,18 @@ export const TargetPopulationAutocomplete = ({
       getOptionSelected={(option, value1) => {
         return option.node?.id === value1;
       }}
-      getOptionLabel={(option) => option.node?.name}
+      getOptionLabel={(option) => {
+        let optionLabel;
+        if (option.node) {
+          optionLabel = `${option.node.name}`;
+        } else {
+          optionLabel =
+            data?.allTargetPopulation?.edges?.find(
+              (el) => el.node.id === option,
+            )?.node.name || '';
+        }
+        return `${optionLabel}`;
+      }}
       disabled={disabled}
       options={get(data, 'allTargetPopulation.edges', [])}
       loading={loading}
