@@ -1,9 +1,9 @@
-from typing import Any
+from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
@@ -12,17 +12,18 @@ from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 from sentry_sdk import set_tag
 
 from .models import Registration
-from .utils import fetch
+from .utils import fetch_metadata
 
 
 class FetchDataView(ProcessFormView):
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseRedirectToReferrer:
         return HttpResponseRedirectToReferrer(request)
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseRedirectToReferrer:
         if "_fetch" in request.POST:
             messages.add_message(request, messages.SUCCESS, "Data fetched")
-            fetch()
+            aurora_token = request.user.custom_fields.get("aurora_token")
+            fetch_metadata(aurora_token)
         return HttpResponseRedirectToReferrer(request)
 
 
@@ -34,13 +35,13 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
     ]
     raise_exception = False
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         kwargs["registration"] = self.registration
         kwargs["drf_page_size"] = settings.REST_FRAMEWORK["PAGE_SIZE"]
         return super().get_context_data(**kwargs)
 
     @cached_property
-    def registration(self):
+    def registration(self) -> Registration:
         if "slug" in self.kwargs:
             filters = {"slug": self.kwargs["slug"]}
         elif "pk" in self.kwargs:
