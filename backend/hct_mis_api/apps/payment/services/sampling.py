@@ -39,7 +39,7 @@ class Sampling:
         payment_verification_plan.excluded_admin_areas_filter = sampling.excluded_admin_areas
         payment_verification_plan.sample_size = sampling.sample_size
 
-        self.payment_records = sampling.payment_records  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Optional[_QuerySet[Any, Any]]", variable has type "_QuerySet[Any, Any]")
+        self.payment_records = sampling.payment_records
 
         if sampling.sampling_type == PaymentVerificationPlan.SAMPLING_RANDOM:
             self.payment_records = self.payment_records.order_by("?")[: sampling.sample_size]
@@ -80,7 +80,7 @@ class BaseSampling(abc.ABC):
         if self.sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             return sample_count
         else:
-            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)  # type: ignore # FIXME: args 2 and 3 are opt, func def required non-opt
+            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
     @abc.abstractmethod
     def sampling(self, payment_records: QuerySet["PaymentRecord"]) -> None:

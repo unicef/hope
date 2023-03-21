@@ -39,7 +39,7 @@ class ValidatorTest(TestCase):
 
     def assertErrors(self, post_data: Dict, expected: Dict) -> None:
         res = self._run(post_data)
-        self.assertDictEqual(res, expected)  # type: ignore # FIXME: Argument 1 to "assertDictEqual" of "TestCase" has incompatible type "Union[Dict[Any, Any], List[Any]]"; expected "Mapping[Any, object]"
+        self.assertDictEqual(res, expected)
 
     def test_empty_post(self) -> None:
         self.assertErrors(

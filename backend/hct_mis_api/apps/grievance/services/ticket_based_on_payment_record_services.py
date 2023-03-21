@@ -14,10 +14,10 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 def create_tickets_based_on_payment_records_service(
     grievance_ticket: GrievanceTicket, details: Dict, model: Type
 ) -> List[GrievanceTicket]:
-    individual_encoded_id = details.get("individual")
+    individual_encoded_id = details.get("individual", "")
     individual = decode_and_get_object(individual_encoded_id, Individual, False)
 
-    household_encoded_id = details.get("household")
+    household_encoded_id = details.get("household", "")
     household = decode_and_get_object(household_encoded_id, Household, False)
 
     payment_record_encoded_ids_list = details.get("payment_record") or []
