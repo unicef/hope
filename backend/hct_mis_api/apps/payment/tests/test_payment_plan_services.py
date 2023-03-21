@@ -101,7 +101,7 @@ class TestPaymentPlanServices(APITestCase):
 
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 9, 10, tzinfo=utc),
+            start_date=timezone.datetime(2021, 9, 10, tzinfo=utc).date(),
         )
 
         hoh1 = IndividualFactory(household=None)
@@ -118,8 +118,8 @@ class TestPaymentPlanServices(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             targeting_id=self.id_to_base64(targeting.id, "Targeting"),
-            start_date=parse_date("2021-10-10"),
-            end_date=parse_date("2021-12-10"),
+            start_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 12, 10, tzinfo=utc),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
@@ -192,7 +192,7 @@ class TestPaymentPlanServices(APITestCase):
         new_targeting = TargetPopulationFactory()
         new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         new_targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
+            start_date=timezone.datetime(2021, 11, 10, tzinfo=utc).date(),
         )
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -226,7 +226,7 @@ class TestPaymentPlanServices(APITestCase):
             # test start_date update
             old_pp_start_date = pp.start_date
             updated_pp_2 = PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(start_date=parse_date("2021-12-10"))
+                input_data=dict(start_date=timezone.datetime(2021, 12, 10, tzinfo=utc))
             )
             updated_pp_2.refresh_from_db()
             self.assertNotEqual(old_pp_start_date, updated_pp_2.start_date)
@@ -246,8 +246,8 @@ class TestPaymentPlanServices(APITestCase):
 
         targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc),
+            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
         )
         targeting.households.set([hh1, hh2])
         targeting.save()
@@ -280,8 +280,8 @@ class TestPaymentPlanServices(APITestCase):
 
         targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc),
+            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
         )
         targeting.households.set([hh1, hh2])
         targeting.save()
@@ -311,8 +311,8 @@ class TestPaymentPlanServices(APITestCase):
         PaymentFactory(parent=pp, excluded=False, household=hh1)
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc),
+            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
         )
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -328,8 +328,9 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaisesMessage(GraphQLError, "Start date cannot be earlier than start date in the program"):
             PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(start_date=timezone.datetime(2021, 4, 10, tzinfo=utc))
+                input_data=dict(start_date=timezone.datetime(2021, 4, 10, tzinfo=utc))  # datetime
             )
+            PaymentPlanService(payment_plan=pp).update(input_data=dict(end_date=parse_date("2021-04-10")))  # date
 
     @freeze_time("2020-10-10")
     def test_cannot_update_payment_plan_with_end_date_later_than_in_program(self) -> None:
@@ -343,8 +344,8 @@ class TestPaymentPlanServices(APITestCase):
         PaymentFactory(parent=pp, excluded=False, household=hh1)
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc),
-            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc),
+            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
         )
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -360,5 +361,6 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaisesMessage(GraphQLError, "End date cannot be later that end date in the program"):
             PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(end_date=timezone.datetime(2021, 9, 10, tzinfo=utc))
+                input_data=dict(end_date=timezone.datetime(2021, 9, 10, tzinfo=utc))  # datetime
             )
+            PaymentPlanService(payment_plan=pp).update(input_data=dict(end_date=parse_date("2021-09-10")))  # date

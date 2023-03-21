@@ -89,7 +89,7 @@ class HopeAdminSite(SmartAdminSite):
     def get_urls(self) -> List:
         urls = super().get_urls()
         custom_urls = [
-            path("clean-cache/", self.admin_view(clear_cache_view), name="clear_cache"),
+            path("clear-cache/", self.admin_view(clear_cache_view), name="clear_cache"),
         ]
         return custom_urls + urls
 

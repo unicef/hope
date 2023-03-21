@@ -44,23 +44,6 @@ def get_sync_run_rapid_pro_task() -> None:
 
 @app.task
 @log_start_and_end
-def fsp_generate_xlsx_report_task(fsp_id: str) -> None:
-    try:
-        from hct_mis_api.apps.payment.models import FinancialServiceProvider
-        from hct_mis_api.apps.payment.services.generate_fsp_xlsx_service import (
-            GenerateReportService,
-        )
-
-        fsp = FinancialServiceProvider.objects.get(id=fsp_id)
-        service = GenerateReportService(fsp=fsp)
-        service.generate_report()
-    except Exception as e:
-        logger.exception(e)
-        raise
-
-
-@app.task
-@log_start_and_end
 @sentry_tags
 def create_payment_verification_plan_xlsx(payment_verification_plan_id: str, user_id: str) -> None:
     try:
