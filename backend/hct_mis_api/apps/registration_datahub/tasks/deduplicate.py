@@ -828,14 +828,23 @@ class DeduplicateTask:
             .order_by("pk")
         )
         documents_numbers = [x.document_number for x in documents_to_dedup]
-        new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
+        new_document_signatures = [f"{d.type_id}--{d.document_number}--{d.country_id}" for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
         all_matching_number_documents = (
             Document.objects.select_related("individual", "individual__household", "individual__business_area")
             .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
-            .annotate(signature=Concat(F("type_id"), Value("--"), F("document_number"), output_field=CharField()))
+            .annotate(
+                signature=Concat(
+                    F("type_id"),
+                    Value("--"),
+                    F("document_number"),
+                    Value("--"),
+                    F("country_id"),
+                    output_field=CharField(),
+                )
+            )
         )
         all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
@@ -844,7 +853,9 @@ class DeduplicateTask:
         possible_duplicates_individuals_id_set = set()
 
         for new_document in documents_to_dedup:
-            new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
+            new_document_signature = (
+                f"{new_document.type_id}--{new_document.document_number}--{new_document.country_id}"
+            )
 
             if new_document_signature in all_matching_number_documents_signatures:
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
