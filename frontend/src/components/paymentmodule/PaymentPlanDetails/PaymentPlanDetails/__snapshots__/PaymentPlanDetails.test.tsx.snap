@@ -1,0 +1,193 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should render 1`] = `
+<div>
+  <div
+    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+  >
+    <div
+      class="MuiPaper-root sc-bwzfXH jJiWad MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="sc-EHOje eUSYOR"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+        >
+          Details
+        </h6>
+      </div>
+      <div
+        class="sc-ifAKCX iZCSws"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Created By
+              </span>
+              <div
+                data-cy="label-Created By"
+              >
+                Matthew Sosa
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Programme
+              </span>
+              <div
+                data-cy="label-Programme"
+              >
+                <a
+                  class="sc-bdVaJa jPYjeL"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
+                >
+                  Already attention fear well hit instead person.
+                </a>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Target Population
+              </span>
+              <div
+                data-cy="label-Target Population"
+              >
+                <a
+                  class="sc-bdVaJa jPYjeL"
+                  href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm"
+                >
+                  Report should property early adult.
+                </a>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Currency
+              </span>
+              <div
+                data-cy="label-Currency"
+              >
+                PLN
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Start Date
+              </span>
+              <div
+                data-cy="label-Start Date"
+              >
+                <time
+                  datetime="1603756800000"
+                >
+                  27 Oct 2020
+                </time>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                End Date
+              </span>
+              <div
+                data-cy="label-End Date"
+              >
+                <time
+                  datetime="1631059200000"
+                >
+                  8 Sep 2021
+                </time>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Dispersion Start Date
+              </span>
+              <div
+                data-cy="label-Dispersion Start Date"
+              >
+                <time
+                  datetime="1842307200000"
+                >
+                  19 May 2028
+                </time>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Dispersion End Date
+              </span>
+              <div
+                data-cy="label-Dispersion End Date"
+              >
+                <time
+                  datetime="1880755200000"
+                >
+                  7 Aug 2029
+                </time>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

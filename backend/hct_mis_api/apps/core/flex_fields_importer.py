@@ -12,7 +12,7 @@ import xlrd
 from openpyxl.worksheet.worksheet import Worksheet
 from xlwt import Row
 
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_DATE,
     TYPE_DECIMAL,
     TYPE_IMAGE,

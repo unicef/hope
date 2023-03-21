@@ -11,7 +11,6 @@ export const LookUpSection = ({
   values,
   disabledHouseholdIndividual,
   disabledPaymentRecords,
-  showPaymentRecords = true,
   errors,
   touched,
 }: {
@@ -21,7 +20,6 @@ export const LookUpSection = ({
   disabledPaymentRecords?;
   errors?;
   touched?;
-  showPaymentRecords?;
 }): React.ReactElement => {
   const renderedLookupHouseholdIndividual = (
     <Grid item xs={6}>
@@ -59,7 +57,7 @@ export const LookUpSection = ({
   const allThree = (
     <Grid container alignItems='center'>
       {renderedLookupHouseholdIndividual}
-      {showPaymentRecords && renderedLookupPaymentRecords}
+      {renderedLookupPaymentRecords}
       {renderedLookupLinkedTickets}
     </Grid>
   );

@@ -109,7 +109,7 @@ class TestUkrainianRegistrationService(TestCase):
             "phone_no_i_c": "0501706662",
         }
         defaults = {
-            "registration": 1,
+            "registration": 2,
             "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
         }
 

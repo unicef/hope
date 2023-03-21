@@ -15,7 +15,7 @@ from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields impo
     KoboRetriableError,
 )
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_SIZE_ONLY,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_TAX_ID,
     MALE,
@@ -106,7 +106,11 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):
             registration_data_import = RegistrationDataImport.objects.create(
-                name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
+                name=f"{storage_obj.file.name}_{program.name}",
+                number_of_individuals=0,
+                number_of_households=0,
+                business_area=program.business_area,
+                data_source=RegistrationDataImport.EDOPOMOGA,
             )
 
             business_area = storage_obj.business_area
@@ -138,6 +142,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                     iban = row["IBAN"]
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
+                    size = row["FAM_NUM"]
 
                     individual_data = {
                         "given_name": row.get("NAME", ""),
@@ -164,10 +169,10 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                             first_registration_date=first_registration_date,
                             last_registration_date=last_registration_date,
                             registration_data_import=registration_data_import,
-                            size=1,
+                            size=size,
                             family_id=family_id,
                             storage_obj=storage_obj,
-                            collect_individual_data=COLLECT_TYPE_NONE,
+                            collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
                         )
 
                         individual.household = household
@@ -209,12 +214,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
-            households = Household.objects.filter(family_id__in=list(families.keys())).only("id")
-            if len(families) != rows_count:
-                for household in households:
-                    household.size = Individual.objects.filter(household=household).count()
-                Household.objects.bulk_update(households, ("size",))
-
+            households = Household.objects.filter(family_id__in=list(families.keys()))
             households.update(withdrawn=True, withdrawn_date=timezone.now())
             Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
 

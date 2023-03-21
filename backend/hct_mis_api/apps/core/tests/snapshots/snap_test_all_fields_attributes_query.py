@@ -18410,6 +18410,2430 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
+                        'labelEn': 'Abrykosivska-UA0112001',
+                        'labels': [
+                            {
+                                'label': 'Abrykosivska-UA0112001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112001'
+                    },
+                    {
+                        'labelEn': 'Amurska-UA0112003',
+                        'labels': [
+                            {
+                                'label': 'Amurska-UA0112003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112003'
+                    },
+                    {
+                        'labelEn': 'Armianska-UA0114001',
+                        'labels': [
+                            {
+                                'label': 'Armianska-UA0114001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114001'
+                    },
+                    {
+                        'labelEn': 'Aromatnenska-UA0102003',
+                        'labels': [
+                            {
+                                'label': 'Aromatnenska-UA0102003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102003'
+                    },
+                    {
+                        'labelEn': 'Aromatnivska-UA0104001',
+                        'labels': [
+                            {
+                                'label': 'Aromatnivska-UA0104001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104001'
+                    },
+                    {
+                        'labelEn': 'Azovska-UA0106001',
+                        'labels': [
+                            {
+                                'label': 'Azovska-UA0106001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106001'
+                    },
+                    {
+                        'labelEn': 'Bahativska-UA0104003',
+                        'labels': [
+                            {
+                                'label': 'Bahativska-UA0104003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104003'
+                    },
+                    {
+                        'labelEn': 'Baherivska-UA0110001',
+                        'labels': [
+                            {
+                                'label': 'Baherivska-UA0110001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110001'
+                    },
+                    {
+                        'labelEn': 'Bakhchysaraiska-UA0102005',
+                        'labels': [
+                            {
+                                'label': 'Bakhchysaraiska-UA0102005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102005'
+                    },
+                    {
+                        'labelEn': 'Batalnenska-UA0110003',
+                        'labels': [
+                            {
+                                'label': 'Batalnenska-UA0110003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110003'
+                    },
+                    {
+                        'labelEn': 'Berezivska-UA0114003',
+                        'labels': [
+                            {
+                                'label': 'Berezivska-UA0114003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114003'
+                    },
+                    {
+                        'labelEn': 'Bielinska-UA0110005',
+                        'labels': [
+                            {
+                                'label': 'Bielinska-UA0110005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110005'
+                    },
+                    {
+                        'labelEn': 'Bilohirska-UA0104005',
+                        'labels': [
+                            {
+                                'label': 'Bilohirska-UA0104005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104005'
+                    },
+                    {
+                        'labelEn': 'Botanichna-UA0114005',
+                        'labels': [
+                            {
+                                'label': 'Botanichna-UA0114005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114005'
+                    },
+                    {
+                        'labelEn': 'Bratska-UA0114007',
+                        'labels': [
+                            {
+                                'label': 'Bratska-UA0114007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114007'
+                    },
+                    {
+                        'labelEn': 'Chaikynska-UA0106051',
+                        'labels': [
+                            {
+                                'label': 'Chaikynska-UA0106051',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106051'
+                    },
+                    {
+                        'labelEn': 'Cheliadinivska-UA0110051',
+                        'labels': [
+                            {
+                                'label': 'Cheliadinivska-UA0110051',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110051'
+                    },
+                    {
+                        'labelEn': 'Chernovska-UA0112071',
+                        'labels': [
+                            {
+                                'label': 'Chernovska-UA0112071',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112071'
+                    },
+                    {
+                        'labelEn': 'Chernyshivska-UA0114053',
+                        'labels': [
+                            {
+                                'label': 'Chernyshivska-UA0114053',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114053'
+                    },
+                    {
+                        'labelEn': 'Chkalovska-UA0104071',
+                        'labels': [
+                            {
+                                'label': 'Chkalovska-UA0104071',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104071'
+                    },
+                    {
+                        'labelEn': 'Chornomorska-UA0108077',
+                        'labels': [
+                            {
+                                'label': 'Chornomorska-UA0108077',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108077'
+                    },
+                    {
+                        'labelEn': 'Chornopilska-UA0104073',
+                        'labels': [
+                            {
+                                'label': 'Chornopilska-UA0104073',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104073'
+                    },
+                    {
+                        'labelEn': 'Chystopilska-UA0110053',
+                        'labels': [
+                            {
+                                'label': 'Chystopilska-UA0110053',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110053'
+                    },
+                    {
+                        'labelEn': 'Dalekivska-UA0108011',
+                        'labels': [
+                            {
+                                'label': 'Dalekivska-UA0108011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108011'
+                    },
+                    {
+                        'labelEn': 'Dobrivska-UA0116005',
+                        'labels': [
+                            {
+                                'label': 'Dobrivska-UA0116005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116005'
+                    },
+                    {
+                        'labelEn': 'Dobrushynska-UA0108013',
+                        'labels': [
+                            {
+                                'label': 'Dobrushynska-UA0108013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108013'
+                    },
+                    {
+                        'labelEn': 'Dolynnenska-UA0102015',
+                        'labels': [
+                            {
+                                'label': 'Dolynnenska-UA0102015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102015'
+                    },
+                    {
+                        'labelEn': 'Donska-UA0116007',
+                        'labels': [
+                            {
+                                'label': 'Donska-UA0116007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116007'
+                    },
+                    {
+                        'labelEn': 'Drofynska-UA0104011',
+                        'labels': [
+                            {
+                                'label': 'Drofynska-UA0104011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104011'
+                    },
+                    {
+                        'labelEn': 'Dzhankoiska-UA0106005',
+                        'labels': [
+                            {
+                                'label': 'Dzhankoiska-UA0106005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106005'
+                    },
+                    {
+                        'labelEn': 'Filativska-UA0114051',
+                        'labels': [
+                            {
+                                'label': 'Filativska-UA0114051',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114051'
+                    },
+                    {
+                        'labelEn': 'Frunzenska-UA0108075',
+                        'labels': [
+                            {
+                                'label': 'Frunzenska-UA0108075',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108075'
+                    },
+                    {
+                        'labelEn': 'Heroiska-UA0108009',
+                        'labels': [
+                            {
+                                'label': 'Heroiska-UA0108009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108009'
+                    },
+                    {
+                        'labelEn': 'Hlazivska-UA0110011',
+                        'labels': [
+                            {
+                                'label': 'Hlazivska-UA0110011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110011'
+                    },
+                    {
+                        'labelEn': 'Holubynska-UA0102013',
+                        'labels': [
+                            {
+                                'label': 'Holubynska-UA0102013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102013'
+                    },
+                    {
+                        'labelEn': 'Hornostaivska-UA0110013',
+                        'labels': [
+                            {
+                                'label': 'Hornostaivska-UA0110013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110013'
+                    },
+                    {
+                        'labelEn': 'Hresivska-UA0116003',
+                        'labels': [
+                            {
+                                'label': 'Hresivska-UA0116003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116003'
+                    },
+                    {
+                        'labelEn': 'Hryshynska-UA0112011',
+                        'labels': [
+                            {
+                                'label': 'Hryshynska-UA0112011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112011'
+                    },
+                    {
+                        'labelEn': 'Hvardiiska-UA0112009',
+                        'labels': [
+                            {
+                                'label': 'Hvardiiska-UA0112009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112009'
+                    },
+                    {
+                        'labelEn': 'Hvardiiska-UA0116001',
+                        'labels': [
+                            {
+                                'label': 'Hvardiiska-UA0116001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116001'
+                    },
+                    {
+                        'labelEn': 'Illichivska-UA0110017',
+                        'labels': [
+                            {
+                                'label': 'Illichivska-UA0110017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110017'
+                    },
+                    {
+                        'labelEn': 'Illinska-UA0114015',
+                        'labels': [
+                            {
+                                'label': 'Illinska-UA0114015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114015'
+                    },
+                    {
+                        'labelEn': 'Ishunska-UA0114017',
+                        'labels': [
+                            {
+                                'label': 'Ishunska-UA0114017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114017'
+                    },
+                    {
+                        'labelEn': 'Ivanivska-UA0104027',
+                        'labels': [
+                            {
+                                'label': 'Ivanivska-UA0104027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104027'
+                    },
+                    {
+                        'labelEn': 'Ivanivska-UA0108021',
+                        'labels': [
+                            {
+                                'label': 'Ivanivska-UA0108021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108021'
+                    },
+                    {
+                        'labelEn': 'Izobilnenska-UA0104029',
+                        'labels': [
+                            {
+                                'label': 'Izobilnenska-UA0104029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104029'
+                    },
+                    {
+                        'labelEn': 'Izumrudnivska-UA0106013',
+                        'labels': [
+                            {
+                                'label': 'Izumrudnivska-UA0106013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106013'
+                    },
+                    {
+                        'labelEn': 'Kalininska-UA0112015',
+                        'labels': [
+                            {
+                                'label': 'Kalininska-UA0112015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112015'
+                    },
+                    {
+                        'labelEn': 'Kalininska-UA0112017',
+                        'labels': [
+                            {
+                                'label': 'Kalininska-UA0112017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112017'
+                    },
+                    {
+                        'labelEn': 'Kalynivska-UA0110019',
+                        'labels': [
+                            {
+                                'label': 'Kalynivska-UA0110019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110019'
+                    },
+                    {
+                        'labelEn': 'Kashtanivska-UA0102025',
+                        'labels': [
+                            {
+                                'label': 'Kashtanivska-UA0102025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102025'
+                    },
+                    {
+                        'labelEn': 'Kerchenska-UA0110021',
+                        'labels': [
+                            {
+                                'label': 'Kerchenska-UA0110021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110021'
+                    },
+                    {
+                        'labelEn': 'Kindrativska-UA0106015',
+                        'labels': [
+                            {
+                                'label': 'Kindrativska-UA0106015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106015'
+                    },
+                    {
+                        'labelEn': 'Kirovska-UA0108023',
+                        'labels': [
+                            {
+                                'label': 'Kirovska-UA0108023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108023'
+                    },
+                    {
+                        'labelEn': 'Kirovska-UA0110023',
+                        'labels': [
+                            {
+                                'label': 'Kirovska-UA0110023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110023'
+                    },
+                    {
+                        'labelEn': 'Kistochkivska-UA0104031',
+                        'labels': [
+                            {
+                                'label': 'Kistochkivska-UA0104031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104031'
+                    },
+                    {
+                        'labelEn': 'Klepyninska-UA0112019',
+                        'labels': [
+                            {
+                                'label': 'Klepyninska-UA0112019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112019'
+                    },
+                    {
+                        'labelEn': 'Kolchuhynska-UA0116011',
+                        'labels': [
+                            {
+                                'label': 'Kolchuhynska-UA0116011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116011'
+                    },
+                    {
+                        'labelEn': 'Kolodiazianska-UA0112021',
+                        'labels': [
+                            {
+                                'label': 'Kolodiazianska-UA0112021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112021'
+                    },
+                    {
+                        'labelEn': 'Koltsovska-UA0108025',
+                        'labels': [
+                            {
+                                'label': 'Koltsovska-UA0108025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108025'
+                    },
+                    {
+                        'labelEn': 'Kormivska-UA0112023',
+                        'labels': [
+                            {
+                                'label': 'Kormivska-UA0112023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112023'
+                    },
+                    {
+                        'labelEn': 'Kotelnykivska-UA0112025',
+                        'labels': [
+                            {
+                                'label': 'Kotelnykivska-UA0112025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112025'
+                    },
+                    {
+                        'labelEn': 'Kovylnivska-UA0114019',
+                        'labels': [
+                            {
+                                'label': 'Kovylnivska-UA0114019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114019'
+                    },
+                    {
+                        'labelEn': 'Krainenska-UA0108027',
+                        'labels': [
+                            {
+                                'label': 'Krainenska-UA0108027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108027'
+                    },
+                    {
+                        'labelEn': 'Krasnoarmiiska-UA0114021',
+                        'labels': [
+                            {
+                                'label': 'Krasnoarmiiska-UA0114021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114021'
+                    },
+                    {
+                        'labelEn': 'Krasnohirska-UA0110025',
+                        'labels': [
+                            {
+                                'label': 'Krasnohirska-UA0110025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110025'
+                    },
+                    {
+                        'labelEn': 'Krasnohvardiiska-UA0112027',
+                        'labels': [
+                            {
+                                'label': 'Krasnohvardiiska-UA0112027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112027'
+                    },
+                    {
+                        'labelEn': 'Krasnoiarska-UA0108031',
+                        'labels': [
+                            {
+                                'label': 'Krasnoiarska-UA0108031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108031'
+                    },
+                    {
+                        'labelEn': 'Krasnomatska-UA0102027',
+                        'labels': [
+                            {
+                                'label': 'Krasnomatska-UA0102027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102027'
+                    },
+                    {
+                        'labelEn': 'Krasnoperekopska-UA0114023',
+                        'labels': [
+                            {
+                                'label': 'Krasnoperekopska-UA0114023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114023'
+                    },
+                    {
+                        'labelEn': 'Krasnopolianska-UA0108029',
+                        'labels': [
+                            {
+                                'label': 'Krasnopolianska-UA0108029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108029'
+                    },
+                    {
+                        'labelEn': 'Krasnoznamianska-UA0112029',
+                        'labels': [
+                            {
+                                'label': 'Krasnoznamianska-UA0112029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112029'
+                    },
+                    {
+                        'labelEn': 'Krestianivska-UA0112031',
+                        'labels': [
+                            {
+                                'label': 'Krestianivska-UA0112031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112031'
+                    },
+                    {
+                        'labelEn': 'Krymkivska-UA0106017',
+                        'labels': [
+                            {
+                                'label': 'Krymkivska-UA0106017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106017'
+                    },
+                    {
+                        'labelEn': 'Krymska-UA0108033',
+                        'labels': [
+                            {
+                                'label': 'Krymska-UA0108033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108033'
+                    },
+                    {
+                        'labelEn': 'Krymskorozivska-UA0104033',
+                        'labels': [
+                            {
+                                'label': 'Krymskorozivska-UA0104033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104033'
+                    },
+                    {
+                        'labelEn': 'Krynychnenska-UA0104035',
+                        'labels': [
+                            {
+                                'label': 'Krynychnenska-UA0104035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104035'
+                    },
+                    {
+                        'labelEn': 'Kuibyshevska-UA0102029',
+                        'labels': [
+                            {
+                                'label': 'Kuibyshevska-UA0102029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102029'
+                    },
+                    {
+                        'labelEn': 'Kukushkinska-UA0114025',
+                        'labels': [
+                            {
+                                'label': 'Kukushkinska-UA0114025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114025'
+                    },
+                    {
+                        'labelEn': 'Kurska-UA0104037',
+                        'labels': [
+                            {
+                                'label': 'Kurska-UA0104037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104037'
+                    },
+                    {
+                        'labelEn': 'Leninska-UA0110027',
+                        'labels': [
+                            {
+                                'label': 'Leninska-UA0110027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110027'
+                    },
+                    {
+                        'labelEn': 'Leninska-UA0110029',
+                        'labels': [
+                            {
+                                'label': 'Leninska-UA0110029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110029'
+                    },
+                    {
+                        'labelEn': 'Leninska-UA0112033',
+                        'labels': [
+                            {
+                                'label': 'Leninska-UA0112033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112033'
+                    },
+                    {
+                        'labelEn': 'Lisnivska-UA0108035',
+                        'labels': [
+                            {
+                                'label': 'Lisnivska-UA0108035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108035'
+                    },
+                    {
+                        'labelEn': 'Lobanivska-UA0106019',
+                        'labels': [
+                            {
+                                'label': 'Lobanivska-UA0106019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106019'
+                    },
+                    {
+                        'labelEn': 'Luhanska-UA0106021',
+                        'labels': [
+                            {
+                                'label': 'Luhanska-UA0106021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106021'
+                    },
+                    {
+                        'labelEn': 'Luhivska-UA0110031',
+                        'labels': [
+                            {
+                                'label': 'Luhivska-UA0110031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110031'
+                    },
+                    {
+                        'labelEn': 'Lystvynska-UA0104039',
+                        'labels': [
+                            {
+                                'label': 'Lystvynska-UA0104039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104039'
+                    },
+                    {
+                        'labelEn': 'Mahazynska-UA0114027',
+                        'labels': [
+                            {
+                                'label': 'Mahazynska-UA0114027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114027'
+                    },
+                    {
+                        'labelEn': 'Maiska-UA0106023',
+                        'labels': [
+                            {
+                                'label': 'Maiska-UA0106023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106023'
+                    },
+                    {
+                        'labelEn': 'Marfivska-UA0110035',
+                        'labels': [
+                            {
+                                'label': 'Marfivska-UA0110035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110035'
+                    },
+                    {
+                        'labelEn': 'Marianivska-UA0112035',
+                        'labels': [
+                            {
+                                'label': 'Marianivska-UA0112035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112035'
+                    },
+                    {
+                        'labelEn': 'Marivska-UA0110033',
+                        'labels': [
+                            {
+                                'label': 'Marivska-UA0110033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110033'
+                    },
+                    {
+                        'labelEn': 'Maslivska-UA0106025',
+                        'labels': [
+                            {
+                                'label': 'Maslivska-UA0106025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106025'
+                    },
+                    {
+                        'labelEn': 'Mazanska-UA0116013',
+                        'labels': [
+                            {
+                                'label': 'Mazanska-UA0116013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116013'
+                    },
+                    {
+                        'labelEn': 'Medvedivska-UA0106027',
+                        'labels': [
+                            {
+                                'label': 'Medvedivska-UA0106027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106027'
+                    },
+                    {
+                        'labelEn': 'Medvedivska-UA0108037',
+                        'labels': [
+                            {
+                                'label': 'Medvedivska-UA0108037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108037'
+                    },
+                    {
+                        'labelEn': 'Melnychna-UA0104041',
+                        'labels': [
+                            {
+                                'label': 'Melnychna-UA0104041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104041'
+                    },
+                    {
+                        'labelEn': 'Michurinska-UA0104047',
+                        'labels': [
+                            {
+                                'label': 'Michurinska-UA0104047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104047'
+                    },
+                    {
+                        'labelEn': 'Mizhvodnenska-UA0108043',
+                        'labels': [
+                            {
+                                'label': 'Mizhvodnenska-UA0108043',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108043'
+                    },
+                    {
+                        'labelEn': 'Molochnenska-UA0108045',
+                        'labels': [
+                            {
+                                'label': 'Molochnenska-UA0108045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108045'
+                    },
+                    {
+                        'labelEn': 'Molodizhnenska-UA0116019',
+                        'labels': [
+                            {
+                                'label': 'Molodizhnenska-UA0116019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116019'
+                    },
+                    {
+                        'labelEn': 'Muromska-UA0104049',
+                        'labels': [
+                            {
+                                'label': 'Muromska-UA0104049',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104049'
+                    },
+                    {
+                        'labelEn': 'Mykhailivska-UA0104045',
+                        'labels': [
+                            {
+                                'label': 'Mykhailivska-UA0104045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104045'
+                    },
+                    {
+                        'labelEn': 'Mykolaivska-UA0116015',
+                        'labels': [
+                            {
+                                'label': 'Mykolaivska-UA0116015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116015'
+                    },
+                    {
+                        'labelEn': 'Myrnivska-UA0106029',
+                        'labels': [
+                            {
+                                'label': 'Myrnivska-UA0106029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106029'
+                    },
+                    {
+                        'labelEn': 'Myrnivska-UA0108039',
+                        'labels': [
+                            {
+                                'label': 'Myrnivska-UA0108039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108039'
+                    },
+                    {
+                        'labelEn': 'Myrnivska-UA0116017',
+                        'labels': [
+                            {
+                                'label': 'Myrnivska-UA0116017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116017'
+                    },
+                    {
+                        'labelEn': 'Mysivska-UA0110037',
+                        'labels': [
+                            {
+                                'label': 'Mysivska-UA0110037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110037'
+                    },
+                    {
+                        'labelEn': 'Mytiaivska-UA0108041',
+                        'labels': [
+                            {
+                                'label': 'Mytiaivska-UA0108041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108041'
+                    },
+                    {
+                        'labelEn': 'Mytrofanivska-UA0104043',
+                        'labels': [
+                            {
+                                'label': 'Mytrofanivska-UA0104043',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104043'
+                    },
+                    {
+                        'labelEn': 'Naidonivska-UA0112037',
+                        'labels': [
+                            {
+                                'label': 'Naidonivska-UA0112037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112037'
+                    },
+                    {
+                        'labelEn': 'Novoandriivska-UA0116021',
+                        'labels': [
+                            {
+                                'label': 'Novoandriivska-UA0116021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116021'
+                    },
+                    {
+                        'labelEn': 'Novofedorivska-UA0108053',
+                        'labels': [
+                            {
+                                'label': 'Novofedorivska-UA0108053',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108053'
+                    },
+                    {
+                        'labelEn': 'Novohryhorivska-UA0104053',
+                        'labels': [
+                            {
+                                'label': 'Novohryhorivska-UA0104053',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104053'
+                    },
+                    {
+                        'labelEn': 'Novoivanivska-UA0108047',
+                        'labels': [
+                            {
+                                'label': 'Novoivanivska-UA0108047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108047'
+                    },
+                    {
+                        'labelEn': 'Novokrymska-UA0106031',
+                        'labels': [
+                            {
+                                'label': 'Novokrymska-UA0106031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106031'
+                    },
+                    {
+                        'labelEn': 'Novomykolaivska-UA0110039',
+                        'labels': [
+                            {
+                                'label': 'Novomykolaivska-UA0110039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110039'
+                    },
+                    {
+                        'labelEn': 'Novoozernivska-UA0108049',
+                        'labels': [
+                            {
+                                'label': 'Novoozernivska-UA0108049',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108049'
+                    },
+                    {
+                        'labelEn': 'Novopavlivska-UA0114029',
+                        'labels': [
+                            {
+                                'label': 'Novopavlivska-UA0114029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114029'
+                    },
+                    {
+                        'labelEn': 'Novopokrovska-UA0112039',
+                        'labels': [
+                            {
+                                'label': 'Novopokrovska-UA0112039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112039'
+                    },
+                    {
+                        'labelEn': 'Novoselivska-UA0114031',
+                        'labels': [
+                            {
+                                'label': 'Novoselivska-UA0114031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114031'
+                    },
+                    {
+                        'labelEn': 'Novoselivska-UA0116023',
+                        'labels': [
+                            {
+                                'label': 'Novoselivska-UA0116023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116023'
+                    },
+                    {
+                        'labelEn': 'Novosilska-UA0108051',
+                        'labels': [
+                            {
+                                'label': 'Novosilska-UA0108051',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108051'
+                    },
+                    {
+                        'labelEn': 'Novozhylivska-UA0104055',
+                        'labels': [
+                            {
+                                'label': 'Novozhylivska-UA0104055',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104055'
+                    },
+                    {
+                        'labelEn': 'Nyzhnohirska-UA0104051',
+                        'labels': [
+                            {
+                                'label': 'Nyzhnohirska-UA0104051',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104051'
+                    },
+                    {
+                        'labelEn': 'Okhotnykivska-UA0108061',
+                        'labels': [
+                            {
+                                'label': 'Okhotnykivska-UA0108061',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108061'
+                    },
+                    {
+                        'labelEn': 'Okhotska-UA0104059',
+                        'labels': [
+                            {
+                                'label': 'Okhotska-UA0104059',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104059'
+                    },
+                    {
+                        'labelEn': 'Oktiabrska-UA0110041',
+                        'labels': [
+                            {
+                                'label': 'Oktiabrska-UA0110041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110041'
+                    },
+                    {
+                        'labelEn': 'Oktiabrska-UA0112041',
+                        'labels': [
+                            {
+                                'label': 'Oktiabrska-UA0112041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112041'
+                    },
+                    {
+                        'labelEn': 'Oktiabrska-UA0112043',
+                        'labels': [
+                            {
+                                'label': 'Oktiabrska-UA0112043',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112043'
+                    },
+                    {
+                        'labelEn': 'Okunivska-UA0108055',
+                        'labels': [
+                            {
+                                'label': 'Okunivska-UA0108055',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108055'
+                    },
+                    {
+                        'labelEn': 'Oleksandrivska-UA0112045',
+                        'labels': [
+                            {
+                                'label': 'Oleksandrivska-UA0112045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112045'
+                    },
+                    {
+                        'labelEn': 'Oleksiivska-UA0112047',
+                        'labels': [
+                            {
+                                'label': 'Oleksiivska-UA0112047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112047'
+                    },
+                    {
+                        'labelEn': 'Olenivska-UA0108057',
+                        'labels': [
+                            {
+                                'label': 'Olenivska-UA0108057',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108057'
+                    },
+                    {
+                        'labelEn': 'Omelianivska-UA0104057',
+                        'labels': [
+                            {
+                                'label': 'Omelianivska-UA0104057',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104057'
+                    },
+                    {
+                        'labelEn': 'Orikhivska-UA0108059',
+                        'labels': [
+                            {
+                                'label': 'Orikhivska-UA0108059',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108059'
+                    },
+                    {
+                        'labelEn': 'Orlivska-UA0114033',
+                        'labels': [
+                            {
+                                'label': 'Orlivska-UA0114033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114033'
+                    },
+                    {
+                        'labelEn': 'Ostaninska-UA0110043',
+                        'labels': [
+                            {
+                                'label': 'Ostaninska-UA0110043',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110043'
+                    },
+                    {
+                        'labelEn': 'Ostrovska-UA0112049',
+                        'labels': [
+                            {
+                                'label': 'Ostrovska-UA0112049',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112049'
+                    },
+                    {
+                        'labelEn': 'Pakharivska-UA0106033',
+                        'labels': [
+                            {
+                                'label': 'Pakharivska-UA0106033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106033'
+                    },
+                    {
+                        'labelEn': 'Perovska-UA0116027',
+                        'labels': [
+                            {
+                                'label': 'Perovska-UA0116027',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116027'
+                    },
+                    {
+                        'labelEn': 'Pervomaiska-UA0112053',
+                        'labels': [
+                            {
+                                'label': 'Pervomaiska-UA0112053',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112053'
+                    },
+                    {
+                        'labelEn': 'Pervomaiska-UA0116025',
+                        'labels': [
+                            {
+                                'label': 'Pervomaiska-UA0116025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116025'
+                    },
+                    {
+                        'labelEn': 'Petrivska-UA0112055',
+                        'labels': [
+                            {
+                                'label': 'Petrivska-UA0112055',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112055'
+                    },
+                    {
+                        'labelEn': 'Piatykhatska-UA0112051',
+                        'labels': [
+                            {
+                                'label': 'Piatykhatska-UA0112051',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112051'
+                    },
+                    {
+                        'labelEn': 'Pishchanivska-UA0102033',
+                        'labels': [
+                            {
+                                'label': 'Pishchanivska-UA0102033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102033'
+                    },
+                    {
+                        'labelEn': 'Plodivska-UA0102035',
+                        'labels': [
+                            {
+                                'label': 'Plodivska-UA0102035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102035'
+                    },
+                    {
+                        'labelEn': 'Pobiednenska-UA0106035',
+                        'labels': [
+                            {
+                                'label': 'Pobiednenska-UA0106035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106035'
+                    },
+                    {
+                        'labelEn': 'Pochetnenska-UA0114035',
+                        'labels': [
+                            {
+                                'label': 'Pochetnenska-UA0114035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114035'
+                    },
+                    {
+                        'labelEn': 'Poltavska-UA0112057',
+                        'labels': [
+                            {
+                                'label': 'Poltavska-UA0112057',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112057'
+                    },
+                    {
+                        'labelEn': 'Poshtivska-UA0102037',
+                        'labels': [
+                            {
+                                'label': 'Poshtivska-UA0102037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102037'
+                    },
+                    {
+                        'labelEn': 'Pozharska-UA0116029',
+                        'labels': [
+                            {
+                                'label': 'Pozharska-UA0116029',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116029'
+                    },
+                    {
+                        'labelEn': 'Pravdivska-UA0112059',
+                        'labels': [
+                            {
+                                'label': 'Pravdivska-UA0112059',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112059'
+                    },
+                    {
+                        'labelEn': 'Prostornenska-UA0106037',
+                        'labels': [
+                            {
+                                'label': 'Prostornenska-UA0106037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106037'
+                    },
+                    {
+                        'labelEn': 'Pryozernivska-UA0110045',
+                        'labels': [
+                            {
+                                'label': 'Pryozernivska-UA0110045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110045'
+                    },
+                    {
+                        'labelEn': 'Pshenychnenska-UA0104061',
+                        'labels': [
+                            {
+                                'label': 'Pshenychnenska-UA0104061',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104061'
+                    },
+                    {
+                        'labelEn': 'Rivnivska-UA0112061',
+                        'labels': [
+                            {
+                                'label': 'Rivnivska-UA0112061',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112061'
+                    },
+                    {
+                        'labelEn': 'Rodnykivska-UA0116031',
+                        'labels': [
+                            {
+                                'label': 'Rodnykivska-UA0116031',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116031'
+                    },
+                    {
+                        'labelEn': 'Romashkinska-UA0108063',
+                        'labels': [
+                            {
+                                'label': 'Romashkinska-UA0108063',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108063'
+                    },
+                    {
+                        'labelEn': 'Roshchynska-UA0106041',
+                        'labels': [
+                            {
+                                'label': 'Roshchynska-UA0106041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106041'
+                    },
+                    {
+                        'labelEn': 'Rozdolnenska-UA0114037',
+                        'labels': [
+                            {
+                                'label': 'Rozdolnenska-UA0114037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114037'
+                    },
+                    {
+                        'labelEn': 'Rozkishnenska-UA0106039',
+                        'labels': [
+                            {
+                                'label': 'Rozkishnenska-UA0106039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106039'
+                    },
+                    {
+                        'labelEn': 'Ruchivska-UA0114039',
+                        'labels': [
+                            {
+                                'label': 'Ruchivska-UA0114039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114039'
+                    },
+                    {
+                        'labelEn': 'Rusakivska-UA0104063',
+                        'labels': [
+                            {
+                                'label': 'Rusakivska-UA0104063',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104063'
+                    },
+                    {
+                        'labelEn': 'Sadova-UA0104065',
+                        'labels': [
+                            {
+                                'label': 'Sadova-UA0104065',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104065'
+                    },
+                    {
+                        'labelEn': 'Sakska-UA0108065',
+                        'labels': [
+                            {
+                                'label': 'Sakska-UA0108065',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108065'
+                    },
+                    {
+                        'labelEn': 'Sarybashivska-UA0112063',
+                        'labels': [
+                            {
+                                'label': 'Sarybashivska-UA0112063',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112063'
+                    },
+                    {
+                        'labelEn': 'Semysotska-UA0110047',
+                        'labels': [
+                            {
+                                'label': 'Semysotska-UA0110047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110047'
+                    },
+                    {
+                        'labelEn': 'Serebrianska-UA0114041',
+                        'labels': [
+                            {
+                                'label': 'Serebrianska-UA0114041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114041'
+                    },
+                    {
+                        'labelEn': 'Sevastopilska-UA0102000',
+                        'labels': [
+                            {
+                                'label': 'Sevastopilska-UA0102000',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102000'
+                    },
+                    {
+                        'labelEn': 'Shcholkinska-UA0110055',
+                        'labels': [
+                            {
+                                'label': 'Shcholkinska-UA0110055',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110055'
+                    },
+                    {
+                        'labelEn': 'Shtormivska-UA0108079',
+                        'labels': [
+                            {
+                                'label': 'Shtormivska-UA0108079',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108079'
+                    },
+                    {
+                        'labelEn': 'Simferopolska-UA0116033',
+                        'labels': [
+                            {
+                                'label': 'Simferopolska-UA0116033',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116033'
+                    },
+                    {
+                        'labelEn': 'Skalystivska-UA0102039',
+                        'labels': [
+                            {
+                                'label': 'Skalystivska-UA0102039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102039'
+                    },
+                    {
+                        'labelEn': 'Skvortsivska-UA0116035',
+                        'labels': [
+                            {
+                                'label': 'Skvortsivska-UA0116035',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116035'
+                    },
+                    {
+                        'labelEn': 'Slavnivska-UA0114043',
+                        'labels': [
+                            {
+                                'label': 'Slavnivska-UA0114043',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114043'
+                    },
+                    {
+                        'labelEn': 'Slovianska-UA0114045',
+                        'labels': [
+                            {
+                                'label': 'Slovianska-UA0114045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114045'
+                    },
+                    {
+                        'labelEn': 'Sovkhoznenska-UA0114047',
+                        'labels': [
+                            {
+                                'label': 'Sovkhoznenska-UA0114047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114047'
+                    },
+                    {
+                        'labelEn': 'Stakhanovska-UA0112065',
+                        'labels': [
+                            {
+                                'label': 'Stakhanovska-UA0112065',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112065'
+                    },
+                    {
+                        'labelEn': 'Stalnenska-UA0106045',
+                        'labels': [
+                            {
+                                'label': 'Stalnenska-UA0106045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106045'
+                    },
+                    {
+                        'labelEn': 'Stepnivska-UA0112067',
+                        'labels': [
+                            {
+                                'label': 'Stepnivska-UA0112067',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112067'
+                    },
+                    {
+                        'labelEn': 'Stovpivska-UA0108069',
+                        'labels': [
+                            {
+                                'label': 'Stovpivska-UA0108069',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108069'
+                    },
+                    {
+                        'labelEn': 'Susaninska-UA0112069',
+                        'labels': [
+                            {
+                                'label': 'Susaninska-UA0112069',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112069'
+                    },
+                    {
+                        'labelEn': 'Suvorovska-UA0108071',
+                        'labels': [
+                            {
+                                'label': 'Suvorovska-UA0108071',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108071'
+                    },
+                    {
+                        'labelEn': 'Suvorovska-UA0114049',
+                        'labels': [
+                            {
+                                'label': 'Suvorovska-UA0114049',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114049'
+                    },
+                    {
+                        'labelEn': 'Svitlivska-UA0106043',
+                        'labels': [
+                            {
+                                'label': 'Svitlivska-UA0106043',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106043'
+                    },
+                    {
+                        'labelEn': 'Syzivska-UA0108067',
+                        'labels': [
+                            {
+                                'label': 'Syzivska-UA0108067',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108067'
+                    },
+                    {
+                        'labelEn': 'Tabachnenska-UA0102041',
+                        'labels': [
+                            {
+                                'label': 'Tabachnenska-UA0102041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102041'
+                    },
+                    {
+                        'labelEn': 'Tabachnenska-UA0106047',
+                        'labels': [
+                            {
+                                'label': 'Tabachnenska-UA0106047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106047'
+                    },
+                    {
+                        'labelEn': 'Tinystivska-UA0102045',
+                        'labels': [
+                            {
+                                'label': 'Tinystivska-UA0102045',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102045'
+                    },
+                    {
+                        'labelEn': 'Trudivska-UA0116037',
+                        'labels': [
+                            {
+                                'label': 'Trudivska-UA0116037',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116037'
+                    },
+                    {
+                        'labelEn': 'Tsilynna-UA0106049',
+                        'labels': [
+                            {
+                                'label': 'Tsilynna-UA0106049',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106049'
+                    },
+                    {
+                        'labelEn': 'Tsvitochnenska-UA0104069',
+                        'labels': [
+                            {
+                                'label': 'Tsvitochnenska-UA0104069',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104069'
+                    },
+                    {
+                        'labelEn': 'Uhlivska-UA0102047',
+                        'labels': [
+                            {
+                                'label': 'Uhlivska-UA0102047',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102047'
+                    },
+                    {
+                        'labelEn': 'Uiutnenska-UA0108073',
+                        'labels': [
+                            {
+                                'label': 'Uiutnenska-UA0108073',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108073'
+                    },
+                    {
+                        'labelEn': 'Ukromnivska-UA0116039',
+                        'labels': [
+                            {
+                                'label': 'Ukromnivska-UA0116039',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116039'
+                    },
+                    {
+                        'labelEn': 'Urozhainivska-UA0116041',
+                        'labels': [
+                            {
+                                'label': 'Urozhainivska-UA0116041',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116041'
+                    },
+                    {
+                        'labelEn': 'Uvarivska-UA0104067',
+                        'labels': [
+                            {
+                                'label': 'Uvarivska-UA0104067',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104067'
+                    },
+                    {
+                        'labelEn': 'Uvarivska-UA0110049',
+                        'labels': [
+                            {
+                                'label': 'Uvarivska-UA0110049',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110049'
+                    },
+                    {
+                        'labelEn': 'Vasylivska-UA0104007',
+                        'labels': [
+                            {
+                                'label': 'Vasylivska-UA0104007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104007'
+                    },
+                    {
+                        'labelEn': 'Veresaievska-UA0108001',
+                        'labels': [
+                            {
+                                'label': 'Veresaievska-UA0108001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108001'
+                    },
+                    {
+                        'labelEn': 'Verkhorichenska-UA0102009',
+                        'labels': [
+                            {
+                                'label': 'Verkhorichenska-UA0102009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102009'
+                    },
+                    {
+                        'labelEn': 'Veselivska-UA0108003',
+                        'labels': [
+                            {
+                                'label': 'Veselivska-UA0108003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108003'
+                    },
+                    {
+                        'labelEn': 'Vilinska-UA0102011',
+                        'labels': [
+                            {
+                                'label': 'Vilinska-UA0102011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102011'
+                    },
+                    {
+                        'labelEn': 'Vilnenska-UA0106003',
+                        'labels': [
+                            {
+                                'label': 'Vilnenska-UA0106003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106003'
+                    },
+                    {
+                        'labelEn': 'Voikovska-UA0110009',
+                        'labels': [
+                            {
+                                'label': 'Voikovska-UA0110009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110009'
+                    },
+                    {
+                        'labelEn': 'Voikovska-UA0112005',
+                        'labels': [
+                            {
+                                'label': 'Voikovska-UA0112005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112005'
+                    },
+                    {
+                        'labelEn': 'Voinska-UA0114011',
+                        'labels': [
+                            {
+                                'label': 'Voinska-UA0114011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114011'
+                    },
+                    {
+                        'labelEn': 'Vorobiovska-UA0108007',
+                        'labels': [
+                            {
+                                'label': 'Vorobiovska-UA0108007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108007'
+                    },
+                    {
+                        'labelEn': 'Voskhodnenska-UA0112007',
+                        'labels': [
+                            {
+                                'label': 'Voskhodnenska-UA0112007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112007'
+                    },
+                    {
+                        'labelEn': 'Vynohradivska-UA0108005',
+                        'labels': [
+                            {
+                                'label': 'Vynohradivska-UA0108005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108005'
+                    },
+                    {
+                        'labelEn': 'Vynohradnenska-UA0110007',
+                        'labels': [
+                            {
+                                'label': 'Vynohradnenska-UA0110007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110007'
+                    },
+                    {
+                        'labelEn': 'Vyshenska-UA0104009',
+                        'labels': [
+                            {
+                                'label': 'Vyshenska-UA0104009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104009'
+                    },
+                    {
+                        'labelEn': 'Vyshnivska-UA0114009',
+                        'labels': [
+                            {
+                                'label': 'Vyshnivska-UA0114009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114009'
+                    },
+                    {
+                        'labelEn': 'Yakymivska-UA0104075',
+                        'labels': [
+                            {
+                                'label': 'Yakymivska-UA0104075',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104075'
+                    },
+                    {
+                        'labelEn': 'Yantarnenska-UA0112073',
+                        'labels': [
+                            {
+                                'label': 'Yantarnenska-UA0112073',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112073'
+                    },
+                    {
+                        'labelEn': 'Yarkivska-UA0106053',
+                        'labels': [
+                            {
+                                'label': 'Yarkivska-UA0106053',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106053'
+                    },
+                    {
+                        'labelEn': 'Yarkopolenska-UA0106055',
+                        'labels': [
+                            {
+                                'label': 'Yarkopolenska-UA0106055',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106055'
+                    },
+                    {
+                        'labelEn': 'Yasnopolianska-UA0106057',
+                        'labels': [
+                            {
+                                'label': 'Yasnopolianska-UA0106057',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106057'
+                    },
+                    {
+                        'labelEn': 'Yermakivska-UA0106007',
+                        'labels': [
+                            {
+                                'label': 'Yermakivska-UA0106007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106007'
+                    },
+                    {
+                        'labelEn': 'Yevpatoriiska-UA0108015',
+                        'labels': [
+                            {
+                                'label': 'Yevpatoriiska-UA0108015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108015'
+                    },
+                    {
+                        'labelEn': 'Zaliznychnenska-UA0102017',
+                        'labels': [
+                            {
+                                'label': 'Zaliznychnenska-UA0102017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102017'
+                    },
+                    {
+                        'labelEn': 'Zaozernenska-UA0108017',
+                        'labels': [
+                            {
+                                'label': 'Zaozernenska-UA0108017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108017'
+                    },
+                    {
+                        'labelEn': 'Zarichnenska-UA0106011',
+                        'labels': [
+                            {
+                                'label': 'Zarichnenska-UA0106011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106011'
+                    },
+                    {
+                        'labelEn': 'Zavitnenska-UA0110015',
+                        'labels': [
+                            {
+                                'label': 'Zavitnenska-UA0110015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110015'
+                    },
+                    {
+                        'labelEn': 'Zavito-Leninska-UA0106009',
+                        'labels': [
+                            {
+                                'label': 'Zavito-Leninska-UA0106009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106009'
+                    },
+                    {
+                        'labelEn': 'Zelenivska-UA0102019',
+                        'labels': [
+                            {
+                                'label': 'Zelenivska-UA0102019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102019'
+                    },
+                    {
+                        'labelEn': 'Zelenohirska-UA0104017',
+                        'labels': [
+                            {
+                                'label': 'Zelenohirska-UA0104017',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104017'
+                    },
+                    {
+                        'labelEn': 'Zemlianychnenska-UA0104019',
+                        'labels': [
+                            {
+                                'label': 'Zemlianychnenska-UA0104019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104019'
+                    },
+                    {
+                        'labelEn': 'Zernivska-UA0108019',
+                        'labels': [
+                            {
+                                'label': 'Zernivska-UA0108019',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108019'
+                    },
+                    {
+                        'labelEn': 'Zernivska-UA0112013',
+                        'labels': [
+                            {
+                                'label': 'Zernivska-UA0112013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112013'
+                    },
+                    {
+                        'labelEn': 'Zheliabovska-UA0104013',
+                        'labels': [
+                            {
+                                'label': 'Zheliabovska-UA0104013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104013'
+                    },
+                    {
+                        'labelEn': 'Zhemchuzhynska-UA0104015',
+                        'labels': [
+                            {
+                                'label': 'Zhemchuzhynska-UA0104015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104015'
+                    },
+                    {
+                        'labelEn': 'Zhuravlivska-UA0116009',
+                        'labels': [
+                            {
+                                'label': 'Zhuravlivska-UA0116009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116009'
+                    },
+                    {
+                        'labelEn': 'Zorkinska-UA0104023',
+                        'labels': [
+                            {
+                                'label': 'Zorkinska-UA0104023',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104023'
+                    },
+                    {
+                        'labelEn': 'Zuiska-UA0104025',
+                        'labels': [
+                            {
+                                'label': 'Zuiska-UA0104025',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104025'
+                    },
+                    {
+                        'labelEn': 'Zybynska-UA0104021',
+                        'labels': [
+                            {
+                                'label': 'Zybynska-UA0104021',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104021'
+                    },
+                    {
+                        'labelEn': 'Zymynska-UA0114013',
+                        'labels': [
+                            {
+                                'label': 'Zymynska-UA0114013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114013'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Household resides in which ${admin3_h_c}?',
+                'labels': [
+                    {
+                        'label': 'Household resides in which ${admin3_h_c}?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'admin3',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Household resides in which ${admin4_h_c}?',
+                'labels': [
+                    {
+                        'label': 'Household resides in which ${admin4_h_c}?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'admin4',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
                         'labelEn': 'Monthly',
                         'labels': [
                             {
@@ -44694,6 +47118,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'DAUGHTERINLAW_SONINLAW'
+                    },
+                    {
+                        'labelEn': 'Foster child',
+                        'labels': [
+                            {
+                                'label': 'Foster child',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'FOSTER_CHILD'
                     },
                     {
                         'labelEn': 'Granddaughter / Grandson',

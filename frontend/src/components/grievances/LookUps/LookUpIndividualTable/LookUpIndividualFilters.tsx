@@ -10,11 +10,11 @@ import WcIcon from '@material-ui/icons/Wc';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LookUpAdminAreaAutocomplete } from '../../../../shared/autocompletes/LookUpAdminAreaAutocomplete';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
 
 interface LookUpIndividualFiltersProps {
   onFilterChange;
@@ -120,8 +120,8 @@ export function LookUpIndividualFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item xs={5}>
-          <AdminAreaAutocomplete
+        <Grid item>
+          <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}

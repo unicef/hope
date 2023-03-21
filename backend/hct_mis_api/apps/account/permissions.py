@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -75,6 +75,27 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_DELETE = auto()
     PAYMENT_VERIFICATION_INVALID = auto()
     PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
+
+    # Payment Module
+    PM_VIEW_LIST = auto()
+    PM_CREATE = auto()
+    PM_VIEW_DETAILS = auto()
+    PM_IMPORT_XLSX_WITH_ENTITLEMENTS = auto()
+    PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS = auto()
+
+    PM_LOCK_AND_UNLOCK = auto()
+    PM_LOCK_AND_UNLOCK_FSP = auto()
+    PM_SEND_FOR_APPROVAL = auto()
+    PM_ACCEPTANCE_PROCESS_APPROVE = auto()
+    PM_ACCEPTANCE_PROCESS_AUTHORIZE = auto()
+    PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW = auto()
+    PM_IMPORT_XLSX_WITH_RECONCILIATION = auto()
+    PM_EXPORT_XLSX_FOR_FSP = auto()
+    PM_DOWNLOAD_XLSX_FOR_FSP = auto()
+    PM_MARK_PAYMENT_AS_FAILED = auto()
+
+    # Payment Module Admin
+    PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
@@ -294,7 +315,7 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
 
-class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
+class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
         type: Type,
@@ -371,6 +392,10 @@ class DjangoPermissionFilterConnectionField(DjangoFastConnectionField):
         )
 
 
+class DjangoPermissionFilterConnectionField(DjangoPermissionFilterFastConnectionField):
+    use_cached_count = False
+
+
 class BaseMutationPermissionMixin:
     @classmethod
     def is_authenticated(cls, info: Any) -> Optional[bool]:
@@ -379,7 +404,9 @@ class BaseMutationPermissionMixin:
         return True
 
     @classmethod
-    def has_permission(cls, info: Any, permission: Any, business_area_arg: str, raise_error: bool = True) -> bool:
+    def has_permission(
+        cls, info: Any, permission: Any, business_area_arg: Union[str, BusinessArea], raise_error: bool = True
+    ) -> bool:
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):

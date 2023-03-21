@@ -42,6 +42,7 @@ export function CreateTargetPopulationHeader({
           fullWidth
           required
           component={FormikTextField}
+          data-cy='input-name'
         />
       }
       breadCrumbs={

@@ -34,7 +34,7 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> QuerySet["BusinessArea"]:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Any:  # TODO: typing
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:

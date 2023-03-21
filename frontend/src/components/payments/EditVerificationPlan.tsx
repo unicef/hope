@@ -28,12 +28,13 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
+  PaymentPlanQuery,
   useAllAdminAreasQuery,
-  useAllRapidProFlowsQuery,
-  useCashPlanQuery,
-  useEditCashPlanPaymentVerificationMutation,
+  useAllRapidProFlowsLazyQuery,
+  useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
@@ -49,18 +50,20 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  cashPlanVerificationId,
+  cashOrPaymentPlanId = null,
+  paymentVerificationPlanId,
   selectedTab,
   values,
   businessArea,
-  cashPlanId = null,
 ) {
   return {
     input: {
-      ...(cashPlanVerificationId && {
-        cashPlanPaymentVerificationId: cashPlanVerificationId,
+      ...(cashOrPaymentPlanId && {
+        cashOrPaymentPlanId,
       }),
-      ...(cashPlanId && { cashPlanId }),
+      ...(paymentVerificationPlanId && {
+        paymentVerificationPlanId,
+      }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedTab === 0
@@ -98,55 +101,59 @@ function prepareVariables(
 }
 
 export interface Props {
-  cashPlanVerificationId: string;
-  cashPlanId: string;
+  paymentVerificationPlanNode: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  cashOrPaymentPlanId: string;
 }
+
 export function EditVerificationPlan({
-  cashPlanVerificationId,
-  cashPlanId,
+  paymentVerificationPlanNode,
+  cashOrPaymentPlanId,
 }: Props): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useEditCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const businessArea = useBusinessArea();
-  const {
-    data: { cashPlan },
-  } = useCashPlanQuery({
-    variables: { id: cashPlanId },
-  });
-  const verification = cashPlan?.verifications?.edges[0].node;
+
   useEffect(() => {
-    if (verification.sampling === 'FULL_LIST') {
+    if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
       setSelectedTab(0);
     } else {
       setSelectedTab(1);
     }
-  }, [verification.sampling]);
+  }, [paymentVerificationPlanNode.sampling]);
 
   const initialValues = {
-    confidenceInterval: verification.confidenceInterval * 100 || 95,
-    marginOfError: verification.marginOfError * 100 || 5,
-    filterAgeMin: verification.ageFilter?.min || '',
-    filterAgeMax: verification.ageFilter?.max || '',
-    filterSex: verification.sexFilter || '',
-    excludedAdminAreasFull: verification.excludedAdminAreasFilter,
-    excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
-    verificationChannel: verification.verificationChannel || null,
-    rapidProFlow: verification.rapidProFlowId || null,
-    adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
+    confidenceInterval:
+      paymentVerificationPlanNode.confidenceInterval * 100 || 95,
+    marginOfError: paymentVerificationPlanNode.marginOfError * 100 || 5,
+    filterAgeMin: paymentVerificationPlanNode.ageFilter?.min || '',
+    filterAgeMax: paymentVerificationPlanNode.ageFilter?.max || '',
+    filterSex: paymentVerificationPlanNode.sexFilter || '',
+    excludedAdminAreasFull:
+      paymentVerificationPlanNode.excludedAdminAreasFilter || [],
+    excludedAdminAreasRandom:
+      paymentVerificationPlanNode.excludedAdminAreasFilter || [],
+    verificationChannel:
+      paymentVerificationPlanNode.verificationChannel || null,
+    rapidProFlow: paymentVerificationPlanNode.rapidProFlowId || '',
+    adminCheckbox:
+      paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
     ageCheckbox:
-      Boolean(verification.ageFilter?.min) ||
-      Boolean(verification.ageFilter?.max) ||
+      Boolean(paymentVerificationPlanNode.ageFilter?.min) ||
+      Boolean(paymentVerificationPlanNode.ageFilter?.max) ||
       false,
-    sexCheckbox: Boolean(verification.sexFilter) || false,
+    sexCheckbox: Boolean(paymentVerificationPlanNode.sexFilter) || false,
   };
 
   const [formValues, setFormValues] = useState(initialValues);
 
-  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
+  const [
+    loadRapidProFlows,
+    { data: rapidProFlows },
+  ] = useAllRapidProFlowsLazyQuery({
     variables: {
       businessAreaSlug: businessArea,
     },
@@ -160,24 +167,29 @@ export function EditVerificationPlan({
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
-      cashPlanVerificationId,
+      cashOrPaymentPlanId,
+      paymentVerificationPlanNode.id,
       selectedTab,
       formValues,
       businessArea,
-      cashPlanId,
     ),
     fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
-    loadSampleSize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues, open]);
+    if (open) {
+      loadSampleSize();
+      if (formValues.verificationChannel === 'RAPIDPRO') {
+        loadRapidProFlows();
+      }
+    }
+  }, [formValues, open, loadSampleSize, loadRapidProFlows]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        cashPlanVerificationId,
+        null,
+        paymentVerificationPlanNode.id,
         selectedTab,
         values,
         businessArea,
@@ -216,6 +228,7 @@ export function EditVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <FormikEffect
             values={values}
             onChange={() => handleFormChange(values)}

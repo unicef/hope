@@ -14,13 +14,15 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     BasePermission,
     DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopePermissionClass,
 )
 from hct_mis_api.apps.account.schema import PartnerType
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
@@ -62,7 +64,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -93,18 +95,18 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-    payment_record = graphene.Field(PaymentRecordNode)
+    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
+    related_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
     urgency = graphene.Int()
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
-    related_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
@@ -134,6 +136,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @staticmethod
     def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         return getattr(grievance_ticket.ticket_details, "household", None)
 
@@ -153,6 +156,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_admin2(grievance_ticket: GrievanceTicket, info: Any) -> Area:
         return grievance_ticket.admin2
 
+    @staticmethod
     def resolve_linked_tickets(grievance_ticket: GrievanceTicket, info: Any) -> QuerySet:
         return grievance_ticket._linked_tickets
 
@@ -219,7 +223,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Arg", variable has type "Dict[Any, Any]")
+        individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -276,7 +280,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore # FIXME: Incompatible types in assignment (expression has type "Arg", variable has type "Dict[Any, Any]")
+        individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -433,7 +437,7 @@ class ChartGrievanceTicketsNode(ChartDatasetNode):
 
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
-    all_grievance_ticket = DjangoPermissionFilterConnectionField(
+    all_grievance_ticket = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=GrievanceTicketFilter,
         permission_classes=(
@@ -445,7 +449,7 @@ class Query(graphene.ObjectType):
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
         ),
     )
-    existing_grievance_tickets = DjangoPermissionFilterConnectionField(
+    existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
         permission_classes=(
@@ -514,7 +518,12 @@ class Query(graphene.ObjectType):
         return to_choice_object(URGENCY_CHOICES)
 
     def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
-        fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
+        business_area_slug = info.context.headers.get("Business-Area")
+        fields = (
+            FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
+            .associated_with_individual()
+            .apply_business_area(business_area_slug)
+        )
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
         )
@@ -538,7 +547,7 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, object]:
         grievance_tickets = chart_get_filtered_qs(
-            GrievanceTicket,
+            GrievanceTicket.objects,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
         )

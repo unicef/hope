@@ -30,11 +30,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -157,7 +158,7 @@ class Command(BaseCommand):
                     program.admin_areas.add(household.admin_area)
 
                 payment_record = PaymentRecordFactory(
-                    cash_plan=cash_plan,
+                    parent=cash_plan,
                     household=household,
                     target_population=target_population,
                     delivered_quantity_usd=None,
@@ -197,7 +198,7 @@ class Command(BaseCommand):
                     switch_dict[grievance_type]()
 
                 EntitlementCardFactory(household=household)
-        CashPlanPaymentVerificationFactory.create_batch(1)
+        PaymentVerificationPlanFactory()
         PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic

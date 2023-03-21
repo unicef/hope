@@ -48,6 +48,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           >
             <h6
               class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+              data-cy="table-title"
             >
               Cash Plans
             </h6>
@@ -258,6 +259,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           >
             <tr
               class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
@@ -265,7 +267,69 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <a
                   class="sc-bZQynM iXasVI"
-                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmNiNzBjYjdmLWY0N2EtNDI5Yy04Y2FjLTk0YzU0MDRiOTFkZA=="
+                  href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmIyNTYzN2VjLWNkYmUtNDEzMC04N2JlLWU1OGIzYzcxMDdkMg=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    PP-0060-22-11223344
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje cjSgDD"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                999.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bZQynM iXasVI"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmZiY2MxZDY4LWU1YzUtNGM3ZC05ZjA3LTRkZGU4NjU4NTU3Yg=="
                 >
                   <div
                     style="text-overflow: ellipsis;"
@@ -281,10 +345,10 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-EHOje cjSgDD"
                     data-cy="status-container"
                   >
-                    TRANSACTION COMPLETED
+                    PENDING
                   </div>
                 </div>
               </td>
@@ -296,32 +360,165 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Aruban florin
+                HH
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                81,968,631.29
+                60,422,683.87
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                24,029,588.26
+                71,007,093.19
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                53,795,776.44
+                45,476,368.48
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                <time
-                  datetime="1635902172000"
-                >
-                  3 Nov 2021
-                </time>
+                -
               </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bZQynM iXasVI"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmE3NmNjNTRhLWE5YWMtNDgyNS05OTg5LTk1ZTYwMTUwODE0MA=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00002
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje cjSgDD"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                5
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                40,010,736.01
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                18,271,344.05
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                18,320,390.85
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bZQynM iXasVI"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOjE3MWMzOWYxLTI3Y2EtNDQ2Zi05OGMyLWNlYjRiMWY2YjhjZg=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00001
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje cjSgDD"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                5
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                49,925,970.55
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                37,836,624.22
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                43,002,539.53
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root"
+              style="height: 54px;"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="8"
+              />
             </tr>
           </tbody>
         </table>
@@ -374,7 +571,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-5 of 6
+            1-4 of 4
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -404,8 +601,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             </button>
             <button
               aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
-              tabindex="0"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              disabled=""
+              tabindex="-1"
               title="Next page"
               type="button"
             >
@@ -423,9 +621,6 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   />
                 </svg>
               </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>

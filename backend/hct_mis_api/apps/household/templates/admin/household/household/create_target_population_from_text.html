@@ -1,0 +1,42 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load hope i18n admin_urls static admin_modify %}
+{% block action-content %}
+    {% if total == 0 %}
+        <h1>There are no households in that business area matching your text search</h1>
+        <input type="button"
+               onclick="window.location.href='.'"
+               value="Back"
+               class="btn btn-default">
+
+    {% else  %}
+        <form method="post">{% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            {% if request.POST.apply %}
+                <div class="content">
+                    You are going to create a new Target Population
+                    '<strong>{{ form.name.value }}</strong>' within business area <strong>{{ ba_name }}</strong> 
+                    for the list of <b>{{total}}</b> households. Please, remember to attach a program at the next step. {% if total <= 100 %}
+                        <strong> {% for household  in households  %}
+                        <p>{{household}}</p>
+                    {% endfor %} </strong>
+                    {% endif %}.
+                </div>
+            {% endif %}
+            <div class="submit-row">
+                {% if request.POST.apply %}
+                    <input type="submit"
+                           name="confirm"
+                           value="Create"
+                           class="btn btn-default">
+                {% else %}
+                    <input type="submit"
+                           name="apply"
+                           value="Preview"
+                           class="btn btn-default">
+                {% endif %}
+            </div>
+        </form>
+    {% endif %}
+
+{% endblock action-content %}

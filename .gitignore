@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+bin/
 build/
 develop-eggs/
 dist/
@@ -58,6 +59,7 @@ coverage.xml
 *.log
 local_settings.py
 db.sqlite3
+*.sql
 
 # Flask stuff:
 instance/
@@ -116,5 +118,5 @@ venv.bak/
 
 *.DS_Store
 *.devcontainer
-/.vscode/settings.json
+**/.vscode/settings.json
 /HCT-MIS.code-workspace

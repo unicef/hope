@@ -4,6 +4,7 @@ from django.forms import model_to_dict
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COLLECT_TYPE_FULL,
@@ -39,6 +40,28 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         cls.rdi.datahub_id = cls.rdi_hub.id
         cls.rdi.save()
+
+        area_type_level_1 = AreaTypeFactory(
+            name="State1",
+            area_level=1,
+        )
+        area_type_level_2 = AreaTypeFactory(
+            name="State2",
+            area_level=2,
+        )
+        area_type_level_3 = AreaTypeFactory(
+            name="State3",
+            area_level=3,
+        )
+        area_type_level_4 = AreaTypeFactory(
+            name="State4",
+            area_level=4,
+        )
+        cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
+        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
+        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
+        cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+
         super().setUpTestData()
 
     @classmethod
@@ -102,6 +125,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "birth_date": "2005-10-10",  # age 16
                 "sex": "FEMALE",
                 "registration_data_import": cls.rdi_hub,
+                "phone_no": "+41 (0) 78 927 2696",
+                "phone_no_alternative": "+41 (0) 78 927 2696",
+                "phone_no_valid": None,
+                "phone_no_alternative_valid": None,
                 "household": imported_household,
             },
             {
@@ -112,6 +139,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "birth_date": "1996-11-29",  # age 25
                 "sex": "FEMALE",
                 "registration_data_import": cls.rdi_hub,
+                "phone_no": "wrong-phone",
+                "phone_no_alternative": "definitely-wrong-phone",
+                "phone_no_valid": None,
+                "phone_no_alternative_valid": None,
                 "household": imported_household,
             },
             {
@@ -133,6 +164,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         imported_household = ImportedHouseholdFactory(
             collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi_hub,
+            admin_area=self.area4.p_code,
+            admin_area_title=self.area4.name,
+            admin4=self.area4.p_code,
+            admin4_title=self.area4.name,
         )
         self.set_imported_individuals(imported_household)
 
@@ -144,6 +179,15 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(1, households.count())
         self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
+
+        individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
+        individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
+
+        self.assertEqual(individual_with_valid_phone_data.phone_no_valid, True)
+        self.assertEqual(individual_with_valid_phone_data.phone_no_alternative_valid, True)
+
+        self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
+        self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
 
         household_data = model_to_dict(
             households[0],
@@ -160,6 +204,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "male_age_group_60_count",
                 "children_count",
                 "size",
+                "admin_area",
+                "admin1",
+                "admin2",
+                "admin3",
+                "admin4",
             ),
         )
 
@@ -176,6 +225,11 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "male_age_group_60_count": 1,
             "children_count": 5,
             "size": 8,
+            "admin_area": self.area4.id,
+            "admin1": self.area1.id,
+            "admin2": self.area2.id,
+            "admin3": self.area3.id,
+            "admin4": self.area4.id,
         }
         self.assertEqual(household_data, expected)
 

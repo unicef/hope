@@ -6,8 +6,6 @@ from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
     serialize_flex_attributes,
 )
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
@@ -25,17 +23,6 @@ logger = logging.getLogger(__name__)
 class RdiBaseCreateTask:
     COMBINED_FIELDS = get_combined_attributes()
     FLEX_FIELDS = serialize_flex_attributes()
-
-    @staticmethod
-    def _assign_admin_areas_titles(household_obj: Household) -> Household:
-        if household_obj.admin1:
-            admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
-            household_obj.admin1_title = getattr(admin_area_level_1, "name", "")
-        if household_obj.admin2:
-            admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
-            household_obj.admin2_title = getattr(admin_area_level_2, "name", "")
-
-        return household_obj
 
     def _cast_value(self, value: Any, header: str) -> Any:
         if isinstance(value, str):

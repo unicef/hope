@@ -31,6 +31,7 @@ export function ImportedHouseholdTableRow({
       onClick={handleClick}
       role='checkbox'
       key={household.id}
+      data-cy='imported-households-row'
     >
       <TableCell align='left'>
         {household.hasDuplicates && (

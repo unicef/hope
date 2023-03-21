@@ -11,7 +11,7 @@ from django.utils import timezone
 import requests_mock
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.exchange_rates import ExchangeRateAPI, ExchangeRates
+from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import (
     EXCHANGE_RATES_API_RESPONSE,
@@ -104,7 +104,7 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 class TestExchangeRatesAPI(TestCase):
     @mock.patch.dict(os.environ, clear=True)
     def test_test_api_class_initialization_key_not_in_env(self) -> None:
-        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateAPI)
+        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateClientAPI)
 
     @parameterized.expand(
         [
@@ -115,7 +115,7 @@ class TestExchangeRatesAPI(TestCase):
     )
     def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
         with mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True):
-            api_client = ExchangeRateAPI(api_key=api_key, api_url=api_url)
+            api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
             if api_key is not None:
                 self.assertEqual(api_key, api_client.api_key)
@@ -148,7 +148,7 @@ class TestExchangeRatesAPI(TestCase):
                     json=EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA,
                 )
 
-            api_client = ExchangeRateAPI(api_key="TEST_API_KEY")
+            api_client = ExchangeRateClientAPI(api_key="TEST_API_KEY")
             response_dict = api_client.fetch_exchange_rates(with_history=with_history)
 
             if test_name == "with_history":
@@ -175,10 +175,28 @@ class TestExchangeRates(TestCase):
         self.assertEqual(3, len(xeu.historical_exchange_rates))
 
         xeu_second_historical_rate = xeu.historical_exchange_rates[1]
-        self.assertEqual(datetime(1998, 2, 1, 0, 0), xeu_second_historical_rate.valid_from)
-        self.assertEqual(datetime(1998, 2, 28, 0, 0), xeu_second_historical_rate.valid_to)
-        self.assertEqual(0.926, xeu_second_historical_rate.past_xrate)
-        self.assertEqual(1, xeu_second_historical_rate.past_ratio)
+        self.assertEqual(
+            xeu_second_historical_rate,
+            {
+                "VALID_FROM": "01-FEB-98",
+                "VALID_TO": "28-FEB-98",
+                "PAST_XRATE": ".926",
+                "PAST_RATIO": "1",
+            },
+        )
+
+        # dispersion_date not provided, return current rate
+        self.assertEqual(xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None), xeu.x_rate * xeu.ratio)
+        # dispersion_date from current valid date range, return current rate
+        self.assertEqual(
+            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 12, 15, 0, 0)),
+            xeu.x_rate * xeu.ratio,
+        )
+        # dispersion_date from past valid date range, return past rate
+        self.assertEqual(
+            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 2, 15, 0, 0)),
+            float(xeu_second_historical_rate["PAST_XRATE"]) * float(xeu_second_historical_rate["PAST_RATIO"]),
+        )
 
         self.assertEqual("CUP1", cup1.currency_code)
         self.assertEqual(1.0, cup1.ratio)
@@ -244,7 +262,7 @@ class TestFixExchangeRatesCommand(TestCase):
         )
         for currency, cash_plan in cash_plans_with_currency:
             RealPaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 currency=currency,
                 delivered_quantity=200,
             )

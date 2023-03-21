@@ -55,7 +55,7 @@ stages:
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
-                backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.secret.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.SECRET_KEY=$(SECRET_KEY),\

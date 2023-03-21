@@ -3,7 +3,7 @@ import { Info } from '@material-ui/icons';
 import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -12,6 +12,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
@@ -19,20 +20,23 @@ import {
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 
-export function TargetPopulationsPage(): React.ReactElement {
+const initialFilter = {
+  name: '',
+  status: '',
+  program: '',
+  numIndividualsMin: null,
+  numIndividualsMax: null,
+};
+
+export const TargetPopulationsPage = (): React.ReactElement => {
+  const location = useLocation();
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [filter, setFilter] = useState({
-    name: '',
-    status: '',
-    program: '',
-    numIndividuals: {
-      min: undefined,
-      max: undefined,
-    },
-    createdAtRange: { min: undefined, max: undefined },
-  });
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsForChoicesQuery({
@@ -90,4 +94,4 @@ export function TargetPopulationsPage(): React.ReactElement {
       />
     </>
   );
-}
+};

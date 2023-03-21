@@ -451,9 +451,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.individual_data_change_grievance_ticket.refresh_from_db()
         result = self.individual_data_change_grievance_ticket.individual_data_update_ticket_details.individual_data
+        expected_result: Dict
         # TODO: test shouldn't use conditional logic
         if name == "with_permission":
-            expected_result: Dict = {
+            expected_result = {
                 "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
                 "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
                 "documents": [
@@ -511,7 +512,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             }
 
         else:
-            expected_result: Dict = {  # type: ignore # FIXME: defined above; once it's refactored, it shouldn't be an issue
+            expected_result = {
                 "sex": {"value": "MALE", "approve_status": False},
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [

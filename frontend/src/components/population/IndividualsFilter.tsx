@@ -3,6 +3,8 @@ import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { createHandleFilterChange } from '../../utils/utils';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
@@ -31,8 +33,16 @@ export const IndividualsFilter = ({
   choicesData,
 }: IndividualsFilterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -40,19 +50,21 @@ export const IndividualsFilter = ({
           <SearchTextField
             label={t('Search')}
             value={filter.text}
-            onChange={(e) => handleFilterChange(e, 'text')}
-            data-cy='filters-search'
+            onChange={(e) => handleFilterChange('text', e.target.value)}
+            data-cy='ind-filters-search'
           />
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete
-            onFilterChange={onFilterChange}
             name='adminArea'
+            value={filter.adminArea}
+            onFilterChange={onFilterChange}
+            filter={filter}
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'sex')}
+            onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
@@ -74,13 +86,10 @@ export const IndividualsFilter = ({
           <NumberTextField
             topLabel={t('Age')}
             placeholder={t('From')}
-            value={filter.age.min}
+            value={filter.ageMin}
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
-              onFilterChange({
-                ...filter,
-                age: { ...filter.age, min: e.target.value },
-              });
+              handleFilterChange('ageMin', e.target.value);
             }}
             icon={<CakeIcon />}
           />
@@ -88,20 +97,17 @@ export const IndividualsFilter = ({
         <Grid item>
           <NumberTextField
             placeholder={t('To')}
-            value={filter.age.max}
+            value={filter.ageMax}
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
-              onFilterChange({
-                ...filter,
-                age: { ...filter.age, max: e.target.value },
-              });
+              handleFilterChange('ageMax', e.target.value);
             }}
             icon={<CakeIcon />}
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'flags')}
+            onChange={(e) => handleFilterChange('flags', e.target.value)}
             label={t('Flags')}
             multiple
             value={filter.flags}
@@ -123,7 +129,7 @@ export const IndividualsFilter = ({
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'orderBy')}
+            onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
           >

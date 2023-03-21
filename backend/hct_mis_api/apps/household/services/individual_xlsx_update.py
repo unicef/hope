@@ -9,13 +9,14 @@ from xlwt import Row
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     FieldFactory,
-    Scope,
 )
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 
 
 class InvalidColumnsError(Exception):
@@ -59,15 +60,21 @@ class IndividualXlsxUpdate:
         self.get_matching_report()
 
         individuals = []
-
+        columns = [column.replace("individual__", "") for column in self.columns_names]
+        columns.append("row_id")
+        has_phone_number = "phone_no" in columns or "phone_no_alternative" in columns
+        if has_phone_number:
+            columns.append("phone_no_valid")
+            columns.append("phone_no_alternative_valid")
         for individuals_unique_report in self.report_dict[IndividualXlsxUpdate.STATUS_UNIQUE]:
             row_num, individual = individuals_unique_report
             row = self.individuals_ws[row_num]
             individual.row_id = row_num
-            individuals.append(self._update_single_individual(row, individual))
+            individual = self._update_single_individual(row, individual)
+            if has_phone_number:
+                individual = calculate_phone_numbers_validity(individual)
+            individuals.append(individual)
 
-        columns = [column.replace("individual__", "") for column in self.columns_names]
-        columns.append("row_id")
         Individual.objects.bulk_update(individuals, columns)
 
     @staticmethod

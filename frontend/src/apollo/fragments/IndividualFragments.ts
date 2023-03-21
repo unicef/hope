@@ -150,5 +150,6 @@ export const individualDetailed = gql`
       bankName
       bankAccountNumber
     }
+    preferredLanguage
   }
 `;

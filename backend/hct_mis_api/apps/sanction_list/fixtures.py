@@ -1,10 +1,11 @@
 import factory
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 
-class SanctionListIndividualFactory(factory.DjangoModelFactory):
+class SanctionListIndividualFactory(DjangoModelFactory):
     class Meta:
         model = SanctionListIndividual
 

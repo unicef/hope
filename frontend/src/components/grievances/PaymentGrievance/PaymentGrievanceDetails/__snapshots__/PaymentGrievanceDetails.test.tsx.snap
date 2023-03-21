@@ -79,9 +79,7 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
           />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-          >
-            3355
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
           >

@@ -3,6 +3,7 @@ pr:
   - master
   - develop
   - new_gf # TODO remove this line after merge to develop
+  - feature/*
 resources:
   - repo: self
 
@@ -10,20 +11,19 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Docker.backend.filePath: "**/backend/Dockerfile"
-  Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.registry: "ICTD-HOPE-DEV-ACR"
+  Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
+  tag: '$(System.PullRequest.PullRequestId)'
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
+  Docker.cypress.repository: "hope-cypress"
   Docker.url: "uniappsakshopedev.azurecr.io"
-  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
-  Kubernetes.namespace: "ictd-hope-dev"
+  DOCKER_BUILDKIT: 1
 
 stages:
   - stage: test_frontend
     displayName: Test-Frontend
     jobs:
-      - job: django_tests
+      - job: frontend_tests
         pool:
           vmImage: ubuntu-latest
         displayName: "[FRONTEND TEST]"
@@ -37,10 +37,9 @@ stages:
               key: $(Build.SourcesDirectory)/frontend/yarn.lock
               path: $(Build.SourcesDirectory)/frontend/node_modules
             displayName: Cache Yarn packages
-          - script: yarn
+          - script: yarn install --frozen-lockfile
             displayName: "Yarn Install"
             workingDirectory: 'frontend'
-
           - script: yarn test --watchAll=false
             workingDirectory: 'frontend'
             displayName: "Test"
@@ -58,7 +57,7 @@ stages:
             inputs:
               versionSpec: "3.9"
             displayName: "Use Python 3.9"
-          - script: pip install black==22.8.0 isort==5.10.1
+          - script: pip install black==23.1 isort==5.12
           # remember to update this if you change the version of black/isort in pyproject.toml
             displayName: "Install tools"
           - script: black --check .
@@ -80,38 +79,84 @@ stages:
         steps:
           - task: Docker@2
             inputs:
-              containerRegistry: '$(Docker.registry)'
+              containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest"
-            displayName: Pull latest for layer caching for this branch
-            continueOnError: true # for first build, no cache
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
-            displayName: Pull latest for layer caching
-            continueOnError: true # for first build, no cache
+            displayName: Docker Login
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.backend.repository):latest \
+              --push \
+              ./backend
+            displayName: Docker build
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
+              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
+              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
+              -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
+              --push --target dev \
+              ./backend
+            displayName: Docker build dev
+
+  - stage: build_and_push_frontend
+    dependsOn: test_frontend
+    displayName: BUILD and PUSH Frontend
+    jobs:
+      - job: build_and_push_frontend
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[Build_Frontend]"
+        steps:
           - task: Docker@2
-            displayName: Build
             inputs:
-              command: build
-              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.PullRequestId)-latest 
-                          --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
-              dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
+              containerRegistry: '$(Docker.registryConnection)'
+              command: 'login'
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(tag) \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
+              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:$(tag) \
+              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.frontend.repository):latest \
+              --push \
+              ./frontend
+            displayName: Docker build
+
+  - stage: build_and_push_cypress
+    dependsOn: test_frontend
+    displayName: BUILD and PUSH cypress
+    jobs:
+      - job: build_and_push_cypress
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[Build_Cypress]"
+        steps:
           - task: Docker@2
-            displayName: Push
             inputs:
-              command: push
-              dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-                $(System.PullRequest.PullRequestId)-latest
+              containerRegistry: '$(Docker.registryConnection)'
+              command: 'login'
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.cypress.repository)-cache:$(tag) \
+              --cache-from=$(Docker.url)/$(Docker.cypress.repository)-cache:latest \
+              --cache-to=$(Docker.url)/$(Docker.cypress.repository)-cache:$(tag) \
+              --cache-to=$(Docker.url)/$(Docker.cypress.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.cypress.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.cypress.repository):latest \
+              --push \
+              ./cypress
+            displayName: Docker build
 
   - stage: lint_backend
     dependsOn: build_and_push
@@ -121,25 +166,23 @@ stages:
         pool:
           vmImage: ubuntu-latest
         displayName: "[DJANGO LINT]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend lint'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish lint result"
@@ -160,25 +203,23 @@ stages:
         pool:
           vmImage: ubuntu-latest
         displayName: "[DJANGO MYPY]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run --no-deps backend mypy'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish mypy result"
@@ -199,24 +240,22 @@ stages:
         pool:
           vmImage: ubuntu-latest
         displayName: "[DJANGO TEST]"
-        variables:
-          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
             inputs:
               command: login
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registryConnection)
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
+              azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
@@ -225,6 +264,45 @@ stages:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
               searchFolder: 'backend/test-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
+
+  - stage: e2e_tests
+    dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
+    displayName: E2E-Tests
+    jobs:
+      - job: cypress_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CYPRESS TEST]"
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
+          - script: |
+              mkdir -p cypress-results
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registryConnection)
+              dockerComposeFile: '**/docker-compose.cy.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run cypress ci-test'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(tag)
+               cypress_image=$(Docker.url)/$(Docker.cypress.repository):$(tag)
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: './cypress-results/'
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
