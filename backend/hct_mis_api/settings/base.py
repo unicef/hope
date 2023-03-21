@@ -478,6 +478,11 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
+    "AURORA_SERVER": (
+        "",
+        "",
+        str,
+    ),
     "DEDUPLICATION_DUPLICATE_SCORE": (
         6.0,
         "Results equal or above this score are considered duplicates",
@@ -847,10 +852,10 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Individual",
     "mis_datahub.Household",
 ]
-
-AURORA_SERVER = env("AURORA_SERVER")
-AURORA_TOKEN = env("AURORA_TOKEN")
-AURORA_USER = env("AURORA_USER")
+#
+# AURORA_SERVER = env("AURORA_SERVER")
+# AURORA_TOKEN = env("AURORA_TOKEN")
+# AURORA_USER = env("AURORA_USER")
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
 
