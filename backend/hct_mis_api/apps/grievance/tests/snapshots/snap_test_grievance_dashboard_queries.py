@@ -128,8 +128,8 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_status_0_with_pe
             ],
             'labels': [
                 'Closed',
-                'New',
                 'In Progress',
+                'New',
                 'On Hold'
             ]
         }
@@ -151,8 +151,8 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_status_1_without
             ],
             'labels': [
                 'Closed',
-                'New',
                 'In Progress',
+                'New',
                 'On Hold'
             ]
         }
