@@ -1,6 +1,7 @@
 import { Paper } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -9,10 +10,11 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import { CreateProgram } from '../../dialogs/programs/CreateProgram';
+import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
-import { ProgrammesTable } from '../../tables/ProgrammesTable/ProgrammesTable';
 
 const Container = styled(Paper)`
   display: flex;
@@ -28,22 +30,24 @@ const Container = styled(Paper)`
   }
 `;
 
-export function ProgramsPage(): React.ReactElement {
-  const [filter, setFilter] = useState({
-    search: '',
-    startDate: undefined,
-    endDate: undefined,
-    status: [],
-    sector: [],
-    numberOfHouseholds: {
-      min: '',
-      max: '',
-    },
-    budget: {
-      min: '',
-      max: '',
-    },
-  });
+const initialFilter = {
+  search: '',
+  startDate: undefined,
+  endDate: undefined,
+  status: '',
+  sector: [],
+  numberOfHouseholdsMin: '',
+  numberOfHouseholdsMax: '',
+  budgetMin: '',
+  budgetMax: '',
+};
+
+export const ProgramsPage = (): React.ReactElement => {
+  const location = useLocation();
+
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -86,4 +90,4 @@ export function ProgramsPage(): React.ReactElement {
       />
     </div>
   );
-}
+};

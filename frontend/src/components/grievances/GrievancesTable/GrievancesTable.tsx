@@ -15,14 +15,14 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
-import { choicesToDict, decodeIdString } from '../../../utils/utils';
+import { decodeIdString, choicesToDict } from '../../../utils/utils';
 import {
-  AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
-  useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
   useMeQuery,
+  AllGrievanceTicketQuery,
+  useAllGrievanceTicketQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
@@ -47,7 +47,10 @@ export const GrievancesTable = ({
     search: `${filter.search && filter.searchType} ${filter.search}`,
     status: [filter.status],
     fsp: filter.fsp,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
+    createdAtRange: JSON.stringify({
+      min: filter.createdAtRangeMin,
+      max: filter.createdAtRangeMax,
+    }),
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
@@ -60,6 +63,7 @@ export const GrievancesTable = ({
     grievanceStatus: filter.grievanceStatus,
     priority: filter.priority,
     urgency: filter.urgency,
+    preferredLanguage: filter.preferredLanguage,
   };
 
   const [inputValue, setInputValue] = useState('');
@@ -134,21 +138,19 @@ export const GrievancesTable = ({
     );
   };
 
-  const handleCheckboxClick = (event, name): void => {
+  const handleCheckboxClick = (
+    _event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    name: string,
+  ): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
+    const newSelected = [...selected];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+      newSelected.push(name);
+    } else {
+      newSelected.splice(selectedIndex, 1);
     }
 
     setSelected(newSelected);
@@ -169,19 +171,20 @@ export const GrievancesTable = ({
 
   return (
     <>
-      <Box display='flex' alignItems='center' px={5} pt={5}>
-        <BulkAssignModal
-          optionsData={optionsData}
-          selected={selected}
-          businessArea={businessArea}
-          initialVariables={initialVariables}
-          setInputValue={setInputValue}
-          setSelected={setSelected}
-        />
-        <Box display='flex' ml='auto'>
-          <Box>
-            {/* TODO: Enable Export Report button */}
-            {/* <Button
+      <Box display='flex' flexDirection='column' px={5} pt={5}>
+        <Box display='flex' justifyContent='space-between' px={5}>
+          <BulkAssignModal
+            optionsData={optionsData}
+            selected={selected}
+            businessArea={businessArea}
+            initialVariables={initialVariables}
+            setInputValue={setInputValue}
+            setSelected={setSelected}
+          />
+          <Box display='flex' ml='auto'>
+            <Box>
+              {/* TODO: Enable Export Report button */}
+              {/* <Button
               startIcon={<GetAppOutlined />}
               variant='text'
               color='primary'
@@ -191,10 +194,10 @@ export const GrievancesTable = ({
             >
               {t('Export Report')}
             </Button> */}
-          </Box>
-          <Box ml={5} mr={7}>
-            {/* TODO: Enable Upload Tickets button */}
-            {/* <Button
+            </Box>
+            <Box ml={5} mr={7}>
+              {/* TODO: Enable Upload Tickets button */}
+              {/* <Button
               startIcon={<PublishOutlined />}
               variant='text'
               color='primary'
@@ -204,56 +207,57 @@ export const GrievancesTable = ({
             >
               {t('Upload Tickets')}
             </Button> */}
+            </Box>
+            {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
+              hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+                <Button
+                  alignItems='center'
+                  variant='contained'
+                  color='primary'
+                  component={Link}
+                  to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+                  data-cy='button-new-ticket'
+                >
+                  {t('NEW TICKET')}
+                </Button>
+              )}
           </Box>
-          {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
-            hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-              <Button
-                alignItems='center'
-                variant='contained'
-                color='primary'
-                component={Link}
-                to={`/${businessArea}/grievance-and-feedback/new-ticket`}
-                data-cy='button-new-ticket'
-              >
-                {t('NEW TICKET')}
-              </Button>
-            )}
         </Box>
+        <TableWrapper>
+          <UniversalTable<
+            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+            AllGrievanceTicketQueryVariables
+          >
+            headCells={headCells}
+            title={t('Grievance and Feedback List')}
+            rowsPerPageOptions={[10, 15, 20]}
+            query={useAllGrievanceTicketQuery}
+            onSelectAllClick={handleSelectAllCheckboxesClick}
+            numSelected={selected.length}
+            queriedObjectName='allGrievanceTicket'
+            initialVariables={initialVariables}
+            defaultOrderBy='created_at'
+            defaultOrderDirection='desc'
+            renderRow={(row) => (
+              <GrievancesTableRow
+                key={row.id}
+                ticket={row}
+                statusChoices={statusChoices}
+                categoryChoices={categoryChoices}
+                issueTypeChoicesData={issueTypeChoicesData}
+                priorityChoicesData={priorityChoicesData}
+                urgencyChoicesData={urgencyChoicesData}
+                canViewDetails={getCanViewDetailsOfTicket(row)}
+                checkboxClickHandler={handleCheckboxClick}
+                selected={selected}
+                optionsData={optionsData}
+                setInputValue={setInputValue}
+                initialVariables={initialVariables}
+              />
+            )}
+          />
+        </TableWrapper>
       </Box>
-      <TableWrapper>
-        <UniversalTable<
-          AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-          AllGrievanceTicketQueryVariables
-        >
-          headCells={headCells}
-          title={t('Grievance and Feedback List')}
-          rowsPerPageOptions={[10, 15, 20]}
-          query={useAllGrievanceTicketQuery}
-          onSelectAllClick={handleSelectAllCheckboxesClick}
-          numSelected={selected.length}
-          queriedObjectName='allGrievanceTicket'
-          initialVariables={initialVariables}
-          defaultOrderBy='created_at'
-          defaultOrderDirection='desc'
-          renderRow={(row) => (
-            <GrievancesTableRow
-              key={row.id}
-              ticket={row}
-              statusChoices={statusChoices}
-              categoryChoices={categoryChoices}
-              issueTypeChoicesData={issueTypeChoicesData}
-              priorityChoicesData={priorityChoicesData}
-              urgencyChoicesData={urgencyChoicesData}
-              canViewDetails={getCanViewDetailsOfTicket(row)}
-              checkboxClickHandler={handleCheckboxClick}
-              selected={selected}
-              optionsData={optionsData}
-              setInputValue={setInputValue}
-              initialVariables={initialVariables}
-            />
-          )}
-        />
-      </TableWrapper>
     </>
   );
 };

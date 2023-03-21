@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Tuple
 
+from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -16,6 +17,17 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 
+# Set of Individual fields which affects Household recalculation
+RECALCULATION_INDIVIDUAL_FIELDS = {
+    "relationship",
+    "withdrawn",
+    "duplicate",
+    "sex",
+    "disability",
+    "birth_date",
+    "pregnant",
+}
+
 
 def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
     if household.collect_individual_data == COLLECT_TYPE_PARTIAL:
@@ -23,6 +35,7 @@ def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
     return household.individuals.aggregate(**kwargs)
 
 
+@transaction.atomic
 def recalculate_data(household: Household, save: bool = True) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
@@ -32,7 +45,7 @@ def recalculate_data(household: Household, save: bool = True) -> Tuple[Household
     individuals_to_update = []
     individuals_fields_to_update = []
 
-    for individual in household.individuals.all().select_for_update():
+    for individual in household.individuals.all().select_for_update().order_by("pk"):
         _individual, _fields_to_update = individual.recalculate_data(save=False)
         individuals_to_update.append(_individual)
         individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)

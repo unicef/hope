@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator
@@ -12,7 +13,7 @@ from constance import config
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
+from model_utils.models import SoftDeletableModel, TimeStampedModel
 from natural_keys import NaturalKeyModel
 
 import mptt
@@ -50,6 +51,8 @@ class BusinessArea(TimeStampedUUIDModel):
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
+    kobo_token = models.CharField(max_length=255, null=True, blank=True)
+    kobo_url = models.URLField(max_length=255, null=True, blank=True)
     rapid_pro_host = models.URLField(null=True, blank=True)
     rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
     slug = models.CharField(
@@ -100,6 +103,8 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+
+    is_payment_plan_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -392,6 +397,19 @@ class StorageFile(models.Model):
 
     def __str__(self) -> str:
         return self.file.name
+
+
+class FileTemp(TimeStampedModel):
+    """Use this model for temporary store files"""
+
+    object_id = models.CharField(max_length=120, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    file = models.FileField()
+    was_downloaded = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.file.name} - {self.created}"
 
 
 class TicketPriority(models.Model):

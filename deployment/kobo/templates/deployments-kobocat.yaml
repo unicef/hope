@@ -19,10 +19,7 @@ spec:
   replicas: {{ .Values.kobocat.replicas }}
   minReadySeconds: 30
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
   selector:
     matchLabels:
       app: {{ include "kobo.labels.app" . }}
@@ -48,7 +45,6 @@ spec:
       affinity:
         {{- toYaml .Values.kobocat.affinity | nindent 8 }}
       {{- end }}
-
       containers:
       - name: backend
         image: {{ .Values.kobocat.image }}
@@ -67,12 +63,15 @@ spec:
         - name: static-volume
           mountPath: /srv/static
         - name: uwsgi-config
-          mountPath: /srv/src/kobocat/docker/kobocat.ini
+          mountPath: /srv/src/kobocat/docker/uwsgi.ini
           subPath: uwsgi.ini
         - name: scripts
           mountPath: /etc/profile.d/
         - name: scripts
           mountPath: /srv/init/
+        - name: scripts
+          mountPath: /srv/src/kobocat/docker/sync_static.bash
+          subPath: sync_static.bash
       - name: nginx
         image: nginx:1.19.0
         command: [nginx, -g,'daemon off;']
@@ -109,3 +108,5 @@ spec:
             path: wait_for_postgres.bash
           - key: wait_for_mongo.bash
             path: wait_for_mongo.bash
+          - key: sync_static.bash
+            path: sync_static.bash

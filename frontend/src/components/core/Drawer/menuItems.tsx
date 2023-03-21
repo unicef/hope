@@ -90,6 +90,14 @@ export const menuItems = [
     external: true,
   },
   {
+    name: 'Payment Module',
+    href: '/payment-module',
+    selectedRegexp: /^\/payment-module.*$/,
+    icon: <PaymentIcon />,
+    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+    flag: 'isPaymentPlanApplicable',
+  },
+  {
     name: 'Payment Verification',
     href: '/payment-verification',
     selectedRegexp: /^\/payment-verification.*$/,
@@ -188,7 +196,7 @@ export const resourcesItems = [
   {
     name: 'Conversations',
     href:
-      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiI2NDk1MDA4In0',
+      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIxMzAzMTkwMDc3NDQifQ/all',
     icon: <QuestionAnswerIcon />,
   },
   {

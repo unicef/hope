@@ -15,7 +15,7 @@ export const UPDATE_PAYMENT_VERIFICATION_STATUS_AND_RECEIVED_AMOUNT = gql`
         id
         status
         receivedAmount
-        cashPlanPaymentVerification {
+        paymentVerificationPlan {
           id
           receivedCount
           notReceivedCount

@@ -10,8 +10,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 
 
 class TestDetectingAlreadyPaidHouseholds(TestCase):
@@ -54,7 +53,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             household=cls.household_2,
             full_name=cls.individuals_2[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cls.cash_plan,
+            parent=cls.cash_plan,
         )
         cls.individuals_2[0].documents.add(
             DocumentAllowDuplicatesFactory(individual=cls.individuals_2[0], type=cls.document_type, document_number="1")

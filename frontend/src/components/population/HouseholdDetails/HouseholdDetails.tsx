@@ -212,10 +212,15 @@ export const HouseholdDetails = ({
                           <Box
                             key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
                           >
-                            {formatCurrencyWithSymbol(
+                            {qty.currency === "USD" ?
+                              formatCurrencyWithSymbol(
                               qty.totalDeliveredQuantity,
-                              qty.currency,
-                            )}
+                              qty.currency)
+                              :
+                              `(${formatCurrencyWithSymbol(
+                              qty.totalDeliveredQuantity,
+                              qty.currency)})`
+                            }
                           </Box>
                         ))}
                       </Box>

@@ -1,13 +1,15 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
-import { Switch, useLocation } from 'react-router-dom';
+import { Redirect, Switch, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { AppBar } from '../components/core/AppBar';
 import { Drawer } from '../components/core/Drawer/Drawer';
+import { LoadingComponent } from '../components/core/LoadingComponent';
 import { SentryRoute } from '../components/core/SentryRoute';
 import { useSnackbar } from '../hooks/useSnackBar';
 import { MiśTheme } from '../theme';
+import { useAllBusinessAreasQuery } from '../__generated__/graphql';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -19,12 +21,21 @@ import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
 import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
 import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
 import { CreateCommunicationPage } from './pages/accountability/communication/CreateCommunicationPage';
+import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
+import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { PaymentDetailsPage } from './pages/paymentmodule/PaymentDetailsPage';
+import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
+import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
+import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
+import { PaymentPlanVerificationDetailsPage } from './pages/payments/PaymentPlanVerificationDetailsPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
-import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
-import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
+import { VerificationPaymentDetailsPage } from './pages/payments/VerificationPaymentDetailsPage';
+import { VerificationPaymentRecordDetailsPage } from './pages/payments/VerificationPaymentRecordDetailsPage';
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
@@ -63,6 +74,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 
 export function HomeRouter(): React.ReactElement {
   const [open, setOpen] = React.useState(true);
+  const { businessArea } = useParams();
   const classes = useStyles({});
   const location = useLocation();
   const snackBar = useSnackbar();
@@ -72,6 +84,29 @@ export function HomeRouter(): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
+  const { data, loading } = useAllBusinessAreasQuery({
+    variables: {
+      slug: businessArea,
+    },
+    fetchPolicy: 'cache-first',
+  });
+
+  if (!data) {
+    return null;
+  }
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
+  const allBusinessAreasSlugs = data.allBusinessAreas.edges.map(
+    (el) => el.node.slug,
+  );
+  const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
+
+  if (!isBusinessAreaValid) {
+    return <Redirect to='/' noThrow />;
+  }
+
   return (
     <Root>
       <CssBaseline />
@@ -106,17 +141,44 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/verification/payment-record/:id'>
+            <VerificationPaymentRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/verification/payment/:id'>
+            <VerificationPaymentDetailsPage />
+          </SentryRoute>
           <SentryRoute exact path='/:businessArea/payment-verification'>
             <PaymentVerificationPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/verification-records/:id'>
-            <VerificationRecordDetailsPage />
+          <SentryRoute path='/:businessArea/payment-verification/cash-plan/:id'>
+            <CashPlanVerificationDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-verification/:id'>
-            <PaymentVerificationDetailsPage />
+          <SentryRoute path='/:businessArea/payment-verification/payment-plan/:id'>
+            <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/csh-payment-verification/:id'>
             <CashPlanVerificationRedirectPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/new-plan'>
+            <CreatePaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/payment-module'>
+            <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
+            <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
+            <EditSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
+            <EditPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payments/:id'>
+            <PaymentDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
+            <PaymentPlanDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />

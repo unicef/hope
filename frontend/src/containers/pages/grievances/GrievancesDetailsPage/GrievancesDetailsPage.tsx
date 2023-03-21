@@ -31,10 +31,6 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'network-only',
   });
-  const ticket = data?.grievanceTicket;
-  const currentUserId = currentUserData?.me?.id;
-  const isCreator = currentUserId === ticket?.createdBy?.id;
-  const isOwner = currentUserId === ticket?.assignedTo?.id;
 
   const businessArea = useBusinessArea();
   const {
@@ -46,8 +42,18 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !currentUserData || permissions === null)
+  if (
+    !data?.grievanceTicket ||
+    !choicesData ||
+    !currentUserData ||
+    permissions === null
+  )
     return null;
+
+  const ticket = data?.grievanceTicket;
+  const currentUserId = currentUserData?.me?.id;
+  const isCreator = currentUserId === ticket?.createdBy?.id;
+  const isOwner = currentUserId === ticket?.assignedTo?.id;
 
   const {
     canViewHouseholdDetails,

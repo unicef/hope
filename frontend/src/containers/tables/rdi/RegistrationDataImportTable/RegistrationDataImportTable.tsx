@@ -43,13 +43,11 @@ export function RegistrationDataImportTable({
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables = {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    name_Icontains: filter.search,
+    search: filter.search,
     importDate: filter.importDate
       ? moment(filter.importDate).format('YYYY-MM-DD')
       : null,
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    importedBy_Id: filter.importedBy
+    importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,

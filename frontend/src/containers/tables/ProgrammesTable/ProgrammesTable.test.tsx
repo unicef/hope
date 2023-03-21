@@ -8,12 +8,24 @@ import { fakeProgramChoices } from '../../../../fixtures/programs/fakeProgramCho
 import { fakeApolloAllPrograms } from '../../../../fixtures/programs/fakeApolloAllPrograms';
 
 describe('containers/tables/ProgrammesTable', () => {
+  const initialFilter = {
+    search: '',
+    startDate: undefined,
+    endDate: undefined,
+    status: '',
+    sector: [],
+    numberOfHouseholdsMin: '',
+    numberOfHouseholdsMax: '',
+    budgetMin: '',
+    budgetMax: '',
+  };
+
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllPrograms}>
         <ProgrammesTable
           businessArea='afghanistan'
-          filter={{}}
+          filter={initialFilter}
           choicesData={fakeProgramChoices}
         />
       </MockedProvider>,
@@ -32,7 +44,7 @@ describe('containers/tables/ProgrammesTable', () => {
       >
         <ProgrammesTable
           businessArea='afghanistan'
-          filter={{}}
+          filter={initialFilter}
           choicesData={fakeProgramChoices}
         />
       </MockedProvider>,

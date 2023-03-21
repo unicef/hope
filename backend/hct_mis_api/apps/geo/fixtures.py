@@ -2,6 +2,7 @@ from django.contrib.gis.geos import MultiPolygon, Polygon
 
 import factory
 from factory import fuzzy
+from factory.django import DjangoModelFactory
 from faker import Faker
 
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
@@ -16,7 +17,7 @@ def create_fake_multipolygon() -> MultiPolygon:
     return MultiPolygon(p1, p2)
 
 
-class CountryFactory(factory.DjangoModelFactory):
+class CountryFactory(DjangoModelFactory):
     class Meta:
         model = Country
         django_get_or_create = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
@@ -29,7 +30,7 @@ class CountryFactory(factory.DjangoModelFactory):
     parent = None
 
 
-class AreaTypeFactory(factory.DjangoModelFactory):
+class AreaTypeFactory(DjangoModelFactory):
     class Meta:
         model = AreaType
         django_get_or_create = ("name", "country", "area_level")
@@ -40,7 +41,7 @@ class AreaTypeFactory(factory.DjangoModelFactory):
     parent = None
 
 
-class AreaFactory(factory.DjangoModelFactory):
+class AreaFactory(DjangoModelFactory):
     class Meta:
         model = Area
         django_get_or_create = ("name", "p_code", "area_type")

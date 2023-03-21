@@ -19,10 +19,7 @@ spec:
   replicas: {{ .Values.kpi.replicas }}
   minReadySeconds: 30
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
   selector:
     matchLabels:
       app: {{ include "kobo.labels.app" . }}
@@ -43,12 +40,20 @@ spec:
       nodeSelector:
         {{- toYaml .Values.kpi.nodeSelector | nindent 8 }}
       {{- end }}
-      
-      {{- if .Values.kpi.affinity }}
       affinity:
-        {{- toYaml .Values.kpi.affinity | nindent 8 }}
-      {{- end }}
-  
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: component
+                operator: In
+                values:
+                - kobocat
+              - key: app
+                operator: In
+                values:
+                - {{ include "kobo.labels.app" . }}
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: backend
         image: {{ .Values.kpi.image }}
@@ -64,6 +69,8 @@ spec:
         volumeMounts:
         - name: media-volume
           mountPath: /srv/src/kpi/media
+        - mountPath: /srv/src/kobocat/media
+          name: kobocat-media-volume
         - name: static-volume
           mountPath: /srv/static
         - name: scripts
@@ -71,7 +78,7 @@ spec:
         - name: scripts
           mountPath: /etc/profile.d/
         - name: uwsgi-config
-          mountPath: /srv/src/kpi/uwsgi.ini
+          mountPath: /srv/src/kpi/docker/uwsgi.ini
           subPath: uwsgi.ini
         {{- if .Values.kpi.livenessProbe.enabled }}
         livenessProbe:
@@ -113,17 +120,22 @@ spec:
         volumeMounts:
         - name: media-volume
           mountPath: /media
+        - mountPath: /srv/src/kobocat/media
+          name: kobocat-media-volume
         - name: static-volume
           mountPath: /static
         - name: nginx-conf
           mountPath: /etc/nginx/conf.d/
         ports:
           - containerPort: 80
-
       volumes:
       - name: media-volume
         persistentVolumeClaim:
           claimName: kpi-media-pvc
+      - name: kobocat-media-volume
+        persistentVolumeClaim:
+          claimName: kobocat-media-pvc
+          readOnly: true
       - name: static-volume
         emptyDir: {}
       - name: uwsgi-config

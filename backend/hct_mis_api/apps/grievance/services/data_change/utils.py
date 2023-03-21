@@ -2,7 +2,8 @@ import logging
 import random
 import string
 import urllib.parse
-from typing import Any, Dict, List, Optional, Union
+from collections import Counter
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -11,7 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     FIELD_TYPES_TO_INTERNAL_TYPE,
     TYPE_IMAGE,
     TYPE_SELECT_MANY,
@@ -25,7 +27,10 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
+    HEAD,
+    RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
@@ -107,7 +112,7 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
             IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
-def handle_add_document(document: Dict, individual: Individual) -> Document:
+def handle_add_document(document: Document, individual: Individual) -> Document:
     type_name = document.get("type")
     country_code = document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
@@ -239,13 +244,55 @@ def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dic
     return previous_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[int, Any]:
-    previous_identities = {}
+def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
+    edited_documents = []
+
+    for document_to_edit in documents_to_edit:
+        encoded_id = document_to_edit.get("id")
+        document_type = document_to_edit.get("type")
+        country = document_to_edit.get("country")
+        document_number = document_to_edit.get("number")
+        document_photo = document_to_edit.get("photo")
+        document_photoraw = document_to_edit.get("photoraw")
+
+        document_photo = handle_photo(document_photo, document_photoraw)
+
+        document_id = decode_id_string(encoded_id)
+        document = get_object_or_404(Document, id=document_id)
+
+        edited_documents.append(
+            {
+                "approve_status": False,
+                "value": {
+                    "id": encoded_id,
+                    "type": document_type,
+                    "country": country,
+                    "number": document_number,
+                    "photo": document_photo,
+                    "photoraw": document_photo,
+                },
+                "previous_value": {
+                    "id": encoded_id,
+                    "type": document.type.type,
+                    "country": document.country.iso_code3,
+                    "number": document.document_number,
+                    "photo": document.photo.name,
+                    "photoraw": document.photo.name,
+                },
+            }
+        )
+
+    return edited_documents
+
+
+def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
+    previous_identities: Dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
-        previous_identities[identity.id] = {
-            "id": identity.id,
+        encoded_identity = encode_id_base64_required(identity.id, "IndividualIdentity")
+        previous_identities[encoded_identity] = {
+            "id": encoded_identity,  # TODO: can be removed maybe
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "partner": identity.partner.name,
@@ -312,8 +359,9 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     }
 
     for pc in payment_channels:
-        handler = handlers.get(pc.get("type"))  # type: ignore # FIXME: Argument 1 to "get" of "dict" has incompatible type "Optional[Any]"; expected "str"
-        items.append(handler(pc))
+        if type_ := pc.get("type"):
+            if handler := handlers.get(type_):
+                items.append(handler(pc))
     return items
 
 
@@ -367,6 +415,233 @@ def handle_documents(documents: List[Dict]) -> List[Dict]:
     return [handle_document(document) for document in documents]
 
 
+def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) -> None:
+    from hct_mis_api.apps.core.utils import nested_dict_get
+
+    for key, value in options.items():
+        if key != input_data.get(field_name):
+            continue
+        for required in value.get("required"):
+            if nested_dict_get(input_data, required) is None:
+                raise ValidationError(f"You have to provide {required} in {key}")
+        for not_allowed in value.get("not_allowed"):
+            if nested_dict_get(input_data, not_allowed) is not None:
+                raise ValidationError(f"You can't provide {not_allowed} in {key}")
+
+
+def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> None:
+    for field in fields_list:
+        data_dict.pop(field, None)
+
+
+def withdraw_individual_and_reassign_roles(
+    ticket_details: List["GrievanceTicket"], individual_to_remove: Individual, info: Any
+) -> None:
+    old_individual = Individual.objects.get(id=individual_to_remove.id)
+    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    withdraw_individual(individual_to_remove, info, old_individual, household)
+
+
+def mark_as_duplicate_individual_and_reassign_roles(
+    ticket_details: Any, individual_to_remove: Individual, info: Any, unique_individual: Individual
+) -> None:
+    old_individual = Individual.objects.get(id=individual_to_remove.id)
+    if ticket_details.is_multiple_duplicates_version:
+        household = reassign_roles_on_disable_individual(
+            individual_to_remove, ticket_details.role_reassign_data, info, is_new_ticket=True
+        )
+    else:
+        household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
+
+
+def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
+    role_name = role_data.get("role")
+
+    individual_id = decode_id_string(role_data.get("individual"))
+    household_id = decode_id_string(role_data.get("household"))
+
+    old_individual = get_object_or_404(Individual, id=individual_id)
+    new_individual = get_object_or_404(Individual, id=individual_id)
+
+    household = get_object_or_404(Household, id=household_id)
+    return role_name, old_individual, new_individual, household
+
+
+def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
+    role_name, old_individual, _, household = get_data_from_role_data(role_data)
+    new_individual_id = decode_id_string(role_data.get("new_individual"))
+    new_individual = get_object_or_404(Individual, id=new_individual_id)
+
+    return role_name, old_individual, new_individual, household
+
+
+def reassign_roles_on_disable_individual(
+    individual_to_remove: Individual, role_reassign_data: Dict, info: Optional[Any] = None, is_new_ticket: bool = False
+) -> Household:
+    roles_to_bulk_update = []
+    for role_data in role_reassign_data.values():
+        if is_new_ticket:
+            (
+                role_name,
+                old_new_individual,
+                new_individual,
+                household,
+            ) = get_data_from_role_data_new_ticket(role_data)
+        else:
+            (
+                role_name,
+                old_new_individual,
+                new_individual,
+                household,
+            ) = get_data_from_role_data(role_data)
+
+        if role_name == HEAD:
+            if household.head_of_household.pk != new_individual.pk:
+                household.head_of_household = new_individual
+
+                # can be directly saved, because there is always only one head of household to update
+                household.save()
+                household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
+            new_individual.relationship = HEAD
+            new_individual.save()
+            if info:
+                log_create(
+                    Individual.ACTIVITY_LOG_MAPPING,
+                    "business_area",
+                    info.context.user,
+                    old_new_individual,
+                    new_individual,
+                )
+
+        if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
+            raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
+
+        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
+            role = get_object_or_404(
+                IndividualRoleInHousehold,
+                role=role_name,
+                household=household,
+                individual=individual_to_remove,
+            )
+            role.individual = new_individual
+            roles_to_bulk_update.append(role)
+
+    primary_roles_count = Counter([role.get("role") for role in role_reassign_data.values()])[ROLE_PRIMARY]
+
+    household_to_remove = individual_to_remove.household
+    is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
+
+    if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
+        raise ValidationError("Ticket cannot be closed, not all roles have been reassigned")
+
+    if (
+        all(HEAD not in key for key in role_reassign_data.keys())
+        and individual_to_remove.is_head()
+        and not is_one_individual
+    ):
+        raise ValidationError("Ticket cannot be closed head of household has not been reassigned")
+
+    if roles_to_bulk_update:
+        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
+
+    return household_to_remove
+
+
+def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, info: Optional[Any] = None) -> None:
+    roles_to_bulk_update = []
+    for role_data in role_reassign_data.values():
+        (
+            role_name,
+            old_new_individual,
+            new_individual,
+            household,
+        ) = get_data_from_role_data(role_data)
+
+        if role_name == HEAD:
+            household.head_of_household = new_individual
+            household.save()
+            new_individual.relationship = HEAD
+            new_individual.save()
+            if info:
+                log_create(
+                    Individual.ACTIVITY_LOG_MAPPING,
+                    "business_area",
+                    info.context.user,
+                    old_new_individual,
+                    new_individual,
+                )
+
+        if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
+            raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
+
+        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
+            role = get_object_or_404(
+                IndividualRoleInHousehold,
+                role=role_name,
+                household=household,
+                individual=individual,
+            )
+            role.individual = new_individual
+            roles_to_bulk_update.append(role)
+
+    if roles_to_bulk_update:
+        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
+
+
+def withdraw_individual(
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
+) -> None:
+    individual_to_remove.withdraw()
+
+    Document.objects.filter(status=Document.STATUS_VALID, individual=individual_to_remove).update(
+        status=Document.STATUS_NEED_INVESTIGATION
+    )
+    log_and_withdraw_household_if_needed(
+        individual_to_remove,
+        info,
+        old_individual_to_remove,
+        removed_individual_household,
+    )
+
+
+def mark_as_duplicate_individual(
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
+    unique_individual: Individual,
+) -> None:
+    individual_to_remove.mark_as_duplicate(unique_individual)
+    log_and_withdraw_household_if_needed(
+        individual_to_remove,
+        info,
+        old_individual_to_remove,
+        removed_individual_household,
+    )
+
+
+def log_and_withdraw_household_if_needed(
+    individual_to_remove: Individual,
+    info: Any,
+    old_individual_to_remove: Individual,
+    removed_individual_household: Household,
+) -> None:
+    log_create(
+        Individual.ACTIVITY_LOG_MAPPING,
+        "business_area",
+        info.context.user,
+        old_individual_to_remove,
+        individual_to_remove,
+    )
+    removed_individual_household.refresh_from_db()
+    if removed_individual_household and removed_individual_household.active_individuals.count() == 0:
+        removed_individual_household.withdraw()
+
+
 def save_images(flex_fields: Dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
         logger.error("associated_with argument must be one of ['household', 'individual']")
@@ -388,44 +663,3 @@ def save_images(flex_fields: Dict, associated_with: str) -> None:
                 file_name = value.replace(default_storage.base_url, "")
                 unquoted_value = urllib.parse.unquote(file_name)
                 flex_fields[name] = unquoted_value
-
-
-def prepare_edit_documents(documents_to_edit: List[Dict]) -> List[Dict]:
-    edited_documents = []
-
-    for document_to_edit in documents_to_edit:
-        encoded_id = document_to_edit.get("id")
-        document_type = document_to_edit.get("type")
-        country = document_to_edit.get("country")
-        document_number = document_to_edit.get("number")
-        document_photo = document_to_edit.get("photo")
-        document_photoraw = document_to_edit.get("photoraw")
-
-        document_photo = handle_photo(document_photo, document_photoraw)
-
-        document_id = decode_id_string(encoded_id)
-        document = get_object_or_404(Document, id=document_id)
-
-        edited_documents.append(
-            {
-                "approve_status": False,
-                "value": {
-                    "id": encoded_id,
-                    "type": document_type,
-                    "country": country,
-                    "number": document_number,
-                    "photo": document_photo,
-                    "photoraw": document_photo,
-                },
-                "previous_value": {
-                    "id": encoded_id,
-                    "type": document.type.type,
-                    "country": document.country.iso_code3,
-                    "number": document.document_number,
-                    "photo": document.photo.name,
-                    "photoraw": document.photo.name,
-                },
-            }
-        )
-
-    return edited_documents

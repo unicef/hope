@@ -144,7 +144,7 @@ class Query(graphene.ObjectType):
             .values("status_name")
             .annotate(count=Count("status"))
             .values_list("status_name", "count")
-            .order_by("-count")
+            .order_by("-count", "status_name")
         )
 
         return transform_to_chart_dataset(qs)

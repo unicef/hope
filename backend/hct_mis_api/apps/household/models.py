@@ -1,7 +1,6 @@
 import logging
 import re
-from datetime import date
-from decimal import Decimal
+from datetime import date, timedelta
 from typing import Any, List, Optional, Tuple
 
 from django.conf import settings
@@ -12,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField, QuerySet
+from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +25,9 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -108,6 +109,7 @@ SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
 GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
+FOSTER_CHILD = "FOSTER_CHILD"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
 
@@ -131,6 +133,7 @@ RELATIONSHIP_CHOICE = (
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
+    (FOSTER_CHILD, "Foster child"),
 )
 YES = "1"
 NO = "0"
@@ -144,11 +147,13 @@ COLLECT_TYPE_UNKNOWN = ""
 COLLECT_TYPE_NONE = "0"
 COLLECT_TYPE_FULL = "1"
 COLLECT_TYPE_PARTIAL = "2"
+COLLECT_TYPE_SIZE_ONLY = "3"
 
 COLLECT_TYPES = (
     (COLLECT_TYPE_UNKNOWN, _("Unknown")),
     (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
     (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
     (COLLECT_TYPE_NONE, _("No individual data")),
 )
 
@@ -173,6 +178,9 @@ IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
 IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
 IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
 IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
+IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
+IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE = "DISABILITY_CERTIFICATE"
+IDENTIFICATION_TYPE_FOSTER_CHILD = "FOSTER_CHILD"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -182,6 +190,9 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
     (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
     (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
+    (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
+    (IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE, _("Disability Certificate")),
+    (IDENTIFICATION_TYPE_FOSTER_CHILD, _("Foster Child")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -306,6 +317,10 @@ class Household(
             "size",
             "address",
             "admin_area",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
             "representatives",
             "geopoint",
             "female_age_group_0_5_count",
@@ -365,6 +380,10 @@ class Household(
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
+    admin1 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin2 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin3 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -465,6 +484,7 @@ class Household(
             HouseholdSelection.objects.filter(
                 household=self, target_population__status=TargetPopulation.STATUS_LOCKED
             ).delete()
+        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         super().save(*args, **kwargs)
 
     @property
@@ -494,31 +514,26 @@ class Household(
             return self.user_fields["sys"][key]
         return None
 
-    @property
-    def admin_area_title(self) -> Optional[str]:
-        if not self.admin_area:
-            return None
-        return self.admin_area.name
+    def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
+        """Propagates admin1,2,3,4 based on admin_area parents"""
+        admins = ["admin1", "admin2", "admin3", "admin4"]
 
-    @property
-    def admin1(self) -> Any:
-        if self.admin_area is None:
-            return None
-        if self.admin_area.area_type.area_level == 0:
-            return None
-        current_admin = self.admin_area
-        while current_admin.area_type.area_level != 1:
-            current_admin = current_admin.parent
-        return current_admin
+        if not new_admin_area:
+            new_admin_area = self.admin_area
+        else:
+            self.admin_area = new_admin_area
 
-    @property
-    def admin2(self) -> Any:
-        if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
-            return None
-        current_admin = self.admin_area
-        while current_admin.area_type.area_level != 2:
-            current_admin = current_admin.parent
-        return current_admin
+        for admin in admins:
+            setattr(self, admin, None)
+
+        new_admin_area_level = new_admin_area.area_type.area_level
+
+        for admin_level in reversed(range(1, new_admin_area_level + 1)):
+            setattr(self, f"admin{admin_level}", new_admin_area)
+            new_admin_area = new_admin_area.parent
+
+        if save:
+            self.save(update_fields=["admin_area"] + admins)
 
     @property
     def sanction_list_possible_match(self) -> bool:
@@ -527,22 +542,6 @@ class Household(
     @property
     def sanction_list_confirmed_match(self) -> bool:
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
-
-    @property
-    def total_cash_received_realtime(self) -> Decimal:
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
-            .get("delivered_quantity__sum")
-        )
-
-    @property
-    def total_cash_received_usd_realtime(self) -> Decimal:
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
-            .get("delivered_quantity_usd__sum")
-        )
 
     @property
     def active_individuals(self) -> QuerySet:
@@ -557,7 +556,24 @@ class Household(
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     def __str__(self) -> str:
-        return f"{self.unicef_id}"
+        return self.unicef_id or ""
+
+    def can_be_erase(self) -> bool:
+        yesterday = timezone.now() - timedelta(days=1)
+        conditions = [
+            self.is_removed,
+            self.withdrawn,
+            self.removed_date >= yesterday,
+            self.withdrawn_date >= yesterday,
+        ]
+        return all(conditions)
+
+    def erase(self) -> None:
+        for individual in self.individuals.all():
+            individual.erase()
+
+        self.flex_fields = {}
+        self.save()
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -568,6 +584,8 @@ class DocumentValidator(TimeStampedUUIDModel):
 class DocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
+    is_identity_document = models.BooleanField(default=True)
+    unique_for_individual = models.BooleanField(default=False)
 
     class Meta:
         ordering = [
@@ -579,11 +597,6 @@ class DocumentType(TimeStampedUUIDModel):
 
 
 class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
-    document_number = models.CharField(max_length=255, blank=True)
-    photo = models.ImageField(blank=True)
-    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
-    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -594,7 +607,16 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_NEED_INVESTIGATION, _("Need Investigation")),
         (STATUS_INVALID, _("Invalid")),
     )
+
+    document_number = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(blank=True)
+    individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    cleared = models.BooleanField(default=False)
+    cleared_date = models.DateTimeField(default=timezone.now)
+    cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -607,10 +629,33 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
+                fields=["type", "country"],
+                condition=Q(
+                    Q(is_removed=False)
+                    & Q(status="VALID")
+                    & Func(
+                        F("type_id"),
+                        Value(True),
+                        function="check_unique_document_for_individual",
+                        output_field=BooleanField(),
+                    )
+                ),
+                name="unique_for_individual_if_not_removed_and_valid",
+            ),
+            UniqueConstraint(
                 fields=["document_number", "type", "country"],
-                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                condition=Q(
+                    Q(is_removed=False)
+                    & Q(status="VALID")
+                    & Func(
+                        F("type_id"),
+                        Value(False),
+                        function="check_unique_document_for_individual",
+                        output_field=BooleanField(),
+                    )
+                ),
                 name="unique_if_not_removed_and_valid",
-            )
+            ),
         ]
 
     def __str__(self) -> str:
@@ -621,6 +666,12 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
 
     def mark_as_valid(self) -> None:
         self.status = self.STATUS_VALID
+
+    def erase(self) -> None:
+        self.is_removed = True
+        self.photo = ""
+        self.document_number = "GDPR REMOVED"
+        self.save()
 
 
 class IndividualIdentity(models.Model):
@@ -807,6 +858,8 @@ class Individual(
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
+    relationship_confirmed = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
@@ -855,6 +908,16 @@ class Individual(
     def sanction_list_last_check(self) -> Any:
         return cache.get("sanction_list_last_check")
 
+    @property
+    def bank_name(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_name if bank_account_info else None
+
+    @property
+    def bank_account_number(self) -> str:
+        bank_account_info = self.bank_account_info.first()
+        return bank_account_info.bank_account_number if bank_account_info else None
+
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
@@ -875,8 +938,12 @@ class Individual(
         self.duplicate_date = timezone.now()
         self.save()
 
+    def set_relationship_confirmed_flag(self, confirmed: bool) -> None:
+        self.relationship_confirmed = confirmed
+        self.save(update_fields=["relationship_confirmed"])
+
     def __str__(self) -> str:
-        return self.unicef_id
+        return self.unicef_id or ""
 
     class Meta:
         verbose_name = "Individual"
@@ -941,6 +1008,25 @@ class Individual(
         if not self.household:
             return False
         return self.household.head_of_household.id == self.id
+
+    def erase(self) -> None:
+        for document in self.documents.all():
+            document.erase()
+
+        self.is_removed = True
+        self.removed_date = timezone.now()
+        self.full_name = "GDPR REMOVED"
+        self.given_name = "GDPR REMOVED"
+        self.middle_name = "GDPR REMOVED"
+        self.family_name = "GDPR REMOVED"
+        self.photo = ""
+        self.disability_certificate_picture = ""
+        self.phone_no = ""
+        self.phone_no_valid = False
+        self.phone_no_alternative = ""
+        self.phone_no_alternative_valid = False
+        self.flex_fields = {}
+        self.save()
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         recalculate_phone_numbers_validity(self, Individual)

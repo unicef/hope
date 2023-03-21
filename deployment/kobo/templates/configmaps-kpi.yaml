@@ -60,6 +60,7 @@ data:
   KOBOCAT_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.kobocat.subdomain .Values.ingress.host }}"
   ENKETO_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.enketo.subdomain .Values.ingress.host }}"
 
+  KOBOFORM_SERVER_PROTOCOL: "https"
   KOBOFORM_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kpi"
   KOBOCAT_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kobocat"
   ENKETO_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-enketo"
@@ -75,7 +76,7 @@ data:
   KOBOFORM_PUBLIC_SUBDOMAIN: "{{ .Values.kpi.subdomain }}"
   PUBLIC_DOMAIN_NAME: "{{ .Values.ingress.host }}"
 
-  PUBLIC_REQUEST_SCHEME: "{{ .Values.ingress.scheme }}"
+  PUBLIC_REQUEST_SCHEME: https
 
   INTERNAL_DOMAIN_NAME: "{{ include "kobo.fullname" . }}-kpi"
 
@@ -90,9 +91,6 @@ data:
   KPI_POSTGRES_DB: "{{ .Values.postgresql.externalDatabase.kpiDatabase }}"
   KOBOCAT_POSTGRES_DB: "{{ .Values.postgresql.externalDatabase.kobocatDatabase }}"
   {{- end  }}
-  {{-  if .Values.ingress.tls }}
-  SECURE_PROXY_SSL_HEADER: "HTTP_X_FORWARDED_PROTO, https"
-  {{- end }}
   SYNC_KOBOCAT_XFORMS: "True"
 
   EMAIL_HOST: "{{ .Values.smtp.host }}"

@@ -8,6 +8,7 @@ import {
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -56,6 +57,7 @@ export const DeleteTargetPopulation = ({
       >
         {({ submitForm }) => (
           <>
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle>{t('Delete Target Population')}</DialogTitle>
             </DialogTitleWrapper>

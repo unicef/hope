@@ -142,8 +142,8 @@ class TicketCreatorService:
         linked_feedback.save()
 
     def _create_ticket(self, business_area: BusinessArea, input_data: Dict, user: AbstractUser) -> GrievanceTicket:
-        partner = decode_and_get_object(input_data.pop("partner", None), Partner)
-        assigned_to = decode_and_get_object(input_data.pop("assigned_to", None), get_user_model())
+        partner = decode_and_get_object(input_data.pop("partner", None), Partner, False)
+        assigned_to = decode_and_get_object(input_data.pop("assigned_to", None), get_user_model(), False)
         admin = input_data.pop("admin", None)
         programme = input_data.pop("programme", None)
 

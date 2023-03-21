@@ -2,16 +2,21 @@ import { Box, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { PaymentVerificationNode, PaymentRecordNode } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
-export const PaymentIds = ({
-  verifications,
-}: {
-  verifications: GrievanceTicketQuery['grievanceTicket']['paymentVerificationTicketDetails']['paymentVerifications']['edges'];
-}): React.ReactElement => {
+type VerificationId = {
+  id: PaymentVerificationNode["id"];
+  caId: PaymentRecordNode["caId"];
+}
+
+interface PaymentIdsProps {
+  verifications: VerificationId[];
+}
+
+export const PaymentIds = ({ verifications }: PaymentIdsProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
@@ -19,9 +24,9 @@ export const PaymentIds = ({
     (verification): React.ReactElement => (
       <Box mb={1}>
         <ContentLink
-          href={`/${businessArea}/verification-records/${verification.node.id}`}
+          href={`/${businessArea}/verification-records/${verification.id}`}
         >
-          {verification.node.paymentRecord.caId}
+          {verification.caId}
         </ContentLink>
       </Box>
     ),

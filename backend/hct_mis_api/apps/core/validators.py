@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_BOOL,
     TYPE_DATE,
     TYPE_DECIMAL,
@@ -13,7 +14,6 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
     TYPE_STRING,
-    FieldFactory,
     Scope,
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
@@ -147,6 +147,7 @@ class KoboTemplateValidator:
         "admin1_h_c",
         "admin2_h_c",
         "disability_i_c",
+        "preferred_language_i_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
         BLANK,
@@ -210,7 +211,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_db(cls) -> Dict:
-        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)  # type: ignore # TODO: none business area?
+        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area()
         return {
             core_field_data["xlsx_field"]: {
                 "type": core_field_data["type"],

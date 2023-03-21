@@ -97,6 +97,29 @@ export const GrievancesDetails = ({
     );
   };
 
+  const renderPaymentUrl = (): React.ReactElement => {
+    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
+      return (
+        <ContentLink
+          href={`/${businessArea}/verification/payment-record/${ticket.paymentRecord.id}`}
+        >
+          {ticket.paymentRecord.caId}
+        </ContentLink>
+      );
+    }
+    if (ticket?.paymentRecord?.objType === 'Payment') {
+      return (
+        <ContentLink
+          href={`/${businessArea}/verification/payment/${ticket.paymentRecord.id}`}
+        >
+          {ticket.paymentRecord.caId}
+        </ContentLink>
+      );
+    }
+
+    return <>-</>;
+  };
+
   return (
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
@@ -199,15 +222,7 @@ export const GrievancesDetails = ({
                 label: t('Payment ID'),
                 value: (
                   <span>
-                    {ticket.paymentRecord?.caId ? (
-                      <ContentLink
-                        href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
-                      >
-                        {ticket.paymentRecord.caId}
-                      </ContentLink>
-                    ) : (
-                      '-'
-                    )}
+                   {renderPaymentUrl()}
                   </span>
                 ),
                 size: showProgramme || showPartner ? 3 : 12,

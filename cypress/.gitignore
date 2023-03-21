@@ -1,0 +1,13 @@
+node_modules
+*.log
+*.aes
+cypress/screenshots
+cypress/videos
+cypress/logs
+cypress/fixtures/profile.json
+cypress/fixtures/users.json
+cypress/results
+.history
+.vscode
+env
+.DS_Store

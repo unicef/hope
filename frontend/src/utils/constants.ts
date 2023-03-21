@@ -1,15 +1,62 @@
-import { TargetPopulationStatus } from '../__generated__/graphql';
+import {
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus,
+  ProgramStatus,
+  TargetPopulationStatus,
+} from '../__generated__/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
   [TargetPopulationStatus.Open]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
+  [TargetPopulationStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
   [TargetPopulationStatus.Processing]: 'Processing',
-  [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
-  [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
-  [TargetPopulationStatus.SteficonCompleted]: 'Steficon Completed',
-  [TargetPopulationStatus.SteficonError]: 'Steficon Error',
+  [TargetPopulationStatus.SteficonWait]: 'Entitlement Formula Wait',
+  [TargetPopulationStatus.SteficonRun]: 'Entitlement Formula Run',
+  [TargetPopulationStatus.SteficonCompleted]: 'Entitlement Formula Completed',
+  [TargetPopulationStatus.SteficonError]: 'Entitlement Formula Error',
+  [TargetPopulationStatus.Assigned]: 'Assigned',
+};
+
+export const PROGRAM_STATES = {
+  [ProgramStatus.Active]: 'Active',
+  [ProgramStatus.Draft]: 'Draft',
+  [ProgramStatus.Finished]: 'Finished',
+};
+
+export const PAYMENT_PLAN_STATES = {
+  [PaymentPlanStatus.Open]: 'Open',
+  [PaymentPlanStatus.Locked]: 'Locked',
+  [PaymentPlanStatus.LockedFsp]: 'FSP Locked',
+  [PaymentPlanStatus.InApproval]: 'In Approval',
+  [PaymentPlanStatus.InAuthorization]: 'In Authorization',
+  [PaymentPlanStatus.InReview]: 'In Review',
+  [PaymentPlanStatus.Accepted]: 'Accepted',
+  [PaymentPlanStatus.Finished]: 'Finished',
+};
+
+export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
+  [PaymentPlanBackgroundActionStatus.RuleEngineRun]: 'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+    'Entitlement Formula Error',
+  [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
+  [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+    'XLSX Importing Entitlements',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+    'XLSX Importing Reconciliation',
+  [PaymentPlanBackgroundActionStatus.XlsxImportError]: 'XLSX Import Error',
+};
+
+export const PAYMENT_PLAN_ACTIONS = {
+  LOCK: 'LOCK',
+  UNLOCK: 'UNLOCK',
+  SEND_FOR_APPROVAL: 'SEND_FOR_APPROVAL',
+  APPROVE: 'APPROVE',
+  AUTHORIZE: 'AUTHORIZE',
+  REVIEW: 'REVIEW',
+  REJECT: 'REJECT',
 };
 
 export const GRIEVANCE_TICKET_STATES = {
@@ -60,16 +107,15 @@ export const REPORT_TYPES = {
 export const REPORTING_STATES = {
   PROCESSING: 1,
   GENERATED: 2,
-  FAILED: 3
+  FAILED: 3,
 };
 
-
 export const COLLECT_TYPES_MAPPING = {
-  "A_": "Unknown",
-  "A_0": "None",
-  "A_1": "Full",
-  "A_2": "Partial",
-}
+  A_: 'Unknown',
+  A_0: 'None',
+  A_1: 'Full',
+  A_2: 'Partial',
+};
 export const GRIEVANCE_TICKETS_TYPES = {
   userGenerated: 0,
   systemGenerated: 1,
@@ -134,4 +180,8 @@ export const SurveyTabsValues = {
   PROGRAM: 0,
   TARGET_POPULATION: 1,
   RDI: 2,
+  A_: 'Unknown',
+  A_0: 'None',
+  A_1: 'Full',
+  A_2: 'Partial',
 };

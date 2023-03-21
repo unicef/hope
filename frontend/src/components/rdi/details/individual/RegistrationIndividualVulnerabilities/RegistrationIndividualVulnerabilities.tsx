@@ -42,6 +42,14 @@ export function RegistrationIndividualVulnerabilities({
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
+      if(key in flexAttributesDict === false)
+        return (
+          <Grid item xs={4} key={key}>
+            <LabelizedField label={key} value={value}>
+              {value}
+            </LabelizedField>
+          </Grid>
+        );
       const { type, choices } = flexAttributesDict[key];
       const label = key.replaceAll('_i_f', '').replace(/_/g, ' ');
       let newValue;

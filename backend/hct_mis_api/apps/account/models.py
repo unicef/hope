@@ -2,6 +2,7 @@ import logging
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
@@ -18,6 +19,7 @@ from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
+from hct_mis_api.apps.account.fields import ChoiceArrayField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -115,6 +117,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             for role in self.user_roles.all()
         )
 
+    def can_change_fsp(self) -> bool:
+        return any(
+            self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
     class Meta:
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
@@ -128,10 +136,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
 
 
-class ChoiceArrayField(ArrayField):
+class HorizontalChoiceArrayField(ArrayField):
     def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,
+            "widget": widget,
             "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
@@ -197,6 +207,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("name", "subsystem")
+        ordering = ("subsystem", "name")
 
     def __str__(self) -> str:
         return f"{self.name} ({self.subsystem})"

@@ -14,6 +14,7 @@ export const AllTargetPopulations = gql`
     $businessArea: String
     $program: [ID]
     $createdAtRange: String
+    $paymentPlanApplicable: Boolean
   ) {
     allTargetPopulation(
       after: $after
@@ -28,6 +29,7 @@ export const AllTargetPopulations = gql`
       businessArea: $businessArea
       program: $program
       createdAtRange: $createdAtRange
+      paymentPlanApplicable: $paymentPlanApplicable
     ) {
       edges {
         node {

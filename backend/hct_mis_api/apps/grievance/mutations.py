@@ -53,6 +53,7 @@ from hct_mis_api.apps.grievance.services.ticket_status_changer_service import (
     TicketStatusChangerService,
 )
 from hct_mis_api.apps.grievance.utils import (
+    clear_cache,
     create_grievance_documents,
     delete_grievance_documents,
     get_individual,
@@ -347,7 +348,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             raise GraphQLError("Feedback tickets are not allowed to be created through this mutation.")
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            log_and_raise("Grievance Ticket in status Closed is not editable")
+            raise ValidationError("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
@@ -580,6 +581,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
 
         if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             notifications.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
         if (
             old_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL

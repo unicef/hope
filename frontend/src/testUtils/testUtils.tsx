@@ -3,15 +3,24 @@ import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
 import { TestProviders } from './testProviders';
 import { MockLink } from '@apollo/react-testing';
+import { Formik } from 'formik';
+import noop from 'lodash/noop';
 
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'queries'>,
 ) =>
-  render(<BrowserRouter>{ui}</BrowserRouter>, {
-    wrapper: TestProviders,
-    ...options,
-  });
+  render(
+    <BrowserRouter>
+      <Formik initialValues={{}} onSubmit={noop}>
+        {ui}
+      </Formik>
+    </BrowserRouter>,
+    {
+      wrapper: TestProviders,
+      ...options,
+    },
+  );
 
 export * from '@testing-library/react';
 export { customRender as render };

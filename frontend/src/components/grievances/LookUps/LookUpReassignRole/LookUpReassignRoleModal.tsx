@@ -21,6 +21,7 @@ import {
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
@@ -105,7 +106,7 @@ export const LookUpReassignRoleModal = ({
         const multipleRolesVariables = {
           grievanceTicketId: id,
           householdId: household.id,
-          newIndividualId: values.selectedIndividual.id,
+          newIndividualId: values.selectedIndividual?.id,
           individualId: individual.id,
           role: values.role,
         };
@@ -113,7 +114,7 @@ export const LookUpReassignRoleModal = ({
         const singleRoleVariables = {
           grievanceTicketId: id,
           householdId: household.id,
-          individualId: values.selectedIndividual.id,
+          individualId: values.selectedIndividual?.id,
           role: values.role,
         };
 
@@ -147,6 +148,7 @@ export const LookUpReassignRoleModal = ({
           scroll='paper'
           aria-labelledby='form-dialog-title'
         >
+          {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle>{t('Reassign Role')}</DialogTitle>
           </DialogTitleWrapper>

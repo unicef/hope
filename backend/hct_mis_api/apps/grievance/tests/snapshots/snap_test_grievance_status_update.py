@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_assign_user_0_with_permission 1'] = {
@@ -13,7 +14,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_assign_user_0_w
                 'status': 2
             }
         }
-    }
+    },
 }
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_assign_user_1_without_permission 1'] = {

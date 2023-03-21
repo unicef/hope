@@ -1,4 +1,7 @@
+
+import { act } from '@testing-library/react';
 import React from 'react';
+import wait from 'waait';
 import { MockedProvider } from '@apollo/react-testing';
 import { render } from '../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../fixtures/population/fakeHouseholdChoices';
@@ -8,7 +11,7 @@ import { fakeGrievancesChoices } from '../../../../fixtures/grievances/fakeGriev
 import { IndividualBioData } from './IndividualBioData';
 
 describe('components/population/IndividualBioData', () => {
-  it('should render', () => {
+  it('should render', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
@@ -22,6 +25,7 @@ describe('components/population/IndividualBioData', () => {
         />
       </MockedProvider>
     );
+    await act(() => wait(0)); // wait for response
     expect(container).toMatchSnapshot();
   });
 });

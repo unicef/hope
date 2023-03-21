@@ -329,7 +329,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             household_obj.first_registration_date = registration_date
             household_obj.last_registration_date = registration_date
             household_obj.registration_data_import = registration_data_import
-            household_obj = self._assign_admin_areas_titles(household_obj)
+            household_obj.set_admin_areas()
             households_to_create.append(household_obj)
 
             for ind in current_individuals:

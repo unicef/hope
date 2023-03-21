@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   hasPermissionInModule,
@@ -13,18 +13,25 @@ import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
 import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
+import { getFilterFromQueryParams } from '../../../../utils/utils';
+
+const initialFilter = {
+  feedbackId: '',
+  issueType: '',
+  createdBy: '',
+  createdAtRangeMin: null,
+  createdAtRangeMax: null,
+};
 
 export const FeedbackPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { t } = useTranslation();
+  const location = useLocation();
 
-  const [filter, setFilter] = useState({
-    feedbackId: '',
-    issueType: '',
-    createdBy: '',
-    createdAtRange: '',
-  });
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
   const debouncedFilter = useDebounce(filter, 500);
 

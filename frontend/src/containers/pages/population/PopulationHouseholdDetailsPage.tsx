@@ -29,7 +29,7 @@ import {
 } from '../../../__generated__/graphql';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable/HouseholdIndividualsTable';
-import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordHouseholdTable';
+import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
 import { Title } from '../../../components/core/Title';
@@ -76,14 +76,28 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  const { data: grievancesChoices } = useGrievancesChoiceDataQuery();
+  const {
+    data: grievancesChoices,
+    loading: grievancesChoicesLoading,
+  } = useGrievancesChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
+  if (
+    loading ||
+    choicesLoading ||
+    flexFieldsDataLoading ||
+    grievancesChoicesLoading
+  )
     return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
+  if (
+    !data ||
+    !choicesData ||
+    !grievancesChoices ||
+    !flexFieldsData ||
+    permissions === null
+  )
     return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

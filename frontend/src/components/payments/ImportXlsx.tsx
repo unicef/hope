@@ -15,8 +15,8 @@ import { ImportErrors } from '../../containers/tables/payments/VerificationRecor
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
-  useImportXlsxCashPlanVerificationMutation,
-  ImportXlsxCashPlanVerificationMutation,
+  useImportXlsxPaymentVerificationPlanFileMutation,
+  ImportXlsxPaymentVerificationPlanFileMutation,
   XlsxErrorNode,
 } from '../../__generated__/graphql';
 import { DropzoneField } from '../core/DropzoneField';
@@ -30,8 +30,13 @@ const StyledButton = styled(Button)`
   width: 150px;
 `;
 
-export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+export interface ImportXlsxProps {
+  paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
+}
+
+export function ImportXlsx({ paymentVerificationPlanId, cashOrPaymentPlanId }: ImportXlsxProps): ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
@@ -41,11 +46,11 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
   const [
     mutate,
     { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxCashPlanVerificationMutation();
+  ] = useImportXlsxPaymentVerificationPlanFileMutation();
 
-  const xlsxErrors: ImportXlsxCashPlanVerificationMutation['importXlsxCashPlanVerification']['errors'] = get(
+  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] = get(
     uploadData,
-    'importXlsxCashPlanVerification.errors',
+    'importXlsxPaymentVerificationPlanFile.errors',
   );
 
   const handleImport = async (): Promise<void> => {
@@ -53,13 +58,13 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
       try {
         const { data, errors } = await mutate({
           variables: {
-            cashPlanVerificationId: verificationPlanId,
+            paymentVerificationPlanId,
             file: fileToImport,
           },
           refetchQueries,
         });
 
-        if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
+        if (!errors && !data?.importXlsxPaymentVerificationPlanFile?.errors.length) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
         }
@@ -129,7 +134,7 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import'
+              data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
             </Button>

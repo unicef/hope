@@ -8,16 +8,15 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class TestCreatePaymentVerificationMutation(APITestCase):
     MUTATION = """
-        mutation createCashPlanPaymentVerification( $input: CreatePaymentVerificationInput! ) {
-            createCashPlanPaymentVerification(input: $input) {
-                cashPlan {
+        mutation createPaymentVerificationPlan( $input: CreatePaymentVerificationInput! ) {
+            createPaymentVerificationPlan(input: $input) {
+                paymentPlan {
                     id
                 }
             }
@@ -45,7 +44,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         (household, _) = create_household(household_args={"size": 1})
         PaymentRecordFactory.create(
-            cash_plan=self.cash_plan,
+            parent=self.cash_plan,
             business_area=self.cash_plan.business_area,
             delivered_quantity=1000,
             delivered_quantity_usd=None,
@@ -63,7 +62,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "input": {
-                    "cashPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+                    "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
                     "sampling": "FULL_LIST",
                     "fullListArguments": {"excludedAdminAreas": []},
                     "verificationChannel": "MANUAL",
@@ -78,7 +77,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
 
         defaults = {
-            "cashPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+            "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
             "businessAreaSlug": "afghanistan",
         }
 
@@ -141,7 +140,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "input": {
-                    "cashPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+                    "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
                     "sampling": "FULL_LIST",
                     "fullListArguments": {"excludedAdminAreas": []},
                     "verificationChannel": "MANUAL",

@@ -3,10 +3,12 @@ import FlashOnIcon from '@material-ui/icons/FlashOn';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import moment from 'moment';
 import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
+import { createHandleFilterChange } from '../../../../utils/utils';
 import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
@@ -17,13 +19,20 @@ interface PaymentFiltersProps {
   filter;
   programs: ProgramNode[];
 }
-export function PaymentFilters({
+export const PaymentFilters = ({
   onFilterChange,
   filter,
   programs,
-}: PaymentFiltersProps): React.ReactElement {
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+}: PaymentFiltersProps): React.ReactElement => {
+  const history = useHistory();
+  const location = useLocation();
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+
   const {
     data: statusChoicesData,
   } = useCashPlanVerificationStatusChoicesQuery();
@@ -38,13 +47,15 @@ export function PaymentFilters({
         <Grid item>
           <SearchTextField
             value={filter.search}
-            label='Cash Plan ID'
-            onChange={(e) => handleFilterChange(e, 'search')}
+            label='Cash/Payment Plan ID'
+            onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'verificationStatus')}
+            onChange={(e) =>
+              handleFilterChange('verificationStatus', e.target.value)
+            }
             label='Status'
             multiple
             value={filter.verificationStatus}
@@ -62,12 +73,14 @@ export function PaymentFilters({
           <SearchTextField
             value={filter.serviceProvider}
             label='FSP'
-            onChange={(e) => handleFilterChange(e, 'serviceProvider')}
+            onChange={(e) =>
+              handleFilterChange('serviceProvider', e.target.value)
+            }
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'deliveryType')}
+            onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
             label='Modality'
             value={filter.deliveryType}
             icon={<MonetizationOnIcon />}
@@ -86,12 +99,12 @@ export function PaymentFilters({
           <DatePickerFilter
             label='Start Date'
             onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                startDate: moment(date)
+              handleFilterChange(
+                'startDate',
+                moment(date)
                   .startOf('day')
                   .toISOString(),
-              })
+              )
             }
             value={filter.startDate}
           />
@@ -100,19 +113,19 @@ export function PaymentFilters({
           <DatePickerFilter
             label='End Date'
             onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                endDate: moment(date)
+              handleFilterChange(
+                'endDate',
+                moment(date)
                   .endOf('day')
                   .toISOString(),
-              })
+              )
             }
             value={filter.endDate}
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'program')}
+            onChange={(e) => handleFilterChange('program', e.target.value)}
             label='Programme'
             value={filter.program}
             icon={<FlashOnIcon />}
@@ -130,4 +143,4 @@ export function PaymentFilters({
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

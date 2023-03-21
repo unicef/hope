@@ -1,16 +1,27 @@
 import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
+import { useHistory, useLocation, LocationState } from 'react-router-dom';
 import localForage from 'localforage';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus,
+  PaymentRecordStatus,
+  PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -48,11 +59,11 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'DRAFT':
+    case ProgramStatus.Draft:
       return theme.hctPalette.gray;
-    case 'ACTIVE':
+    case ProgramStatus.Active:
       return theme.hctPalette.green;
-    case 'FINISHED':
+    case ProgramStatus.Finished:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
@@ -107,12 +118,30 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'TRANSACTION_SUCCESSFUL':
-      return theme.hctPalette.green;
-    case 'DISTRIBUTION_SUCCESSFUL':
-      return theme.hctPalette.green;
-    case 'TRANSACTION_PENDING':
+    case PaymentRecordStatus.Pending:
       return theme.hctPalette.orange;
+    case PaymentRecordStatus.DistributionSuccessful:
+    case PaymentRecordStatus.TransactionSuccessful:
+      return theme.hctPalette.green;
+    case PaymentRecordStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function paymentStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case PaymentStatus.Pending:
+      return theme.hctPalette.orange;
+    case PaymentStatus.DistributionSuccessful:
+    case PaymentStatus.TransactionSuccessful:
+      return theme.hctPalette.green;
+    case PaymentStatus.PartiallyDistributed:
+      return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
   }
@@ -175,6 +204,8 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
+    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
@@ -195,6 +226,50 @@ export function targetPopulationBuildStatusToColor(
     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
     [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.Finished]: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanBackgroundActionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -436,6 +511,18 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
+export function programStatusMapping(status): string {
+  return PROGRAM_STATES[status];
+}
+
+export function paymentPlanStatusMapping(status): string {
+  return PAYMENT_PLAN_STATES[status];
+}
+
+export function paymentPlanBackgroundActionStatusMapping(status): string {
+  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
@@ -624,4 +711,121 @@ export async function clearCache(apolloClient = null): Promise<void> {
 
 export const round = (value: number, decimals = 2): number => {
   return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
+};
+
+type Location = ReturnType<typeof useLocation>;
+type FilterValue = string | string[] | boolean | null | undefined;
+type Filter = { [key: string]: FilterValue };
+
+export const getFilterFromQueryParams = (
+  location: Location,
+  initialFilter: Filter = {},
+): Filter => {
+  const filter: Filter = { ...initialFilter };
+  const searchParams = new URLSearchParams(location.search);
+  for (const [key, value] of searchParams.entries()) {
+    if (key in filter) {
+      const existingValue = filter[key];
+      if (Array.isArray(existingValue)) {
+        const values = value.split(',');
+        filter[key] = [...existingValue, ...values];
+      } else {
+        filter[key] =
+          value !== 'true' && value !== 'false' ? value : value === 'true';
+      }
+    }
+  }
+  return filter;
+};
+
+export const setQueryParam = (
+  key: string,
+  value: string,
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  const params = new URLSearchParams(location.search);
+
+  // Remove all existing values for the given key
+  params.delete(key);
+
+  // Add the new value for the given key
+  params.append(key, value);
+
+  history.push({ search: params.toString() });
+};
+
+export const setFilterToQueryParams = (
+  filter: { [key: string]: FilterValue },
+  history: useHistory<LocationState>,
+  location: Location,
+): void => {
+  const params = new URLSearchParams(location.search);
+  Object.entries(filter).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        // remove all existing params for this key
+        params.delete(key);
+
+        // add each value as a separate param
+        value.forEach((val) => {
+          if (val !== null && val !== undefined) {
+            params.append(key, val);
+          }
+        });
+      } else {
+        const paramValue =
+          typeof value === 'boolean' ? value.toString() : value;
+        params.set(key, paramValue);
+      }
+    } else {
+      params.delete(key);
+    }
+  });
+  const search = params.toString();
+  history.push({ search });
+};
+
+export const createHandleFilterChange = (
+  onFilterChange: (filter: { [key: string]: FilterValue }) => void,
+  initialFilter: Filter,
+  history: useHistory<LocationState>,
+  location: Location,
+): ((key: string, value: FilterValue) => void) => {
+  let filterFromQueryParams = getFilterFromQueryParams(location, initialFilter);
+
+  const handleFilterChange = (key: string, value: FilterValue): void => {
+    const newFilter = {
+      ...filterFromQueryParams,
+      [key]: value,
+    };
+
+    filterFromQueryParams = newFilter;
+    onFilterChange(newFilter);
+
+    const params = new URLSearchParams(location.search);
+    const isEmpty = (v: FilterValue): boolean =>
+      v === '' ||
+      v === null ||
+      v === undefined ||
+      (Array.isArray(v) && v.length === 0);
+
+    if (isEmpty(value)) {
+      params.delete(key);
+    } else if (Array.isArray(value)) {
+      const filteredValues = value.filter((v) => !isEmpty(v));
+      if (filteredValues.length > 0) {
+        params.set(key, filteredValues.join(','));
+      } else {
+        params.delete(key);
+      }
+    } else {
+      params.set(key, value.toString());
+    }
+
+    const search = params.toString();
+    history.push({ search });
+  };
+
+  return handleFilterChange;
 };
