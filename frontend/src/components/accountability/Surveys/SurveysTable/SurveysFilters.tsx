@@ -1,21 +1,20 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import get from 'lodash/get';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import get from 'lodash/get';
 import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
+import { createHandleFilterChange } from '../../../../utils/utils';
 import { useAllProgramsForChoicesQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { createHandleFilterChange } from '../../../../utils/utils';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 
 interface SurveysFiltersProps {
   onFilterChange;
