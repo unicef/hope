@@ -52,8 +52,7 @@ class TestAllFinancialServiceProviders(APITestCase):
             financialServiceProvider {
                 name
                 visionVendorNumber
-                deliveryMechanisms {
-                }
+                deliveryMechanisms
                 communicationChannel
                 distributionLimit
             }
@@ -75,8 +74,7 @@ class TestAllFinancialServiceProviders(APITestCase):
             financialServiceProvider {
                 name
                 visionVendorNumber
-                deliveryMechanisms {
-                }
+                deliveryMechanisms
                 communicationChannel
                 distributionLimit
             }
@@ -119,7 +117,7 @@ class TestAllFinancialServiceProviders(APITestCase):
     def test_create_financial_service_provider(self) -> None:
         FinancialServiceProviderXlsxTemplateFactory.create()
 
-        self.graphql_request(
+        self.snapshot_graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
             context={"user": self.user},
             variables={
@@ -138,7 +136,7 @@ class TestAllFinancialServiceProviders(APITestCase):
         fsp = FinancialServiceProviderFactory.create()
         FinancialServiceProviderXlsxTemplateFactory.create()
 
-        self.graphql_request(
+        self.snapshot_graphql_request(
             request_string=self.MUTATION_UPDATE_FSP,
             context={"user": self.user},
             variables={
@@ -146,9 +144,9 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "businessAreaSlug": self.BUSINESS_AREA_SLUG,
                 "inputs": {
                     "name": "New Gen Bank",
-                    "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": ["Transfer"],
-                    "distributionLimit": "123456789",
+                    "visionVendorNumber": "XYZB-123456799",
+                    "deliveryMechanisms": ["Transfer", "Cash"],
+                    "distributionLimit": "100999",
                     "communicationChannel": "XLSX",
                 },
             },
