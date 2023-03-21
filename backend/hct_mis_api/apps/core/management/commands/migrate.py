@@ -382,5 +382,5 @@ class Command(BaseCommand):
             is_error = True
         if action:
             action = " -> " + action
-        truncated = Truncator(action)  # type: ignore # FIXME: Argument 1 to "Truncator" has incompatible type "Optional[str]"; expected "Union[Model, str]"
+        truncated = Truncator(action)
         return prefix + operation.describe() + truncated.chars(40), is_error

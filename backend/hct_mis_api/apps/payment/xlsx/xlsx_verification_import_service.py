@@ -36,7 +36,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.was_validation_run = False
 
     def open_workbook(self) -> openpyxl.Workbook:
-        wb = openpyxl.load_workbook(self.file, data_only=True)  # type: ignore # FIXME: Argument 1 to "load_workbook" has incompatible type "IO[Any]"; expected "Union[str, Path, BufferedReader, BytesIO]"
+        wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
         return wb
