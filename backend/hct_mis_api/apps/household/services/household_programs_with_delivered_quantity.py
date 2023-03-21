@@ -1,6 +1,6 @@
 from collections import defaultdict
 from decimal import Decimal
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List
 
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Coalesce
@@ -9,17 +9,6 @@ from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
-
-
-class QuantityType(TypedDict):
-    total_delivered_quantity: Decimal
-    currency: str
-
-
-class ProgramType(TypedDict):
-    id: str
-    name: str
-    quantity: List[QuantityType]
 
 
 def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any]]:

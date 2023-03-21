@@ -234,6 +234,26 @@
   }
 },
 {
+  "model": "household.documenttype",
+  "pk": "afd33528-f377-4494-80be-89f5ab8c2d3b",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.291Z",
+    "updated_at": "2022-08-10T14:00:37.291Z",
+    "label": "Disability Certificate",
+    "type": "DISABILITY_CERTIFICATE"
+  }
+},
+{
+  "model": "household.documenttype",
+  "pk": "b37fbf40-bc38-4a86-9e87-e2f420fd0754",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.291Z",
+    "updated_at": "2022-08-10T14:00:37.291Z",
+    "label": "Foster child",
+    "type": "FOSTER_CHILD"
+  }
+},
+{
   "model": "household.document",
   "pk": "0040cb2a-4b86-41b2-82b1-d5ac4d11471d",
   "fields": {
@@ -245,7 +265,8 @@
     "individual": "c539b6ba-35fe-4ecb-a04b-c34af50da675",
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {
@@ -260,7 +281,8 @@
     "individual": "e7753941-b557-478f-81b3-9db7d18fc623",
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {
@@ -275,7 +297,8 @@
     "individual": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {
@@ -290,7 +313,8 @@
     "individual": "e05d082f-ca29-4114-85d3-05118e73c284",
     "type": "012a3ecb-0d6e-440f-9c68-83e5bf1ccddf",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {
@@ -305,7 +329,8 @@
     "individual": "c0105724-0dfc-4560-b628-a4dc87d732f6",
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {
@@ -320,7 +345,8 @@
     "individual": "e05d082f-ca29-4114-85d3-05118e73c284",
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {
@@ -335,7 +361,8 @@
     "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
     "type": "227fcbc0-297a-4d85-8390-7de189278321",
     "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-    "status": "VALID"
+    "status": "VALID",
+    "cleared_date": "2022-08-10T14:30:11.116Z"
   }
 },
 {

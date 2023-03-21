@@ -42,7 +42,7 @@ context("Program", () => {
         force: true
       });
       cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-      cy.get('[data-cy="status-container"]').contains("Active");
+      cy.get('[data-cy="status-container"]').contains("ACTIVE");
     });
   });
 });

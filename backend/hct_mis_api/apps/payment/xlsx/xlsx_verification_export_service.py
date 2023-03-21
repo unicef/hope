@@ -122,7 +122,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self._add_headers()
         self._add_payment_record_verifications()
         self._add_data_validation()
-        self._adjust_column_width_from_col(self.ws_export_list, 0, 1, 8)  # min_row, min_col, max_col
+        self._adjust_column_width_from_col(self.ws_export_list)  # min_row, min_col, max_col
         return self.wb
 
     def save_xlsx_file(self, user: "User") -> None:

@@ -577,7 +577,7 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         bool,
     ),
     "RECALCULATE_POPULATION_FIELDS_CHUNK": (
-        100000,
+        50000,
         "recalculate_population_fields_task Household table pagination value",
         "positive_integers",
     ),

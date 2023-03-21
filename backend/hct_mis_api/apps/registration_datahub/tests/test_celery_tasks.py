@@ -329,7 +329,6 @@ class TestAutomatingRDICreationTask(TestCase):
 
         registration_ids = [2, 3, 17, 18, 19, 999]
         for registration_id in registration_ids:
-
             for _ in range(amount_of_records):
                 records_count += 1
                 if registration_id == 17:

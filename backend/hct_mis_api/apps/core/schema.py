@@ -48,6 +48,10 @@ class ChoiceObject(graphene.ObjectType):
 
 
 class BusinessAreaNode(DjangoObjectType):
+    @classmethod
+    def get_queryset(cls, queryset: "QuerySet", info: Any) -> "QuerySet":
+        return queryset.filter(is_split=False)
+
     class Meta:
         model = BusinessArea
         filter_fields = ["id", "slug"]
@@ -311,9 +315,6 @@ class Query(graphene.ObjectType):
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
-
-    def resolve_all_business_areas(parent, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX

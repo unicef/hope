@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 def fix_exchange_rates(all: Optional[Any] = None) -> None:
-
     all_payment_records = PaymentRecord.objects.all()
     if not all:
         all_payment_records = all_payment_records.filter(

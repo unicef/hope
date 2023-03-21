@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None:
     from hct_mis_api.apps.household.models import Household, Individual
-
+    
     # memory optimization
     paginator = Paginator(households_ids, 200)
 
