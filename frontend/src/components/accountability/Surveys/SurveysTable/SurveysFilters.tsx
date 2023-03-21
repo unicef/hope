@@ -101,7 +101,7 @@ export const SurveysFilters = ({
               label='From'
               onChange={(date) =>
                 handleFilterChange(
-                  'createdAtRange',
+                  'createdAtRangeMin',
                   moment(date)
                     .startOf('day')
                     .toISOString(),
@@ -115,7 +115,7 @@ export const SurveysFilters = ({
               label={t('To')}
               onChange={(date) =>
                 handleFilterChange(
-                  'createdAtRange',
+                  'createdAtRangeMax',
                   moment(date)
                     .endOf('day')
                     .toISOString(),
