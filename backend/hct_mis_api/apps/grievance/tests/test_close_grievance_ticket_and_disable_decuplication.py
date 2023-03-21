@@ -1,5 +1,5 @@
 from datetime import date
-from unittest import mock, skip
+from unittest import mock
 
 from django.conf import settings
 
@@ -141,7 +141,6 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         )
 
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
-    @skip("to fix")
     def test_add_individual_close_ticket_for_postponed_deduplication(self) -> None:
         permissions = [
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,

@@ -1,5 +1,4 @@
 from typing import Any, List
-from unittest import skip
 
 from django.core.management import call_command
 
@@ -17,6 +16,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class TestGrievanceCreateDataChangeMutation(APITestCase):
@@ -124,7 +124,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    @skip("to fix")
     def test_grievance_assign_user(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -137,7 +136,15 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             created_by=self.user,
             business_area=self.business_area,
         )
-        TicketNeedsAdjudicationDetailsFactory(ticket=grievance_ticket)
+
+        _, (first_individual, second_individual) = create_household({"size": 2})
+
+        TicketNeedsAdjudicationDetailsFactory(
+            ticket=grievance_ticket,
+            golden_records_individual=first_individual,
+            possible_duplicate=second_individual,
+            selected_individual=None,
+        )
 
         variables = {
             "status": GrievanceTicket.STATUS_ASSIGNED,
