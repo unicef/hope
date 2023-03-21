@@ -171,19 +171,20 @@ export const GrievancesTable = ({
 
   return (
     <>
-      <Box display='flex' alignItems='center' px={5} pt={5}>
-        <BulkAssignModal
-          optionsData={optionsData}
-          selected={selected}
-          businessArea={businessArea}
-          initialVariables={initialVariables}
-          setInputValue={setInputValue}
-          setSelected={setSelected}
-        />
-        <Box display='flex' ml='auto'>
-          <Box>
-            {/* TODO: Enable Export Report button */}
-            {/* <Button
+      <Box display='flex' flexDirection='column' px={5} pt={5}>
+        <Box display='flex' justifyContent='space-between' px={5}>
+          <BulkAssignModal
+            optionsData={optionsData}
+            selected={selected}
+            businessArea={businessArea}
+            initialVariables={initialVariables}
+            setInputValue={setInputValue}
+            setSelected={setSelected}
+          />
+          <Box display='flex' ml='auto'>
+            <Box>
+              {/* TODO: Enable Export Report button */}
+              {/* <Button
               startIcon={<GetAppOutlined />}
               variant='text'
               color='primary'
@@ -193,10 +194,10 @@ export const GrievancesTable = ({
             >
               {t('Export Report')}
             </Button> */}
-          </Box>
-          <Box ml={5} mr={7}>
-            {/* TODO: Enable Upload Tickets button */}
-            {/* <Button
+            </Box>
+            <Box ml={5} mr={7}>
+              {/* TODO: Enable Upload Tickets button */}
+              {/* <Button
               startIcon={<PublishOutlined />}
               variant='text'
               color='primary'
@@ -206,20 +207,21 @@ export const GrievancesTable = ({
             >
               {t('Upload Tickets')}
             </Button> */}
+            </Box>
+            {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
+              hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+                <Button
+                  alignItems='center'
+                  variant='contained'
+                  color='primary'
+                  component={Link}
+                  to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+                  data-cy='button-new-ticket'
+                >
+                  {t('NEW TICKET')}
+                </Button>
+              )}
           </Box>
-          {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
-            hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-              <Button
-                alignItems='center'
-                variant='contained'
-                color='primary'
-                component={Link}
-                to={`/${businessArea}/grievance-and-feedback/new-ticket`}
-                data-cy='button-new-ticket'
-              >
-                {t('NEW TICKET')}
-              </Button>
-            )}
         </Box>
         <TableWrapper>
           <UniversalTable<
