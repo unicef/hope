@@ -292,7 +292,7 @@ class GrievanceDocumentUpdateInput(graphene.InputObjectType):
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
     description = graphene.String(required=True)
-    assigned_to = graphene.GlobalID(node=UserNode, required=True)
+    assigned_to = graphene.GlobalID(node=UserNode, required=False)
     category = graphene.Int(required=True)
     issue_type = graphene.Int()
     admin = graphene.String()
@@ -331,4 +331,3 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     documentation = graphene.List(GrievanceDocumentInput)
     documentation_to_update = graphene.List(GrievanceDocumentUpdateInput)
     documentation_to_delete = graphene.List(graphene.ID)
-    extras = UpdateGrievanceTicketExtrasInput()
