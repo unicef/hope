@@ -28,6 +28,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
 def base_setup(cls: Any) -> None:
@@ -89,7 +90,7 @@ def payment_plan_setup(cls: Any) -> None:
         business_area=cls.business_area,
         status=TargetPopulation.STATUS_LOCKED,
     )
-    target_population.full_rebuild()
+    full_rebuild(target_population)
     target_population.save()
     cls.payment_plan = PaymentPlanFactory(
         total_households_count=4, target_population=target_population, status=PaymentPlan.Status.LOCKED

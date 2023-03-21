@@ -3,6 +3,7 @@ from random import randint
 
 import factory
 from factory import fuzzy
+from factory.django import DjangoModelFactory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -10,7 +11,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.reporting.models import Report
 
 
-class ReportFactory(factory.DjangoModelFactory):
+class ReportFactory(DjangoModelFactory):
     class Meta:
         model = Report
 

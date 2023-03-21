@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
@@ -9,26 +9,30 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
-import {
-  PaymentPlansFilters,
-  FilterProps,
-} from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
+import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
-export function PaymentModulePage(): React.ReactElement {
+const initialFilter = {
+  search: null,
+  dispersionStartDate: null,
+  dispersionEndDate: null,
+  status: [],
+  totalEntitledQuantityFrom: null,
+  totalEntitledQuantityTo: null,
+};
+
+export const PaymentModulePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [planfilter, setPlanFilter] = useState<FilterProps>({
-    search: null,
-    dispersionStartDate: null,
-    dispersionEndDate: null,
-    status: [],
-    totalEntitledQuantityFrom: null,
-    totalEntitledQuantityTo: null,
-  });
+  const location = useLocation();
 
-  const debouncedPlanFilter = useDebounce(planfilter, 500);
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+
+  const debouncedFilter = useDebounce(filter, 500);
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
@@ -49,11 +53,10 @@ export function PaymentModulePage(): React.ReactElement {
           </Button>
         )}
       </PageHeader>
-      <PaymentPlansFilters filter={planfilter} onFilterChange={setPlanFilter} />
-
+      <PaymentPlansFilters filter={filter} onFilterChange={setFilter} />
       <TableWrapper>
         <PaymentPlansTable
-          filter={debouncedPlanFilter}
+          filter={debouncedFilter}
           businessArea={businessArea}
           canViewDetails={hasPermissions(
             PERMISSIONS.PM_VIEW_DETAILS,
@@ -63,4 +66,4 @@ export function PaymentModulePage(): React.ReactElement {
       </TableWrapper>
     </>
   );
-}
+};

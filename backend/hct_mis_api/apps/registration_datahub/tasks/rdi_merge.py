@@ -142,7 +142,6 @@ class RdiMergeTask:
         imported_household: ImportedHousehold,
         household: Household,
     ) -> None:
-
         admins = {
             "admin_area": imported_household.admin_area,
             "admin1": imported_household.admin1,

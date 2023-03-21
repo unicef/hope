@@ -101,7 +101,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                         payment_row.extend(core_fields_row)
                         ws_fsp.append(list(map(self.right_format_for_xlsx, payment_row)))
 
-                    self._adjust_column_width_from_col(ws_fsp, max_col=len(column_list))
+                    self._adjust_column_width_from_col(ws_fsp)
 
                     filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}.xlsx"
 

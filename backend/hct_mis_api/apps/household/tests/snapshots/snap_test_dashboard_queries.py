@@ -119,7 +119,7 @@ snapshots['TestDashboardQueries::test_sections_0_sectionHouseholdsReached 1'] = 
 snapshots['TestDashboardQueries::test_sections_1_sectionIndividualsReached 1'] = {
     'data': {
         'sectionIndividualsReached': {
-            'total': 38.0
+            'total': 40.0
         }
     }
 }

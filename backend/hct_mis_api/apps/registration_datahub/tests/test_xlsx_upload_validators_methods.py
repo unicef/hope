@@ -161,7 +161,6 @@ class TestXLSXValidatorsMethods(APITestCase):
         self.assertEqual(expected, result)
 
     def test_rows_validator(self) -> None:
-
         wb = openpyxl.load_workbook(
             f"{self.FILES_DIR_PATH}/invalid_rows.xlsx",
             data_only=True,
