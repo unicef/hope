@@ -291,7 +291,7 @@ class TicketPaymentVerificationDetailsFactory(DjangoModelFactory):
     )
 
 
-class GrievanceDocumentFactory(factory.DjangoModelFactory):
+class GrievanceDocumentFactory(DjangoModelFactory):
     class Meta:
         model = GrievanceDocument
 

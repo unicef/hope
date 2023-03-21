@@ -449,6 +449,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         with open(grievance_es_index) as f:
             es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+            es.indices.delete(index="test_es_db", ignore=[400, 404])
             es.indices.create(
                 index="test_es_db",
                 body={
