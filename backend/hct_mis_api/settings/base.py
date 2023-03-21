@@ -550,13 +550,14 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "QUICK_LINKS": (
-        """Kobo,https://kf-hope.unitst.org/;
-CashAssist,https://cashassist-trn.crm4.dynamics.com/;
-Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/;
-elasticsearch,hope-elasticsearch-coordinating-only:9200;
-Datamart,https://datamart.unicef.io;
-Flower,https://stg-hope.unitst.org/flower/;
-Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
+        """Kobo,https://kf-hope.unitst.org/
+CashAssist,https://cashassist-trn.crm4.dynamics.com/
+Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
+elasticsearch,hope-elasticsearch-coordinating-only:9200
+Datamart,https://datamart.unicef.io
+Flower,https://stg-hope.unitst.org/flower/
+Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/
+Clear Cache,clear-cache/
 """,
         "",
         str,

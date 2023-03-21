@@ -25,13 +25,11 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
-    fsp_generate_xlsx_report_task,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
-    CreateFinancialServiceProviderInput,
     CreatePaymentPlanInput,
     CreatePaymentVerificationInput,
     EditPaymentVerificationInput,
@@ -49,14 +47,12 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
 )
 from hct_mis_api.apps.payment.schema import (
-    FinancialServiceProviderNode,
     GenericPaymentPlanNode,
     PaymentNode,
     PaymentPlanNode,
     PaymentRecordNode,
     PaymentVerificationNode,
 )
-from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
@@ -677,51 +673,6 @@ class RevertMarkPaymentAsFailedMutation(PermissionMutation):
         return cls(payment)
 
 
-class CreateFinancialServiceProviderMutation(PermissionMutation):
-    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
-
-    class Arguments:
-        business_area_slug = graphene.String(required=True)
-        inputs = CreateFinancialServiceProviderInput(required=True)
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(
-        cls, root: Any, info: Any, business_area_slug: str, inputs: Dict
-    ) -> "CreateFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
-
-        fsp = FSPService.create(inputs, info.context.user)
-        # Schedule task to generate downloadable report
-        fsp_generate_xlsx_report_task.delay(fsp.id)
-
-        return cls(financial_service_provider=fsp)
-
-
-class EditFinancialServiceProviderMutation(PermissionMutation):
-    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
-
-    class Arguments:
-        business_area_slug = graphene.String(required=True)
-        financial_service_provider_id = graphene.ID(required=True)
-        inputs = CreateFinancialServiceProviderInput(required=True)
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(
-        cls, root: Any, info: Any, business_area_slug: str, financial_service_provider_id: str, inputs: Dict
-    ) -> "EditFinancialServiceProviderMutation":
-        cls.has_permission(info, Permissions.PM_LOCK_AND_UNLOCK_FSP, business_area_slug)
-
-        fsp_id = decode_id_string(financial_service_provider_id)
-        fsp = FSPService.update(fsp_id, inputs)
-        fsp_generate_xlsx_report_task.delay(fsp_id)
-
-        return cls(financial_service_provider=fsp)
-
-
 class ActionPaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -1178,8 +1129,6 @@ class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
 
-    create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
-    edit_financial_service_provider = EditFinancialServiceProviderMutation.Field()
     export_xlsx_payment_verification_plan_file = ExportXlsxPaymentVerificationPlanFile.Field()
     import_xlsx_payment_verification_plan_file = ImportXlsxPaymentVerificationPlanFile.Field()
     activate_payment_verification_plan = ActivatePaymentVerificationPlan.Field()
@@ -1187,8 +1136,6 @@ class Mutations(graphene.ObjectType):
     discard_payment_verification_plan = DiscardPaymentVerificationPlan.Field()
     invalid_payment_verification_plan = InvalidPaymentVerificationPlan.Field()
     delete_payment_verification_plan = DeletePaymentVerificationPlan.Field()
-    choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
-    assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
     revert_mark_payment_record_as_failed = RevertMarkPaymentRecordAsFailedMutation.Field()
@@ -1201,6 +1148,8 @@ class Mutations(graphene.ObjectType):
     create_payment_plan = CreatePaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()
+    choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
+    assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
 
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
     export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
