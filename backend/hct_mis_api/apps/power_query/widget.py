@@ -64,7 +64,7 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
             initial=initial,
             help_text=help_text,
             to_field_name=to_field_name,
-            limit_choices_to=limit_choices_to,  # type: ignore # FIXME
+            limit_choices_to=limit_choices_to,
             **kwargs,
         )
 

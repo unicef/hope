@@ -174,7 +174,7 @@ class FieldAttributeNode(graphene.ObjectType):
         return isinstance(self, FlexibleAttribute)
 
     def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))  # type: ignore # FIXME: Argument 1 to "resolve_label" has incompatible type "Callable[..., Any]"; expected "Dict[Any, Any]"
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info: Any) -> Any:
         return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
@@ -254,7 +254,7 @@ def get_fields_attr_generators(
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-            business_area_slug  # type: ignore # FIXME: Argument 1 to "apply_business_area" of "FieldFactory" has incompatible type "Optional[str]"; expected "str"
+            business_area_slug
         )
 
 
@@ -354,7 +354,7 @@ class Query(graphene.ObjectType):
         return sort_by_attr(
             (
                 attr
-                for attr in get_fields_attr_generators(flex_field, business_area_slug)  # type: ignore # FIXME: Argument 1 to "get_fields_attr_generators" has incompatible type "Optional[bool]"; expected "bool"
+                for attr in get_fields_attr_generators(flex_field, business_area_slug)
                 if not is_a_killer_filter(attr)
             ),
             "label.English(EN)",
