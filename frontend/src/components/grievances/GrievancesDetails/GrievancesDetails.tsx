@@ -222,15 +222,7 @@ export const GrievancesDetails = ({
                 label: t('Payment ID'),
                 value: (
                   <span>
-                    {ticket.paymentRecord?.caId ? (
-                      <ContentLink
-                        href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
-                      >
-                        {ticket.paymentRecord.caId}
-                      </ContentLink>
-                    ) : (
-                      '-'
-                    )}
+                   {renderPaymentUrl()}
                   </span>
                 ),
                 size: showProgramme || showPartner ? 3 : 12,
