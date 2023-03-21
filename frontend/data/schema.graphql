@@ -628,7 +628,7 @@ input CreateGrievanceTicketExtrasInput {
 
 input CreateGrievanceTicketInput {
   description: String!
-  assignedTo: ID!
+  assignedTo: ID
   category: Int!
   issueType: Int
   admin: String
@@ -4637,6 +4637,7 @@ input UpdateGrievanceTicketInput {
   household: ID
   individual: ID
   paymentRecord: ID
+  extras: UpdateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
   partner: Int
@@ -4645,7 +4646,6 @@ input UpdateGrievanceTicketInput {
   documentation: [GrievanceDocumentInput]
   documentationToUpdate: [GrievanceDocumentUpdateInput]
   documentationToDelete: [ID]
-  extras: UpdateGrievanceTicketExtrasInput
 }
 
 type UpdateGrievanceTicketMutation {
