@@ -94,6 +94,7 @@ class Command(BaseCommand):
             "jyablonski@unicef.org",
             "nmkuzi@unicef.org",
             "swaheed@unicef.org",
+            "zuzanna.okrutna@kellton.com",
         ]
         pm_list = [
             "khaddad@unicef.org",

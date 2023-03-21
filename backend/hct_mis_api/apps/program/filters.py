@@ -56,7 +56,7 @@ class ProgramFilter(FilterSet):
         if max_value := value.get("max"):
             queryset = queryset.filter(total_hh_count__lte=max_value)
 
-        return super().filter_queryset(queryset)
+        return queryset
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")

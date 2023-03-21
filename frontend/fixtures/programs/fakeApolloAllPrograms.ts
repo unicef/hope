@@ -4,7 +4,16 @@ export const fakeApolloAllPrograms = [
   {
     request: {
       query: AllProgramsDocument,
-      variables: { businessArea: 'afghanistan', first: 5, orderBy: null },
+      variables: {
+        businessArea: 'afghanistan',
+        search: '',
+        status: '',
+        sector: [],
+        numberOfHouseholds: '{"min":"","max":""}',
+        budget: '{"min":"","max":""}',
+        first: 5,
+        orderBy: null,
+      },
     },
     result: {
       data: {

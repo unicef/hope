@@ -29,7 +29,7 @@ class TargetPopulationFromListMixin:
                 population = form.cleaned_data["criteria"]
                 with atomic():
                     tp = TargetPopulation.objects.create(
-                        targeting_criteria=None,
+                        targeting_criteria=form.cleaned_data["targeting_criteria"],
                         created_by=request.user,
                         name=form.cleaned_data["name"],
                         business_area=ba,
@@ -42,6 +42,8 @@ class TargetPopulationFromListMixin:
         else:
             targeting_criteria = TargetingCriteria()
             targeting_criteria.save()
-            form = CreateTargetPopulationTextForm(initial={"action": "create_tp_from_list"})
+            form = CreateTargetPopulationTextForm(
+                initial={"action": "create_tp_from_list", "targeting_criteria": targeting_criteria}
+            )
         context["form"] = form
         return TemplateResponse(request, "admin/household/household/create_target_population_from_text.html", context)

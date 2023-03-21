@@ -97,11 +97,11 @@ class VerificationPlanStatusChangeServices:
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
         flow_start_info_list, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
-        for (flow_start_info, _) in flow_start_info_list:
+        for flow_start_info, _ in flow_start_info_list:
             self.payment_verification_plan.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))
 
         all_urns = []
-        for (_, urns) in flow_start_info_list:
+        for _, urns in flow_start_info_list:
             all_urns.extend(urn.split(":")[-1] for urn in urns)
         processed_individuals = individuals.filter(phone_no__in=all_urns)
 
@@ -148,7 +148,6 @@ class VerificationPlanStatusChangeServices:
 
         ticket_payment_verification_details_list = []
         for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
-
             GrievanceNotification.send_all_notifications(
                 GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
             )

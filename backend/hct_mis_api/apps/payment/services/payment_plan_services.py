@@ -316,6 +316,14 @@ class PaymentPlanService:
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
+        start_date = input_data["start_date"]
+        if start_date < target_population.program.start_date:
+            raise GraphQLError("Start date cannot be earlier than start date in the program")
+
+        end_date = input_data["end_date"]
+        if end_date > target_population.program.end_date:
+            raise GraphQLError("End date cannot be later that end date in the program")
+
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
             created_by=user,
@@ -325,8 +333,8 @@ class PaymentPlanService:
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
             status_date=timezone.now(),
-            start_date=input_data["start_date"],
-            end_date=input_data["end_date"],
+            start_date=start_date,
+            end_date=end_date,
         )
 
         PaymentPlanService._create_payments(payment_plan)
@@ -388,6 +396,15 @@ class PaymentPlanService:
             self.payment_plan.currency = input_data["currency"]
             recreate_payments = True
             recalculate_payments = True
+
+        if (
+            input_data.get("start_date")
+            and input_data["start_date"] < self.payment_plan.target_population.program.start_date
+        ):
+            raise GraphQLError("Start date cannot be earlier than start date in the program")
+
+        if input_data.get("end_date") and input_data["end_date"] > self.payment_plan.target_population.program.end_date:
+            raise GraphQLError("End date cannot be later that end date in the program")
 
         self.payment_plan.save()
 

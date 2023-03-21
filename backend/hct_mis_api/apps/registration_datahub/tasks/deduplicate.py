@@ -824,7 +824,7 @@ class DeduplicateTask:
             new_documents.exclude(status=Document.STATUS_VALID)
             .filter(type__is_identity_document=True)
             .select_related("individual")
-            .select_for_update(of=("self", "individual"))
+            .select_for_update(of=("self",))  # no need to lock individuals
             .order_by("pk")
         )
         documents_numbers = [x.document_number for x in documents_to_dedup]
@@ -898,7 +898,7 @@ class DeduplicateTask:
         )
 
         possible_duplicates_through_dict = defaultdict(set)
-        for (ticked_details_id, individual_id, main_individual_id) in possible_duplicates_through_existing_list:
+        for ticked_details_id, individual_id, main_individual_id in possible_duplicates_through_existing_list:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 

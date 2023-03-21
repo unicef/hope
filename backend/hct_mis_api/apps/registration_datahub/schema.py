@@ -128,7 +128,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
-            row = f" (Kobo {parent.kobo_asset_id})"
+            row = f" (Source id {parent.kobo_asset_id})"
         if parent.row_id:
             row = f" (XLS row {parent.row_id})"
 

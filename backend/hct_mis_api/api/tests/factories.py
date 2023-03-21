@@ -1,13 +1,14 @@
 from django.utils import timezone
 
-import factory
+from factory import SubFactory
+from factory.django import DjangoModelFactory
 
 from ...apps.account.fixtures import UserFactory
 from ..models import APIToken, Grant
 
 
-class APITokenFactory(factory.DjangoModelFactory):
-    user = factory.SubFactory(UserFactory)
+class APITokenFactory(DjangoModelFactory):
+    user = SubFactory(UserFactory)
     allowed_ips = ""
     grants = [Grant.API_RDI_CREATE]
     valid_from = timezone.now

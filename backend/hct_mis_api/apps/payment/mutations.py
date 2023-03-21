@@ -42,6 +42,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     GenericPayment,
+    Payment,
     PaymentPlan,
     PaymentRecord,
     PaymentVerification,
@@ -50,6 +51,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.schema import (
     FinancialServiceProviderNode,
     GenericPaymentPlanNode,
+    PaymentNode,
     PaymentPlanNode,
     PaymentRecordNode,
     PaymentVerificationNode,
@@ -599,7 +601,29 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
         return cls(payment_record)
 
 
-class RevertMarkAsFailedMutation(PermissionMutation):
+class MarkPaymentAsFailedMutation(PermissionMutation):
+    payment = graphene.Field(PaymentNode)
+
+    class Arguments:
+        payment_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_id: str,
+        **kwargs: Any,
+    ) -> "MarkPaymentAsFailedMutation":
+        payment = get_object_or_404(Payment, id=decode_id_string(payment_id))
+        cls.has_permission(info, Permissions.PM_MARK_PAYMENT_AS_FAILED, payment.business_area)
+        mark_as_failed(payment)
+        return cls(payment)
+
+
+class RevertMarkPaymentRecordAsFailedMutation(PermissionMutation):
     payment_record = graphene.Field(PaymentRecordNode)
 
     class Arguments:
@@ -618,12 +642,39 @@ class RevertMarkAsFailedMutation(PermissionMutation):
         delivered_quantity: Decimal,
         delivery_date: date,
         **kwargs: Any,
-    ) -> "RevertMarkAsFailedMutation":
+    ) -> "RevertMarkPaymentRecordAsFailedMutation":
         payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
         delivery_date = datetime.combine(delivery_date, datetime.min.time())
         revert_mark_as_failed(payment_record, delivered_quantity, delivery_date)
         return cls(payment_record)
+
+
+class RevertMarkPaymentAsFailedMutation(PermissionMutation):
+    payment = graphene.Field(PaymentNode)
+
+    class Arguments:
+        payment_id = graphene.ID(required=True)
+        delivered_quantity = graphene.Decimal(required=True)
+        delivery_date = graphene.Date(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_id: str,
+        delivered_quantity: Decimal,
+        delivery_date: date,
+        **kwargs: Any,
+    ) -> "RevertMarkPaymentAsFailedMutation":
+        payment = get_object_or_404(Payment, id=decode_id_string(payment_id))
+        cls.has_permission(info, Permissions.PM_MARK_PAYMENT_AS_FAILED, payment.business_area)
+        delivery_date = datetime.combine(delivery_date, datetime.min.time())
+        revert_mark_as_failed(payment, delivered_quantity, delivery_date)
+        return cls(payment)
 
 
 class CreateFinancialServiceProviderMutation(PermissionMutation):
@@ -683,9 +734,12 @@ class ActionPaymentPlanMutation(PermissionMutation):
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "ActionPaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+
         old_payment_plan = copy_model_object(payment_plan)
         if old_payment_plan.imported_file:
             old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
+        if old_payment_plan.export_file:
+            old_payment_plan.export_file = copy_model_object(payment_plan.export_file)
 
         cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
 
@@ -1137,7 +1191,9 @@ class Mutations(graphene.ObjectType):
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
-    revert_mark_payment_record_as_failed = RevertMarkAsFailedMutation.Field()
+    revert_mark_payment_record_as_failed = RevertMarkPaymentRecordAsFailedMutation.Field()
+    mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
+    revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )
