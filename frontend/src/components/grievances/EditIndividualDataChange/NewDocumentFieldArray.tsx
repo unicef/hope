@@ -28,8 +28,8 @@ export function NewDocumentFieldArray({
               {values.individualDataUpdateFieldsDocuments?.map(
                 (item, index) => (
                   <DocumentField
-                    index={index}
-                    key={`${index}-${item?.country}-${item?.type}`}
+                    id={item.node.id}
+                    key={`${item.node.id}-${item?.country}-${item?.type}`}
                     onDelete={() => arrayHelpers.remove(index)}
                     countryChoices={addIndividualFieldsData.countriesChoices}
                     documentTypeChoices={
@@ -37,6 +37,7 @@ export function NewDocumentFieldArray({
                     }
                     baseName='individualDataUpdateFieldsDocuments'
                     setFieldValue={setFieldValue}
+                    values={values}
                   />
                 ),
               )}

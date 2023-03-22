@@ -11,6 +11,7 @@ import {
 import { LabelizedField } from '../../core/LabelizedField';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
+import { removeDocument } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -22,7 +23,7 @@ export interface EditDocumentRowProps {
   document: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['documents']['edges'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
-  index;
+  id;
 }
 
 export function EditDocumentRow({
@@ -31,7 +32,7 @@ export function EditDocumentRow({
   document,
   arrayHelpers,
   addIndividualFieldsData,
-  index,
+  id,
 }: EditDocumentRowProps): React.ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
@@ -41,15 +42,22 @@ export function EditDocumentRow({
   return isEdited ? (
     <>
       <DocumentField
-        index={index}
-        key={`${index}-${document.node.country}-${document.node.type.label}`}
-        onDelete={() => arrayHelpers.remove(index)}
+        id={id}
+        key={`${id}-${document.node.country}-${document.node.type.label}`}
+        onDelete={() =>
+          removeDocument(
+            values.individualDataUpdateDocumentsToEdit,
+            document.node.id,
+            arrayHelpers,
+          )
+        }
         countryChoices={addIndividualFieldsData.countriesChoices}
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
         baseName='individualDataUpdateDocumentsToEdit'
         isEdited={isEdited}
         photoSrc={document.node.photo}
         setFieldValue={setFieldValue}
+        values={values}
       />
       <Box
         style={{ width: '100%' }}
@@ -85,10 +93,7 @@ export function EditDocumentRow({
       </Grid>
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('Country')}
-            value={document.node.country}
-          />
+          <LabelizedField label={t('Country')} value={document.node.country} />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
