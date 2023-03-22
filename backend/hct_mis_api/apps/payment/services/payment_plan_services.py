@@ -1,3 +1,4 @@
+import datetime
 import logging
 from decimal import Decimal
 from functools import partial
@@ -317,10 +318,12 @@ class PaymentPlanService:
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
         start_date = input_data["start_date"]
+        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
         if start_date < target_population.program.start_date:
             raise GraphQLError("Start date cannot be earlier than start date in the program")
 
         end_date = input_data["end_date"]
+        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
         if end_date > target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
@@ -333,8 +336,8 @@ class PaymentPlanService:
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
             status_date=timezone.now(),
-            start_date=start_date,
-            end_date=end_date,
+            start_date=input_data["start_date"],
+            end_date=input_data["end_date"],
         )
 
         PaymentPlanService._create_payments(payment_plan)
@@ -397,13 +400,14 @@ class PaymentPlanService:
             recreate_payments = True
             recalculate_payments = True
 
-        if (
-            input_data.get("start_date")
-            and input_data["start_date"] < self.payment_plan.target_population.program.start_date
-        ):
+        start_date = input_data.get("start_date")
+        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
+        if start_date and start_date < self.payment_plan.target_population.program.start_date:
             raise GraphQLError("Start date cannot be earlier than start date in the program")
 
-        if input_data.get("end_date") and input_data["end_date"] > self.payment_plan.target_population.program.end_date:
+        end_date = input_data.get("end_date")
+        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
+        if end_date and end_date > self.payment_plan.target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
         self.payment_plan.save()
