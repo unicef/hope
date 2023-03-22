@@ -608,19 +608,6 @@ type CreateFeedbackMutation {
   feedback: FeedbackNode
 }
 
-input CreateFinancialServiceProviderInput {
-  name: String!
-  visionVendorNumber: String!
-  deliveryMechanisms: [String]!
-  distributionLimit: Decimal
-  communicationChannel: String!
-  fspXlsxTemplateId: ID!
-}
-
-type CreateFinancialServiceProviderMutation {
-  financialServiceProvider: FinancialServiceProviderNode
-}
-
 input CreateGrievanceTicketExtrasInput {
   category: CategoryExtrasInput
   issueType: IssueTypeExtrasInput
@@ -940,10 +927,6 @@ input EditBankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
-}
-
-type EditFinancialServiceProviderMutation {
-  financialServiceProvider: FinancialServiceProviderNode
 }
 
 input EditIndividualDocumentObjectType {
@@ -2523,8 +2506,6 @@ type Mutations {
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   createPaymentVerificationPlan(input: CreatePaymentVerificationInput!): CreateVerificationPlanMutation
   editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
-  createFinancialServiceProvider(businessAreaSlug: String!, inputs: CreateFinancialServiceProviderInput!): CreateFinancialServiceProviderMutation
-  editFinancialServiceProvider(businessAreaSlug: String!, financialServiceProviderId: ID!, inputs: CreateFinancialServiceProviderInput!): EditFinancialServiceProviderMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
   importXlsxPaymentVerificationPlanFile(file: Upload!, paymentVerificationPlanId: ID!): ImportXlsxPaymentVerificationPlanFile
   activatePaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): ActivatePaymentVerificationPlan
@@ -2532,8 +2513,6 @@ type Mutations {
   discardPaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): DiscardPaymentVerificationPlan
   invalidPaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): InvalidPaymentVerificationPlan
   deletePaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): DeletePaymentVerificationPlan
-  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
-  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
   revertMarkPaymentRecordAsFailed(deliveredQuantity: Decimal!, deliveryDate: Date!, paymentRecordId: ID!): RevertMarkPaymentRecordAsFailedMutation
@@ -2544,6 +2523,8 @@ type Mutations {
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
   updatePaymentPlan(input: UpdatePaymentPlanInput!): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
+  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
+  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
