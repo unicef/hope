@@ -521,10 +521,11 @@ def check_rdi_imports_periodic_task() -> None:
     registration_xlsx_import_task_kwargs = []
     for rdi_id in rdi_to_run:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
+        rdi_datahub = RegistrationDataImportDatahub.objects.get(id=str(rdi.datahub_id))
         kwargs = {
-            'registration_data_import_id': rdi_id,
-            'import_data_id': RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id).import_data_id,
-            'business_area_id': rdi.business_area.id
+            'registration_data_import_id': str(rdi_datahub.id),
+            'import_data_id': str(rdi_datahub.import_data_id),
+            'business_area_id': str(rdi.business_area.id)
         }
         registration_xlsx_import_task_kwargs.append(kwargs)
 
