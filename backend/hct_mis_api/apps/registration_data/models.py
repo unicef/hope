@@ -39,6 +39,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     IMPORT_SCHEDULED = "IMPORT_SCHEDULED"
     IMPORTING = "IMPORTING"
     IN_REVIEW = "IN_REVIEW"
+    MERGE_SCHEDULED = "MERGE_SCHEDULED"
     MERGING = "MERGING"
     MERGED = "MERGED"
     DEDUPLICATION_FAILED = "DEDUPLICATION_FAILED"
@@ -50,10 +51,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         (LOADING, _("Loading")),
         (DEDUPLICATION, _("Deduplication")),
         (DEDUPLICATION_FAILED, _("Deduplication Failed")),
-        (IMPORT_SCHEDULED, "Import Scheduled"),
+        (IMPORT_SCHEDULED, _("Import Scheduled")),
         (IMPORTING, _("Importing")),
         (IMPORT_ERROR, _("Import Error")),
         (IN_REVIEW, _("In Review")),
+        (MERGE_SCHEDULED, _("Merge Scheduled")),
         (MERGED, _("Merged")),
         (MERGING, _("Merging")),
         (MERGE_ERROR, _("Merge Error")),
