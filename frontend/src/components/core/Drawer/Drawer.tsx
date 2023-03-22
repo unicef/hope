@@ -25,6 +25,9 @@ import { resourcesItems } from './menuItems';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
+  if (window.location.hostname === 'localhost') {
+    return '#FF6600';
+  }
   if (url.includes('trn')) {
     return '#BF360C';
   }
