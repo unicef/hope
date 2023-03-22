@@ -4,6 +4,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { removeIdPropertyFromObjects } from './helpers';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function preparePositiveFeedbackVariables(requiredVariables, values) {
@@ -195,17 +196,17 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
-  const newlyAddedDocumentsWithoutIds = values.individualDataUpdateFieldsDocuments?.map(
-    (obj) => {
-      const { id, ...rest } = obj;
-      return rest;
-    },
+
+  const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsDocuments,
   );
-  const newlyAddedIdentitiesWithoutIds = values.individualDataUpdateFieldsIdentities?.map(
-    (obj) => {
-      const { id, ...rest } = obj;
-      return rest;
-    },
+
+  const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsIdentities,
+  );
+
+  const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsPaymentChannels,
   );
 
   return {
@@ -227,8 +228,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-                paymentChannels:
-                  values.individualDataUpdateFieldsPaymentChannels,
+                paymentChannels: newlyAddedPaymentChannelsWithoutIds,
                 paymentChannelsToRemove:
                   values.individualDataUpdatePaymentChannelsToRemove,
                 paymentChannelsToEdit:

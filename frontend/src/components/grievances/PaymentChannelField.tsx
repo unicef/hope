@@ -6,23 +6,30 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { AllIndividualsQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
+import { getIndexForId } from './utils/helpers';
 
 export interface PaymentChannelProps {
-  index: number;
+  id: string;
   baseName: string;
-  onDelete: () => {};
+  onDelete;
   isEdited?: boolean;
   paymentChannel?: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['paymentChannels'][number];
+  values;
 }
 
 export function PaymentChannelField({
-  index,
+  id,
   baseName,
   onDelete,
   isEdited,
   paymentChannel,
+  values,
 }: PaymentChannelProps): React.ReactElement {
   const { t } = useTranslation();
+  const paymentChannelFieldName = `${baseName}.${getIndexForId(
+    values[baseName],
+    id,
+  )}`;
   return (
     <>
       <Grid item xs={11} />
@@ -44,7 +51,7 @@ export function PaymentChannelField({
       </Grid>
       <Grid item xs={3}>
         <Field
-          name={`${baseName}[${index}].bankAccountNumber`}
+          name={`${paymentChannelFieldName}.bankAccountNumber`}
           fullWidth
           variant='outlined'
           label={t('New Value')}
@@ -66,7 +73,7 @@ export function PaymentChannelField({
       </Grid>
       <Grid item xs={3}>
         <Field
-          name={`${baseName}[${index}].bankName`}
+          name={`${paymentChannelFieldName}.bankName`}
           fullWidth
           variant='outlined'
           label={t('New Value')}
