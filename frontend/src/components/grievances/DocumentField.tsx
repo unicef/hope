@@ -33,7 +33,6 @@ export function DocumentField({
   values,
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
-
   const docFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
 
   return (
