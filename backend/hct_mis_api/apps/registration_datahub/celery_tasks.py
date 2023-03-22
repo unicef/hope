@@ -323,12 +323,12 @@ def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = No
 @log_start_and_end
 @sentry_tags
 def automate_rdi_creation_task(
-        registration_id: int,
-        page_size: int,
-        template: str = "{business_area_name} rdi {date}",
-        auto_merge: bool = False,
-        fix_tax_id: bool = False,
-        **filters: Any,
+    registration_id: int,
+    page_size: int,
+    template: str = "{business_area_name} rdi {date}",
+    auto_merge: bool = False,
+    fix_tax_id: bool = False,
+    **filters: Any,
 ) -> List:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         get_registration_to_rdi_service_map,
@@ -354,7 +354,7 @@ def automate_rdi_creation_task(
                 return ["No Records found", 0]
 
             splitted_record_ids = [
-                all_records_ids[i: i + page_size] for i in range(0, len(all_records_ids), page_size)
+                all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
             ]
             for page, records_ids in enumerate(splitted_record_ids, 1):
                 rdi_name = template.format(
@@ -399,7 +399,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(
-        page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
@@ -428,7 +428,7 @@ def automate_registration_diia_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(
-        diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
@@ -462,8 +462,8 @@ def deduplicate_documents() -> bool:
             return True
         grouped_rdi = (
             Document.objects.filter(status=Document.STATUS_PENDING)
-                .values("individual__registration_data_import")
-                .annotate(count=Count("individual__registration_data_import"))
+            .values("individual__registration_data_import")
+            .annotate(count=Count("individual__registration_data_import"))
         )
         rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
         for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
@@ -496,5 +496,8 @@ def deduplicate_documents() -> bool:
 @app.task
 @sentry_tags
 def check_rdi_merge_periodic_task() -> None:
-    from hct_mis_api.apps.registration_datahub.celery_manager import rdi_merge_celery_manager
+    from hct_mis_api.apps.registration_datahub.celery_manager import (
+        rdi_merge_celery_manager,
+    )
+
     rdi_merge_celery_manager.execute()
