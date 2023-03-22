@@ -195,6 +195,19 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
+  const newlyAddedDocumentsWithoutIds = values.individualDataUpdateFieldsDocuments?.map(
+    (obj) => {
+      const { id, ...rest } = obj;
+      return rest;
+    },
+  );
+  const newlyAddedIdentitiesWithoutIds = values.individualDataUpdateFieldsIdentities?.map(
+    (obj) => {
+      const { id, ...rest } = obj;
+      return rest;
+    },
+  );
+
   return {
     variables: {
       input: {
@@ -207,10 +220,10 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               individual: values.selectedIndividual?.id,
               individualData: {
                 ...individualData,
-                documents: values.individualDataUpdateFieldsDocuments,
+                documents: newlyAddedDocumentsWithoutIds,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
                 documentsToEdit: values.individualDataUpdateDocumentsToEdit,
-                identities: values.individualDataUpdateFieldsIdentities,
+                identities: newlyAddedIdentitiesWithoutIds,
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
