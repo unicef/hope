@@ -22,14 +22,14 @@ export function ExistingPaymentChannelFieldArray({
         render={(arrayHelpers) => {
           return (
             <>
-              {individual?.paymentChannels?.map((item, index) => {
+              {individual?.paymentChannels?.map((item) => {
                 return (
                   <EditPaymentChannelRow
                     key={item.id}
                     setFieldValue={setFieldValue}
                     values={values}
                     paymentChannel={item}
-                    index={index}
+                    id={item.id}
                     arrayHelpers={arrayHelpers}
                   />
                 );
