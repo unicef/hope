@@ -282,7 +282,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         if not obj_hct.can_be_merged():
             raise GraphQLError(f"Can't begin to merge RDI: {obj_hct}")
 
-        obj_hct.status = RegistrationDataImport.MERGING
+        obj_hct.status = RegistrationDataImport.MERGE_SCHEDULED
         obj_hct.save()
         merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
 
