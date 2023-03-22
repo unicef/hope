@@ -1,0 +1,12 @@
+{% extends "admin/app_index.html" %}{% load static %}
+{% block sidebar %}
+<div id="content-related">
+<form method="post" action="{% url "aurora:app_index" %}" class="form">
+    {% csrf_token %}
+    <div>
+        <input type="submit" value="Fetch Data" name="_fetch">
+    </div>
+    </form>
+</div>
+
+{% endblock %}
