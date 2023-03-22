@@ -121,10 +121,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const categoryChoices: {
-    [id: number]: string;
-  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
-
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
   const {
@@ -183,6 +179,10 @@ export const EditGrievancePage = (): React.ReactElement => {
   )
     return null;
 
+  const categoryChoices: {
+      [id: number]: string;
+    } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
+
   const currentUserId = currentUserData.me.id;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
@@ -232,9 +232,9 @@ export const EditGrievancePage = (): React.ReactElement => {
   );
   const showIssueType = (values): boolean => {
     return (
-      values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-      values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+      values.category === parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE,10) ||
+      values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE,10) ||
+      values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT,10)
     );
   };
   const dataChangeErrors = (errors, touched): React.ReactElement[] =>
