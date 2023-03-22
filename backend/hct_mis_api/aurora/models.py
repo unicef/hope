@@ -22,7 +22,7 @@ class Organization(AuroraModel):
     slug = models.SlugField(max_length=1000)
     business_area = models.ForeignKey(BusinessArea, null=True, blank=True, on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -31,7 +31,7 @@ class Project(AuroraModel):
     programme = models.ForeignKey(Program, null=True, blank=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=100)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -58,7 +58,7 @@ class Registration(AuroraModel):
     mapping = models.JSONField(blank=True, null=True)
     private_key = models.TextField(blank=True, null=True, editable=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
