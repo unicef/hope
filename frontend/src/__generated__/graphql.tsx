@@ -814,20 +814,6 @@ export type CreateDashboardReportInput = {
   program?: Maybe<Scalars['ID']>,
 };
 
-export type CreateFinancialServiceProviderInput = {
-  name: Scalars['String'],
-  visionVendorNumber: Scalars['String'],
-  deliveryMechanisms: Array<Maybe<Scalars['String']>>,
-  distributionLimit?: Maybe<Scalars['Decimal']>,
-  communicationChannel: Scalars['String'],
-  fspXlsxTemplateId: Scalars['ID'],
-};
-
-export type CreateFinancialServiceProviderMutation = {
-   __typename?: 'CreateFinancialServiceProviderMutation',
-  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
-};
-
 export type CreateGrievanceTicketExtrasInput = {
   category?: Maybe<CategoryExtrasInput>,
   issueType?: Maybe<IssueTypeExtrasInput>,
@@ -1088,6 +1074,9 @@ export type DocumentNode = Node & {
   type: DocumentTypeNode,
   country?: Maybe<Scalars['String']>,
   status: DocumentStatus,
+  cleared: Scalars['Boolean'],
+  clearedDate: Scalars['DateTime'],
+  clearedBy?: Maybe<UserNode>,
   countryIso3?: Maybe<Scalars['String']>,
 };
 
@@ -1120,6 +1109,7 @@ export type DocumentTypeNode = {
   label: Scalars['String'],
   type: DocumentTypeType,
   isIdentityDocument: Scalars['Boolean'],
+  uniqueForIndividual: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -1142,6 +1132,7 @@ export enum DocumentTypeType {
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
   DisabilityCertificate = 'DISABILITY_CERTIFICATE',
+  FosterChild = 'FOSTER_CHILD',
   Other = 'OTHER'
 }
 
@@ -1150,11 +1141,6 @@ export type EditBankTransferObjectType = {
   type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
-};
-
-export type EditFinancialServiceProviderMutation = {
-   __typename?: 'EditFinancialServiceProviderMutation',
-  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -1568,6 +1554,7 @@ export enum HouseholdCollectIndividualData {
   A = 'A_',
   A_2 = 'A_2',
   A_1 = 'A_1',
+  A_3 = 'A_3',
   A_0 = 'A_0'
 }
 
@@ -2031,6 +2018,7 @@ export enum ImportedDocumentTypeType {
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
   DisabilityCertificate = 'DISABILITY_CERTIFICATE',
+  FosterChild = 'FOSTER_CHILD',
   Other = 'OTHER'
 }
 
@@ -2637,6 +2625,7 @@ export type IndividualNode = Node & {
   rowId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
+  relationshipConfirmed: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -2837,7 +2826,8 @@ export enum IndividualRelationship {
   Other = 'OTHER',
   SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   SonDaughter = 'SON_DAUGHTER',
-  WifeHusband = 'WIFE_HUSBAND'
+  WifeHusband = 'WIFE_HUSBAND',
+  FosterChild = 'FOSTER_CHILD'
 }
 
 export type IndividualRoleInHouseholdNode = {
@@ -3075,8 +3065,6 @@ export type Mutations = {
   reassignRole?: Maybe<ReassignRoleMutation>,
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>,
   editPaymentVerificationPlan?: Maybe<EditPaymentVerificationMutation>,
-  createFinancialServiceProvider?: Maybe<CreateFinancialServiceProviderMutation>,
-  editFinancialServiceProvider?: Maybe<EditFinancialServiceProviderMutation>,
   exportXlsxPaymentVerificationPlanFile?: Maybe<ExportXlsxPaymentVerificationPlanFile>,
   importXlsxPaymentVerificationPlanFile?: Maybe<ImportXlsxPaymentVerificationPlanFile>,
   activatePaymentVerificationPlan?: Maybe<ActivatePaymentVerificationPlan>,
@@ -3084,8 +3072,6 @@ export type Mutations = {
   discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>,
   invalidPaymentVerificationPlan?: Maybe<InvalidPaymentVerificationPlan>,
   deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>,
-  chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
-  assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   markPaymentRecordAsFailed?: Maybe<MarkPaymentRecordAsFailedMutation>,
   revertMarkPaymentRecordAsFailed?: Maybe<RevertMarkPaymentRecordAsFailedMutation>,
@@ -3096,6 +3082,8 @@ export type Mutations = {
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>,
   updatePaymentPlan?: Maybe<UpdatePaymentPlanMutation>,
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>,
+  chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
+  assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   exportXlsxPaymentPlanPaymentList?: Maybe<ExportXlsxPaymentPlanPaymentListMutation>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Maybe<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   importXlsxPaymentPlanPaymentList?: Maybe<ImportXlsxPaymentPlanPaymentListMutation>,
@@ -3256,19 +3244,6 @@ export type MutationsEditPaymentVerificationPlanArgs = {
 };
 
 
-export type MutationsCreateFinancialServiceProviderArgs = {
-  businessAreaSlug: Scalars['String'],
-  inputs: CreateFinancialServiceProviderInput
-};
-
-
-export type MutationsEditFinancialServiceProviderArgs = {
-  businessAreaSlug: Scalars['String'],
-  financialServiceProviderId: Scalars['ID'],
-  inputs: CreateFinancialServiceProviderInput
-};
-
-
 export type MutationsExportXlsxPaymentVerificationPlanFileArgs = {
   paymentVerificationPlanId: Scalars['ID']
 };
@@ -3307,16 +3282,6 @@ export type MutationsInvalidPaymentVerificationPlanArgs = {
 export type MutationsDeletePaymentVerificationPlanArgs = {
   paymentVerificationPlanId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
-};
-
-
-export type MutationsChooseDeliveryMechanismsForPaymentPlanArgs = {
-  input: ChooseDeliveryMechanismsForPaymentPlanInput
-};
-
-
-export type MutationsAssignFspToDeliveryMechanismArgs = {
-  input: AssignFspToDeliveryMechanismInput
 };
 
 
@@ -3377,6 +3342,16 @@ export type MutationsUpdatePaymentPlanArgs = {
 
 export type MutationsDeletePaymentPlanArgs = {
   paymentPlanId: Scalars['ID']
+};
+
+
+export type MutationsChooseDeliveryMechanismsForPaymentPlanArgs = {
+  input: ChooseDeliveryMechanismsForPaymentPlanInput
+};
+
+
+export type MutationsAssignFspToDeliveryMechanismArgs = {
+  input: AssignFspToDeliveryMechanismInput
 };
 
 
@@ -7076,6 +7051,7 @@ export type UserNode = Node & {
   lastDoapSync?: Maybe<Scalars['DateTime']>,
   doapHash: Scalars['String'],
   userRoles: Array<UserRoleNode>,
+  documentSet: DocumentNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   createdPaymentPlans: PaymentPlanNodeConnection,
   createdFinancialServiceProviderXlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection,
@@ -7092,6 +7068,15 @@ export type UserNode = Node & {
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
+};
+
+
+export type UserNodeDocumentSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -23032,18 +23017,18 @@ export type ResolversTypes = {
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
   RoleSubsystem: RoleSubsystem,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
-  IndividualDisability: IndividualDisability,
-  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  IndividualDisability: IndividualDisability,
+  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
@@ -23208,9 +23193,6 @@ export type ResolversTypes = {
   GenericPaymentPlanNode: ResolverTypeWrapper<GenericPaymentPlanNode>,
   EditPaymentVerificationInput: EditPaymentVerificationInput,
   EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
-  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
-  CreateFinancialServiceProviderMutation: ResolverTypeWrapper<CreateFinancialServiceProviderMutation>,
-  EditFinancialServiceProviderMutation: ResolverTypeWrapper<EditFinancialServiceProviderMutation>,
   ExportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ExportXlsxPaymentVerificationPlanFile>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   ImportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ImportXlsxPaymentVerificationPlanFile>,
@@ -23220,11 +23202,6 @@ export type ResolversTypes = {
   DiscardPaymentVerificationPlan: ResolverTypeWrapper<DiscardPaymentVerificationPlan>,
   InvalidPaymentVerificationPlan: ResolverTypeWrapper<InvalidPaymentVerificationPlan>,
   DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>,
-  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
-  ChooseDeliveryMechanismsForPaymentPlanMutation: ResolverTypeWrapper<ChooseDeliveryMechanismsForPaymentPlanMutation>,
-  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
-  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
-  AssignFspToDeliveryMechanismMutation: ResolverTypeWrapper<AssignFspToDeliveryMechanismMutation>,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   MarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<MarkPaymentRecordAsFailedMutation>,
@@ -23240,6 +23217,11 @@ export type ResolversTypes = {
   UpdatePaymentPlanInput: UpdatePaymentPlanInput,
   UpdatePaymentPlanMutation: ResolverTypeWrapper<UpdatePaymentPlanMutation>,
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>,
+  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
+  ChooseDeliveryMechanismsForPaymentPlanMutation: ResolverTypeWrapper<ChooseDeliveryMechanismsForPaymentPlanMutation>,
+  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
+  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
+  AssignFspToDeliveryMechanismMutation: ResolverTypeWrapper<AssignFspToDeliveryMechanismMutation>,
   ExportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListMutation>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   ImportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListMutation>,
@@ -23483,18 +23465,18 @@ export type ResolversParentTypes = {
   ProgramNodeEdge: ProgramNodeEdge,
   RoleNode: RoleNode,
   RoleSubsystem: RoleSubsystem,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: CountAndPercentageNode,
-  IndividualDisability: IndividualDisability,
-  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
+  IndividualDisability: IndividualDisability,
+  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: BankAccountInfoNode,
@@ -23659,9 +23641,6 @@ export type ResolversParentTypes = {
   GenericPaymentPlanNode: GenericPaymentPlanNode,
   EditPaymentVerificationInput: EditPaymentVerificationInput,
   EditPaymentVerificationMutation: EditPaymentVerificationMutation,
-  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
-  CreateFinancialServiceProviderMutation: CreateFinancialServiceProviderMutation,
-  EditFinancialServiceProviderMutation: EditFinancialServiceProviderMutation,
   ExportXlsxPaymentVerificationPlanFile: ExportXlsxPaymentVerificationPlanFile,
   Upload: Scalars['Upload'],
   ImportXlsxPaymentVerificationPlanFile: ImportXlsxPaymentVerificationPlanFile,
@@ -23671,11 +23650,6 @@ export type ResolversParentTypes = {
   DiscardPaymentVerificationPlan: DiscardPaymentVerificationPlan,
   InvalidPaymentVerificationPlan: InvalidPaymentVerificationPlan,
   DeletePaymentVerificationPlan: DeletePaymentVerificationPlan,
-  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
-  ChooseDeliveryMechanismsForPaymentPlanMutation: ChooseDeliveryMechanismsForPaymentPlanMutation,
-  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
-  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
-  AssignFspToDeliveryMechanismMutation: AssignFspToDeliveryMechanismMutation,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   MarkPaymentRecordAsFailedMutation: MarkPaymentRecordAsFailedMutation,
@@ -23691,6 +23665,11 @@ export type ResolversParentTypes = {
   UpdatePaymentPlanInput: UpdatePaymentPlanInput,
   UpdatePaymentPlanMutation: UpdatePaymentPlanMutation,
   DeletePaymentPlanMutation: DeletePaymentPlanMutation,
+  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
+  ChooseDeliveryMechanismsForPaymentPlanMutation: ChooseDeliveryMechanismsForPaymentPlanMutation,
+  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
+  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
+  AssignFspToDeliveryMechanismMutation: AssignFspToDeliveryMechanismMutation,
   ExportXLSXPaymentPlanPaymentListMutation: ExportXlsxPaymentPlanPaymentListMutation,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ExportXlsxPaymentPlanPaymentListPerFspMutation,
   ImportXLSXPaymentPlanPaymentListMutation: ImportXlsxPaymentPlanPaymentListMutation,
@@ -24109,10 +24088,6 @@ export type CreateDashboardReportResolvers<ContextType = any, ParentType extends
   success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
-export type CreateFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFinancialServiceProviderMutation'] = ResolversParentTypes['CreateFinancialServiceProviderMutation']> = {
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
-};
-
 export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
   grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
@@ -24260,6 +24235,9 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
+  cleared?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  clearedDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -24282,11 +24260,8 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  uniqueForIndividual?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
-};
-
-export type EditFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditFinancialServiceProviderMutation'] = ResolversParentTypes['EditFinancialServiceProviderMutation']> = {
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
 };
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
@@ -24982,6 +24957,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -25171,8 +25147,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>,
   editPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditPaymentVerificationPlanArgs, 'input'>>,
-  createFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['CreateFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFinancialServiceProviderArgs, 'businessAreaSlug' | 'inputs'>>,
-  editFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['EditFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsEditFinancialServiceProviderArgs, 'businessAreaSlug' | 'financialServiceProviderId' | 'inputs'>>,
   exportXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ExportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentVerificationPlanFileArgs, 'paymentVerificationPlanId'>>,
   importXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ImportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentVerificationPlanFileArgs, 'file' | 'paymentVerificationPlanId'>>,
   activatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['ActivatePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsActivatePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
@@ -25180,8 +25154,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
   invalidPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['InvalidPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsInvalidPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
   deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
-  chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
-  assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   markPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
   revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>,
@@ -25192,6 +25164,8 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
   updatePaymentPlan?: Resolver<Maybe<ResolversTypes['UpdatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>>,
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>,
+  chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
+  assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
@@ -26739,6 +26713,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  documentSet?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, UserNodeDocumentSetArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   createdPaymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, UserNodeCreatedPaymentPlansArgs>,
   createdFinancialServiceProviderXlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs>,
@@ -26840,7 +26815,6 @@ export type Resolvers<ContextType = any> = {
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
-  CreateFinancialServiceProviderMutation?: CreateFinancialServiceProviderMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
@@ -26869,7 +26843,6 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeConnection?: DocumentNodeConnectionResolvers<ContextType>,
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
-  EditFinancialServiceProviderMutation?: EditFinancialServiceProviderMutationResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,

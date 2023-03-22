@@ -439,10 +439,12 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
         }
         for x in wildcard_fields
     ]
+    national_id_query: Iterable = [{"term": {"documents.type": "NATIONAL_ID"}}, {"term": {"documents.number": value}}]
     all_queries: List = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
+    all_queries.extend(national_id_query)
 
     values = value.split(" ")
     if len(values) == 2:
