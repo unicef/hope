@@ -504,6 +504,9 @@ class Query(graphene.ObjectType):
     def resolve_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
 
+    def resolve_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
+
     def resolve_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
