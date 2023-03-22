@@ -2,7 +2,7 @@ from strategy_field.registry import Registry
 
 
 class AuroraProcessor:
-    def label(self):
+    def label(self) -> str:
         return self.__class__.__name__
 
 
