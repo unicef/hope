@@ -37,4 +37,8 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.payment.celery_tasks.remove_old_cash_plan_payment_verification_xls",
         "schedule": crontab(hour="*/24"),
     },
+    "check_rdi_imports_periodic_task": {
+        "task": "hct_mis_api.apps.registration_datahub.celery_tasks.check_rdi_imports_periodic_task",
+        "schedule": crontab(minute="*/15")
+    }
 }
