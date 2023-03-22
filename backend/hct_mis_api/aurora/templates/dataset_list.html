@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% load static %}
+{% block header-title %}
+    <div class="text-center text-xl">{{ registration }}</div>
+{% endblock %}
+{% block body %}
+{#    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"#}
+{#          integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="#}
+{#          crossorigin="anonymous" referrerpolicy="no-referrer"/>#}
+    <link rel="stylesheet" href="{% static 'datatable.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/css/ui.jqgrid.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/jquery.jqgrid.min.js"></script>
+    <div class="flex w-100">
+        <div class="flex-none">
+            <div class="w-100 border m-2 p-2">
+                Start date <input placeholder="YYYY-MM-DD"  class="input border p-1" type="text" id="date_start">
+                End date <input placeholder="YYYY-MM-DD" class="border p-1" type="text " id="date_end">
+                <button class="text-xs border p-1 bg-gray-200" id="refresh">Filter</button>
+                <button class="text-xs border p-1 bg-gray-200" id="clear">Clear</button>
+            </div>
+            <table id="records" class="w-100" data-reg="{{ registration.id }}"
+                   data-rowPerPage="{{ drf_page_size }}"></table>
+            <div id="dataTablePager"></div>
+        </div>
+        <div class="px-3 flex-grow bg-gray-200" id="details">
+
+        </div>
+    </div>
+    <script src="{% static "js/datatable.min.js" %}"></script>
+{% endblock %}

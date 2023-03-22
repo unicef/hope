@@ -1,0 +1,17 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {% if metadata %}
+        <pre>{{ metadata }}</pre>
+    {% endif %}
+    {% if info %}
+        <pre>{{ info }}</pre>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ form }}
+        </table>
+        <input type="submit">
+        <input type="submit" name="detect" value="Detect">
+    </form>
+{% endblock %}
