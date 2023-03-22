@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import List
+from typing import Any, List
 
 from django.db.models import Q
 from django.utils import timezone
@@ -16,10 +16,12 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
-@app.task(queue="priority")
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def deduplicate_and_check_against_sanctions_list_task(should_populate_index: bool, individuals_ids: List[str]) -> None:
+def deduplicate_and_check_against_sanctions_list_task(
+    self: Any, should_populate_index: bool, individuals_ids: List[str]
+) -> None:
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             DeduplicateAndCheckAgainstSanctionsListTask,
@@ -28,7 +30,7 @@ def deduplicate_and_check_against_sanctions_list_task(should_populate_index: boo
         DeduplicateAndCheckAgainstSanctionsListTask().execute(should_populate_index, individuals_ids)
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
 @app.task
