@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from uuid import UUID
 
 from hct_mis_api.apps.core.celery import app
@@ -8,10 +9,10 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def sync_sanction_list_task() -> None:
+def sync_sanction_list_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.sanction_list.tasks.load_xml import (
             LoadSanctionListXMLTask,
@@ -20,12 +21,12 @@ def sync_sanction_list_task() -> None:
         LoadSanctionListXMLTask().execute()
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
-def check_against_sanction_list_task(uploaded_file_id: UUID, original_file_name: str) -> None:
+def check_against_sanction_list_task(self: Any, uploaded_file_id: UUID, original_file_name: str) -> None:
     try:
         from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
             CheckAgainstSanctionListTask,
@@ -37,4 +38,4 @@ def check_against_sanction_list_task(uploaded_file_id: UUID, original_file_name:
         )
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
