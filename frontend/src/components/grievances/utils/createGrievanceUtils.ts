@@ -71,6 +71,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+        issueType: parseInt(values.issueType, 10),
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           category: {
