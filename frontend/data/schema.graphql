@@ -730,6 +730,9 @@ type DocumentNode implements Node {
   type: DocumentTypeNode!
   country: String
   status: DocumentStatus!
+  cleared: Boolean!
+  clearedDate: DateTime!
+  clearedBy: UserNode
   countryIso3: String
 }
 
@@ -759,6 +762,7 @@ type DocumentTypeNode {
   label: String!
   type: DocumentTypeType!
   isIdentityDocument: Boolean!
+  uniqueForIndividual: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
@@ -772,6 +776,7 @@ enum DocumentTypeType {
   RESIDENCE_PERMIT_NO
   BANK_STATEMENT
   DISABILITY_CERTIFICATE
+  FOSTER_CHILD
   OTHER
 }
 
@@ -1104,6 +1109,7 @@ enum HouseholdCollectIndividualData {
   A_
   A_2
   A_1
+  A_3
   A_0
 }
 
@@ -1405,6 +1411,7 @@ enum ImportedDocumentTypeType {
   RESIDENCE_PERMIT_NO
   BANK_STATEMENT
   DISABILITY_CERTIFICATE
+  FOSTER_CHILD
   OTHER
 }
 
@@ -1952,6 +1959,7 @@ type IndividualNode implements Node {
   rowId: Int
   disabilityCertificatePicture: String
   preferredLanguage: String
+  relationshipConfirmed: Boolean!
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2007,6 +2015,7 @@ enum IndividualRelationship {
   SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
+  FOSTER_CHILD
 }
 
 type IndividualRoleInHouseholdNode {
@@ -3096,7 +3105,7 @@ type Query {
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], countryOrigin: String, orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin2: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, countryOrigin: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
   allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
@@ -4367,6 +4376,7 @@ type UserNode implements Node {
   lastDoapSync: DateTime
   doapHash: String!
   userRoles: [UserRoleNode!]!
+  documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
