@@ -14,12 +14,8 @@ export const handleSelected = (
   setFieldValue(arrayName, newSelected);
 };
 
-export const removeDocument = (
-  documents,
-  docId: string,
-  arrayHelpers,
-): void => {
-  const index = documents?.findIndex((item) => item.id === docId);
+export const removeItemById = (array, id: string, arrayHelpers): void => {
+  const index = array?.findIndex((item) => item.id === id);
   if (index !== -1) {
     arrayHelpers.remove(index);
   }

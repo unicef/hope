@@ -11,7 +11,7 @@ import {
 import { LabelizedField } from '../../core/LabelizedField';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
-import { removeDocument } from '../utils/helpers';
+import { removeItemById } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -23,7 +23,7 @@ export interface EditDocumentRowProps {
   document: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['documents']['edges'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
-  id;
+  id: string;
 }
 
 export function EditDocumentRow({
@@ -45,7 +45,7 @@ export function EditDocumentRow({
         id={id}
         key={`${id}-${document.node.country}-${document.node.type.label}`}
         onDelete={() =>
-          removeDocument(
+          removeItemById(
             values.individualDataUpdateDocumentsToEdit,
             document.node.id,
             arrayHelpers,
@@ -112,6 +112,16 @@ export function EditDocumentRow({
           <Box display='flex' align-items='center'>
             <IconButton
               onClick={() => {
+                setFieldValue(
+                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
+                  document.node.id,
+                );
+              }}
+            >
+              <Delete />
+            </IconButton>
+            <IconButton
+              onClick={() => {
                 arrayHelpers.push({
                   id: document.node.id,
                   country: document.node.countryIso3,
@@ -123,16 +133,6 @@ export function EditDocumentRow({
               }}
             >
               <Edit />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                setFieldValue(
-                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                  document.node.id,
-                );
-              }}
-            >
-              <Delete />
             </IconButton>
           </Box>
         ) : (
