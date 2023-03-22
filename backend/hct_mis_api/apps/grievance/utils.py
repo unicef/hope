@@ -1,8 +1,8 @@
 import logging
-from typing import List, Union
+from typing import Union
 
 from django.core.cache import cache
-from django.db.models import QuerySet, Q
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.utils import decode_id_string
