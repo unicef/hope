@@ -36,7 +36,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
     def get_form(
         self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
-    ) -> Type[forms.ModelForm[models.Project]]:
+    ) -> Type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
         form.base_fields["programme"].queryset = Program.objects.filter(business_area=obj.business_area)
         return form
