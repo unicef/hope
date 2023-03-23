@@ -55,10 +55,12 @@ def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
             logger.info(f"Task with key {key} finished")
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def registration_xlsx_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
+def registration_xlsx_import_task(
+    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str
+) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -83,12 +85,15 @@ def registration_xlsx_import_task(registration_data_import_id: str, import_data_
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_task(registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
+def registration_kobo_import_task(
+    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str
+) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -114,12 +119,13 @@ def registration_kobo_import_task(registration_data_import_id: str, import_data_
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         handle_rdi_exception(registration_data_import_id, e)
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def registration_kobo_import_hourly_task() -> None:
+def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -144,14 +150,14 @@ def registration_kobo_import_hourly_task() -> None:
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
             )
-    except Exception:
-        raise
+    except Exception as e:
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def registration_xlsx_import_hourly_task() -> None:
+def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -176,14 +182,14 @@ def registration_xlsx_import_hourly_task() -> None:
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
             )
-    except Exception:
-        raise
+    except Exception as e:
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def merge_registration_data_import_task(registration_data_import_id: str) -> bool:
+def merge_registration_data_import_task(self: Any, registration_data_import_id: str) -> bool:
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
@@ -203,7 +209,7 @@ def merge_registration_data_import_task(registration_data_import_id: str) -> boo
             RegistrationDataImport.objects.filter(
                 id=registration_data_import_id,
             ).update(status=RegistrationDataImport.MERGE_ERROR)
-            raise
+            raise self.retry(exc=e)
 
     logger.info(
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
@@ -211,10 +217,10 @@ def merge_registration_data_import_task(registration_data_import_id: str) -> boo
     return True
 
 
-@app.task(queue="priority")
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def rdi_deduplication_task(registration_data_import_id: str) -> None:
+def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
@@ -231,12 +237,13 @@ def rdi_deduplication_task(registration_data_import_id: str) -> None:
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def pull_kobo_submissions_task(import_data_id: "UUID") -> Dict:
+def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
@@ -252,13 +259,13 @@ def pull_kobo_submissions_task(import_data_id: "UUID") -> Dict:
         RegistrationDataImport.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def validate_xlsx_import_task(import_data_id: "UUID") -> Dict:
+def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
     import_data = ImportData.objects.get(id=import_data_id)
@@ -272,35 +279,37 @@ def validate_xlsx_import_task(import_data_id: "UUID") -> Dict:
         ImportData.objects.filter(
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
+def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     try:
         FlexRegistrationService().process_records(rdi_id, records_ids)
-    except Exception:
+    except Exception as e:
         logger.exception("Process Flex Records Task error")
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_sri_lanka_flex_records_task(rdi_id: "UUID", records_ids: List) -> None:
+def process_sri_lanka_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         SriLankaRegistrationService,
     )
 
     try:
         SriLankaRegistrationService().process_records(rdi_id, records_ids)
-    except Exception:
+    except Exception as e:
         logger.exception("Process Flex Records Task for Sri-Lanka caused error")
+        raise self.retry(exc=e)
 
 
 @app.task
@@ -396,11 +405,11 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
     return results
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(
-    page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    self: Any, page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
@@ -421,15 +430,15 @@ def automate_registration_diia_import_task(
                 rdi = service.create_rdi(None, rdi_name)
                 service.execute(rdi.id, diia_hh_count=page_size)
                 return [rdi_name, page_size]
-        except Exception:
-            raise
+        except Exception as e:
+            raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(
-    diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    self: Any, diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
@@ -450,8 +459,8 @@ def registration_diia_import_task(
                 rdi = service.create_rdi(None, rdi_name)
                 service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
                 return [rdi_name, len(diia_hh_ids)]
-        except Exception:
-            raise
+        except Exception as e:
+            raise self.retry(exc=e)
 
 
 @app.task
