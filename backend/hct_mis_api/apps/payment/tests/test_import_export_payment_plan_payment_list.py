@@ -176,6 +176,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
             financial_service_provider=financial_service_provider2,
         )
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
 
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
