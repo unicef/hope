@@ -24,10 +24,9 @@ def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, sep
     else:
         list_of_households = list(map(str.strip, text.split(separator)))
     if target_field == "unicef_id":
-        return Household.objects.filter(withdrawn=False, business_area=ba, unicef_id__in=list_of_households)
+        return Household.objects.filter(business_area=ba, unicef_id__in=list_of_households)
     elif target_field == "unique_id":
         return Household.objects.filter(
-            withdrawn=False,
             business_area=ba,
             id__in=list_of_households,
         )
