@@ -144,7 +144,11 @@ export const GrievancesDetails = ({
                 value: (
                   <StatusBox
                     status={
-                      priorityChoicesData[ticket.priority - 1]?.name || '-'
+                      priorityChoicesData[
+                        priorityChoicesData.findIndex(
+                          (obj) => obj.value === ticket.priority,
+                        )
+                      ]?.name || '-'
                     }
                     statusToColor={grievanceTicketBadgeColors}
                   />
@@ -155,7 +159,13 @@ export const GrievancesDetails = ({
                 label: t('Urgency'),
                 value: (
                   <StatusBox
-                    status={urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
+                    status={
+                      urgencyChoicesData[
+                        urgencyChoicesData.findIndex(
+                          (obj) => obj.value === ticket.urgency,
+                        )
+                      ]?.name || '-'
+                    }
                     statusToColor={grievanceTicketBadgeColors}
                   />
                 ),
@@ -220,11 +230,7 @@ export const GrievancesDetails = ({
               },
               {
                 label: t('Payment ID'),
-                value: (
-                  <span>
-                   {renderPaymentUrl()}
-                  </span>
-                ),
+                value: <span>{renderPaymentUrl()}</span>,
                 size: showProgramme || showPartner ? 3 : 12,
               },
               showProgramme && {
