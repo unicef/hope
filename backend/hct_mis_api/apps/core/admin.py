@@ -41,6 +41,7 @@ from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
+from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
@@ -206,11 +207,11 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     )
     search_fields = ("name", "slug")
     list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
-    readonly_fields = ("parent", "is_split")
+    readonly_fields = ("parent", "is_split", "document_type_valid_for_deduplication")
     filter_horizontal = ("countries",)
-    # TODO:
-    # display the list of DocumentType.filter(valid_for_deduplication=True)
-    # to enable dedupe based on this dedupe
+
+    def document_type_valid_for_deduplication(self, obj) -> List:
+        return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
