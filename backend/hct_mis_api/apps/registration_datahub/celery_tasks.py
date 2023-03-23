@@ -495,18 +495,17 @@ def deduplicate_documents() -> bool:
     return True
 
 
-# @app.task
-# @sentry_tags
-# def check_rdi_import_periodic_task() -> None:
-#     from hct_mis_api.apps.registration_datahub.celery_manager import rdi_import_celery_manager
-#     rdi_import_celery_manager.execute()
+@app.task
+@sentry_tags
+def check_rdi_import_periodic_task() -> None:
+    from hct_mis_api.apps.utils.celery_manager import rdi_import_celery_manager
+
+    rdi_import_celery_manager.execute()
 
 
 @app.task
 @sentry_tags
 def check_rdi_merge_periodic_task() -> None:
-    from hct_mis_api.apps.registration_datahub.celery_manager import (
-        rdi_merge_celery_manager,
-    )
+    from hct_mis_api.apps.utils.celery_manager import rdi_merge_celery_manager
 
     rdi_merge_celery_manager.execute()
