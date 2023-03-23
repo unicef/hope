@@ -208,6 +208,9 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
     list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
+    # TODO:
+    # display the list of DocumentType.filter(valid_for_deduplication=True)
+    # to enable dedupe based on this dedupe
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":

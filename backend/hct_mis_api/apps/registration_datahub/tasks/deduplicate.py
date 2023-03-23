@@ -817,7 +817,10 @@ class DeduplicateTask:
 
     @staticmethod
     def _get_document_signature(document: Document) -> str:
-        return f"{document.type_id}--{document.document_number}--{document.country_id}"
+        if document.type.valid_for_deduplication:
+            return f"{document.type_id}--{document.document_number}--{document.country_id}"
+        else:
+            return f"{document.document_number}--{document.country_id}"
 
     @classmethod
     @transaction.atomic

@@ -586,6 +586,7 @@ class DocumentType(TimeStampedUUIDModel):
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
     is_identity_document = models.BooleanField(default=True)
     unique_for_individual = models.BooleanField(default=False)
+    valid_for_deduplication = models.BooleanField(default=False)
 
     class Meta:
         ordering = [
