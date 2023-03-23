@@ -5,7 +5,7 @@ from dataclasses import dataclass, fields
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type, Union
 
 from django.db import transaction
-from django.db.models import CharField, F, Q, QuerySet, Value
+from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 
 from constance import config
@@ -830,7 +830,7 @@ class DeduplicateTask:
         documents_to_dedup = evaluate_qs(
             new_documents.exclude(status=Document.STATUS_VALID)
             .filter(type__is_identity_document=True)
-            .select_related("individual")
+            .select_related("individual", "type")
             .select_for_update(of=("self",))  # no need to lock individuals
             .order_by("pk")
         )
@@ -844,8 +844,12 @@ class DeduplicateTask:
             .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
             .annotate(
                 signature=Concat(
-                    F("type_id"),
-                    Value("--"),
+                    Case(
+                        When(
+                            Q(type__valid_for_deduplication=True),
+                            then=Concat(F("type_id"), Value("--"), default=Value(""), output_field=CharField()),
+                        )
+                    ),
                     F("document_number"),
                     Value("--"),
                     F("country_id"),
