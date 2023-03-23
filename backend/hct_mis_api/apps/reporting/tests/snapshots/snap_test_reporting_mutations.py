@@ -84,7 +84,7 @@ snapshots['TestReportingMutation::test_restart_create_report_0_with_permission 1
         'restartCreateReport': {
             'report': {
                 'reportType': 1,
-                'status': 1
+                'status': 2
             }
         }
     }
