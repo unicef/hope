@@ -216,6 +216,9 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
 
             households = Household.objects.filter(family_id__in=list(families.keys()))
 
+            household.update(withdrawn=True, withdrawn_date=timezone.now())
+            Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
+
             target_population = TargetPopulation.objects.create(
                 name=tp_name,
                 created_by=storage_obj.created_by,
