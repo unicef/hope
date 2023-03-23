@@ -183,12 +183,12 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.has_export_file)
         self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
         self.assertTrue(
-            self.payment_plan.export_file.file.name.startswith(
+            self.payment_plan.export_file_per_fsp.file.name.startswith(
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
         fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
-        with zipfile.ZipFile(self.payment_plan.export_file.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
             fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
