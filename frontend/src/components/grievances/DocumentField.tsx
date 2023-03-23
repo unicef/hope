@@ -7,20 +7,22 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
 import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
+import { getIndexForId } from './utils/helpers';
 
 export interface DocumentFieldProps {
-  index: number;
+  id: string;
   baseName: string;
-  onDelete: () => {};
+  onDelete;
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
   isEdited?: boolean;
   setFieldValue?;
   photoSrc?: string;
+  values;
 }
 
 export function DocumentField({
-  index,
+  id,
   baseName,
   onDelete,
   countryChoices,
@@ -28,14 +30,16 @@ export function DocumentField({
   isEdited,
   setFieldValue,
   photoSrc,
+  values,
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
+  const docFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
 
   return (
     <>
       <Grid item xs={3}>
         <Field
-          name={`${baseName}[${index}].type`}
+          name={`${docFieldName}.type`}
           fullWidth
           variant='outlined'
           label={t('Type')}
@@ -46,7 +50,7 @@ export function DocumentField({
       </Grid>
       <Grid item xs={2}>
         <Field
-          name={`${baseName}[${index}].country`}
+          name={`${docFieldName}.country`}
           fullWidth
           variant='outlined'
           label={t('Country')}
@@ -57,7 +61,7 @@ export function DocumentField({
       </Grid>
       <Grid item xs={3}>
         <Field
-          name={`${baseName}[${index}].number`}
+          name={`${docFieldName}.number`}
           fullWidth
           variant='outlined'
           label={t('Document Number')}
@@ -69,7 +73,7 @@ export function DocumentField({
         <GrievanceDocumentPhotoModalEditable
           photoSrc={photoSrc}
           setFieldValue={setFieldValue}
-          fieldName={`${baseName}[${index}].photo`}
+          fieldName={`${docFieldName}.photo`}
         />
       </Grid>
       {!isEdited ? (

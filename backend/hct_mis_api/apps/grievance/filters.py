@@ -137,10 +137,12 @@ class GrievanceTicketFilter(FilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value.startswith("GRV-"):
+            return qs.filter(unicef_id__istartswith=value)
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(registration_data_import__name__icontains=value)
+            q_obj |= Q(unicef_id__icontains=value) | Q(registration_data_import__name__icontains=value)
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
