@@ -137,6 +137,8 @@ class GrievanceTicketFilter(FilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value.startswith("GRV-"):
+            return qs.filter(unicef_id__istartswith=value)
         values = value.split(" ")
         q_obj = Q()
         for value in values:
