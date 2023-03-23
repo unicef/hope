@@ -1,10 +1,12 @@
 import { Button, Grid } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { v4 as uuidv4 } from 'uuid';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { AgencyField } from '../AgencyField';
+import { removeItemById } from '../utils/helpers';
 
 export interface NewIdentityFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -23,20 +25,28 @@ export function NewIdentityFieldArray({
         render={(arrayHelpers) => {
           return (
             <>
-              {values.individualDataUpdateFieldsIdentities?.map(
-                (item, index) => (
+              {values.individualDataUpdateFieldsIdentities?.map((item) => {
+                const existingOrNewId = item.node?.id || item.id;
+                return (
                   <AgencyField
-                    index={index}
-                    key={`${index}-${item?.country}-${item?.partner}`}
-                    onDelete={() => arrayHelpers.remove(index)}
+                    id={existingOrNewId}
+                    key={`${existingOrNewId}-${item?.country}-${item?.partner}`}
+                    onDelete={() =>
+                      removeItemById(
+                        values.individualDataUpdateFieldsIdentities,
+                        existingOrNewId,
+                        arrayHelpers,
+                      )
+                    }
                     countryChoices={addIndividualFieldsData.countriesChoices}
                     identityTypeChoices={
                       addIndividualFieldsData.identityTypeChoices
                     }
                     baseName='individualDataUpdateFieldsIdentities'
+                    values={values}
                   />
-                ),
-              )}
+                );
+              })}
 
               <Grid item xs={8} />
               <Grid item xs={12}>
@@ -44,6 +54,7 @@ export function NewIdentityFieldArray({
                   color='primary'
                   onClick={() => {
                     arrayHelpers.push({
+                      id: uuidv4(),
                       country: null,
                       partner: null,
                       number: '',
