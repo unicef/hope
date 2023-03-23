@@ -99,7 +99,7 @@ export const IdentitiesToRemoveTable = ({
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>{identity?.label || '-'}</TableCell>
+                <TableCell align='left'>{identity?.partner || '-'}</TableCell>
                 <TableCell align='left'>
                   {countriesDict[identity?.country] || '-'}
                 </TableCell>
