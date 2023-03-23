@@ -209,7 +209,6 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                         individuals = []
                         documents = []
                         bank_infos = []
-
             Individual.objects.bulk_create(individuals)
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
