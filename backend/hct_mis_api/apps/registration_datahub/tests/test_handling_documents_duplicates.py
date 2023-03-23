@@ -21,6 +21,7 @@ from hct_mis_api.apps.household.models import (
     SON_DAUGHTER,
     WIFE_HUSBAND,
     Document,
+    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -251,3 +252,38 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             self.registration_data_import,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
+
+    def test_valid_for_deduplication_doc_type(self) -> None:
+        pl = geo_models.Country.objects.get(iso_code2="PL")
+        dt_tax_id = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
+        dt_national_id = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        Document.objects.create(
+            country=pl,
+            type=dt_tax_id,
+            document_number="TAX_ID_DOC_123",
+            individual=self.individuals[2],
+            status=Document.STATUS_VALID,
+        )
+        doc_national_id_1 = Document.objects.create(
+            country=pl,
+            type=dt_national_id,
+            document_number="TAX_ID_DOC_123",  # the same doc number
+            individual=self.individuals[2],
+        )
+        doc_national_id_2 = Document.objects.create(
+            country=pl,
+            type=dt_national_id,
+            document_number="TAX_ID_DOC_123",  # the same doc number
+            individual=self.individuals[2],
+        )
+
+        DeduplicateTask.hard_deduplicate_documents(self.get_documents_query([doc_national_id_1]))
+        doc_national_id_1.refresh_from_db()
+        self.assertEqual(doc_national_id_1.status, Document.STATUS_NEED_INVESTIGATION)
+
+        dt_national_id.valid_for_deduplication = True
+        dt_national_id.save()
+
+        DeduplicateTask.hard_deduplicate_documents(self.get_documents_query([doc_national_id_2]))
+        doc_national_id_2.refresh_from_db()
+        self.assertEqual(doc_national_id_2.status, Document.STATUS_VALID)
