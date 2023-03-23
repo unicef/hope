@@ -11,9 +11,10 @@ from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
-from ..targeting.models import HouseholdSelection, TargetPopulation
 from .services.targeting_stats_refresher import full_rebuild, refresh_stats
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,11 @@ def target_population_full_rebuild(self: Any, target_population_id: UUID) -> Non
 
 @app.task
 @sentry_tags
-def check_send_tp_periodic_task() -> None:
+def check_send_tp_periodic_task() -> bool:
     from hct_mis_api.apps.utils.celery_manager import send_tp_celery_manager
 
-    send_tp_celery_manager.execute()
+    with locked_cache(key="celery_manager_periodic_task") as locked:
+        if not locked:
+            return True
+        send_tp_celery_manager.execute()
+    return True
