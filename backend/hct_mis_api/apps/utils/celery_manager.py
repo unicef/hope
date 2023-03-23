@@ -1,8 +1,9 @@
 import abc
 import logging
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
@@ -89,9 +90,15 @@ class RdiMergeCeleryManager(BaseCeleryManager):
 
 class SendTPCeleryManager(BaseCeleryManager):
     model = TargetPopulation
+    model_status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
+    task = send_target_population_task
+    lookup = "target_population_id"
 
     def create_kwargs(self, ids_to_run: List[str]) -> List:
-        pass
+        send_tp_task_kwargs = []
+        for tp_id in ids_to_run:
+            send_tp_task_kwargs.append({"target_population_id": str(tp_id)})
+        return send_tp_task_kwargs
 
 
 rdi_import_celery_manager = RdiImportCeleryManager()

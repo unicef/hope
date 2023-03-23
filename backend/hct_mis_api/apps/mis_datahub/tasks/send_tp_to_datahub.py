@@ -95,6 +95,9 @@ class SendTPToDatahubTask:
         tp_entries_to_bulk_create = []
         roles_to_bulk_create = []
 
+        target_population.status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
+        target_population.save(update_fields=["status"])
+
         try:
             program = target_population.program
             self.dh_session = dh_mis_models.Session(
