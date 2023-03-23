@@ -215,6 +215,8 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
             BankAccountInfo.objects.bulk_create(bank_infos)
 
             households = Household.objects.filter(family_id__in=list(families.keys()))
+            households.update(withdrawn=True, withdrawn_date=timezone.now())
+            Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
 
             target_population = TargetPopulation.objects.create(
                 name=tp_name,
