@@ -209,6 +209,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                         individuals = []
                         documents = []
                         bank_infos = []
+
             Individual.objects.bulk_create(individuals)
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
@@ -216,7 +217,6 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
             households = Household.objects.filter(family_id__in=list(families.keys()))
             households.update(withdrawn=True, withdrawn_date=timezone.now())
             Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
-
 
             target_population = TargetPopulation.objects.create(
                 name=tp_name,
