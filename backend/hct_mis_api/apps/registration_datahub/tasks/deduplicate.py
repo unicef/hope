@@ -847,8 +847,9 @@ class DeduplicateTask:
                     Case(
                         When(
                             Q(type__valid_for_deduplication=True),
-                            then=Concat(F("type_id"), Value("--"), default=Value(""), output_field=CharField()),
-                        )
+                            then=Concat(F("type_id"), Value("--"), output_field=CharField()),
+                        ),
+                        default=Value(""),
                     ),
                     F("document_number"),
                     Value("--"),
