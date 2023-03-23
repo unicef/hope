@@ -155,7 +155,6 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         "first_registration_date": first_registration_date,
                         "last_registration_date": last_registration_date,
                         "sex": MALE,
-                        "country": country,
                     }
                     if family_id in families:
                         individual = Individual(**individual_data, household_id=families.get(family_id))
