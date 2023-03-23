@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../core/LabelizedField';
 import { PaymentChannelField } from '../PaymentChannelField';
+import { removeItemById } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -18,7 +19,7 @@ export interface EditPaymentChannelRowProps {
   values;
   paymentChannel: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['paymentChannels'][number];
   arrayHelpers;
-  index;
+  id: string;
 }
 
 export function EditPaymentChannelRow({
@@ -26,7 +27,7 @@ export function EditPaymentChannelRow({
   values,
   paymentChannel,
   arrayHelpers,
-  index,
+  id,
 }: EditPaymentChannelRowProps): React.ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
@@ -35,12 +36,19 @@ export function EditPaymentChannelRow({
   return isEdited ? (
     <>
       <PaymentChannelField
-        index={index}
-        key={`${index}-${paymentChannel.id}`}
-        onDelete={() => arrayHelpers.remove(index)}
+        id={id}
+        key={`${id}-${paymentChannel.id}`}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdatePaymentChannelsToRemove,
+            paymentChannel.id,
+            arrayHelpers,
+          )
+        }
         baseName='individualDataUpdatePaymentChannelsToEdit'
         isEdited={isEdited}
         paymentChannel={paymentChannel}
+        values={values}
       />
       <Box display='flex' alignItems='center'>
         <IconButton
