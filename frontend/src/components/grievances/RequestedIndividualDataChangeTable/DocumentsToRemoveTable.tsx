@@ -99,7 +99,7 @@ export const DocumentsToRemoveTable = ({
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>{document?.label || '-'}</TableCell>
+                <TableCell align='left'>{document?.type || '-'}</TableCell>
                 <TableCell align='left'>
                   {countriesDict[document?.country] || '-'}
                 </TableCell>
