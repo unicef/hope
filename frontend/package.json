@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "2023.3.6",
+  "version": "2023.3.8",
   "private": true,
   "dependencies": {
     "@apollo/react-hooks": "^3.1.3",
@@ -157,6 +157,7 @@
     "jest-canvas-mock": "^2.3.1",
     "prettier": "^1.19.1",
     "string.prototype.replaceall": "^1.0.6",
+    "uuid": "^9.0.0",
     "waait": "^1.0.5"
   }
 }
