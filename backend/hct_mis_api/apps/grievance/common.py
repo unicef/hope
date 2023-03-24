@@ -98,13 +98,16 @@ def create_needs_adjudication_tickets(
         return None
     tickets_to_create = []
     ticket_details_to_create = []
-
+    created_tickets_individuals_hashes = []
     for possible_duplicate in individuals_queryset:
         hit_ids = [
             individual.get("hit_id")
             for individual in possible_duplicate.deduplication_golden_record_results[results_key]
         ]
         possible_duplicates = list(Individual.objects.filter(id__in=hit_ids))
+        possible_duplicates_hash = frozenset(hit_ids + [str(possible_duplicate.id)])
+        if possible_duplicates_hash in created_tickets_individuals_hashes:
+            continue
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
             possible_duplicate=possible_duplicate,  # for backward compatibility
@@ -116,6 +119,7 @@ def create_needs_adjudication_tickets(
         if ticket and ticket_details:
             tickets_to_create.append(ticket)
             ticket_details_to_create.append(ticket_details)
+            created_tickets_individuals_hashes.append(possible_duplicates_hash)
 
     GrievanceTicket.objects.bulk_create(tickets_to_create, batch_size=500)
     TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create, batch_size=500)
