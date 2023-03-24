@@ -11,11 +11,16 @@ from constance import config
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.household.models import COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL
+from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_PARTIAL,
+    Individual,
+)
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
@@ -159,3 +164,15 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
         IndividualsIBANXlsxUpdate.send_error_email(
             error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
         )
+
+
+@app.task()
+@sentry_tags
+def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
+    individuals_to_update = []
+    individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
+    for individual in individuals:
+        individuals_to_update.append(calculate_phone_numbers_validity(individual))
+    Individual.objects.bulk_update(
+        individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
+    )
