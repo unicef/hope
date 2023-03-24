@@ -689,8 +689,10 @@ class ActionPaymentPlanMutation(PermissionMutation):
         old_payment_plan = copy_model_object(payment_plan)
         if old_payment_plan.imported_file:
             old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
-        if old_payment_plan.export_file:
-            old_payment_plan.export_file = copy_model_object(payment_plan.export_file)
+        if old_payment_plan.export_file_entitlement:
+            old_payment_plan.export_file_entitlement = copy_model_object(payment_plan.export_file_entitlement)
+        if old_payment_plan.export_file_per_fsp:
+            old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
 
         cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
 
