@@ -579,7 +579,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             id=registration_data_import_id,
         )
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
+        registration_data_import.status = RegistrationDataImport.IMPORTING
         registration_data_import.save()
+
         import_data = ImportData.objects.get(id=import_data_id)
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)

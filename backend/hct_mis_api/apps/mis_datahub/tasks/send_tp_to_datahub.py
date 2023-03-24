@@ -15,11 +15,10 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
-from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 logger = logging.getLogger(__name__)
@@ -84,6 +83,8 @@ class SendTPToDatahubTask:
     }
 
     def execute(self, target_population: "TargetPopulation") -> Dict:
+        target_population.status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
+        target_population.save(update_fields=["status"])
         return self.send_target_population(target_population)
 
     @transaction.atomic(using="default")
