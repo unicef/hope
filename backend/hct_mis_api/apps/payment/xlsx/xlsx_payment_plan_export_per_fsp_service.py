@@ -112,7 +112,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                         zip_file.writestr(filename, tmp.read())
 
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
-            xlsx_obj = FileTemp(
+            zip_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
@@ -120,6 +120,6 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             tmp_zip.seek(0)
             # remove old file
             self.payment_plan.remove_export_file()
-            xlsx_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_file = xlsx_obj
+            zip_obj.file.save(zip_file_name, File(tmp_zip))
+            self.payment_plan.export_file_per_fsp = zip_obj
             self.payment_plan.save()
