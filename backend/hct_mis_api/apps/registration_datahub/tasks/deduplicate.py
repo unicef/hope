@@ -95,10 +95,8 @@ class DeduplicateTask:
         }
         queries_list = []
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
-        documents_queries = cls._prepare_documents_queries_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
         queries_list.extend(names_queries)
-        queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)
 
         if "household" in fields_meta:
@@ -154,12 +152,6 @@ class DeduplicateTask:
         identities = fields.pop("identities", [])
         identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
         return identities_queries
-
-    @classmethod
-    def _prepare_documents_queries_from_fields(cls, fields: Dict) -> List[Dict]:
-        documents = fields.pop("documents", [])
-        documents_queries = cls._prepare_identities_or_documents_query(documents, "document")
-        return documents_queries
 
     @staticmethod
     def _prepare_fields(
