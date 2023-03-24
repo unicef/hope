@@ -1,14 +1,21 @@
-
-
 const fs = require('fs');
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
 const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
 const ignoredFiles = require('react-dev-utils/ignoredFiles');
+const helmet = require('helmet');
 const paths = require('./paths');
 
 const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 const host = process.env.HOST || '0.0.0.0';
+
+let cspReportUri = null;
+const sentryDsn = process.env.SENTRY_FRONTEND_DSN;
+if (process.env.NODE_ENV !== 'development' && sentryDsn) {
+  const sentryKey = sentryDsn.split('@')[0].split('//')[1];
+  const sentryId = sentryDsn.split('@')[1].split('/')[1];
+  cspReportUri = `https://excubo.unicef.io/api/${sentryId}/security/?sentry_key=${sentryKey}`;
+}
 
 module.exports = function(proxy, allowedHost) {
   return {
@@ -105,6 +112,23 @@ module.exports = function(proxy, allowedHost) {
       // it used the same host and port.
       // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
       app.use(noopServiceWorkerMiddleware('/'));
+      app.use(
+        helmet.contentSecurityPolicy({
+          reportOnly: true, // TODO set to false after deploy
+          directives: {
+            'default-src': ["'self'"],
+            'script-src': ["'self'"],
+            'style-src': [
+              "'self'",
+              "'unsafe-inline'",
+              'https://fonts.googleapis.com',
+            ],
+            'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+            'report-uri': `${cspReportUri}`,
+            'report-to': `${cspReportUri}`,
+          },
+        }),
+      );
     },
   };
 };
