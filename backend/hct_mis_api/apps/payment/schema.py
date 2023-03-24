@@ -1312,7 +1312,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
         # query AllPaymentRecordsAndPayments
-        """ used in Household Page > Payment Records """
+        """used in Household Page > Payment Records"""
         qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.exclude(excluded=True)).order_by(
             "-updated_at"
         )
