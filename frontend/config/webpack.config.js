@@ -28,9 +28,6 @@ const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const postcssNormalize = require('postcss-normalize');
 
 const appPackageJson = require(paths.appPackageJson);
-const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
-const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
-const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
 const helmet = require('helmet');
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
