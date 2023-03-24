@@ -82,7 +82,6 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=Area.objects.filter(area_type__area_level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
 
@@ -94,6 +93,7 @@ class HouseholdFilter(FilterSet):
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
+            "admin2": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
