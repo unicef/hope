@@ -83,6 +83,8 @@ class SendTPToDatahubTask:
     }
 
     def execute(self, target_population: "TargetPopulation") -> Dict:
+        target_population.status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
+        target_population.save(update_fields=["status"])
         return self.send_target_population(target_population)
 
     @transaction.atomic(using="default")
@@ -93,9 +95,6 @@ class SendTPToDatahubTask:
         documents_to_bulk_create = []
         tp_entries_to_bulk_create = []
         roles_to_bulk_create = []
-
-        target_population.status = TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST
-        target_population.save(update_fields=["status"])
 
         try:
             program = target_population.program
