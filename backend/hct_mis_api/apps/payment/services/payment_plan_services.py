@@ -5,7 +5,7 @@ from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -15,7 +15,7 @@ from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -269,13 +269,22 @@ class PaymentPlanService:
     @staticmethod
     def _create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
-        for household in payment_plan.target_population.households.all():
-            try:
-                collector = household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual
-            except AttributeError as exception:
-                msg = f"Couldn't find a primary collector in {household}"
+        households = (
+            payment_plan.target_population.households.annotate(
+                collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
+                    "individual"
+                )[:1]
+            )
+            .all()
+            .values("pk", "collector", "unicef_id", "head_of_household")
+        )
+
+        for household in households:
+            collector_id = household["collector"]
+            if not collector_id:
+                msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
-                raise GraphQLError(msg) from exception
+                raise GraphQLError(msg)
 
             payments_to_create.append(
                 Payment(
@@ -283,9 +292,9 @@ class PaymentPlanService:
                     business_area=payment_plan.business_area,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
-                    household=household,
-                    head_of_household=household.head_of_household,
-                    collector=collector,
+                    household_id=household["pk"],
+                    head_of_household_id=household["head_of_household"],
+                    collector_id=collector_id,
                     currency=payment_plan.currency,
                 )
             )
@@ -296,14 +305,17 @@ class PaymentPlanService:
 
     @staticmethod
     def create(input_data: Dict, user: "User") -> PaymentPlan:
-        business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
+        business_area_slug = input_data["business_area_slug"]
+        business_area = BusinessArea.objects.only("is_payment_plan_applicable").get(slug=business_area_slug)
         if not business_area.is_payment_plan_applicable:
             raise GraphQLError("PaymentPlan can not be created in provided Business Area")
 
         targeting_id = decode_id_string(input_data["targeting_id"])
         try:
-            target_population = TargetPopulation.objects.get(
-                id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+            target_population = (
+                TargetPopulation.objects.select_related("program")
+                .only("program", "program__start_date", "program__end_date")
+                .get(id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
             )
         except TargetPopulation.DoesNotExist:
             raise GraphQLError(
@@ -342,8 +354,9 @@ class PaymentPlanService:
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
 
-        payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
-        payment_plan.target_population.save()
+        TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
+            status=TargetPopulation.STATUS_ASSIGNED
+        )
 
         return payment_plan
 
