@@ -690,7 +690,7 @@ module.exports = function(webpackEnv) {
           ],
           'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
           'img-src': ["'self'", 'data:'],
-          'connect-src': ['excubo.unicef.io', 'sentry.io'],
+          'connect-src': ["'self'", 'excubo.unicef.io', 'sentry.io'],
         },
         {
           enabled: true,
