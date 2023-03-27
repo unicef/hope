@@ -125,7 +125,7 @@ export const BulkAssignModal = ({
           <Box mt={2} mb={6}>
             <StyledTable>
               <Typography>
-                {t('Tickets ID')}:<Bold>{selected.join(', ')}</Bold>
+                {t('Tickets ID')}: <Bold>{selected.join(', ')}</Bold>
               </Typography>
             </StyledTable>
           </Box>
