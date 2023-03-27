@@ -70,6 +70,7 @@ function generateNginxHeaderFile(
   if (cspReportUri) {
     header += `report-uri ${cspReportUri}; report-to default ${cspReportUri};`;
   }
+  header += '";';
   compilation.emitAsset('nginx-csp-header.conf', new RawSource(header));
 }
 
@@ -680,16 +681,16 @@ module.exports = function(webpackEnv) {
         }),
       new CspHtmlWebpackPlugin(
         {
-          'base-uri': "'self'",
           'default-src': "'self'",
-          'object-src': "'none'",
-          'script-src': "'self'",
           'style-src': [
             "'self'",
             "'unsafe-inline'",
+            "'unsafe-eval'",
             'https://fonts.googleapis.com',
           ],
           'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+          'img-src': ["'self'", 'data:'],
+          'connect-src': ['excubo.unicef.io', 'sentry.io'],
         },
         {
           enabled: true,

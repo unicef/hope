@@ -93,10 +93,10 @@ CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
 CSP_DEFAULT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'",)
-CSP_IMG_SRC = ("'self'",)
-CSP_FONT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'",)
+CSP_IMG_SRC = ("'self'", "data:",)
+CSP_FONT_SRC = ("'self'", "data:",)
 CSP_MEDIA_SRC = ("'self'",)
 CSP_CONNECT_SRC = (
     "excubo.unicef.io",
