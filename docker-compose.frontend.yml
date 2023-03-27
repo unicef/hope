@@ -7,7 +7,7 @@ services:
   proxy:
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=frontend:80
+      - FRONTEND_HOST=frontend:3000
     depends_on:
       - backend
       - frontend
@@ -19,7 +19,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-      target: dist
+      target: dev
       args:
         ENV: dev
     ports:
@@ -28,3 +28,4 @@ services:
     volumes:
       - ./frontend/:/code
       - /code/node_modules
+    command: sh -c 'npm start'
