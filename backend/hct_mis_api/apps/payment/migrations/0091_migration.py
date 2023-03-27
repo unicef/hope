@@ -17,20 +17,28 @@ def remove_payment_plan_old_export_file(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0064_migration'),
-        ('payment', '0090_migration'),
+        ("core", "0064_migration"),
+        ("payment", "0090_migration"),
     ]
 
     operations = [
+        migrations.RunSQL("SET CONSTRAINTS ALL IMMEDIATE;"),
         migrations.RunPython(remove_payment_plan_old_export_file, migrations.RunPython.noop),
+        migrations.RunSQL("SET CONSTRAINTS ALL DEFERRED;"),
         migrations.RenameField(
-            model_name='paymentplan',
-            old_name='export_file',
-            new_name='export_file_entitlement',
+            model_name="paymentplan",
+            old_name="export_file",
+            new_name="export_file_entitlement",
         ),
         migrations.AddField(
-            model_name='paymentplan',
-            name='export_file_per_fsp',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='core.filetemp'),
+            model_name="paymentplan",
+            name="export_file_per_fsp",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="core.filetemp",
+            ),
         ),
     ]
