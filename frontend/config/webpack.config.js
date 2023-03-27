@@ -24,11 +24,11 @@ const getClientEnvironment = require('./env');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
-
+const { RawSource } = require('webpack-sources');
+const CspHtmlWebpackPlugin = require('csp-html-webpack-plugin');
 const postcssNormalize = require('postcss-normalize');
 
 const appPackageJson = require(paths.appPackageJson);
-const helmet = require('helmet');
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
@@ -56,6 +56,21 @@ if (process.env.NODE_ENV !== 'development' && sentryDsn) {
   const sentryKey = sentryDsn.split('@')[0].split('//')[1];
   const sentryId = sentryDsn.split('@')[1].split('/')[1];
   cspReportUri = `https://excubo.unicef.io/api/${sentryId}/security/?sentry_key=${sentryKey}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function generateNginxHeaderFile(
+  builtPolicy,
+  _htmlPluginData,
+  _obj,
+  compilation,
+) {
+  let header = `add_header Content-Security-Policy-Report-Only "${builtPolicy};`;
+  // `add_header Content-Security-Policy "${builtPolicy};`; // uncomment this line to enable CSP
+  if (cspReportUri) {
+    header += `report-uri ${cspReportUri}; report-to default ${cspReportUri};`;
+  }
+  compilation.emitAsset('nginx-csp-header.conf', new RawSource(header));
 }
 
 // This is the production and development configuration.
@@ -663,6 +678,33 @@ module.exports = function(webpackEnv) {
           // The formatter is invoked directly in WebpackDevServerUtils during development
           formatter: isEnvProduction ? typescriptFormatter : undefined,
         }),
+      new CspHtmlWebpackPlugin(
+        {
+          'base-uri': "'self'",
+          'default-src': "'self'",
+          'object-src': "'none'",
+          'script-src': "'self'",
+          'style-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://fonts.googleapis.com',
+          ],
+          'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+        },
+        {
+          enabled: true,
+          hashingMethod: 'sha256',
+          hashEnabled: {
+            'script-src': false,
+            'style-src': false,
+          },
+          nonceEnabled: {
+            'script-src': false,
+            'style-src': false,
+          },
+          processFn: generateNginxHeaderFile,
+        },
+      ),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
@@ -679,25 +721,5 @@ module.exports = function(webpackEnv) {
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter
     performance: false,
-    // eslint-disable-next-line no-unused-vars
-    before(app, server) {
-      app.use(
-        helmet.contentSecurityPolicy({
-          reportOnly: true, // TODO set to false after deploy
-          directives: {
-            'default-src': ["'self'"],
-            'script-src': ["'self'"],
-            'style-src': [
-              "'self'",
-              "'unsafe-inline'",
-              'https://fonts.googleapis.com',
-            ],
-            'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
-            'report-uri': `${cspReportUri}`,
-            'report-to': `${cspReportUri}`,
-          },
-        }),
-      );
-    },
   };
 };

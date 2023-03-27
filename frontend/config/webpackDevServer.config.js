@@ -114,7 +114,7 @@ module.exports = function(proxy, allowedHost) {
       app.use(noopServiceWorkerMiddleware('/'));
       app.use(
         helmet.contentSecurityPolicy({
-          reportOnly: true, // TODO set to false after deploy
+          reportOnly: true,
           directives: {
             'default-src': ["'self'"],
             'script-src': ["'self'"],
@@ -124,6 +124,7 @@ module.exports = function(proxy, allowedHost) {
               'https://fonts.googleapis.com',
             ],
             'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+            'connect-src': ["excubo.unicef.io", "sentry.io"],
             'report-uri': `${cspReportUri}`,
             'report-to': `${cspReportUri}`,
           },
