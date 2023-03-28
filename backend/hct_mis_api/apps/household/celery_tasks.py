@@ -11,11 +11,16 @@ from constance import config
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.household.models import COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL
+from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_PARTIAL,
+    Individual,
+)
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
@@ -27,26 +32,32 @@ logger = logging.getLogger(__name__)
 def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None:
     from hct_mis_api.apps.household.models import Household, Individual
 
-    households_to_update = []
-    fields_to_update = []
+    # memory optimization
+    paginator = Paginator(households_ids, 200)
 
     with configure_scope() as scope:
         with disable_concurrency(Household), disable_concurrency(Individual):
             with transaction.atomic():
-                for hh in (
-                    Household.objects.filter(pk__in=households_ids)
-                    .only("id", "collect_individual_data")
-                    .prefetch_related("individuals")
-                    .select_for_update(of=("self",), skip_locked=True)
-                    .order_by("pk")
-                ):
-                    scope.set_tag("business_area", hh.business_area)
-                    household, updated_fields = recalculate_data(hh, save=False)
-                    households_to_update.append(household)
-                    fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
-
-                if fields_to_update:
-                    Household.objects.bulk_update(households_to_update, fields_to_update)
+                for page in paginator.page_range:
+                    logger.info(
+                        f"recalculate_population_fields_chunk_task: Processing page {page} of {paginator.num_pages}"
+                    )
+                    households_ids_page = paginator.page(page).object_list
+                    households_to_update = []
+                    fields_to_update = []
+                    for hh in (
+                        Household.objects.filter(pk__in=households_ids_page)
+                        .only("id", "collect_individual_data")
+                        .prefetch_related("individuals")
+                        .select_for_update(of=("self",), skip_locked=True)
+                        .order_by("pk")
+                    ):
+                        scope.set_tag("business_area", hh.business_area)
+                        household, updated_fields = recalculate_data(hh, save=False)
+                        households_to_update.append(household)
+                        fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
+                    if fields_to_update:
+                        Household.objects.bulk_update(households_to_update, fields_to_update)
 
 
 @app.task()
@@ -159,3 +170,15 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
         IndividualsIBANXlsxUpdate.send_error_email(
             error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
         )
+
+
+@app.task()
+@sentry_tags
+def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
+    individuals_to_update = []
+    individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
+    for individual in individuals:
+        individuals_to_update.append(calculate_phone_numbers_validity(individual))
+    Individual.objects.bulk_update(
+        individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
+    )

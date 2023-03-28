@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
     from django.db.models import QuerySet, _QuerySet
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -493,4 +492,28 @@ def deduplicate_documents() -> bool:
             DeduplicateTask.hard_deduplicate_documents(
                 documents_query,
             )
+    return True
+
+
+@app.task
+@sentry_tags
+def check_rdi_import_periodic_task() -> bool:
+    from hct_mis_api.apps.utils.celery_manager import rdi_import_celery_manager
+
+    with locked_cache(key="celery_manager_periodic_task") as locked:
+        if not locked:
+            return True
+        rdi_import_celery_manager.execute()
+    return True
+
+
+@app.task
+@sentry_tags
+def check_rdi_merge_periodic_task() -> bool:
+    from hct_mis_api.apps.utils.celery_manager import rdi_merge_celery_manager
+
+    with locked_cache(key="celery_manager_periodic_task") as locked:
+        if not locked:
+            return True
+        rdi_merge_celery_manager.execute()
     return True

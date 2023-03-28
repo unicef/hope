@@ -430,7 +430,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
     imported_file_date = models.DateTimeField(blank=True, null=True)
     imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_file_entitlement = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    export_file_per_fsp = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -714,16 +719,27 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def has_export_file(self) -> bool:
         try:
-            return self.export_file is not None
+            if self.status == PaymentPlan.Status.LOCKED:
+                return self.export_file_entitlement is not None
+            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+                return self.export_file_per_fsp is not None
+            else:
+                return False
         except FileTemp.DoesNotExist:
             return False
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        return self.export_file.file.url if self.export_file else None
+        if self.status == PaymentPlan.Status.LOCKED:
+            return self.export_file_entitlement.file.url
+        elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+            return self.export_file_per_fsp.file.url
+        else:
+            return None
 
     @property
     def imported_file_name(self) -> str:
+        """used for import entitlements"""
         try:
             return self.imported_file.file.name if self.imported_file else ""
         except FileTemp.DoesNotExist:
@@ -738,10 +754,16 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     def remove_export_file(self) -> None:
-        if self.export_file:
-            self.export_file.file.delete(save=False)
-            self.export_file.delete()
-            self.export_file = None
+        # remove export_file_entitlement
+        if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
+            self.export_file_entitlement.file.delete(save=False)
+            self.export_file_entitlement.delete()
+            self.export_file_entitlement = None
+        # remove export_file_per_fsp
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
+            self.export_file_per_fsp.file.delete(save=False)
+            self.export_file_per_fsp.delete()
+            self.export_file_per_fsp = None
 
     def remove_imported_file(self) -> None:
         if self.imported_file:

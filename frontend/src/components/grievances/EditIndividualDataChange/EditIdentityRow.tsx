@@ -11,6 +11,7 @@ import {
 } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../core/LabelizedField';
 import { AgencyField } from '../AgencyField';
+import { removeItemById } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -22,7 +23,7 @@ export interface EditIdentityRowProps {
   identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities']['edges'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
-  index;
+  id: string;
 }
 
 export function EditIdentityRow({
@@ -31,7 +32,7 @@ export function EditIdentityRow({
   identity,
   arrayHelpers,
   addIndividualFieldsData,
-  index,
+  id,
 }: EditIdentityRowProps): React.ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
@@ -41,13 +42,20 @@ export function EditIdentityRow({
   return isEdited ? (
     <>
       <AgencyField
-        index={index}
-        key={`${index}-${identity?.node?.number}-${identity?.node?.partner}`}
-        onDelete={() => arrayHelpers.remove(index)}
+        id={id}
+        key={`${id}-${identity?.node?.number}-${identity?.node?.partner}`}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdateDocumentsToEdit,
+            identity.node.id,
+            arrayHelpers,
+          )
+        }
         countryChoices={addIndividualFieldsData.countriesChoices}
         identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
         baseName='individualDataUpdateIdentitiesToEdit'
         isEdited={isEdited}
+        values={values}
       />
       <Box display='flex' alignItems='center'>
         <IconButton

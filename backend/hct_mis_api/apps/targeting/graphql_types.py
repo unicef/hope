@@ -28,8 +28,10 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
-def get_field_by_name(field_name: str) -> Dict:
-    field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")[field_name]
+def get_field_by_name(field_name: str, business_area) -> Dict:
+    factory = FieldFactory.from_scope(Scope.TARGETING)
+    factory.apply_business_area(business_area.slug)
+    field = factory.to_dict_by("name")[field_name]
     choices = field.get("choices")
     if choices and callable(choices):
         field["choices"] = choices()
@@ -56,7 +58,9 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
-            field_attribute = get_field_by_name(parent.field_name)
+            field_attribute = get_field_by_name(
+                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population.business_area
+            )
             return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
     class Meta:
@@ -74,7 +78,10 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
 
-        field_attribute = get_field_by_name(parent.field_name)
+        field_attribute = get_field_by_name(
+            parent.field_name,
+            parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population.business_area,
+        )
         return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
     class Meta:
