@@ -64,9 +64,8 @@ export function GrievancesTableRow({
   const issueType = ticket.issueType
     ? issueTypeChoicesData
         .find((el) => el.category === ticket.category.toString())
-        .subCategories.find(
-          (el) => el.value === ticket.issueType.toString(),
-        ).name
+        .subCategories.find((el) => el.value === ticket.issueType.toString())
+        .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
@@ -136,13 +135,25 @@ export function GrievancesTableRow({
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={priorityChoicesData[ticket.priority - 1]?.name || '-'}
+          status={
+            priorityChoicesData[
+              priorityChoicesData.findIndex(
+                (obj) => obj.value === ticket.priority,
+              )
+            ]?.name || '-'
+          }
           statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
+          status={
+            urgencyChoicesData[
+              urgencyChoicesData.findIndex(
+                (obj) => obj.value === ticket.urgency,
+              )
+            ]?.name || '-'
+          }
           statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
