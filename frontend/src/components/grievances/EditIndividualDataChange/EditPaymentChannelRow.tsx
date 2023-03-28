@@ -1,6 +1,7 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import Close from '@material-ui/icons/Close';
+import { useLocation } from 'react-router-dom';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,8 @@ export function EditPaymentChannelRow({
   arrayHelpers,
   index,
 }: EditPaymentChannelRowProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const toRemove = values?.individualDataUpdatePaymentChannelsToRemove || [];
@@ -85,6 +88,7 @@ export function EditPaymentChannelRow({
                   paymentChannel.id,
                 );
               }}
+              disabled={isEditTicket}
             >
               <Delete />
             </IconButton>
@@ -98,6 +102,7 @@ export function EditPaymentChannelRow({
                 });
                 setEdit(true);
               }}
+              disabled={isEditTicket}
             >
               <Edit />
             </IconButton>

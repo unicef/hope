@@ -1,4 +1,5 @@
 import { Button, Grid } from '@material-ui/core';
+import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React from 'react';
@@ -18,6 +19,8 @@ export function NewDocumentFieldArray({
   setFieldValue,
 }: NewDocumentFieldArrayProps): React.ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container spacing={3}>
       <FieldArray
@@ -45,6 +48,7 @@ export function NewDocumentFieldArray({
               <Grid item xs={12}>
                 <Button
                   color='primary'
+                  disabled={isEditTicket}
                   onClick={() => {
                     arrayHelpers.push({
                       country: null,

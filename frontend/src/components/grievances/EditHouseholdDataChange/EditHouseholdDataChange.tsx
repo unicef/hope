@@ -1,6 +1,7 @@
 import { Button, Grid, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
+import { useLocation } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,6 +22,8 @@ export const EditHouseholdDataChange = ({
   setFieldValue,
 }: EditHouseholdDataChangeProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.includes('edit-ticket');
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
   const [
@@ -88,6 +91,7 @@ export const EditHouseholdDataChange = ({
                     arrayHelpers.push({ fieldName: null, fieldValue: null });
                   }}
                   data-cy='button-add-new-field'
+                  disabled={isEditTicket}
                 >
                   {t('Add new field')}
                 </Button>
