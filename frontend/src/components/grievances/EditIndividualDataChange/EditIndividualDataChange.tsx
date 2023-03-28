@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +37,8 @@ export const EditIndividualDataChange = ({
   setFieldValue,
 }: EditIndividualDataChangeProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const {
@@ -117,6 +120,7 @@ export const EditIndividualDataChange = ({
                     }}
                     startIcon={<AddCircleOutline />}
                     data-cy='button-add-new-field'
+                    disabled={isEditTicket}
                   >
                     {t('Add new field')}
                   </Button>
