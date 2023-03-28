@@ -214,7 +214,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             "issue_type",
             "priority",
             "urgency",
-            # "total_days",
+            "total_days",
         )
     )
 
