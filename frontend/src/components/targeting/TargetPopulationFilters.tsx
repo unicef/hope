@@ -90,7 +90,7 @@ export const TargetPopulationFilters = ({
         </SelectFilter>
       </Grid>
       <Grid container item xs={3} spacing={3} alignItems='flex-end'>
-        <Grid item>
+        <Grid item xs={6}>
           <NumberTextField
             topLabel={t('Number of Households')}
             value={filter.numIndividualsMin}
@@ -101,7 +101,7 @@ export const TargetPopulationFilters = ({
             icon={<Group />}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={6}>
           <NumberTextField
             value={filter.numIndividualsMax}
             placeholder={t('To')}
