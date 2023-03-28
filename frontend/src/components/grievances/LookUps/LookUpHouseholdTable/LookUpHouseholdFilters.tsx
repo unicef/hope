@@ -103,6 +103,7 @@ export function LookUpHouseholdFilters({
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Status')}
             value={filter.residenceStatus}
+            fullWidth
           >
             {choicesData.residenceStatusChoices?.map((item) => {
               return (
@@ -113,7 +114,7 @@ export function LookUpHouseholdFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'

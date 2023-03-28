@@ -120,7 +120,7 @@ export function LookUpIndividualFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <LookUpAdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
@@ -128,7 +128,7 @@ export function LookUpIndividualFilters({
             fullWidth
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
             value={filter.sex}
