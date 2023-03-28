@@ -23,7 +23,7 @@ const initialFilter = {
   text: '',
   program: '',
   residenceStatus: '',
-  adminArea: '',
+  admin2: '',
   householdSizeMin: '',
   householdSizeMax: '',
   orderBy: 'unicef_id',

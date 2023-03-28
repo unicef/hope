@@ -67,13 +67,22 @@ export const PaymentPlanTableRow = ({
       <TableCell align='left'>{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align='left'>{plan.currencyName}</TableCell>
       <TableCell align='right'>
-        {`${formatCurrencyWithSymbol(plan.totalEntitledQuantity, 'USD')}`}
+        {`${formatCurrencyWithSymbol(
+          plan.totalEntitledQuantity,
+          plan.currency,
+        )}`}
       </TableCell>
       <TableCell align='right'>
-        {`${formatCurrencyWithSymbol(plan.totalDeliveredQuantity, 'USD')}`}
+        {`${formatCurrencyWithSymbol(
+          plan.totalDeliveredQuantity,
+          plan.currency,
+        )}`}
       </TableCell>
       <TableCell align='right'>
-        {`${formatCurrencyWithSymbol(plan.totalUndeliveredQuantity, 'USD')}`}
+        {`${formatCurrencyWithSymbol(
+          plan.totalUndeliveredQuantity,
+          plan.currency,
+        )}`}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>

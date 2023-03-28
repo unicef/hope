@@ -2,17 +2,17 @@ import { MockedProvider } from '@apollo/react-testing';
 import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
-import { HouseholdTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
 import { fakeApolloAllHouseholdsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable';
+import { HouseholdTable } from '.';
 
 describe('containers/tables/population/HouseholdTable', () => {
   const initialFilter = {
     text: '',
     program: '',
     residenceStatus: '',
-    adminArea: '',
+    admin2: '',
     householdSizeMin: '',
     householdSizeMax: '',
     orderBy: 'unicef_id',
@@ -27,7 +27,7 @@ describe('containers/tables/population/HouseholdTable', () => {
         <HouseholdTable
           businessArea='afghanistan'
           filter={initialFilter}
-          canViewDetails={true}
+          canViewDetails
           choicesData={fakeHouseholdChoices}
         />
       </MockedProvider>,
@@ -47,7 +47,7 @@ describe('containers/tables/population/HouseholdTable', () => {
         <HouseholdTable
           businessArea='afghanistan'
           filter={initialFilter}
-          canViewDetails={true}
+          canViewDetails
           choicesData={fakeHouseholdChoices}
         />
       </MockedProvider>,
