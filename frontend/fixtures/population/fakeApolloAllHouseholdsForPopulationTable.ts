@@ -8,7 +8,7 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
         businessArea: 'afghanistan',
         familySize: '{"min":"","max":""}',
         search: '',
-        adminArea: '',
+        admin2: '',
         residenceStatus: '',
         first: 10,
         orderBy: 'unicef_id',

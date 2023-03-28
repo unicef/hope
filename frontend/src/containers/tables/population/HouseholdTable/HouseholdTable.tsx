@@ -32,7 +32,7 @@ export const HouseholdTable = ({
       max: filter.householdSizeMax,
     }),
     search: filter.text,
-    adminArea: filter.adminArea,
+    admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {
