@@ -68,7 +68,7 @@ function generateNginxHeaderFile(
   let header = `add_header Content-Security-Policy-Report-Only "${builtPolicy};`;
   // `add_header Content-Security-Policy "${builtPolicy};`; // uncomment this line to enable CSP
   if (cspReportUri) {
-    header += `report-uri ${cspReportUri}; report-to default ${cspReportUri};`;
+    header += `report-uri ${cspReportUri};report-to ${cspReportUri};`;
   }
   header += '";';
   compilation.emitAsset('nginx-csp-header.conf', new RawSource(header));
