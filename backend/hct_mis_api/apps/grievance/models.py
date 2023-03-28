@@ -207,6 +207,13 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     )
     CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
+    CREATE_CATEGORY_CHOICES = (
+        (CATEGORY_DATA_CHANGE, _("Data Change")),
+        (CATEGORY_GRIEVANCE_COMPLAINT, _("Grievance Complaint")),
+        (CATEGORY_REFERRAL, _("Referral")),
+        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
+    )
+
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
             "individual": "individual",
