@@ -502,7 +502,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
+        return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
