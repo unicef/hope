@@ -92,6 +92,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const selectedIndividual = history.location.state?.selectedIndividual;
   const category = history.location.state?.category;
   const linkedFeedbackId = history.location.state?.linkedFeedbackId;
+  const redirectedFromRelatedTicket = Boolean(category);
+
+  console.log(redirectedFromRelatedTicket)
 
   const initialValues = {
     description: '',
@@ -339,6 +342,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           setFieldValue={setFieldValue}
                           showIssueType={showIssueType}
                           values={values}
+                          redirectedFromRelatedTicket={redirectedFromRelatedTicket}
                         />
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
