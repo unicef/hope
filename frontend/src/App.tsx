@@ -29,11 +29,6 @@ export const App: React.FC = () => {
               Throw new error
             </button>
           </SentryRoute>
-          <ProtectedRoute
-            path='/sanction-list'
-            component={SanctionList}
-            location={window.location}
-          />
           <SentryRoute path='/accounts/profile/'>
             <ProfilePage />
           </SentryRoute>
