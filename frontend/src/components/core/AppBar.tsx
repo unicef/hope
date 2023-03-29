@@ -62,11 +62,14 @@ const StyledLink = styled.a`
   color: #e3e6e7;
 `;
 
-
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
-  const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${window.location.pathname.split('/')[2]}&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${window.location.href}`
+  const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
+    window.location.pathname.split('/')[2]
+  }&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${
+    window.location.href
+  }`;
   if (meLoading) {
     return null;
   }
@@ -76,24 +79,26 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
       className={clsx(classes.appBar, open && classes.appBarShift)}
     >
       <StyledToolbar>
-        <IconButton
-          edge='start'
-          color='inherit'
-          aria-label='open drawer'
-          onClick={handleDrawerOpen}
-          className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-        >
-          <MenuIcon />
-        </IconButton>
+        <Box ml={1}>
+          <IconButton
+            edge='start'
+            color='inherit'
+            aria-label='open drawer'
+            onClick={handleDrawerOpen}
+            className={clsx(
+              classes.menuButton,
+              open && classes.menuButtonHidden,
+            )}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Box>
         <BusinessAreaContainer data-cy='business-area-container'>
           <BusinessAreaSelect />
         </BusinessAreaContainer>
         <Box display='flex' justifyContent='flex-end'>
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
-            <StyledLink
-              target='_blank'
-              href={servicenow}
-            >
+            <StyledLink target='_blank' href={servicenow}>
               Support
             </StyledLink>
           </Button>

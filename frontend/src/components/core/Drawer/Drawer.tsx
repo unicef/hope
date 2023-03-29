@@ -185,11 +185,13 @@ export function Drawer({
         <Box mb={2}>
           <Divider />
         </Box>
-        <Box mb={2}>
-          <Typography variant='subtitle2' align='center'>
-            {t('Resources')}
-          </Typography>
-        </Box>
+        {open && (
+          <Box mb={2}>
+            <Typography variant='subtitle2' align='center'>
+              {t('Resources')}
+            </Typography>
+          </Box>
+        )}
         {resourcesItems.map((item) => (
           <ListItem button key={item.name + item.href}>
             <StyledLink target='_blank' href={item.href}>
@@ -202,10 +204,12 @@ export function Drawer({
         ))}
       </ResourcesBox>
       <BorderBox />
-      <div className={classes.version}>
-        <div>Backend Version: {backendVersion}</div>
-        <div>Frontend Version: {frontendVersion}</div>
-      </div>
+      {open && (
+        <div className={classes.version}>
+          <div>Backend Version: {backendVersion}</div>
+          <div>Frontend Version: {frontendVersion}</div>
+        </div>
+      )}
       <AlertDialog
         show={showMismatchedDialog}
         message={t('Version mismatch, please refresh page')}
