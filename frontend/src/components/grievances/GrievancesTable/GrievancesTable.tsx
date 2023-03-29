@@ -15,7 +15,7 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
-import { decodeIdString, choicesToDict } from '../../../utils/utils';
+import { choicesToDict } from '../../../utils/utils';
 import {
   AllGrievanceTicketQueryVariables,
   useAllUsersForFiltersLazyQuery,
@@ -54,7 +54,7 @@ export const GrievancesTable = ({
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,
-    admin: [decodeIdString(filter?.admin?.node?.id)],
+    admin: filter.admin,
     registrationDataImport: filter.registrationDataImport,
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
