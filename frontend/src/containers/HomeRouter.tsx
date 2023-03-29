@@ -54,7 +54,6 @@ const Root = styled.div`
 `;
 const MainContent = styled.div`
   flex-grow: 1;
-  height: 100vh;
   overflow: auto;
 `;
 const useStyles = makeStyles((theme: MiśTheme) => ({
