@@ -94,8 +94,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const linkedFeedbackId = history.location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
 
-  console.log(redirectedFromRelatedTicket)
-
   const initialValues = {
     description: '',
     category: category || null,
