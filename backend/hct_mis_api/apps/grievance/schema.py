@@ -495,8 +495,7 @@ class Query(graphene.ObjectType):
         queryset = queryset.prefetch_related(*to_prefetch)
 
         return (
-            queryset
-            .select_related("assigned_to", "created_by")
+            queryset.select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
