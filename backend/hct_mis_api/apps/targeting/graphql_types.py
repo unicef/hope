@@ -25,10 +25,11 @@ if TYPE_CHECKING:
 
     from graphene.types.structures import List as GrapheneList
 
+    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
 
 
-def get_field_by_name(field_name: str, business_area) -> Dict:
+def get_field_by_name(field_name: str, business_area: "BusinessArea") -> Dict:
     factory = FieldFactory.from_scope(Scope.TARGETING)
     factory.apply_business_area(business_area.slug)
     field = factory.to_dict_by("name")[field_name]
