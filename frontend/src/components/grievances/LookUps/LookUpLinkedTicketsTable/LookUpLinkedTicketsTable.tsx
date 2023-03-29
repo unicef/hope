@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString, choicesToDict } from '../../../../utils/utils';
+import { choicesToDict } from '../../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -30,7 +30,7 @@ export const LookUpLinkedTicketsTable = ({
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    admin: [decodeIdString(filter?.admin?.node?.id)],
+    admin: filter?.admin?.node?.id,
   };
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
   const {
