@@ -11,6 +11,7 @@ export interface SelectionProps {
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   showIssueType: (values) => boolean;
   values;
+  redirectedFromRelatedTicket: boolean
 }
 
 export const Selection = ({
@@ -19,12 +20,21 @@ export const Selection = ({
   setFieldValue,
   showIssueType,
   values,
+  redirectedFromRelatedTicket
 }: SelectionProps): React.ReactElement => {
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
     'category',
     '*',
   );
+
+  console.log(redirectedFromRelatedTicket)
+  const issueTypeChoices = redirectedFromRelatedTicket ?
+      issueTypeDict["2"].subCategories.filter(
+          (subCategory) =>
+              subCategory.name === "Household Data Update" ||
+              subCategory.name === "Individual Data Update"
+      ) : issueTypeDict[values.category].subCategories
 
   return (
     <Grid container spacing={3}>
@@ -39,6 +49,7 @@ export const Selection = ({
           variant='outlined'
           choices={choicesData.grievanceTicketManualCategoryChoices}
           component={FormikSelectField}
+          disabled={redirectedFromRelatedTicket}
         />
       </Grid>
       {showIssueType(values) && (
@@ -47,7 +58,7 @@ export const Selection = ({
             name='issueType'
             label='Issue Type*'
             variant='outlined'
-            choices={issueTypeDict[values.category].subCategories}
+            choices={issueTypeChoices}
             component={FormikSelectField}
           />
         </Grid>
