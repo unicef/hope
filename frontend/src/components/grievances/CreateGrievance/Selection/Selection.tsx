@@ -28,13 +28,10 @@ export const Selection = ({
     '*',
   );
 
-  console.log(redirectedFromRelatedTicket)
-  const issueTypeChoices = redirectedFromRelatedTicket ?
-      issueTypeDict["2"].subCategories.filter(
-          (subCategory) =>
-              subCategory.name === "Household Data Update" ||
-              subCategory.name === "Individual Data Update"
-      ) : issueTypeDict[values.category].subCategories
+  const dataChangeIssueTypes = [
+    {name: 'Add Individual', value: '16'},
+    {name: 'Household Data Update', value: '13'}
+  ]
 
   return (
     <Grid container spacing={3}>
@@ -58,7 +55,7 @@ export const Selection = ({
             name='issueType'
             label='Issue Type*'
             variant='outlined'
-            choices={issueTypeChoices}
+            choices={redirectedFromRelatedTicket ? dataChangeIssueTypes : issueTypeDict[values.category].subCategories}
             component={FormikSelectField}
           />
         </Grid>
