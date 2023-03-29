@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from django.db.models import Q
 
-from django_filters import CharFilter, FilterSet, UUIDFilter
+from django_filters import CharFilter, FilterSet
 
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.core.utils import decode_id_string_required
