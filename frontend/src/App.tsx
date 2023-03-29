@@ -1,12 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { AutoLogout } from './components/core/AutoLogout';
-import { ProtectedRoute } from './components/core/ProtectedRoute';
 import { DefaultRoute } from './containers/DefaultRoute';
 import { HomeRouter } from './containers/HomeRouter';
 import { LoginPage } from './containers/pages/core/LoginPage';
 import { ProfilePage } from './containers/pages/core/ProfilePage';
-import { SanctionList } from './containers/pages/core/SanctionList';
 import { Providers } from './providers';
 import { SentryRoute } from './components/core/SentryRoute';
 
