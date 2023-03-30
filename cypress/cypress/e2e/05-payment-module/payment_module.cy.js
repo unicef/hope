@@ -5,14 +5,18 @@ context("Payment", () => {
     cy.initScenario("payment_plan");
     cy.adminLogin();
     cy.visit("/api/unicorn/core/businessarea/");
-    cy.get("th").contains("Afghanistan").parent().find("a").click();
+    cy.get("th")
+      .contains("Afghanistan")
+      .parent()
+      .find("a")
+      .click();
     cy.get("#id_is_payment_plan_applicable").should("be.checked");
   });
 
   it("Can create a payment plan", () => {
     const downloadsFolder = Cypress.config("downloadsFolder");
-    const fileName = (id) => `payment_plan_payment_list_${id}`;
-    const zipFileName = (id) => `${fileName(id)}.zip`;
+    const fileName = id => `payment_plan_payment_list_${id}`;
+    const zipFileName = id => `${fileName(id)}.zip`;
 
     let targetPopulationName = "PaymentPlanTargetPopulation";
     let paymentPlanUnicefId;
@@ -30,7 +34,7 @@ context("Payment", () => {
       timeout: 10000
     });
     cy.get('[data-cy="pp-unicef-id"]')
-      .then(($el) => {
+      .then($el => {
         paymentPlanUnicefId = $el.text();
       })
       .then(() => {
@@ -53,8 +57,10 @@ context("Payment", () => {
           force: true
         });
         cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
-        cy.uniqueSeed().then((seed) => {
-          cy.get("li").contains(`Rule-${seed}`).click({ force: true });
+        cy.uniqueSeed().then(seed => {
+          cy.get("li")
+            .contains(`Rule-${seed}`)
+            .click({ force: true });
         });
         cy.get('[data-cy="button-apply-steficon"]').click({ force: true });
         cy.reload();
@@ -135,7 +141,7 @@ context("Payment", () => {
         cy.exec(
           `find ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | sed 's@.*/@@'`
         )
-          .then((result) => {
+          .then(result => {
             fspXlsxFilenames = result.stdout.split("\n");
             expect(fspXlsxFilenames.length).to.eq(1);
           })
@@ -149,7 +155,7 @@ context("Payment", () => {
             const filledFilePath = `out_${fspFilename}`;
             cy.log(filledFilePath);
             cy.get('[data-cy="button-import"]').click({ force: true });
-            cy.fixture(filledFilePath, "base64").then((fileContent) => {
+            cy.fixture(filledFilePath, "base64").then(fileContent => {
               cy.get('[data-cy="file-input"]').attachFile({
                 fileContent,
                 fileName: filledFilePath,
@@ -165,7 +171,7 @@ context("Payment", () => {
             cy.get("p").should("not.contain", "Errors");
             cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
             cy.reload();
-            cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
+            cy.get('[data-cy="delivered-quantity-cell"]').each($el => {
               cy.wrap($el).should("contain", "AFN");
               cy.wrap($el).should("contain", "500");
             });
@@ -177,7 +183,9 @@ context("Payment", () => {
 
 function createPaymentPlan(targetPopulationName) {
   cy.visit("/");
-  cy.get("span").contains("Payment Module").click();
+  cy.get("span")
+    .contains("Payment Module")
+    .click();
   cy.get('[data-cy="page-header-container"]').contains("Payment Module");
   cy.get('[data-cy="button-new-payment-plan"]').click({
     force: true
@@ -185,20 +193,31 @@ function createPaymentPlan(targetPopulationName) {
   cy.get('[data-cy="page-header-container"]').contains("New Payment Plan");
 
   //fill in the form and save
-  cy.get('[data-cy="input-target-population"]').first().click();
+  cy.get('[data-cy="input-target-population"]')
+    .first()
+    .click();
   cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
 
-  cy.uniqueSeed().then((seed) => {
+  cy.uniqueSeed().then(seed => {
     cy.get(`[data-cy="select-option-${targetPopulationName}-${seed}"]`).click();
   });
-  cy.get('[data-cy="input-start-date"]').click().type("2032-12-12");
-  cy.get('[data-cy="input-end-date"]').click().type("2032-12-23");
+  cy.wait(1000);
+  cy.get('[data-cy="input-start-date"]')
+    .click()
+    .type("2032-12-12");
+  cy.get('[data-cy="input-end-date"]')
+    .click()
+    .type("2032-12-23");
   cy.get('[data-cy="input-currency"]')
     .click()
     .type("Afghan")
     .type("{downArrow}{enter}");
-  cy.get('[data-cy="input-dispersion-start-date"]').click().type("2033-12-12");
-  cy.get('[data-cy="input-dispersion-end-date"]').click().type("2033-12-23");
+  cy.get('[data-cy="input-dispersion-start-date"]')
+    .click()
+    .type("2033-12-12");
+  cy.get('[data-cy="input-dispersion-end-date"]')
+    .click()
+    .type("2033-12-23");
   cy.get('[data-cy="button-save-payment-plan"]').click({
     force: true
   });
