@@ -1,6 +1,7 @@
 import { Grid, IconButton } from '@material-ui/core';
 import camelCase from 'lodash/camelCase';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
 import React, { useEffect } from 'react';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
@@ -29,6 +30,8 @@ export const EditIndividualDataChangeFieldRow = ({
   onDelete,
   values,
 }: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
   // eslint-disable-next-line
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
@@ -47,6 +50,7 @@ export const EditIndividualDataChangeFieldRow = ({
           variant='outlined'
           label='Field'
           required
+          disabled={isEditTicket}
           component={FormikSelectField}
           choices={fields
             .filter(
@@ -80,7 +84,7 @@ export const EditIndividualDataChangeFieldRow = ({
       )}
       {itemValue.fieldName && (
         <Grid item xs={1}>
-          <IconButton onClick={onDelete}>
+          <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
         </Grid>
