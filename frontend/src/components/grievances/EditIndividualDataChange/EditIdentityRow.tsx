@@ -1,5 +1,6 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import Close from '@material-ui/icons/Close';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
@@ -33,6 +34,8 @@ export function EditIdentityRow({
   addIndividualFieldsData,
   index,
 }: EditIdentityRowProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const identitiesToRemove =
@@ -88,6 +91,7 @@ export function EditIdentityRow({
         {!removed ? (
           <Box display='flex' align-items='center'>
             <IconButton
+              disabled={isEditTicket}
               onClick={() => {
                 setFieldValue(
                   `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
@@ -98,6 +102,7 @@ export function EditIdentityRow({
               <Delete />
             </IconButton>
             <IconButton
+              disabled={isEditTicket}
               onClick={() => {
                 arrayHelpers.replace(index, {
                   id: identity.node.id,
