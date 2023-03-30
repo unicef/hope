@@ -4,7 +4,41 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
+
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_0_with_permission 1'] = {
+    'data': {
+        'registrationXlsxImport': {
+            'registrationDataImport': {
+                'name': 'New Import of Data 123',
+                'numberOfHouseholds': 3,
+                'numberOfIndividuals': 6,
+                'status': 'IMPORT_SCHEDULED'
+            }
+        }
+    }
+}
+
+snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_1_without_permission 1'] = {
+    'data': {
+        'registrationXlsxImport': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 5
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'registrationXlsxImport'
+            ]
+        }
+    ]
+}
 
 snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_0_with_permission 1'] = {
     'data': {
@@ -34,39 +68,6 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'uploadImportDataXlsxFileAsync'
-            ]
-        }
-    ]
-}
-
-snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_0_with_permission 1'] = {
-    'data': {
-        'registrationXlsxImport': {
-            'registrationDataImport': {
-                'name': 'New Import of Data 123',
-                'numberOfHouseholds': 3,
-                'numberOfIndividuals': 6,
-                'status': 'IMPORTING'
-            }
-        }
-    }
-}
-
-snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_create_1_without_permission 1'] = {
-    'data': {
-        'registrationXlsxImport': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 5
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'registrationXlsxImport'
             ]
         }
     ]

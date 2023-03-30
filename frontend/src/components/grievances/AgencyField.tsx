@@ -7,32 +7,37 @@ import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
+import { getIndexForId } from './utils/helpers';
 
 export interface AgencyFieldProps {
-  index: number;
+  id: string;
   baseName: string;
-  onDelete: () => {};
+  onDelete;
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   identityTypeChoices: AllAddIndividualFieldsQuery['identityTypeChoices'];
   isEdited?: boolean;
+  values;
 }
 
 export function AgencyField({
-  index,
+  id,
   baseName,
   onDelete,
   countryChoices,
   identityTypeChoices,
   isEdited,
+  values,
 }: AgencyFieldProps): React.ReactElement {
   const { t } = useTranslation();
+  const agencyFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
+
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <>
       <Grid item xs={4}>
         <Field
-          name={`${baseName}[${index}].partner`}
+          name={`${agencyFieldName}.partner`}
           fullWidth
           variant='outlined'
           label={t('Agency')}
@@ -44,7 +49,7 @@ export function AgencyField({
       </Grid>
       <Grid item xs={4}>
         <Field
-          name={`${baseName}[${index}].country`}
+          name={`${agencyFieldName}.country`}
           fullWidth
           variant='outlined'
           label={t('Country')}
@@ -56,7 +61,7 @@ export function AgencyField({
       </Grid>
       <Grid item xs={3}>
         <Field
-          name={`${baseName}[${index}].number`}
+          name={`${agencyFieldName}.number`}
           fullWidth
           variant='outlined'
           label={t('Identity Number')}
