@@ -10,6 +10,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
     $last: Int
     $search: String
     $module: String
+    $userId: String
   ) {
     allLogEntries(
       after: $after
@@ -20,6 +21,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
       businessArea: $businessArea
       search: $search
       module: $module
+      userId: $userId
     ) {
       pageInfo {
         hasNextPage
