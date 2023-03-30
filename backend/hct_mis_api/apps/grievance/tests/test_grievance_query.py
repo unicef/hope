@@ -42,8 +42,8 @@ class TestGrievanceQuery(APITestCase):
     """
 
     FILTER_BY_ADMIN_AREA = """
-    query AllGrievanceTickets($admin: [ID]) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin: $admin) {
+    query AllGrievanceTickets($admin: ID) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin2: $admin) {
         edges {
           node {
             status
@@ -294,7 +294,7 @@ class TestGrievanceQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
-            variables={"admin": self.admin_area_1.id},
+            variables={"admin": self.id_to_base64(self.admin_area_1.id, "GrievanceTicketNode")},
         )
 
     def test_grievance_list_filtered_by_created_at(self) -> None:
