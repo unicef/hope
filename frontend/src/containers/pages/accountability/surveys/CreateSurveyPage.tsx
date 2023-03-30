@@ -32,9 +32,10 @@ import {
   AccountabilitySampleSizeQueryVariables,
   CreateSurveyAccountabilityMutationVariables,
   SamplingChoices,
+  SurveyCategory,
   useAccountabilitySampleSizeLazyQuery,
   useAllAdminAreasQuery,
-  useAvailableFlowsQuery,
+  useAvailableFlowsLazyQuery,
   useCreateSurveyAccountabilityMutation,
 } from '../../../../__generated__/graphql';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
@@ -142,9 +143,18 @@ export const CreateSurveyPage = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
 
-  const { data: flowsData, loading: flowsLoading } = useAvailableFlowsQuery({
+  const [
+    loadAvailableFlows,
+    { data: flowsData, loading: flowsLoading },
+  ] = useAvailableFlowsLazyQuery({
     fetchPolicy: 'network-only',
   });
+
+  useEffect(() => {
+    if (category === SurveyCategory.RapidPro) {
+      loadAvailableFlows();
+    }
+  }, [category, loadAvailableFlows]);
 
   useEffect(() => {
     if (activeStep === SurveySteps.SampleSize) {
@@ -174,7 +184,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
     return Yup.object().shape(datum);
   }, [activeStep, t, category]);
 
-  if (permissions === null || !adminAreasData || !flowsData) return null;
+  if (permissions === null || !adminAreasData) return null;
   if (
     !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE, permissions)
   )
