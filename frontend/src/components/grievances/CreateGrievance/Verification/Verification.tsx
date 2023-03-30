@@ -30,9 +30,11 @@ export const Verification = ({
   return (
     <BoxWithBorders>
       <>
-        <Typography variant='subtitle1'>
-          {t('Select correctly answered questions (minimum 5)')}
-        </Typography>
+        {(values.selectedHousehold || values.selectedIndividual) && (
+          <Typography variant='subtitle1'>
+            {t('Select correctly answered questions (minimum 5)')}
+          </Typography>
+        )}
         {values.selectedHousehold && (
           <Box py={4}>
             <Typography variant='subtitle2'>

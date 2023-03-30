@@ -1,5 +1,6 @@
 import { Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +35,8 @@ export function DocumentField({
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
   const docFieldName = `${baseName}.${getIndexForId(values[baseName], id)}`;
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
 
   return (
     <>
@@ -46,6 +49,7 @@ export function DocumentField({
           component={FormikSelectField}
           choices={documentTypeChoices}
           required
+          disabled={isEditTicket}
         />
       </Grid>
       <Grid item xs={2}>
@@ -57,6 +61,7 @@ export function DocumentField({
           component={FormikSelectField}
           choices={countryChoices}
           required
+          disabled={isEditTicket}
         />
       </Grid>
       <Grid item xs={3}>
@@ -67,6 +72,7 @@ export function DocumentField({
           label={t('Document Number')}
           component={FormikTextField}
           required
+          disabled={isEditTicket}
         />
       </Grid>
       <Grid item xs={3}>
@@ -78,7 +84,7 @@ export function DocumentField({
       </Grid>
       {!isEdited ? (
         <Grid item xs={1}>
-          <IconButton onClick={onDelete}>
+          <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
         </Grid>
