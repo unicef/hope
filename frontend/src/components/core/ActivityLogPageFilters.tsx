@@ -7,6 +7,7 @@ import { createHandleFilterChange } from '../../utils/utils';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
+import {AssigneeAutocomplete} from "../../shared/AssigneeAutocomplete";
 
 interface ActivityLogPageFiltersProps {
   onFilterChange;
@@ -71,6 +72,15 @@ export function ActivityLogPageFilters({
                 </MenuItem>
               ))}
           </SelectFilter>
+        </Grid>
+        <Grid item>
+          <AssigneeAutocomplete
+            label="User"
+            onFilterChange={onFilterChange}
+            filter={filter}
+            name='userId'
+            value={filter.userId}
+          />
         </Grid>
       </Grid>
     </ContainerWithBorder>

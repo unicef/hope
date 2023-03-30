@@ -750,6 +750,7 @@ type DocumentTypeNode {
   type: DocumentTypeType!
   isIdentityDocument: Boolean!
   uniqueForIndividual: Boolean!
+  validForDeduplication: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
@@ -3001,7 +3002,7 @@ type ProgramsWithDeliveredQuantityNode {
 type Query {
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
-  allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
+  allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
   allReports(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: DateTime, createdTo: DateTime, orderBy: String): ReportNodeConnection
@@ -3053,7 +3054,7 @@ type Query {
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
-  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String, objectType: String): PaymentVerificationLogEntryNodeConnection
+  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, objectType: String): PaymentVerificationLogEntryNodeConnection
   paymentPlan(id: ID!): PaymentPlanNode
   allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, orderBy: String): PaymentPlanNodeConnection
   paymentPlanStatusChoices: [ChoiceObject]
@@ -3285,9 +3286,11 @@ enum RegistrationDataImportStatus {
   LOADING
   DEDUPLICATION
   DEDUPLICATION_FAILED
+  IMPORT_SCHEDULED
   IMPORTING
   IMPORT_ERROR
   IN_REVIEW
+  MERGE_SCHEDULED
   MERGED
   MERGING
   MERGE_ERROR
@@ -3739,6 +3742,7 @@ enum TargetPopulationStatus {
   STEFICON_COMPLETED
   STEFICON_ERROR
   PROCESSING
+  SENDING_TO_CASH_ASSIST
   READY_FOR_CASH_ASSIST
   READY_FOR_PAYMENT_MODULE
   ASSIGNED
