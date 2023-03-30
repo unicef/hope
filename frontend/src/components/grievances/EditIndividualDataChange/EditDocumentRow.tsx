@@ -1,5 +1,6 @@
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +36,8 @@ export function EditDocumentRow({
 }: EditDocumentRowProps): React.ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const documentsToRemove = values?.individualDataUpdateDocumentsToRemove || [];
   const removed = documentsToRemove.includes(document.node.id);
 
@@ -85,10 +88,7 @@ export function EditDocumentRow({
       </Grid>
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('Country')}
-            value={document.node.country}
-          />
+          <LabelizedField label={t('Country')} value={document.node.country} />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
@@ -106,6 +106,7 @@ export function EditDocumentRow({
         {!removed ? (
           <Box display='flex' align-items='center'>
             <IconButton
+              disabled={isEditTicket}
               onClick={() => {
                 arrayHelpers.replace(index, {
                   id: document.node.id,
@@ -120,6 +121,7 @@ export function EditDocumentRow({
               <Edit />
             </IconButton>
             <IconButton
+              disabled={isEditTicket}
               onClick={() => {
                 setFieldValue(
                   `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,

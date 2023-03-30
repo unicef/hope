@@ -1,5 +1,6 @@
 import { Button, Grid, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
@@ -28,6 +29,9 @@ export const AddIndividualDataChangeField = ({
   flexField,
 }: AddIndividualDataChangeFieldProps): React.ReactElement => {
   let fieldProps;
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   switch (field.type) {
     case 'DECIMAL':
       fieldProps = {
@@ -96,6 +100,7 @@ export const AddIndividualDataChangeField = ({
           variant='outlined'
           label={field.labelEn}
           required={field.required}
+          disabled={isEditTicket}
           {...fieldProps}
         />
       </Grid>
@@ -114,6 +119,9 @@ export const AddIndividualDataChange = ({
   setFieldValue,
 }: AddIndividualDataChangeProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading) {
     return <LoadingComponent />;
@@ -154,7 +162,7 @@ export const AddIndividualDataChange = ({
           render={(arrayHelpers) => {
             return (
               <>
-                {values.individualData?.documents?.map((item, index) => (
+                {values.individualData?.documents?.map((_item, index) => (
                   <DocumentField
                     index={index}
                     onDelete={() => arrayHelpers.remove(index)}
@@ -176,8 +184,9 @@ export const AddIndividualDataChange = ({
                         number: '',
                       });
                     }}
+                    disabled={isEditTicket}
+                    startIcon={<AddCircleOutline />}
                   >
-                    <AddCircleOutline />
                     {t('Add Document')}
                   </Button>
                 </Grid>
@@ -192,7 +201,7 @@ export const AddIndividualDataChange = ({
           render={(arrayHelpers) => {
             return (
               <>
-                {values.individualData?.identities?.map((item, index) => (
+                {values.individualData?.identities?.map((_item, index) => (
                   <AgencyField
                     index={index}
                     onDelete={() => arrayHelpers.remove(index)}
@@ -207,6 +216,7 @@ export const AddIndividualDataChange = ({
                   <Button
                     color='primary'
                     startIcon={<AddCircleOutline />}
+                    disabled={isEditTicket}
                     onClick={() => {
                       arrayHelpers.push({
                         country: null,

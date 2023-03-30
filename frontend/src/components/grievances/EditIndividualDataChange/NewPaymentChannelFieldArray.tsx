@@ -1,5 +1,6 @@
 import { Button, Grid } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,8 @@ export function NewPaymentChannelFieldArray({
   values,
 }: NewPaymentChannelFieldArrayProps): React.ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container spacing={3}>
       <FieldArray
@@ -42,6 +45,7 @@ export function NewPaymentChannelFieldArray({
                       type: 'BANK_TRANSFER',
                     });
                   }}
+                  disabled={isEditTicket}
                   startIcon={<AddCircleOutline />}
                 >
                   {t('Add Payment Channel')}

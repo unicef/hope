@@ -105,8 +105,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const ticket = ticketData.grievanceTicket;
-
   const {
     data: currentUserData,
     loading: currentUserDataLoading,
@@ -184,6 +182,7 @@ export const EditGrievancePage = (): React.ReactElement => {
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const currentUserId = currentUserData.me.id;
+  const ticket = ticketData.grievanceTicket;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
