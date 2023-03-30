@@ -285,7 +285,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='admin2'
-                            label={t('Administrative Level 2')}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
                           />
