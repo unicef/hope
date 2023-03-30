@@ -29,8 +29,8 @@ export const Selection = ({
   );
 
   const dataChangeIssueTypes = [
-    {name: 'Add Individual', value: '16'},
-    {name: 'Household Data Update', value: '13'}
+    {name: 'Household Data Update', value: '13'},
+    {name: 'Individual Data Update', value: '14'}
   ]
 
   return (
