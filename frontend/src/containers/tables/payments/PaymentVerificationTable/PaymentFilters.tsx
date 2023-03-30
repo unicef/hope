@@ -44,20 +44,22 @@ export const PaymentFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container spacing={3}>
-        <Grid item>
+        <Grid item xs={4}>
           <SearchTextField
             value={filter.search}
             label='Cash/Payment Plan ID'
             onChange={(e) => handleFilterChange('search', e.target.value)}
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationStatus', e.target.value)
             }
             label='Status'
             multiple
+            fullWidth
             value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
@@ -69,20 +71,22 @@ export const PaymentFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <SearchTextField
             value={filter.serviceProvider}
             label='FSP'
+            fullWidth
             onChange={(e) =>
               handleFilterChange('serviceProvider', e.target.value)
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
             label='Modality'
             value={filter.deliveryType}
+            fullWidth
             icon={<MonetizationOnIcon />}
           >
             <MenuItem value=''>
@@ -95,9 +99,10 @@ export const PaymentFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             label='Start Date'
+            fullWidth
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -109,9 +114,10 @@ export const PaymentFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <DatePickerFilter
             label='End Date'
+            fullWidth
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -123,10 +129,11 @@ export const PaymentFilters = ({
             value={filter.endDate}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={6}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label='Programme'
+            fullWidth
             value={filter.program}
             icon={<FlashOnIcon />}
           >
