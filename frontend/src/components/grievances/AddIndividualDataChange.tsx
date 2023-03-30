@@ -19,6 +19,7 @@ import { Title } from '../core/Title';
 import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { removeItemById } from './utils/helpers';
 
 export interface AddIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -132,6 +133,7 @@ export const AddIndividualDataChange = ({
   const coreFields = data.allAddIndividualsFieldsAttributes.filter(
     (item) => !item.isFlexField,
   );
+
   return (
     <>
       <Title>
@@ -162,14 +164,21 @@ export const AddIndividualDataChange = ({
           render={(arrayHelpers) => {
             return (
               <>
-                {values.individualData?.documents?.map((_item, index) => (
+                {values.individualData?.documents?.map((item) => (
                   <DocumentField
-                    index={index}
-                    onDelete={() => arrayHelpers.remove(index)}
+                    id={item.node.id}
+                    onDelete={() =>
+                      removeItemById(
+                        values.individualData.documents,
+                        item.node.id,
+                        arrayHelpers,
+                      )
+                    }
                     countryChoices={data.countriesChoices}
                     documentTypeChoices={data.documentTypeChoices}
                     baseName='individualData.documents'
                     setFieldValue={setFieldValue}
+                    values={values}
                   />
                 ))}
 
@@ -201,13 +210,20 @@ export const AddIndividualDataChange = ({
           render={(arrayHelpers) => {
             return (
               <>
-                {values.individualData?.identities?.map((_item, index) => (
+                {values.individualData?.identities?.map((item) => (
                   <AgencyField
-                    index={index}
-                    onDelete={() => arrayHelpers.remove(index)}
+                    id={item.node.id}
+                    onDelete={() =>
+                      removeItemById(
+                        values.individualData.identities,
+                        item.node.id,
+                        arrayHelpers,
+                      )
+                    }
                     countryChoices={data.countriesChoices}
                     identityTypeChoices={data.identityTypeChoices}
                     baseName='individualData.identities'
+                    values={values}
                   />
                 ))}
 
