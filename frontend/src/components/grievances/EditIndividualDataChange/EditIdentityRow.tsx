@@ -107,7 +107,7 @@ export function EditIdentityRow({
             </IconButton>
             <IconButton
               onClick={() => {
-                arrayHelpers.replace(index, {
+                arrayHelpers.replace({
                   id: identity.node.id,
                   country: identity.node.countryIso3,
                   partner: identity.node.partner,
