@@ -1110,6 +1110,7 @@ export type DocumentTypeNode = {
   type: DocumentTypeType,
   isIdentityDocument: Scalars['Boolean'],
   uniqueForIndividual: Scalars['Boolean'],
+  validForDeduplication: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -4586,9 +4587,11 @@ export type QueryAllLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
+  user?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>
 };
 
 
@@ -4927,9 +4930,11 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
+  user?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>,
   objectType?: Maybe<Scalars['String']>
 };
 
@@ -5551,9 +5556,11 @@ export enum RegistrationDataImportStatus {
   Loading = 'LOADING',
   Deduplication = 'DEDUPLICATION',
   DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  ImportScheduled = 'IMPORT_SCHEDULED',
   Importing = 'IMPORTING',
   ImportError = 'IMPORT_ERROR',
   InReview = 'IN_REVIEW',
+  MergeScheduled = 'MERGE_SCHEDULED',
   Merged = 'MERGED',
   Merging = 'MERGING',
   MergeError = 'MERGE_ERROR',
@@ -6322,6 +6329,7 @@ export enum TargetPopulationStatus {
   SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   Processing = 'PROCESSING',
+  SendingToCashAssist = 'SENDING_TO_CASH_ASSIST',
   ReadyForCashAssist = 'READY_FOR_CASH_ASSIST',
   ReadyForPaymentModule = 'READY_FOR_PAYMENT_MODULE',
   Assigned = 'ASSIGNED'
@@ -8966,7 +8974,8 @@ export type AllLogEntriesQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>
 };
 
 
@@ -16040,8 +16049,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
-  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String, $userId: String) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module, userId: $userId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -16116,6 +16125,7 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      last: // value for 'last'
  *      search: // value for 'search'
  *      module: // value for 'module'
+ *      userId: // value for 'userId'
  *   },
  * });
  */
@@ -24261,6 +24271,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   uniqueForIndividual?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  validForDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
 
