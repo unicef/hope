@@ -46,23 +46,25 @@ export const IndividualsFilter = ({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={4}>
           <SearchTextField
             label={t('Search')}
             value={filter.text}
             onChange={(e) => handleFilterChange('text', e.target.value)}
             data-cy='ind-filters-search'
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <AdminAreaAutocomplete
             name='adminArea'
             value={filter.adminArea}
             onFilterChange={onFilterChange}
             filter={filter}
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
@@ -74,6 +76,7 @@ export const IndividualsFilter = ({
             MenuProps={{
               'data-cy': 'filters-sex-options',
             }}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -82,8 +85,9 @@ export const IndividualsFilter = ({
             <MenuItem value='MALE'>{t('Male')}</MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
+            fullWidth
             topLabel={t('Age')}
             placeholder={t('From')}
             value={filter.ageMin}
@@ -94,8 +98,9 @@ export const IndividualsFilter = ({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <NumberTextField
+            fullWidth
             placeholder={t('To')}
             value={filter.ageMax}
             onChange={(e) => {
@@ -105,11 +110,12 @@ export const IndividualsFilter = ({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={6}>
           <SelectFilter
             onChange={(e) => handleFilterChange('flags', e.target.value)}
             label={t('Flags')}
             multiple
+            fullWidth
             value={filter.flags}
             SelectDisplayProps={{ 'data-cy': 'filters-flags' }}
             MenuProps={{
@@ -127,11 +133,12 @@ export const IndividualsFilter = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
