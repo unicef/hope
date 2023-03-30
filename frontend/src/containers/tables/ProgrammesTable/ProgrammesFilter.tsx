@@ -35,19 +35,21 @@ export const ProgrammesFilters = ({
       <Grid container alignItems='center' spacing={3}>
         <Grid item xs={12}>
           <Grid container alignItems='center' spacing={3}>
-            <Grid item>
+            <Grid item xs={6}>
               <SearchTextField
                 label='Search'
                 value={filter.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
                 data-cy='filters-search'
+                fullWidth
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={6}>
               <SelectFilter
                 onChange={(e) => handleFilterChange('status', e.target.value)}
                 label='Status'
                 value={filter.status}
+                fullWidth
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -61,7 +63,7 @@ export const ProgrammesFilters = ({
                 })}
               </SelectFilter>
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <DatePickerFilter
                 label='Start Date'
                 onChange={(date) =>
@@ -73,7 +75,7 @@ export const ProgrammesFilters = ({
                 value={filter.startDate}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <DatePickerFilter
                 label='End Date'
                 onChange={(date) =>
@@ -85,11 +87,12 @@ export const ProgrammesFilters = ({
                 value={filter.endDate}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={6}>
               <SelectFilter
                 onChange={(e) => handleFilterChange('sector', e.target.value)}
                 label='Sector'
                 value={filter.sector}
+                fullWidth
                 multiple
               >
                 <MenuItem value=''>
@@ -108,7 +111,7 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={12}>
           <Grid container alignItems='flex-end' spacing={3}>
-            <Grid item>
+            <Grid item xs={3}>
               <NumberTextField
                 topLabel='Num. of Households'
                 placeholder='From'
@@ -119,7 +122,7 @@ export const ProgrammesFilters = ({
                 icon={<GroupIcon />}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <NumberTextField
                 value={filter.numberOfHouseholdsMax}
                 placeholder='To'
@@ -129,7 +132,7 @@ export const ProgrammesFilters = ({
                 icon={<GroupIcon />}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <NumberTextField
                 topLabel='Budget (USD)'
                 value={filter.budgetMin}
@@ -139,7 +142,7 @@ export const ProgrammesFilters = ({
                 }
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={3}>
               <NumberTextField
                 value={filter.budgetMax}
                 placeholder='To'

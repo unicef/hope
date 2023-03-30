@@ -43,7 +43,7 @@ export const RegistrationFilters = ({
   const renderTable = (): React.ReactElement => {
     return (
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -52,7 +52,7 @@ export const RegistrationFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
             name='importedBy'
@@ -62,7 +62,7 @@ export const RegistrationFilters = ({
             value={filter.impo}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <SelectFilter
             value={filter.status}
             label={t('Status')}
@@ -83,7 +83,7 @@ export const RegistrationFilters = ({
             )}
           </SelectFilter>
         </Grid>
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+        <Grid container item xs={4} spacing={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <NumberTextField
               id='minFilter'
@@ -104,7 +104,7 @@ export const RegistrationFilters = ({
             />
           </Grid>
         </Grid>
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+        <Grid container item xs={4} spacing={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <DatePickerFilter
               topLabel={t('Import Date')}
