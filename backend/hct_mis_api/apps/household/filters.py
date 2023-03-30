@@ -82,7 +82,6 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=Area.objects.filter(area_type__area_level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
 
@@ -94,6 +93,7 @@ class HouseholdFilter(FilterSet):
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
+            "admin2": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
@@ -232,7 +232,7 @@ class IndividualFilter(FilterSet):
             get_individual_doc(business_area)
             .search()
             .params(search_type="dfs_query_then_fetch")
-            .from_dict(query_dict)
+            .update_from_dict(query_dict)
             .execute()
         )
 
@@ -439,12 +439,10 @@ def get_elasticsearch_query_for_households(value: Any, business_area: "BusinessA
         }
         for x in wildcard_fields
     ]
-    national_id_query: Iterable = [{"term": {"documents.type": "NATIONAL_ID"}}, {"term": {"documents.number": value}}]
     all_queries: List = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
-    all_queries.extend(national_id_query)
 
     values = value.split(" ")
     if len(values) == 2:

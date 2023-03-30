@@ -1,4 +1,5 @@
 import { Button, Grid } from '@material-ui/core';
+import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
@@ -6,6 +7,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { DocumentField } from '../DocumentField';
+import { removeItemById } from '../utils/helpers';
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -28,21 +30,29 @@ export function NewDocumentFieldArray({
         render={(arrayHelpers) => {
           return (
             <>
-              {values.individualDataUpdateFieldsDocuments?.map(
-                (item, index) => (
+              {values.individualDataUpdateFieldsDocuments?.map((item) => {
+                const existingOrNewId = item.node?.id || item.id;
+                return (
                   <DocumentField
-                    index={index}
-                    key={`${index}-${item?.country}-${item?.type}`}
-                    onDelete={() => arrayHelpers.remove(index)}
+                    id={existingOrNewId}
+                    key={`${existingOrNewId}-${item?.country}-${item?.type}`}
+                    onDelete={() =>
+                      removeItemById(
+                        values.individualDataUpdateFieldsDocuments,
+                        existingOrNewId,
+                        arrayHelpers,
+                      )
+                    }
                     countryChoices={addIndividualFieldsData.countriesChoices}
                     documentTypeChoices={
                       addIndividualFieldsData.documentTypeChoices
                     }
                     baseName='individualDataUpdateFieldsDocuments'
                     setFieldValue={setFieldValue}
+                    values={values}
                   />
-                ),
-              )}
+                );
+              })}
 
               <Grid item xs={8} />
               <Grid item xs={12}>
@@ -51,6 +61,7 @@ export function NewDocumentFieldArray({
                   disabled={isEditTicket}
                   onClick={() => {
                     arrayHelpers.push({
+                      id: uuidv4(),
                       country: null,
                       type: null,
                       number: '',

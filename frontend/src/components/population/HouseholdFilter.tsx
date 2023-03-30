@@ -103,8 +103,8 @@ export const HouseholdFilters = ({
         </Grid>
         <Grid item xs={4}>
           <AdminAreaAutocomplete
-            name='adminArea'
-            value={filter.adminArea}
+            name='admin2'
+            value={filter.admin2}
             onFilterChange={onFilterChange}
             filter={filter}
             fullWidth

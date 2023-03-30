@@ -27,14 +27,14 @@ export function ExistingDocumentFieldArray({
         render={(arrayHelpers) => {
           return (
             <>
-              {individual?.documents?.edges?.map((item, index) => {
+              {individual?.documents?.edges?.map((item) => {
                 return (
                   <EditDocumentRow
                     key={item.node.id}
                     setFieldValue={setFieldValue}
                     values={values}
                     document={item}
-                    index={index}
+                    id={item.node.id}
                     arrayHelpers={arrayHelpers}
                     addIndividualFieldsData={addIndividualFieldsData}
                   />

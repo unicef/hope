@@ -343,7 +343,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     )
     extras = JSONField(blank=True, default=dict)
     ignored = models.BooleanField(default=False, db_index=True)
-    household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
+    household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
     priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_LOW)
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_URGENT)
     partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
