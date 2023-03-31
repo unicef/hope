@@ -101,7 +101,8 @@ class TestPaymentPlanServices(APITestCase):
 
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 9, 10, tzinfo=utc).date(),
+            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
         )
 
         hoh1 = IndividualFactory(household=None)
