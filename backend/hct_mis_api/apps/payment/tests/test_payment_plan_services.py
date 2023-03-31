@@ -125,7 +125,8 @@ class TestPaymentPlanServices(APITestCase):
             currency="USD",
         )
 
-        pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+        with self.assertNumQueries(12):
+            pp = PaymentPlanService.create(input_data=input_data, user=self.user)
 
         pp.refresh_from_db()
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
