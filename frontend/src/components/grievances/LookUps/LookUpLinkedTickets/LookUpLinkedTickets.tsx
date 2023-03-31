@@ -22,11 +22,12 @@ export const LookUpLinkedTickets = ({
           onValueChange={onValueChange}
         />
       ) : (
-        <LookUpButton
-          title={t('Look up Linked Ticket')}
-          handleClick={() => setLookUpDialogOpen(true)}
-          placeholder={isEditTicket}
-        />
+        !isEditTicket && (
+          <LookUpButton
+            title={t('Look up Linked Ticket')}
+            handleClick={() => setLookUpDialogOpen(true)}
+          />
+        )
       )}
       <LookUpLinkedTicketsModal
         lookUpDialogOpen={lookUpDialogOpen}
