@@ -6471,6 +6471,16 @@
                 "defaultValue": null
               },
               {
+                "name": "headOfHousehold_PhoneNoValid",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "size_Range",
                 "description": null,
                 "type": {

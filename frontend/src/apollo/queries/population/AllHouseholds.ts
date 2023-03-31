@@ -11,6 +11,7 @@ export const AllHouseholds = gql`
     $familySize: String
     $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
+    $headOfHouseholdPhoneNoValid: Boolean
     $adminArea: ID
     $search: String
     $residenceStatus: String
@@ -28,6 +29,7 @@ export const AllHouseholds = gql`
       orderBy: $orderBy
       programs: $programs
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
+      headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
       adminArea: $adminArea
       search: $search
       residenceStatus: $residenceStatus

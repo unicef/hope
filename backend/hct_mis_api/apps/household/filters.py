@@ -81,6 +81,7 @@ class HouseholdFilter(FilterSet):
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
+    head_of_household__phone_no_valid = BooleanFilter(field_name="head_of_household__phone_no_valid")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=Area.objects.filter(area_type__area_level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
@@ -92,6 +93,7 @@ class HouseholdFilter(FilterSet):
             "business_area": ["exact"],
             "address": ["exact", "startswith"],
             "head_of_household__full_name": ["exact", "startswith"],
+            "head_of_household__phone_no_valid": ["exact"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
             "target_populations": ["exact"],
