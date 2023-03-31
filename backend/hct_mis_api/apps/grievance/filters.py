@@ -18,7 +18,7 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
-from hct_mis_api.apps.geo.models import Area, ValidityQuerySet
+from hct_mis_api.apps.geo.models import ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
@@ -169,11 +169,6 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
 
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = CharFilter(method="fsp_filter")
-    admin = ModelMultipleChoiceFilter(
-        field_name="admin",
-        method="admin_filter",
-        queryset=Area.objects.filter(area_type__area_level=2),
-    )
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verification__payment_verification_plan__payment_plan_object_id",
@@ -198,6 +193,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             "area": ["exact", "startswith"],
             "assigned_to": ["exact"],
             "registration_data_import": ["exact"],
+            "admin2": ["exact"],
         }
         model = GrievanceTicket
 
@@ -249,11 +245,6 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
                 q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value})
 
             return qs.filter(q_obj)
-        return qs
-
-    def admin_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        if value:
-            return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
