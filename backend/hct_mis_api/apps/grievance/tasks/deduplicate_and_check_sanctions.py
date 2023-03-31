@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from django.db import transaction
@@ -16,15 +17,21 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
+logger = logging.getLogger(__name__)
+
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
     @transaction.atomic(using="default")
     def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
-
         if should_populate_index is True:
             populate_index(individuals, get_individual_doc(business_area))
+
+        if business_area.postpone_deduplication:
+            logger.info("Postponing deduplication for business area %s", business_area)
+            DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))
+            return
 
         DeduplicateTask.deduplicate_individuals_from_other_source(individuals, business_area)
 
