@@ -5294,11 +5294,11 @@ export type QueryAllGrievanceTicketArgs = {
   area_Startswith?: Maybe<Scalars['String']>,
   assignedTo?: Maybe<Scalars['ID']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
+  admin2?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   fsp?: Maybe<Scalars['String']>,
-  admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
   cashPlan?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -10701,7 +10701,7 @@ export type AllGrievanceTicketQueryVariables = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   fsp?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
-  admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  admin?: Maybe<Scalars['ID']>,
   orderBy?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
@@ -19796,8 +19796,8 @@ export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAl
 export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
 export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage) {
     totalCount
     pageInfo {
       startCursor
