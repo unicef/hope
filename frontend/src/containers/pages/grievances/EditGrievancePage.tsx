@@ -512,16 +512,14 @@ export const EditGrievancePage = (): React.ReactElement => {
                       )}
                     </BoxPadding>
                     <BoxPadding>
-                      <BoxWithBorders>
-                        <Grid item xs={6}>
-                          <Box py={3}>
-                            <LookUpLinkedTickets
-                              values={values}
-                              onValueChange={setFieldValue}
-                            />
-                          </Box>
-                        </Grid>
-                      </BoxWithBorders>
+                      <Grid item xs={6}>
+                        <Box py={3}>
+                          <LookUpLinkedTickets
+                            values={values}
+                            onValueChange={setFieldValue}
+                          />
+                        </Box>
+                      </Grid>
                       {(ticket.issueType?.toString() ===
                         GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                         ticket.issueType?.toString() ===
