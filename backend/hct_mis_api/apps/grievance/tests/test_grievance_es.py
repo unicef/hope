@@ -68,8 +68,8 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     """
 
     FILTER_BY_ADMIN_AREA = """
-    query AllGrievanceTickets($admin: [ID]) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin: $admin) {
+    query AllGrievanceTickets($admin: ID) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin2: $admin) {
         edges {
           node {
             householdUnicefId
@@ -567,7 +567,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
-            variables={"admin": [self.admin_area_1.id]},
+            variables={"admin": self.id_to_base64(self.admin_area_1.id, "GrievanceTicketNode")},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
