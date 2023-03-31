@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
@@ -20,9 +20,9 @@ export function ExistingPaymentChannelFieldArray({
       <FieldArray
         name='individualDataUpdatePaymentChannelsToEdit'
         render={(arrayHelpers) => {
-          return (
+          return individual?.paymentChannels?.length > 0 ? (
             <>
-              {individual?.paymentChannels?.map((item) => {
+              {individual.paymentChannels.map((item) => {
                 return (
                   <EditPaymentChannelRow
                     key={item.id}
@@ -35,6 +35,8 @@ export function ExistingPaymentChannelFieldArray({
                 );
               })}
             </>
+          ) : (
+            <Box ml={2}>-</Box>
           );
         }}
       />
