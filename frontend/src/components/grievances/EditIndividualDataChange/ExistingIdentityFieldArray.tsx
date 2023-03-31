@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { FieldArray } from 'formik';
 import React from 'react';
 import {
@@ -20,14 +20,14 @@ export function ExistingIdentityFieldArray({
   individual,
   addIndividualFieldsData,
 }: ExistingIdentityFieldArrayProps): React.ReactElement {
-  return (
+  return individual?.identities?.edges?.length > 0 ? (
     <Grid container spacing={3}>
       <FieldArray
         name='individualDataUpdateIdentitiesToEdit'
         render={(arrayHelpers) => {
           return (
             <>
-              {individual?.identities?.edges?.map((item) => {
+              {individual.identities.edges.map((item) => {
                 return (
                   <EditIdentityRow
                     key={item.node.id}
@@ -45,5 +45,7 @@ export function ExistingIdentityFieldArray({
         }}
       />
     </Grid>
+  ) : (
+    <Box ml={2}>-</Box>
   );
 }
