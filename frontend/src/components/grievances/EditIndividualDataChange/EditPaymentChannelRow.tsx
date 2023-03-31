@@ -1,6 +1,7 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import Close from '@material-ui/icons/Close';
+import { useLocation } from 'react-router-dom';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import styled from 'styled-components';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../core/LabelizedField';
 import { PaymentChannelField } from '../PaymentChannelField';
+import { removeItemById } from '../utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -18,7 +20,7 @@ export interface EditPaymentChannelRowProps {
   values;
   paymentChannel: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['paymentChannels'][number];
   arrayHelpers;
-  index;
+  id: string;
 }
 
 export function EditPaymentChannelRow({
@@ -26,8 +28,10 @@ export function EditPaymentChannelRow({
   values,
   paymentChannel,
   arrayHelpers,
-  index,
+  id,
 }: EditPaymentChannelRowProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const toRemove = values?.individualDataUpdatePaymentChannelsToRemove || [];
@@ -35,12 +39,19 @@ export function EditPaymentChannelRow({
   return isEdited ? (
     <>
       <PaymentChannelField
-        index={index}
-        key={`${index}-${paymentChannel.id}`}
-        onDelete={() => arrayHelpers.remove(index)}
+        id={id}
+        key={`${id}-${paymentChannel.id}`}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdatePaymentChannelsToRemove,
+            paymentChannel.id,
+            arrayHelpers,
+          )
+        }
         baseName='individualDataUpdatePaymentChannelsToEdit'
         isEdited={isEdited}
         paymentChannel={paymentChannel}
+        values={values}
       />
       <Box display='flex' alignItems='center'>
         <IconButton
@@ -85,12 +96,13 @@ export function EditPaymentChannelRow({
                   paymentChannel.id,
                 );
               }}
+              disabled={isEditTicket}
             >
               <Delete />
             </IconButton>
             <IconButton
               onClick={() => {
-                arrayHelpers.replace(index, {
+                arrayHelpers.replace({
                   id: paymentChannel.id,
                   bankName: paymentChannel.bankName,
                   bankAccountNumber: paymentChannel.bankAccountNumber,
@@ -98,6 +110,7 @@ export function EditPaymentChannelRow({
                 });
                 setEdit(true);
               }}
+              disabled={isEditTicket}
             >
               <Edit />
             </IconButton>

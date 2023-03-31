@@ -3,7 +3,7 @@ import {
   Button,
   FormHelperText,
   Grid,
-  Typography
+  Typography,
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
@@ -29,14 +29,14 @@ import {
   dataChangeComponentDict,
   EmptyComponent,
   prepareInitialValues,
-  prepareVariables
+  prepareVariables,
 } from '../../../components/grievances/utils/editGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
-  PERMISSIONS
+  PERMISSIONS,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -48,13 +48,13 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES
+  GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import {
   choicesToDict,
   isInvalid,
   isPermissionDeniedError,
-  thingForSpecificGrievanceType
+  thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 import {
   GrievanceTicketDocument,
@@ -66,7 +66,7 @@ import {
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
   useMeQuery,
-  useUpdateGrievanceMutation
+  useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
@@ -104,8 +104,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     },
     fetchPolicy: 'cache-and-network',
   });
-
-  const ticket = ticketData.grievanceTicket;
 
   const {
     data: currentUserData,
@@ -180,10 +178,11 @@ export const EditGrievancePage = (): React.ReactElement => {
     return null;
 
   const categoryChoices: {
-      [id: number]: string;
-    } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
+    [id: number]: string;
+  } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const currentUserId = currentUserData.me.id;
+  const ticket = ticketData.grievanceTicket;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
@@ -232,9 +231,10 @@ export const EditGrievancePage = (): React.ReactElement => {
   );
   const showIssueType = (values): boolean => {
     return (
-      values.category === parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE,10) ||
-      values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE,10) ||
-      values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT,10)
+      values.category ===
+        parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10) ||
+      values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) ||
+      values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10)
     );
   };
   const dataChangeErrors = (errors, touched): React.ReactElement[] =>
@@ -426,7 +426,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='admin'
-                            label={t('Administrative Level 2')}
                             disabled={Boolean(ticket.admin)}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}

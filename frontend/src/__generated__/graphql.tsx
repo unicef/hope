@@ -1324,6 +1324,7 @@ export type DocumentTypeNode = {
   type: DocumentTypeType,
   isIdentityDocument: Scalars['Boolean'],
   uniqueForIndividual: Scalars['Boolean'],
+  validForDeduplication: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -5837,6 +5838,7 @@ export type QueryAllHouseholdsArgs = {
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
   adminArea?: Maybe<Scalars['ID']>,
+  admin2?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
@@ -5844,7 +5846,6 @@ export type QueryAllHouseholdsArgs = {
   size?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   countryOrigin?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -6273,9 +6274,11 @@ export enum RegistrationDataImportStatus {
   Loading = 'LOADING',
   Deduplication = 'DEDUPLICATION',
   DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  ImportScheduled = 'IMPORT_SCHEDULED',
   Importing = 'IMPORTING',
   ImportError = 'IMPORT_ERROR',
   InReview = 'IN_REVIEW',
+  MergeScheduled = 'MERGE_SCHEDULED',
   Merged = 'MERGED',
   Merging = 'MERGING',
   MergeError = 'MERGE_ERROR',
@@ -7132,6 +7135,7 @@ export enum TargetPopulationStatus {
   SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   Processing = 'PROCESSING',
+  SendingToCashAssist = 'SENDING_TO_CASH_ASSIST',
   ReadyForCashAssist = 'READY_FOR_CASH_ASSIST',
   ReadyForPaymentModule = 'READY_FOR_PAYMENT_MODULE',
   Assigned = 'ASSIGNED'
@@ -12045,7 +12049,7 @@ export type AllHouseholdsQueryVariables = {
   search?: Maybe<Scalars['String']>,
   residenceStatus?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  admin2?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>
 };
 
@@ -12102,7 +12106,7 @@ export type AllHouseholdsForPopulationTableQueryVariables = {
   search?: Maybe<Scalars['String']>,
   residenceStatus?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  admin2?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>
 };
 
@@ -22805,7 +22809,7 @@ export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<type
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
   allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
@@ -22921,7 +22925,7 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
   allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
@@ -27764,6 +27768,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   uniqueForIndividual?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  validForDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
 };
 

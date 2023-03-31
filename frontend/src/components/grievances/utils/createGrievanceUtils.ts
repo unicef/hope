@@ -4,6 +4,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { removeIdPropertyFromObjects } from './helpers';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function preparePositiveFeedbackVariables(requiredVariables, values) {
@@ -196,6 +197,19 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
+
+  const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsDocuments,
+  );
+
+  const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsIdentities,
+  );
+
+  const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsPaymentChannels,
+  );
+
   return {
     variables: {
       input: {
@@ -208,15 +222,14 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               individual: values.selectedIndividual?.id,
               individualData: {
                 ...individualData,
-                documents: values.individualDataUpdateFieldsDocuments,
+                documents: newlyAddedDocumentsWithoutIds,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
                 documentsToEdit: values.individualDataUpdateDocumentsToEdit,
-                identities: values.individualDataUpdateFieldsIdentities,
+                identities: newlyAddedIdentitiesWithoutIds,
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-                paymentChannels:
-                  values.individualDataUpdateFieldsPaymentChannels,
+                paymentChannels: newlyAddedPaymentChannelsWithoutIds,
                 paymentChannelsToRemove:
                   values.individualDataUpdatePaymentChannelsToRemove,
                 paymentChannelsToEdit:

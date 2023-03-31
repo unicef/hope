@@ -3,7 +3,8 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.core.files.storage import default_storage
-from django.db.models import Q, QuerySet
+from django.db.models import Case, DateField, F, Q, QuerySet, When
+from django.utils import timezone
 
 import graphene
 from graphene import relay
@@ -493,7 +494,20 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        return queryset
+        return (
+            queryset.select_related("assigned_to", "created_by")
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),  # type: ignore
+                    output_field=DateField(),
+                )
+            )
+            .annotate(total_days=F("total__day"))
+        )
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
@@ -502,7 +516,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
+        return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)

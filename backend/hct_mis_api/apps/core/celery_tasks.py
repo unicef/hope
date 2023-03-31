@@ -173,6 +173,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                             family_id=family_id,
                             storage_obj=storage_obj,
                             collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
+                            country=country,
                         )
 
                         individual.household = household

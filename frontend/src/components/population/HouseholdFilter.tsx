@@ -51,20 +51,22 @@ export const HouseholdFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={4}>
           <SearchTextField
             label={t('Search')}
             value={filter.text}
+            fullWidth
             onChange={(e) => handleFilterChange('text', e.target.value)}
             data-cy='hh-filters-search'
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
             value={filter.program}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -76,12 +78,13 @@ export const HouseholdFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
             }
             label={t('Residence Status')}
+            fullWidth
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
             SelectDisplayProps={{
@@ -98,40 +101,44 @@ export const HouseholdFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <AdminAreaAutocomplete
-            name='adminArea'
-            value={filter.adminArea}
+            name='admin2'
+            value={filter.admin2}
             onFilterChange={onFilterChange}
             filter={filter}
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <NumberTextField
             topLabel={t('Household Size')}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
+            fullWidth
             onChange={(e) =>
               handleFilterChange('householdSizeMin', e.target.value)
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
             icon={<GroupIcon />}
+            fullWidth
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>

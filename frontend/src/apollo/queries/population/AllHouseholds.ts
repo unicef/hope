@@ -16,7 +16,7 @@ export const AllHouseholds = gql`
     $search: String
     $residenceStatus: String
     $lastRegistrationDate: String
-    $admin2: [ID]
+    $admin2: ID
     $withdrawn: Boolean
   ) {
     allHouseholds(

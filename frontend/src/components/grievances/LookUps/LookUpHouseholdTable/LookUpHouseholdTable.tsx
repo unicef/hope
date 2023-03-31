@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
 import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
@@ -48,7 +47,7 @@ export const LookUpHouseholdTable = ({
     programs: [filter.programs],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     residenceStatus: filter.residenceStatus,
-    admin2: [decodeIdString(filter?.admin2?.node?.id)],
+    admin2: filter?.admin2?.node?.id,
     familySize: JSON.stringify(filter.size),
     withdrawn: false,
     headOfHouseholdPhoneNoValid: true,

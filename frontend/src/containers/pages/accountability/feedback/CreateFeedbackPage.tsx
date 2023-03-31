@@ -133,9 +133,10 @@ export function validateUsingSteps(
     (values.selectedHousehold ||
       (values.selectedIndividual && !values.verificationRequired))
   ) {
-    if (
-      verficationStepFields.filter((item) => values[item] === true).length < 5
-    ) {
+    const MIN_SELECTED_ITEMS = 5;
+    const selectedItems = verficationStepFields.filter((item) => values[item]);
+
+    if (selectedItems.length < MIN_SELECTED_ITEMS) {
       setValidateData(true);
       errors.verificationRequired = 'Select correctly minimum 5 questions';
     }
@@ -421,7 +422,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             <Grid item xs={6}>
                               <Field
                                 name='admin2'
-                                label={t('Administrative Level 2')}
                                 variant='outlined'
                                 component={FormikAdminAreaAutocomplete}
                               />

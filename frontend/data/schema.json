@@ -6525,6 +6525,16 @@
                 "defaultValue": null
               },
               {
+                "name": "admin2",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "targetPopulations",
                 "description": null,
                 "type": {
@@ -6599,20 +6609,6 @@
                   "kind": "SCALAR",
                   "name": "String",
                   "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "admin2",
-                "description": null,
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
                 },
                 "defaultValue": null
               },
@@ -22343,6 +22339,12 @@
             "deprecationReason": null
           },
           {
+            "name": "IMPORT_SCHEDULED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "IMPORTING",
             "description": null,
             "isDeprecated": false,
@@ -22356,6 +22358,12 @@
           },
           {
             "name": "IN_REVIEW",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MERGE_SCHEDULED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -27860,6 +27868,12 @@
           },
           {
             "name": "PROCESSING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SENDING_TO_CASH_ASSIST",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -44759,6 +44773,22 @@
           },
           {
             "name": "uniqueForIndividual",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "validForDeduplication",
             "description": null,
             "args": [],
             "type": {

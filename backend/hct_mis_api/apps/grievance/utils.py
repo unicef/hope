@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
+from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -29,31 +30,28 @@ def get_individual(individual_id: str) -> Individual:
     return individual
 
 
-def select_individual(
-    ticket_details: TicketNeedsAdjudicationDetails,
-    selected_individual: Individual,
-    ticket_duplicates: List[Individual],
-    ticket_individuals: List[Individual],
-) -> None:
-    if selected_individual in ticket_duplicates and selected_individual not in ticket_individuals:
-        ticket_details.selected_individuals.add(selected_individual)
-
-        logger.info("Individual with id: %s added to ticket %s", str(selected_individual.id), str(ticket_details.id))
-
-
-def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individual: Individual) -> None:
+def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:
     rdi = grievance_ticket.registration_data_import
     if not rdi:
         return
 
-    sibling_tickets = GrievanceTicket.objects.filter(registration_data_import_id=rdi.id)
+    ticket_details_queryset = (
+        (
+            TicketNeedsAdjudicationDetails.objects.filter(
+                Q(possible_duplicates__in=selected_individuals) | Q(golden_records_individual__in=selected_individuals)
+            ).exclude(Q(ticket__status=GrievanceTicket.STATUS_CLOSED) | Q(ticket__id=grievance_ticket.id))
+        )
+        .prefetch_related("possible_duplicates")
+        .distinct()
+    )
 
-    for ticket in sibling_tickets:
-        ticket_details = ticket.ticket_details
-        ticket_duplicates = ticket_details.possible_duplicates.all()
-        ticket_individuals = ticket_details.selected_individuals.all()
-
-        select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
+    selected_individuals_set = set([str(i.id) for i in selected_individuals])
+    for ticket_details in ticket_details_queryset:
+        possible_duplicates_set = set([str(i.id) for i in ticket_details.possible_duplicates.all()]).union(
+            {str(ticket_details.golden_records_individual.id)}
+        )
+        intersection = selected_individuals_set.intersection(possible_duplicates_set)
+        ticket_details.selected_individuals.add(*intersection)
 
 
 def clear_cache(

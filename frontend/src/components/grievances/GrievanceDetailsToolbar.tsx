@@ -486,7 +486,7 @@ export const GrievanceDetailsToolbar = ({
                 </LoadingButton>
               </Box>
             )}
-            {canCreateDataChange && (
+            {canCreateDataChange() && (
               <Box mr={3}>
                 <Button
                   onClick={() =>

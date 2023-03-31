@@ -56,6 +56,7 @@ class HouseholdAdmin(
 ):
     list_display = (
         "unicef_id",
+        "business_area",
         "country",
         "head_of_household",
         "size",

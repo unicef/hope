@@ -1,5 +1,6 @@
 import { Box, Grid } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { useLocation } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,9 @@ export const LookUpLinkedTicketsDisplay = ({
   onValueChange,
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   const handleRemove = (): void => {
     onValueChange('selectedLinkedTickets', []);
   };
@@ -31,30 +35,32 @@ export const LookUpLinkedTicketsDisplay = ({
             {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
-        <Grid item>
-          <Box p={2}>
-            <Grid container justify='center' alignItems='center'>
-              <Grid item>
-                <LightGrey>
-                  <EditIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => setLookUpDialogOpen(true)}
-                  />
-                </LightGrey>
+        {!isEditTicket && (
+          <Grid item>
+            <Box p={2}>
+              <Grid container justify='center' alignItems='center'>
+                <Grid item>
+                  <LightGrey>
+                    <EditIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => setLookUpDialogOpen(true)}
+                    />
+                  </LightGrey>
+                </Grid>
+                <Grid item>
+                  <DarkGrey>
+                    <DeleteIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => handleRemove()}
+                    />
+                  </DarkGrey>
+                </Grid>
               </Grid>
-              <Grid item>
-                <DarkGrey>
-                  <DeleteIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => handleRemove()}
-                  />
-                </DarkGrey>
-              </Grid>
-            </Grid>
-          </Box>
-        </Grid>
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </StyledBox>
   );

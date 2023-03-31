@@ -44,7 +44,7 @@ export const TargetPopulationFilters = ({
 
   const renderTable = (): React.ReactElement => (
     <Grid container alignItems='flex-end' spacing={3}>
-      <Grid item xs={3}>
+      <Grid item xs={4}>
         <SearchTextField
           label={t('Search')}
           value={filter.name}
@@ -53,7 +53,7 @@ export const TargetPopulationFilters = ({
           fullWidth
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={4}>
         <SelectFilter
           onChange={(e) => handleFilterChange('status', e.target.value)}
           value={filter.status}
@@ -71,7 +71,7 @@ export const TargetPopulationFilters = ({
             ))}
         </SelectFilter>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={4}>
         <SelectFilter
           onChange={(e) => handleFilterChange('program', e.target.value)}
           label={t('Programme')}
@@ -89,8 +89,8 @@ export const TargetPopulationFilters = ({
           ))}
         </SelectFilter>
       </Grid>
-      <Grid container item xs={3} spacing={3} alignItems='flex-end'>
-        <Grid item>
+      <Grid container item xs={4} spacing={3} alignItems='flex-end'>
+        <Grid item xs={6}>
           <NumberTextField
             topLabel={t('Number of Households')}
             value={filter.numIndividualsMin}
@@ -101,7 +101,7 @@ export const TargetPopulationFilters = ({
             icon={<Group />}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={6}>
           <NumberTextField
             value={filter.numIndividualsMax}
             placeholder={t('To')}
@@ -112,7 +112,7 @@ export const TargetPopulationFilters = ({
           />
         </Grid>
       </Grid>
-      <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+      <Grid container item xs={4} spacing={3} alignItems='flex-end'>
         <Grid item xs={6}>
           <DatePickerFilter
             topLabel={t('Date Created')}
