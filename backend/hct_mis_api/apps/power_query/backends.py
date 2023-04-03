@@ -31,10 +31,10 @@ class PowerQueryBackend(ModelBackend):
         if not isinstance(user_obj, User):
             return False
         if isinstance(obj, Report):
-            if obj.owner == user_obj:
+            if obj.owner == user_obj or obj.limit_access_to.filter(pk=user_obj.pk).exists():
                 return True
         elif isinstance(obj, ReportDocument):
-            if obj.report.owner == user_obj:
+            if obj.report.owner == user_obj or obj.limit_access_to.filter(pk=user_obj.pk).exists():
                 return True
             if "business_area" not in obj.arguments:
                 return False
