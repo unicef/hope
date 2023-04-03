@@ -1,5 +1,6 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import Close from '@material-ui/icons/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
@@ -62,13 +63,8 @@ export function EditDocumentRow({
         setFieldValue={setFieldValue}
         values={values}
       />
-      <Box
-        style={{ width: '100%' }}
-        display='flex'
-        alignItems='center'
-        justifyContent='flex-end'
-      >
-        <Button
+      <Box display='flex' alignItems='center'>
+        <IconButton
           onClick={() => {
             arrayHelpers.remove({
               id: document.node.id,
@@ -80,8 +76,8 @@ export function EditDocumentRow({
             setEdit(false);
           }}
         >
-          {t('CANCEL')}
-        </Button>
+          <Close />
+        </IconButton>
       </Box>
     </>
   ) : (
@@ -112,44 +108,34 @@ export function EditDocumentRow({
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
-          <Box display='flex' align-items='center'>
-            <IconButton
-              disabled={isEditTicket}
-              onClick={() => {
-                setFieldValue(
-                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                  document.node.id,
-                );
-              }}
-            >
-              <Delete />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                arrayHelpers.push({
-                  id: document.node.id,
-                  country: document.node.countryIso3,
-                  type: document.node.type.type,
-                  number: document.node.documentNumber,
-                  photo: document.node.photo,
-                });
-                setEdit(true);
-              }}
-            >
-              <Edit />
-            </IconButton>
-            <IconButton
-              disabled={isEditTicket}
-              onClick={() => {
-                setFieldValue(
-                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                  document.node.id,
-                );
-              }}
-            >
-              <Delete />
-            </IconButton>
-          </Box>
+          !isEditTicket && (
+            <Box display='flex' align-items='center'>
+              <IconButton
+                onClick={() => {
+                  setFieldValue(
+                    `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
+                    document.node.id,
+                  );
+                }}
+              >
+                <Delete />
+              </IconButton>
+              <IconButton
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: document.node.id,
+                    country: document.node.countryIso3,
+                    type: document.node.type.type,
+                    number: document.node.documentNumber,
+                    photo: document.node.photo,
+                  });
+                  setEdit(true);
+                }}
+              >
+                <Edit />
+              </IconButton>
+            </Box>
+          )
         ) : (
           <Box display='flex' alignItems='center' height={48} color='red'>
             {t('REMOVED')}

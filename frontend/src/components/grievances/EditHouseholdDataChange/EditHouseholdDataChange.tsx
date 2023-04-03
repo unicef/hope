@@ -61,45 +61,48 @@ export const EditHouseholdDataChange = ({
     (fieldItem) => fieldItem.fieldName,
   );
   return (
-    <>
-      <Title>
-        <Typography variant='h6'>{t('Household Data')}</Typography>
-      </Title>
-      <Grid container spacing={3}>
-        <FieldArray
-          name='householdDataUpdateFields'
-          render={(arrayHelpers) => (
-            <>
-              {(values.householdDataUpdateFields || []).map((item, index) => (
-                <EditHouseholdDataChangeFieldRow
-                  /* eslint-disable-next-line react/no-array-index-key */
-                  key={`${index}-${item.fieldName}`}
-                  itemValue={item}
-                  index={index}
-                  household={fullHousehold.household}
-                  fields={householdFieldsData.allEditHouseholdFieldsAttributes}
-                  notAvailableFields={notAvailableItems}
-                  onDelete={() => arrayHelpers.remove(index)}
-                  values={values}
-                />
-              ))}
-              <Grid item xs={4}>
-                <Button
-                  color='primary'
-                  startIcon={<AddCircleOutline />}
-                  onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: null });
-                  }}
-                  data-cy='button-add-new-field'
-                  disabled={isEditTicket}
-                >
-                  {t('Add new field')}
-                </Button>
-              </Grid>
-            </>
-          )}
-        />
-      </Grid>
-    </>
+    !isEditTicket && (
+      <>
+        <Title>
+          <Typography variant='h6'>{t('Household Data')}</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <FieldArray
+            name='householdDataUpdateFields'
+            render={(arrayHelpers) => (
+              <>
+                {(values.householdDataUpdateFields || []).map((item, index) => (
+                  <EditHouseholdDataChangeFieldRow
+                    /* eslint-disable-next-line react/no-array-index-key */
+                    key={`${index}-${item.fieldName}`}
+                    itemValue={item}
+                    index={index}
+                    household={fullHousehold.household}
+                    fields={
+                      householdFieldsData.allEditHouseholdFieldsAttributes
+                    }
+                    notAvailableFields={notAvailableItems}
+                    onDelete={() => arrayHelpers.remove(index)}
+                    values={values}
+                  />
+                ))}
+                <Grid item xs={4}>
+                  <Button
+                    color='primary'
+                    startIcon={<AddCircleOutline />}
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: null });
+                    }}
+                    data-cy='button-add-new-field'
+                  >
+                    {t('Add new field')}
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
+        </Grid>
+      </>
+    )
   );
 };

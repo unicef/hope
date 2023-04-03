@@ -21,6 +21,7 @@ interface LookUpHouseholdTableProps {
   setSelectedHousehold?;
   noTableStyling?;
   householdMultiSelect?: boolean;
+  redirectedFromRelatedTicket?: boolean;
 }
 
 const NoTableStyling = styled.div`
@@ -40,6 +41,7 @@ export const LookUpHouseholdTable = ({
   setSelectedHousehold,
   noTableStyling = false,
   householdMultiSelect,
+  redirectedFromRelatedTicket,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
@@ -132,6 +134,7 @@ export const LookUpHouseholdTable = ({
             checkboxClickHandler={handleCheckboxClick}
             selected={selected}
             householdMultiSelect={householdMultiSelect}
+            redirectedFromRelatedTicket={redirectedFromRelatedTicket}
           />
         )}
       />
