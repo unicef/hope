@@ -10,12 +10,14 @@ export const LookUpHouseholdIndividualSelection = ({
   disabled,
   errors,
   touched,
+  redirectedFromRelatedTicket,
 }: {
   onValueChange: (field: string, value, shouldValidate?: boolean) => void;
   values;
   disabled?: boolean;
   errors?;
   touched?;
+  redirectedFromRelatedTicket?: boolean;
 }): React.ReactElement => {
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
@@ -32,11 +34,12 @@ export const LookUpHouseholdIndividualSelection = ({
         selectedHousehold={selectedHousehold}
         setSelectedHousehold={setSelectedHousehold}
         setSelectedIndividual={setSelectedIndividual}
+        redirectedFromRelatedTicket={redirectedFromRelatedTicket}
       />
       <Box display='flex' flexDirection='column'>
         <LookUpHouseholdIndividualSelectionDisplay
           values={values}
-          disabled={disabled}
+          disabled={disabled || redirectedFromRelatedTicket}
           onValueChange={onValueChange}
           selectedHousehold={selectedHousehold}
           setSelectedHousehold={setSelectedHousehold}

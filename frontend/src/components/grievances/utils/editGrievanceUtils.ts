@@ -217,8 +217,8 @@ export function prepareInitialValues(
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
       : [],
-    selectedLinkedTickets: ticket.relatedTickets.map(
-      (relatedTicket) => relatedTicket.id,
+    selectedLinkedTickets: ticket.linkedTickets.map(
+      (linkedTicket) => linkedTicket.id,
     ),
     documentation: null,
     documentationToUpdate: null,

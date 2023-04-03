@@ -353,6 +353,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               onValueChange={setFieldValue}
                               errors={errors}
                               touched={touched}
+                              redirectedFromRelatedTicket={
+                                redirectedFromRelatedTicket
+                              }
                             />
                           </Box>
                         </BoxWithBorders>
