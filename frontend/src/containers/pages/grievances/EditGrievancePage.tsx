@@ -76,11 +76,6 @@ const BoxPadding = styled.div`
 const NewTicket = styled.div`
   padding: 20px;
 `;
-const BoxWithBorders = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  padding: 15px 0;
-`;
 
 const BoxWithBottomBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -512,16 +507,15 @@ export const EditGrievancePage = (): React.ReactElement => {
                       )}
                     </BoxPadding>
                     <BoxPadding>
-                      <BoxWithBorders>
-                        <Grid item xs={6}>
-                          <Box py={3}>
-                            <LookUpLinkedTickets
-                              values={values}
-                              onValueChange={setFieldValue}
-                            />
-                          </Box>
-                        </Grid>
-                      </BoxWithBorders>
+                      <Grid item xs={6}>
+                        <Box py={3}>
+                          <LookUpLinkedTickets
+                            values={values}
+                            onValueChange={setFieldValue}
+                            disabled={Boolean(ticket.linkedTickets)}
+                          />
+                        </Box>
+                      </Grid>
                       {(ticket.issueType?.toString() ===
                         GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                         ticket.issueType?.toString() ===

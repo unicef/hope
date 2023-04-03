@@ -56,7 +56,7 @@ export function validate(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual) {
-        errors.selectedIndividual = 'Individual is Required';
+        errors.selectedIndividual = 'quired';
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {

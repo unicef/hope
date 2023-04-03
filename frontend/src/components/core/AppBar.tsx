@@ -24,6 +24,8 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
     ...theme.mixins.toolbar,
   },
   appBar: {
+    position: 'fixed',
+    top: 0,
     zIndex: theme.zIndex.drawer + 1,
     backgroundColor: theme.palette.secondary.main,
     transition: theme.transitions.create(['width', 'margin'], {
@@ -74,10 +76,7 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
     return null;
   }
   return (
-    <MuiAppBar
-      position='absolute'
-      className={clsx(classes.appBar, open && classes.appBarShift)}
-    >
+    <MuiAppBar className={clsx(classes.appBar, open && classes.appBarShift)}>
       <StyledToolbar>
         <Box display='flex' alignItems='center' justifyContent='center'>
           <Box ml={1}>
