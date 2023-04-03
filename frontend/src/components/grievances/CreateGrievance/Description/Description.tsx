@@ -272,14 +272,16 @@ export const Description = ({
       </BoxPadding>
       {canAddDocumentation && (
         <Box mt={3}>
-          <Title>
-            <Typography variant='h6'>{t('Documentation')}</Typography>
-          </Title>
-          <NewDocumentationFieldArray
-            values={values}
-            setFieldValue={setFieldValue}
-            errors={errors}
-          />
+          <BoxWithBorderBottom>
+            <Title>
+              <Typography variant='h6'>{t('Documentation')}</Typography>
+            </Title>
+            <NewDocumentationFieldArray
+              values={values}
+              setFieldValue={setFieldValue}
+              errors={errors}
+            />
+          </BoxWithBorderBottom>
         </Box>
       )}
     </>

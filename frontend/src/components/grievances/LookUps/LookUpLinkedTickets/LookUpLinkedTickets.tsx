@@ -8,6 +8,11 @@ import { LookUpLinkedTicketsModal } from './LookUpLinkedTicketsModal';
 export const LookUpLinkedTickets = ({
   onValueChange,
   values,
+  disabled,
+}: {
+  onValueChange;
+  values;
+  disabled?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -19,6 +24,7 @@ export const LookUpLinkedTickets = ({
         <LookUpLinkedTicketsDisplay
           setLookUpDialogOpen={setLookUpDialogOpen}
           values={values}
+          disabled={disabled}
           onValueChange={onValueChange}
         />
       ) : (

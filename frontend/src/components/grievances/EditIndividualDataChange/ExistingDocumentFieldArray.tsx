@@ -1,5 +1,6 @@
 import { Box, Grid } from '@material-ui/core';
 import { FieldArray } from 'formik';
+import { useLocation } from 'react-router-dom';
 import React from 'react';
 import {
   AllAddIndividualFieldsQuery,
@@ -20,6 +21,9 @@ export function ExistingDocumentFieldArray({
   individual,
   addIndividualFieldsData,
 }: ExistingDocumentFieldArrayProps): React.ReactElement {
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   return individual?.documents?.edges?.length > 0 ? (
     <Grid container spacing={3}>
       <FieldArray
@@ -46,6 +50,6 @@ export function ExistingDocumentFieldArray({
       />
     </Grid>
   ) : (
-    <Box ml={2}>-</Box>
+    isEditTicket && <Box ml={2}>-</Box>
   );
 }
