@@ -108,6 +108,7 @@ class HouseholdDataUpdateService(DataChangeService):
             return
         details = self.grievance_ticket.household_data_update_ticket_details
         household = details.household
+        old_household = copy_model_object(household)
         household_data = details.household_data
         country_origin = household_data.get("country_origin", {})
         country = household_data.get("country", {})
@@ -134,7 +135,6 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value_and_approve_status in household_data.items()
             if is_approved(value_and_approve_status)
         }
-        old_household = copy_model_object(household)
         merged_flex_fields = {}
         cast_flex_fields(flex_fields)
         if household.flex_fields is not None:
@@ -142,5 +142,6 @@ class HouseholdDataUpdateService(DataChangeService):
         merged_flex_fields.update(flex_fields)
         new_household = Household.objects.select_for_update().get(id=household.id)
         Household.objects.filter(id=new_household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+        updated_household = Household.objects.get(id=household.id)  # refresh_from_db() doesn't work here
         recalculate_data(new_household)
-        log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", user, old_household, new_household)
+        log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", user, old_household, updated_household)
