@@ -28,6 +28,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  redirectedFromRelatedTicket,
 }: {
   onValueChange;
   initialValues;
@@ -35,6 +36,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   selectedHousehold;
   setSelectedIndividual;
   setSelectedHousehold;
+  redirectedFromRelatedTicket?: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState(0);
@@ -134,6 +136,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
             setSelectedIndividual={setSelectedIndividual}
+            redirectedFromRelatedTicket={redirectedFromRelatedTicket}
             noTableStyling
           />
         </TabPanel>

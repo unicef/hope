@@ -76,11 +76,6 @@ const BoxPadding = styled.div`
 const NewTicket = styled.div`
   padding: 20px;
 `;
-const BoxWithBorders = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  padding: 15px 0;
-`;
 
 const BoxWithBottomBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
