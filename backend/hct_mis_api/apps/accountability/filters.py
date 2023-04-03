@@ -42,6 +42,12 @@ class MessageRecipientsMapFilter(FilterSet):
     phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
     sex = CharFilter(field_name="head_of_household__sex")
 
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        queryset = queryset.exclude(
+            head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+        )
+        return super().filter_queryset(queryset)
+
     def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
         return queryset.filter(messages__id=decode_id_string(value))
 

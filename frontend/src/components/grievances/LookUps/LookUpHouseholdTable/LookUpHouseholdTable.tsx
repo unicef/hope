@@ -50,6 +50,7 @@ export const LookUpHouseholdTable = ({
     admin2: filter?.admin2?.node?.id,
     familySize: JSON.stringify(filter.size),
     withdrawn: false,
+    headOfHouseholdPhoneNoValid: true,
   };
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
