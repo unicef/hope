@@ -517,6 +517,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                           <LookUpLinkedTickets
                             values={values}
                             onValueChange={setFieldValue}
+                            disabled={Boolean(ticket.linkedTickets)}
                           />
                         </Box>
                       </Grid>

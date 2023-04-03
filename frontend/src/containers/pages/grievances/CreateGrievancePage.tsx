@@ -340,7 +340,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           setFieldValue={setFieldValue}
                           showIssueType={showIssueType}
                           values={values}
-                          redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+                          redirectedFromRelatedTicket={
+                            redirectedFromRelatedTicket
+                          }
                         />
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
