@@ -340,7 +340,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           setFieldValue={setFieldValue}
                           showIssueType={showIssueType}
                           values={values}
-                          redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+                          redirectedFromRelatedTicket={
+                            redirectedFromRelatedTicket
+                          }
                         />
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
@@ -351,6 +353,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               onValueChange={setFieldValue}
                               errors={errors}
                               touched={touched}
+                              redirectedFromRelatedTicket={
+                                redirectedFromRelatedTicket
+                              }
                             />
                           </Box>
                         </BoxWithBorders>
