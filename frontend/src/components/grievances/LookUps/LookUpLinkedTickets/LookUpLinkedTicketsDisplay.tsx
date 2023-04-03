@@ -11,6 +11,12 @@ export const LookUpLinkedTicketsDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
+  disabled,
+}: {
+  values;
+  setLookUpDialogOpen;
+  onValueChange;
+  disabled?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -28,7 +34,7 @@ export const LookUpLinkedTicketsDisplay = ({
     return <BlueText>-</BlueText>;
   };
   return (
-    <StyledBox>
+    <StyledBox disabled={disabled}>
       <Grid container justify='space-between'>
         <Grid item>
           <Box display='flex' flexDirection='column'>
