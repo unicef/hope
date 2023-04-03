@@ -58,6 +58,7 @@ export function LookUpHouseholdTableRow({
   return (
     <ClickableTableRow
       onClick={(event) => {
+        if (redirectedFromRelatedTicket) return;
         handleClick(event);
       }}
       hover
