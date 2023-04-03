@@ -25,6 +25,7 @@ interface LookUpHouseholdTableRowProps {
   ) => void;
   selected?: Array<string>;
   householdMultiSelect: boolean;
+  redirectedFromRelatedTicket?: boolean;
 }
 
 export function LookUpHouseholdTableRow({
@@ -34,6 +35,7 @@ export function LookUpHouseholdTableRow({
   checkboxClickHandler,
   selected,
   householdMultiSelect,
+  redirectedFromRelatedTicket,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const isSelected = (id: string): boolean => selected.includes(id);
@@ -71,6 +73,7 @@ export function LookUpHouseholdTableRow({
             checked={isItemSelected}
             data-cy='input-checkbox-household'
             inputProps={{ 'aria-labelledby': household.id }}
+            disabled={redirectedFromRelatedTicket || false}
           />
         ) : (
           <Radio
@@ -83,6 +86,7 @@ export function LookUpHouseholdTableRow({
             name='radio-button-household'
             inputProps={{ 'aria-label': household.id }}
             data-cy='input-radio-household'
+            disabled={redirectedFromRelatedTicket || false}
           />
         )}
       </TableCell>
