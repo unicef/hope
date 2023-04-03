@@ -2640,6 +2640,7 @@ enum PaymentPlanStatus {
   IN_REVIEW
   ACCEPTED
   FINISHED
+  PREPARING
 }
 
 type PaymentRecordAndPaymentNode {

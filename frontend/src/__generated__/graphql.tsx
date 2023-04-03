@@ -3932,7 +3932,8 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  Finished = 'FINISHED'
+  Finished = 'FINISHED',
+  Preparing = 'PREPARING'
 }
 
 export type PaymentRecordAndPaymentNode = {
