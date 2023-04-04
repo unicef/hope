@@ -225,9 +225,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
-    phone_no_valid = models.BooleanField(default=False)
+    phone_no_valid = models.BooleanField(null=True)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
-    phone_no_alternative_valid = models.BooleanField(default=False)
+    phone_no_alternative_valid = models.BooleanField(null=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
