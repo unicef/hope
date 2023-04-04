@@ -7,7 +7,8 @@ from django.forms import modelform_factory
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
-    build_arg_dict_from_dict, IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    build_arg_dict_from_dict,
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -71,11 +72,26 @@ class UkraineRegistrationService(BaseRegistrationService):
         "size": "size_h_c",
     }
     DOCUMENT_MAPPING_KEY_DICT = {
-        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]: ("national_id_no_i_c_1", "national_id_picture"),
-        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT]: ("international_passport_i_c", "international_passport_picture"),
-        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DRIVERS_LICENSE]: ("drivers_license_no_i_c", "drivers_license_picture"),
-        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]: ("birth_certificate_no_i_c", "birth_certificate_picture"),
-        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO]: ("residence_permit_no_i_c", "residence_permit_picture"),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]: (
+            "national_id_no_i_c_1",
+            "national_id_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT]: (
+            "international_passport_i_c",
+            "international_passport_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DRIVERS_LICENSE]: (
+            "drivers_license_no_i_c",
+            "drivers_license_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]: (
+            "birth_certificate_no_i_c",
+            "birth_certificate_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO]: (
+            "residence_permit_no_i_c",
+            "residence_permit_picture",
+        ),
         IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
