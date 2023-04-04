@@ -814,20 +814,6 @@ export type CreateDashboardReportInput = {
   program?: Maybe<Scalars['ID']>,
 };
 
-export type CreateFinancialServiceProviderInput = {
-  name: Scalars['String'],
-  visionVendorNumber: Scalars['String'],
-  deliveryMechanisms: Array<Maybe<Scalars['String']>>,
-  distributionLimit?: Maybe<Scalars['Decimal']>,
-  communicationChannel: Scalars['String'],
-  fspXlsxTemplateId: Scalars['ID'],
-};
-
-export type CreateFinancialServiceProviderMutation = {
-   __typename?: 'CreateFinancialServiceProviderMutation',
-  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
-};
-
 export type CreateGrievanceTicketExtrasInput = {
   category?: Maybe<CategoryExtrasInput>,
   issueType?: Maybe<IssueTypeExtrasInput>,
@@ -1088,6 +1074,9 @@ export type DocumentNode = Node & {
   type: DocumentTypeNode,
   country?: Maybe<Scalars['String']>,
   status: DocumentStatus,
+  cleared: Scalars['Boolean'],
+  clearedDate: Scalars['DateTime'],
+  clearedBy?: Maybe<UserNode>,
   countryIso3?: Maybe<Scalars['String']>,
 };
 
@@ -1120,6 +1109,8 @@ export type DocumentTypeNode = {
   label: Scalars['String'],
   type: DocumentTypeType,
   isIdentityDocument: Scalars['Boolean'],
+  uniqueForIndividual: Scalars['Boolean'],
+  validForDeduplication: Scalars['Boolean'],
   documents: DocumentNodeConnection,
 };
 
@@ -1141,6 +1132,8 @@ export enum DocumentTypeType {
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
+  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
+  FosterChild = 'FOSTER_CHILD',
   Other = 'OTHER'
 }
 
@@ -1149,11 +1142,6 @@ export type EditBankTransferObjectType = {
   type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
-};
-
-export type EditFinancialServiceProviderMutation = {
-   __typename?: 'EditFinancialServiceProviderMutation',
-  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -1567,6 +1555,7 @@ export enum HouseholdCollectIndividualData {
   A = 'A_',
   A_2 = 'A_2',
   A_1 = 'A_1',
+  A_3 = 'A_3',
   A_0 = 'A_0'
 }
 
@@ -2029,6 +2018,8 @@ export enum ImportedDocumentTypeType {
   TaxId = 'TAX_ID',
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   BankStatement = 'BANK_STATEMENT',
+  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
+  FosterChild = 'FOSTER_CHILD',
   Other = 'OTHER'
 }
 
@@ -2635,6 +2626,7 @@ export type IndividualNode = Node & {
   rowId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
+  relationshipConfirmed: Scalars['Boolean'],
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -2835,7 +2827,8 @@ export enum IndividualRelationship {
   Other = 'OTHER',
   SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   SonDaughter = 'SON_DAUGHTER',
-  WifeHusband = 'WIFE_HUSBAND'
+  WifeHusband = 'WIFE_HUSBAND',
+  FosterChild = 'FOSTER_CHILD'
 }
 
 export type IndividualRoleInHouseholdNode = {
@@ -3038,6 +3031,11 @@ export type LogEntryNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type MarkPaymentAsFailedMutation = {
+   __typename?: 'MarkPaymentAsFailedMutation',
+  payment?: Maybe<PaymentNode>,
+};
+
 export type MarkPaymentRecordAsFailedMutation = {
    __typename?: 'MarkPaymentRecordAsFailedMutation',
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -3068,8 +3066,6 @@ export type Mutations = {
   reassignRole?: Maybe<ReassignRoleMutation>,
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>,
   editPaymentVerificationPlan?: Maybe<EditPaymentVerificationMutation>,
-  createFinancialServiceProvider?: Maybe<CreateFinancialServiceProviderMutation>,
-  editFinancialServiceProvider?: Maybe<EditFinancialServiceProviderMutation>,
   exportXlsxPaymentVerificationPlanFile?: Maybe<ExportXlsxPaymentVerificationPlanFile>,
   importXlsxPaymentVerificationPlanFile?: Maybe<ImportXlsxPaymentVerificationPlanFile>,
   activatePaymentVerificationPlan?: Maybe<ActivatePaymentVerificationPlan>,
@@ -3077,16 +3073,18 @@ export type Mutations = {
   discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>,
   invalidPaymentVerificationPlan?: Maybe<InvalidPaymentVerificationPlan>,
   deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>,
-  chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
-  assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   markPaymentRecordAsFailed?: Maybe<MarkPaymentRecordAsFailedMutation>,
-  revertMarkPaymentRecordAsFailed?: Maybe<RevertMarkAsFailedMutation>,
+  revertMarkPaymentRecordAsFailed?: Maybe<RevertMarkPaymentRecordAsFailedMutation>,
+  markPaymentAsFailed?: Maybe<MarkPaymentAsFailedMutation>,
+  revertMarkPaymentAsFailed?: Maybe<RevertMarkPaymentAsFailedMutation>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   actionPaymentPlanMutation?: Maybe<ActionPaymentPlanMutation>,
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>,
   updatePaymentPlan?: Maybe<UpdatePaymentPlanMutation>,
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>,
+  chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
+  assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   exportXlsxPaymentPlanPaymentList?: Maybe<ExportXlsxPaymentPlanPaymentListMutation>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Maybe<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   importXlsxPaymentPlanPaymentList?: Maybe<ImportXlsxPaymentPlanPaymentListMutation>,
@@ -3247,19 +3245,6 @@ export type MutationsEditPaymentVerificationPlanArgs = {
 };
 
 
-export type MutationsCreateFinancialServiceProviderArgs = {
-  businessAreaSlug: Scalars['String'],
-  inputs: CreateFinancialServiceProviderInput
-};
-
-
-export type MutationsEditFinancialServiceProviderArgs = {
-  businessAreaSlug: Scalars['String'],
-  financialServiceProviderId: Scalars['ID'],
-  inputs: CreateFinancialServiceProviderInput
-};
-
-
 export type MutationsExportXlsxPaymentVerificationPlanFileArgs = {
   paymentVerificationPlanId: Scalars['ID']
 };
@@ -3301,16 +3286,6 @@ export type MutationsDeletePaymentVerificationPlanArgs = {
 };
 
 
-export type MutationsChooseDeliveryMechanismsForPaymentPlanArgs = {
-  input: ChooseDeliveryMechanismsForPaymentPlanInput
-};
-
-
-export type MutationsAssignFspToDeliveryMechanismArgs = {
-  input: AssignFspToDeliveryMechanismInput
-};
-
-
 export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
   paymentVerificationId: Scalars['ID'],
   receivedAmount: Scalars['Decimal'],
@@ -3328,6 +3303,18 @@ export type MutationsRevertMarkPaymentRecordAsFailedArgs = {
   deliveredQuantity: Scalars['Decimal'],
   deliveryDate: Scalars['Date'],
   paymentRecordId: Scalars['ID']
+};
+
+
+export type MutationsMarkPaymentAsFailedArgs = {
+  paymentId: Scalars['ID']
+};
+
+
+export type MutationsRevertMarkPaymentAsFailedArgs = {
+  deliveredQuantity: Scalars['Decimal'],
+  deliveryDate: Scalars['Date'],
+  paymentId: Scalars['ID']
 };
 
 
@@ -3356,6 +3343,16 @@ export type MutationsUpdatePaymentPlanArgs = {
 
 export type MutationsDeletePaymentPlanArgs = {
   paymentPlanId: Scalars['ID']
+};
+
+
+export type MutationsChooseDeliveryMechanismsForPaymentPlanArgs = {
+  input: ChooseDeliveryMechanismsForPaymentPlanInput
+};
+
+
+export type MutationsAssignFspToDeliveryMechanismArgs = {
+  input: AssignFspToDeliveryMechanismInput
 };
 
 
@@ -4590,9 +4587,11 @@ export type QueryAllLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
+  user?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>
 };
 
 
@@ -4931,9 +4930,11 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
+  user?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>,
   objectType?: Maybe<Scalars['String']>
 };
 
@@ -5158,6 +5159,7 @@ export type QueryAllHouseholdsArgs = {
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
   adminArea?: Maybe<Scalars['ID']>,
+  admin2?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
@@ -5165,7 +5167,6 @@ export type QueryAllHouseholdsArgs = {
   size?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   countryOrigin?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -5498,6 +5499,7 @@ export type RegistrationDataImportNode = Node & {
   pullPictures: Scalars['Boolean'],
   businessArea?: Maybe<UserBusinessAreaNode>,
   screenBeneficiary: Scalars['Boolean'],
+  excluded: Scalars['Boolean'],
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -5554,9 +5556,11 @@ export enum RegistrationDataImportStatus {
   Loading = 'LOADING',
   Deduplication = 'DEDUPLICATION',
   DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  ImportScheduled = 'IMPORT_SCHEDULED',
   Importing = 'IMPORTING',
   ImportError = 'IMPORT_ERROR',
   InReview = 'IN_REVIEW',
+  MergeScheduled = 'MERGE_SCHEDULED',
   Merged = 'MERGED',
   Merging = 'MERGING',
   MergeError = 'MERGE_ERROR',
@@ -5669,8 +5673,13 @@ export type RestartCreateReportInput = {
   businessAreaSlug: Scalars['String'],
 };
 
-export type RevertMarkAsFailedMutation = {
-   __typename?: 'RevertMarkAsFailedMutation',
+export type RevertMarkPaymentAsFailedMutation = {
+   __typename?: 'RevertMarkPaymentAsFailedMutation',
+  payment?: Maybe<PaymentNode>,
+};
+
+export type RevertMarkPaymentRecordAsFailedMutation = {
+   __typename?: 'RevertMarkPaymentRecordAsFailedMutation',
   paymentRecord?: Maybe<PaymentRecordNode>,
 };
 
@@ -6320,6 +6329,7 @@ export enum TargetPopulationStatus {
   SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   Processing = 'PROCESSING',
+  SendingToCashAssist = 'SENDING_TO_CASH_ASSIST',
   ReadyForCashAssist = 'READY_FOR_CASH_ASSIST',
   ReadyForPaymentModule = 'READY_FOR_PAYMENT_MODULE',
   Assigned = 'ASSIGNED'
@@ -7049,6 +7059,7 @@ export type UserNode = Node & {
   lastDoapSync?: Maybe<Scalars['DateTime']>,
   doapHash: Scalars['String'],
   userRoles: Array<UserRoleNode>,
+  documentSet: DocumentNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   createdPaymentPlans: PaymentPlanNodeConnection,
   createdFinancialServiceProviderXlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection,
@@ -7065,6 +7076,15 @@ export type UserNode = Node & {
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
+};
+
+
+export type UserNodeDocumentSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -7648,7 +7668,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'status'>
+    & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
@@ -8152,6 +8172,40 @@ export type ImportXlsxPpListPerFspMutation = (
   )> }
 );
 
+export type MarkPayAsFailedMutationVariables = {
+  paymentId: Scalars['ID']
+};
+
+
+export type MarkPayAsFailedMutation = (
+  { __typename?: 'Mutations' }
+  & { markPaymentAsFailed: Maybe<(
+    { __typename?: 'MarkPaymentAsFailedMutation' }
+    & { payment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'deliveredQuantity' | 'deliveryDate'>
+    )> }
+  )> }
+);
+
+export type RevertMarkPayAsFailedMutationVariables = {
+  paymentId: Scalars['ID'],
+  deliveredQuantity: Scalars['Decimal'],
+  deliveryDate: Scalars['Date']
+};
+
+
+export type RevertMarkPayAsFailedMutation = (
+  { __typename?: 'Mutations' }
+  & { revertMarkPaymentAsFailed: Maybe<(
+    { __typename?: 'RevertMarkPaymentAsFailedMutation' }
+    & { payment: Maybe<(
+      { __typename?: 'PaymentNode' }
+      & Pick<PaymentNode, 'id' | 'unicefId' | 'status' | 'statusDate' | 'deliveredQuantity' | 'deliveryDate'>
+    )> }
+  )> }
+);
+
 export type SetSteficonRuleOnPpListMutationVariables = {
   paymentPlanId: Scalars['ID'],
   steficonRuleId: Scalars['ID']
@@ -8408,7 +8462,7 @@ export type RevertMarkPrAsFailedMutationVariables = {
 export type RevertMarkPrAsFailedMutation = (
   { __typename?: 'Mutations' }
   & { revertMarkPaymentRecordAsFailed: Maybe<(
-    { __typename?: 'RevertMarkAsFailedMutation' }
+    { __typename?: 'RevertMarkPaymentRecordAsFailedMutation' }
     & { paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & PaymentRecordDetailsFragment
@@ -8920,7 +8974,8 @@ export type AllLogEntriesQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>
 };
 
 
@@ -9873,7 +9928,7 @@ export type PaymentQuery = (
       & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'unicefId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -10628,7 +10683,7 @@ export type AllHouseholdsQueryVariables = {
   search?: Maybe<Scalars['String']>,
   residenceStatus?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  admin2?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>
 };
 
@@ -10682,7 +10737,7 @@ export type AllHouseholdsForPopulationTableQueryVariables = {
   search?: Maybe<Scalars['String']>,
   residenceStatus?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  admin2?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>
 };
 
@@ -11146,8 +11201,8 @@ export type AllRegistrationDataImportsQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
-  name_Icontains?: Maybe<Scalars['String']>,
-  importedBy_Id?: Maybe<Scalars['UUID']>,
+  search?: Maybe<Scalars['String']>,
+  importedBy?: Maybe<Scalars['UUID']>,
   status?: Maybe<Scalars['String']>,
   importDate?: Maybe<Scalars['Date']>,
   businessArea?: Maybe<Scalars['String']>
@@ -12281,6 +12336,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     id
     name
     status
+    startDate
+    endDate
   }
   createdBy {
     id
@@ -13661,6 +13718,120 @@ export function useImportXlsxPpListPerFspMutation(baseOptions?: ApolloReactHooks
 export type ImportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useImportXlsxPpListPerFspMutation>;
 export type ImportXlsxPpListPerFspMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListPerFspMutation>;
 export type ImportXlsxPpListPerFspMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
+export const MarkPayAsFailedDocument = gql`
+    mutation markPayAsFailed($paymentId: ID!) {
+  markPaymentAsFailed(paymentId: $paymentId) {
+    payment {
+      id
+      unicefId
+      status
+      statusDate
+      deliveredQuantity
+      deliveryDate
+    }
+  }
+}
+    `;
+export type MarkPayAsFailedMutationFn = ApolloReactCommon.MutationFunction<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
+export type MarkPayAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>, 'mutation'>;
+
+    export const MarkPayAsFailedComponent = (props: MarkPayAsFailedComponentProps) => (
+      <ApolloReactComponents.Mutation<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables> mutation={MarkPayAsFailedDocument} {...props} />
+    );
+    
+export type MarkPayAsFailedProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables> & TChildProps;
+export function withMarkPayAsFailed<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MarkPayAsFailedMutation,
+  MarkPayAsFailedMutationVariables,
+  MarkPayAsFailedProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables, MarkPayAsFailedProps<TChildProps>>(MarkPayAsFailedDocument, {
+      alias: 'markPayAsFailed',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMarkPayAsFailedMutation__
+ *
+ * To run a mutation, you first call `useMarkPayAsFailedMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkPayAsFailedMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markPayAsFailedMutation, { data, loading, error }] = useMarkPayAsFailedMutation({
+ *   variables: {
+ *      paymentId: // value for 'paymentId'
+ *   },
+ * });
+ */
+export function useMarkPayAsFailedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>) {
+        return ApolloReactHooks.useMutation<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>(MarkPayAsFailedDocument, baseOptions);
+      }
+export type MarkPayAsFailedMutationHookResult = ReturnType<typeof useMarkPayAsFailedMutation>;
+export type MarkPayAsFailedMutationResult = ApolloReactCommon.MutationResult<MarkPayAsFailedMutation>;
+export type MarkPayAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
+export const RevertMarkPayAsFailedDocument = gql`
+    mutation revertMarkPayAsFailed($paymentId: ID!, $deliveredQuantity: Decimal!, $deliveryDate: Date!) {
+  revertMarkPaymentAsFailed(paymentId: $paymentId, deliveredQuantity: $deliveredQuantity, deliveryDate: $deliveryDate) {
+    payment {
+      id
+      unicefId
+      status
+      statusDate
+      deliveredQuantity
+      deliveryDate
+    }
+  }
+}
+    `;
+export type RevertMarkPayAsFailedMutationFn = ApolloReactCommon.MutationFunction<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
+export type RevertMarkPayAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>, 'mutation'>;
+
+    export const RevertMarkPayAsFailedComponent = (props: RevertMarkPayAsFailedComponentProps) => (
+      <ApolloReactComponents.Mutation<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables> mutation={RevertMarkPayAsFailedDocument} {...props} />
+    );
+    
+export type RevertMarkPayAsFailedProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables> & TChildProps;
+export function withRevertMarkPayAsFailed<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RevertMarkPayAsFailedMutation,
+  RevertMarkPayAsFailedMutationVariables,
+  RevertMarkPayAsFailedProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables, RevertMarkPayAsFailedProps<TChildProps>>(RevertMarkPayAsFailedDocument, {
+      alias: 'revertMarkPayAsFailed',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRevertMarkPayAsFailedMutation__
+ *
+ * To run a mutation, you first call `useRevertMarkPayAsFailedMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRevertMarkPayAsFailedMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [revertMarkPayAsFailedMutation, { data, loading, error }] = useRevertMarkPayAsFailedMutation({
+ *   variables: {
+ *      paymentId: // value for 'paymentId'
+ *      deliveredQuantity: // value for 'deliveredQuantity'
+ *      deliveryDate: // value for 'deliveryDate'
+ *   },
+ * });
+ */
+export function useRevertMarkPayAsFailedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>) {
+        return ApolloReactHooks.useMutation<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>(RevertMarkPayAsFailedDocument, baseOptions);
+      }
+export type RevertMarkPayAsFailedMutationHookResult = ReturnType<typeof useRevertMarkPayAsFailedMutation>;
+export type RevertMarkPayAsFailedMutationResult = ApolloReactCommon.MutationResult<RevertMarkPayAsFailedMutation>;
+export type RevertMarkPayAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
     mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
@@ -15878,8 +16049,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
-  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String, $userId: String) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module, userId: $userId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -15954,6 +16125,7 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      last: // value for 'last'
  *      search: // value for 'search'
  *      module: // value for 'module'
+ *      userId: // value for 'userId'
  *   },
  * });
  */
@@ -18048,6 +18220,7 @@ export const PaymentDocument = gql`
     }
     parent {
       id
+      status
       unicefId
       program {
         id
@@ -19914,7 +20087,7 @@ export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<type
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
   allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
@@ -20016,7 +20189,7 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
+    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
   allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
@@ -21172,8 +21345,8 @@ export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProject
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -21225,8 +21398,8 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
- *      name_Icontains: // value for 'name_Icontains'
- *      importedBy_Id: // value for 'importedBy_Id'
+ *      search: // value for 'search'
+ *      importedBy: // value for 'importedBy'
  *      status: // value for 'status'
  *      importDate: // value for 'importDate'
  *      businessArea: // value for 'businessArea'
@@ -22854,18 +23027,18 @@ export type ResolversTypes = {
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
   RoleSubsystem: RoleSubsystem,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
-  IndividualDisability: IndividualDisability,
-  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  IndividualDisability: IndividualDisability,
+  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
@@ -23030,9 +23203,6 @@ export type ResolversTypes = {
   GenericPaymentPlanNode: ResolverTypeWrapper<GenericPaymentPlanNode>,
   EditPaymentVerificationInput: EditPaymentVerificationInput,
   EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
-  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
-  CreateFinancialServiceProviderMutation: ResolverTypeWrapper<CreateFinancialServiceProviderMutation>,
-  EditFinancialServiceProviderMutation: ResolverTypeWrapper<EditFinancialServiceProviderMutation>,
   ExportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ExportXlsxPaymentVerificationPlanFile>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   ImportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ImportXlsxPaymentVerificationPlanFile>,
@@ -23042,15 +23212,12 @@ export type ResolversTypes = {
   DiscardPaymentVerificationPlan: ResolverTypeWrapper<DiscardPaymentVerificationPlan>,
   InvalidPaymentVerificationPlan: ResolverTypeWrapper<InvalidPaymentVerificationPlan>,
   DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>,
-  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
-  ChooseDeliveryMechanismsForPaymentPlanMutation: ResolverTypeWrapper<ChooseDeliveryMechanismsForPaymentPlanMutation>,
-  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
-  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
-  AssignFspToDeliveryMechanismMutation: ResolverTypeWrapper<AssignFspToDeliveryMechanismMutation>,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   MarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<MarkPaymentRecordAsFailedMutation>,
-  RevertMarkAsFailedMutation: ResolverTypeWrapper<RevertMarkAsFailedMutation>,
+  RevertMarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<RevertMarkPaymentRecordAsFailedMutation>,
+  MarkPaymentAsFailedMutation: ResolverTypeWrapper<MarkPaymentAsFailedMutation>,
+  RevertMarkPaymentAsFailedMutation: ResolverTypeWrapper<RevertMarkPaymentAsFailedMutation>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
   Action: Action,
@@ -23060,6 +23227,11 @@ export type ResolversTypes = {
   UpdatePaymentPlanInput: UpdatePaymentPlanInput,
   UpdatePaymentPlanMutation: ResolverTypeWrapper<UpdatePaymentPlanMutation>,
   DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>,
+  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
+  ChooseDeliveryMechanismsForPaymentPlanMutation: ResolverTypeWrapper<ChooseDeliveryMechanismsForPaymentPlanMutation>,
+  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
+  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
+  AssignFspToDeliveryMechanismMutation: ResolverTypeWrapper<AssignFspToDeliveryMechanismMutation>,
   ExportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListMutation>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   ImportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListMutation>,
@@ -23303,18 +23475,18 @@ export type ResolversParentTypes = {
   ProgramNodeEdge: ProgramNodeEdge,
   RoleNode: RoleNode,
   RoleSubsystem: RoleSubsystem,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: CountAndPercentageNode,
-  IndividualDisability: IndividualDisability,
-  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
+  IndividualDisability: IndividualDisability,
+  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: BankAccountInfoNode,
@@ -23479,9 +23651,6 @@ export type ResolversParentTypes = {
   GenericPaymentPlanNode: GenericPaymentPlanNode,
   EditPaymentVerificationInput: EditPaymentVerificationInput,
   EditPaymentVerificationMutation: EditPaymentVerificationMutation,
-  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
-  CreateFinancialServiceProviderMutation: CreateFinancialServiceProviderMutation,
-  EditFinancialServiceProviderMutation: EditFinancialServiceProviderMutation,
   ExportXlsxPaymentVerificationPlanFile: ExportXlsxPaymentVerificationPlanFile,
   Upload: Scalars['Upload'],
   ImportXlsxPaymentVerificationPlanFile: ImportXlsxPaymentVerificationPlanFile,
@@ -23491,15 +23660,12 @@ export type ResolversParentTypes = {
   DiscardPaymentVerificationPlan: DiscardPaymentVerificationPlan,
   InvalidPaymentVerificationPlan: InvalidPaymentVerificationPlan,
   DeletePaymentVerificationPlan: DeletePaymentVerificationPlan,
-  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
-  ChooseDeliveryMechanismsForPaymentPlanMutation: ChooseDeliveryMechanismsForPaymentPlanMutation,
-  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
-  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
-  AssignFspToDeliveryMechanismMutation: AssignFspToDeliveryMechanismMutation,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   MarkPaymentRecordAsFailedMutation: MarkPaymentRecordAsFailedMutation,
-  RevertMarkAsFailedMutation: RevertMarkAsFailedMutation,
+  RevertMarkPaymentRecordAsFailedMutation: RevertMarkPaymentRecordAsFailedMutation,
+  MarkPaymentAsFailedMutation: MarkPaymentAsFailedMutation,
+  RevertMarkPaymentAsFailedMutation: RevertMarkPaymentAsFailedMutation,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
   Action: Action,
@@ -23509,6 +23675,11 @@ export type ResolversParentTypes = {
   UpdatePaymentPlanInput: UpdatePaymentPlanInput,
   UpdatePaymentPlanMutation: UpdatePaymentPlanMutation,
   DeletePaymentPlanMutation: DeletePaymentPlanMutation,
+  ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
+  ChooseDeliveryMechanismsForPaymentPlanMutation: ChooseDeliveryMechanismsForPaymentPlanMutation,
+  AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
+  FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
+  AssignFspToDeliveryMechanismMutation: AssignFspToDeliveryMechanismMutation,
   ExportXLSXPaymentPlanPaymentListMutation: ExportXlsxPaymentPlanPaymentListMutation,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ExportXlsxPaymentPlanPaymentListPerFspMutation,
   ImportXLSXPaymentPlanPaymentListMutation: ImportXlsxPaymentPlanPaymentListMutation,
@@ -23927,10 +24098,6 @@ export type CreateDashboardReportResolvers<ContextType = any, ParentType extends
   success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
-export type CreateFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFinancialServiceProviderMutation'] = ResolversParentTypes['CreateFinancialServiceProviderMutation']> = {
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
-};
-
 export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
   grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
@@ -24078,6 +24245,9 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
+  cleared?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  clearedDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  clearedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -24100,11 +24270,9 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  uniqueForIndividual?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  validForDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
-};
-
-export type EditFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditFinancialServiceProviderMutation'] = ResolversParentTypes['EditFinancialServiceProviderMutation']> = {
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
 };
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
@@ -24800,6 +24968,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -24958,6 +25127,10 @@ export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends Reso
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type MarkPaymentAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarkPaymentAsFailedMutation'] = ResolversParentTypes['MarkPaymentAsFailedMutation']> = {
+  payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
+};
+
 export type MarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['MarkPaymentRecordAsFailedMutation']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
 };
@@ -24985,8 +25158,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>,
   editPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditPaymentVerificationPlanArgs, 'input'>>,
-  createFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['CreateFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFinancialServiceProviderArgs, 'businessAreaSlug' | 'inputs'>>,
-  editFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['EditFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsEditFinancialServiceProviderArgs, 'businessAreaSlug' | 'financialServiceProviderId' | 'inputs'>>,
   exportXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ExportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentVerificationPlanFileArgs, 'paymentVerificationPlanId'>>,
   importXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ImportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentVerificationPlanFileArgs, 'file' | 'paymentVerificationPlanId'>>,
   activatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['ActivatePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsActivatePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
@@ -24994,16 +25165,18 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
   invalidPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['InvalidPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsInvalidPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
   deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
-  chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
-  assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   markPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
-  revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>,
+  revertMarkPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentRecordAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentRecordId'>>,
+  markPaymentAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentAsFailedArgs, 'paymentId'>>,
+  revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
   updatePaymentPlan?: Resolver<Maybe<ResolversTypes['UpdatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>>,
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>,
+  chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
+  assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
@@ -25675,6 +25848,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
@@ -25747,7 +25921,11 @@ export type RestartCreateReportResolvers<ContextType = any, ParentType extends R
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
 };
 
-export type RevertMarkAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkAsFailedMutation'] = ResolversParentTypes['RevertMarkAsFailedMutation']> = {
+export type RevertMarkPaymentAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkPaymentAsFailedMutation'] = ResolversParentTypes['RevertMarkPaymentAsFailedMutation']> = {
+  payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>,
+};
+
+export type RevertMarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['RevertMarkPaymentRecordAsFailedMutation']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
 };
 
@@ -26546,6 +26724,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  documentSet?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, UserNodeDocumentSetArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   createdPaymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, UserNodeCreatedPaymentPlansArgs>,
   createdFinancialServiceProviderXlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs>,
@@ -26647,7 +26826,6 @@ export type Resolvers<ContextType = any> = {
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
-  CreateFinancialServiceProviderMutation?: CreateFinancialServiceProviderMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
@@ -26676,7 +26854,6 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeConnection?: DocumentNodeConnectionResolvers<ContextType>,
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
-  EditFinancialServiceProviderMutation?: EditFinancialServiceProviderMutationResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
@@ -26752,6 +26929,7 @@ export type Resolvers<ContextType = any> = {
   LogEntryNode?: LogEntryNodeResolvers<ContextType>,
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
   LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
+  MarkPaymentAsFailedMutation?: MarkPaymentAsFailedMutationResolvers<ContextType>,
   MarkPaymentRecordAsFailedMutation?: MarkPaymentRecordAsFailedMutationResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
@@ -26812,7 +26990,8 @@ export type Resolvers<ContextType = any> = {
   ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>,
   ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>,
   RestartCreateReport?: RestartCreateReportResolvers<ContextType>,
-  RevertMarkAsFailedMutation?: RevertMarkAsFailedMutationResolvers<ContextType>,
+  RevertMarkPaymentAsFailedMutation?: RevertMarkPaymentAsFailedMutationResolvers<ContextType>,
+  RevertMarkPaymentRecordAsFailedMutation?: RevertMarkPaymentRecordAsFailedMutationResolvers<ContextType>,
   RoleNode?: RoleNodeResolvers<ContextType>,
   RuleCommitNode?: RuleCommitNodeResolvers<ContextType>,
   RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>,

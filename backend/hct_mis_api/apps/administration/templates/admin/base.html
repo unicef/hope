@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        const url = window.location.href;
+        let color = '';
+        if (window.location.hostname === 'localhost') {
+            color = '#FF6600';
+        } else if (url.includes('trn')) {
+            color = '#BF360C';
+        } else if (url.includes('stg')) {
+            color = '#673AB7';
+        } else if (url.includes('dev')) {
+            color = '#00796B';
+        } else {
+            color = '#00ADEF';
+        }
+        document.getElementById("header").style.backgroundColor = color;
+    });
+</script>
+{% endblock %}

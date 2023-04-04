@@ -24,7 +24,7 @@ class AreaFilter(FilterSet):
         }
 
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet":
-        return qs.filter(area_type__country__name__iexact=value)
+        return qs.filter(area_type__country__business_areas__slug=value)
 
     def parent_id_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet":
         parent_id = decode_id_string(value)

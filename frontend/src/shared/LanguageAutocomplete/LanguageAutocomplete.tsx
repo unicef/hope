@@ -3,8 +3,10 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LocationState, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useDebounce } from '../../hooks/useDebounce';
+import { createHandleFilterChange } from '../../utils/utils';
 import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
 
@@ -15,48 +17,62 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function LanguageAutocomplete({
+export const LanguageAutocomplete = ({
   disabled,
   fullWidth,
-  onFilterChange,
   name,
+  onFilterChange,
+  filter,
   value,
 }: {
   disabled?;
   fullWidth?: boolean;
-  onFilterChange?;
-  name?;
-  value?;
-}): React.ReactElement {
+  name: string;
+  onFilterChange: (filters: { [key: string]: string }) => void;
+  filter?;
+  value?: string;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
+
   const [loadData, { data, loading }] = useLanguageAutocompleteLazyQuery({
     variables: {
       first: 20,
       code: debouncedInputText,
     },
   });
+
   useEffect(() => {
     if (open) {
       loadData();
     }
   }, [open, debouncedInputText, loadData]);
 
-  const onChangeMiddleware = (e, selectedValue): void => {
-    onFilterChange((filters) => ({
-      ...filters,
-      [name]: selectedValue?.node?.code || undefined,
-    }));
-  };
+  // load all languages on mount to match the value from the url
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    useHistory<LocationState>(),
+    useLocation(),
+  );
+
+  if (!data) return null;
+
   return (
     <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options) => options}
-      onChange={onChangeMiddleware}
+      onChange={(_, selectedValue) =>
+        handleFilterChange(name, selectedValue?.node?.code)
+      }
       onOpen={() => {
         setOpen(true);
       }}
@@ -66,13 +82,18 @@ export function LanguageAutocomplete({
         onInputTextChange('');
       }}
       getOptionSelected={(option, v) => {
-        return v?.cursor === option.cursor;
+        return v === option.node.code;
       }}
       getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
+        let label;
+        if (option.node) {
+          label = `${option.node.english}`;
+        } else {
+          label =
+            data?.allLanguages?.edges?.find((el) => el.node.code === option)
+              ?.node.english || '';
         }
-        return `${option.node.english}`;
+        return `${label}`;
       }}
       disabled={disabled}
       options={get(data, 'allLanguages.edges', [])}
@@ -100,4 +121,4 @@ export function LanguageAutocomplete({
       )}
     />
   );
-}
+};

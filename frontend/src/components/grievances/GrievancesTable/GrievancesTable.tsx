@@ -35,7 +35,10 @@ export const GrievancesTable = ({
     search: filter.search,
     status: [filter.status],
     fsp: filter.fsp,
-    createdAtRange: JSON.stringify(filter.createdAtRange),
+    createdAtRange: JSON.stringify({
+      min: filter.createdAtRangeMin,
+      max: filter.createdAtRangeMax,
+    }),
     category: filter.category,
     issueType: filter.issueType,
     assignedTo: filter.assignedTo,

@@ -134,6 +134,7 @@ class RdiMergeTask:
         "kobo_asset_id",
         "row_id",
         "disability_certificate_picture",
+        "preferred_language",
     )
 
     def merge_admin_areas(
@@ -312,6 +313,9 @@ class RdiMergeTask:
                 obj_hct = RegistrationDataImport.objects.get(
                     id=registration_data_import_id,
                 )
+
+                obj_hct.status = RegistrationDataImport.MERGING
+                obj_hct.save(update_fields=["status"])
 
                 obj_hub = RegistrationDataImportDatahub.objects.get(
                     hct_id=registration_data_import_id,

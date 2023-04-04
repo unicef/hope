@@ -11,18 +11,21 @@ from django.utils import timezone
 import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
-from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
-from hct_mis_api.apps.core.schema import BusinessAreaNode
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.grievance.inputs import (
+    CreateGrievanceTicketInput,
+    CreateTicketNoteInput,
+    UpdateGrievanceTicketInput,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
@@ -42,11 +45,7 @@ from hct_mis_api.apps.grievance.mutations_extras.feedback import (
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
     save_grievance_complaint_extras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.main import (
-    CreateGrievanceTicketExtrasInput,
-    UpdateGrievanceTicketExtrasInput,
-    _no_operation_close_method,
-)
+from hct_mis_api.apps.grievance.mutations_extras.main import _no_operation_close_method
 from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
     save_payment_verification_extras,
 )
@@ -88,38 +87,6 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
-
-
-class CreateGrievanceTicketInput(graphene.InputObjectType):
-    description = graphene.String(required=True)
-    assigned_to = graphene.GlobalID(node=UserNode, required=True)
-    category = graphene.Int(required=True)
-    issue_type = graphene.Int()
-    admin = graphene.String()
-    area = graphene.String()
-    language = graphene.String(required=True)
-    consent = graphene.Boolean(required=True)
-    business_area = graphene.GlobalID(node=BusinessAreaNode, required=True)
-    linked_tickets = graphene.List(graphene.ID)
-    extras = CreateGrievanceTicketExtrasInput()
-
-
-class UpdateGrievanceTicketInput(graphene.InputObjectType):
-    ticket_id = graphene.GlobalID(node=GrievanceTicketNode, required=True)
-    description = graphene.String()
-    assigned_to = graphene.GlobalID(node=UserNode, required=False)
-    admin = graphene.String()
-    area = graphene.String()
-    language = graphene.String()
-    linked_tickets = graphene.List(graphene.ID)
-    household = graphene.GlobalID(node=HouseholdNode, required=False)
-    individual = graphene.GlobalID(node=IndividualNode, required=False)
-    extras = UpdateGrievanceTicketExtrasInput()
-
-
-class CreateTicketNoteInput(graphene.InputObjectType):
-    description = graphene.String(required=True)
-    ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
 
 
 class CreateGrievanceTicketMutation(PermissionMutation):
@@ -717,8 +684,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             ticket_details = grievance_ticket.ticket_details
             if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
                 selected_individuals = ticket_details.selected_individuals.all()
-                for individual in selected_individuals:
-                    traverse_sibling_tickets(grievance_ticket, individual)
+                traverse_sibling_tickets(grievance_ticket, selected_individuals)
 
             close_function: Optional[Callable] = cls.get_close_function(
                 grievance_ticket.category, grievance_ticket.issue_type

@@ -98,7 +98,7 @@ class TestDashboardQueries(APITestCase):
 
         household1, individuals1 = create_household(
             household_args={
-                "size": 2,
+                "size": 15,
                 "business_area": cls.business_area,
                 "female_age_group_0_5_disabled_count": 2,
                 "male_age_group_60_disabled_count": 2,
@@ -116,7 +116,7 @@ class TestDashboardQueries(APITestCase):
         )
         household2, individuals2 = create_household(
             household_args={
-                "size": 2,
+                "size": 15,
                 "business_area": cls.business_area,
                 "female_age_group_0_5_disabled_count": 2,
                 "male_age_group_60_disabled_count": 2,
@@ -134,7 +134,7 @@ class TestDashboardQueries(APITestCase):
         )
         household3, individuals3 = create_household(
             household_args={
-                "size": 2,
+                "size": 5,
                 "business_area": cls.business_area,
                 "female_age_group_18_59_disabled_count": 1,
                 "female_age_group_0_5_count": 0,
@@ -151,7 +151,7 @@ class TestDashboardQueries(APITestCase):
         )
         household4, individuals4 = create_household(
             household_args={
-                "size": 2,
+                "size": 5,
                 "business_area": cls.business_area,
                 "female_age_group_18_59_disabled_count": 1,
                 "female_age_group_0_5_count": 0,

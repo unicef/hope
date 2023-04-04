@@ -26,7 +26,6 @@ from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_tas
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
-from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -53,15 +52,13 @@ from .celery_tasks import (
     target_population_full_rebuild,
     target_population_rebuild_stats,
 )
+from .inputs import (
+    CopyTargetPopulationInput,
+    CreateTargetPopulationInput,
+    UpdateTargetPopulationInput,
+)
 
 logger = logging.getLogger(__name__)
-
-
-class CopyTargetPopulationInput(graphene.InputObjectType):
-    """All attribute inputs to create a new entry."""
-
-    id = graphene.ID()
-    name = graphene.String()
 
 
 class ValidatedMutation(PermissionMutation):
@@ -92,26 +89,6 @@ class ValidatedMutation(PermissionMutation):
         for validator in cls.object_validators:
             validator.validate(object)
         return object
-
-
-class UpdateTargetPopulationInput(graphene.InputObjectType):
-    id = graphene.ID(required=True)
-    name = graphene.String()
-    targeting_criteria = TargetingCriteriaObjectType()
-    program_id = graphene.ID()
-    vulnerability_score_min = graphene.Decimal()
-    vulnerability_score_max = graphene.Decimal()
-    excluded_ids = graphene.String()
-    exclusion_reason = graphene.String()
-
-
-class CreateTargetPopulationInput(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    targeting_criteria = TargetingCriteriaObjectType(required=True)
-    business_area_slug = graphene.String(required=True)
-    program_id = graphene.ID(required=True)
-    excluded_ids = graphene.String(required=True)
-    exclusion_reason = graphene.String()
 
 
 def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
@@ -397,7 +374,9 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population.finalized_by = user
                 target_population.finalized_at = timezone.now()
                 target_population.save()
-                transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
+                transaction.on_commit(
+                    lambda: send_target_population_task.delay(target_population_id=target_population.id)
+                )
                 transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,

@@ -1,6 +1,9 @@
 from environ.environ import Env
 
 DEFAULTS = {
+    "AURORA_SERVER": (str, ""),
+    "AURORA_TOKEN": (str, ""),
+    "AURORA_USER": (str, ""),
     "ENV": (str, "dev"),
     "DOMAIN": (str, "localhost"),
     "DJANGO_ALLOWED_HOSTS": (list, "*"),

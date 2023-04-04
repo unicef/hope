@@ -1,6 +1,8 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { createHandleFilterChange } from '../../utils/utils';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
@@ -10,13 +12,21 @@ interface UsersListFiltersProps {
   onFilterChange;
   filter;
 }
-export function UsersListFilters({
+export const UsersListFilters = ({
   onFilterChange,
   filter,
-}: UsersListFiltersProps): React.ReactElement {
+}: UsersListFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+
   const { data: choices } = useUserChoiceDataQuery();
   if (!choices) {
     return null;
@@ -29,12 +39,12 @@ export function UsersListFilters({
           <SearchTextField
             label={t('Search')}
             value={filter.search}
-            onChange={(e) => handleFilterChange(e, 'search')}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'partner')}
+            onChange={(e) => handleFilterChange('partner', e.target.value)}
             label={t('Partner')}
             value={filter.partner}
           >
@@ -52,7 +62,7 @@ export function UsersListFilters({
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'roles')}
+            onChange={(e) => handleFilterChange('roles', e.target.value)}
             label={t('Role')}
             value={filter.roles}
           >
@@ -70,7 +80,7 @@ export function UsersListFilters({
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
           >
@@ -89,4 +99,4 @@ export function UsersListFilters({
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

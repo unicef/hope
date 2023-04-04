@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %} {% load i18n admin_urls static %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo; Clear Cache
+</div>
+{% endblock %}
+{% block content %}
+{% if form and is_root %}
+<h2>Please select which cached key you would like to remove:</h2>
+<br>
+<form method="post" action=".">
+  {% csrf_token %} {{form.as_p}}
+  <br>
+  <a href="../"><input type="button" value="Back" class="btn btn-primary" /></a>
+  <input type="submit" value="CLEAR" />
+  </form>
+{% endif %}
+<br>
+<br>
+<div>
+<p>Cached keys:</p>
+  {% for key in cache_keys %}
+    <li>{{ key }}</li>
+  {% endfor %}
+  {% if not cache_keys %}
+    <i>--empty--</i>
+  {% endif %}
+</div>
+{% endblock %}

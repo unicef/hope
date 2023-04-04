@@ -16,7 +16,6 @@ interface HouseholdTableProps {
   filter;
   choicesData: HouseholdChoiceDataQuery;
   canViewDetails: boolean;
-  filterOrderBy: string;
 }
 
 export const HouseholdTable = ({
@@ -24,14 +23,16 @@ export const HouseholdTable = ({
   filter,
   choicesData,
   canViewDetails,
-  filterOrderBy,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
-    familySize: JSON.stringify(filter.householdSize),
+    familySize: JSON.stringify({
+      min: filter.householdSizeMin,
+      max: filter.householdSizeMax,
+    }),
     search: filter.text,
-    adminArea: filter.adminArea?.node?.id,
+    admin2: filter.admin2,
     residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {
@@ -48,7 +49,7 @@ export const HouseholdTable = ({
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
         allowSort={false}
-        filterOrderBy={filterOrderBy}
+        filterOrderBy={filter.orderBy}
         renderRow={(row) => (
           <HouseHoldTableRow
             key={row.id}

@@ -13,9 +13,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
+    process_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
+    ImportedHousehold,
     ImportedIndividual,
     Record,
 )
@@ -363,3 +365,34 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[0][0].startswith(registration_id_to_ba_name_map.get(registration_id, "wrong"))
                 assert result[0][1] == page_size
                 assert result[1][1] == page_size
+
+    def test_atomic_rollback_if_record_invalid(self) -> None:
+        for document_type in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
+            ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
+        create_ukraine_business_area()
+        create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
+        create_record(
+            fields={"household": [{"aa": "bbb"}], "individuals": [{"abc": "xyz"}]},
+            registration=3,
+            status=Record.STATUS_TO_IMPORT,
+        )
+        records_ids = Record.objects.all().values_list("id", flat=True)
+        rdi = FlexRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+
+        assert Record.objects.count() == 2
+        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
+        assert ImportedIndividual.objects.count() == 0
+        assert ImportedHousehold.objects.count() == 0
+
+        process_flex_records_task(rdi.pk, list(records_ids))
+        rdi.refresh_from_db()
+
+        assert Record.objects.filter(status=Record.STATUS_TO_IMPORT).count() == 1
+        assert Record.objects.filter(status=Record.STATUS_ERROR).count() == 1
+
+        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORT_ERROR).count() == 1
+        assert rdi.error_message == "Records with errors were found during processing"
+        assert rdi.number_of_individuals == 0
+        assert rdi.number_of_households == 0
+        assert ImportedIndividual.objects.count() == 0
+        assert ImportedHousehold.objects.count() == 0
