@@ -91,10 +91,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
-            str(head_of_household.phone_no) if household and hasattr(household, "phone_no") else "",
-            str(head_of_household.phone_no_alternative)
-            if household and hasattr(household, "phone_no_alternative")
-            else "",
+            str(head_of_household.phone_no) if head_of_household else "",
+            str(head_of_household.phone_no_alternative) if head_of_household else "",
             str(household.admin1.name) if household.admin1 else "",
             str(household.admin2.name) if household.admin2 else "",
             str(household.village),

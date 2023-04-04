@@ -314,6 +314,33 @@ class GenericPayment(TimeStampedUUIDModel):
             return None
         return verification
 
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        raise NotImplementedError()
+
+    def mark_as_failed(self) -> None:
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
+
+    @property
+    def get_unicef_id(self) -> str:
+        return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -395,15 +422,20 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()
     dispersion_end_date = models.DateField()
-    female_children_count = models.PositiveSmallIntegerField(default=0)
-    male_children_count = models.PositiveSmallIntegerField(default=0)
-    female_adults_count = models.PositiveSmallIntegerField(default=0)
-    male_adults_count = models.PositiveSmallIntegerField(default=0)
-    total_households_count = models.PositiveSmallIntegerField(default=0)
-    total_individuals_count = models.PositiveSmallIntegerField(default=0)
+    female_children_count = models.PositiveIntegerField(default=0)
+    male_children_count = models.PositiveIntegerField(default=0)
+    female_adults_count = models.PositiveIntegerField(default=0)
+    male_adults_count = models.PositiveIntegerField(default=0)
+    total_households_count = models.PositiveIntegerField(default=0)
+    total_individuals_count = models.PositiveIntegerField(default=0)
     imported_file_date = models.DateTimeField(blank=True, null=True)
     imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_file_entitlement = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
+    export_file_per_fsp = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -687,16 +719,27 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def has_export_file(self) -> bool:
         try:
-            return self.export_file is not None
+            if self.status == PaymentPlan.Status.LOCKED:
+                return self.export_file_entitlement is not None
+            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+                return self.export_file_per_fsp is not None
+            else:
+                return False
         except FileTemp.DoesNotExist:
             return False
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        return self.export_file.file.url if self.export_file else None
+        if self.status == PaymentPlan.Status.LOCKED:
+            return self.export_file_entitlement.file.url
+        elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+            return self.export_file_per_fsp.file.url
+        else:
+            return None
 
     @property
     def imported_file_name(self) -> str:
+        """used for import entitlements"""
         try:
             return self.imported_file.file.name if self.imported_file else ""
         except FileTemp.DoesNotExist:
@@ -711,10 +754,16 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     def remove_export_file(self) -> None:
-        if self.export_file:
-            self.export_file.file.delete(save=False)
-            self.export_file.delete()
-            self.export_file = None
+        # remove export_file_entitlement
+        if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
+            self.export_file_entitlement.file.delete(save=False)
+            self.export_file_entitlement.delete()
+            self.export_file_entitlement = None
+        # remove export_file_per_fsp
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
+            self.export_file_per_fsp.file.delete(save=False)
+            self.export_file_per_fsp.delete()
+            self.export_file_per_fsp = None
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -1176,22 +1225,8 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     def unicef_id(self) -> str:
         return self.ca_id
 
-    def mark_as_failed(self) -> None:
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
-        self.delivered_quantity = 0
-        self.delivered_quantity_usd = 0
-        self.delivery_date = None
-
-    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
-        if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment record marked as force failed can be reverted")
-        self.status = self.STATUS_SUCCESS
-        self.status_date = timezone.now()
-        self.delivered_quantity = delivered_quantity
-        self.delivery_date = delivery_date
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        return self.STATUS_SUCCESS
 
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
@@ -1222,6 +1257,21 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     @property
     def full_name(self) -> str:
         return self.collector.full_name
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+        if delivered_quantity == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED
+
+        elif delivered_quantity < self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL
+
+        elif delivered_quantity == self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS
+
+        else:
+            raise ValidationError(
+                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
+            )
 
     objects = PaymentManager()
 

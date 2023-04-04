@@ -11,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import JSONField, QuerySet
+from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -109,6 +109,7 @@ SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
 GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
+FOSTER_CHILD = "FOSTER_CHILD"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_OTHER = "OTHER"
 
@@ -132,6 +133,7 @@ RELATIONSHIP_CHOICE = (
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
+    (FOSTER_CHILD, "Foster child"),
 )
 YES = "1"
 NO = "0"
@@ -145,11 +147,13 @@ COLLECT_TYPE_UNKNOWN = ""
 COLLECT_TYPE_NONE = "0"
 COLLECT_TYPE_FULL = "1"
 COLLECT_TYPE_PARTIAL = "2"
+COLLECT_TYPE_SIZE_ONLY = "3"
 
 COLLECT_TYPES = (
     (COLLECT_TYPE_UNKNOWN, _("Unknown")),
     (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
     (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
     (COLLECT_TYPE_NONE, _("No individual data")),
 )
 
@@ -176,6 +180,7 @@ IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
 IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
 IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
 IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE = "DISABILITY_CERTIFICATE"
+IDENTIFICATION_TYPE_FOSTER_CHILD = "FOSTER_CHILD"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -187,6 +192,7 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
     (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
     (IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE, _("Disability Certificate")),
+    (IDENTIFICATION_TYPE_FOSTER_CHILD, _("Foster Child")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -579,6 +585,8 @@ class DocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
     is_identity_document = models.BooleanField(default=True)
+    unique_for_individual = models.BooleanField(default=False)
+    valid_for_deduplication = models.BooleanField(default=False)
 
     class Meta:
         ordering = [
@@ -607,6 +615,9 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    cleared = models.BooleanField(default=False)
+    cleared_date = models.DateTimeField(default=timezone.now)
+    cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
         from django.core.exceptions import ValidationError
@@ -619,10 +630,33 @@ class Document(AbstractSyncable, SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
+                fields=["type", "country"],
+                condition=Q(
+                    Q(is_removed=False)
+                    & Q(status="VALID")
+                    & Func(
+                        F("type_id"),
+                        Value(True),
+                        function="check_unique_document_for_individual",
+                        output_field=BooleanField(),
+                    )
+                ),
+                name="unique_for_individual_if_not_removed_and_valid",
+            ),
+            UniqueConstraint(
                 fields=["document_number", "type", "country"],
-                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                condition=Q(
+                    Q(is_removed=False)
+                    & Q(status="VALID")
+                    & Func(
+                        F("type_id"),
+                        Value(False),
+                        function="check_unique_document_for_individual",
+                        output_field=BooleanField(),
+                    )
+                ),
                 name="unique_if_not_removed_and_valid",
-            )
+            ),
         ]
 
     def __str__(self) -> str:
@@ -826,6 +860,7 @@ class Individual(
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
+    relationship_confirmed = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
@@ -903,6 +938,10 @@ class Individual(
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()
+
+    def set_relationship_confirmed_flag(self, confirmed: bool) -> None:
+        self.relationship_confirmed = confirmed
+        self.save(update_fields=["relationship_confirmed"])
 
     def __str__(self) -> str:
         return self.unicef_id or ""

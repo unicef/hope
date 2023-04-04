@@ -81,6 +81,42 @@ STATICFILES_FINDERS = (
     "compressor.finders.CompressorFinder",
 )
 
+SENTRY_DSN = env("SENTRY_DSN")
+if SENTRY_DSN:
+    import re
+
+    sentry_key = re.search(r"//(.*)@", SENTRY_DSN).group(1)
+    sentry_id = re.search(r"@.*/(\d*)$", SENTRY_DSN).group(1)
+    CSP_REPORT_URI = (f"https://excubo.unicef.io/api/{sentry_id}/security/?sentry_key={sentry_key}",)
+    CSP_REPORT_ONLY = True
+CSP_REPORT_PERCENTAGE = 0.1
+
+# default source as self
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+)
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+)
+CSP_FONT_SRC = (
+    "'self'",
+    "data:",
+)
+CSP_MEDIA_SRC = ("'self'",)
+CSP_CONNECT_SRC = (
+    "excubo.unicef.io",
+    "sentry.io",
+)
+
 DEBUG = True
 IS_DEV = False
 IS_STAGING = False
@@ -183,13 +219,13 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
+    "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
 ]
 
 TEMPLATES: List[Dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(PROJECT_ROOT, "apps", "administration", "templates"),
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
@@ -235,6 +271,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
+    "hct_mis_api.aurora.apps.Config",
 ]
 
 DJANGO_APPS = [
@@ -478,6 +515,11 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
+    "AURORA_SERVER": (
+        "",
+        "",
+        str,
+    ),
     "DEDUPLICATION_DUPLICATE_SCORE": (
         6.0,
         "Results equal or above this score are considered duplicates",
@@ -545,13 +587,14 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "QUICK_LINKS": (
-        """Kobo,https://kf-hope.unitst.org/;
-CashAssist,https://cashassist-trn.crm4.dynamics.com/;
-Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/;
-elasticsearch,hope-elasticsearch-coordinating-only:9200;
-Datamart,https://datamart.unicef.io;
-Flower,https://stg-hope.unitst.org/flower/;
-Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
+        """Kobo,https://kf-hope.unitst.org/
+CashAssist,https://cashassist-trn.crm4.dynamics.com/
+Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
+elasticsearch,hope-elasticsearch-coordinating-only:9200
+Datamart,https://datamart.unicef.io
+Flower,https://stg-hope.unitst.org/flower/
+Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/
+Clear Cache,clear-cache/
 """,
         "",
         str,
@@ -792,6 +835,7 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
+MAX_STORAGE_FILE_SIZE = 30
 USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
@@ -846,6 +890,10 @@ SHELL_PLUS_DONT_LOAD = [
     "mis_datahub.Individual",
     "mis_datahub.Household",
 ]
+#
+# AURORA_SERVER = env("AURORA_SERVER")
+# AURORA_TOKEN = env("AURORA_TOKEN")
+# AURORA_USER = env("AURORA_USER")
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
 

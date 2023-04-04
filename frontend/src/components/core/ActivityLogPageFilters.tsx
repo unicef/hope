@@ -1,10 +1,13 @@
 import { Grid, MenuItem } from '@material-ui/core';
+import { useHistory, useLocation } from 'react-router-dom';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { createHandleFilterChange } from '../../utils/utils';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
+import {AssigneeAutocomplete} from "../../shared/AssigneeAutocomplete";
 
 interface ActivityLogPageFiltersProps {
   onFilterChange;
@@ -15,8 +18,15 @@ export function ActivityLogPageFilters({
   filter,
 }: ActivityLogPageFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
 
   const modules = {
     program: 'Programme',
@@ -34,13 +44,13 @@ export function ActivityLogPageFilters({
           <SearchTextField
             label={t('Search')}
             value={filter.search}
-            onChange={(e) => handleFilterChange(e, 'search')}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='filters-search'
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'module')}
+            onChange={(e) => handleFilterChange('module', e.target.value)}
             label={t('Module')}
             value={filter.module}
             icon={<ViewModuleRoundedIcon />}
@@ -62,6 +72,15 @@ export function ActivityLogPageFilters({
                 </MenuItem>
               ))}
           </SelectFilter>
+        </Grid>
+        <Grid item>
+          <AssigneeAutocomplete
+            label="User"
+            onFilterChange={onFilterChange}
+            filter={filter}
+            name='userId'
+            value={filter.userId}
+          />
         </Grid>
       </Grid>
     </ContainerWithBorder>

@@ -312,7 +312,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     )
     extras = JSONField(blank=True, default=dict)
     ignored = models.BooleanField(default=False, db_index=True)
-    household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
+    household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
 
     objects = GrievanceTicketManager()
 

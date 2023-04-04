@@ -92,7 +92,7 @@ class Permissions(Enum):
     PM_IMPORT_XLSX_WITH_RECONCILIATION = auto()
     PM_EXPORT_XLSX_FOR_FSP = auto()
     PM_DOWNLOAD_XLSX_FOR_FSP = auto()
-    PM_SENDING_PAYMENT_PLAN_TO_FSP = auto()
+    PM_MARK_PAYMENT_AS_FAILED = auto()
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()

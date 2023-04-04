@@ -1031,7 +1031,7 @@ class Query(graphene.ObjectType):
         additional_filters: Q = chart_create_filter_query_for_payment_verification_gfk(
             filters,
             program_id_path="payment__parent__program__id,payment_record__parent__program__id",
-            administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
+            administrative_area_path="payment__household__admin_area,payment_record__household__admin_area",
         )
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,
@@ -1311,7 +1311,10 @@ class Query(graphene.ObjectType):
         return resp
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
-        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+        """used in Household Page > Payment Records"""
+        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.exclude(excluded=True)).order_by(
+            "-updated_at"
+        )
 
         qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
 

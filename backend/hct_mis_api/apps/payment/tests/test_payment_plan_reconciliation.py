@@ -358,8 +358,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "input": {
                     "businessAreaSlug": self.business_area.slug,
                     "targetingId": target_population_id,
-                    "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
-                    "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
+                    "startDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
+                    "endDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
                     "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                     "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "currency": "USD",
@@ -597,7 +597,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
         payment_plan.refresh_from_db()
-        zip_file = payment_plan.export_file
+        zip_file = payment_plan.export_file_per_fsp
         assert zip_file is not None
 
         with tempfile.TemporaryDirectory() as temp_dir:

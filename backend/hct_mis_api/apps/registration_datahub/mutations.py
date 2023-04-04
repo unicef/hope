@@ -31,6 +31,10 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
+from hct_mis_api.apps.registration_datahub.inputs import (
+    RegistrationKoboImportMutationInput,
+    RegistrationXlsxImportMutationInput,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedIndividual,
@@ -100,21 +104,6 @@ def create_registration_data_import_objects(
     )
 
 
-class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
-    import_data_id = graphene.ID()
-    name = graphene.String()
-    business_area_slug = graphene.String()
-    screen_beneficiary = graphene.Boolean()
-
-
-class RegistrationKoboImportMutationInput(graphene.InputObjectType):
-    import_data_id = graphene.String()
-    name = graphene.String()
-    pull_pictures = graphene.Boolean()
-    business_area_slug = graphene.String()
-    screen_beneficiary = graphene.Boolean()
-
-
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
@@ -157,6 +146,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
+
+        created_obj_hct.status = RegistrationDataImport.IMPORT_SCHEDULED
+        created_obj_hct.save(update_fields=["status"])
 
         transaction.on_commit(
             lambda: registration_xlsx_import_task.delay(
@@ -290,7 +282,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         if not obj_hct.can_be_merged():
             raise GraphQLError(f"Can't begin to merge RDI: {obj_hct}")
 
-        obj_hct.status = RegistrationDataImport.MERGING
+        obj_hct.status = RegistrationDataImport.MERGE_SCHEDULED
         obj_hct.save()
         merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
 
