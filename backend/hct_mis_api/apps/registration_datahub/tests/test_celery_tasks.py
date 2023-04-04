@@ -21,8 +21,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     Record,
 )
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    FlexRegistrationService,
+from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import (
+    UkraineRegistrationService,
 )
 
 SRI_LANKA_FIELDS: Dict = {
@@ -138,7 +138,7 @@ def create_record(fields: Dict, registration: int, status: str) -> Record:
 
 
 def create_imported_document_types() -> None:
-    for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
+    for document_type_string, _ in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
         ImportedDocumentType.objects.create(type=document_type_string)
 
 
@@ -367,7 +367,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self) -> None:
-        for document_type in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
+        for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
         create_ukraine_business_area()
         create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
@@ -377,7 +377,7 @@ class TestAutomatingRDICreationTask(TestCase):
             status=Record.STATUS_TO_IMPORT,
         )
         records_ids = Record.objects.all().values_list("id", flat=True)
-        rdi = FlexRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+        rdi = UkraineRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
 
         assert Record.objects.count() == 2
         assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1

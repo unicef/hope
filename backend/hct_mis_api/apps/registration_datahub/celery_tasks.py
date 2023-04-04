@@ -285,12 +285,12 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @log_start_and_end
 @sentry_tags
 def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        FlexRegistrationService,
+    from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import (
+        UkraineRegistrationService,
     )
 
     try:
-        FlexRegistrationService().process_records(rdi_id, records_ids)
+        UkraineRegistrationService().process_records(rdi_id, records_ids)
     except Exception as e:
         logger.exception("Process Flex Records Task error")
         raise self.retry(exc=e)
@@ -300,7 +300,7 @@ def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> N
 @log_start_and_end
 @sentry_tags
 def process_sri_lanka_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    from hct_mis_api.apps.registration_datahub.services.sri_lanka_registration_service import (
         SriLankaRegistrationService,
     )
 
@@ -339,7 +339,7 @@ def automate_rdi_creation_task(
     fix_tax_id: bool = False,
     **filters: Any,
 ) -> List:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
         get_registration_to_rdi_service_map,
     )
 
