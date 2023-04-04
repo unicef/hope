@@ -114,6 +114,7 @@ class RdiMergeTask:
         "marital_status",
         "phone_no",
         "phone_no_alternative",
+        "email",
         "disability",
         "flex_fields",
         "first_registration_date",
