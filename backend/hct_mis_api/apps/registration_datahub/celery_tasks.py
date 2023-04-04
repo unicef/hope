@@ -339,7 +339,7 @@ def automate_rdi_creation_task(
     fix_tax_id: bool = False,
     **filters: Any,
 ) -> List:
-    from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service_utils import (
         get_registration_to_rdi_service_map,
     )
 
