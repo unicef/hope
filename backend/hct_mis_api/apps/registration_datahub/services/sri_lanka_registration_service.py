@@ -1,35 +1,40 @@
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
+
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    YES,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_BANK_STATEMENT,
     HEAD,
+    IDENTIFICATION_TYPE_BANK_STATEMENT,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
+    YES,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import process_sri_lanka_flex_records_task
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    process_sri_lanka_flex_records_task,
+)
 from hct_mis_api.apps.registration_datahub.models import (
-    Record,
-    RegistrationDataImportDatahub,
-    ImportedIndividual,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
+    ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    ImportedBankAccountInfo,
+    Record,
+    RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import BaseRegistrationService
+from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
