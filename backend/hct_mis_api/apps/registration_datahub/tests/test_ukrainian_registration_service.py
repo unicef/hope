@@ -13,8 +13,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     Record,
 )
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    FlexRegistrationService,
+from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import (
+    UkraineRegistrationService,
 )
 
 
@@ -159,7 +159,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
-        service = FlexRegistrationService()
+        service = UkraineRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)
@@ -172,14 +172,14 @@ class TestUkrainianRegistrationService(TestCase):
         )
 
     def test_import_data_to_datahub_retry(self) -> None:
-        service = FlexRegistrationService()
+        service = UkraineRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids_all = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
-        service = FlexRegistrationService()
+        service = UkraineRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records[:2]]
         service.process_records(rdi.id, records_ids)
@@ -187,7 +187,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
-        service = FlexRegistrationService()
+        service = UkraineRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 
         service.process_records(rdi.id, [x.id for x in self.bad_records])

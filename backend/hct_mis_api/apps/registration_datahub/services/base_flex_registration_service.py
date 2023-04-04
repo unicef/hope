@@ -2,7 +2,7 @@ import abc
 import base64
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Type, Union, List
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -20,6 +20,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import UkraineRegistrationService
+from hct_mis_api.apps.registration_datahub.services.sri_lanka_registration_service import SriLankaRegistrationService
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -175,3 +177,18 @@ class BaseRegistrationService(abc.ABC):
             name = hashlib.md5(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
+
+
+def get_registration_to_rdi_service_map() -> Dict[int, Any]:
+    return {
+        2: UkraineRegistrationService,  # ukraine
+        3: UkraineRegistrationService,  # ukraine
+        17: SriLankaRegistrationService,  # sri lanka
+        # 18: "czech republic",
+        # 19: "czech republic",
+    }
+
+
+def create_task_for_processing_records(service: Any, rdi_id: "UUID", records_ids: List) -> None:
+    if celery_task := service.PROCESS_FLEX_RECORDS_TASK:
+        celery_task.delay(rdi_id, records_ids)
