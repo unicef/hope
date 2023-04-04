@@ -49,6 +49,7 @@ query AllImportedIndividuals {
         fullName
         givenName
         phoneNo
+        email
       }
     }
   }

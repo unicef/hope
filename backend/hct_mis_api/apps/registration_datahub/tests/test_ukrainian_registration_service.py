@@ -62,6 +62,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email123@mail.com",
         }
         individual_wit_bank_account_and_tax = {
             "tax_id_no_i_c": "123123123",
@@ -73,6 +74,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email321@mail.com",
         }
         individual_with_no_tax = {
             "tax_id_no_i_c": "",
@@ -84,6 +86,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email111@mail.com",
         }
         individual_without_bank_account = {
             "tax_id_no_i_c": "TESTID",
@@ -95,6 +98,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email222@mail.com",
         }
         individual_with_tax_id_which_is_too_long = {
             "tax_id_no_i_c": "x" * 300,
@@ -106,6 +110,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email333@mail.com",
         }
         defaults = {
             "registration": 2,
