@@ -7,8 +7,8 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
     $first: Int
     $last: Int
     $orderBy: String
-    $name_Icontains: String
-    $importedBy_Id: UUID
+    $search: String
+    $importedBy: UUID
     $status: String
     $importDate: Date
     $businessArea: String
@@ -19,8 +19,8 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       first: $first
       last: $last
       orderBy: $orderBy
-      name_Startswith: $name_Icontains
-      importedBy_Id: $importedBy_Id
+      name_Startswith: $search
+      importedBy_Id: $importedBy
       status: $status
       importDate: $importDate
       businessArea: $businessArea

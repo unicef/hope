@@ -12,6 +12,7 @@ from django.db.models import (
     Value,
     When,
 )
+from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
@@ -627,27 +628,11 @@ class Query(graphene.ObjectType):
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
-        households_individuals_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__female_age_group_18_59_count",
-            "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-            "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count",
-        ]
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        individuals_counts = (
-            payment_items_qs.select_related("household")
-            .distinct("household__id")
-            .values_list(*households_individuals_params)
-        )
-        return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
+        return Household.objects.filter(pk__in=households_ids).aggregate(total=Sum(Coalesce("size", 0)))
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
@@ -655,20 +640,18 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         households_child_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
         ]
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-
-        household_child_counts = (
-            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_child_params)
-        )
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
+        household_child_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_child_params)
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -677,23 +660,22 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
         households_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__female_age_group_18_59_count",
-            "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-            "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
         ]
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        household_child_counts = (
-            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_params)
-        )
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
+        household_child_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_params)
 
         return {
             "labels": INDIVIDUALS_CHART_LABELS,
@@ -706,47 +688,43 @@ class Query(graphene.ObjectType):
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
         households_params_with_disability = [
-            "household__female_age_group_0_5_disabled_count",
-            "household__female_age_group_6_11_disabled_count",
-            "household__female_age_group_12_17_disabled_count",
-            "household__female_age_group_18_59_disabled_count",
-            "household__female_age_group_60_disabled_count",
-            "household__male_age_group_0_5_disabled_count",
-            "household__male_age_group_6_11_disabled_count",
-            "household__male_age_group_12_17_disabled_count",
-            "household__male_age_group_18_59_disabled_count",
-            "household__male_age_group_60_disabled_count",
+            "female_age_group_0_5_disabled_count",
+            "female_age_group_6_11_disabled_count",
+            "female_age_group_12_17_disabled_count",
+            "female_age_group_18_59_disabled_count",
+            "female_age_group_60_disabled_count",
+            "male_age_group_0_5_disabled_count",
+            "male_age_group_6_11_disabled_count",
+            "male_age_group_12_17_disabled_count",
+            "male_age_group_18_59_disabled_count",
+            "male_age_group_60_disabled_count",
         ]
         households_params_total = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__female_age_group_18_59_count",
-            "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
-            "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
         ]
 
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
+        households_ids = payment_items_qs.values_list("household", flat=True).distinct()
 
-        # aggregate with distinct by household__id is not possible
-        households_with_disability_counts = (
-            payment_items_qs.select_related("household")
-            .distinct("household__id")
-            .values_list(*households_params_with_disability)
+        households_with_disability_counts = Household.objects.filter(pk__in=households_ids).values_list(
+            *households_params_with_disability
         )
         sum_of_with_disability = sum_lists_with_values(
             households_with_disability_counts, len(households_params_with_disability)
         )
 
-        households_totals_counts = (
-            payment_items_qs.select_related("household").distinct("household__id").values_list(*households_params_total)
-        )
+        households_totals_counts = Household.objects.filter(pk__in=households_ids).values_list(*households_params_total)
         sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
 
         sum_of_without_disability = []

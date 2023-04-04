@@ -15,7 +15,7 @@ from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields impo
     KoboRetriableError,
 )
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_SIZE_ONLY,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_TAX_ID,
     MALE,
@@ -53,7 +53,7 @@ class transaction_celery_task:  # used as decorator
         return task_func
 
 
-@app.task(bind=True, default_retry_delay=60)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
@@ -79,10 +79,10 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
         raise
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
+def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -93,12 +93,12 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: 
         upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
-def create_target_population_task(storage_id: str, program_id: str, tp_name: str) -> None:
+def create_target_population_task(self: Any, storage_id: str, program_id: str, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
     file_path = None
     program = Program.objects.get(id=program_id)
@@ -142,6 +142,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                     iban = row["IBAN"]
                     tax_id = row["N_ID"]
                     passport_id = row["PASSPORT"]
+                    size = row["FAM_NUM"]
 
                     individual_data = {
                         "given_name": row.get("NAME", ""),
@@ -168,10 +169,11 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                             first_registration_date=first_registration_date,
                             last_registration_date=last_registration_date,
                             registration_data_import=registration_data_import,
-                            size=1,
+                            size=size,
                             family_id=family_id,
                             storage_obj=storage_obj,
-                            collect_individual_data=COLLECT_TYPE_NONE,
+                            collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
+                            country=country,
                         )
 
                         individual.household = household
@@ -213,12 +215,7 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
-            households = Household.objects.filter(family_id__in=list(families.keys())).only("id")
-            if len(families) != rows_count:
-                for household in households:
-                    household.size = Individual.objects.filter(household=household).count()
-                Household.objects.bulk_update(households, ("size",))
-
+            households = Household.objects.filter(family_id__in=list(families.keys()))
             households.update(withdrawn=True, withdrawn_date=timezone.now())
             Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
 
@@ -237,10 +234,10 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
 
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
-    except Exception:
+    except Exception as e:
         storage_obj.status = StorageFile.STATUS_FAILED
         storage_obj.save(update_fields=["status"])
-        raise
+        raise self.retry(exc=e)
     finally:
         if file_path:
             os.remove(file_path)

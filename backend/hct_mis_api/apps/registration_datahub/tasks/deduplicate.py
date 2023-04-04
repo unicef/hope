@@ -5,7 +5,7 @@ from dataclasses import dataclass, fields
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Type, Union
 
 from django.db import transaction
-from django.db.models import CharField, F, Q, QuerySet, Value
+from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
 
 from constance import config
@@ -95,10 +95,8 @@ class DeduplicateTask:
         }
         queries_list = []
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
-        documents_queries = cls._prepare_documents_queries_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
         queries_list.extend(names_queries)
-        queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)
 
         if "household" in fields_meta:
@@ -154,12 +152,6 @@ class DeduplicateTask:
         identities = fields.pop("identities", [])
         identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
         return identities_queries
-
-    @classmethod
-    def _prepare_documents_queries_from_fields(cls, fields: Dict) -> List[Dict]:
-        documents = fields.pop("documents", [])
-        documents_queries = cls._prepare_identities_or_documents_query(documents, "document")
-        return documents_queries
 
     @staticmethod
     def _prepare_fields(
@@ -815,6 +807,13 @@ class DeduplicateTask:
             list(imported_individuals.values_list("id", flat=True)), get_imported_individual_doc(business_area)
         )
 
+    @staticmethod
+    def _get_document_signature(document: Document) -> str:
+        if document.type.valid_for_deduplication:
+            return f"{document.type_id}--{document.document_number}--{document.country_id}"
+        else:
+            return f"{document.document_number}--{document.country_id}"
+
     @classmethod
     @transaction.atomic
     def hard_deduplicate_documents(
@@ -823,19 +822,33 @@ class DeduplicateTask:
         documents_to_dedup = evaluate_qs(
             new_documents.exclude(status=Document.STATUS_VALID)
             .filter(type__is_identity_document=True)
-            .select_related("individual")
+            .select_related("individual", "type")
             .select_for_update(of=("self",))  # no need to lock individuals
             .order_by("pk")
         )
         documents_numbers = [x.document_number for x in documents_to_dedup]
-        new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
+        new_document_signatures = [cls._get_document_signature(d) for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
         all_matching_number_documents = (
             Document.objects.select_related("individual", "individual__household", "individual__business_area")
             .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
-            .annotate(signature=Concat(F("type_id"), Value("--"), F("document_number"), output_field=CharField()))
+            .annotate(
+                signature=Concat(
+                    Case(
+                        When(
+                            Q(type__valid_for_deduplication=True),
+                            then=Concat(F("type_id"), Value("--"), output_field=CharField()),
+                        ),
+                        default=Value(""),
+                    ),
+                    F("document_number"),
+                    Value("--"),
+                    F("country_id"),
+                    output_field=CharField(),
+                )
+            )
         )
         all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
@@ -844,7 +857,7 @@ class DeduplicateTask:
         possible_duplicates_individuals_id_set = set()
 
         for new_document in documents_to_dedup:
-            new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
+            new_document_signature = cls._get_document_signature(new_document)
 
             if new_document_signature in all_matching_number_documents_signatures:
                 new_document.status = Document.STATUS_NEED_INVESTIGATION

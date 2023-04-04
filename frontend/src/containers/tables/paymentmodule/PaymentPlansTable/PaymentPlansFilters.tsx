@@ -1,15 +1,17 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
+import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
+import { createHandleFilterChange } from '../../../../utils/utils';
 import {
-  usePaymentPlanStatusChoicesQueryQuery,
   AllPaymentPlansForTableQueryVariables,
+  usePaymentPlanStatusChoicesQueryQuery,
 } from '../../../../__generated__/graphql';
-import { FlexSelectFilter } from '../../../../components/core/FlexSelectFilter';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -22,17 +24,24 @@ export type FilterProps = Pick<
 >;
 
 interface PaymentPlansFiltersProps {
-  onFilterChange: (filter: FilterProps) => void;
-  filter: FilterProps;
+  onFilterChange;
+  filter;
 }
-
 export function PaymentPlansFilters({
   onFilterChange,
   filter,
 }: PaymentPlansFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name: string): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
+
   const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
 
   if (!statusChoicesData) {
@@ -48,16 +57,16 @@ export function PaymentPlansFilters({
               label={t('Search')}
               value={filter.search}
               fullWidth
-              onChange={(e) => handleFilterChange(e, 'search')}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>
             <FlexSelectFilter
-              onChange={(e: unknown) => handleFilterChange(e, 'status')}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
               variant='outlined'
               label={t('Status')}
               multiple
-              value={filter.status || []}
+              value={filter.status}
               fullWidth
               autoWidth
             >
@@ -79,10 +88,7 @@ export function PaymentPlansFilters({
               value={filter.totalEntitledQuantityFrom}
               placeholder={t('From')}
               onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  totalEntitledQuantityFrom: e.target.value || undefined,
-                })
+                handleFilterChange('totalEntitledQuantityFrom', e.target.value)
               }
             />
           </Grid>
@@ -92,10 +98,7 @@ export function PaymentPlansFilters({
               value={filter.totalEntitledQuantityTo}
               placeholder={t('To')}
               onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  totalEntitledQuantityTo: e.target.value || undefined,
-                })
+                handleFilterChange('totalEntitledQuantityTo', e.target.value)
               }
               error={
                 filter.totalEntitledQuantityFrom &&
@@ -110,44 +113,38 @@ export function PaymentPlansFilters({
           <Grid item xs={6}>
             <DatePickerFilter
               topLabel={t('Dispersion Date')}
-              label={t('From')}
+              placeholder={t('From')}
               onChange={(date) => {
                 if (
                   filter.dispersionEndDate &&
                   date.isAfter(filter.dispersionEndDate)
                 ) {
-                  onFilterChange({
-                    ...filter,
-                    dispersionStartDate: date
-                      ? date.format('YYYY-MM-DD')
-                      : undefined,
-                    dispersionEndDate: undefined,
-                  });
+                  handleFilterChange(
+                    'dispersionStartDate',
+                    date.format('YYYY-MM-DD'),
+                  );
+                  handleFilterChange('dispersionEndDate', undefined);
                 } else {
-                  onFilterChange({
-                    ...filter,
-                    dispersionStartDate: date
-                      ? date.format('YYYY-MM-DD')
-                      : undefined,
-                  });
+                  handleFilterChange(
+                    'dispersionStartDate',
+                    date.format('YYYY-MM-DD'),
+                  );
                 }
               }}
-              value={filter.dispersionStartDate || undefined}
+              value={filter.dispersionStartDate}
             />
           </Grid>
           <Grid item xs={6}>
             <DatePickerFilter
-              label={t('To')}
+              placeholder={t('To')}
               onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  dispersionEndDate: date
-                    ? date.format('YYYY-MM-DD')
-                    : undefined,
-                })
+                handleFilterChange(
+                  'dispersionEndDate',
+                  date.format('YYYY-MM-DD'),
+                )
               }
-              value={filter.dispersionEndDate || undefined}
-              minDate={filter.dispersionStartDate || undefined}
+              value={filter.dispersionEndDate}
+              minDate={filter.dispersionStartDate}
               minDateMessage={<span />}
             />
           </Grid>

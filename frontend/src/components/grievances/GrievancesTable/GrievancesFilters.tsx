@@ -1,6 +1,7 @@
 import { Box, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
@@ -14,20 +15,28 @@ import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '../../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
 import { LanguageAutocomplete } from '../../../shared/LanguageAutocomplete';
+import { createHandleFilterChange } from '../../../utils/utils';
 
 interface GrievancesFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
 }
-export function GrievancesFilters({
+export const GrievancesFilters = ({
   onFilterChange,
   filter,
   choicesData,
-}: GrievancesFiltersProps): React.ReactElement {
+}: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const history = useHistory();
+  const location = useLocation();
+
+  const handleFilterChange = createHandleFilterChange(
+    onFilterChange,
+    filter,
+    history,
+    location,
+  );
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -41,13 +50,13 @@ export function GrievancesFilters({
           <SearchTextField
             value={filter.search}
             label='Search'
-            onChange={(e) => handleFilterChange(e, 'search')}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='filters-search'
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
           >
@@ -67,47 +76,41 @@ export function GrievancesFilters({
           <SearchTextField
             value={filter.fsp}
             label='FSP'
-            onChange={(e) => handleFilterChange(e, 'fsp')}
+            onChange={(e) => handleFilterChange('fsp', e.target.value)}
           />
         </Grid>
         <Grid item>
           <DatePickerFilter
             topLabel={t('Creation Date')}
-            label='From'
+            placeholder='From'
             onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  min: moment(date)
-                    .set({ hour: 0, minute: 0 })
-                    .toISOString(),
-                },
-              })
+              handleFilterChange(
+                'createdAtRangeMin',
+                moment(date)
+                  .set({ hour: 0, minute: 0 })
+                  .toISOString(),
+              )
             }
-            value={filter.createdAtRange.min}
+            value={filter.createdAtRangeMin}
           />
         </Grid>
         <Grid item>
           <DatePickerFilter
-            label='To'
+            placeholder='To'
             onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  max: moment(date)
-                    .set({ hour: 23, minute: 59 })
-                    .toISOString(),
-                },
-              })
+              handleFilterChange(
+                'createdAtRangeMax',
+                moment(date)
+                  .set({ hour: 23, minute: 59 })
+                  .toISOString(),
+              )
             }
-            value={filter.createdAtRange.max}
+            value={filter.createdAtRangeMax}
           />
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'category')}
+            onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
             value={filter.category}
           >
@@ -127,7 +130,7 @@ export function GrievancesFilters({
         filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
           <Grid item>
             <SelectFilter
-              onChange={(e) => handleFilterChange(e, 'issueType')}
+              onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label='Issue Type'
               value={filter.issueType}
             >
@@ -146,12 +149,19 @@ export function GrievancesFilters({
         ) : null}
 
         <Grid item>
-          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
+          <AdminAreaAutocomplete
+            onFilterChange={onFilterChange}
+            filter={filter}
+            name='admin'
+            value={filter.admin}
+          />
         </Grid>
         <Grid item>
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
+            filter={filter}
             name='assignedTo'
+            value={filter.assignedTo}
           />
         </Grid>
         <Grid item>
@@ -159,7 +169,7 @@ export function GrievancesFilters({
             topLabel={t('Similarity Score')}
             value={filter.scoreMin}
             placeholder={t('From')}
-            onChange={(e) => handleFilterChange(e, 'scoreMin')}
+            onChange={(e) => handleFilterChange('scoreMin', e.target.value)}
           />
         </Grid>
         <Grid item>
@@ -167,23 +177,27 @@ export function GrievancesFilters({
             <NumberTextField
               value={filter.scoreMax}
               placeholder='To'
-              onChange={(e) => handleFilterChange(e, 'scoreMax')}
+              onChange={(e) => handleFilterChange('scoreMax', e.target.value)}
             />
           </Box>
         </Grid>
         <Grid item>
           <RdiAutocomplete
             onFilterChange={onFilterChange}
+            filter={filter}
             name='registrationDataImport'
+            value={filter.registrationDataImport}
           />
         </Grid>
         <Grid item>
           <LanguageAutocomplete
             onFilterChange={onFilterChange}
+            filter={filter}
             name='preferredLanguage'
+            value={filter.preferredLanguage}
           />
         </Grid>
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

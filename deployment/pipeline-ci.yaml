@@ -5,6 +5,7 @@ trigger:
     - develop
     - staging
     - master
+    - new_gf
     - ops/*
   paths:
     exclude:
