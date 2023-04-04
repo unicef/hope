@@ -1661,6 +1661,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "household_id",
         "scope": [Scope.HOUSEHOLD_ID],
     },
+    {
+        "type": TYPE_STRING,
+        "name": "email",
+        "lookup": "email",
+        "required": False,
+        "label": {"English(EN)": "Individual email"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "email",
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.INDIVIDUAL_XLSX_UPDATE],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
