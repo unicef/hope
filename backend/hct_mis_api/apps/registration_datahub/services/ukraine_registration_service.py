@@ -7,8 +7,8 @@ from django.forms import modelform_factory
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
-    build_arg_dict_from_dict,
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    build_arg_dict_from_dict,
 )
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -24,9 +24,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    process_flex_records_task,
-)
+from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,

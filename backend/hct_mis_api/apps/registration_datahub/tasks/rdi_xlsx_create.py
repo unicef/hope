@@ -22,7 +22,6 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     COLLECT_TYPE_UNKNOWN,
     HEAD,
-    IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,

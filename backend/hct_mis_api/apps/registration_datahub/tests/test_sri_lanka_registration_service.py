@@ -16,7 +16,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
     Record,
 )
-from hct_mis_api.apps.registration_datahub.services.sri_lanka_registration_service import SriLankaRegistrationService
+from hct_mis_api.apps.registration_datahub.services.sri_lanka_registration_service import (
+    SriLankaRegistrationService,
+)
 
 
 class TestUkrainianRegistrationService(TestCase):
