@@ -20,8 +20,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import (
     HEAD,
-    IDENTIFICATION_TYPE_DICT,
-    IDENTIFICATION_TYPE_OTHER,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -60,7 +58,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     def __init__(
         self,
-    ):
+    ) -> None:
         document_keys = ImportedDocumentType.objects.values_list("key", flat=True)
         self.DOCS_AND_IDENTITIES_FIELDS = [
             f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]

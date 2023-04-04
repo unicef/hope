@@ -1,8 +1,12 @@
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from uuid import UUID
 
-from hct_mis_api.apps.registration_datahub.services.sri_lanka_registration_service import SriLankaRegistrationService
-from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import UkraineRegistrationService
+from hct_mis_api.apps.registration_datahub.services.sri_lanka_registration_service import (
+    SriLankaRegistrationService,
+)
+from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import (
+    UkraineRegistrationService,
+)
 
 
 def get_registration_to_rdi_service_map() -> Dict[int, Any]:

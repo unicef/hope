@@ -51,8 +51,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service_utils import (
-    get_registration_to_rdi_service_map,
     create_task_for_processing_records,
+    get_registration_to_rdi_service_map,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
