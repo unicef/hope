@@ -34,6 +34,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         "phone_no_alternative",
         "admin1",
         "admin2",
+        "admin3",
+        "admin4",
         "village",
         "address",
         "household_id",
@@ -45,8 +47,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     PAYMENT_RECORD_ID_LETTER = "A"
     RECEIVED_COLUMN_INDEX = 2
     RECEIVED_COLUMN_LETTER = "C"
-    RECEIVED_AMOUNT_COLUMN_INDEX = 13
-    RECEIVED_AMOUNT_COLUMN_LETTER = "N"
+    RECEIVED_AMOUNT_COLUMN_INDEX = 15
+    RECEIVED_AMOUNT_COLUMN_LETTER = "P"
     VERIFICATION_SHEET = "Payment Verifications"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
@@ -95,6 +97,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             str(head_of_household.phone_no_alternative) if head_of_household else "",
             str(household.admin1.name) if household.admin1 else "",
             str(household.admin2.name) if household.admin2 else "",
+            str(household.admin3.name) if household.admin3 else "",
+            str(household.admin4.name) if household.admin4 else "",
             str(household.village),
             str(household.address),
             str(payment_record_verification.payment_obj.household_id),
