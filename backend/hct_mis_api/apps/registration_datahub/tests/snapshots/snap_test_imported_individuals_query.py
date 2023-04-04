@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_0_all_with_permission 1'] = {
@@ -192,6 +193,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_single_0_
     'data': {
         'importedIndividual': {
             'birthDate': '1943-07-30',
+            'email': 'myemail111@mail.com',
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
             'givenName': 'Benjamin',
