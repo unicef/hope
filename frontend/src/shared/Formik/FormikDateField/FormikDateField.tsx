@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment, Tooltip } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import get from 'lodash/get';
@@ -9,6 +9,7 @@ export const FormikDateField = ({
   form,
   decoratorStart,
   decoratorEnd,
+  tooltip = null,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -20,7 +21,7 @@ export const FormikDateField = ({
     formattedValue = moment(formattedValue).toISOString();
   }
 
-  return (
+  const datePickerComponent = (
     <KeyboardDatePicker
       {...field}
       {...otherProps}
@@ -67,4 +68,13 @@ export const FormikDateField = ({
       }}
     />
   );
+
+  if (tooltip) {
+    return (
+      <Tooltip title={tooltip}>
+        <div>{datePickerComponent}</div>
+      </Tooltip>
+    );
+  }
+  return datePickerComponent;
 };
