@@ -21,6 +21,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -268,7 +269,7 @@ class PaymentPlanService:
             self.payment_plan.save()
 
     @staticmethod
-    def _create_payments(payment_plan: PaymentPlan) -> None:
+    def create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
         households = (
             payment_plan.target_population.households.annotate(
@@ -290,7 +291,7 @@ class PaymentPlanService:
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
-                    business_area=payment_plan.business_area,
+                    business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
                     household_id=household["pk"],
@@ -301,8 +302,8 @@ class PaymentPlanService:
             )
         try:
             Payment.objects.bulk_create(payments_to_create)
-        except IntegrityError:
-            raise GraphQLError("Duplicated Households in provided Targeting")
+        except IntegrityError as e:
+            raise GraphQLError("Duplicated Households in provided Targeting") from e
 
     @staticmethod
     def create(input_data: Dict, user: "User") -> PaymentPlan:
@@ -350,16 +351,14 @@ class PaymentPlanService:
             status_date=timezone.now(),
             start_date=input_data["start_date"],
             end_date=input_data["end_date"],
+            status=PaymentPlan.Status.PREPARING,
         )
-
-        PaymentPlanService._create_payments(payment_plan)
-        payment_plan.refresh_from_db()
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
 
         TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
             status=TargetPopulation.STATUS_ASSIGNED
         )
+
+        prepare_payment_plan_task.delay(payment_plan.id)
 
         return payment_plan
 
@@ -427,7 +426,7 @@ class PaymentPlanService:
 
         if recreate_payments:
             self.payment_plan.payment_items.all().delete()
-            self._create_payments(self.payment_plan)
+            self.create_payments(self.payment_plan)
 
         if recalculate_payments:
             self.payment_plan.refresh_from_db()
