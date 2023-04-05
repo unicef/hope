@@ -1671,7 +1671,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "email",
-        "scope": [Scope.XLSX, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.INDIVIDUAL_XLSX_UPDATE],
+        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.INDIVIDUAL_XLSX_UPDATE],
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
