@@ -4,11 +4,13 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
+from django.db.models import JSONField, Q, QuerySet, UniqueConstraint, UUIDField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
@@ -469,6 +471,9 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    payment_object_id = UUIDField(default=None)
+    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
 
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
