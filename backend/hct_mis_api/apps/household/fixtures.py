@@ -184,9 +184,9 @@ class BankAccountInfoFactory(DjangoModelFactory):
 class DocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = DocumentType
-        django_get_or_create = ("type",)
+        django_get_or_create = ("key",)
 
-    type = factory.fuzzy.FuzzyChoice([value for value, _ in IDENTIFICATION_TYPE_CHOICE])
+    key = factory.fuzzy.FuzzyChoice([value.lower() for value, _ in IDENTIFICATION_TYPE_CHOICE])
 
 
 class DocumentFactory(DjangoModelFactory):
