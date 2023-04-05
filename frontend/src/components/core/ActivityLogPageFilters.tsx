@@ -4,10 +4,10 @@ import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { createHandleFilterChange } from '../../utils/utils';
+import {AssigneeAutocomplete} from "../../shared/AssigneeAutocomplete";
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
-import {AssigneeAutocomplete} from "../../shared/AssigneeAutocomplete";
 
 interface ActivityLogPageFiltersProps {
   onFilterChange;
