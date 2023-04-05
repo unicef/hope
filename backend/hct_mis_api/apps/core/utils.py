@@ -23,6 +23,7 @@ from typing import (
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
+from django.http import Http404
 from django.utils import timezone
 
 import pytz
@@ -432,6 +433,19 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[Any]:
+    from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
+
+    if required is True or encoded_id is not None:
+        decoded_id = decode_id_string(encoded_id)
+        qs = get_payment_items_sequence_qs()
+        try:
+            return qs.get(id=decoded_id)
+        except Exception:
+            raise Http404
+    return None
 
 
 def decode_and_get_object(encoded_id: str, model: Type, required: bool) -> Optional[Any]:

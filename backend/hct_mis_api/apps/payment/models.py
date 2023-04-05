@@ -308,6 +308,7 @@ class GenericPayment(TimeStampedUUIDModel):
     @property
     def verification(self) -> Optional["PaymentVerification"]:
         c_type = ContentType.objects.get_for_model(self.__class__)
+        logger.info(self.__class__)
         try:
             verification = PaymentVerification.objects.get(payment_content_type_id=c_type.pk, payment_object_id=self.pk)
         except PaymentVerification.DoesNotExist:

@@ -6,13 +6,13 @@ import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentRecordNode } from '../../../../__generated__/graphql';
+import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { StatusBox } from '../../../core/StatusBox';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 
 interface LookUpPaymentRecordTableRowProps {
-  paymentRecord: PaymentRecordNode;
+  paymentRecord: PaymentRecordAndPaymentNode;
   openInNewTab: boolean;
   selected: Array<string>;
   checkboxClickHandler: (
@@ -31,7 +31,8 @@ export function LookUpPaymentRecordTableRow({
   const businessArea = useBusinessArea();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
-  const received = paymentRecord?.verification?.receivedAmount;
+  // const received = paymentRecord?.verification?.receivedAmount;
+  const received = null;
   return (
     <ClickableTableRow
       onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
@@ -53,16 +54,16 @@ export function LookUpPaymentRecordTableRow({
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        {paymentRecord.verification?.status ? (
+        {paymentRecord.status ? (
           <StatusBox
-            status={paymentRecord.verification?.status}
+            status={paymentRecord.status}
             statusToColor={verificationRecordsStatusToColor}
           />
         ) : (
           '-'
         )}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.parent.name}</TableCell>
+      <TableCell align='left'>{paymentRecord.parent.programmeName}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,
