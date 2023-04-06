@@ -35,7 +35,7 @@ class TestDOAP(WebTest):
                 self.officer.first_name,
                 self.officer.email,
                 f"UNICEF - {self.business_area.name}",
-                int(self.business_area.code),
+                int(self.business_area.cash_assist_code),
                 "ADD",
             ],
         )
@@ -66,7 +66,7 @@ class TestDOAP(WebTest):
                 self.officer.first_name,
                 self.officer.email,
                 f"UNICEF - {self.business_area.name}",
-                str(int(self.business_area.code)),
+                str(int(self.business_area.cash_assist_code)),
                 "ADD",
             ],
         )
