@@ -9,7 +9,6 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
-from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -41,14 +40,17 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 
 
+def create_document_image() -> File:
+    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    return File(BytesIO(content), name="image.png")
+
+
 class ImageLoaderMock:
     def image_in(self, *args: Any, **kwargs: Any) -> bool:
         return True
 
     def get(self, *args: Any, **kwargs: Any) -> Image:
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-        file = File(BytesIO(content), name="image.png")
-        return Image.open(file)
+        return Image.open(create_document_image())
 
 
 class CellMock:
@@ -57,28 +59,21 @@ class CellMock:
         self.coordinate = coordinate
 
 
-def create_document_image() -> File:
-    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-    return File(BytesIO(content), name="image.png")
-
-
 class TestRdiCreateTask(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
+    databases = {
+        "default",
+        "registration_datahub",
+    }
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        call_command("loadcountries")
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
-            RdiKoboCreateTask,
-        )
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
-        cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
@@ -139,10 +134,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         household_data = {
             "residence_status": "REFUGEE",
             "country": "AF",
+            "zip_code": "2153",
             "flex_fields": {},
         }
         household = matching_individuals.first().household
-        household_obj_data = model_to_dict(household, ("residence_status", "country", "flex_fields"))
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
 
         roles = household.individuals_and_roles.all()
         self.assertEqual(roles.count(), 1)
@@ -397,8 +393,10 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
+    databases = {
+        "default",
+        "registration_datahub",
+    }
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @staticmethod
@@ -413,11 +411,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
-            RdiXlsxCreateTask,
-        )
 
-        cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
