@@ -175,3 +175,7 @@ class BaseRegistrationService(abc.ABC):
             name = hashlib.md5(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
+
+    def _check_registration_id(self, record_registration: int, error_msg: str = "") -> None:
+        if record_registration not in self.REGISTRATION_ID:
+            raise ValidationError(error_msg)
