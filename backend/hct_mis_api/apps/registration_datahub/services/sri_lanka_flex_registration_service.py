@@ -16,9 +16,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    process_sri_lanka_flex_records_task,
-)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -37,7 +34,6 @@ from hct_mis_api.apps.registration_datahub.services.base_flex_registration_servi
 class SriLankaRegistrationService(BaseRegistrationService):
     BUSINESS_AREA_SLUG = "sri-lanka"
     REGISTRATION_ID = (17,)
-    PROCESS_FLEX_RECORDS_TASK = process_sri_lanka_flex_records_task
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin2": "admin2_h_c",

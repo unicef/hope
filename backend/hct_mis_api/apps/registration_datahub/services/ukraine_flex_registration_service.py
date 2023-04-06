@@ -23,9 +23,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    process_ukraine_flex_records_task,
-)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -47,7 +44,6 @@ if TYPE_CHECKING:
 class UkraineBaseRegistrationService(BaseRegistrationService):
     BUSINESS_AREA_SLUG = "ukraine"
     REGISTRATION_ID = (2, 3)
-    PROCESS_FLEX_RECORDS_TASK = process_ukraine_flex_records_task
 
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
@@ -267,11 +263,11 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         other_bank_name = individual_dict.get("other_bank_name", "")
         if not bank_name:
             bank_name = other_bank_name
-        bank_account_number = individual_dict.get("bank_account", "").replace(" ", "") or individual_dict.get("bank_account_number", "").replace(" ", "")
+        bank_account_number = str(individual_dict.get("bank_account", "")).replace(" ", "") or str(individual_dict.get("bank_account_number", "")).replace(" ", "")
         bank_account_info_data = {
             "bank_account_number": bank_account_number,
             "bank_name": bank_name,
-            "debit_card_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
+            "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "individual": individual,
         }
         return bank_account_info_data
