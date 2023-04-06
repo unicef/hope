@@ -789,9 +789,9 @@ class Individual(
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
 
     phone_no = PhoneNumberField(blank=True, db_index=True)
-    phone_no_valid = models.BooleanField(default=False, db_index=True)
+    phone_no_valid = models.BooleanField(null=True, db_index=True)
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
-    phone_no_alternative_valid = models.BooleanField(default=False, db_index=True)
+    phone_no_alternative_valid = models.BooleanField(null=True, db_index=True)
     email = models.CharField(max_length=255, blank=True)
 
     relationship = models.CharField(
