@@ -12,7 +12,7 @@ from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
+from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task, process_flex_records_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedHousehold,
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class BaseRegistrationService(abc.ABC):
     BUSINESS_AREA_SLUG = ""
     REGISTRATION_ID = tuple()
-    PROCESS_FLEX_RECORDS_TASK = None
+    PROCESS_FLEX_RECORDS_TASK = process_flex_records_task
 
     @atomic("default")
     @atomic("registration_datahub")

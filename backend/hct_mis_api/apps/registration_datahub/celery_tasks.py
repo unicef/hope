@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
@@ -284,30 +284,26 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_ukraine_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
+def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Optional[Tuple]) -> None:
     from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
         UkraineBaseRegistrationService,
+        UkraineRegistrationService,
     )
-
-    try:
-        UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
-    except Exception as e:
-        logger.exception("Process Flex Records Task error")
-        raise self.retry(exc=e)
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def process_sri_lanka_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         SriLankaRegistrationService,
     )
 
     try:
-        SriLankaRegistrationService().process_records(rdi_id, records_ids)
+        if (2,3) == registration_ids:
+            UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
+        elif (11,) == registration_ids:
+            UkraineRegistrationService().process_records(rdi_id, records_ids)
+        elif (17,) == registration_ids:
+            SriLankaRegistrationService().process_records(rdi_id, records_ids)
+        else:
+            logger.exception(f"Not Implemented Service for Registration id(s): {registration_ids}")
     except Exception as e:
-        logger.exception("Process Flex Records Task for Sri-Lanka caused error")
+        logger.exception("Process Flex Records Task error")
         raise self.retry(exc=e)
 
 
