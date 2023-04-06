@@ -86,7 +86,7 @@ class TestPullDataFromDatahub(TestCase):
     @classmethod
     def _setup_datahub_data(cls) -> None:
         session = Session()
-        session.business_area = BusinessArea.objects.first().code
+        session.business_area = BusinessArea.objects.first().cash_assist_code
         session.status = Session.STATUS_READY
         session.save()
         cls.session = session
@@ -108,7 +108,7 @@ class TestPullDataFromDatahub(TestCase):
 
         dh_service_provider = DHServiceProvider()
         dh_service_provider.session = session
-        dh_service_provider.business_area = BusinessArea.objects.first().code
+        dh_service_provider.business_area = BusinessArea.objects.first().cash_assist_code
         dh_service_provider.ca_id = "123-SP-12345"
         dh_service_provider.full_name = "SOME TEST BANK"
         dh_service_provider.short_name = "STB"
@@ -119,7 +119,7 @@ class TestPullDataFromDatahub(TestCase):
 
         dh_cash_plan1 = DHCashPlan()
         dh_cash_plan1.session = session
-        dh_cash_plan1.business_area = BusinessArea.objects.first().code
+        dh_cash_plan1.business_area = BusinessArea.objects.first().cash_assist_code
         dh_cash_plan1.cash_plan_id = "123-CSH-12345"
         dh_cash_plan1.cash_plan_hash_id = uuid.uuid4()
         dh_cash_plan1.status = CashPlan.DISTRIBUTION_COMPLETED
@@ -151,7 +151,7 @@ class TestPullDataFromDatahub(TestCase):
 
         dh_payment_record = DHPaymentRecord()
         dh_payment_record.session = session
-        dh_payment_record.business_area = BusinessArea.objects.first().code
+        dh_payment_record.business_area = BusinessArea.objects.first().cash_assist_code
         dh_payment_record.status = PaymentRecord.STATUS_SUCCESS
         dh_payment_record.status_date = timezone.now()
         dh_payment_record.ca_id = "123-PR-12345"
@@ -207,7 +207,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(str(self.program.ca_hash_id), str(self.dh_program.ca_hash_id))
         # service provider
         service_provider = ServiceProvider.objects.get(ca_id=self.dh_payment_record.service_provider_ca_id)
-        self.assertEqual(service_provider.business_area.code, self.dh_service_provider.business_area)
+        self.assertEqual(service_provider.business_area.cash_assist_code, self.dh_service_provider.business_area)
         self.assertEqual(service_provider.ca_id, self.dh_service_provider.ca_id)
         self.assertEqual(service_provider.full_name, self.dh_service_provider.full_name)
         self.assertEqual(service_provider.short_name, self.dh_service_provider.short_name)
@@ -215,7 +215,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(service_provider.vision_id, self.dh_service_provider.vision_id)
         # cash plan
         cash_plan = CashPlan.objects.get(ca_id=self.dh_cash_plan1.cash_plan_id)
-        self.assertEqual(cash_plan.business_area.code, self.dh_cash_plan1.business_area)
+        self.assertEqual(cash_plan.business_area.cash_assist_code, self.dh_cash_plan1.business_area)
         self.assertEqual(cash_plan.ca_id, self.dh_cash_plan1.cash_plan_id)
         self.assertEqual(str(cash_plan.ca_hash_id), str(self.dh_cash_plan1.cash_plan_hash_id))
         self.assertEqual(cash_plan.status, self.dh_cash_plan1.status)
@@ -248,7 +248,7 @@ class TestPullDataFromDatahub(TestCase):
         # payment record
         payment_record = PaymentRecord.objects.get(ca_id=self.dh_payment_record.ca_id)
 
-        self.assertEqual(payment_record.business_area.code, self.dh_payment_record.business_area)
+        self.assertEqual(payment_record.business_area.cash_assist_code, self.dh_payment_record.business_area)
         self.assertEqual(payment_record.status, self.dh_payment_record.status)
         self.assertEqual(payment_record.status_date, self.dh_payment_record.status_date)
         self.assertEqual(payment_record.ca_id, self.dh_payment_record.ca_id)
@@ -290,9 +290,9 @@ class TestSessionsPullDataFromDatahub(TestCase):
         call_command("loadcountrycodes")
 
     def test_multiple_sessions_same_ba_working(self) -> None:
-        session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().cash_assist_code)
         session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().cash_assist_code)
         session2.save()
         copy_session_mock = MagicMock()
         with patch(
@@ -306,9 +306,9 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session2.delete()
 
     def test_multiple_sessions_same_ba_fail(self) -> None:
-        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().cash_assist_code)
         session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().cash_assist_code)
         session2.save()
         copy_session_mock = MagicMock()
         with patch(
@@ -323,11 +323,11 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session2.delete()
 
     def test_multiple_sessions_different_ba_run1(self) -> None:
-        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().cash_assist_code)
         session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().cash_assist_code)
         session2.save()
-        session3 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.all()[3].code)
+        session3 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.all()[3].cash_assist_code)
         session3.save()
         copy_session_mock = MagicMock()
         with patch(
@@ -357,11 +357,11 @@ class TestSessionsPullDataFromDatahub(TestCase):
         ]
     )
     def test_country_mapping(self, _: Any, ca_code: str, expected: str) -> None:
-        session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().cash_assist_code)
         session.save()
         dh_service_provider = DHServiceProvider()
         dh_service_provider.session = session
-        dh_service_provider.business_area = BusinessArea.objects.first().code
+        dh_service_provider.business_area = BusinessArea.objects.first().cash_assist_code
         dh_service_provider.ca_id = str(uuid.uuid4())
         dh_service_provider.full_name = "SOME TEST BANK"
         dh_service_provider.short_name = "STB"
