@@ -66,3 +66,15 @@ class TestEdopomogaCreation(APITestCase):
         self.assertEqual(household1.size, 4)
         self.assertEqual(household2.size, 4)
         self.assertEqual(household3.size, 4)
+
+    def test_create_collector(self) -> None:
+        create_target_population_inner = create_target_population_task.__wrapped__
+        create_target_population_inner(self.storage_file.id, self.program.id, "test_edopomoga")
+
+        household1 = Household.objects.get(family_id="1281191")
+        household2 = Household.objects.get(family_id="1281375")
+        household3 = Household.objects.get(family_id="1281383")
+
+        self.assertEqual(household1.representatives.count(), 1)
+        self.assertEqual(household2.representatives.count(), 1)
+        self.assertEqual(household3.representatives.count(), 1)
