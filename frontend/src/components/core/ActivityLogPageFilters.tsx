@@ -1,8 +1,9 @@
 import { Grid, MenuItem } from '@material-ui/core';
-import { useHistory, useLocation } from 'react-router-dom';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
+import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete';
 import { createHandleFilterChange } from '../../utils/utils';
 import {AssigneeAutocomplete} from "../../shared/AssigneeAutocomplete";
 import { ContainerWithBorder } from './ContainerWithBorder';
@@ -75,7 +76,7 @@ export function ActivityLogPageFilters({
         </Grid>
         <Grid item>
           <AssigneeAutocomplete
-            label="User"
+            label='User'
             onFilterChange={onFilterChange}
             filter={filter}
             name='userId'
