@@ -23,7 +23,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
-    databases = "__all__"
+    databases = {"default", "registration_datahub"}
     fixtures = [
         "hct_mis_api/apps/geo/fixtures/data.json",
         "hct_mis_api/apps/core/fixtures/data.json",
@@ -167,6 +167,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin_area_title=self.area4.name,
             admin4=self.area4.p_code,
             admin4_title=self.area4.name,
+            zip_code="00-123",
         )
         self.set_imported_individuals(imported_household)
 
@@ -208,6 +209,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "admin2",
                 "admin3",
                 "admin4",
+                "zip_code",
             ),
         )
 
@@ -229,6 +231,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "admin2": self.area2.id,
             "admin3": self.area3.id,
             "admin4": self.area4.id,
+            "zip_code": "00-123",
         }
         self.assertEqual(household_data, expected)
 
