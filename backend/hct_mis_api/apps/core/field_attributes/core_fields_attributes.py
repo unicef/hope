@@ -1662,6 +1662,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.HOUSEHOLD_ID],
     },
     {
+        "id": "519af6bf-3e8c-4899-a4f4-360ce55648e0",
         "type": TYPE_STRING,
         "name": "email",
         "lookup": "email",
