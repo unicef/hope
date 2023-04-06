@@ -275,7 +275,7 @@ class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEMode
                 user_data["First Name"] = member.user.first_name
                 user_data["Email"] = member.user.email
                 user_data["Business Unit"] = f"UNICEF - {obj.name}"
-                user_data["Partner Instance ID"] = int(obj.code)
+                user_data["Partner Instance ID"] = int(obj.cash_assist_code)
                 user_data["Action"] = ""
                 for role in ca_roles:
                     user_data[role] = {True: "Yes", False: ""}[role in user_roles]

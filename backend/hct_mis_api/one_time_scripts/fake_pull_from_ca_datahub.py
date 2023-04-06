@@ -26,7 +26,7 @@ def populate_ca_datahub(targeting_id: str) -> None:
     print(f"HopeTargetPopulation {target_population}")
 
     session = Session.objects.create(
-        business_area=target_population.business_area.code,
+        business_area=target_population.business_area.cash_assist_code,
         status=Session.STATUS_READY,
     )
     print(f"Session {session}")
@@ -49,7 +49,7 @@ def populate_ca_datahub(targeting_id: str) -> None:
 
     sp = ServiceProvider.objects.create(
         session=session,
-        business_area=target_population.business_area.code,
+        business_area=target_population.business_area.cash_assist_code,
         ca_id=f"SP-{target_population.id}",
         full_name="SOME TEST BANK",
         short_name="STB",
@@ -60,7 +60,7 @@ def populate_ca_datahub(targeting_id: str) -> None:
 
     cp = CashPlan.objects.create(
         session=session,
-        business_area=target_population.business_area.code,
+        business_area=target_population.business_area.cash_assist_code,
         cash_plan_id=f"123-CSH-12345-{target_population.id}",
         cash_plan_hash_id=uuid.uuid4(),
         status=CashPlan.DISTRIBUTION_COMPLETED,
@@ -111,7 +111,7 @@ def populate_ca_datahub(targeting_id: str) -> None:
         prs.append(
             PaymentRecord(
                 session=session,
-                business_area=target_population.business_area.code,
+                business_area=target_population.business_area.cash_assist_code,
                 status=HopePaymentRecord.STATUS_SUCCESS,
                 status_date=timezone.now(),
                 ca_id=f"PR-{uuid.uuid4()}",
