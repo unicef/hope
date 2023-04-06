@@ -90,6 +90,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
+        if not household_data.get("size"):
+            household_data["size"] = len(individuals_array)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
