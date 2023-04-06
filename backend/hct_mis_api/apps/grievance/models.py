@@ -17,7 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerification, Payment, PaymentRecord
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -474,6 +474,18 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
     payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     payment_object_id = UUIDField(default=None)
     payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
+
+    def get_payment_object(self):
+        from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
+
+        if self.payment_record is not None:
+            return self.payment_record
+
+        try:
+            payment_obj = get_payment_items_sequence_qs().get(id=self.payment_object_id)
+        except (Payment.DoesNotExist, PaymentRecord.DoesNotExist):
+            return None
+        return payment_obj
 
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
