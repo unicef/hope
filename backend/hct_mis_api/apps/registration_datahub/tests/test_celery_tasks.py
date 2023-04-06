@@ -382,7 +382,7 @@ class TestAutomatingRDICreationTask(TestCase):
         registration_id_to_ba_name_map = {
             2: "ukraine",
             3: "ukraine",
-            # 11: "ukraine", # new form
+            11: "ukraine", # new form
             17: "sri-lanka",
             18: "czech republic",
             19: "czech republic",
@@ -394,7 +394,7 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        registration_ids = [2, 3, 17, 18, 19, 999]  # 11
+        registration_ids = [2, 3, 11, 17, 18, 19, 999]
         for registration_id in registration_ids:
             for _ in range(amount_of_records):
                 records_count += 1
@@ -466,28 +466,28 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
 
-    # def test_ukraine_new_registration_form(self):
-    #     for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
-    #         ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
-    #     create_ukraine_business_area()
-    #     create_record(fields=UKRAINE_NEW_FORM_FIELDS, registration=11, status=Record.STATUS_TO_IMPORT)
-    #     records_ids = Record.objects.all().values_list("id", flat=True)
-    #     rdi = UkraineRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
-    #
-    #     assert Record.objects.count() == 1
-    #     assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
-    #     assert ImportedIndividual.objects.count() == 0
-    #     assert ImportedHousehold.objects.count() == 0
-    #
-    #     process_flex_records_task(rdi.pk, list(records_ids), UkraineRegistrationService.REGISTRATION_ID)
-    #     rdi.refresh_from_db()
-    #
-    #     assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 11
-    #
-    #     assert rdi.number_of_individuals == 2
-    #     assert rdi.number_of_households == 1
-    #     assert ImportedIndividual.objects.count() == 2
-    #     assert ImportedHousehold.objects.count() == 1
+    def test_ukraine_new_registration_form(self):
+        for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
+            ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
+        create_ukraine_business_area()
+        create_record(fields=UKRAINE_NEW_FORM_FIELDS, registration=11, status=Record.STATUS_TO_IMPORT)
+        records_ids = Record.objects.all().values_list("id", flat=True)
+        rdi = UkraineRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+
+        assert Record.objects.count() == 1
+        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
+        assert ImportedIndividual.objects.count() == 0
+        assert ImportedHousehold.objects.count() == 0
+
+        process_flex_records_task(rdi.pk, list(records_ids), UkraineRegistrationService.REGISTRATION_ID)
+        rdi.refresh_from_db()
+
+        assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 1
+
+        assert rdi.number_of_individuals == 2
+        assert rdi.number_of_households == 1
+        assert ImportedIndividual.objects.count() == 2
+        assert ImportedHousehold.objects.count() == 1
 
         # TODO: check other data
 
