@@ -19,11 +19,11 @@ export type Scalars = {
   UUID: any,
   JSONString: any,
   BigInt: any,
+  GeoJSON: any,
   Date: any,
   Decimal: any,
   Arg: any,
   FlexFieldsScalar: any,
-  GeoJSON: any,
   Upload: any,
 };
 
@@ -1591,15 +1591,16 @@ export type HouseholdNode = Node & {
   residenceStatus: HouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
-  size?: Maybe<Scalars['Int']>,
   address: Scalars['String'],
+  zipCode?: Maybe<Scalars['String']>,
   adminArea?: Maybe<AreaNode>,
   admin1?: Maybe<AreaNode>,
   admin2?: Maybe<AreaNode>,
   admin3?: Maybe<AreaNode>,
   admin4?: Maybe<AreaNode>,
-  representatives: IndividualNodeConnection,
   geopoint?: Maybe<Scalars['GeoJSON']>,
+  size?: Maybe<Scalars['Int']>,
+  representatives: IndividualNodeConnection,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
@@ -2216,6 +2217,7 @@ export type ImportedHouseholdNode = Node & {
   size: Scalars['Int'],
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
+  zipCode?: Maybe<Scalars['String']>,
   adminArea: Scalars['String'],
   adminAreaTitle: Scalars['String'],
   admin1: Scalars['String'],
@@ -7348,7 +7350,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'collectIndividualData' | 'flexFields'>
+  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'zipCode' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'collectIndividualData' | 'flexFields'>
   & { individuals: Maybe<(
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -11852,6 +11854,7 @@ export const HouseholdDetailedFragmentDoc = gql`
   activeIndividualsCount
   countryOrigin
   country
+  zipCode
   femaleAgeGroup05Count
   femaleAgeGroup611Count
   femaleAgeGroup1217Count
@@ -22855,6 +22858,7 @@ export type ResolversTypes = {
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
+  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
@@ -23062,7 +23066,6 @@ export type ResolversTypes = {
   TicketNegativeFeedbackDetailsNodeEdge: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNodeEdge>,
   TicketReferralDetailsNodeConnection: ResolverTypeWrapper<TicketReferralDetailsNodeConnection>,
   TicketReferralDetailsNodeEdge: ResolverTypeWrapper<TicketReferralDetailsNodeEdge>,
-  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   HouseholdRegistrationMethod: HouseholdRegistrationMethod,
   HouseholdCollectIndividualData: HouseholdCollectIndividualData,
@@ -23303,6 +23306,7 @@ export type ResolversParentTypes = {
   HouseholdNode: HouseholdNode,
   BigInt: Scalars['BigInt'],
   HouseholdResidenceStatus: HouseholdResidenceStatus,
+  GeoJSON: Scalars['GeoJSON'],
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
   IndividualNode: IndividualNode,
@@ -23510,7 +23514,6 @@ export type ResolversParentTypes = {
   TicketNegativeFeedbackDetailsNodeEdge: TicketNegativeFeedbackDetailsNodeEdge,
   TicketReferralDetailsNodeConnection: TicketReferralDetailsNodeConnection,
   TicketReferralDetailsNodeEdge: TicketReferralDetailsNodeEdge,
-  GeoJSON: Scalars['GeoJSON'],
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   HouseholdRegistrationMethod: HouseholdRegistrationMethod,
   HouseholdCollectIndividualData: HouseholdCollectIndividualData,
@@ -24542,15 +24545,16 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  zipCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin3?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin4?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -24714,6 +24718,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  zipCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminArea?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminAreaTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
