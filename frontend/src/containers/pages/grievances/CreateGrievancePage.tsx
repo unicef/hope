@@ -262,7 +262,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   'Grievance Tickets created',
                 )}.`,
                 {
-                  pathname: `/${businessArea}/grievance-and-feedback`,
+                  pathname: `/${businessArea}/grievance-and-feedback/tickets`,
                   historyMethod: 'push',
                 },
               );
