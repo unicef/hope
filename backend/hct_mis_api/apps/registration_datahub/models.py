@@ -95,6 +95,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
+    zip_code = models.CharField(max_length=12, blank=True, null=True)
     """location contains lowest administrative area info"""
     admin_area = models.CharField(max_length=255, blank=True, default=BLANK)
     admin_area_title = models.CharField(max_length=255, blank=True, default=BLANK)
@@ -225,9 +226,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
-    phone_no_valid = models.BooleanField(default=False)
+    phone_no_valid = models.BooleanField(null=True)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
-    phone_no_alternative_valid = models.BooleanField(default=False)
+    phone_no_alternative_valid = models.BooleanField(null=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
