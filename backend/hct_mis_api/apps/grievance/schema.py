@@ -119,6 +119,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
+        # TODO: extend this on other tickets and remove if statement
+        if isinstance(grievance_ticket.ticket_details, TicketComplaintDetails):
+            return grievance_ticket.ticket_details.get_payment_object()
         return getattr(grievance_ticket.ticket_details, "payment_record", None)
 
     @staticmethod

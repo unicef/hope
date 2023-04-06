@@ -33,6 +33,13 @@ export function LookUpPaymentRecordTableRow({
   const isItemSelected = isSelected(paymentRecord.id);
   const received = paymentRecord?.verification?.receivedAmount;
 
+  const renderUrl = objType => {
+    if (objType === "Payment") {
+      return `/${businessArea}/payment-module/payments/${paymentRecord.id}`;
+    }
+    return `/${businessArea}/payment-records/${paymentRecord.id}`;
+  }
+
   return (
     <ClickableTableRow
       onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
@@ -49,7 +56,7 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={`/${businessArea}/payment-records/${paymentRecord.id}`}>
+        <BlackLink to={renderUrl(paymentRecord.objType)}>
           {paymentRecord.caId}
         </BlackLink>
       </TableCell>
