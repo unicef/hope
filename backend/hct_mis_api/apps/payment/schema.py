@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 
 import _decimal
 import graphene
-from graphene import relay, Field
+from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
@@ -645,6 +645,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     delivered_quantity_usd = graphene.Float(source="delivered_quantity_usd")
     currency = graphene.String(source="currency")
     delivery_date = graphene.String(source="delivery_date")
+    verification = graphene.Field(PaymentVerificationNode, source="verification")
 
     def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__

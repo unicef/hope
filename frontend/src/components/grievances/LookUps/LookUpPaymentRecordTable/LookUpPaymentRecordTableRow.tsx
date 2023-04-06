@@ -31,8 +31,8 @@ export function LookUpPaymentRecordTableRow({
   const businessArea = useBusinessArea();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
-  // const received = paymentRecord?.verification?.receivedAmount;
-  const received = null;
+  const received = paymentRecord?.verification?.receivedAmount;
+
   return (
     <ClickableTableRow
       onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}

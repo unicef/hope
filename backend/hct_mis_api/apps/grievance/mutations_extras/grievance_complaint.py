@@ -1,13 +1,17 @@
 from typing import Any, Dict, List
 
-import graphene
 from django.contrib.admin.options import get_content_type_for_model
 
-from hct_mis_api.apps.core.utils import decode_and_get_object, decode_id_string, decode_and_get_payment_object
+import graphene
+
+from hct_mis_api.apps.core.utils import (
+    decode_and_get_object,
+    decode_and_get_payment_object,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketComplaintDetails
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.models import PaymentRecord, Payment
+from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class GrievanceComplaintTicketExtras(graphene.InputObjectType):
@@ -38,7 +42,7 @@ def save_grievance_complaint_extras(
     TicketComplaintDetails.objects.create(
         individual=individual,
         household=household,
-        payment_content_type=get_content_type_for_model(payment_record),
+        payment_content_type=get_content_type_for_model(payment_record),  # type: ignore
         payment_object_id=payment_record.pk,
         ticket=grievance_ticket,
     )
