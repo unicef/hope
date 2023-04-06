@@ -284,13 +284,13 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        FlexRegistrationService,
+def process_ukraine_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List) -> None:
+    from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
+        UkraineBaseRegistrationService,
     )
 
     try:
-        FlexRegistrationService().process_records(rdi_id, records_ids)
+        UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
     except Exception as e:
         logger.exception("Process Flex Records Task error")
         raise self.retry(exc=e)
