@@ -47,14 +47,14 @@ class TestSyncToMisDatahubTask(TestCase):
 
     def test_dont_sync_parent(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
-            business_area=self.bosnia_and_herzegovina.code,
+            business_area=self.bosnia_and_herzegovina.cash_assist_code,
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
         )
         down_payment = DownPayment.objects.create(
             rec_serial_number="1600000009",
-            business_area=self.bosnia_and_herzegovina.code,
+            business_area=self.bosnia_and_herzegovina.cash_assist_code,
             down_payment_reference="2021/3210065763/001",
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
@@ -73,22 +73,22 @@ class TestSyncToMisDatahubTask(TestCase):
 
     def test_sync_with_set_new_business_area(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
-            business_area=self.bosnia_and_herzegovina.code,
+            business_area=self.bosnia_and_herzegovina.cash_assist_code,
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
-            business_office_code=self.bosnia.code,
+            business_office_code=self.bosnia.cash_assist_code,
         )
         down_payment = DownPayment.objects.create(
             rec_serial_number="1600000009",
-            business_area=self.bosnia_and_herzegovina.code,
+            business_area=self.bosnia_and_herzegovina.cash_assist_code,
             down_payment_reference="2021/3210065763/001",
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
             posting_date=timezone.now(),
             created_by="johniak",
-            business_office_code=self.herzegovina.code,
+            business_office_code=self.herzegovina.cash_assist_code,
         )
         task = SyncToMisDatahubTask()
         task.execute()
@@ -101,14 +101,14 @@ class TestSyncToMisDatahubTask(TestCase):
 
     def test_sync_normal(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
-            business_area=BusinessArea.objects.first().code,
+            business_area=BusinessArea.objects.first().cash_assist_code,
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
         )
         down_payment = DownPayment.objects.create(
             rec_serial_number="1600000009",
-            business_area=BusinessArea.objects.first().code,
+            business_area=BusinessArea.objects.first().cash_assist_code,
             down_payment_reference="2021/3210065763/001",
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
@@ -127,23 +127,23 @@ class TestSyncToMisDatahubTask(TestCase):
 
     def test_dont_sync_with_set_new_business_area_already_synced(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
-            business_area=self.bosnia_and_herzegovina.code,
+            business_area=self.bosnia_and_herzegovina.cash_assist_code,
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
-            business_office_code=self.bosnia.code,
+            business_office_code=self.bosnia.cash_assist_code,
             mis_sync_flag=True,
         )
         down_payment = DownPayment.objects.create(
             rec_serial_number="1600000009",
-            business_area=self.bosnia_and_herzegovina.code,
+            business_area=self.bosnia_and_herzegovina.cash_assist_code,
             down_payment_reference="2021/3210065763/001",
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
             posting_date=timezone.now(),
             created_by="johniak",
-            business_office_code=self.herzegovina.code,
+            business_office_code=self.herzegovina.cash_assist_code,
             mis_sync_flag=True,
         )
         task = SyncToMisDatahubTask()
@@ -157,7 +157,7 @@ class TestSyncToMisDatahubTask(TestCase):
 
     def test_dont_sync_normal_already_synced(self) -> None:
         funds_commitment = FundsCommitmentFactory.create(
-            business_area=BusinessArea.objects.first().code,
+            business_area=BusinessArea.objects.first().cash_assist_code,
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
@@ -165,7 +165,7 @@ class TestSyncToMisDatahubTask(TestCase):
         )
         down_payment = DownPayment.objects.create(
             rec_serial_number="1600000009",
-            business_area=BusinessArea.objects.first().code,
+            business_area=BusinessArea.objects.first().cash_assist_code,
             down_payment_reference="2021/3210065763/001",
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
