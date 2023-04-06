@@ -506,7 +506,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
           <div
             data-cy="label-Phone Number"
           >
-            Invalid Phone Number
+            +48734123423
           </div>
         </div>
       </div>

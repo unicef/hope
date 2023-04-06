@@ -52,7 +52,7 @@ class FundsCommitmentAddForm(forms.ModelForm):
         exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
 
     def clean_business_area(self) -> str:
-        return self.cleaned_data["business_area"].code
+        return self.cleaned_data["business_area"].cash_assist_code
 
 
 class DownPaymentAddForm(forms.ModelForm):
@@ -66,7 +66,7 @@ class DownPaymentAddForm(forms.ModelForm):
         exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
 
     def clean_business_area(self) -> str:
-        return self.cleaned_data["business_area"].code
+        return self.cleaned_data["business_area"].cash_assist_code
 
 
 class FundsCommitmentAssignBusinessOffice(forms.ModelForm):
@@ -79,7 +79,7 @@ class FundsCommitmentAssignBusinessOffice(forms.ModelForm):
         fields = ("business_office_code",)
 
     def clean_business_office_code(self) -> str:
-        return self.cleaned_data["business_office_code"].code
+        return self.cleaned_data["business_office_code"].cash_assist_code
 
 
 def should_show_assign_business_office(request: "HttpRequest", obj: Any) -> bool:
@@ -205,7 +205,7 @@ class DownPaymentAssignBusinessOffice(forms.ModelForm):
         fields = ("business_office_code",)
 
     def clean_business_office_code(self) -> str:
-        return self.cleaned_data["business_office_code"].code
+        return self.cleaned_data["business_office_code"].cash_assist_code
 
 
 @admin.register(DownPayment)
