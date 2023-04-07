@@ -56,7 +56,7 @@ stages:
               install: true
               waitForExecution: false
               failOnStderr: false
-              valueFile: "hct-mis/deployment/pipeline-cd-dev.values.yaml'
+              valueFile: 'hct-mis/deployment/pipeline-cd-dev.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
