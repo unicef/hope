@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from django_countries.fields import Country
 
@@ -32,8 +32,8 @@ from hct_mis_api.apps.registration_datahub.services.base_flex_registration_servi
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
-    BUSINESS_AREA_SLUG = "sri-lanka"
-    REGISTRATION_ID = (17,)
+    BUSINESS_AREA_SLUG: str = "sri-lanka"
+    REGISTRATION_ID: Tuple = (17,)
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin2": "admin2_h_c",
