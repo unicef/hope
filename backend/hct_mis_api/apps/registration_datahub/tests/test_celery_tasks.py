@@ -393,7 +393,7 @@ class TestAutomatingRDICreationTask(TestCase):
         registration_id_to_ba_name_map = {
             2: "ukraine",
             3: "ukraine",
-            11: "ukraine", # new form
+            11: "ukraine",  # new form
             17: "sri-lanka",
             18: "czech republic",
             19: "czech republic",
