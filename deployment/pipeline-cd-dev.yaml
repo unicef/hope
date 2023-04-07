@@ -1,6 +1,11 @@
 trigger: none
 pr: none
 resources:
+  repositories:
+  - repository: hct-mis-helm
+    type: github
+    endpoint: "unicef (2)"
+    name: unicef/hct-mis-helm
   pipelines:
   - pipeline: ci-hope
     source: '[CI] HOPE'
@@ -28,7 +33,11 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
+<<<<<<< Updated upstream
           - checkout: git://unicef/hct-mis-helm
+=======
+          - checkout: hct-mis-helm
+>>>>>>> Stashed changes
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
