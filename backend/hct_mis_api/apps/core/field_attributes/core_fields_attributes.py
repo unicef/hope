@@ -1624,7 +1624,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "end",
         "scope": [Scope.KOBO_IMPORT],
     },
-    {
+    {   "id": "16e68909-54f4-47cb-ab06-066d13e85134",
         "type": TYPE_LIST_OF_IDS,
         "name": "primary_collector_id",
         "lookup": "primary_collector_id",
@@ -1637,6 +1637,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.COLLECTOR],
     },
     {
+        "id": "d7f41696-94e5-4e0c-ab1b-20ff27c25364",
         "type": TYPE_LIST_OF_IDS,
         "name": "alternate_collector_id",
         "lookup": "alternate_collector_id",
