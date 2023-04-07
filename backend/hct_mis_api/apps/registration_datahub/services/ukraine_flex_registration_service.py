@@ -1,14 +1,12 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.utils import (
-    build_arg_dict_from_dict,
-)
+from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -36,14 +34,16 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
+
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from hct_mis_api.apps.account.models import Role
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):
-    BUSINESS_AREA_SLUG = "ukraine"
-    REGISTRATION_ID = (2, 3)
+    BUSINESS_AREA_SLUG: str = "ukraine"
+    REGISTRATION_ID: Tuple = (2, 3)
 
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
@@ -76,7 +76,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        self._check_registration_id(record.registration, "Ukraine data is processed only from registration 2,3 or 11!")
+        self._check_registration_id(record.registration, "Ukraine data is processed only from registration 2, 3 or 11!")
 
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
@@ -263,11 +263,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             return None
         bank_name = individual_dict.get("bank_name_h_f", "")
         other_bank_name = individual_dict.get("other_bank_name", "")
-        if not bank_name:
-            bank_name = other_bank_name
-        bank_account_number = str(individual_dict.get("bank_account", "")).replace(" ", "") or str(individual_dict.get("bank_account_number", "")).replace(" ", "")
+        # bank_name is required
+        bank_name = bank_name or other_bank_name
         bank_account_info_data = {
-            "bank_account_number": bank_account_number,
+            "bank_account_number": str(individual_dict.get("bank_account", "")).replace(" ", ""),
             "bank_name": bank_name,
             "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "individual": individual,
@@ -283,11 +282,17 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             raise ValidationError("Household should has at least one Head of Household")
 
     def _has_head(self, individuals_array: List[ImportedIndividual]) -> bool:
-        return any(individual_data.get("relationship_i_c",) == "head" for individual_data in individuals_array)
+        return any(
+            individual_data.get(
+                "relationship_i_c",
+            )
+            == "head"
+            for individual_data in individuals_array
+        )
 
 
 class UkraineRegistrationService(UkraineBaseRegistrationService):
-    REGISTRATION_ID = (11,)
+    REGISTRATION_ID: Tuple = (11,)
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin1": "admin1_h_c",

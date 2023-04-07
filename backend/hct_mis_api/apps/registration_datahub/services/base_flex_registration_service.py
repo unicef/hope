@@ -12,7 +12,10 @@ from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task, process_flex_records_task
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    process_flex_records_task,
+    rdi_deduplication_task,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedHousehold,

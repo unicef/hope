@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django.core.cache import cache
 from django.db import transaction
@@ -284,24 +284,25 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Optional[Tuple]) -> None:
+def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, registration_ids: Tuple) -> None:
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        SriLankaRegistrationService,
+    )
     from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
         UkraineBaseRegistrationService,
         UkraineRegistrationService,
     )
-    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-        SriLankaRegistrationService,
-    )
 
     try:
-        if (2,3) == registration_ids:
+        if registration_ids == (2, 3):
             UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
-        elif (11,) == registration_ids:
+        elif registration_ids == (11,):
             UkraineRegistrationService().process_records(rdi_id, records_ids)
-        elif (17,) == registration_ids:
+        elif registration_ids == (17,):
             SriLankaRegistrationService().process_records(rdi_id, records_ids)
         else:
             logger.exception(f"Not Implemented Service for Registration id(s): {registration_ids}")
+            raise NotImplementedError
     except Exception as e:
         logger.exception("Process Flex Records Task error")
         raise self.retry(exc=e)
