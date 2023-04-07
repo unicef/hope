@@ -33,11 +33,7 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
-<<<<<<< Updated upstream
-          - checkout: git://unicef/hct-mis-helm
-=======
           - checkout: hct-mis-helm
->>>>>>> Stashed changes
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
