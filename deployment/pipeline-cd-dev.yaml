@@ -41,7 +41,7 @@ stages:
               kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
               command: package
               updatedependency: true
-              chartPath: '**/hct-mis-helm'
+              chartPath: 'hct-mis-helm'
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -50,7 +50,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: '**/hct-mis-helm'
+              chartPath: 'hct-mis-helm'
               releaseName: 'hope'
               install: true
               waitForExecution: false
