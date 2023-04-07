@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete';
 import { createHandleFilterChange } from '../../utils/utils';
-import {AssigneeAutocomplete} from "../../shared/AssigneeAutocomplete";
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
