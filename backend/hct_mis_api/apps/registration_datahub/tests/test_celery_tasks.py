@@ -434,8 +434,9 @@ class TestAutomatingRDICreationTask(TestCase):
             else:
                 rdi_count += amount_of_records // page_size
                 # for SriLanka we create "children" and "caretaker" as two separate Individuals
+                # and for Ukr new form reg_id=11 we create 2 Ind and 1 Hh
                 # that why need amount_of_records * 2
-                imported_ind_count += amount_of_records if registration_id != 17 else amount_of_records * 2
+                imported_ind_count += amount_of_records if registration_id not in [17, 11] else amount_of_records * 2
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
