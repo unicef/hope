@@ -8,8 +8,8 @@ from hct_mis_api.apps.household.models import (
 )
 
 
-def find_edopomoga_households() -> QuerySet[Household]:
-    storage_file = StorageFile.objects.get(pk=3)
+def find_edopomoga_households(pk: int) -> QuerySet[Household]:
+    storage_file = StorageFile.objects.get(pk=pk)
     return Household.objects.filter(storage_obj=storage_file, business_area__slug="ukraine").distinct()
 
 
@@ -24,7 +24,7 @@ def create_collector_for_household(household: Household) -> None:
     role.save()
 
 
-def create_collectors_for_households() -> None:
-    households = find_edopomoga_households()
+def create_collectors_for_households(pk: int = 3) -> None:
+    households = find_edopomoga_households(pk)
     for household in households:
         create_collector_for_household(household)
