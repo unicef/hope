@@ -238,6 +238,7 @@ export function paymentPlanStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    [PaymentPlanStatus.Preparing]: theme.hctPalette.gray,
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
     [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
     [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
@@ -564,13 +565,13 @@ export function renderUserName(user): string {
 
 export const getPhoneNoLabel = (
   phoneNo: string,
-  phoneNoValid: boolean,
+  phoneNoValid?: boolean,
 ): string => {
   if (!phoneNo) return '-';
-  if (phoneNoValid) {
-    return phoneNo;
+  if (phoneNoValid === false) {
+    return 'Invalid Phone Number';
   }
-  return 'Invalid Phone Number';
+  return phoneNo;
 };
 
 const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
