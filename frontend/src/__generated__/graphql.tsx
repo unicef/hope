@@ -1956,13 +1956,14 @@ export type HouseholdNode = Node & {
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
   address: Scalars['String'],
+  zipCode?: Maybe<Scalars['String']>,
   adminArea?: Maybe<AreaNode>,
   admin1?: Maybe<AreaNode>,
   admin2?: Maybe<AreaNode>,
   admin3?: Maybe<AreaNode>,
   admin4?: Maybe<AreaNode>,
-  representatives: IndividualNodeConnection,
   geopoint?: Maybe<Scalars['GeoJSON']>,
+  representatives: IndividualNodeConnection,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
@@ -2609,6 +2610,7 @@ export type ImportedHouseholdNode = Node & {
   size: Scalars['Int'],
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
+  zipCode?: Maybe<Scalars['String']>,
   adminArea: Scalars['String'],
   adminAreaTitle: Scalars['String'],
   admin1: Scalars['String'],
@@ -4393,7 +4395,8 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  Finished = 'FINISHED'
+  Finished = 'FINISHED',
+  Preparing = 'PREPARING'
 }
 
 export type PaymentRecordAndPaymentNode = {
@@ -5201,9 +5204,11 @@ export type QueryAllLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
+  user?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>
 };
 
 
@@ -5567,9 +5572,11 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
+  user?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>,
   objectType?: Maybe<Scalars['String']>
 };
 
@@ -5833,7 +5840,6 @@ export type QueryAllHouseholdsArgs = {
   address_Startswith?: Maybe<Scalars['String']>,
   headOfHousehold_FullName?: Maybe<Scalars['String']>,
   headOfHousehold_FullName_Startswith?: Maybe<Scalars['String']>,
-  headOfHousehold_PhoneNoValid?: Maybe<Scalars['Boolean']>,
   size_Range?: Maybe<Array<Maybe<Scalars['Int']>>>,
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
@@ -5845,6 +5851,7 @@ export type QueryAllHouseholdsArgs = {
   withdrawn?: Maybe<Scalars['Boolean']>,
   size?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
+  headOfHousehold_PhoneNoValid?: Maybe<Scalars['Boolean']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
@@ -8263,7 +8270,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'collectIndividualData' | 'flexFields'>
+  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'zipCode' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'collectIndividualData' | 'flexFields'>
   & { individuals: Maybe<(
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -10174,7 +10181,8 @@ export type AllLogEntriesQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  userId?: Maybe<Scalars['String']>
 };
 
 
@@ -13451,6 +13459,7 @@ export const HouseholdDetailedFragmentDoc = gql`
   activeIndividualsCount
   countryOrigin
   country
+  zipCode
   femaleAgeGroup05Count
   femaleAgeGroup611Count
   femaleAgeGroup1217Count
@@ -18406,8 +18415,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
-  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String, $userId: String) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module, userId: $userId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -18482,6 +18491,7 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      last: // value for 'last'
  *      search: // value for 'search'
  *      module: // value for 'module'
+ *      userId: // value for 'userId'
  *   },
  * });
  */
@@ -28130,13 +28140,14 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  zipCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin3?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   admin4?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
+  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -28302,6 +28313,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  zipCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminArea?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminAreaTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

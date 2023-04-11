@@ -1404,13 +1404,14 @@ type HouseholdNode implements Node {
   countryOrigin: String
   country: String
   address: String!
+  zipCode: String
   adminArea: AreaNode
   admin1: AreaNode
   admin2: AreaNode
   admin3: AreaNode
   admin4: AreaNode
-  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
+  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
   femaleAgeGroup1217Count: Int
@@ -1868,6 +1869,7 @@ type ImportedHouseholdNode implements Node {
   size: Int!
   address: String!
   country: String
+  zipCode: String
   adminArea: String!
   adminAreaTitle: String!
   admin1: String!
@@ -2930,6 +2932,7 @@ enum PaymentPlanStatus {
   IN_REVIEW
   ACCEPTED
   FINISHED
+  PREPARING
 }
 
 type PaymentRecordAndPaymentNode {
@@ -3308,7 +3311,7 @@ type Query {
   availableFlows: [RapidProFlowNode]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int, parentId: String): AreaNodeConnection
-  allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
+  allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
   allReports(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: DateTime, createdTo: DateTime, orderBy: String): ReportNodeConnection
@@ -3367,7 +3370,7 @@ type Query {
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
-  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String, objectType: String): PaymentVerificationLogEntryNodeConnection
+  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, objectType: String): PaymentVerificationLogEntryNodeConnection
   paymentPlan(id: ID!): PaymentPlanNode
   allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, orderBy: String): PaymentPlanNodeConnection
   paymentPlanStatusChoices: [ChoiceObject]
@@ -3402,7 +3405,7 @@ type Query {
   targetPopulationStatusChoices: [ChoiceObject]
   allActiveTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, headOfHousehold_PhoneNoValid: Boolean, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin2: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, countryOrigin: String, orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin2: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
   allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode

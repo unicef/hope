@@ -484,7 +484,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           <div
             data-cy="label-Phone Number"
           >
-            Invalid Phone Number
+            +48503123555
           </div>
         </div>
       </div>
