@@ -119,9 +119,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
-        # TODO: extend this on other tickets and remove if statement
-        if isinstance(grievance_ticket.ticket_details, TicketComplaintDetails):
-            return grievance_ticket.ticket_details.get_payment_object()
         return getattr(grievance_ticket.ticket_details, "payment_record", None)
 
     @staticmethod
@@ -154,11 +151,16 @@ class TicketNoteNode(DjangoObjectType):
 
 
 class TicketComplaintDetailsNode(DjangoObjectType):
+    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+
     class Meta:
         model = TicketComplaintDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_payment_record(self, info: Any) -> Optional[Any]:
+        return getattr(self, "payment_record", None)
 
 
 class TicketSensitiveDetailsNode(DjangoObjectType):

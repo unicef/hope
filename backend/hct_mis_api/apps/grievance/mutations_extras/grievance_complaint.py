@@ -42,8 +42,8 @@ def save_grievance_complaint_extras(
     TicketComplaintDetails.objects.create(
         individual=individual,
         household=household,
-        payment_content_type=get_content_type_for_model(payment_record),  # type: ignore
-        payment_object_id=payment_record.pk,
+        payment_content_type=get_content_type_for_model(payment_record) if payment_record else None,
+        payment_object_id=getattr(payment_record, "pk", None),
         ticket=grievance_ticket,
     )
     grievance_ticket.refresh_from_db()
