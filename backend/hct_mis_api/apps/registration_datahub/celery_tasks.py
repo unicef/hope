@@ -294,11 +294,14 @@ def process_flex_records_task(self: Any, rdi_id: "UUID", records_ids: List, regi
     )
 
     try:
-        if registration_ids == (2, 3):
+        # check only first item in tuple registration_ids
+        # TODO: maybe refactor registration_ids arg or add service_name in arg
+        registration_id = next(iter(registration_ids))
+        if registration_id in [2, 3]:
             UkraineBaseRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_ids == (11,):
+        elif registration_id == 11:
             UkraineRegistrationService().process_records(rdi_id, records_ids)
-        elif registration_ids == (17,):
+        elif registration_id == 17:
             SriLankaRegistrationService().process_records(rdi_id, records_ids)
         else:
             logger.exception(f"Not Implemented Service for Registration id(s): {registration_ids}")
