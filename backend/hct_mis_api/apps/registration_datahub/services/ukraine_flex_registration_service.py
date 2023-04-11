@@ -262,7 +262,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         if not individual_dict.get("bank_account_number") or not individual_dict.get("bank_account"):
             return None
         bank_name = individual_dict.get("bank_name_h_f", "")
-        other_bank_name = individual_dict.get("other_bank_name", "")
+        # AB#154910 default bank name for Ukraine is 'Private Bank'
+        other_bank_name = individual_dict.get("other_bank_name", "Private Bank")
         # bank_name is required
         bank_name = bank_name or other_bank_name
         bank_account_info_data = {

@@ -158,7 +158,6 @@ UKRAINE_NEW_FORM_FIELDS: Dict = {
             "given_name_i_c": "Pavlo",
             "family_name_i_c": "Mok",
             "bank_account_h_f": "y",
-            "bank_name_h_f": "AvalBank",  # TODO: required field should be in reg form ??
             "relationship_i_c": "head",
             "bank_account_number": "1236 5498 7999 1999",
         },
@@ -538,7 +537,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
         assert bank_acc_info.bank_account_number == "IBAN1236549879998999"
         assert bank_acc_info.debit_card_number == "1236549879991999"
-        assert bank_acc_info.bank_name == "AvalBank"
+        assert bank_acc_info.bank_name == "Private Bank"
 
     def test_create_task_for_processing_records_not_implemented_error(self) -> None:
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
