@@ -71,17 +71,17 @@ class Command(BaseCommand):
         generate_reconciled_payment_plan()
 
         email_list = [
-            "jan.romaniak@tivix.com",
-            "jakub.krasnowski@tivix.com",
-            "bartosz.wozniak@tivix.com",
-            "pavlo.mokiichuk@tivix.com",
-            "kamil.swiechowski@tivix.com",
-            "karolina.sliwinska@tivix.com",
-            "katarzyna.lanecka@tivix.com",
-            "konrad.marzec@tivix.com",
-            "maciej.szewczyk@tivix.com",
-            "marek.biczysko@tivix.com",
-            "patryk.dabrowski@tivix.com",
+            "jan.romaniak@kellton.com",
+            "jakub.krasnowski@kellton.com",
+            "pavlo.mokiichuk@kellton.com",
+            "kamil.swiechowski@kellton.com",
+            "karolina.sliwinska@kellton.com",
+            "katarzyna.lanecka@kellton.com",
+            "konrad.marzec@kellton.com",
+            "maciej.szewczyk@kellton.com",
+            "marek.biczysko@kellton.com",
+            "patryk.dabrowski@kellton.com",
+            "zuzanna.okrutna@kellton.com",
             "gerba@unicef.org",
             "ddinicola@unicef.org",
             "sapostolico@unicef.org",
@@ -94,7 +94,6 @@ class Command(BaseCommand):
             "jyablonski@unicef.org",
             "nmkuzi@unicef.org",
             "swaheed@unicef.org",
-            "zuzanna.okrutna@kellton.com",
         ]
         pm_list = [
             "khaddad@unicef.org",
@@ -107,12 +106,16 @@ class Command(BaseCommand):
             "ilutska@unicef.org",
             "okozyrenko@unicef.org",
         ]
+
+        role_with_all_perms = Role.objects.get(name="Role with all permissions")
+        afghanistan = BusinessArea.objects.get(slug="afghanistan")
+
         for email in email_list + pm_list:
             user = User.objects.create_user(email, email, "password")
             UserRole.objects.create(
                 user=user,
-                role=Role.objects.get(name="Role with all permissions"),
-                business_area=BusinessArea.objects.get(slug="afghanistan"),
+                role=role_with_all_perms,
+                business_area=afghanistan,
             )
             if email in email_list:
                 user.is_staff = True

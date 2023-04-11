@@ -36,6 +36,7 @@ ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 ####
 ADMINS = (
     ("Alerts", env("ALERTS_EMAIL")),
+    # TODO: update to @kellton.com
     ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
 )
 
