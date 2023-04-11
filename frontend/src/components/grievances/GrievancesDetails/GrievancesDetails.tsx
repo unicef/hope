@@ -54,7 +54,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return (
         <ContentLink
-          href={`/${businessArea}/verification/payment-record/${ticket.paymentRecord.id}`}
+          href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -63,7 +63,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'Payment') {
       return (
         <ContentLink
-          href={`/${businessArea}/verification/payment/${ticket.paymentRecord.id}`}
+          href={`/${businessArea}/payment-module/payments/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
