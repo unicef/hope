@@ -68,7 +68,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -91,7 +91,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -114,7 +114,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -137,7 +137,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -160,7 +160,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -183,7 +183,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -206,7 +206,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -229,7 +229,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -252,14 +252,14 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb iRvpKE"
+                  class="sc-gzVnrw hnJLim"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY="
                 />
               </td>
