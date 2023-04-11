@@ -17,7 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.payment.models import PaymentVerification, Payment, PaymentRecord
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -26,7 +26,6 @@ from hct_mis_api.apps.utils.models import (
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
-    from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 logger = logging.getLogger(__name__)
@@ -453,12 +452,6 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
     )
-    payment_record = models.ForeignKey(
-        "payment.PaymentRecord",
-        related_name="complaint_ticket_details",
-        on_delete=models.CASCADE,
-        null=True,
-    )
     household = models.ForeignKey(
         "household.Household",
         related_name="complaint_ticket_details",
@@ -472,20 +465,16 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         null=True,
     )
     payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = UUIDField(default=None)
+    payment_object_id = UUIDField(null=True)
     payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
 
-    def get_payment_object(self):
+    @property
+    def payment_record(self) -> Optional[Union[Payment, PaymentRecord]]:
         from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
 
-        if self.payment_record is not None:
-            return self.payment_record
-
-        try:
-            payment_obj = get_payment_items_sequence_qs().get(id=self.payment_object_id)
-        except (Payment.DoesNotExist, PaymentRecord.DoesNotExist):
-            return None
-        return payment_obj
+        if self.payment_object_id:
+            return get_payment_items_sequence_qs().get(id=self.payment_object_id)
+        return None
 
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
