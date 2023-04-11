@@ -81,7 +81,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -104,7 +104,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -128,7 +128,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd MuiTableSortLabel-active"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU MuiTableSortLabel-active"
                     role="button"
                     tabindex="0"
                   >
@@ -156,7 +156,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -179,7 +179,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -202,7 +202,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -225,7 +225,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -248,14 +248,14 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-gzVnrw hnJLim"
+                    class="sc-gZMcBi ecDzIq"
                     href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6OWJlMjUwNGMtZGQ3YS00ZDZkLWE4OGEtOTU5YWZkZGY3MTgy"
                   >
                     Adam Row ID Test 2
@@ -265,10 +265,10 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <div
-                    class="sc-EHOje gFjtOh"
+                    class="sc-dnqmqq fRlUlo"
                   >
                     <div
-                      class="sc-bZQynM eoRnNj"
+                      class="sc-iwsKbI gJyerb"
                       data-cy="status-container"
                     >
                       MERGED
