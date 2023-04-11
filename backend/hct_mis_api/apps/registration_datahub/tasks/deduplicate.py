@@ -342,7 +342,7 @@ class DeduplicateTask:
                 "full_name": individual_hit.full_name,
                 "score": individual_hit.meta.score,
                 "location": individual_hit.admin2,  # + village
-                "dob": individual_hit.birth_date,
+                "dob": individual_hit.birth_date.strftime("%Y-%m-%d"),
             }
             if score >= duplicate_score:
                 duplicates.append(individual_hit.id)
