@@ -444,7 +444,7 @@ class GenerateDashboardReportContentHelpers:
     @classmethod
     def format_programs_row(cls, instance: Program, *args: Any) -> Tuple:
         result: List = [
-            instance.business_area.code,
+            instance.business_area.cash_assist_code,
             instance.business_area.name,
             instance.name,
             instance.sector,
@@ -513,7 +513,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def format_payment_verifications_row(instance: Program, *args: Any) -> Tuple:
         return (
-            instance.business_area.code,
+            instance.business_area.cash_assist_code,
             instance.business_area.name,
             instance.name,
             instance.total_cash_plan_verifications,

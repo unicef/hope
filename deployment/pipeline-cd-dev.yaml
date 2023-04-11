@@ -1,6 +1,11 @@
 trigger: none
 pr: none
 resources:
+  repositories:
+  - repository: hct-mis-helm
+    type: github
+    endpoint: "unicef (2)"
+    name: unicef/hct-mis-helm
   pipelines:
   - pipeline: ci-hope
     source: '[CI] HOPE'
@@ -28,6 +33,8 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
+          - checkout: self
+          - checkout: hct-mis-helm
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
@@ -35,7 +42,7 @@ stages:
               kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
               command: package
               updatedependency: true
-              chartPath: '**/deployment/hope'
+              chartPath: 'hct-mis-helm'
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -44,12 +51,12 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: '**/deployment/hope'
+              chartPath: 'hct-mis-helm'
               releaseName: 'hope'
               install: true
               waitForExecution: false
               failOnStderr: false
-              valueFile: '**/deployment/pipeline-cd-dev.values.yaml'
+              valueFile: 'hct-mis/deployment/pipeline-cd-dev.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\

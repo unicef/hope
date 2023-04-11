@@ -16,7 +16,9 @@ class Command(BaseCommand):
         business_areas = BusinessArea.objects.all()
         some_business_area = business_areas.order_by("?").first()
 
-        some_session = Session.objects.get_or_create(business_area=some_business_area.code, status=Session.STATUS_READY)
+        some_session = Session.objects.get_or_create(
+            business_area=some_business_area.cash_assist_code, status=Session.STATUS_READY
+        )
 
         service_provider_ca_id = UUID("00000000-0000-0000-0000-000000000000")
         cash_plan_ca_id = UUID("00000000-0000-0000-0000-000000000001")

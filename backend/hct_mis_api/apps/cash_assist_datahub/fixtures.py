@@ -23,7 +23,7 @@ class ServiceProviderFactory(DjangoModelFactory):
     class Meta:
         model = ServiceProvider
 
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
     ca_id = factory.Faker("uuid4")
     full_name = factory.Faker("company")
     short_name = factory.LazyAttribute(lambda o: o.full_name[0:3])
@@ -35,7 +35,7 @@ class PaymentRecordFactory(DjangoModelFactory):
     class Meta:
         model = PaymentRecord
 
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
     status = fuzzy.FuzzyChoice(
         payment_models.PaymentRecord.STATUS_CHOICE,
         getter=lambda c: c[0],
@@ -89,7 +89,7 @@ class CashPlanFactory(DjangoModelFactory):
     class Meta:
         model = CashPlan
 
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
 
     program_mis_id = factory.LazyAttribute(lambda o: program_models.Program.objects.order_by("?").first().id)
     cash_plan_id = factory.Faker("uuid4")
