@@ -81,7 +81,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   />
                 </th>
                 <th
@@ -90,7 +90,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Household Id
                   </span>
@@ -101,7 +101,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Status
                   </span>
@@ -112,7 +112,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Head of Household
                   </span>
@@ -123,7 +123,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Household Size
                   </span>
@@ -134,7 +134,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Administrative Level 2
                   </span>
@@ -145,7 +145,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Residence Status
                   </span>
@@ -156,7 +156,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Total Cash Received
                   </span>
@@ -167,7 +167,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Registration Date
                   </span>
@@ -178,7 +178,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                class="MuiTableRow-root sc-gqjmRU hspxAx MuiTableRow-hover"
                 data-cy="household-table-row"
                 role="checkbox"
               >
@@ -199,7 +199,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-ifAKCX hQSvGu"
+                    class="sc-htoDjs fzdMAW"
                     href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc="
                   >
                     HH-20-0000.0001
@@ -209,10 +209,10 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <div
-                    class="sc-bZQynM hTcAyj"
+                    class="sc-iwsKbI dUmvrG"
                   >
                     <div
-                      class="sc-gzVnrw dubIBG"
+                      class="sc-gZMcBi kXwxiR"
                       data-cy="status-container"
                     >
                       ACTIVE
