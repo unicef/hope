@@ -110,6 +110,7 @@ django-concurrency = "^2.4"
 django-constance = { version = "^2.9", extras = ["redis"] }
 django-cors-headers = "^3.13.0"
 django-countries = "^7.3.2"
+django-csp = "^3.7"
 django-debug-toolbar = "^3.7.0"
 django-elasticsearch-dsl = "^7.2.2"
 django-environ = "^0.10.0"

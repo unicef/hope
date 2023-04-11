@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
@@ -23,28 +23,39 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const { data, loading } = usePaymentPlanQuery({
+  const { data, loading, startPolling, stopPolling } = usePaymentPlanQuery({
     variables: {
       id,
     },
     fetchPolicy: 'cache-and-network',
   });
 
-  if (permissions === null) return null;
-  if (!data) return null;
-  if (loading) return <LoadingComponent />;
+  const status = data?.paymentPlan?.status;
+
+  useEffect(() => {
+    if (PaymentPlanStatus.Preparing === status) {
+      startPolling(3000);
+    } else {
+      stopPolling();
+    }
+    return stopPolling;
+  }, [status, startPolling, stopPolling]);
+
+  if (loading && !data) return <LoadingComponent />;
+  if (permissions === null || !data) return null;
+
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
-  const { paymentPlan } = data;
+
   const shouldDisplayEntitlement =
-    paymentPlan.status !== PaymentPlanStatus.Open &&
-    paymentPlan.status !== PaymentPlanStatus.Accepted;
+    status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
 
-  const shouldDisplayFsp = paymentPlan.status !== PaymentPlanStatus.Open;
+  const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
   const shouldDisplayReconciliationSummary =
-    paymentPlan.status === PaymentPlanStatus.Accepted ||
-    paymentPlan.status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatus.Accepted ||
+    status === PaymentPlanStatus.Finished;
 
+  const { paymentPlan } = data;
   return (
     <>
       <PaymentPlanDetailsHeader

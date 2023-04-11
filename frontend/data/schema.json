@@ -1016,6 +1016,16 @@
                 "defaultValue": null
               },
               {
+                "name": "user",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "businessArea",
                 "description": null,
                 "type": {
@@ -1041,6 +1051,16 @@
               },
               {
                 "name": "module",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "userId",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -4104,6 +4124,16 @@
                 "defaultValue": null
               },
               {
+                "name": "user",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "businessArea",
                 "description": null,
                 "type": {
@@ -4129,6 +4159,16 @@
               },
               {
                 "name": "module",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "userId",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -6467,16 +6507,6 @@
                 "defaultValue": null
               },
               {
-                "name": "headOfHousehold_PhoneNoValid",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "size_Range",
                 "description": null,
                 "type": {
@@ -6594,6 +6624,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "headOfHousehold_PhoneNoValid",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -14542,6 +14582,18 @@
             "deprecationReason": null
           },
           {
+            "name": "zipCode",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "adminArea",
             "description": null,
             "args": [],
@@ -14596,6 +14648,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "AreaNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "geopoint",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "GeoJSON",
               "ofType": null
             },
             "isDeprecated": false,
@@ -14664,18 +14728,6 @@
                 "name": "IndividualNodeConnection",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "geopoint",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "GeoJSON",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -35042,6 +35094,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "PREPARING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -50839,6 +50897,18 @@
           },
           {
             "name": "country",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "zipCode",
             "description": null,
             "args": [],
             "type": {
