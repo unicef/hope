@@ -550,9 +550,17 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 },
                 "other_id_no_i_c": {},
             }
+
+            def has_value(cell: Cell) -> bool:
+                if cell.value is None:
+                    return False
+                if isinstance(cell.value, str):
+                    return cell.value.strip() != ""
+                return True
+
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
-                if not any([cell.value for cell in row]):
+                if not any(has_value(cell) for cell in row):
                     continue
                 row_number = 0
                 for cell, header in zip(row, first_row):
