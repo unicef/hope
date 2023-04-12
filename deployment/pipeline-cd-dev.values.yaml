@@ -46,14 +46,14 @@ postgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
   username: devcashubusr
   password: #secret-variables: POSTGRES_PASSWORD
-  db: dev_hope_appdb_datahubdb
+  database: dev_hope_appdb_datahubdb
 registrationdatahubpostgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
   username: devreghubusr
   password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
-  db: dev_registration_datahubdb
+  database: dev_registration_datahubdb
 cashassistdatahubpostgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
   username: devcashubusr
   password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
-  db: dev_cashassist_datahubdb
+  database: dev_cashassist_datahubdb
