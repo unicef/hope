@@ -8,7 +8,7 @@ import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeA
 import { createHandleFilterChange } from '../../../../utils/utils';
 import {
   useAllProgramsForChoicesQuery,
-  useAllTargetPopulationForChoicesQuery
+  useAllTargetPopulationForChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
@@ -59,7 +59,7 @@ export const CommunicationFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={3}>
+        <Grid item xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
@@ -76,7 +76,7 @@ export const CommunicationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('targetPopulation', e.target.value)
@@ -105,7 +105,7 @@ export const CommunicationFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+        <Grid container item xs={6} spacing={3} alignItems='flex-end'>
           <Grid item xs={6}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
