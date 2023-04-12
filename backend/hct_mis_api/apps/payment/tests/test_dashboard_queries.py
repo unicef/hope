@@ -144,7 +144,11 @@ class TestDashboardQueries(APITestCase):
                 household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3},
             )
 
-            program1 = ProgramFactory.create(cash_plus=True)
+            program1 = ProgramFactory(
+                cash_plus=True,
+                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+            )
             cash_plan1 = CashPlanFactory(program=program1, business_area=business_area)
             PaymentRecordFactory(
                 parent=cash_plan1,
