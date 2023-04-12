@@ -151,7 +151,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         )
                     )
                     continue
-                document_type, _ = ImportedDocumentType.objects.get(key=document_name)
+                document_type = ImportedDocumentType.objects.get(key=document_name)
                 file = self._handle_image_field(data.get("photo", ""), False)
                 documents.append(
                     ImportedDocument(
