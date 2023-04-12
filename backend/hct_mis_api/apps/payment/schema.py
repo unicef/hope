@@ -645,6 +645,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
     delivered_quantity_usd = graphene.Float(source="delivered_quantity_usd")
     currency = graphene.String(source="currency")
     delivery_date = graphene.String(source="delivery_date")
+    verification = graphene.Field(PaymentVerificationNode, source="verification")
 
     def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
@@ -1311,7 +1312,10 @@ class Query(graphene.ObjectType):
         return resp
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
-        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.all()).order_by("-updated_at")
+        """used in Household Page > Payment Records"""
+        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.exclude(excluded=True)).order_by(
+            "-updated_at"
+        )
 
         qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
 
