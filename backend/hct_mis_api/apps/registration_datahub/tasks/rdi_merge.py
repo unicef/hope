@@ -55,6 +55,7 @@ class RdiMergeTask:
         "consent_sharing",
         "residence_status",
         "country_origin",
+        "zip_code",
         "size",
         "address",
         "country",
