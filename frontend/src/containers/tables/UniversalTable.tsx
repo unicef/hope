@@ -1,12 +1,13 @@
 import React, { ReactElement, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { LoadingComponent } from '../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../components/core/PermissionDenied';
 import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
 import {
   Order,
   TableComponent,
 } from '../../components/core/Table/TableComponent';
-import { columnToOrderBy } from '../../utils/utils';
+import { columnToOrderBy, isPermissionDeniedError } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
   rowsPerPageOptions?: number[];
@@ -79,6 +80,8 @@ export function UniversalTable<T, K>({
   if (error) {
     //  eslint-disable-next-line no-console
     console.error(error);
+    if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
     return <div>Unexpected error</div>;
   }
   if (loading) return <LoadingComponent />;
