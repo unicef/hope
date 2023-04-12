@@ -181,7 +181,6 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             **self.variables,
             "paymentRecord": [self.payment_record.id, self.payment_record2.id],
         }
-
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
             context={"user": self.user},
