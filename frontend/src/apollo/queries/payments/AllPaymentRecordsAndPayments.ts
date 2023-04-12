@@ -42,6 +42,10 @@ export const AllPaymentRecordsAndPayments = gql`
             id
             programmeName
           }
+          verification {
+            id
+            receivedAmount
+          }
         }
       }
       totalCount

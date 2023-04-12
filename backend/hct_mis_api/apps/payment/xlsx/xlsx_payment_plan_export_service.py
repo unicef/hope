@@ -67,5 +67,5 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
-            self.payment_plan.export_file = xlsx_obj
+            self.payment_plan.export_file_entitlement = xlsx_obj
             self.payment_plan.save()

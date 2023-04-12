@@ -88,6 +88,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_STEFICON_RUN = "STEFICON_RUN"
     STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
     STATUS_STEFICON_ERROR = "STEFICON_ERROR"
+    STATUS_SENDING_TO_CASH_ASSIST = "SENDING_TO_CASH_ASSIST"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
     STATUS_READY_FOR_PAYMENT_MODULE = "READY_FOR_PAYMENT_MODULE"
     STATUS_ASSIGNED = "ASSIGNED"
@@ -100,6 +101,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         (STATUS_STEFICON_COMPLETED, _("Rule Engine Completed")),
         (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
+        (STATUS_SENDING_TO_CASH_ASSIST, _("Sending to Cash Assist")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
         (STATUS_READY_FOR_PAYMENT_MODULE, _("Ready for payment module")),
         (STATUS_ASSIGNED, _("Assigned")),
