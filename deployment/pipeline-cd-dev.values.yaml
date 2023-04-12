@@ -44,16 +44,16 @@ ingress:
 
 postgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-  user: devcashubusr
+  username: devcashubusr
   password: #secret-variables: POSTGRES_PASSWORD
   db: dev_hope_appdb_datahubdb
 registrationdatahubpostgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-  user: devreghubusr
+  username: devreghubusr
   password: #secret-variables: REGISTRATION_DATAHUB_POSTGRES_PASSWORD
   db: dev_registration_datahubdb
 cashassistdatahubpostgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-  user: devcashubusr
+  username: devcashubusr
   password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
   db: dev_cashassist_datahubdb
