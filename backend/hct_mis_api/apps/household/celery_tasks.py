@@ -1,16 +1,19 @@
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 from uuid import UUID
 
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.transaction import atomic
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 from constance import config
 from sentry_sdk import configure_scope
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
@@ -19,6 +22,8 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 from hct_mis_api.apps.utils.sentry import sentry_tags
@@ -182,3 +187,22 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
     Individual.objects.bulk_update(
         individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
     )
+
+
+@app.task()
+@sentry_tags
+def create_tp_from_list(form_data: Dict[str, str], user: Optional[str]) -> None:
+    form = CreateTargetPopulationTextForm(form_data)
+    if form.is_valid():
+        ba = form.cleaned_data["business_area"]
+        population = form.cleaned_data["criteria"]
+        with atomic():
+            tp = TargetPopulation.objects.create(
+                targeting_criteria=form.cleaned_data["targeting_criteria"],
+                created_by=User.objects.get(pk=user),
+                name=form.cleaned_data["name"],
+                business_area=ba,
+            )
+            tp.households.set(population)
+            refresh_stats(tp)
+            tp.save()
