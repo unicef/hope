@@ -19,6 +19,7 @@ from PIL import Image
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -103,7 +104,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.business_area = BusinessArea.objects.first()
         ImportedDocumentType.objects.create(
             label="Tax Number Identification",
-            type=IDENTIFICATION_TYPE_TAX_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
         super().setUpTestData()
 
@@ -294,7 +295,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
             label="Birth Certificate",
-            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+            type=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
         task.documents = {
             "individual_14_birth_certificate_i_c": {
@@ -423,7 +424,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(ImportedDocumentType(label=label, type=doc_type))
+            document_types.append(ImportedDocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
