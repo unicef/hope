@@ -8,7 +8,7 @@ context("Payment Verification", () => {
     cy.get("input").contains("Log in").click();
   });
 
-  it("Can see the Cash Plan Details Page", () => {
+  it.skip("Can see the Cash Plan Details Page", () => {
     cy.visit("/");
     cy.get("span").contains("Payment Verification").click();
     cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting

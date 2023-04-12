@@ -20,5 +20,9 @@
     "clean": "rm -rf cypress/downloads/* cypress/screenshots/* cypress/videos/*"
   },
   "author": "",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "cy-verify-downloads": "^0.1.14",
+    "cypress-downloadfile": "^1.2.3"
+  }
 }

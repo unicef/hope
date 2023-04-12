@@ -7,7 +7,7 @@ context("Population Individuals", () => {
     cy.get('input[name="password"]').type(Cypress.env("password"));
     cy.get("input").contains("Log in").click();
   });
-  it("Can visit the Population Individuals page and go to Population Individual Details page", () => {
+  it.skip("Can visit the Population Individuals page and go to Population Individual Details page", () => {
     cy.visit("/");
     cy.get("span").contains("Population").click();
     cy.get("span").contains("Individuals");

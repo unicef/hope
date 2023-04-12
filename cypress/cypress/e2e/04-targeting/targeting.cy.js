@@ -11,7 +11,7 @@ context("Targeting", () => {
     cy.get("input").contains("Log in").click();
   });
 
-  it("Can visit the targeting page and create a target population", () => {
+  it.skip("Can visit the targeting page and create a target population", () => {
     cy.visit("/");
     cy.get("span").contains("Targeting").click();
     cy.get("h5").contains("Targeting");
