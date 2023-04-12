@@ -57,7 +57,7 @@ export const SurveysFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid xs={3} item>
+        <Grid xs={5} item>
           <SelectFilter
             onChange={(e) => handleFilterChange('program', e.target.value)}
             label={t('Programme')}
@@ -75,7 +75,7 @@ export const SurveysFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid xs={3} item>
+        <Grid xs={4} item>
           <TargetPopulationAutocomplete
             onFilterChange={onFilterChange}
             name='targetPopulation'
@@ -84,18 +84,18 @@ export const SurveysFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
-          <AssigneeAutocomplete
-            onFilterChange={onFilterChange}
-            name='createdBy'
-            label={t('Created by')}
-            value={filter.createdBy}
-            filter={filter}
-            fullWidth
-          />
-        </Grid>
-        <Grid container item xs={6} spacing={3} alignItems='flex-end'>
-          <Grid item xs={6}>
+        <Grid container item xs={12} spacing={3} alignItems='flex-end'>
+          <Grid item xs={4}>
+            <AssigneeAutocomplete
+              onFilterChange={onFilterChange}
+              name='createdBy'
+              label={t('Created by')}
+              value={filter.createdBy}
+              filter={filter}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label='From'
@@ -110,7 +110,7 @@ export const SurveysFilters = ({
               value={filter.createdAtRangeMin}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <DatePickerFilter
               label={t('To')}
               onChange={(date) =>
