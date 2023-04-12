@@ -14,7 +14,7 @@ import TextField from '../TextField';
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
     .MuiFormControl-marginDense {
-    margin-top: 4px;
+    margin-top: 6px;
   }
 `;
 
