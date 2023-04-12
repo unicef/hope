@@ -34,8 +34,7 @@ context("Program", () => {
         .click()
         .type("{backspace}{backspace}{backspace}{backspace}4000");
       cy.get('[data-cy="button-save"]').click({ force: true });
-
-      cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
       cy.get("h6").contains("Programme Details");
       cy.get('[data-cy="button-activate-program"]').click({ force: true });
       cy.get('[data-cy="button-activate-program-modal"]').click({force: true});

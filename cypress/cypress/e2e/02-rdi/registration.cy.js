@@ -23,7 +23,7 @@ context("RDI", () => {
     cy.verifyDownload('registration_data_import_template.xlsx');
   })
 
-  it("Registration Data Import with excel and verfify", () => {
+  it.only("Registration Data Import with excel and verfify", () => {
     uploadRDIFile();
     verifyUpload()
     return;
