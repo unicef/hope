@@ -115,8 +115,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         cls.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
             household=cls.household,
             individual=cls.individuals[0],
-            payment_object_id=cls.payment_record.id,
-            payment_content_type_id=80,
+            payment_obj=cls.payment_record,
             ticket=grievance_1,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
@@ -127,8 +126,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         SensitiveGrievanceTicketWithoutExtrasFactory(
             household=cls.household,
             individual=cls.individuals[0],
-            payment_object_id=cls.payment_record2.id,
-            payment_content_type_id=80,
+            payment_obj=cls.payment_record2,
             ticket=grievance_3,
         )
         GrievanceComplaintTicketFactory.create_batch(5)
