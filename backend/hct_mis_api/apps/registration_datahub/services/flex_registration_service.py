@@ -69,6 +69,7 @@ class FlexRegistrationService(BaseRegistrationService):
         "disability_certificate_picture": "disability_certificate_picture",
         "phone_no": "phone_no_i_c",
         "role": "role_i_c",
+        "email": "email",
     }
 
     HOUSEHOLD_MAPPING_DICT = {
@@ -316,6 +317,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         "who_answers_phone": "who_answers_phone_i_c",
         "relationship": "relationship_i_c",
         "phone_no": "phone_no_i_c",
+        "email": "email",
     }
 
     INDIVIDUAL_FLEX_FIELDS = [
