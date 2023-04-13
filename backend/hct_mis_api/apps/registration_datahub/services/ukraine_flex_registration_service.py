@@ -56,6 +56,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         "disability_certificate_picture": "disability_certificate_picture",
         "phone_no": "phone_no_i_c",
         "role": "role_i_c",
+        "email": "email",
     }
 
     HOUSEHOLD_MAPPING_DICT = {

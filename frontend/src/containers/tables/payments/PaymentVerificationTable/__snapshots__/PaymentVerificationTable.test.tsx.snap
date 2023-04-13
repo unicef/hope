@@ -74,7 +74,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -97,7 +97,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -120,7 +120,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -143,7 +143,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -166,7 +166,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -189,7 +189,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >

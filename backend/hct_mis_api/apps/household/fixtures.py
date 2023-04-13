@@ -161,6 +161,7 @@ class IndividualFactory(DjangoModelFactory):
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
+    email = factory.Faker("email")
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
