@@ -1756,6 +1756,7 @@ type ImportedIndividualNode implements Node {
   phoneNoValid: Boolean
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
+  email: String
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
@@ -1911,6 +1912,7 @@ type IndividualNode implements Node {
   phoneNoValid: Boolean
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
+  email: String!
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
