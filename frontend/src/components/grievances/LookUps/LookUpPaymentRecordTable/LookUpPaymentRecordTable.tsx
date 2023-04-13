@@ -1,11 +1,11 @@
 import React, { ReactElement, useState } from 'react';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
-  LookUpPaymentRecordsQueryVariables, PaymentRecordAndPaymentNode,
-  PaymentRecordNode,
+  LookUpPaymentRecordsQueryVariables,
+  PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 
@@ -61,7 +61,10 @@ export function LookUpPaymentRecordTable({
   };
   const numSelected = selected.length;
   return (
-    <UniversalTable<PaymentRecordAndPaymentNode, LookUpPaymentRecordsQueryVariables>
+    <UniversalTable<
+      PaymentRecordAndPaymentNode,
+      LookUpPaymentRecordsQueryVariables
+    >
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}
       queriedObjectName='allPaymentRecordsAndPayments'

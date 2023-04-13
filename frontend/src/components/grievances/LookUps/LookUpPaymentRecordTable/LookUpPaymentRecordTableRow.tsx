@@ -33,12 +33,12 @@ export function LookUpPaymentRecordTableRow({
   const isItemSelected = isSelected(paymentRecord.id);
   const received = paymentRecord?.verification?.receivedAmount;
 
-  const renderUrl = objType => {
-    if (objType === "Payment") {
+  const renderUrl = (objType): string => {
+    if (objType === 'Payment') {
       return `/${businessArea}/payment-module/payments/${paymentRecord.id}`;
     }
     return `/${businessArea}/payment-records/${paymentRecord.id}`;
-  }
+  };
 
   return (
     <ClickableTableRow
