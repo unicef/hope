@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_0_all_with_permission 1'] = {
@@ -141,6 +142,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_b
                 {
                     'node': {
                         'birthDate': '1983-12-21',
+                        'email': 'myemail333@mail.com',
                         'familyName': 'Perry',
                         'fullName': 'Timothy Perry',
                         'givenName': 'Timothy',
@@ -150,6 +152,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_b
                 {
                     'node': {
                         'birthDate': '1973-03-23',
+                        'email': 'myemail444@mail.com',
                         'familyName': 'Torres',
                         'fullName': 'Eric Torres',
                         'givenName': 'Eric',
@@ -159,6 +162,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_b
                 {
                     'node': {
                         'birthDate': '1969-11-29',
+                        'email': 'myemail555@mail.com',
                         'familyName': 'Franklin',
                         'fullName': 'Jenna Franklin',
                         'givenName': 'Jenna',
@@ -168,6 +172,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_b
                 {
                     'node': {
                         'birthDate': '1946-02-15',
+                        'email': 'myemail222@mail.com',
                         'familyName': 'Ford',
                         'fullName': 'Robin Ford',
                         'givenName': 'Robin',
@@ -177,6 +182,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_b
                 {
                     'node': {
                         'birthDate': '1943-07-30',
+                        'email': 'myemail111@mail.com',
                         'familyName': 'Butler',
                         'fullName': 'Benjamin Butler',
                         'givenName': 'Benjamin',
@@ -192,6 +198,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_single_0_
     'data': {
         'importedIndividual': {
             'birthDate': '1943-07-30',
+            'email': 'myemail111@mail.com',
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
             'givenName': 'Benjamin',
