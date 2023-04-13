@@ -63,6 +63,14 @@ from hct_mis_api.apps.targeting.models import (
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 
 
+def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
+    currency = kwargs.get("currency", "USD")
+    if currency == "USD":
+        kwargs["entitlement_quantity"] = kwargs["entitlement_quantity_usd"]
+        kwargs["delivered_quantity"] = kwargs["delivered_quantity_usd"]
+    return kwargs
+
+
 class PaymentGFKFactory(DjangoModelFactory):
     payment_object_id = factory.SelfAttribute("generic_fk_obj.id")
     payment_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
@@ -267,6 +275,7 @@ class PaymentRecordFactory(DjangoModelFactory):
     )
     currency = factory.Faker("currency_code")
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
+    entitlement_quantity_usd = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivered_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivery_date = factory.Faker(
@@ -277,6 +286,12 @@ class PaymentRecordFactory(DjangoModelFactory):
     )
     service_provider = factory.SubFactory(ServiceProviderFactory)
     registration_ca_id = factory.Faker("uuid4")
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "PaymentRecord":
+        instance = model_class(**update_kwargs_with_usd_currency(kwargs))
+        instance.save()
+        return instance
 
 
 class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
@@ -599,6 +614,12 @@ class PaymentFactory(DjangoModelFactory):
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
 
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "Payment":
+        instance = model_class(**update_kwargs_with_usd_currency(kwargs))
+        instance.save()
+        return instance
+
 
 class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
     class Meta:
@@ -651,17 +672,16 @@ def create_payment_verification_plan_with_status(
 
         household.programs.add(program)
 
+        currency = getattr(cash_plan, "currency", None)
+        if currency is None:
+            currency = "USD"
+
         if isinstance(cash_plan, CashPlan):
             payment_record = PaymentRecordFactory(
-                parent=cash_plan,
-                household=household,
-                target_population=target_population,
+                parent=cash_plan, household=household, target_population=target_population, currency=currency
             )
         else:
-            payment_record = PaymentFactory(
-                parent=cash_plan,
-                household=household,
-            )
+            payment_record = PaymentFactory(parent=cash_plan, household=household, currency=currency)
 
         pv = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
