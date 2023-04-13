@@ -64,11 +64,7 @@ class GenericPaymentTicket(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional[Union[Payment, PaymentRecord]]:
-        from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
-
-        if self.payment_object_id:
-            return get_payment_items_sequence_qs().get(id=self.payment_object_id)
-        return None
+        return self.payment_obj
 
 
 class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
