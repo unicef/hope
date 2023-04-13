@@ -2405,6 +2405,7 @@ export type ImportedIndividualNode = Node & {
   phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
+  email?: Maybe<Scalars['String']>,
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: ImportedIndividualDisability,
@@ -2603,6 +2604,7 @@ export type IndividualNode = Node & {
   phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
+  email: Scalars['String'],
   relationship?: Maybe<IndividualRelationship>,
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -7418,7 +7420,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'email' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -7465,7 +7467,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -7624,7 +7626,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'preferredLanguage'>
+  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'preferredLanguage' | 'email'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -11802,6 +11804,7 @@ export const IndividualMinimalFragmentDoc = gql`
   maritalStatus
   phoneNo
   phoneNoValid
+  email
   sanctionListPossibleMatch
   sanctionListConfirmedMatch
   deduplicationGoldenRecordStatus
@@ -11979,6 +11982,7 @@ export const IndividualDetailedFragmentDoc = gql`
   whoAnswersPhone
   phoneNoAlternative
   phoneNoAlternativeValid
+  email
   hearingDisability
   observedDisability
   individualId
@@ -12299,6 +12303,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   phoneNoValid
   phoneNoAlternativeValid
   preferredLanguage
+  email
 }
     ${ImportedIndividualMinimalFragmentDoc}`;
 export const TargetPopulationMinimalFragmentDoc = gql`
@@ -24847,6 +24852,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
@@ -24960,6 +24966,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
