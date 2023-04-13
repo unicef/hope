@@ -1,7 +1,5 @@
 from typing import Any, Dict, List
 
-from django.contrib.admin.options import get_content_type_for_model
-
 import graphene
 
 from hct_mis_api.apps.core.utils import (

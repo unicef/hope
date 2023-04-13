@@ -17,11 +17,10 @@ from django_filters import (
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.models import PaymentRecord, Payment
+from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class GrievanceTicketFilter(FilterSet):
