@@ -229,6 +229,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     phone_no_valid = models.BooleanField(null=True)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
     phone_no_alternative_valid = models.BooleanField(null=True)
+    email = models.CharField(max_length=255, blank=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -663,6 +664,7 @@ class DiiaIndividual(models.Model):
     doc_serie = models.CharField(max_length=64, blank=True, null=True)
     doc_number = models.CharField(max_length=64, blank=True, null=True)
     doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",

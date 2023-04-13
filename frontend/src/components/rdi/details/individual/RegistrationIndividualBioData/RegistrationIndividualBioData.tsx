@@ -236,6 +236,11 @@ export function RegistrationIndividualBioData({
           <BorderBox />
         </Grid>
         <Grid item xs={3}>
+          <LabelizedField label={t('Email')}>
+            {individual?.email}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
           <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
           </LabelizedField>

@@ -37,6 +37,7 @@ SRI_LANKA_FIELDS: Dict = {
             "phone_no_i_c": "+94715880855",
             "please_confirm_nic_number": "927091615V",
             "who_answers_phone_i_c": "mother/caretaker",
+            "email": "collector-email@mail.com",
         }
     ],
     "children-info": [
@@ -93,6 +94,7 @@ UKRAINE_FIELDS: Dict = {
             "disability_i_c": "y",
             "disabiliyt_recognize_i_c": "y",
             "phone_no_i_c": "0636060474",
+            "email": "fake-email-123@mail.com",
             "q1": "",
             "tax_id_no_i_c": "123123123",
             "national_id_no_i_c_1": "",

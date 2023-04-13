@@ -159,6 +159,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
     preferred_language = graphene.String()
+    email = graphene.String(source="email")
 
     @staticmethod
     def resolve_preferred_language(parent: ImportedIndividual, info: Any) -> Optional[str]:
