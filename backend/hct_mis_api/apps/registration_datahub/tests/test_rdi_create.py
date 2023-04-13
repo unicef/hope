@@ -18,6 +18,7 @@ from PIL import Image
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -45,7 +46,10 @@ def create_document_image() -> File:
     return File(BytesIO(content), name="image.png")
 
 
-class ImageLoaderMock:
+class ImageLoaderMock(SheetImageLoader):
+    def __init__(self) -> None:
+        pass
+
     def image_in(self, *args: Any, **kwargs: Any) -> bool:
         return True
 
@@ -68,18 +72,18 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+        ).read_bytes()
+        file = File(BytesIO(content), name="new_reg_data_import.xlsx")
+        business_area = create_afghanistan()
+
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
 
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
-        ).read_bytes()
-        file = File(BytesIO(content), name="new_reg_data_import.xlsx")
-        business_area = BusinessArea.objects.first()
         cls.import_data = ImportData.objects.create(
             file=file,
             number_of_households=3,
@@ -361,11 +365,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         households = ImportedHousehold.objects.all()
         for household in households:
-            self.assertTrue(household.row_id in [3, 4, 5])
+            self.assertTrue(household.row_id in [3, 4, 6])
 
         individuals = ImportedIndividual.objects.all()
         for individual in individuals:
-            self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8])
+            self.assertTrue(individual.row_id in [3, 4, 5, 7, 8, 9])
 
     def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
@@ -375,7 +379,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
         )
 
-        bank_account_info = ImportedBankAccountInfo.objects.filter(individual__row_id=6).first()
+        bank_account_info = ImportedBankAccountInfo.objects.get(individual__row_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
@@ -388,9 +392,21 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
         )
 
-        document = ImportedDocument.objects.filter(individual__row_id=5).first()
+        document = ImportedDocument.objects.get(individual__row_id=5)
         self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
         self.assertEqual(document.document_number, "CD1247246Q12W")
+
+    def test_import_empty_cell_as_blank_cell(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        individual = ImportedIndividual.objects.get(row_id=3)
+        self.assertEqual(individual.seeing_disability, "")
+        self.assertEqual(individual.hearing_disability, "")
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
