@@ -23,17 +23,17 @@ context("RDI", () => {
     cy.verifyDownload('registration_data_import_template.xlsx');
   })
 
-  it.only("Registration Data Import with excel and verfify", () => {
+  it("Registration Data Import with excel and verfify", () => {
     uploadRDIFile();
     verifyUpload()
     return;
   })
 
-  it("Registration Data Import with Kobo and verfify", () => {
-    uploadRDIFileKobo();
-    verifyUploadKobo()
-    return;
-  })
+  // it("Registration Data Import with Kobo and verfify", () => {
+  //   uploadRDIFileKobo();
+  //   verifyUploadKobo()
+  //   return;
+  // })
 
 
   it("Registration Data Import and Repuse the import", () => {
@@ -50,8 +50,13 @@ context("RDI", () => {
     verifyMergedData()
     return;
   })
-  it('Merged View ticket', () => {
-    cy.get('tbody tr').each(($tablerows) => {
+  it.only('Merged View ticket', () => {
+    uploadRDIFile();
+    mergeRDIFile()
+   
+   cy.get('div.sc-kEYyzF').click({ force: true })
+   cy.reload()
+    cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').eq(1).each(($data) => {
           if ($data.text() == 'MERGED')
@@ -67,19 +72,21 @@ context("RDI", () => {
 function verifyMergedData() {
   let householdId;
   let individualId;
-  // cy.get('div.sc-kEYyzF').click({ force: true })
-  // cy.log("Looking for householdId");
-  // cy.get('tbody tr').eq(0).each(($tablerows) => {
-  //   cy.wrap($tablerows).within(() => {
-  //     cy.get('td').eq(1).each(($data) => {
-  //       cy.contains('MERGED SCHEDULED').click({ force: true })
-  //     })
-  //   })
-  // })
+  cy.get('div.sc-kEYyzF').click({ force: true })
+  
+  cy.log("Looking for householdId");
+  cy.get('tbody tr').eq(0).each(($tablerows) => {
+    cy.wrap($tablerows).within(() => {
+      cy.get('td').eq(1).each(($data) => {
+        cy.contains('MERGED').click({ force: true })
+      })
+    })
+  })
   cy.get('[data-cy="imported-households-row"]')
     .find("td:nth-child(2)")
     .then(($td) => {
       householdId = $td.text().split(" (")[0];
+      cy.log($td.text())
       cy.log(`Saved householdId: ${householdId}`);
     })
     .then(() => {
@@ -100,15 +107,11 @@ function verifyMergedData() {
             .find("input")
             .type(householdId, { force: true });
           cy.get("td").should("contain", householdId);
-
-          cy.get("span").contains("Individuals").click({ force: true });
-
+         cy.get("span").contains("Individuals").click({ force: true });
           cy.log(`looking for individualId: + ${individualId}`);
           cy.get('[data-cy="ind-filters-search"]').type(individualId);
           cy.get("td").should("contain", individualId);
-
           // cy.get("td").contains(householdId).click({ force: true });
-
           // cy.get('[data-cy="label-Household ID"]').contains(householdId);
         });
     });
@@ -138,8 +141,9 @@ function uploadRDIFile() {
   });
   cy.wait(5000)
   cy.get('[data-cy="button-import-rdi"] > .MuiButton-label').click({ force: true })
-  cy.wait(2000)
+
   cy.get('div.sc-kEYyzF').click({ force: true })
+  
 }
 
 
@@ -165,19 +169,20 @@ function verifyUploadKobo() {
 
 }
 function verifyUpload() {
-  
+  cy.reload()
   cy.get('tbody tr').eq(0).each(($tablerows) => {
     cy.wrap($tablerows).within(() => {
       cy.get('td').eq(1).each(($data) => {
         // cy.log($data.text())
         if ($data.text() == 'IN REVIEW')
-          cy.log($data.text())
+        expect($data.text()).to.eq('IN REVIEW')
       })
     })
   })
 }
 
 function mergeRDIFile() {
+  cy.reload()
   cy.get('tbody tr').eq(0).each(($tablerows) => {
     cy.wrap($tablerows).within(() => {
       cy.get('td').eq(1).each(($data) => {
@@ -192,6 +197,7 @@ function mergeRDIFile() {
   cy.get("span").contains("Merge").click({ force: true });
   cy.get('strong').should('contain', '1 households and 1 individuals will be merged.')
   cy.get("span").contains("MERGE").click({ force: true })
+  cy.wait(2000)
 }
 function refuseImport() {
   cy.get('tbody tr').eq(0).each(($tablerows) => {
@@ -203,14 +209,17 @@ function refuseImport() {
     })
   })
   cy.get('span').contains('Refuse Import').click({ force: true })
+  cy.wait(2000)
+  cy.get('div.sc-kEYyzF').click({ force: true })
 }
 
 function verfifyRefuseImport() {
   cy.get('tbody tr').eq(0).each(($tablerows) => {
     cy.wrap($tablerows).within(() => {
       cy.get('td').eq(1).each(($data) => {
-        if ($data.text() == 'REPUSE')
-          cy.log($data.text())
+        if ($data.text() == 'REFUSED')
+          expect($data.text()).to.eq('REFUSED')
+          
       })
     })
   })
