@@ -13,6 +13,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -36,11 +37,14 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     Record,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import BaseRegistrationService
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import create_task_for_processing_records
-from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import \
-    UkraineBaseRegistrationService
-from hct_mis_api.apps.registration_datahub.services.ukraine_registration_service import (
+from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    create_task_for_processing_records,
+)
+from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
+    UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
 
@@ -214,7 +218,6 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
 def create_imported_document_types() -> None:
     for document_key_string, _ in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
         ImportedDocumentType.objects.create(key=document_key_string)
-
 
 
 def create_ukraine_business_area() -> None:
@@ -480,8 +483,8 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedHousehold.objects.count() == 0
 
     def test_ukraine_new_registration_form(self) -> None:
-        for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
-            ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
+        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+            ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(
             fields=UKRAINE_NEW_FORM_FIELDS,
@@ -531,9 +534,9 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ind_2.disability == DISABLED
 
         assert doc_ind_1.document_number == "123465432321321"
-        assert doc_ind_1.type.type == IDENTIFICATION_TYPE_TAX_ID
+        assert doc_ind_1.type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
         assert doc_ind_2.document_number == "І-ASD-454511"
-        assert doc_ind_2.type.type == IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+        assert doc_ind_2.type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
 
         assert bank_acc_info.bank_account_number == "IBAN1236549879998999"
         assert bank_acc_info.debit_card_number == "1236549879991999"

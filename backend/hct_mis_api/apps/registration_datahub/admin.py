@@ -50,7 +50,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service_utils import (
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     create_task_for_processing_records,
     get_registration_to_rdi_service_map,
 )

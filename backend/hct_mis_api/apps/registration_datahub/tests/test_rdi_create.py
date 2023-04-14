@@ -18,8 +18,10 @@ from PIL import Image
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.core.utils import SheetImageLoader
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    SheetImageLoader,
+)
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
