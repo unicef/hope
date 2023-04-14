@@ -70,7 +70,7 @@ export function EditDocumentRow({
             arrayHelpers.remove({
               id: document.node.id,
               country: document.node.countryIso3,
-              type: document.node.type.type,
+              type: document.node.type.key,
               number: document.node.documentNumber,
               photo: document.node.photo,
             });
@@ -125,7 +125,7 @@ export function EditDocumentRow({
                 arrayHelpers.push({
                   id: document.node.id,
                   country: document.node.countryIso3,
-                  type: document.node.type.type,
+                  type: document.node.type.key,
                   number: document.node.documentNumber,
                   photo: document.node.photo,
                 });
