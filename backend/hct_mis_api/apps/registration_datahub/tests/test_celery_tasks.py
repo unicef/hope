@@ -1,8 +1,11 @@
 import base64
+import datetime
 import json
+import uuid
+from abc import ABC
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -10,19 +13,38 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import (
+    DISABLED,
+    FEMALE,
+    HEAD,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_TAX_ID,
+    MALE,
+    NOT_DISABLED,
+    SON_DAUGHTER,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
+    ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     Record,
 )
+from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    FlexRegistrationService,
+    create_task_for_processing_records,
+)
+from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
+    UkraineBaseRegistrationService,
+    UkraineRegistrationService,
 )
 
 SRI_LANKA_FIELDS: Dict = {
@@ -114,12 +136,65 @@ UKRAINE_FIELDS: Dict = {
     ],
 }
 
+UKRAINE_NEW_FORM_FIELDS: Dict = {
+    "ip": "176.113.164.17",
+    "counters": {
+        "start": "Thu Mar 23 2023 14:26:07 GMT+0200 (Eastern European Standard Time)",
+        "total": "71464926",
+        "rounds": "1",
+        "elapsed": "71464926",
+    },
+    "household": [{"admin1_h_c": "UA14", "admin2_h_c": "UA1408", "admin3_h_c": "UA1408005"}],
+    "marketing": [{"can_unicef_contact_you": [{}]}],
+    "individuals": [
+        {
+            "id_type": "tax_id",
+            "role_i_c": "y",
+            "birth_date": "1990-11-11",
+            "gender_i_c": "male",
+            "patronymic": "Viktorovich",
+            "bank_account": "IBAN 1236 5498 7999 8999",
+            "phone_no_i_c": "+380952025248",
+            "tax_id_no_i_c": "123465432321321",
+            "disability_i_c": "n",
+            "given_name_i_c": "Pavlo",
+            "family_name_i_c": "Mok",
+            "bank_account_h_f": "y",
+            "relationship_i_c": "head",
+            "bank_account_number": "1236 5498 7999 1999",
+        },
+        {
+            "birth_date": "2023-03-06",
+            "gender_i_c": "female",
+            "patronymic": "Petrovich",
+            "disability_i_c": "y",
+            "given_name_i_c": "Stefania",
+            "family_name_i_c": "Bandera",
+            "relationship_i_c": "son_daughter",
+            "verified_disability": "1",
+            "birth_certificate_no_i_c": "І-ASD-454511",
+        },
+    ],
+    "validator_uk": [{"validation": "y"}],
+}
 
-def create_record(fields: Dict, registration: int, status: str) -> Record:
+UKRAINE_NEW_FORM_FILES: Dict = {
+    "individuals": [
+        {},  # no files for first Individual
+        {
+            "disability_certificate_picture": str(base64.b64encode(b"h\x65llo"), "utf-8"),
+            "birth_certificate_picture": str(base64.b64encode(b"h\x65llo"), "utf-8"),
+        },
+    ],
+}
+
+
+def create_record(fields: Dict, registration: int, status: str, files: Optional[Dict] = None) -> Record:
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
 
-    files = {
+    # need files for each Individual
+    files = files or {
         "individuals": [
             {
                 "disability_certificate_picture": str(base64.b64encode(content), "utf-8"),
@@ -140,7 +215,7 @@ def create_record(fields: Dict, registration: int, status: str) -> Record:
 
 
 def create_imported_document_types() -> None:
-    for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
+    for document_type_string, _ in UkraineBaseRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
         ImportedDocumentType.objects.create(type=document_type_string)
 
 
@@ -304,7 +379,8 @@ class TestAutomatingRDICreationTask(TestCase):
     def test_with_different_registration_ids(self) -> None:
         """
         based on registration_id select RegistrationService
-        Ukraine - 2, 3 -> FlexRegistrationService()
+        Ukraine - 2, 3 -> UkraineBaseRegistrationService()
+        Ukraine - 11 -> UkraineRegistrationService()
         Sri Lanka - 17 -> SriLankaRegistrationService()
         Czech Republic - 18, 19 -> NotImplementedError for now
 
@@ -318,6 +394,7 @@ class TestAutomatingRDICreationTask(TestCase):
         registration_id_to_ba_name_map = {
             2: "ukraine",
             3: "ukraine",
+            11: "ukraine",  # new form
             17: "sri-lanka",
             18: "czech republic",
             19: "czech republic",
@@ -329,15 +406,19 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 5
 
-        registration_ids = [2, 3, 17, 18, 19, 999]
+        registration_ids = [2, 3, 11, 17, 18, 19, 999]
         for registration_id in registration_ids:
             for _ in range(amount_of_records):
                 records_count += 1
+                files = None
                 if registration_id == 17:
                     data = SRI_LANKA_FIELDS
+                elif registration_id == 11:
+                    data = UKRAINE_NEW_FORM_FIELDS
+                    files = UKRAINE_NEW_FORM_FILES
                 else:
                     data = UKRAINE_FIELDS
-                create_record(fields=data, registration=registration_id, status=Record.STATUS_TO_IMPORT)
+                create_record(fields=data, registration=registration_id, status=Record.STATUS_TO_IMPORT, files=files)
 
             assert Record.objects.count() == records_count
             assert RegistrationDataImport.objects.count() == rdi_count
@@ -354,8 +435,9 @@ class TestAutomatingRDICreationTask(TestCase):
             else:
                 rdi_count += amount_of_records // page_size
                 # for SriLanka we create "children" and "caretaker" as two separate Individuals
+                # and for Ukr new form reg_id=11 we create 2 Ind and 1 Hh
                 # that why need amount_of_records * 2
-                imported_ind_count += amount_of_records if registration_id != 17 else amount_of_records * 2
+                imported_ind_count += amount_of_records if registration_id not in [17, 11] else amount_of_records * 2
                 result = run_automate_rdi_creation_task(
                     registration_id=registration_id,
                     page_size=page_size,
@@ -369,7 +451,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self) -> None:
-        for document_type in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
+        for document_type in UkraineBaseRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
             ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
         create_ukraine_business_area()
         create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
@@ -379,14 +461,14 @@ class TestAutomatingRDICreationTask(TestCase):
             status=Record.STATUS_TO_IMPORT,
         )
         records_ids = Record.objects.all().values_list("id", flat=True)
-        rdi = FlexRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+        rdi = UkraineBaseRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
 
         assert Record.objects.count() == 2
         assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
 
-        process_flex_records_task(rdi.pk, list(records_ids))
+        process_flex_records_task(rdi.pk, list(records_ids), UkraineBaseRegistrationService.REGISTRATION_ID)
         rdi.refresh_from_db()
 
         assert Record.objects.filter(status=Record.STATUS_TO_IMPORT).count() == 1
@@ -398,3 +480,70 @@ class TestAutomatingRDICreationTask(TestCase):
         assert rdi.number_of_households == 0
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
+
+    def test_ukraine_new_registration_form(self) -> None:
+        for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
+            ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
+        create_ukraine_business_area()
+        create_record(
+            fields=UKRAINE_NEW_FORM_FIELDS,
+            registration=11,
+            status=Record.STATUS_TO_IMPORT,
+            files=UKRAINE_NEW_FORM_FILES,
+        )
+        records_ids = Record.objects.all().values_list("id", flat=True)
+        rdi = UkraineRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
+
+        assert Record.objects.count() == 1
+        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
+        assert ImportedIndividual.objects.count() == 0
+        assert ImportedHousehold.objects.count() == 0
+
+        process_flex_records_task(rdi.pk, list(records_ids), UkraineRegistrationService.REGISTRATION_ID)
+        rdi.refresh_from_db()
+
+        assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 1
+
+        assert rdi.number_of_individuals == 2
+        assert rdi.number_of_households == 1
+        assert ImportedIndividual.objects.count() == 2
+        assert ImportedHousehold.objects.count() == 1
+
+        hh = ImportedHousehold.objects.first()
+        ind_1 = ImportedIndividual.objects.filter(full_name="Pavlo Viktorovich Mok").first()
+        ind_2 = ImportedIndividual.objects.filter(full_name="Stefania Petrovich Bandera").first()
+        doc_ind_1 = ImportedDocument.objects.filter(individual=ind_1).first()
+        doc_ind_2 = ImportedDocument.objects.filter(individual=ind_2).first()
+        bank_acc_info = ImportedBankAccountInfo.objects.filter(individual=ind_1).first()
+
+        assert hh.head_of_household == ind_1
+        assert hh.admin1 == "UA14"
+        assert hh.admin2 == "UA1408"
+        assert hh.admin3 == "UA1408005"
+
+        assert ind_1.birth_date == datetime.date(1990, 11, 11)
+        assert ind_1.disability == NOT_DISABLED
+        assert ind_1.phone_no == "+380952025248"
+        assert ind_1.relationship == HEAD
+        assert ind_1.sex == MALE
+
+        assert ind_2.birth_date == datetime.date(2023, 3, 6)
+        assert ind_2.sex == FEMALE
+        assert ind_2.relationship == SON_DAUGHTER
+        assert ind_2.disability == DISABLED
+
+        assert doc_ind_1.document_number == "123465432321321"
+        assert doc_ind_1.type.type == IDENTIFICATION_TYPE_TAX_ID
+        assert doc_ind_2.document_number == "І-ASD-454511"
+        assert doc_ind_2.type.type == IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+
+        assert bank_acc_info.bank_account_number == "IBAN1236549879998999"
+        assert bank_acc_info.debit_card_number == "1236549879991999"
+        assert bank_acc_info.bank_name == "Private Bank"
+
+    def test_create_task_for_processing_records_not_implemented_error(self) -> None:
+        class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
+            PROCESS_FLEX_RECORDS_TASK = None
+
+        with self.assertRaises(NotImplementedError):
+            create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), [1])
