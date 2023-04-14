@@ -14,6 +14,7 @@ from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_SIZE_ONLY,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -116,8 +117,8 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
             business_area = storage_obj.business_area
             country = business_area.countries.first()
 
-            passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
-            tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
+            passport_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT])
+            tax_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
 
             first_registration_date = timezone.now()
             last_registration_date = first_registration_date
