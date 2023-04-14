@@ -229,16 +229,16 @@ class DeduplicateTask:
                     {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
                 ]
                 if prefix == "documents":
-                    country = item.get("country", "")
-                    queries_list.append(
-                        {
-                            "match": {
-                                f"{prefix}.country": {
-                                    "query": country.alpha3 if isinstance(country, Country) else country.iso_code3
+                    if country := item.get("country"):
+                        queries_list.append(
+                            {
+                                "match": {
+                                    f"{prefix}.country": {
+                                        "query": country.alpha3 if isinstance(country, Country) else country.iso_code3
+                                    }
                                 }
-                            }
-                        },
-                    )
+                            },
+                        )
                 queries.extend(
                     [
                         {
@@ -740,7 +740,16 @@ class DeduplicateTask:
 
             checked_individuals_ids.append(imported_individual.id)
 
-            if batch_amount_exceeded:
+            if batch_amount_exceeded and golden_record_amount_exceeded:
+                message = (
+                    f"The percentage of records (batch: {cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%, "
+                    f"population: {cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
+                    "deemed as 'duplicate', within a batch and population has reached the maximum number."
+                )
+                cls.set_error_message_and_status(registration_data_import, message)
+                break
+
+            elif batch_amount_exceeded:
                 message = (
                     f"The percentage of records ({cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a batch has reached the maximum number."
@@ -751,14 +760,6 @@ class DeduplicateTask:
                 message = (
                     f"The percentage of records ({cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a population has reached the maximum number."
-                )
-                cls.set_error_message_and_status(registration_data_import, message)
-                break
-            elif batch_amount_exceeded and golden_record_amount_exceeded:
-                message = (
-                    f"The percentage of records (batch: {cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%, "
-                    f"population: {cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
-                    "deemed as 'duplicate', within a batch and population has reached the maximum number."
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
                 break

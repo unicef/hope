@@ -253,13 +253,6 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
-        status = kwargs.get("status")
-        if status != RegistrationDataImport.IN_REVIEW:
-            logger.error("Only In Review Registration Data Import can be merged into Population")
-            raise ValidationError("Only In Review Registration Data Import can be merged into Population")
-
-    @classmethod
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     @is_authenticated
@@ -276,11 +269,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
         if not obj_hct.can_be_merged():
-            raise ValidationError("can't merge RDI with this status")
-        cls.validate(status=obj_hct.status)
-
-        if not obj_hct.can_be_merged():
-            raise GraphQLError(f"Can't begin to merge RDI: {obj_hct}")
+            raise ValidationError(f"Can't merge RDI {obj_hct} with {obj_hct.status} status")
 
         obj_hct.status = RegistrationDataImport.MERGE_SCHEDULED
         obj_hct.save()
