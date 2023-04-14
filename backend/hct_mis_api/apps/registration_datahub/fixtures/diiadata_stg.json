@@ -21,7 +21,8 @@
       "doc_number": "682171",
       "doc_issue_date": "16.06.2000",
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -46,7 +47,8 @@
       "doc_number": null,
       "doc_issue_date": null,
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -71,7 +73,8 @@
       "doc_number": null,
       "doc_issue_date": null,
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -96,7 +99,8 @@
       "doc_number": "682172",
       "doc_issue_date": "16.06.2001",
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -121,7 +125,8 @@
       "doc_number": null,
       "doc_issue_date": null,
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -146,7 +151,8 @@
       "doc_number": null,
       "doc_issue_date": null,
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -171,7 +177,8 @@
       "doc_number": "682173",
       "doc_issue_date": "16.06.2002",
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -196,7 +203,8 @@
       "doc_number": null,
       "doc_issue_date": null,
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -221,7 +229,8 @@
       "doc_number": null,
       "doc_issue_date": null,
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   },
   {
@@ -310,7 +319,8 @@
       "doc_number": "99997",
       "doc_issue_date": "11.03.2010",
       "registration_data_import": null,
-      "imported_individual": null
+      "imported_individual": null,
+      "email": "fake111test@email.com"
     }
   }
 ]

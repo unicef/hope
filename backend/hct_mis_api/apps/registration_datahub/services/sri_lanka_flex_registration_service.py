@@ -1,14 +1,11 @@
-from typing import Any, Dict, Optional
-
-from django.core.exceptions import ValidationError
+from typing import Any, Dict, Optional, Tuple
 
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
     build_arg_dict_from_dict_if_exists,
-    build_flex_arg_dict_from_list_if_exists,
+    build_flex_arg_dict_from_list_if_exists, IDENTIFICATION_TYPE_TO_KEY_MAPPING,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
@@ -18,9 +15,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
     YES,
-)
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    process_sri_lanka_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
@@ -38,9 +32,8 @@ from hct_mis_api.apps.registration_datahub.services.base_flex_registration_servi
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
-    BUSINESS_AREA_SLUG = "sri-lanka"
-    REGISTRATION_ID = (17,)
-    PROCESS_FLEX_RECORDS_TASK = process_sri_lanka_flex_records_task
+    BUSINESS_AREA_SLUG: str = "sri-lanka"
+    REGISTRATION_ID: Tuple = (17,)
 
     HOUSEHOLD_MAPPING_DICT = {
         "admin2": "admin2_h_c",
@@ -56,6 +49,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         "who_answers_phone": "who_answers_phone_i_c",
         "relationship": "relationship_i_c",
         "phone_no": "phone_no_i_c",
+        "email": "email",
     }
 
     INDIVIDUAL_FLEX_FIELDS = [
@@ -178,8 +172,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        if record.registration not in self.REGISTRATION_ID:
-            raise ValidationError("Sri-Lanka data is processed only from registration 17!")
+        self._check_registration_id(record.registration, "Sri-Lanka data is processed only from registration 17!")
 
         record_data_dict = record.get_data()
 

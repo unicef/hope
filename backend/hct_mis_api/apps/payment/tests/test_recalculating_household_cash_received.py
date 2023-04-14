@@ -211,7 +211,7 @@ class TestRecalculatingCash(APITestCase):
         self.assertIsNone(household.total_cash_received_usd)
 
         session = ca_models.Session.objects.create(
-            business_area=self.business_area.code, status=ca_models.Session.STATUS_READY
+            business_area=self.business_area.cash_assist_code, status=ca_models.Session.STATUS_READY
         )
 
         service_provider_ca_id = uuid.uuid4()
@@ -252,7 +252,7 @@ class TestRecalculatingCash(APITestCase):
         self.assertIsNotNone(household.total_cash_received_usd)
 
         session_2 = ca_models.Session.objects.create(
-            business_area=self.business_area.code, status=ca_models.Session.STATUS_READY
+            business_area=self.business_area.cash_assist_code, status=ca_models.Session.STATUS_READY
         )
         cash_amount_2 = 234
         ca_fixtures.PaymentRecordFactory.create(
