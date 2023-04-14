@@ -32,7 +32,7 @@ export const individualMinimal = gql`
           photo
           type {
             label
-            type
+            key
           }
         }
       }
@@ -112,6 +112,7 @@ export const individualDetailed = gql`
           photo
           type {
             label
+            key
           }
           documentNumber
         }
