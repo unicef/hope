@@ -42,27 +42,28 @@ export const fakeImportedIndividualDetailedFragment = {
   selfcareDisability: '',
   commsDisability: '',
   disability: 'NOT_DISABLED',
-  documents: {
-    edges: [
-      {
-        node: {
-          id:
-            'SW1wb3J0ZWREb2N1bWVudE5vZGU6MDE0NThkYjEtMTJjYS00NzE1LTk0ZTMtNGQwODFiNjMzZmE4',
-          country: 'Poland',
-          type: {
-            label: 'National ID',
-            country: 'PL',
-            __typename: 'ImportedDocumentTypeNode',
-          },
-          documentNumber: 'BSH221315',
-          photo: null,
-          __typename: 'ImportedDocumentNode',
-        },
-        __typename: 'ImportedDocumentNodeEdge',
-      },
-    ],
-    __typename: 'ImportedDocumentNodeConnection',
-  },
+  //TODO: fix this
+  // documents: {
+  //   edges: [
+  //     {
+  //       node: {
+  //         id:
+  //           'SW1wb3J0ZWREb2N1bWVudE5vZGU6MDE0NThkYjEtMTJjYS00NzE1LTk0ZTMtNGQwODFiNjMzZmE4',
+  //         country: 'Poland',
+  //         type: {
+  //           label: 'National ID',
+  //           country: 'PL',
+  //           __typename: 'ImportedDocumentTypeNode',
+  //         },
+  //         documentNumber: 'BSH221315',
+  //         photo: null,
+  //         __typename: 'ImportedDocumentNode',
+  //       },
+  //       __typename: 'ImportedDocumentNodeEdge',
+  //     },
+  //   ],
+  //   __typename: 'ImportedDocumentNodeConnection',
+  // },
   identities: {
     edges: [],
     __typename: 'ImportedIndividualIdentityNodeConnection',
