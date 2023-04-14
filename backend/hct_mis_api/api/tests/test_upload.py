@@ -158,7 +158,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": "",
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -217,7 +217,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -290,7 +290,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "document_number": 10,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -322,7 +322,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -354,7 +354,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -467,7 +467,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "document_number": 10,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -554,7 +554,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "document_number": 10,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },

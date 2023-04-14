@@ -17,6 +17,7 @@ from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_NONE,
@@ -84,7 +85,7 @@ class HouseholdValidator:
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    type = serializers.ChoiceField(choices=IDENTIFICATION_TYPE_CHOICE, allow_blank=True, required=False)
+    type = serializers.ChoiceField(choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value],label) for (value,label) in IDENTIFICATION_TYPE_CHOICE], allow_blank=True, required=False)
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
 
