@@ -182,7 +182,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         cls.household_one = household_one
 
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
         cls.national_id = DocumentFactory.create(
             country=country_pl,
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
@@ -304,7 +306,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "maritalStatus": SINGLE,
                                 "documents": [
                                     {
-                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
+                                            IDENTIFICATION_TYPE_NATIONAL_PASSPORT
+                                        ],
                                         "country": "POL",
                                         "number": "321-321-XU-987",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),

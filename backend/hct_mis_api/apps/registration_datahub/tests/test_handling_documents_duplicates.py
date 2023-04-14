@@ -15,8 +15,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_TAX_ID,
     MALE,
     SON_DAUGHTER,
     WIFE_HUSBAND,

@@ -43,7 +43,11 @@ class CheckAgainstSanctionListPreMergeTask:
                 "bool": {
                     "must": [
                         {"match": {"documents.number": doc.document_number}},
-                        {"match": {"documents.key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]}},
+                        {
+                            "match": {
+                                "documents.key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+                            }
+                        },
                         {"match": {"documents.country": getattr(doc.issuing_country, "iso_code3", "")}},
                     ],
                     "boost": 2,
