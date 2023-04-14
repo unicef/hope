@@ -81,7 +81,7 @@ class PushToRDITests(HOPEApiTestCase):
                                 "image": base64_encoded_data,
                                 "doc_date": "2010-01-01",
                                 "country": "AF",
-                                "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
                         ],
                     },
