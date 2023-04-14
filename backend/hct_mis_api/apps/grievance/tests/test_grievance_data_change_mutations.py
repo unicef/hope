@@ -238,7 +238,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "role": ROLE_NO_ROLE,
                                 "documents": [
                                     {
-                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                         "country": "POL",
                                         "number": "123-123-UX-321",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
@@ -304,7 +304,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "maritalStatus": SINGLE,
                                 "documents": [
                                     {
-                                        "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
                                         "country": "POL",
                                         "number": "321-321-XU-987",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
@@ -313,7 +313,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "documentsToEdit": [
                                     {
                                         "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
-                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                         "country": "POL",
                                         "number": "321-321-XU-123",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
