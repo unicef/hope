@@ -168,7 +168,9 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
         self.assertEqual(
-            ImportedDocument.objects.filter(document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]).count(),
+            ImportedDocument.objects.filter(
+                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+            ).count(),
             1,
         )
 

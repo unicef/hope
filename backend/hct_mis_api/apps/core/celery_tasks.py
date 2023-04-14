@@ -117,7 +117,9 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
             business_area = storage_obj.business_area
             country = business_area.countries.first()
 
-            passport_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT])
+            passport_type = DocumentType.objects.get(
+                key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT]
+            )
             tax_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
 
             first_registration_date = timezone.now()

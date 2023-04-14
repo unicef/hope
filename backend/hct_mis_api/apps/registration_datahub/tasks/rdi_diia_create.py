@@ -9,6 +9,7 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -45,8 +46,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -352,7 +351,7 @@ class RdiDiiaCreateTask:
         self.national_passport_document_type = ImportedDocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
         )
-        self.birth_document_type  = ImportedDocumentType.objects.get(
+        self.birth_document_type = ImportedDocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
         self.other_document_type = ImportedDocumentType.objects.get(

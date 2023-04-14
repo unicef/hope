@@ -38,6 +38,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
             RdiDiiaCreateTask,
         )
+
         call_command("generatedocumenttypes")
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
         super().setUpTestData()

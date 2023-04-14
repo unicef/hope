@@ -135,8 +135,12 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         first_individual = cls.individuals[0]
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
-        birth_certificate_type = DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE])
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
+        birth_certificate_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+        )
         cls.national_id = DocumentFactory(
             country=country_pl, type=national_id_type, document_number="789-789-645", individual=first_individual
         )
@@ -167,7 +171,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [{"key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID], "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [
+                    {
+                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                        "country": "POL",
+                        "number": "123-123-UX-321",
+                    }
+                ],
             },
             approve_status=True,
         )
@@ -195,7 +205,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
                     {
-                        "value": {"country": "POL", "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID], "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                            "number": "999-888-777",
+                        },
                         "approve_status": True,
                     },
                 ],

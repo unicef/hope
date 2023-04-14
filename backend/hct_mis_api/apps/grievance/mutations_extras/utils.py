@@ -51,6 +51,7 @@ def handle_role(role: "IndividualRoleInHousehold", household: Household, individ
 
 def handle_add_document(document: Document, individual: Individual) -> Document:
     from hct_mis_api.apps.household.models import Document, DocumentType
+
     document_key = document.get("key")
     country_code = document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
