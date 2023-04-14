@@ -136,7 +136,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return ImportedDocument.objects.create(
             document_number=national_id,
             individual=imported_individual,
-            key=ImportedDocumentType.objects.get(
+            type=ImportedDocumentType.objects.get(
                 key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
             ),
             country=Country(code="LK"),
