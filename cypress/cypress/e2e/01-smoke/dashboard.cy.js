@@ -17,7 +17,4 @@ context("Visibility", () => {
       cy.get('.MuiGrid-spacing-xs-6 > :nth-child(4) > :nth-child(2)').should("contain",'Grievances and Feedback')
       cy.get('.MuiGrid-spacing-xs-6 > :nth-child(4) > :nth-child(3)').should("contain",'Payments')
     })
-   
-
-
 })
