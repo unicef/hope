@@ -614,6 +614,39 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     def test_cast_and_assign(self) -> None:
         pass
 
+    def test_cast_boolean_value(self) -> None:
+        task = self.RdiKoboCreateTask()
+
+        result = task._cast_value("FALSE", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("false", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("False", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("0", "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
+        result = task._cast_value("TRUE", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("true", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("True", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("1", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value(True, "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value(False, "estimated_birth_date_i_c")
+        self.assertEqual(result, False)
+
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
