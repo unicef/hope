@@ -372,6 +372,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+        PREPARING = "PREPARING", "Preparing"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -640,6 +641,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
+
+    @transition(
+        field=status,
+        source=Status.PREPARING,
+        target=Status.OPEN,
+    )
+    def status_open(self) -> None:
+        self.status_date = timezone.now()
 
     @property
     def currency_exchange_date(self) -> datetime:

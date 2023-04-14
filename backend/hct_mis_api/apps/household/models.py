@@ -314,6 +314,7 @@ class Household(
             "residence_status",
             "country_origin",
             "country",
+            "zip_code",
             "size",
             "address",
             "admin_area",
@@ -374,16 +375,20 @@ class Household(
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
+
     country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    size = models.PositiveIntegerField(db_index=True, null=True)
     address = CICharField(max_length=1024, blank=True)
+    zip_code = models.CharField(max_length=12, blank=True, null=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     admin1 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     admin2 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     admin3 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
+    geopoint = PointField(blank=True, null=True)
+
+    size = models.PositiveIntegerField(db_index=True, null=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -392,7 +397,6 @@ class Household(
             Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
         related_name="represented_households",
     )
-    geopoint = PointField(blank=True, null=True)
     female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
@@ -785,9 +789,10 @@ class Individual(
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
 
     phone_no = PhoneNumberField(blank=True, db_index=True)
-    phone_no_valid = models.BooleanField(default=False, db_index=True)
+    phone_no_valid = models.BooleanField(null=True, db_index=True)
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
-    phone_no_alternative_valid = models.BooleanField(default=False, db_index=True)
+    phone_no_alternative_valid = models.BooleanField(null=True, db_index=True)
+    email = models.CharField(max_length=255, blank=True)
 
     relationship = models.CharField(
         max_length=255,

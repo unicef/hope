@@ -1,15 +1,12 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.utils import (
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
-    build_arg_dict_from_dict,
-)
+from hct_mis_api.apps.core.utils import build_arg_dict_from_dict, IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -24,7 +21,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     YES,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -45,10 +41,9 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import Role
 
 
-class UkraineRegistrationService(BaseRegistrationService):
-    BUSINESS_AREA_SLUG = "ukraine"
-    REGISTRATION_ID = (2, 3)
-    PROCESS_FLEX_RECORDS_TASK = process_flex_records_task
+class UkraineBaseRegistrationService(BaseRegistrationService):
+    BUSINESS_AREA_SLUG: str = "ukraine"
+    REGISTRATION_ID: Tuple = (2, 3)
 
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
@@ -61,6 +56,7 @@ class UkraineRegistrationService(BaseRegistrationService):
         "disability_certificate_picture": "disability_certificate_picture",
         "phone_no": "phone_no_i_c",
         "role": "role_i_c",
+        "email": "email",
     }
 
     HOUSEHOLD_MAPPING_DICT = {
@@ -69,6 +65,7 @@ class UkraineRegistrationService(BaseRegistrationService):
         "admin2": "admin2_h_c",
         "size": "size_h_c",
     }
+
     DOCUMENT_MAPPING_KEY_DICT = {
         IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]: (
             "national_id_no_i_c_1",
@@ -96,8 +93,7 @@ class UkraineRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
-        if record.registration not in self.REGISTRATION_ID:
-            raise ValidationError("Ukraine data is processed only from registration 2 or 3!")
+        self._check_registration_id(record.registration, "Ukraine data is processed only from registration 2, 3 or 11!")
 
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
@@ -111,6 +107,8 @@ class UkraineRegistrationService(BaseRegistrationService):
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
+        if not household_data.get("size"):
+            household_data["size"] = len(individuals_array)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
@@ -176,7 +174,7 @@ class UkraineRegistrationService(BaseRegistrationService):
         self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
         household_data = dict(
-            **build_arg_dict_from_dict(household_dict, UkraineRegistrationService.HOUSEHOLD_MAPPING_DICT),
+            **build_arg_dict_from_dict(household_dict, self.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
@@ -199,7 +197,7 @@ class UkraineRegistrationService(BaseRegistrationService):
         registration_data_import: RegistrationDataImportDatahub,
     ) -> Dict:
         individual_data = dict(
-            **build_arg_dict_from_dict(individual_dict, UkraineRegistrationService.INDIVIDUAL_MAPPING_DICT),
+            **build_arg_dict_from_dict(individual_dict, self.INDIVIDUAL_MAPPING_DICT),
             household=household,
             registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
@@ -278,16 +276,17 @@ class UkraineRegistrationService(BaseRegistrationService):
     ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return None
-        if not individual_dict.get("bank_account_number"):
+        if not individual_dict.get("bank_account_number") or not individual_dict.get("bank_account"):
             return None
         bank_name = individual_dict.get("bank_name_h_f", "")
-        other_bank_name = individual_dict.get("other_bank_name", "")
-        if not bank_name:
-            bank_name = other_bank_name
+        # AB#154910 default bank name for Ukraine is 'Private Bank'
+        other_bank_name = individual_dict.get("other_bank_name", "Private Bank")
+        # bank_name is required
+        bank_name = bank_name or other_bank_name
         bank_account_info_data = {
-            "bank_account_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
+            "bank_account_number": str(individual_dict.get("bank_account", "")).replace(" ", ""),
             "bank_name": bank_name,
-            "debit_card_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
+            "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
             "individual": individual,
         }
         return bank_account_info_data
@@ -301,4 +300,21 @@ class UkraineRegistrationService(BaseRegistrationService):
             raise ValidationError("Household should has at least one Head of Household")
 
     def _has_head(self, individuals_array: List[ImportedIndividual]) -> bool:
-        return any(individual_data.get("relationship_i_c") == "head" for individual_data in individuals_array)
+        return any(
+            individual_data.get(
+                "relationship_i_c",
+            )
+            == "head"
+            for individual_data in individuals_array
+        )
+
+
+class UkraineRegistrationService(UkraineBaseRegistrationService):
+    REGISTRATION_ID: Tuple = (11,)
+
+    HOUSEHOLD_MAPPING_DICT = {
+        "admin1": "admin1_h_c",
+        "admin2": "admin2_h_c",
+        "admin3": "admin3_h_c",
+        "admin4": "admin4_h_c",
+    }
