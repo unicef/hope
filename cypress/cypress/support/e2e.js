@@ -22,12 +22,17 @@ require('cy-verify-downloads').addCustomCommand();
 
 
 const uniqueSeed = Date.now();
+
 Cypress.Commands.add("uniqueSeed", () => uniqueSeed);
+
+// const uniqueSeed = Date.now();
+// const getUniqueId = () => Cypress._.uniqueId(uniqueSeed);
 
 Cypress.Commands.add("createExcel", () => {
 cy.uniqueSeed().then((seed) => {
+  cy.log(seed)
   cy.exec(
-    `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
+    `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`,{failOnNonZeroExit: false}
   );
   
 });

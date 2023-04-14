@@ -81,7 +81,7 @@ it("Finish Program", () => {
   cy.get('[data-mui-test="SelectDisplay"]').eq(0).click({force:true})
  cy.get('[data-value="ACTIVE"]').click({force:true})
 
-cy.get('tbody tr').eq(1).each(($tablerows) => {
+cy.get('tbody tr').eq(0).each(($tablerows) => {
   cy.wrap($tablerows).within(() => {
     cy.get('td').eq(1).each(($data) => {
       if ($data.text() == 'ACTIVE')

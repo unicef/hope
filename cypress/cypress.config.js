@@ -16,6 +16,7 @@ module.exports = defineConfig({
       password: 'cypress-password'
     },
     reporter: "junit",
+  
     reporterOptions: {
       mochaFile: "cypress/results/results-[hash].xml",
       toConsole: true,

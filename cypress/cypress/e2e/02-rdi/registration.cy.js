@@ -34,9 +34,14 @@ context("RDI", () => {
   //   verifyUploadKobo()
   //   return;
   // })
+  it("Registration Data Import and merge the data and verify merge file", () => {
+    uploadRDIFile();
+    mergeRDIFile()
+    verifyMergedData()
+    return;
+  })
 
-
-  it("Registration Data Import and Repuse the import", () => {
+  it("Registration Data Import and Refuse the import", () => {
     uploadRDIFile();
     verifyUpload()
     refuseImport()
@@ -44,13 +49,8 @@ context("RDI", () => {
     return;
   })
 
-  it("Registration Data Import and merge the data and verify merge file", () => {
-    uploadRDIFile();
-    mergeRDIFile()
-    verifyMergedData()
-    return;
-  })
-  it.only('Merged View ticket', () => {
+  
+  it('Merged View ticket', () => {
     uploadRDIFile();
     mergeRDIFile()
    
@@ -118,7 +118,9 @@ function verifyMergedData() {
 }
 
 function uploadRDIFile() {
-  cy.createExcel()
+
+    
+cy.createExcel()
   cy.get("h5").contains("Registration Data Import");
   cy.get("button > span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
@@ -186,7 +188,6 @@ function mergeRDIFile() {
   cy.get('tbody tr').eq(0).each(($tablerows) => {
     cy.wrap($tablerows).within(() => {
       cy.get('td').eq(1).each(($data) => {
-        // cy.log($data.text())
         if ($data.text() == 'IN REVIEW')
           cy.contains('IN REVIEW').click({ force: true })
       })
@@ -219,8 +220,7 @@ function verfifyRefuseImport() {
       cy.get('td').eq(1).each(($data) => {
         if ($data.text() == 'REFUSED')
           expect($data.text()).to.eq('REFUSED')
-          
-      })
+          })
     })
   })
 }
