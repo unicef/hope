@@ -4,6 +4,7 @@ from constance.test import override_config
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -113,7 +114,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
 
         ind = Individual.objects.get(full_name="Abdul Afghanistan")
         country = geo_models.Country.objects.get(iso_code3="AFG")
-        doc_type = DocumentTypeFactory(label="National ID", type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        doc_type = DocumentTypeFactory(label="National ID", key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
         DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country)
         super().setUpTestData()
 

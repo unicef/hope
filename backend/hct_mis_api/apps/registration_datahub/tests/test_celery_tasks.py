@@ -10,6 +10,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
@@ -138,8 +139,8 @@ def create_record(fields: Dict, registration: int, status: str) -> Record:
 
 
 def create_imported_document_types() -> None:
-    for document_type_string, _ in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
-        ImportedDocumentType.objects.create(type=document_type_string)
+    for document_key_string, _ in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
+        ImportedDocumentType.objects.create(key=document_key_string)
 
 
 def create_ukraine_business_area() -> None:
@@ -367,8 +368,8 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self) -> None:
-        for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
-            ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
+        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+            ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
         create_record(
