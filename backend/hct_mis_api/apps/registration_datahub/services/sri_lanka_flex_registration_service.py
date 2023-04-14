@@ -3,9 +3,10 @@ from typing import Any, Dict, Optional, Tuple
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
     build_arg_dict_from_dict_if_exists,
-    build_flex_arg_dict_from_list_if_exists, IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (

@@ -6,7 +6,10 @@ from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.utils import build_arg_dict_from_dict, IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    build_arg_dict_from_dict,
+)
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,

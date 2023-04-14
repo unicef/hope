@@ -14,7 +14,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     Record,
 )
-
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     UkraineBaseRegistrationService,
 )
