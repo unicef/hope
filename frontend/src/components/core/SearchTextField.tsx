@@ -16,6 +16,9 @@ export const SearchTextField = ({ ...props }): React.ReactElement => {
       {...props}
       variant='outlined'
       margin='dense'
+      inputProps={{ maxLength: 200 }}
+      // https://github.com/mui-org/material-ui/issues/12805
+      // eslint-disable-next-line react/jsx-no-duplicate-props
       InputProps={{
         startAdornment: (
           <InputAdornment position='start'>

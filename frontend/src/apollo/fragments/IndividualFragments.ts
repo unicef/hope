@@ -14,6 +14,7 @@ export const individualMinimal = gql`
     maritalStatus
     phoneNo
     phoneNoValid
+    email
     sanctionListPossibleMatch
     sanctionListConfirmedMatch
     deduplicationGoldenRecordStatus
@@ -93,6 +94,7 @@ export const individualDetailed = gql`
     whoAnswersPhone
     phoneNoAlternative
     phoneNoAlternativeValid
+    email
     hearingDisability
     observedDisability
     individualId
