@@ -33,7 +33,9 @@ class UploadRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--")
+        ImportedDocumentType.objects.create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+        )
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
 
     def test_upload_single_household(self) -> None:

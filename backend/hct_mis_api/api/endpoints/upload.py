@@ -85,7 +85,11 @@ class HouseholdValidator:
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    type = serializers.ChoiceField(choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value],label) for (value,label) in IDENTIFICATION_TYPE_CHOICE], allow_blank=True, required=False)
+    type = serializers.ChoiceField(
+        choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value], label) for (value, label) in IDENTIFICATION_TYPE_CHOICE],
+        allow_blank=True,
+        required=False,
+    )
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
 

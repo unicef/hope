@@ -151,7 +151,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return ImportedDocument.objects.create(
             document_number=national_id,
             individual=imported_individual,
-            type=ImportedDocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]),
+            type=ImportedDocumentType.objects.get(
+                key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+            ),
             country=Country(code="LK"),
         )
 
@@ -166,7 +168,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return ImportedDocument.objects.create(
             document_number=bank_account,
             individual=imported_individual,
-            type=ImportedDocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BANK_STATEMENT]),
+            type=ImportedDocumentType.objects.get(
+                key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BANK_STATEMENT]
+            ),
             photo=image,
             country=Country(code="LK"),
         )

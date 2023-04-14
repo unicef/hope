@@ -9,4 +9,6 @@ class TestImportedDocumentTypeModel(TestCase):
     databases = "__all__"
 
     def test_create_document_type(self) -> None:
-        assert ImportedDocumentType.objects.create(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE])
+        assert ImportedDocumentType.objects.create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+        )
