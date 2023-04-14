@@ -429,6 +429,51 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       <div
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
       >
+        <div
+          class="MuiBox-root MuiBox-root-1"
+        >
+          <div
+            class="MuiBox-root MuiBox-root-2"
+          >
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                National ID
+              </span>
+              <div
+                data-cy="label-National ID"
+              >
+                WSH221365
+              </div>
+            </div>
+          </div>
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              issued
+            </span>
+            <div
+              data-cy="label-issued"
+            >
+              Poland
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+      >
+        <div
+          class="sc-iwsKbI AgGOt"
+        />
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+      >
         <div>
           <span
             class="sc-bwzfXH eoWrid"
