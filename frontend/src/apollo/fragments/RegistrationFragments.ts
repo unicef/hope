@@ -196,5 +196,6 @@ export const importedIndividualDetailed = gql`
     phoneNoValid
     phoneNoAlternativeValid
     preferredLanguage
+    email
   }
 `;
