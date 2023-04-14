@@ -1,5 +1,5 @@
 from typing import Any
-from unittest.mock import patch
+from unittest import mock
 
 from django.utils import timezone
 
@@ -19,6 +19,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -92,7 +93,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService.create(input_data=input_data, user=self.user)
 
     @freeze_time("2020-10-10")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
         targeting = TargetPopulationFactory()
 
@@ -126,17 +127,29 @@ class TestPaymentPlanServices(APITestCase):
             currency="USD",
         )
 
-        with self.assertNumQueries(12):
-            pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+        with mock.patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"
+        ) as mock_prepare_payment_plan_task:
+            with self.assertNumQueries(4):
+                pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+            self.assertEqual(mock_prepare_payment_plan_task.delay.call_args, mock.call(pp.id))
 
-        pp.refresh_from_db()
+        self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
+        self.assertEqual(pp.total_households_count, 0)
+        self.assertEqual(pp.total_individuals_count, 0)
+        self.assertEqual(pp.payment_items.count(), 0)
+
+        with self.assertNumQueries(10):
+            prepare_payment_plan_task.delay(pp.id)
+        pp.refresh_from_db()
+        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
         self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
         new_targeting = TargetPopulationFactory(program=None)
@@ -183,7 +196,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2020-10-10")
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)

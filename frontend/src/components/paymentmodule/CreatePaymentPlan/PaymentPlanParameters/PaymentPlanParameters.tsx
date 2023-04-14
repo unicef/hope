@@ -55,6 +55,9 @@ export const PaymentPlanParameters = ({
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-start-date'
+              tooltip={t(
+                'The first day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
+              )}
             />
           </Grid>
           <Grid item xs={4}>
@@ -70,9 +73,11 @@ export const PaymentPlanParameters = ({
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-end-date'
+              tooltip={t(
+                'The last day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
+              )}
             />
           </Grid>
-
           <Grid item xs={4}>
             <Field
               name='currency'
@@ -90,6 +95,9 @@ export const PaymentPlanParameters = ({
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-dispersion-start-date'
+              tooltip={t(
+                'The first day from which payments could be delivered.',
+              )}
             />
           </Grid>
           <Grid item xs={4}>
@@ -104,6 +112,7 @@ export const PaymentPlanParameters = ({
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
               data-cy='input-dispersion-end-date'
+              tooltip={t('The last day on which payments could be delivered.')}
             />
           </Grid>
         </Grid>

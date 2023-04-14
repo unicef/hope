@@ -233,11 +233,15 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
-
         q_obj = Q()
         for ticket_type, lookup_objs in types_and_lookups.items():
             real_lookup = lookup_objs.get(lookup)
-            if real_lookup:
+            if (
+                ticket_type in ("complaint_ticket_details", "sensitive_ticket_details")
+                and real_lookup == "payment_record"
+            ):
+                q_obj |= Q(**{f"{ticket_type}__payment_object_id": str(obj.id)})
+            elif real_lookup:
                 q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
         return q_obj
 
