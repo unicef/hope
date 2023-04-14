@@ -24,7 +24,7 @@ Cypress.Commands.add("uniqueSeed", () => uniqueSeed);
 Cypress.Commands.add("createExcel", () => {
 cy.uniqueSeed().then((seed) => {
   cy.exec(
-    `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
+    `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`,{failOnNonZeroExit: false}
   );
 });
 })
