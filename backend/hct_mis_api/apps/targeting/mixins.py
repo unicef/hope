@@ -9,8 +9,8 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.decorators import button
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
+from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 
 

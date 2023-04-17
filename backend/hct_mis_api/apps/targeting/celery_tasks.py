@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Dict
 from uuid import UUID
 
 from django.core.cache import cache
@@ -10,7 +10,9 @@ from django.utils import timezone
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.utils.sentry import sentry_tags
@@ -112,3 +114,25 @@ def check_send_tp_periodic_task() -> bool:
             return True
         send_tp_celery_manager.execute()
     return True
+
+
+@app.task()
+@sentry_tags
+def create_tp_from_list(form_data: Dict[str, str], user_id: str) -> None:
+    form = CreateTargetPopulationTextForm(form_data)
+    if form.is_valid():
+        ba = form.cleaned_data["business_area"]
+        population = form.cleaned_data["criteria"]
+        try:
+            with atomic():
+                tp = TargetPopulation.objects.create(
+                    targeting_criteria=form.cleaned_data["targeting_criteria"],
+                    created_by=User.objects.get(pk=user_id),
+                    name=form.cleaned_data["name"],
+                    business_area=ba,
+                )
+                tp.households.set(population)
+                refresh_stats(tp)
+                tp.save()
+        except Exception as e:
+            logger.exception(e)
