@@ -741,7 +741,6 @@ def fix_flex_type_fields(items: Any, flex_fields: Dict) -> List[Dict]:
                     item.flex_fields[key] = float(value)
                 else:
                     item.flex_fields[key] = None
-
     return items
 
 
