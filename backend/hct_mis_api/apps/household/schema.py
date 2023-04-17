@@ -593,7 +593,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(ROLE_CHOICE)
 
     def resolve_document_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
+        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.all()]
 
     def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)

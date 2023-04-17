@@ -86,7 +86,7 @@ export function EditDocumentRow({
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
-            label={t('ID TYPE1')}
+            label={t('ID TYPE')}
             value={document.node.type.label}
           />
         </DisabledDiv>
