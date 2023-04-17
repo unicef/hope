@@ -5,11 +5,13 @@ context("RDI", () => {
     cy.visit("/");
     cy.get("span").contains("Registration Data Import").click();
   })
-
   it("RDI visibility", () => {
     cy.get('[data-cy="button-import"]').should('be.visible')
     cy.get('[data-cy="table-title"]').should('be.visible')
     cy.get('.sc-keFjpB > .MuiInputBase-root > .MuiInputBase-input').should('be.visible')
+    cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').should('be.visible')
+    cy.get('div.MuiFormControl-fullWidth').should('be.visible')
+    cy.get('[data-mui-test="SelectDisplay"]').should('be.visible')
   })
 
   it("Download Template", () => {
@@ -58,6 +60,68 @@ context("RDI", () => {
     cy.get('a span.MuiButton-label').click({ force: true })
     cy.get('h5').should('contain', 'Grievance and Feedback')
   })
+
+  it('registration Data Import Search by Import Titile', () => {
+    cy.get('.sc-keFjpB > .MuiInputBase-root > .MuiInputBase-input').type('Test import 2023-04-14T14:00:03.895Z')
+    cy.get('tbody tr').eq(0).each(($tablerows) => {
+      cy.wrap($tablerows).within(() => {
+        cy.get('td').eq(0).each(($data) => {
+          expect($data.text()).to.eq('Test import 2023-04-14T14:00:03.895Z')
+        })
+      })
+    })
+  })
+
+  it('registration Data Import Search by Date', () => {
+    cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').type('2023-04-14')
+
+    cy.get('tbody tr').eq(0).each(($tablerows) => {
+      cy.wrap($tablerows).within(() => {
+        cy.get('td').eq(2).each(($data) => {
+          expect($data.text()).to.contain('14 Apr 2023')
+        })
+      })
+    })
+  })
+
+  it('registration Data Import Search with Imported by', () => {
+    cy.get('div.MuiFormControl-fullWidth').type('cypress@cypress.com')
+    cy.get('tbody tr').eq(0).each(($tablerows) => {
+      cy.wrap($tablerows).within(() => {
+        cy.get('td').eq(5).each(($data) => {
+          expect($data.text()).to.contain('cypress@cypress.com')
+        })
+      })
+    })
+  })
+
+  it('registration Data Import Search with Status', () => {
+    cy.get('[data-mui-test="SelectDisplay"]').click()
+    cy.get('li[data-value="IN_REVIEW"]').click()
+    cy.reload()
+    cy.get('tbody tr').eq(0).each(($tablerows) => {
+      cy.wrap($tablerows).within(() => {
+        cy.get('td').eq(1).each(($data) => {
+          expect($data.text()).to.contain('IN REVIEW')
+        })
+      })
+    })
+  })
+
+  it('registration Data Import Search with all filters', () => {
+    cy.get('.sc-keFjpB > .MuiInputBase-root > .MuiInputBase-input').type('Test import 2023-04-14T14:00:03.895Z')
+    cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').type('2023-04-14')
+    cy.get('div.MuiFormControl-fullWidth').type('cypress@cypress.com')
+    cy.get('[data-mui-test="SelectDisplay"]').click()
+    cy.get('li[data-value="IN_REVIEW"]').click()
+    cy.get('tbody tr').eq(0).each(($tablerows) => {
+      cy.wrap($tablerows).within(() => {
+        cy.get('td').each(($data) => {
+          cy.log($data.text())
+        })
+      })
+    })
+  })
 });
 
 function uploadRDIFile() {
@@ -67,7 +131,6 @@ function uploadRDIFile() {
   cy.get("h2").contains("Select File to Import").click();
   cy.get('[data-cy="import-type-select"]').click();
   cy.get('[data-cy="excel-menu-item"]').click();
-
   cy.get('[data-cy="input-name"]').type(
     "Test import ".concat(new Date().toISOString())
   );
@@ -82,7 +145,7 @@ function uploadRDIFile() {
       });
     });
   });
-  cy.wait(5000)
+  cy.wait(10000)
   cy.get('[data-cy="button-import-rdi"] > .MuiButton-label').click({ force: true })
   cy.get('div.sc-kEYyzF').click({ force: true })
 }
@@ -120,7 +183,7 @@ function mergeRDIFile() {
 function verifyMergedData() {
   let householdId;
   let individualId;
-  cy.get('div.sc-kEYyzF').click({ force: true })
+  cy.get('div.sc-kkGfuU').click({ force: true })
   cy.log("Looking for householdId");
   cy.get('tbody tr').eq(0).each(($tablerows) => {
     cy.wrap($tablerows).within(() => {
@@ -184,4 +247,5 @@ function verfifyRefuseImport() {
     })
   })
 }
+
 
