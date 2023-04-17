@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Dict, Optional, Type
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -155,8 +155,9 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         )
 
 
-def get_imported_individual_doc(business_area_slug: str) -> Type[Document]:
-    return {
+def get_imported_individual_doc(business_area_slug: str) -> Type[ImportedIndividualDocument]:
+    documents: Dict[str, Type[ImportedIndividualDocument]] = {
         "afghanistan": ImportedIndividualDocumentAfghanistan,
         "ukraine": ImportedIndividualDocumentUkraine,
-    }.get(business_area_slug, ImportedIndividualDocumentOthers)
+    }
+    return documents.get(business_area_slug, ImportedIndividualDocumentOthers)
