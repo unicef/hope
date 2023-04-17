@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Dict, Optional, Type, Union
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -174,11 +174,14 @@ class IndividualDocumentOthers(IndividualDocument):
         return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
-def get_individual_doc(business_area_slug: str) -> Type:
-    return {
+def get_individual_doc(
+    business_area_slug: str,
+) -> Type[IndividualDocument]:
+    documents: Dict[str, Type[IndividualDocument]] = {
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,
-    }.get(business_area_slug, IndividualDocumentOthers)
+    }
+    return documents.get(business_area_slug, IndividualDocumentOthers)
 
 
 @registry.register_document
