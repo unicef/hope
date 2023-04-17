@@ -91,17 +91,12 @@ class DeduplicateTask:
             "middle_name": {"boost": 1},
             "admin1": {"boost": 1},
             "admin2": {"boost": 1},
-            # household - not used right now, repopulate ES Individuals, ImportedIndividuals in order to use HH fields
         }
         queries_list = []
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
         queries_list.extend(names_queries)
         queries_list.extend(identities_queries)
-
-        if "household" in fields_meta:
-            household_queries = cls._prepare_household_query(fields.get("household", {}))
-            queries_list.extend(household_queries)
 
         for field_name, field_value in fields.items():
             if field_value is None:
@@ -117,16 +112,15 @@ class DeduplicateTask:
                         field_name: {
                             "query": field_value,
                             "boost": field_meta.get("boost", 1),
-                            "operator": field_meta.get("operator", "OR"),
+                            "operator": "OR",
                         }
                     }
                 }
             ]
             queries_list.extend(queries_to_append)
 
-        query_dict = {
+        return {
             "min_score": min_score,
-            # TODO add pagination
             "size": "100",
             "query": {
                 "bool": {
@@ -136,7 +130,6 @@ class DeduplicateTask:
                 }
             },
         }
-        return query_dict
 
     @classmethod
     def _prepare_queries_for_names_from_fields(cls, fields: Dict) -> List[Dict]:
@@ -163,56 +156,6 @@ class DeduplicateTask:
         if not isinstance(fields["phone_no_alternative"], str):
             fields["phone_no_alternative"] = fields["phone_no_alternative"].raw_input
         return fields
-
-    @classmethod
-    def _prepare_household_query(cls, household_data: Dict) -> List[Dict[str, Dict[Any, Dict[str, Any]]]]:
-        """
-        Not used right now,
-        in order to use HH fields:
-        - repopulate ES Individuals, ImportedIndividuals
-        - uncomment fields in IndividualDocument, ImportedIndividualDocument
-        """
-
-        queries = []
-        important_fields = (
-            "address",
-            "country",
-            "country_origin",
-        )
-
-        for key, data in household_data.items():
-            if not data or key not in important_fields:
-                continue
-
-            if "." in key:
-                key = key.split(".")[0]
-            if key in ("head_of_household", "id"):
-                data = str(data)
-
-            if key in ("admin_area", "admin1", "admin2"):
-                if key != "admin_area":
-                    admin_areas = {
-                        key: data,
-                    }
-                else:
-                    admin_areas = {
-                        "admin1": data.name if data else None,
-                        "admin2": data.children.filter(area_type__area_level=2).first(),
-                    }
-                queries.extend([{"match": {admin_area: {"query": value}}} for admin_area, value in admin_areas.items()])
-            else:
-                queries.append(
-                    {
-                        "match": {
-                            f"household.{key}": {
-                                "query": data.alpha3 if isinstance(data, Country) else data.iso_code3,
-                                "boost": 0.4,
-                            }
-                        }
-                    }
-                )
-
-        return queries
 
     @classmethod
     def _prepare_identities_or_documents_query(cls, data: Dict, data_type: str) -> List[Dict]:
@@ -383,42 +326,6 @@ class DeduplicateTask:
         dict_fields: Dict[str, Tuple[str, ...]] = {
             "documents": ("document_number", "type.type", "country"),
             "identities": ("document_number", "partner.name"),
-            "household": (  # NOT USED
-                "residence_status",
-                "country_origin",
-                "size",
-                "address",
-                "country",
-                "admin1",
-                "admin2",
-                "female_age_group_0_5_count",
-                "female_age_group_6_11_count",
-                "female_age_group_12_17_count",
-                "female_age_group_18_59_count",
-                "female_age_group_60_count",
-                "pregnant_count",
-                "male_age_group_0_5_count",
-                "male_age_group_6_11_count",
-                "male_age_group_12_17_count",
-                "male_age_group_18_59_count",
-                "male_age_group_60_count",
-                "female_age_group_0_5_disabled_count",
-                "female_age_group_6_11_disabled_count",
-                "female_age_group_12_17_disabled_count",
-                "female_age_group_18_59_disabled_count",
-                "female_age_group_60_disabled_count",
-                "male_age_group_0_5_disabled_count",
-                "male_age_group_6_11_disabled_count",
-                "male_age_group_12_17_disabled_count",
-                "male_age_group_18_59_disabled_count",
-                "male_age_group_60_disabled_count",
-                "head_of_household.id",
-                "returnee",
-                "registration_method",
-                "collect_individual_data",
-                "currency",
-                "unhcr_id",
-            ),
         }
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
@@ -456,43 +363,6 @@ class DeduplicateTask:
         dict_fields = {
             "documents": ("document_number", "type.type", "country"),
             "identities": ("number", "partner.name"),
-            "household": (  # NOT USED
-                "residence_status",
-                "country_origin",
-                "size",
-                "address",
-                "country",
-                "admin_area",
-                "female_age_group_0_5_count",
-                "female_age_group_6_11_count",
-                "female_age_group_12_17_count",
-                "female_age_group_18_59_count",
-                "female_age_group_60_count",
-                "pregnant_count",
-                "male_age_group_0_5_count",
-                "male_age_group_6_11_count",
-                "male_age_group_12_17_count",
-                "male_age_group_18_59_count",
-                "male_age_group_60_count",
-                "female_age_group_0_5_disabled_count",
-                "female_age_group_6_11_disabled_count",
-                "female_age_group_12_17_disabled_count",
-                "female_age_group_18_59_disabled_count",
-                "female_age_group_60_disabled_count",
-                "male_age_group_0_5_disabled_count",
-                "male_age_group_6_11_disabled_count",
-                "male_age_group_12_17_disabled_count",
-                "male_age_group_18_59_disabled_count",
-                "male_age_group_60_disabled_count",
-                "head_of_household.id",
-                "first_registration_date",
-                "last_registration_date",
-                "returnee",
-                "registration_method",
-                "collect_individual_data",
-                "currency",
-                "unhcr_id",
-            ),
         }
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
