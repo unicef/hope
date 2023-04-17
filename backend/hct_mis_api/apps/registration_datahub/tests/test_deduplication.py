@@ -24,6 +24,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 
 class TestBatchDeduplication(BaseElasticSearchTestCase):
@@ -395,7 +396,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     def test_golden_record_deduplication(self) -> None:
         task = DeduplicateTask()
         task.business_area = self.business_area.slug
-        task.deduplicate_individuals(self.registration_data_import)
+        individuals = evaluate_qs(
+            Individual.objects.filter(registration_data_import=self.registration_data_import)
+            .select_for_update()
+            .order_by("pk")
+        )
+        task.deduplicate_individuals(individuals, self.business_area)
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 

@@ -44,6 +44,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
 
@@ -392,7 +393,10 @@ class RdiMergeTask:
                 populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                 logger.info(f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households")
                 if not obj_hct.business_area.postpone_deduplication:
-                    DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
+                    individuals = evaluate_qs(
+                        Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                    )
+                    DeduplicateTask.deduplicate_individuals(individuals, obj_hct.business_area)
                     logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
                     golden_record_duplicates = Individual.objects.filter(
                         registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
