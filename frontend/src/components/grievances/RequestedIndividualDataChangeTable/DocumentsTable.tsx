@@ -101,7 +101,7 @@ export const DocumentsTable = ({
                   )}
                 </TableCell>
                 <TableCell align='left'>
-                  {documentTypeDict[row.value.type]}
+                  {documentTypeDict[row.value.key]}
                 </TableCell>
                 <TableCell align='left'>
                   {countriesDict[row.value.country]}
