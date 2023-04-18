@@ -233,7 +233,9 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         with configure_scope() as scope:
             scope.set_tag("business_area", rdi_obj.business_area_slug)
 
-            DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
+            DeduplicateTask(rdi_obj.business_area_slug).deduplicate_imported_individuals(
+                registration_data_import_datahub=rdi_obj
+            )
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
