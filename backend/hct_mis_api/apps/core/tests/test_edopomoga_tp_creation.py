@@ -82,7 +82,7 @@ class TestEdopomogaCreation(APITestCase):
         self.assertEqual(household1.representatives.count(), 1)
         self.assertEqual(household2.representatives.count(), 1)
         self.assertEqual(household3.representatives.count(), 1)
-        
+
     def test_edopomoga_tp_send_to_ca_clear_withdrawn(self) -> None:
         # set clear_withdrawn flag
         self.business_area.custom_fields = {"clear_withdrawn": True}
