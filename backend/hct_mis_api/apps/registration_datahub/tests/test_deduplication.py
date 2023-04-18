@@ -32,9 +32,8 @@ from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 
 class TestBatchDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    databases = {"default", "registration_datahub"}
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -223,7 +222,9 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
     def test_batch_deduplication(self) -> None:
         task = DeduplicateTask(self.business_area.slug)
-        task.deduplicate_imported_individuals(self.registration_data_import_datahub)
+
+        with self.assertNumQueries(9):
+            task.deduplicate_imported_individuals(self.registration_data_import_datahub)
         duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
         )
