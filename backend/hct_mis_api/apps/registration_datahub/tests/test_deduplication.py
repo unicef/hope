@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -218,8 +220,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_batch_deduplication(self) -> None:
-        task = DeduplicateTask()
-        task.business_area = self.business_area.slug
+        task = DeduplicateTask(self.business_area.slug)
         task.deduplicate_imported_individuals(self.registration_data_import_datahub)
         duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
@@ -286,9 +287,8 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
-    databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    databases = {"default", "registration_datahub"}
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -394,14 +394,14 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_golden_record_deduplication(self) -> None:
-        task = DeduplicateTask()
-        task.business_area = self.business_area.slug
+        task = DeduplicateTask(self.business_area.slug)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=self.registration_data_import)
             .select_for_update()
             .order_by("pk")
         )
-        task.deduplicate_individuals(individuals, self.business_area)
+        with self.assertNumQueries(4):
+            task.deduplicate_individuals_against_population(individuals)
         needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
 

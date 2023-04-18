@@ -391,7 +391,7 @@ class RdiMergeTask:
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
-                    DeduplicateTask.deduplicate_individuals(individuals, obj_hct.business_area)
+                    DeduplicateTask(obj_hct.business_area.slug).deduplicate_individuals_against_population(individuals)
 
                     golden_record_duplicates = Individual.objects.filter(
                         registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
