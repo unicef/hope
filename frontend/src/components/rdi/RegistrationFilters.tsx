@@ -12,6 +12,7 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { SelectFilter } from '../core/SelectFilter';
 import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
 import { createHandleFilterChange } from '../../utils/utils';
+import { SearchTextField } from '../core/SearchTextField';
 
 const StyledTextField = styled(TextField)`
   flex: 1;
@@ -46,19 +47,11 @@ export const RegistrationFilters = ({
 
   return (
     <ContainerWithBorder>
-      <StyledTextField
-        variant='outlined'
+      <SearchTextField
         label={t('Search')}
-        margin='dense'
-        onChange={(e) => handleFilterChange('search', e.target.value)}
         value={filter.search}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
+        onChange={(e) => handleFilterChange('search', e.target.value)}
+        data-cy='filter-search'
       />
       <DatePickerFilter
         label={t('Import Date')}
@@ -66,6 +59,7 @@ export const RegistrationFilters = ({
           handleFilterChange('importDate', moment(date).format('YYYY-MM-DD'))
         }
         value={filter.importDate}
+        data-cy='filter-import-date'
       />
       <AssigneeAutocomplete
         name='importedBy'
@@ -73,11 +67,13 @@ export const RegistrationFilters = ({
         onFilterChange={onFilterChange}
         filter={filter}
         label={t('Imported By')}
+        data-cy='filter-imported-by'
       />
       <SelectFilter
         value={filter.status}
         label={t('Status')}
         onChange={(e) => handleFilterChange('status', e.target.value)}
+        data-cy='filter-status'
       >
         <MenuItem value=''>
           <em>{t('None')}</em>
