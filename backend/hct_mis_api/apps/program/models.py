@@ -140,7 +140,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False,
         help_text="""
         This boolean decides whether the target population sync will send
-        all individuals of a household thats part of the population or only
+        all individuals of a household that's part of the population or only
         the relevant ones (collectors etc.)""",
     )
 
@@ -156,7 +156,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self) -> int:
-        qs = ExtendedQuerySetSequence(self.cycles.paymentplan_set.all(), self.cashplan_set.all())
+        qs = ExtendedQuerySetSequence(self.paymentplan_set.all(), self.cashplan_set.all())
         return self.get_total_number_of_households_from_payments(qs)
 
     @property
