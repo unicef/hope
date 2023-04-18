@@ -66,7 +66,7 @@ context("RDI", () => {
     cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').eq(0).each(($data) => {
-          expect($data.text()).to.eq('Test import 2023-04-14T14:00:03.895Z')
+          expect($data.text()).to.contain('Test import')
         })
       })
     })
@@ -74,7 +74,6 @@ context("RDI", () => {
 
   it('registration Data Import Search by Date', () => {
     cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').type('2023-04-14')
-
     cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').eq(2).each(($data) => {
