@@ -323,8 +323,7 @@ class DeduplicateTask:
         original_individuals_ids_duplicates = []
         original_individuals_ids_possible_duplicates = []
         # TODO add pagination
-        query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
-        query._index = document._index._name
+        query = document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict)
         results = query.execute()
         results_data = {
             "duplicates": [],
@@ -343,7 +342,7 @@ class DeduplicateTask:
                 "full_name": individual_hit.full_name,
                 "score": individual_hit.meta.score,
                 "location": individual_hit.admin2,  # + village
-                "dob": individual_hit.birth_date,
+                "dob": individual_hit.birth_date.strftime("%Y-%m-%d"),
             }
             if score >= duplicate_score:
                 duplicates.append(individual_hit.id)
