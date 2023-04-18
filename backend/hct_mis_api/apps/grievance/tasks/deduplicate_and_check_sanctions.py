@@ -11,7 +11,10 @@ from hct_mis_api.apps.household.models import (
     Document,
     Individual,
 )
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    DeduplicateTask,
+    HardDocumentDeduplication,
+)
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
@@ -30,7 +33,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
 
         if business_area.postpone_deduplication:
             logger.info("Postponing deduplication for business area %s", business_area)
-            DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))
+            HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))
             return
 
         DeduplicateTask(business_area.slug).deduplicate_individuals_from_other_source(individuals)
@@ -44,4 +47,4 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
         create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
 
         CheckAgainstSanctionListPreMergeTask.execute()
-        DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))
+        HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))
