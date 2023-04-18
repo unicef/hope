@@ -207,7 +207,8 @@ class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, C
 
     class Meta:
         unique_together = ("iteration", "program")
-        verbose_name = "ProgrammeCycles"
+        ordering = ["program", "iteration"]
+        verbose_name = "ProgrammeCycle"
 
     def __str__(self) -> str:
         return f"{self.program.name} - cycle {self.iteration}"
