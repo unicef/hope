@@ -172,8 +172,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
-    # TODO create 1st iteration with copied date from program (for pp)
-    # TODO migrate pp connect to pc
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "iteration",
