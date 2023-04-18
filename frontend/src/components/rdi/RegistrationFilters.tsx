@@ -1,25 +1,17 @@
-import { InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import { MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import TextField from '../../shared/TextField';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
+import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
+import TextField from '../../shared/TextField';
+import { createHandleFilterChange } from '../../utils/utils';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
-import { SelectFilter } from '../core/SelectFilter';
-import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
-import { createHandleFilterChange } from '../../utils/utils';
 import { SearchTextField } from '../core/SearchTextField';
-
-const StyledTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
+import { SelectFilter } from '../core/SelectFilter';
 
 interface RegistrationFiltersProps {
   onFilterChange;
