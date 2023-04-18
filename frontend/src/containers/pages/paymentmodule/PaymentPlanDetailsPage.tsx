@@ -19,6 +19,7 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { isPermissionDeniedError } from '../../../utils/utils';
+import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -81,6 +82,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
+      <ExcludeSection />
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
