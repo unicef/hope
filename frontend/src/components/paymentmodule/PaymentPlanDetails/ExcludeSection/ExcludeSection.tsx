@@ -26,15 +26,17 @@ export const ExcludeSection = ({
   };
 
   const handleApply = (): void => {
-    const idRegex = /^HH-\d{2}-\d{4}\.\d{4}$/;
-    const ids = value.split(',');
+    const idRegex = /^HH-\d{2}-\d{4}\.\d{4}(\s*,\s*HH-\d{2}-\d{4}\.\d{4})*$/;
+    const ids = value.split(/,\s*|\s+/);
     const invalidIds = ids.filter(
       (id) => !idRegex.test(id) || excludedIds.includes(id),
     );
     const newExcludedIds = ids.filter(
       (id) => idRegex.test(id) && !excludedIds.includes(id),
     );
-    if (invalidIds.length > 0) {
+    if (invalidIds.length === 1) {
+      setError(`Invalid ID: ${invalidIds.join(', ')}`);
+    } else if (invalidIds.length > 0) {
       setError(`Invalid IDs: ${invalidIds.join(', ')}`);
     }
     if (!invalidIds.length) {
@@ -93,7 +95,7 @@ export const ExcludeSection = ({
                   />
                 </Box>
               </Grid>
-              <Grid>
+              <Grid item>
                 <Button
                   variant='contained'
                   color='primary'
