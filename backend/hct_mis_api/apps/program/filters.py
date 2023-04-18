@@ -14,7 +14,7 @@ class ProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
-    sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
+    sectors = MultipleChoiceFilter(field_name="sectors", choices=Program.SECTOR_CHOICE)
     number_of_households = IntegerRangeFilter(method="filter_number_of_households")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
@@ -25,7 +25,7 @@ class ProgramFilter(FilterSet):
             "business_area",
             "search",
             "status",
-            "sector",
+            "sectors",
             "number_of_households",
             "budget",
             "start_date",
@@ -34,7 +34,7 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_number_of_households", "budget")
+        fields=(Lower("name"), "status", "start_date", "end_date", "sectors", "total_number_of_households", "budget")
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:

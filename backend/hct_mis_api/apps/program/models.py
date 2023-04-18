@@ -12,6 +12,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
+from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
@@ -39,7 +40,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "business_area",
             "budget",
             "frequency_of_payments",
-            "sector",
+            "sectors",
             "scope",
             "cash_plus",
             "population_goal",
@@ -124,7 +125,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         max_length=50,
         choices=FREQUENCY_OF_PAYMENTS_CHOICE,
     )
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
+    # TODO: max_choices=3 if needed
+    # sectors = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
+    sectors = MultiSelectField(max_length=50, choices=SECTOR_CHOICE, db_index=True, null=True)
     scope = models.CharField(
         max_length=50,
         choices=SCOPE_CHOICE,

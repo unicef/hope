@@ -366,7 +366,7 @@ class RealProgramFactory(DjangoModelFactory):
         Program.FREQUENCY_OF_PAYMENTS_CHOICE,
         getter=lambda c: c[0],
     )
-    sector = factory.fuzzy.FuzzyChoice(
+    sectors = factory.fuzzy.FuzzyChoice(
         Program.SECTOR_CHOICE,
         getter=lambda c: c[0],
     )
@@ -882,7 +882,7 @@ def generate_payment_plan() -> None:
         population_goal=250,
         status=Program.ACTIVE,
         frequency_of_payments=Program.ONE_OFF,
-        sector=Program.MULTI_PURPOSE,
+        sectors=[Program.MULTI_PURPOSE],
         scope=Program.SCOPE_UNICEF,
     )[0]
 

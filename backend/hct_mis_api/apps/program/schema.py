@@ -224,6 +224,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
+        # TODO: support multiple sectors
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
@@ -232,8 +233,8 @@ class Query(graphene.ObjectType):
         programs = Program.objects.filter(id__in=programs_ids).distinct()
 
         programmes_by_sector = (
-            programs.values("sector")
-            .order_by("sector")
+            programs.values("sectors")
+            .order_by("sectors")
             .annotate(total_count_without_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=False)))
             .annotate(total_count_with_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=True)))
         )
@@ -242,7 +243,7 @@ class Query(graphene.ObjectType):
         programmes_with_cash_plus = []
         programmes_total = []
         for programme in programmes_by_sector:
-            labels.append(sector_choice_mapping.get(programme.get("sector")))
+            labels.append(sector_choice_mapping.get(programme.get("sectors")))
             programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus") or 0)
             programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus") or 0)
             programmes_total.append(programmes_wo_cash_plus[-1] + programmes_with_cash_plus[-1])

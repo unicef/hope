@@ -42,6 +42,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
         )
+        # TODO: validate sectors max_choices if needed
 
         program = Program(
             **program_data,
@@ -79,6 +80,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+        # TODO: validate sectors max_choices if needed
 
         # permission if updating any other fields
         if [k for k, v in program_data.items() if k != "status"]:

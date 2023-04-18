@@ -43,7 +43,7 @@ class ProgramFactory(DjangoModelFactory):
         Program.FREQUENCY_OF_PAYMENTS_CHOICE,
         getter=lambda c: c[0],
     )
-    sector = fuzzy.FuzzyChoice(
+    sectors = fuzzy.FuzzyChoice(
         Program.SECTOR_CHOICE,
         getter=lambda c: c[0],
     )

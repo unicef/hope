@@ -21,7 +21,7 @@ class TestCreateProgram(APITestCase):
           budget
           description
           frequencyOfPayments
-          sector
+          sectors
           scope
           cashPlus
           populationGoal
@@ -45,7 +45,7 @@ class TestCreateProgram(APITestCase):
                 "budget": 20000000,
                 "description": "my description of program",
                 "frequencyOfPayments": "REGULAR",
-                "sector": "EDUCATION",
+                "sectors": ["EDUCATION"],
                 "scope": "UNICEF",
                 "cashPlus": True,
                 "populationGoal": 150000,
