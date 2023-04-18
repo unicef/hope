@@ -1,7 +1,8 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -10,15 +11,24 @@ const StyledBox = styled(Box)`
   color: '#404040';
 `;
 
+const IdDiv = styled.div`
+  text-decoration: ${({ isDeleted }) => (isDeleted ? 'line-through' : 'none')};
+`;
 interface ExcludedItemProps {
   id: string;
   onDelete;
+  onUndo;
+  isDeleted: boolean;
 }
 
 export const ExcludedItem = ({
   id,
   onDelete,
+  onUndo,
+  isDeleted,
 }: ExcludedItemProps): React.ReactElement => {
+  const { t } = useTranslation();
+
   return (
     <StyledBox
       display='flex'
@@ -30,10 +40,16 @@ export const ExcludedItem = ({
       pb={4}
       mt={2}
     >
-      {id}
-      <IconButton onClick={onDelete}>
-        <Delete />
-      </IconButton>
+      <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
+      {isDeleted ? (
+        <Button variant='text' color='primary' onClick={onUndo}>
+          {t('Undo')}
+        </Button>
+      ) : (
+        <IconButton onClick={onDelete}>
+          <Delete />
+        </IconButton>
+      )}
     </StyledBox>
   );
 };
