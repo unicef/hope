@@ -15,6 +15,7 @@ export const ExcludeSection = ({
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [value, setValue] = useState('');
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
 
   const handleChange = (event): void => {
@@ -22,34 +23,61 @@ export const ExcludeSection = ({
   };
 
   const handleSave = (): void => {
-    console.log('🤪🤪🤪', excludedIds);
+    const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
+    console.log('🤪🤪🤪 idsToSave', idsToSave);
   };
 
   const handleApply = (): void => {
-    const idRegex = /^HH-\d{2}-\d{4}\.\d{4}(\s*,\s*HH-\d{2}-\d{4}\.\d{4})*$/;
+    const idRegex = /^HH-\d{2}-\d{4}\.\d{4}$/;
     const ids = value.split(/,\s*|\s+/);
-    const invalidIds = ids.filter(
-      (id) => !idRegex.test(id) || excludedIds.includes(id),
-    );
-    const newExcludedIds = ids.filter(
-      (id) => idRegex.test(id) && !excludedIds.includes(id),
-    );
-    if (invalidIds.length === 1) {
-      setError(`Invalid ID: ${invalidIds.join(', ')}`);
-    } else if (invalidIds.length > 0) {
-      setError(`Invalid IDs: ${invalidIds.join(', ')}`);
-    }
-    if (!invalidIds.length) {
-      setError('');
+    const invalidIds: string[] = [];
+    const alreadyExcludedIds: string[] = [];
+    const newExcludedIds: string[] = [];
+
+    for (const id of ids) {
+      if (!idRegex.test(id)) {
+        invalidIds.push(id);
+      } else if (excludedIds.includes(id)) {
+        alreadyExcludedIds.push(id);
+      } else {
+        newExcludedIds.push(id);
+      }
     }
 
-    setExcludedIds([...excludedIds, ...newExcludedIds]);
-    setValue('');
+    let errorMessage = '';
+    if (invalidIds.length > 0) {
+      errorMessage += ` Invalid IDs: ${invalidIds.join(', ')}`;
+    }
+    if (alreadyExcludedIds.length > 0) {
+      errorMessage += ` IDs already excluded: ${alreadyExcludedIds.join(', ')}`;
+    }
+
+    if (errorMessage) {
+      setError(errorMessage.trim());
+    } else {
+      setError('');
+      setExcludedIds([...excludedIds, ...newExcludedIds]);
+      setValue('');
+    }
   };
 
   const handleDelete = (id: string): void => {
-    setExcludedIds(excludedIds.filter((excludedId) => excludedId !== id));
+    if (!deletedIds.includes(id)) {
+      setDeletedIds([...deletedIds, id]);
+    }
   };
+
+  const handleUndo = (id: string): void => {
+    if (deletedIds.includes(id)) {
+      setDeletedIds(deletedIds.filter((deletedId) => deletedId !== id));
+    }
+  };
+
+  const handleCheckIfDeleted = (id: string): boolean => {
+    return deletedIds.includes(id);
+  };
+
+  const numberOfExcluded = excludedIds.length - deletedIds.length;
 
   return (
     <PaperContainer>
@@ -82,7 +110,7 @@ export const ExcludeSection = ({
       <Collapse in={isExclusionsOpen}>
         <Box display='flex' flexDirection='column'>
           <Box mt={2} display='flex' alignItems='center'>
-            <Grid alignItems='center' container spacing={3}>
+            <Grid alignItems='flex-start' container spacing={3}>
               <Grid item xs={6}>
                 <Box mr={2}>
                   <StyledTextField
@@ -109,10 +137,10 @@ export const ExcludeSection = ({
               </Grid>
             </Grid>
           </Box>
-          {excludedIds.length > 0 && (
+          {numberOfExcluded > 0 && (
             <Box mt={2} mb={2}>
-              <GreyText>{`${excludedIds.length} ${
-                excludedIds.length === 1 ? 'Household' : 'Households'
+              <GreyText>{`${numberOfExcluded} ${
+                numberOfExcluded === 1 ? 'Household' : 'Households'
               } excluded`}</GreyText>
             </Box>
           )}
@@ -123,6 +151,8 @@ export const ExcludeSection = ({
                   key={id}
                   id={id}
                   onDelete={() => handleDelete(id)}
+                  onUndo={() => handleUndo(id)}
+                  isDeleted={handleCheckIfDeleted(id)}
                 />
               </Grid>
             ))}
