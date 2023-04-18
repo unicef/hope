@@ -149,55 +149,66 @@ class DeduplicateTask:
 
         Individual.objects.bulk_update(
             to_bulk_update_results,
-            ["deduplication_golden_record_results"],
+            ("deduplication_golden_record_results",),
         )
 
-    @classmethod
-    @transaction.atomic
-    def deduplicate_individuals_from_other_source(
-        cls, individuals: QuerySet[Individual], business_area: BusinessArea
-    ) -> None:
+    def deduplicate_individuals_from_other_source(self, individuals: QuerySet[Individual]) -> None:
         wait_until_es_healthy()
-        cls._set_thresholds(business_area)
-
-        evaluate_qs(individuals.select_for_update().order_by("pk"))
 
         to_bulk_update_results = []
-        for individual in individuals:
-            deduplication_result = cls._deduplicate_single_individual(individual, business_area.slug)
+        all_duplicates = []
+        all_possible_duplicates = []
+        individual_fields = [
+            "given_name",
+            "full_name",
+            "middle_name",
+            "family_name",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+            "sex",
+            "birth_date",
+            "unicef_id",
+            "business_area__deduplication_ignore_withdraw",
+        ]
+        individual_qs = (
+            individuals.only(*individual_fields).prefetch_related("identities").select_related("business_area")
+        )
+        for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
+            deduplication_result = self._deduplicate_single_individual(individual, self.business_area.slug)
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
-                individual.deduplication_golden_record_status = DUPLICATE
+                all_duplicates.append(individual.id)
             elif deduplication_result.possible_duplicates:
-                individual.deduplication_golden_record_status = NEEDS_ADJUDICATION
+                all_possible_duplicates.append(individual.id)
 
             to_bulk_update_results.append(individual)
 
+        Individual.objects.filter(id__in=all_duplicates).update(deduplication_golden_record_status=DUPLICATE)
+        Individual.objects.filter(id__in=all_possible_duplicates).update(
+            deduplication_golden_record_status=NEEDS_ADJUDICATION
+        )
         Individual.objects.bulk_update(
             to_bulk_update_results,
-            ["deduplication_golden_record_results", "deduplication_golden_record_status"],
+            ("deduplication_golden_record_results",),
         )
 
-    @classmethod
-    def deduplicate_imported_individuals(cls, registration_data_import_datahub: RegistrationDataImportDatahub) -> None:
-        business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
-        cls._set_thresholds(business_area)
-
+    def deduplicate_imported_individuals(self, registration_data_import_datahub: RegistrationDataImportDatahub) -> None:
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
 
         wait_until_es_healthy()
-        populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
+        populate_index(imported_individuals, get_imported_individual_doc(self.business_area.slug))
 
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
-            (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
+            (imported_individuals.count() or 1) * (self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
         allowed_duplicates_golden_record_amount = round(
             (imported_individuals.count() or 1)
-            * (cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
+            * (self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
         )
 
         all_duplicates = []
@@ -207,7 +218,7 @@ class DeduplicateTask:
         to_bulk_update_results = []
         checked_individuals_ids = []
         for imported_individual in imported_individuals:
-            imported_deduplication_result = cls._deduplicate_single_imported_individual(imported_individual)
+            imported_deduplication_result = self._deduplicate_single_imported_individual(imported_individual)
 
             imported_individual.deduplication_batch_results = imported_deduplication_result.results_data
             post_process_dedupe_results(imported_individual)
@@ -219,7 +230,7 @@ class DeduplicateTask:
             all_duplicates.extend(imported_deduplication_result.duplicates)
             all_possible_duplicates.extend(imported_deduplication_result.possible_duplicates)
 
-            deduplication_result = cls._deduplicate_single_individual(
+            deduplication_result = self._deduplicate_single_individual(
                 imported_individual, registration_data_import_datahub.business_area_slug
             )
             imported_individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -239,24 +250,24 @@ class DeduplicateTask:
 
             if (
                 len(imported_deduplication_result.results_data["duplicates"])
-                > cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED
+                > self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED
             ):
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
+                    f"exceed the maximum allowed ({self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
                 )
-                cls._set_error_message_and_status(registration_data_import, message)
+                self._set_error_message_and_status(registration_data_import, message)
                 break
 
             if (
                 len(deduplication_result.results_data["duplicates"])
-                > cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED
+                > self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED
             ):
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
+                    f"exceed the maximum allowed ({self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
                 )
-                cls._set_error_message_and_status(registration_data_import, message)
+                self._set_error_message_and_status(registration_data_import, message)
                 break
 
             set_of_all_duplicates = set(all_duplicates)
@@ -273,17 +284,17 @@ class DeduplicateTask:
 
             if batch_amount_exceeded:
                 message = (
-                    f"The percentage of records ({cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
+                    f"The percentage of records ({self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a batch has reached the maximum number."
                 )
-                cls._set_error_message_and_status(registration_data_import, message)
+                self._set_error_message_and_status(registration_data_import, message)
                 break
             elif golden_record_amount_exceeded:
                 message = (
-                    f"The percentage of records ({cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
+                    f"The percentage of records ({self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a population has reached the maximum number."
                 )
-                cls._set_error_message_and_status(registration_data_import, message)
+                self._set_error_message_and_status(registration_data_import, message)
                 break
         ImportedIndividual.objects.bulk_update(
             to_bulk_update_results,
@@ -326,7 +337,8 @@ class DeduplicateTask:
             )
 
         remove_elasticsearch_documents_by_matching_ids(
-            list(imported_individuals.values_list("id", flat=True)), get_imported_individual_doc(business_area)
+            list(imported_individuals.values_list("id", flat=True)),
+            get_imported_individual_doc(self.business_area.slug),
         )
 
     @classmethod
