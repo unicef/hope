@@ -99,19 +99,36 @@ class DeduplicateTask:
     business_area = None
     thresholds: Optional[Thresholds] = None
 
-    @classmethod
-    @transaction.atomic
-    def deduplicate_individuals(cls, individuals: QuerySet[Individual], business_area: BusinessArea) -> None:
+    def __init__(self, business_area_slug: str):
+        business_area: BusinessArea = BusinessArea.objects.get(slug=business_area_slug)
+        self.thresholds: Thresholds = self._set_thresholds(business_area)
+
+    def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
         wait_until_es_healthy()
-        cls._set_thresholds(business_area)
 
         all_duplicates = []
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
         all_original_individuals_ids_possible_duplicates = []
         to_bulk_update_results = []
-        for individual in individuals:
-            deduplication_result = cls._deduplicate_single_individual(individual)
+        individual_fields = [
+            "given_name",
+            "full_name",
+            "middle_name",
+            "family_name",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+            "sex",
+            "birth_date",
+            "unicef_id",
+            "business_area__deduplication_ignore_withdraw",
+        ]
+        individual_qs = (
+            individuals.only(*individual_fields).prefetch_related("identities").select_related("business_area")
+        )
+        for individual in individual_qs:
+            deduplication_result = self._deduplicate_single_individual(individual, self.business_area.slug)
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             to_bulk_update_results.append(individual)
@@ -147,7 +164,7 @@ class DeduplicateTask:
 
         to_bulk_update_results = []
         for individual in individuals:
-            deduplication_result = cls._deduplicate_single_individual(individual)
+            deduplication_result = cls._deduplicate_single_individual(individual, business_area.slug)
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -202,7 +219,9 @@ class DeduplicateTask:
             all_duplicates.extend(imported_deduplication_result.duplicates)
             all_possible_duplicates.extend(imported_deduplication_result.possible_duplicates)
 
-            deduplication_result = cls._deduplicate_single_individual(imported_individual)
+            deduplication_result = cls._deduplicate_single_individual(
+                imported_individual, registration_data_import_datahub.business_area_slug
+            )
             imported_individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.results_data["duplicates"]:
                 imported_individual.deduplication_golden_record_status = DUPLICATE
@@ -602,12 +621,16 @@ class DeduplicateTask:
             "duplicates": [],
             "possible_duplicates": [],
         }
+        should_ignore_withdraw = (
+            isinstance(individual, Individual) and individual.business_area.deduplication_ignore_withdraw
+        )
+
+        individual_hit_ids = Individual.objects.filter(
+            withdrawn=True, id__in=[result.id for result in results]
+        ).values_list("id", flat=True)
+
         for individual_hit in results:
-            if (
-                isinstance(individual, Individual)
-                and Individual.objects.filter(id=individual_hit.id, withdrawn=True).exists()
-                and individual.business_area.deduplication_ignore_withdraw
-            ):
+            if should_ignore_withdraw and individual_hit.id in individual_hit_ids:
                 continue
             score = individual_hit.meta.score
             results_core_data = {
@@ -673,7 +696,9 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _deduplicate_single_individual(cls, individual: Union[Individual, ImportedIndividual]) -> DeduplicationResult:
+    def _deduplicate_single_individual(
+        cls, individual: Union[Individual, ImportedIndividual], business_area_slug: str
+    ) -> DeduplicationResult:
         fields_names = (
             "given_name",
             "full_name",
@@ -686,7 +711,6 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "country"),
             "identities": ("number", "partner.name"),
         }
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
@@ -700,10 +724,6 @@ class DeduplicateTask:
             {"term": {"business_area": cls.business_area.slug}},
         ]
 
-        if isinstance(individual, ImportedIndividual):
-            business_area_slug = individual.registration_data_import.business_area
-        else:
-            business_area_slug = individual.business_area.slug
         document = get_individual_doc(business_area_slug)
 
         return cls._get_duplicates_tuple(
@@ -729,9 +749,10 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _set_thresholds(cls, business_area: BusinessArea) -> None:
+    def _set_thresholds(cls, business_area: BusinessArea) -> Thresholds:
         cls.business_area = business_area
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
+        return cls.thresholds
 
     @staticmethod
     def _get_document_signature(document: Document) -> str:
