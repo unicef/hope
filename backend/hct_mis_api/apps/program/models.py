@@ -156,7 +156,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self) -> int:
-        qs = ExtendedQuerySetSequence(self.paymentplan_set.all(), self.cashplan_set.all())
+        qs = ExtendedQuerySetSequence(self.cycles.paymentplan_set.all(), self.cashplan_set.all())
         return self.get_total_number_of_households_from_payments(qs)
 
     @property
@@ -169,3 +169,47 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     def __str__(self) -> str:
         return self.name
+
+
+class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+    # TODO create 1st iteration with copied date from program (for pp)
+    # TODO migrate pp connect to pc
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "iteration",
+            "status",
+            "start_date",
+            "end_date",
+            "description",
+        ],
+    )
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
+    STATUS_CHOICE = (
+        (ACTIVE, _("Active")),
+        (CLOSED, _("Closed")),
+    )
+
+    iteration = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(1),
+        ],
+        db_index=True,
+        default=1,
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
+    start_date = models.DateField()  # first from program
+    end_date = models.DateField(null=True, blank=True)
+    description = models.CharField(
+        blank=True,
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
+    program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
+
+    class Meta:
+        unique_together = ("iteration", "program")
+        verbose_name = "ProgrammeCycles"
+
+    def __str__(self) -> str:
+        return f"{self.program.name} - cycle {self.iteration}"

@@ -47,7 +47,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -384,6 +384,13 @@ class RealProgramFactory(DjangoModelFactory):
     )
     individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
 
+    @factory.post_generation
+    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+
+        ProgramCycleFactory(program=self)
+
 
 class RealCashPlanFactory(DjangoModelFactory):
     class Meta:
@@ -549,6 +556,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
+    program_cycle = factory.LazyAttribute(lambda o: o.program.cycles.first())
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
@@ -777,6 +785,7 @@ def generate_reconciled_payment_plan() -> None:
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
         program=tp.program,
+        program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
     )[0]
     # update status
@@ -885,6 +894,9 @@ def generate_payment_plan() -> None:
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
     )[0]
+    program_cycle = ProgramCycleFactory(
+        program=program,
+    )
 
     targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
     targeting_criteria = TargetingCriteria.objects.update_or_create(
@@ -932,6 +944,7 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program=program,
+        program_cycle=program_cycle,
     )[0]
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
