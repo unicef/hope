@@ -43,23 +43,17 @@ ingress:
 
 
 postgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-    user: trncashubusr
-    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
-    db: trn_hope_appdb_datahubdb
+  host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
+  username: trncashubusr
+  password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+  database: trn_hope_appdb_datahubdb
 registrationdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-    user: trnreghubusr
-    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
-    db: trn_registration_datahubdb
+  host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
+  username: trnreghubusr
+  password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+  database: trn_registration_datahubdb
 cashassistdatahubpostgresql:
-  enabled: false
-  externalDatabase:
-    host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-    user: trncashubusr
-    password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
-    db: trn_cashassist_datahubdb
+  host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
+  username: trncashubusr
+  password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
+  database: trn_cashassist_datahubdb

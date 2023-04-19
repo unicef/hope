@@ -78,13 +78,13 @@
             "name": "TicketComplaintDetailsNode"
           },
           {
-            "name": "TicketSensitiveDetailsNode"
+            "name": "PaymentVerificationPlanNode"
           },
           {
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "PaymentVerificationPlanNode"
+            "name": "TicketPaymentVerificationDetailsNode"
           },
           {
             "name": "PaymentVerificationSummaryNode"
@@ -93,7 +93,7 @@
             "name": "PaymentVerificationLogEntryNode"
           },
           {
-            "name": "TicketPaymentVerificationDetailsNode"
+            "name": "TicketSensitiveDetailsNode"
           },
           {
             "name": "ReportNode"

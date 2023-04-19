@@ -4,13 +4,15 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
+from django.db.models import JSONField, Q, QuerySet, UniqueConstraint, UUIDField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
@@ -19,6 +21,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.grievance.constants import (
     PRIORITY_CHOICES,
     PRIORITY_LOW,
@@ -34,7 +37,6 @@ from hct_mis_api.apps.utils.models import (
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
-    from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 logger = logging.getLogger(__name__)
@@ -61,6 +63,19 @@ class GrievanceTicketManager(models.Manager):
             (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
         )
+
+
+class GenericPaymentTicket(TimeStampedUUIDModel):
+    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    payment_object_id = UUIDField(null=True)
+    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
+
+    class Meta:
+        abstract = True
+
+    @property
+    def payment_record(self) -> Optional[Union[Payment, PaymentRecord]]:
+        return self.payment_obj
 
 
 class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
@@ -540,19 +555,13 @@ FEEDBACK_STATUS_FLOW = {
 }
 
 
-class TicketComplaintDetails(TimeStampedUUIDModel):
+class TicketComplaintDetails(GenericPaymentTicket):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
-    )
-    payment_record = models.ForeignKey(
-        "payment.PaymentRecord",
-        related_name="complaint_ticket_details",
-        on_delete=models.CASCADE,
-        null=True,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -568,19 +577,13 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
     )
 
 
-class TicketSensitiveDetails(TimeStampedUUIDModel):
+class TicketSensitiveDetails(GenericPaymentTicket):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
-    )
-    payment_record = models.ForeignKey(
-        "payment.PaymentRecord",
-        related_name="sensitive_ticket_details",
-        on_delete=models.CASCADE,
-        null=True,
     )
     household = models.ForeignKey(
         "household.Household",
