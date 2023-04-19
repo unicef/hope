@@ -28,6 +28,9 @@ export const ExcludeSection = ({
   const [isEdit, setEdit] = useState(false);
 
   const handleChange = (event): void => {
+    if (event.target.value === '') {
+      setErrors([]);
+    }
     setValue(event.target.value);
   };
 
@@ -177,7 +180,7 @@ export const ExcludeSection = ({
                   value={value}
                   onChange={handleChange}
                   fullWidth
-                  error={errors.length > 0}
+                  error={errors.length > 0 && value !== ''}
                 />
               </Box>
             </Grid>
