@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from constance import config
 
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSystemFlaggingDetails,
@@ -42,7 +43,11 @@ class CheckAgainstSanctionListPreMergeTask:
                 "bool": {
                     "must": [
                         {"match": {"documents.number": doc.document_number}},
-                        {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
+                        {
+                            "match": {
+                                "documents.key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+                            }
+                        },
                         {"match": {"documents.country": getattr(doc.issuing_country, "iso_code3", "")}},
                     ],
                     "boost": 2,

@@ -15,8 +15,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    IDENTIFICATION_TYPE_TAX_ID,
     MALE,
     SON_DAUGHTER,
     WIFE_HUSBAND,
@@ -111,8 +109,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentTypeFactory(label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        dt_tax_id = DocumentTypeFactory(label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID)
+        dt = DocumentTypeFactory(label="national_id", type="national_id")
+        dt_tax_id = DocumentTypeFactory(label="tax_id", type="tax_id")
         dt.save()
         cls.document1 = Document(
             country=country,
@@ -255,8 +253,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         pl = geo_models.Country.objects.get(iso_code2="PL")
-        dt_tax_id = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
-        dt_national_id = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        dt_tax_id = DocumentType.objects.get(key="tax_id")
+        dt_national_id = DocumentType.objects.get(key="national_id")
         Document.objects.create(
             country=pl,
             type=dt_tax_id,
