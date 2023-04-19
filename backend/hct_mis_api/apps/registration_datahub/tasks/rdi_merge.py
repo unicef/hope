@@ -199,8 +199,8 @@ class RdiMergeTask:
     ) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
-            document_type, _ = DocumentType.objects.get_or_create(
-                type=imported_document.type.type,
+            document_type = DocumentType.objects.get(
+                key=imported_document.type.key,
             )
             document = Document(
                 document_number=imported_document.document_number,
