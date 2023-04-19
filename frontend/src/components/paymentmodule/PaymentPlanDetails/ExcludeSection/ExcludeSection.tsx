@@ -1,6 +1,14 @@
-import { Box, Button, Collapse, Grid, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Collapse,
+  FormHelperText,
+  Grid,
+  Typography,
+} from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import EditIcon from '@material-ui/icons/EditRounded';
 import { StyledTextField } from '../../../../shared/StyledTextField';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
@@ -16,7 +24,8 @@ export const ExcludeSection = ({
   const [value, setValue] = useState('');
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
-  const [error, setError] = useState<string>('');
+  const [errors, setErrors] = useState<string[]>([]);
+  const [isEdit, setEdit] = useState(false);
 
   const handleChange = (event): void => {
     setValue(event.target.value);
@@ -44,18 +53,18 @@ export const ExcludeSection = ({
       }
     }
 
-    let errorMessage = '';
+    const idErrors: string[] = [];
     if (invalidIds.length > 0) {
-      errorMessage += ` Invalid IDs: ${invalidIds.join(', ')}`;
+      idErrors.push(` Invalid IDs: ${invalidIds.join(', ')}`);
     }
     if (alreadyExcludedIds.length > 0) {
-      errorMessage += ` IDs already excluded: ${alreadyExcludedIds.join(', ')}`;
+      idErrors.push(` IDs already excluded: ${alreadyExcludedIds.join(', ')}`);
     }
 
-    if (errorMessage) {
-      setError(errorMessage.trim());
+    if (idErrors.length > 0) {
+      setErrors(idErrors);
     } else {
-      setError('');
+      setErrors([]);
       setExcludedIds([...excludedIds, ...newExcludedIds]);
       setValue('');
     }
@@ -79,64 +88,141 @@ export const ExcludeSection = ({
 
   const numberOfExcluded = excludedIds.length - deletedIds.length;
 
+  const renderButtons = (): React.ReactElement => {
+    if (isExclusionsOpen && isEdit) {
+      return (
+        <Box display='flex' alignItems='center' justifyContent='center'>
+          <Box mr={2}>
+            <Button
+              variant='text'
+              color='primary'
+              onClick={() => {
+                setExclusionsOpen(false);
+                setErrors([]);
+                setExcludedIds([]);
+                setDeletedIds([]);
+                setValue('');
+                setEdit(false);
+              }}
+            >
+              {t('Cancel')}
+            </Button>
+          </Box>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={() => {
+              handleSave();
+              setExclusionsOpen(false);
+            }}
+          >
+            {t('Save')}
+          </Button>
+        </Box>
+      );
+    }
+    if (isExclusionsOpen && !isEdit && numberOfExcluded > 0) {
+      return (
+        <Button
+          color='primary'
+          variant='outlined'
+          startIcon={<EditIcon />}
+          onClick={() => setEdit(true)}
+        >
+          {t('Edit')}
+        </Button>
+      );
+    }
+
+    if (!isExclusionsOpen && numberOfExcluded > 0) {
+      return (
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={() => {
+            setExclusionsOpen(true);
+            setEdit(false);
+          }}
+        >
+          {t('Preview')}
+        </Button>
+      );
+    }
+    if (!isExclusionsOpen && numberOfExcluded === 0) {
+      return (
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={() => {
+            setExclusionsOpen(true);
+            setEdit(true);
+          }}
+        >
+          {t('Create')}
+        </Button>
+      );
+    }
+    return null;
+  };
+
+  const renderInputAndApply = (): React.ReactElement => {
+    if (isEdit || numberOfExcluded === 0) {
+      return (
+        <Box mt={2} display='flex' alignItems='center'>
+          <Grid alignItems='flex-start' container spacing={3}>
+            <Grid item xs={6}>
+              <Box mr={2}>
+                <StyledTextField
+                  label={t('Household Ids')}
+                  value={value}
+                  onChange={handleChange}
+                  fullWidth
+                  error={errors.length > 0}
+                />
+              </Box>
+            </Grid>
+            <Grid item>
+              <Button
+                variant='contained'
+                color='primary'
+                disabled={!value}
+                onClick={() => {
+                  handleApply();
+                }}
+              >
+                {t('Apply')}
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+      );
+    }
+    return null;
+  };
+
   return (
     <PaperContainer>
       <Box display='flex' justifyContent='space-between'>
         <Typography variant='h6'>{t('Exclude')}</Typography>
-        <Box display='flex' alignItems='center' justifyContent='center'>
-          <Box mr={2}>
-            <Button
-              variant={isExclusionsOpen ? 'text' : 'contained'}
-              color='primary'
-              onClick={() => setExclusionsOpen(!isExclusionsOpen)}
-            >
-              {isExclusionsOpen ? t('Cancel') : t('Create')}
-            </Button>
-          </Box>
-          {isExclusionsOpen && (
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={() => {
-                handleSave();
-                setExclusionsOpen(false);
-              }}
-            >
-              {t('Save')}
-            </Button>
-          )}
-        </Box>
+        {renderButtons()}
       </Box>
+      {!isExclusionsOpen && numberOfExcluded > 0 ? (
+        <Box mt={2} mb={2}>
+          <GreyText>{`${numberOfExcluded} ${
+            numberOfExcluded === 1 ? 'Household' : 'Households'
+          } excluded`}</GreyText>
+        </Box>
+      ) : null}
       <Collapse in={isExclusionsOpen}>
         <Box display='flex' flexDirection='column'>
-          <Box mt={2} display='flex' alignItems='center'>
-            <Grid alignItems='flex-start' container spacing={3}>
-              <Grid item xs={6}>
-                <Box mr={2}>
-                  <StyledTextField
-                    label={t('Household Ids')}
-                    value={value}
-                    onChange={handleChange}
-                    fullWidth
-                    helperText={error}
-                    error={!!error}
-                  />
-                </Box>
+          {renderInputAndApply()}
+          <Grid container item xs={6}>
+            {errors?.map((error) => (
+              <Grid item xs={12}>
+                <FormHelperText error>{error}</FormHelperText>
               </Grid>
-              <Grid item>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  disabled={!value}
-                  onClick={() => {
-                    handleApply();
-                  }}
-                >
-                  {t('Apply')}
-                </Button>
-              </Grid>
-            </Grid>
-          </Box>
+            ))}
+          </Grid>
           {numberOfExcluded > 0 && (
             <Box mt={2} mb={2}>
               <GreyText>{`${numberOfExcluded} ${
@@ -144,7 +230,7 @@ export const ExcludeSection = ({
               } excluded`}</GreyText>
             </Box>
           )}
-          <Grid container item xs={4}>
+          <Grid container direction='column' item xs={6}>
             {excludedIds.map((id) => (
               <Grid item xs={12}>
                 <ExcludedItem
@@ -153,6 +239,7 @@ export const ExcludeSection = ({
                   onDelete={() => handleDelete(id)}
                   onUndo={() => handleUndo(id)}
                   isDeleted={handleCheckIfDeleted(id)}
+                  isEdit={isEdit}
                 />
               </Grid>
             ))}
