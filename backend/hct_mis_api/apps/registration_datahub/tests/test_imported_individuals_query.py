@@ -51,6 +51,7 @@ query AllImportedIndividuals {
         fullName
         givenName
         phoneNo
+        email
       }
     }
   }
@@ -64,6 +65,7 @@ query ImportedIndividual($id: ID!) {
         fullName
         givenName
         phoneNo
+        email
   }
 }
 """
@@ -89,6 +91,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "given_name": "Benjamin",
                 "family_name": "Butler",
                 "phone_no": "(953)682-4596",
+                "email": "myemail111@mail.com",
                 "birth_date": "1943-07-30",
                 "sex": "MALE",
                 "id": "47dd625a-e64e-48a9-bfcd-e970ca356bf7",
@@ -98,6 +101,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "given_name": "Robin",
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
+                "email": "myemail222@mail.com",
                 "birth_date": "1946-02-15",
                 "sex": "MALE",
                 "id": "f91eb18b-175a-495c-a49d-92af4ad554ba",
@@ -107,6 +111,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "given_name": "Timothy",
                 "family_name": "Perry",
                 "phone_no": "(548)313-1700-902",
+                "email": "myemail333@mail.com",
                 "birth_date": "1983-12-21",
                 "sex": "MALE",
                 "id": "4174aa63-4d3d-416a-bf39-09bc0e14e7c6",
@@ -116,6 +121,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "given_name": "Eric",
                 "family_name": "Torres",
                 "phone_no": "(228)231-5473",
+                "email": "myemail444@mail.com",
                 "birth_date": "1973-03-23",
                 "sex": "MALE",
                 "id": "6aada701-4639-4142-92ca-7cbf82411534",
@@ -125,6 +131,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "given_name": "Jenna",
                 "family_name": "Franklin",
                 "phone_no": "001-296-358-5428-607",
+                "email": "myemail555@mail.com",
                 "birth_date": "1969-11-29",
                 "sex": "FEMALE",
                 "id": "c38fa2a5-e518-495c-988f-c308c94dcc53",

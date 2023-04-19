@@ -75,12 +75,6 @@
             "name": "SurveyNode"
           },
           {
-            "name": "TicketComplaintDetailsNode"
-          },
-          {
-            "name": "TicketSensitiveDetailsNode"
-          },
-          {
             "name": "PaymentVerificationNode"
           },
           {
@@ -88,6 +82,12 @@
           },
           {
             "name": "PaymentVerificationSummaryNode"
+          },
+          {
+            "name": "TicketComplaintDetailsNode"
+          },
+          {
+            "name": "TicketSensitiveDetailsNode"
           },
           {
             "name": "PaymentVerificationLogEntryNode"

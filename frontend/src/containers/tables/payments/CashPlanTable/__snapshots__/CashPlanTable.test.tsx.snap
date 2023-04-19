@@ -74,7 +74,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -97,7 +97,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -120,7 +120,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -143,7 +143,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -166,7 +166,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -189,7 +189,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -212,7 +212,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -235,7 +235,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <span
                   aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                   role="button"
                   tabindex="0"
                 >
@@ -258,7 +258,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -266,7 +266,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bZQynM iXasVI"
+                  class="sc-iwsKbI keCfRQ"
                   href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmIyNTYzN2VjLWNkYmUtNDEzMC04N2JlLWU1OGIzYzcxMDdkMg=="
                 >
                   <div
@@ -280,10 +280,10 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje cjSgDD"
+                    class="sc-dnqmqq QDGnp"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -320,7 +320,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -328,7 +328,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bZQynM iXasVI"
+                  class="sc-iwsKbI keCfRQ"
                   href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmZiY2MxZDY4LWU1YzUtNGM3ZC05ZjA3LTRkZGU4NjU4NTU3Yg=="
                 >
                   <div
@@ -342,10 +342,10 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje cjSgDD"
+                    class="sc-dnqmqq QDGnp"
                     data-cy="status-container"
                   >
                     PENDING
@@ -384,7 +384,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -392,7 +392,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bZQynM iXasVI"
+                  class="sc-iwsKbI keCfRQ"
                   href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmE3NmNjNTRhLWE5YWMtNDgyNS05OTg5LTk1ZTYwMTUwODE0MA=="
                 >
                   <div
@@ -406,10 +406,10 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje cjSgDD"
+                    class="sc-dnqmqq QDGnp"
                     data-cy="status-container"
                   >
                     PENDING
@@ -448,7 +448,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -456,7 +456,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bZQynM iXasVI"
+                  class="sc-iwsKbI keCfRQ"
                   href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOjE3MWMzOWYxLTI3Y2EtNDQ2Zi05OGMyLWNlYjRiMWY2YjhjZg=="
                 >
                   <div
@@ -470,10 +470,10 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-ifAKCX iPKgts"
+                  class="sc-htoDjs koRFFa"
                 >
                   <div
-                    class="sc-EHOje cjSgDD"
+                    class="sc-dnqmqq QDGnp"
                     data-cy="status-container"
                   >
                     PENDING

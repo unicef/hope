@@ -124,6 +124,7 @@ class ImportedIndividualFactory(DjangoModelFactory):
     )
     phone_no = factory.LazyFunction(faker.phone_number)
     phone_no_alternative = ""
+    email = factory.Faker("email")
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
     household = factory.SubFactory(ImportedHouseholdFactory)
