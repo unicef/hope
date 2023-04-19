@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -32,7 +33,9 @@ class UploadRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
+        ImportedDocumentType.objects.create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+        )
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
 
     def test_upload_single_household(self) -> None:
@@ -157,7 +160,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": "",
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -216,7 +219,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -289,7 +292,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "document_number": 10,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -321,7 +324,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -353,7 +356,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -466,7 +469,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "document_number": 10,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },
@@ -553,7 +556,7 @@ class UploadRDITests(HOPEApiTestCase):
                                     "document_number": 10,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
-                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                    "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                                 }
                             ],
                         },

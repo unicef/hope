@@ -84,7 +84,7 @@ class ImportedIndividualDocument(Document):
     documents = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
-            "type": fields.KeywordField(attr="type.type", similarity="boolean"),
+            "key ": fields.KeywordField(attr="type.key", similarity="boolean"),
             "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
         }
     )
