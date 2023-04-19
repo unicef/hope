@@ -317,9 +317,6 @@ class RdiMergeTask:
                     id=registration_data_import_id,
                 )
 
-                obj_hct.status = RegistrationDataImport.MERGING
-                obj_hct.save(update_fields=["status"])
-
                 obj_hub = RegistrationDataImportDatahub.objects.get(
                     hct_id=registration_data_import_id,
                 )
