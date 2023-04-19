@@ -523,6 +523,7 @@ type ContentTypeObjectType {
   paymentverificationSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   paymentverificationsummarySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationSummaryNodeConnection!
   ticketcomplaintdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
+  ticketsensitivedetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   logEntries(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   name: String
 }
@@ -3006,8 +3007,6 @@ type PaymentRecordNode implements Node {
   visionId: String
   registrationCaId: String
   serviceProvider: ServiceProviderNode!
-  complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
-  sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   verification: PaymentVerificationNode
   unicefId: String
 }
@@ -4277,11 +4276,11 @@ type TicketComplaintDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentRecord: PaymentRecordNode
+  paymentContentType: ContentTypeObjectType
+  paymentObjectId: UUID
   household: HouseholdNode
   individual: IndividualNode
-  paymentContentType: ContentTypeObjectType
-  paymentObjectId: UUID!
+  paymentRecord: PaymentRecordAndPaymentNode
 }
 
 type TicketComplaintDetailsNodeConnection {
@@ -4545,9 +4544,11 @@ type TicketSensitiveDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentRecord: PaymentRecordNode
+  paymentContentType: ContentTypeObjectType
+  paymentObjectId: UUID
   household: HouseholdNode
   individual: IndividualNode
+  paymentRecord: PaymentRecordAndPaymentNode
 }
 
 type TicketSensitiveDetailsNodeConnection {
