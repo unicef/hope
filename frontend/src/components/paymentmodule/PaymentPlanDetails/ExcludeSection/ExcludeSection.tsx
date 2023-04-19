@@ -37,8 +37,8 @@ export const ExcludeSection = ({
   };
 
   const handleApply = (): void => {
-    const idRegex = /^HH-\d{2}-\d{4}\.\d{4}$/;
-    const ids = value.split(/,\s*|\s+/);
+    const idRegex = /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
+    const ids = value.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
     const newExcludedIds: string[] = [];
@@ -46,7 +46,7 @@ export const ExcludeSection = ({
     for (const id of ids) {
       if (!idRegex.test(id)) {
         invalidIds.push(id);
-      } else if (excludedIds.includes(id)) {
+      } else if (excludedIds.includes(id.trim())) {
         alreadyExcludedIds.push(id);
       } else {
         newExcludedIds.push(id);
