@@ -118,6 +118,7 @@ module.exports = function(proxy, allowedHost) {
           directives: {
             'default-src': ["'self'"],
             'script-src': ["'self'"],
+            'frame-ancestors': ['none'],
             'style-src': [
               "'self'",
               "'unsafe-inline'",
