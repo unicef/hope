@@ -4,9 +4,9 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -21,14 +21,13 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.grievance.constants import (
     PRIORITY_CHOICES,
     PRIORITY_LOW,
     URGENCY_CHOICES,
     URGENCY_NOT_URGENT,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
