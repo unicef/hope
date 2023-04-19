@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -12,6 +12,8 @@ from django.utils import timezone
 
 import openpyxl
 from django_countries.fields import Country
+from openpyxl.cell import Cell
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
@@ -44,9 +46,6 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
-
-if TYPE_CHECKING:
-    from xlrd.sheet import Sheet
 
 
 class RdiXlsxCreateTask(RdiBaseCreateTask):
@@ -380,7 +379,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return obj_to_create
 
-    def _create_objects(self, sheet: "Sheet", registration_data_import: RegistrationDataImport) -> None:
+    def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "tax_id_no_i_c": self._handle_document_fields,
@@ -440,18 +439,26 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "BOOL": self._handle_bool_field,
         }
 
-        sheet_title = sheet.title.lower()
+        sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
             obj = partial(ImportedHousehold, registration_data_import=registration_data_import)
         elif sheet_title == "individuals":
             obj = partial(ImportedIndividual, registration_data_import=registration_data_import)
         else:
-            raise ValueError(f"Unhandled sheet label '{sheet.title}'")
+            raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")
 
         first_row = sheet[1]
         households_to_update = []
+
+        def has_value(cell: Cell) -> bool:
+            if cell.value is None:
+                return False
+            if isinstance(cell.value, str):
+                return cell.value.strip() != ""
+            return True
+
         for row in sheet.iter_rows(min_row=3):
-            if not any([cell.value for cell in row]):
+            if not any(has_value(cell) for cell in row):
                 continue
             try:
                 obj_to_create = obj()
@@ -470,6 +477,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                         is_not_image = current_field["type"] != "IMAGE"
 
+                        cell_value = cell.value
+                        if isinstance(cell_value, str):
+                            cell_value = cell_value.strip()
+
                         is_not_required_and_empty = (
                             not current_field.get("required") and cell.value is None and is_not_image
                         )
@@ -479,7 +490,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             continue
 
                         if header == "household_id":
-                            temp_value = cell.value
+                            temp_value = cell_value
                             if isinstance(temp_value, float) and temp_value.is_integer():
                                 temp_value = int(temp_value)
                             household_id = str(temp_value)
@@ -489,7 +500,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         if header in complex_fields[sheet_title]:
                             fn_complex: Callable = complex_fields[sheet_title][header]
                             value = fn_complex(
-                                value=cell.value,
+                                value=cell_value,
                                 cell=cell,
                                 header=header,
                                 row_num=cell.row,
@@ -510,7 +521,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             )
                             and header != "household_id"
                         ):
-                            value = self._cast_value(cell.value, header)
+                            value = self._cast_value(cell_value, header)
                             if value in (None, ""):
                                 continue
 
@@ -526,12 +537,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 value,
                             )
                         elif header in self.FLEX_FIELDS[sheet_title]:
-                            value = self._cast_value(cell.value, header)
+                            value = self._cast_value(cell_value, header)
                             type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
                             if type_name in complex_types:
                                 fn_flex: Callable = complex_types[type_name]
                                 value = fn_flex(
-                                    value=cell.value,
+                                    value=cell_value,
                                     cell=cell,
                                     header=header,
                                     is_flex_field=True,
@@ -579,7 +590,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             id=registration_data_import_id,
         )
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
+        registration_data_import.status = RegistrationDataImport.IMPORTING
         registration_data_import.save()
+
         import_data = ImportData.objects.get(id=import_data_id)
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)

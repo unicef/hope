@@ -24,12 +24,19 @@ export const StyledPaper = styled(Paper)`
 `;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function filtersToVariables(filters) {
-  const variables: { module?: string; search?: string } = {};
+  const variables: { module?: string; search?: string, userId?: string } = {};
+  if (filters.userId !== '') {
+    variables.userId = filters.userId;
+  } else {
+    variables.userId = undefined;
+  }
+
   if (filters.module !== '') {
     variables.module = filters.module;
   } else {
     variables.module = undefined;
   }
+
   if (
     filters.search !== '' &&
     filters.search !== null &&
@@ -42,7 +49,7 @@ function filtersToVariables(filters) {
   return variables;
 }
 
-const initialFilter = { search: '', module: '' };
+const initialFilter = { search: '', module: '', userId: '' };
 
 export const ActivityLogPage = (): React.ReactElement => {
   const { t } = useTranslation();

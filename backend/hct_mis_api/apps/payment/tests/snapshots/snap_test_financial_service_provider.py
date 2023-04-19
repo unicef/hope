@@ -13,80 +13,162 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
             'edges': [
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
                 },
                 {
                     'node': {
-                        'financialserviceproviderxlsxreportSet': {
+                        'communicationChannel': 'XLSX',
+                        'deliveryMechanisms': [
+                            'Cash'
+                        ],
+                        'distributionLimit': 9999.0,
+                        'xlsxTemplates': {
                             'edges': [
-                            ]
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'financialserviceproviderxlsxreportSet': {
-                            'edges': [
+                                {
+                                    'node': {
+                                        'name': 'TestName123'
+                                    }
+                                }
                             ]
                         }
                     }
@@ -99,8 +181,8 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
 snapshots['TestAllFinancialServiceProviders::test_fetch_count_financial_service_providers 1'] = {
     'data': {
         'allFinancialServiceProviders': {
-            'edgeCount': 10,
-            'totalCount': 10
+            'edgeCount': 9,
+            'totalCount': 9
         }
     }
 }

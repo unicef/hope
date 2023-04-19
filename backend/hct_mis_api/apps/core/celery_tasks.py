@@ -19,11 +19,13 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_TAX_ID,
     MALE,
+    ROLE_PRIMARY,
     BankAccountInfo,
     Document,
     DocumentType,
     Household,
     Individual,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -53,7 +55,7 @@ class transaction_celery_task:  # used as decorator
         return task_func
 
 
-@app.task(bind=True, default_retry_delay=60)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
@@ -79,10 +81,10 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
         raise
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: str) -> None:
+def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -93,12 +95,12 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id: 
         upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
-def create_target_population_task(storage_id: str, program_id: str, tp_name: str) -> None:
+def create_target_population_task(self: Any, storage_id: str, program_id: str, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
     file_path = None
     program = Program.objects.get(id=program_id)
@@ -173,10 +175,17 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
                             family_id=family_id,
                             storage_obj=storage_obj,
                             collect_individual_data=COLLECT_TYPE_SIZE_ONLY,
+                            country=country,
                         )
 
                         individual.household = household
                         individual.save(update_fields=("household",))
+
+                        IndividualRoleInHousehold.objects.create(
+                            role=ROLE_PRIMARY,
+                            individual=individual,
+                            household=household,
+                        )
 
                         families[family_id] = household.id
 
@@ -233,10 +242,10 @@ def create_target_population_task(storage_id: str, program_id: str, tp_name: str
 
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
-    except Exception:
+    except Exception as e:
         storage_obj.status = StorageFile.STATUS_FAILED
         storage_obj.save(update_fields=["status"])
-        raise
+        raise self.retry(exc=e)
     finally:
         if file_path:
             os.remove(file_path)
