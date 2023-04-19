@@ -180,7 +180,7 @@ export const ExcludeSection = ({
                   value={value}
                   onChange={handleChange}
                   fullWidth
-                  error={errors.length > 0 && value !== ''}
+                  error={errors.length > 0}
                 />
               </Box>
             </Grid>
