@@ -71,7 +71,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -94,7 +94,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -117,7 +117,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -140,7 +140,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -163,7 +163,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -186,7 +186,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
                     role="button"
                     tabindex="0"
                   >
@@ -209,14 +209,14 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-EHOje fJINSq"
+                    class="sc-dnqmqq jOPVUj"
                     href="/afghanistan/accountability/feedback/RmVlZGJhY2tOb2RlOmNhNzNkZjEyLTNiZTctNDM4Yy04OWUyLWMzYTAyZDIzZDcxMQ=="
                   >
                     MSG-22-0001
@@ -231,7 +231,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-EHOje fJINSq"
+                    class="sc-dnqmqq jOPVUj"
                     href="/afghanistan/population/households/SG91c2Vob2xkTm9kZTozZGIyNzI5ZS03MjU5LTRiMTMtODNiMi0zMDkwZDg0N2U1Y2M="
                   >
                     HH-20-0000.0002
@@ -241,7 +241,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render with data 1`] =
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-EHOje fJINSq"
+                    class="sc-dnqmqq jOPVUj"
                     href="/afghanistan/grievance-and-feedback/R3JpZXZhbmNlVGlja2V0Tm9kZTo3YzE4NDgwOC1hMTg3LTQ0YmUtYmVjYi1lYmFjZjA2MGNlMGQ="
                   >
                     GRV-0000002
