@@ -9,7 +9,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-12 sc-eNQAEJ eAIuLz"
+        class="MuiBox-root MuiBox-root-12 sc-iAyFgw eivOuT"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -89,7 +89,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-eNQAEJ eAIuLz"
+        class="MuiBox-root MuiBox-root-1 sc-iAyFgw eivOuT"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -161,7 +161,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -184,7 +184,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -207,7 +207,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -230,7 +230,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -253,7 +253,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -276,7 +276,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -299,7 +299,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -322,7 +322,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -345,7 +345,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -368,7 +368,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gqjmRU dUmvUe"
                     role="button"
                     tabindex="0"
                   >
@@ -391,7 +391,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
+                class="MuiTableRow-root sc-fjdhpX gsvsfq MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
@@ -437,7 +437,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                   data-cy="delivered-quantity-cell"
                 >
                   <div
-                    class="sc-jTzLTM liqwSL"
+                    class="sc-kAzzGY bNxIeM"
                   >
                     UNSUCCESSFUL
                   </div>
@@ -447,7 +447,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 />
               </tr>
               <tr
-                class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
+                class="MuiTableRow-root sc-fjdhpX gsvsfq MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
@@ -500,7 +500,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 >
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root sc-cSHVUG gdxzAW"
+                    class="MuiSvgIcon-root sc-kGXeez hJMCz"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >

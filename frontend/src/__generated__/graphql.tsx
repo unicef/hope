@@ -875,6 +875,8 @@ export type ContentTypeObjectType = {
   paymentverificationplanSet: PaymentVerificationPlanNodeConnection,
   paymentverificationSet: PaymentVerificationNodeConnection,
   paymentverificationsummarySet: PaymentVerificationSummaryNodeConnection,
+  ticketcomplaintdetailsSet: TicketComplaintDetailsNodeConnection,
+  ticketsensitivedetailsSet: TicketSensitiveDetailsNodeConnection,
   logEntries: PaymentVerificationLogEntryNodeConnection,
   name?: Maybe<Scalars['String']>,
 };
@@ -899,6 +901,24 @@ export type ContentTypeObjectTypePaymentverificationSetArgs = {
 
 
 export type ContentTypeObjectTypePaymentverificationsummarySetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ContentTypeObjectTypeTicketcomplaintdetailsSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ContentTypeObjectTypeTicketsensitivedetailsSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2788,6 +2808,7 @@ export type ImportedIndividualNode = Node & {
   phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
+  email?: Maybe<Scalars['String']>,
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: ImportedIndividualDisability,
@@ -2986,6 +3007,7 @@ export type IndividualNode = Node & {
   phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternative: Scalars['String'],
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
+  email: Scalars['String'],
   relationship?: Maybe<IndividualRelationship>,
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -4412,6 +4434,7 @@ export type PaymentRecordAndPaymentNode = {
   deliveredQuantityUsd?: Maybe<Scalars['Float']>,
   currency?: Maybe<Scalars['String']>,
   deliveryDate?: Maybe<Scalars['String']>,
+  verification?: Maybe<PaymentVerificationNode>,
 };
 
 export enum PaymentRecordDeliveryType {
@@ -4468,28 +4491,8 @@ export type PaymentRecordNode = Node & {
   visionId?: Maybe<Scalars['String']>,
   registrationCaId?: Maybe<Scalars['String']>,
   serviceProvider: ServiceProviderNode,
-  complaintTicketDetails: TicketComplaintDetailsNodeConnection,
-  sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
   verification?: Maybe<PaymentVerificationNode>,
   unicefId?: Maybe<Scalars['String']>,
-};
-
-
-export type PaymentRecordNodeComplaintTicketDetailsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type PaymentRecordNodeSensitiveTicketDetailsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 export type PaymentRecordNodeConnection = {
@@ -7187,9 +7190,11 @@ export type TicketComplaintDetailsNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  paymentRecord?: Maybe<PaymentRecordNode>,
+  paymentContentType?: Maybe<ContentTypeObjectType>,
+  paymentObjectId?: Maybe<Scalars['UUID']>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
+  paymentRecord?: Maybe<PaymentRecordAndPaymentNode>,
 };
 
 export type TicketComplaintDetailsNodeConnection = {
@@ -7496,9 +7501,11 @@ export type TicketSensitiveDetailsNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  paymentRecord?: Maybe<PaymentRecordNode>,
+  paymentContentType?: Maybe<ContentTypeObjectType>,
+  paymentObjectId?: Maybe<Scalars['UUID']>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
+  paymentRecord?: Maybe<PaymentRecordAndPaymentNode>,
 };
 
 export type TicketSensitiveDetailsNodeConnection = {
@@ -8327,7 +8334,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'email' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8374,7 +8381,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8533,7 +8540,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'preferredLanguage'>
+  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid' | 'preferredLanguage' | 'email'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -11610,6 +11617,9 @@ export type AllPaymentRecordsAndPaymentsQuery = (
         & { parent: Maybe<(
           { __typename?: 'CashPlanAndPaymentPlanNode' }
           & Pick<CashPlanAndPaymentPlanNode, 'id' | 'programmeName'>
+        )>, verification: Maybe<(
+          { __typename?: 'PaymentVerificationNode' }
+          & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
         )> }
       )> }
     )>>> }
@@ -13394,6 +13404,7 @@ export const IndividualMinimalFragmentDoc = gql`
   maritalStatus
   phoneNo
   phoneNoValid
+  email
   sanctionListPossibleMatch
   sanctionListConfirmedMatch
   deduplicationGoldenRecordStatus
@@ -13571,6 +13582,7 @@ export const IndividualDetailedFragmentDoc = gql`
   whoAnswersPhone
   phoneNoAlternative
   phoneNoAlternativeValid
+  email
   hearingDisability
   observedDisability
   individualId
@@ -13891,6 +13903,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   phoneNoValid
   phoneNoAlternativeValid
   preferredLanguage
+  email
 }
     ${ImportedIndividualMinimalFragmentDoc}`;
 export const TargetPopulationMinimalFragmentDoc = gql`
@@ -21603,6 +21616,10 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
           id
           programmeName
         }
+        verification {
+          id
+          receivedAmount
+        }
       }
     }
     totalCount
@@ -26257,12 +26274,6 @@ export type ResolversTypes = {
   SurveyCategory: SurveyCategory,
   SurveySamplingType: SurveySamplingType,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
-  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<TicketComplaintDetailsNodeEdge>,
-  TicketComplaintDetailsNode: ResolverTypeWrapper<TicketComplaintDetailsNode>,
-  TicketSensitiveDetailsNodeConnection: ResolverTypeWrapper<TicketSensitiveDetailsNodeConnection>,
-  TicketSensitiveDetailsNodeEdge: ResolverTypeWrapper<TicketSensitiveDetailsNodeEdge>,
-  TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>,
   PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
   PaymentVerificationPlanNode: ResolverTypeWrapper<PaymentVerificationPlanNode>,
   PaymentVerificationPlanStatus: PaymentVerificationPlanStatus,
@@ -26275,6 +26286,14 @@ export type ResolversTypes = {
   PaymentVerificationSummaryNodeEdge: ResolverTypeWrapper<PaymentVerificationSummaryNodeEdge>,
   PaymentVerificationSummaryNode: ResolverTypeWrapper<PaymentVerificationSummaryNode>,
   PaymentVerificationSummaryStatus: PaymentVerificationSummaryStatus,
+  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
+  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<TicketComplaintDetailsNodeEdge>,
+  TicketComplaintDetailsNode: ResolverTypeWrapper<TicketComplaintDetailsNode>,
+  PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>,
+  CashPlanAndPaymentPlanNode: ResolverTypeWrapper<CashPlanAndPaymentPlanNode>,
+  TicketSensitiveDetailsNodeConnection: ResolverTypeWrapper<TicketSensitiveDetailsNodeConnection>,
+  TicketSensitiveDetailsNodeEdge: ResolverTypeWrapper<TicketSensitiveDetailsNodeEdge>,
+  TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>,
   PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
   PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
   PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
@@ -26369,8 +26388,6 @@ export type ResolversTypes = {
   GrievanceDocumentNodeConnection: ResolverTypeWrapper<GrievanceDocumentNodeConnection>,
   GrievanceDocumentNodeEdge: ResolverTypeWrapper<GrievanceDocumentNodeEdge>,
   GrievanceDocumentNode: ResolverTypeWrapper<GrievanceDocumentNode>,
-  PaymentRecordAndPaymentNode: ResolverTypeWrapper<PaymentRecordAndPaymentNode>,
-  CashPlanAndPaymentPlanNode: ResolverTypeWrapper<CashPlanAndPaymentPlanNode>,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
@@ -26755,12 +26772,6 @@ export type ResolversParentTypes = {
   SurveyCategory: SurveyCategory,
   SurveySamplingType: SurveySamplingType,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
-  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge,
-  TicketComplaintDetailsNode: TicketComplaintDetailsNode,
-  TicketSensitiveDetailsNodeConnection: TicketSensitiveDetailsNodeConnection,
-  TicketSensitiveDetailsNodeEdge: TicketSensitiveDetailsNodeEdge,
-  TicketSensitiveDetailsNode: TicketSensitiveDetailsNode,
   PaymentVerificationNode: PaymentVerificationNode,
   PaymentVerificationPlanNode: PaymentVerificationPlanNode,
   PaymentVerificationPlanStatus: PaymentVerificationPlanStatus,
@@ -26773,6 +26784,14 @@ export type ResolversParentTypes = {
   PaymentVerificationSummaryNodeEdge: PaymentVerificationSummaryNodeEdge,
   PaymentVerificationSummaryNode: PaymentVerificationSummaryNode,
   PaymentVerificationSummaryStatus: PaymentVerificationSummaryStatus,
+  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
+  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge,
+  TicketComplaintDetailsNode: TicketComplaintDetailsNode,
+  PaymentRecordAndPaymentNode: PaymentRecordAndPaymentNode,
+  CashPlanAndPaymentPlanNode: CashPlanAndPaymentPlanNode,
+  TicketSensitiveDetailsNodeConnection: TicketSensitiveDetailsNodeConnection,
+  TicketSensitiveDetailsNodeEdge: TicketSensitiveDetailsNodeEdge,
+  TicketSensitiveDetailsNode: TicketSensitiveDetailsNode,
   PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
   PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
   PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
@@ -26867,8 +26886,6 @@ export type ResolversParentTypes = {
   GrievanceDocumentNodeConnection: GrievanceDocumentNodeConnection,
   GrievanceDocumentNodeEdge: GrievanceDocumentNodeEdge,
   GrievanceDocumentNode: GrievanceDocumentNode,
-  PaymentRecordAndPaymentNode: PaymentRecordAndPaymentNode,
-  CashPlanAndPaymentPlanNode: CashPlanAndPaymentPlanNode,
   GeoJSON: Scalars['GeoJSON'],
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
@@ -27562,6 +27579,8 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
   paymentverificationplanSet?: Resolver<ResolversTypes['PaymentVerificationPlanNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationplanSetArgs>,
   paymentverificationSet?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationSetArgs>,
   paymentverificationsummarySet?: Resolver<ResolversTypes['PaymentVerificationSummaryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationsummarySetArgs>,
+  ticketcomplaintdetailsSet?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeTicketcomplaintdetailsSetArgs>,
+  ticketsensitivedetailsSet?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeTicketsensitivedetailsSetArgs>,
   logEntries?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -28426,6 +28445,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
@@ -28539,6 +28559,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
@@ -28824,7 +28845,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'RegistrationDataImportNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'RegistrationDataImportNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -29003,6 +29024,7 @@ export type PaymentRecordAndPaymentNodeResolvers<ContextType = any, ParentType e
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   deliveryDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
 };
 
 export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
@@ -29037,8 +29059,6 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
-  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeComplaintTicketDetailsArgs>,
-  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeSensitiveTicketDetailsArgs>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -30032,9 +30052,11 @@ export type TicketComplaintDetailsNodeResolvers<ContextType = any, ParentType ex
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  paymentContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  paymentObjectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordAndPaymentNode']>, ParentType, ContextType>,
 };
 
 export type TicketComplaintDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeConnection'] = ResolversParentTypes['TicketComplaintDetailsNodeConnection']> = {
@@ -30279,9 +30301,11 @@ export type TicketSensitiveDetailsNodeResolvers<ContextType = any, ParentType ex
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  paymentContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  paymentObjectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordAndPaymentNode']>, ParentType, ContextType>,
 };
 
 export type TicketSensitiveDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeConnection'] = ResolversParentTypes['TicketSensitiveDetailsNodeConnection']> = {

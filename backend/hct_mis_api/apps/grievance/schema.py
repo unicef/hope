@@ -199,19 +199,29 @@ class TicketNoteNode(DjangoObjectType):
 
 
 class TicketComplaintDetailsNode(DjangoObjectType):
+    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+
     class Meta:
         model = TicketComplaintDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    def resolve_payment_record(self, info: Any) -> Optional[Any]:
+        return getattr(self, "payment_record", None)
+
 
 class TicketSensitiveDetailsNode(DjangoObjectType):
+    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+
     class Meta:
         model = TicketSensitiveDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_payment_record(self, info: Any) -> Optional[Any]:
+        return getattr(self, "payment_record", None)
 
 
 class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
