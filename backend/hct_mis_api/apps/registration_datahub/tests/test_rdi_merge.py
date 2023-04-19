@@ -24,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
-    databases = "__all__"
+    databases = {"default", "registration_datahub"}
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
@@ -76,6 +76,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_1@com",
             },
             {
                 "full_name": "Robin Ford",
@@ -86,6 +87,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_2@com",
             },
             {
                 "full_name": "Timothy Perry",
@@ -96,6 +98,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_3@com",
             },
             {
                 "full_name": "Eric Torres",
@@ -106,6 +109,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_4@com",
             },
             {
                 "full_name": "Baz Bush",
@@ -116,6 +120,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "fake_email_5@com",
             },
             {
                 "full_name": "Liz Female",
@@ -130,6 +135,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
                 "household": imported_household,
+                "email": "fake_email_6@com",
             },
             {
                 "full_name": "Jenna Franklin",
@@ -144,6 +150,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "phone_no_valid": None,
                 "phone_no_alternative_valid": None,
                 "household": imported_household,
+                "email": "fake_email_7@com",
             },
             {
                 "full_name": "Bob Jackson",
@@ -154,6 +161,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "sex": "MALE",
                 "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
+                "email": "",
             },
         ]
 
@@ -168,6 +176,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             admin_area_title=self.area4.name,
             admin4=self.area4.p_code,
             admin4_title=self.area4.name,
+            zip_code="00-123",
         )
         self.set_imported_individuals(imported_household)
 
@@ -189,6 +198,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
         self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
 
+        self.assertEqual(Individual.objects.filter(full_name="Baz Bush").first().email, "fake_email_5@com")
+        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().email, "fake_email_1@com")
+        self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
+
         household_data = model_to_dict(
             households[0],
             (
@@ -209,6 +222,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "admin2",
                 "admin3",
                 "admin4",
+                "zip_code",
             ),
         )
 
@@ -230,6 +244,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "admin2": self.area2.id,
             "admin3": self.area3.id,
             "admin4": self.area4.id,
+            "zip_code": "00-123",
         }
         self.assertEqual(household_data, expected)
 

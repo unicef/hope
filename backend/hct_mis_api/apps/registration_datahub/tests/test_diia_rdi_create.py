@@ -63,9 +63,11 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
             individual.documents.filter(document_number="123412341234999222").first().type.type,
             IDENTIFICATION_TYPE_TAX_ID,
         )
+        self.assertEqual(individual.email, "fake111test@email.com")
 
         individual_2 = individuals.get(full_name="Sam Bautista")
         self.assertEqual(str(individual_2.birth_date), "2009-06-16")
+        self.assertEqual(individual_2.email, "fake111sam_bautista@email.com")
 
         individuals_obj_data = model_to_dict(
             individual,

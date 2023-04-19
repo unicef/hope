@@ -522,6 +522,7 @@ type ContentTypeObjectType {
   paymentverificationplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
   paymentverificationSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   paymentverificationsummarySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationSummaryNodeConnection!
+  ticketcomplaintdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   logEntries(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   name: String
 }
@@ -2032,6 +2033,7 @@ type ImportedIndividualNode implements Node {
   phoneNoValid: Boolean
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
+  email: String
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: ImportedIndividualDisability!
@@ -2187,6 +2189,7 @@ type IndividualNode implements Node {
   phoneNoValid: Boolean
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
+  email: String!
   relationship: IndividualRelationship
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
@@ -2947,6 +2950,7 @@ type PaymentRecordAndPaymentNode {
   deliveredQuantityUsd: Float
   currency: String
   deliveryDate: String
+  verification: PaymentVerificationNode
 }
 
 enum PaymentRecordDeliveryType {
@@ -4276,6 +4280,8 @@ type TicketComplaintDetailsNode implements Node {
   paymentRecord: PaymentRecordNode
   household: HouseholdNode
   individual: IndividualNode
+  paymentContentType: ContentTypeObjectType
+  paymentObjectId: UUID!
 }
 
 type TicketComplaintDetailsNodeConnection {
