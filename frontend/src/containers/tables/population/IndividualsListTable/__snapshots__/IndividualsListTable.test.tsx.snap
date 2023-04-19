@@ -81,7 +81,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   />
                 </th>
                 <th
@@ -90,7 +90,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Individual ID
                   </span>
@@ -101,7 +101,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Individual
                   </span>
@@ -112,7 +112,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Household ID
                   </span>
@@ -123,7 +123,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Relationship to HoH
                   </span>
@@ -134,7 +134,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Age
                   </span>
@@ -145,7 +145,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Gender
                   </span>
@@ -156,7 +156,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   scope="col"
                 >
                   <span
-                    class="sc-bxivhb fYYxJD"
+                    class="sc-gzVnrw dYSoUE"
                   >
                     Administrative Level 2
                   </span>
@@ -167,7 +167,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-bZQynM IAXmQ MuiTableRow-hover"
+                class="MuiTableRow-root sc-iwsKbI jVTAHI MuiTableRow-hover"
                 data-cy="individual-table-row"
                 role="checkbox"
               >
@@ -179,7 +179,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   >
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root sc-gzVnrw ehdClQ"
+                      class="MuiSvgIcon-root sc-gZMcBi ehqlMD"
                       confirmed="0"
                       focusable="false"
                       title="Possible Duplicate"
@@ -201,7 +201,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-ifAKCX hQSvGu"
+                    class="sc-htoDjs fzdMAW"
                     href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2VkZDRiNDktNTRlMC00NDA4LThmZDItMTAzMGYwNWE3YTZh"
                   >
                     IND-74-0000.0006

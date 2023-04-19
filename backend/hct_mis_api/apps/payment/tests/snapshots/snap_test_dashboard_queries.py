@@ -13,8 +13,8 @@ snapshots['TestDashboardQueries::test_charts_0_chartVolumeByDeliveryMechanism 1'
             'datasets': [
                 {
                     'data': [
-                        80.0,
-                        40.0
+                        480.0,
+                        240.0
                     ]
                 }
             ],
@@ -48,7 +48,7 @@ snapshots['TestDashboardQueries::test_charts_1_chartPayment 1'] = {
 snapshots['TestDashboardQueries::test_sections_0_sectionTotalTransferred 1'] = {
     'data': {
         'sectionTotalTransferred': {
-            'total': 120.0
+            'total': 720.0
         }
     }
 }
@@ -59,17 +59,17 @@ snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administra
             'data': [
                 {
                     'admin2': 'afghanistan city 1',
-                    'totalCashTransferred': 20.0,
+                    'totalCashTransferred': 220.0,
                     'totalHouseholds': 2
                 },
                 {
                     'admin2': 'afghanistan city 2',
-                    'totalCashTransferred': 40.0,
+                    'totalCashTransferred': 240.0,
                     'totalHouseholds': 2
                 },
                 {
                     'admin2': 'afghanistan city 3',
-                    'totalCashTransferred': 60.0,
+                    'totalCashTransferred': 260.0,
                     'totalHouseholds': 2
                 }
             ]

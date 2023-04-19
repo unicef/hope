@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict
+from typing import Any, Dict
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -27,10 +27,10 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def get_sync_run_rapid_pro_task() -> None:
+def get_sync_run_rapid_pro_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
             CheckRapidProVerificationTask,
@@ -39,12 +39,12 @@ def get_sync_run_rapid_pro_task() -> None:
         CheckRapidProVerificationTask().execute()
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
-def fsp_generate_xlsx_report_task(fsp_id: str) -> None:
+def fsp_generate_xlsx_report_task(self: Any, fsp_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import FinancialServiceProvider
         from hct_mis_api.apps.payment.services.generate_fsp_xlsx_service import (
@@ -56,13 +56,13 @@ def fsp_generate_xlsx_report_task(fsp_id: str) -> None:
         service.generate_report()
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_verification_plan_xlsx(payment_verification_plan_id: str, user_id: str) -> None:
+def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_id: str, user_id: str) -> None:
     try:
         user = get_user_model().objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
@@ -80,13 +80,13 @@ def create_payment_verification_plan_xlsx(payment_verification_plan_id: str, use
             service.send_email(user)
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
+def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Verification report XLSX files"""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
@@ -101,13 +101,13 @@ def remove_old_cash_plan_payment_verification_xls(past_days: int = 30) -> None:
 
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx(payment_plan_id: str, user_id: str) -> None:
+def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
@@ -130,21 +130,21 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id: str, user_id: str) ->
 
                     transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
 
-            except Exception:
+            except Exception as e:
                 payment_plan.background_action_status_xlsx_export_error()
                 payment_plan.save()
                 logger.exception("Create Payment Plan Generate XLSX Error")
-                raise
+                raise self.retry(exc=e)
 
-    except Exception:
+    except Exception as e:
         logger.exception("Create Payment Plan List XLSX Error")
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: str, user_id: str) -> None:
+def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: str, user_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
@@ -167,21 +167,21 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id: str, user_id:
 
                     transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
 
-            except Exception:
+            except Exception as e:
                 payment_plan.background_action_status_xlsx_export_error()
                 payment_plan.save()
                 logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
-                raise
+                raise self.retry(exc=e)
 
-    except Exception:
+    except Exception as e:
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx(payment_plan_id: str) -> None:
+def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
@@ -208,20 +208,21 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id: str) -> None:
                     payment_plan.remove_export_file()
                     payment_plan.save()
                     payment_plan.update_money_fields()
-            except Exception:
+            except Exception as e:
                 logger.exception("PaymentPlan Error import from xlsx")
                 payment_plan.background_action_status_xlsx_import_error()
                 payment_plan.save()
+                raise self.retry(exc=e)
 
-    except Exception:
+    except Exception as e:
         logger.exception("PaymentPlan Unexpected Error import from xlsx")
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: str, file_pk: str) -> None:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str, file_pk: str) -> None:
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -244,14 +245,15 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id: str, fil
 
                     payment_plan.save()
 
-        except Exception:
+        except Exception as e:
             logger.exception("Unexpected error during xlsx per fsp import")
             payment_plan.background_action_status_xlsx_import_error()
             payment_plan.save()
+            raise self.retry(exc=e)
 
     except Exception as e:
         logger.exception(e)
-        raise
+        raise self.retry(exc=e)
 
 
 @app.task
@@ -310,10 +312,10 @@ def create_cash_plan_reconciliation_xlsx(
         raise
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_engine_rule(payment_plan_id: str, engine_rule_id: str) -> None:
+def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
@@ -352,17 +354,17 @@ def payment_plan_apply_engine_rule(payment_plan_id: str, engine_rule_id: str) ->
                 payment_plan.save()
                 payment_plan.update_money_fields()
 
-    except Exception:
+    except Exception as e:
         logger.exception("PaymentPlan Run Engine Rule Error")
         payment_plan.background_action_status_steficon_error()
         payment_plan.save()
-        raise
+        raise self.retry(exc=e)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def remove_old_payment_plan_payment_list_xlsx(past_days: int = 30) -> None:
+def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
     """Remove old Payment Plan Payment List XLSX files"""
     try:
         from hct_mis_api.apps.core.models import FileTemp
@@ -377,6 +379,31 @@ def remove_old_payment_plan_payment_list_xlsx(past_days: int = 30) -> None:
 
             logger.info(f"Removed old FileTemp: {file_qs.count()}")
 
-    except Exception:
+    except Exception as e:
         logger.exception("Remove old Payment Plan Payment List Error")
-        raise
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.services.payment_plan_services import (
+            PaymentPlanService,
+        )
+
+        payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
+
+        PaymentPlanService.create_payments(payment_plan)
+        payment_plan.refresh_from_db()
+        payment_plan.update_population_count_fields()
+        payment_plan.update_money_fields()
+        payment_plan.status_open()
+        payment_plan.save(update_fields=("status",))
+    except Exception as e:
+        logger.exception("Prepare Payment Plan Error")
+        raise self.retry(exc=e) from e
+
+    return True

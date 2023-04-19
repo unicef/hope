@@ -25,6 +25,9 @@ import { resourcesItems } from './menuItems';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
+  if (window.location.hostname === 'localhost') {
+    return '#FF6600';
+  }
   if (url.includes('trn')) {
     return '#BF360C';
   }
@@ -57,7 +60,8 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     opacity: 0.54,
   },
   drawerPaper: {
-    position: 'relative',
+    height: '100vh',
+    position: 'sticky',
     whiteSpace: 'nowrap',
     width: theme.drawer.width,
     transition: theme.transitions.create('width', {

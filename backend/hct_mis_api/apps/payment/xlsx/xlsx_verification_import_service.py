@@ -16,7 +16,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
 
 
 class XlsxVerificationImportService(XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
+    COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
     def __init__(self, cashplan_payment_verification: PaymentVerificationPlan, file: io.BytesIO) -> None:
         self.file = file

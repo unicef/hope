@@ -55,6 +55,7 @@ class RdiMergeTask:
         "consent_sharing",
         "residence_status",
         "country_origin",
+        "zip_code",
         "size",
         "address",
         "country",
@@ -114,6 +115,7 @@ class RdiMergeTask:
         "marital_status",
         "phone_no",
         "phone_no_alternative",
+        "email",
         "disability",
         "flex_fields",
         "first_registration_date",
@@ -313,6 +315,9 @@ class RdiMergeTask:
                 obj_hct = RegistrationDataImport.objects.get(
                     id=registration_data_import_id,
                 )
+
+                obj_hct.status = RegistrationDataImport.MERGING
+                obj_hct.save(update_fields=["status"])
 
                 obj_hub = RegistrationDataImportDatahub.objects.get(
                     hct_id=registration_data_import_id,

@@ -54,6 +54,7 @@ class TestExtractRecords(TestCase):
                     "bank_account_number": "879789789",
                     "debit_card_number_h_f": 9978967867666,
                     "debit_card_number": "87987979789789",
+                    "email": "fake@email.com",
                 }
             ],
         }
@@ -89,6 +90,7 @@ class TestExtractRecords(TestCase):
             [
                 {
                     "q1": "",
+                    "email": "fake@email.com",
                     "role_i_c": "y",
                     "birth_date": "1983-09-24",
                     "gender_i_c": "female",

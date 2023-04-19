@@ -1,5 +1,8 @@
 import { Box } from '@material-ui/core';
-import { KeyboardDatePicker, KeyboardDatePickerProps } from '@material-ui/pickers';
+import {
+  KeyboardDatePicker,
+  KeyboardDatePickerProps,
+} from '@material-ui/pickers';
 import React from 'react';
 import { FieldLabel } from './FieldLabel';
 
@@ -21,7 +24,11 @@ export function DatePickerFilter({
         inputVariant='outlined'
         margin='dense'
         autoOk
-        onChange={onChange}
+        onChange={(date) => {
+          if (date?.valueOf()) {
+            onChange(date);
+          }
+        }}
         value={value}
         format='YYYY-MM-DD'
         InputAdornmentProps={{ position: 'end' }}
