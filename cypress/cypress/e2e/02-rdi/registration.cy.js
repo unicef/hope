@@ -8,26 +8,22 @@ context("RDI", () => {
   it("RDI visibility", () => {
     cy.get('[data-cy="button-import"]').should('be.visible')
     cy.get('[data-cy="table-title"]').should('be.visible')
-    cy.get('.sc-keFjpB > .MuiInputBase-root > .MuiInputBase-input').should('be.visible')
-    cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').should('be.visible')
-    cy.get('div.MuiFormControl-fullWidth').should('be.visible')
-    cy.get('[data-mui-test="SelectDisplay"]').should('be.visible')
+    cy.get('[data-cy="filter-search"]').should('be.visible')
+    cy.get('[data-cy="filter-import-date"]').should('be.visible')
+    cy.get('[data-cy="filter-status"]').should('be.visible')
   })
-
   it("Download Template", () => {
     cy.get("button > span").contains("IMPORT").click({ force: true });
     cy.window().document().then(function (doc) {
       doc.addEventListener('click', () => {
         setTimeout(function () { doc.location.reload() }, 5000)
       })
-      cy.get('span.MuiButton-label').contains('DOWNLOAD TEMPLATE').click()
+      cy.get('span').contains('DOWNLOAD TEMPLATE').click()
     })
     cy.verifyDownload('registration_data_import_template.xlsx');
   })
-
   it("Registration Data Import with excel and verfify", () => {
     uploadRDIFile();
-    verifyUpload()
     return;
   })
   it("Registration Data Import and merge the data and verify merge file", () => {
@@ -36,55 +32,68 @@ context("RDI", () => {
     verifyMergedData()
     return;
   })
-
   it("Registration Data Import and Refuse the import", () => {
     uploadRDIFile();
-    verifyUpload()
     refuseImport()
-    verfifyRefuseImport()
     return;
   })
   it('Merged View ticket', () => {
     uploadRDIFile();
     mergeRDIFile()
-    cy.get('div.sc-kEYyzF').click({ force: true })
-    cy.reload()
-    cy.get('tbody tr').eq(0).each(($tablerows) => {
-      cy.wrap($tablerows).within(() => {
-        cy.get('td').eq(1).each(($data) => {
-          if ($data.text() == 'MERGED')
-            cy.contains('MERGED').click({ force: true })
-        })
-      })
-    })
-    cy.get('a span.MuiButton-label').click({ force: true })
+    cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
+    cy.get('span').contains('View Tickets').click({ force: true })
     cy.get('h5').should('contain', 'Grievance and Feedback')
   })
-
-  it('registration Data Import Search by Import Titile', () => {
-    cy.get('.sc-keFjpB > .MuiInputBase-root > .MuiInputBase-input').type('Test import 2023-04-14T14:00:03.895Z')
+  it('RDI- Searches by import title', () => {
+    cy.createExcel()
+    cy.get("h5").contains("Registration Data Import");
+    cy.get("span").contains("IMPORT").click({ force: true });
+    cy.get("h2").contains("Select File to Import").click();
+    cy.get('[data-cy="import-type-select"]').click();
+    cy.get('[data-cy="excel-menu-item"]').click();
+    cy.get('[data-cy="input-name"]').type(
+      "Test import ".concat(new Date().toISOString())
+    );
+    const name = "Test import ".concat(new Date().toISOString())
+    cy.uniqueSeed().then((seed) => {
+      const fileName = `rdi_import_1_hh_1_ind_seed_${seed}.xlsx`;
+      cy.fixture(fileName, "base64").then((fileContent) => {
+        cy.get('[data-cy="file-input"]').attachFile({
+          fileContent,
+          fileName,
+          mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          encoding: "base64",
+        });
+      });
+    });
+    cy.wait(5000)
+    cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+    cy.get("span").contains("Registration Data Import").click();
+    cy.reload()
+    cy.get('[data-cy="filter-search"]').type(name)
     cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').eq(0).each(($data) => {
-          expect($data.text()).to.contain('Test import')
+          expect($data.text()).to.contain(name)
         })
       })
     })
   })
-
-  it('registration Data Import Search by Date', () => {
-    cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').type('2023-04-14')
+  it('RDI- Searches by Date', () => {
+    const d = new Date()
+    cy.get('[data-cy="filter-import-date"]').type(d.toLocaleDateString('en-CA') + '{enter}')
     cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').eq(2).each(($data) => {
-          expect($data.text()).to.contain('14 Apr 2023')
+          expect($data.text()).to.contain(d.toLocaleDateString('en-US', { day: "2-digit" }) + " " + d.toLocaleDateString('en-US', { month: "short" }) + " " + d.toLocaleDateString('en-US', { year: "numeric" }))
         })
       })
     })
   })
 
-  it('registration Data Import Search with Imported by', () => {
-    cy.get('div.MuiFormControl-fullWidth').type('cypress@cypress.com')
+  it('RDI-searches Imported by', () => {
+    cy.get('input[type="text"]').eq(2).type('cypress@cypress.com{downArrow}{enter}')
+    cy.reload()
     cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').eq(5).each(($data) => {
@@ -93,9 +102,8 @@ context("RDI", () => {
       })
     })
   })
-
-  it('registration Data Import Search with Status', () => {
-    cy.get('[data-mui-test="SelectDisplay"]').click()
+  it('RDI-searches by status', () => {
+    cy.get('[data-cy="filter-status"]').click()
     cy.get('li[data-value="IN_REVIEW"]').click()
     cy.reload()
     cy.get('tbody tr').eq(0).each(($tablerows) => {
@@ -108,11 +116,39 @@ context("RDI", () => {
   })
 
   it('registration Data Import Search with all filters', () => {
-    cy.get('.sc-keFjpB > .MuiInputBase-root > .MuiInputBase-input').type('Test import 2023-04-14T14:00:03.895Z')
-    cy.get('.MuiBox-root > .MuiFormControl-root > .MuiInputBase-root > .MuiInputBase-input').type('2023-04-14')
-    cy.get('div.MuiFormControl-fullWidth').type('cypress@cypress.com')
-    cy.get('[data-mui-test="SelectDisplay"]').click()
+    cy.createExcel()
+    const d = new Date()
+    cy.get("h5").contains("Registration Data Import");
+    cy.get("span").contains("IMPORT").click({ force: true });
+    cy.get("h2").contains("Select File to Import").click();
+    cy.get('[data-cy="import-type-select"]').click();
+    cy.get('[data-cy="excel-menu-item"]').click();
+    cy.get('[data-cy="input-name"]').type(
+      "Test import ".concat(d.toISOString())
+    );
+    const name = "Test import ".concat(d.toISOString())
+    cy.uniqueSeed().then((seed) => {
+      const fileName = `rdi_import_1_hh_1_ind_seed_${seed}.xlsx`;
+      cy.fixture(fileName, "base64").then((fileContent) => {
+        cy.get('[data-cy="file-input"]').attachFile({
+          fileContent,
+          fileName,
+          mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          encoding: "base64",
+        });
+      });
+    });
+    cy.wait(5000)
+    cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+    cy.get("span").contains("Registration Data Import").click();
+    cy.reload()
+    cy.get('[data-cy="filter-search"]').type(name)
+    cy.get('[data-cy="filter-import-date"]').type(d.toLocaleDateString('en-CA'))
+
+    cy.get('input[type="text"]').eq(2).type('cypress@cypress.com{downArrow}{enter}')
+    cy.get('[data-cy="filter-status"]').click()
     cy.get('li[data-value="IN_REVIEW"]').click()
+
     cy.get('tbody tr').eq(0).each(($tablerows) => {
       cy.wrap($tablerows).within(() => {
         cy.get('td').each(($data) => {
@@ -126,13 +162,14 @@ context("RDI", () => {
 function uploadRDIFile() {
   cy.createExcel()
   cy.get("h5").contains("Registration Data Import");
-  cy.get("button > span").contains("IMPORT").click({ force: true });
+  cy.get("span").contains("IMPORT").click({ force: true });
   cy.get("h2").contains("Select File to Import").click();
   cy.get('[data-cy="import-type-select"]').click();
   cy.get('[data-cy="excel-menu-item"]').click();
   cy.get('[data-cy="input-name"]').type(
     "Test import ".concat(new Date().toISOString())
   );
+  const name = "Test import ".concat(new Date().toISOString())
   cy.uniqueSeed().then((seed) => {
     const fileName = `rdi_import_1_hh_1_ind_seed_${seed}.xlsx`;
     cy.fixture(fileName, "base64").then((fileContent) => {
@@ -144,53 +181,30 @@ function uploadRDIFile() {
       });
     });
   });
-  cy.wait(10000)
-  cy.get('[data-cy="button-import-rdi"] > .MuiButton-label').click({ force: true })
-  cy.get('div.sc-kEYyzF').click({ force: true })
-}
-
-function verifyUpload() {
+  cy.wait(5000)
+  cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+  cy.get("span").contains("Registration Data Import").click();
   cy.reload()
-  cy.get('tbody tr').eq(0).each(($tablerows) => {
-    cy.wrap($tablerows).within(() => {
-      cy.get('td').eq(1).each(($data) => {
-        // cy.log($data.text())
-        if ($data.text() == 'IN REVIEW')
-          expect($data.text()).to.eq('IN REVIEW')
-      })
-    })
-  })
+  cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
 }
 function mergeRDIFile() {
-  cy.reload()
-  cy.get('tbody tr').eq(0).each(($tablerows) => {
-    cy.wrap($tablerows).within(() => {
-      cy.get('td').eq(1).each(($data) => {
-        if ($data.text() == 'IN REVIEW')
-          cy.contains('IN REVIEW').click({ force: true })
-      })
-    })
-  })
+  cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
   cy.get('[data-cy="label-Total Number of Households"]').contains("1");
   cy.get('[data-cy="label-Total Number of Individuals"]').contains("1");
   cy.get("span").contains("Merge").click({ force: true });
   cy.get('strong').should('contain', '1 households and 1 individuals will be merged.')
   cy.get("span").contains("MERGE").click({ force: true })
-  cy.wait(2000)
+
+  cy.get("span").contains("Registration Data Import").click();
+  cy.reload()
+  cy.get('[data-cy="status-container"]').eq(0).should('contain', 'MERGED')
 }
 
 function verifyMergedData() {
   let householdId;
   let individualId;
-  cy.get('div.sc-kkGfuU').click({ force: true })
+  cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
   cy.log("Looking for householdId");
-  cy.get('tbody tr').eq(0).each(($tablerows) => {
-    cy.wrap($tablerows).within(() => {
-      cy.get('td').eq(1).each(($data) => {
-        cy.contains('MERGED').click({ force: true })
-      })
-    })
-  })
   cy.get('[data-cy="imported-households-row"]')
     .find("td:nth-child(2)")
     .then(($td) => {
@@ -200,7 +214,6 @@ function verifyMergedData() {
     })
     .then(() => {
       cy.get("button> span").contains("Individuals").click({ force: true });
-
       cy.get('[data-cy="imported-individuals-table"]')
         .find(`tbody > tr:nth-child(1) > td:nth-child(1)`)
         .then(($td) => {
@@ -210,7 +223,6 @@ function verifyMergedData() {
         .then(() => {
           cy.get("span").contains("Population").click();
           cy.get("span").contains("Households").click();
-
           cy.log(`looking for householdId: ${householdId}`);
           cy.get('[data-cy="hh-filters-search"]')
             .find("input")
@@ -224,27 +236,11 @@ function verifyMergedData() {
     });
 }
 function refuseImport() {
-  cy.get('tbody tr').eq(0).each(($tablerows) => {
-    cy.wrap($tablerows).within(() => {
-      cy.get('td').eq(1).each(($data) => {
-        if ($data.text() == 'IN REVIEW')
-          cy.contains('IN REVIEW').click({ force: true })
-      })
-    })
-  })
+  cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
   cy.get('span').contains('Refuse Import').click({ force: true })
-  cy.wait(2000)
-  cy.get('div.sc-kEYyzF').click({ force: true })
-}
-function verfifyRefuseImport() {
-  cy.get('tbody tr').eq(0).each(($tablerows) => {
-    cy.wrap($tablerows).within(() => {
-      cy.get('td').eq(1).each(($data) => {
-        if ($data.text() == 'REFUSED')
-          expect($data.text()).to.eq('REFUSED')
-      })
-    })
-  })
+  cy.get("span").contains("Registration Data Import").click();
+  cy.reload()
+  cy.get('[data-cy="status-container"]').eq(0).should('contain', 'REFUSED')
 }
 
 
