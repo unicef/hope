@@ -230,7 +230,7 @@ export const ExcludeSection = ({
               } excluded`}</GreyText>
             </Box>
           )}
-          <Grid container direction='column' item xs={6}>
+          <Grid container direction='column' item xs={3}>
             {excludedIds.map((id) => (
               <Grid item xs={12}>
                 <ExcludedItem
