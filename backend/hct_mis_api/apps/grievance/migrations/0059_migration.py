@@ -10,7 +10,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('program', '0036_migration'),
+        ('program', '0035_migration'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('account', '0050_migration'),
         ('grievance', '0058_migration'),
