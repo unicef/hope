@@ -186,10 +186,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'documents': [
                                 {
                                     'country': 'POL',
+                                    'key': 'national_id',
                                     'number': '123-123-UX-321',
                                     'photo': '/api/uploads/test_file_name.jpg',
-                                    'photoraw': 'test_file_name.jpg',
-                                    'type': 'NATIONAL_ID'
+                                    'photoraw': 'test_file_name.jpg'
                                 }
                             ],
                             'estimated_birth_date': False,
@@ -416,10 +416,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                     'approve_status': False,
                                     'value': {
                                         'country': 'POL',
+                                        'key': 'national_passport',
                                         'number': '321-321-XU-987',
                                         'photo': '/api/uploads/test_file_name.jpg',
-                                        'photoraw': 'test_file_name.jpg',
-                                        'type': 'NATIONAL_PASSPORT'
+                                        'photoraw': 'test_file_name.jpg'
                                     }
                                 }
                             ],
@@ -429,18 +429,18 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                     'previous_value': {
                                         'country': 'POL',
                                         'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
+                                        'key': 'national_id',
                                         'number': '789-789-645',
                                         'photo': '',
-                                        'photoraw': '',
-                                        'type': 'NATIONAL_ID'
+                                        'photoraw': ''
                                     },
                                     'value': {
                                         'country': 'POL',
                                         'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
+                                        'key': 'national_id',
                                         'number': '321-321-XU-123',
                                         'photo': '/api/uploads/test_file_name.jpg',
-                                        'photoraw': 'test_file_name.jpg',
-                                        'type': 'NATIONAL_ID'
+                                        'photoraw': 'test_file_name.jpg'
                                     }
                                 }
                             ],

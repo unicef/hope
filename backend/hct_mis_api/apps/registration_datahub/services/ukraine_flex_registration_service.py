@@ -6,7 +6,10 @@ from django.forms import modelform_factory
 
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    build_arg_dict_from_dict,
+)
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -65,13 +68,29 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         "admin2": "admin2_h_c",
         "size": "size_h_c",
     }
-    DOCUMENT_MAPPING_TYPE_DICT = {
-        IDENTIFICATION_TYPE_NATIONAL_ID: ("national_id_no_i_c_1", "national_id_picture"),
-        IDENTIFICATION_TYPE_NATIONAL_PASSPORT: ("international_passport_i_c", "international_passport_picture"),
-        IDENTIFICATION_TYPE_DRIVERS_LICENSE: ("drivers_license_no_i_c", "drivers_license_picture"),
-        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: ("birth_certificate_no_i_c", "birth_certificate_picture"),
-        IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: ("residence_permit_no_i_c", "residence_permit_picture"),
-        IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
+
+    DOCUMENT_MAPPING_KEY_DICT = {
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]: (
+            "national_id_no_i_c_1",
+            "national_id_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT]: (
+            "international_passport_i_c",
+            "international_passport_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DRIVERS_LICENSE]: (
+            "drivers_license_no_i_c",
+            "drivers_license_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]: (
+            "birth_certificate_no_i_c",
+            "birth_certificate_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO]: (
+            "residence_permit_no_i_c",
+            "residence_permit_picture",
+        ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
     def create_household_for_rdi_household(
@@ -225,10 +244,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_documents(self, individual_dict: Dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
 
-        for document_type_string, (
+        for document_key_string, (
             document_number_field_name,
             picture_field_name,
-        ) in self.DOCUMENT_MAPPING_TYPE_DICT.items():
+        ) in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
             document_number = individual_dict.get(document_number_field_name)
             certificate_picture = individual_dict.get(picture_field_name, "")
 
@@ -239,7 +258,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
-            document_type = ImportedDocumentType.objects.get(type=document_type_string)
+            document_type = ImportedDocumentType.objects.get(key=document_key_string)
             document_kwargs = {
                 "country": "UA",
                 "type": document_type,
