@@ -145,6 +145,7 @@ class DeduplicateTask:
         Individual.objects.bulk_update(
             to_bulk_update_results,
             ("deduplication_golden_record_results",),
+            batch_size=1000,
         )
 
     def deduplicate_individuals_from_other_source(self, individuals: QuerySet[Individual]) -> None:
@@ -195,12 +196,12 @@ class DeduplicateTask:
         populate_index(imported_individuals, get_imported_individual_doc(self.business_area.slug))
 
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+        individuals_count = imported_individuals.count()
         allowed_duplicates_in_batch = round(
-            (imported_individuals.count() or 1) * (self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
+            (individuals_count or 1) * (self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
         allowed_duplicates_in_population = round(
-            (imported_individuals.count() or 1)
-            * (self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
+            (individuals_count or 1) * (self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
         )
 
         to_bulk_update_results = []
@@ -240,7 +241,7 @@ class DeduplicateTask:
                 self._set_error_message_and_status(registration_data_import, message)
                 break
 
-            if (len(duplicates_in_batch) >= allowed_duplicates_in_batch) and imported_individuals.count() > 1:
+            if (len(duplicates_in_batch) >= allowed_duplicates_in_batch) and individuals_count > 1:
                 message = (
                     f"The percentage of records ({self.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a batch has reached the maximum number."
@@ -271,7 +272,7 @@ class DeduplicateTask:
                 self._set_error_message_and_status(registration_data_import, message)
                 break
 
-            if (len(duplicates_in_population) >= allowed_duplicates_in_population) and imported_individuals.count() > 1:
+            if (len(duplicates_in_population) >= allowed_duplicates_in_population) and individuals_count > 1:
                 message = (
                     f"The percentage of records ({self.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a population has reached the maximum number."
@@ -287,6 +288,7 @@ class DeduplicateTask:
                 "deduplication_batch_status",
                 "deduplication_golden_record_status",
             ],
+            batch_size=1000,
         )
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
             ImportedIndividual.objects.filter(
