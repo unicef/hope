@@ -92,6 +92,7 @@ class TestUkrainianRegistrationService(TestCase):
                 "bank_name": "7472",
                 "gender_i_c": " male",
                 "phone_no_i_c": "+94788908046",
+                "email": "email999@mail.com",
                 "full_name_i_c": "Dome",
                 "birth_date_i_c": "1980-01-04",
                 "bank_description": "Axis Bank",
@@ -184,6 +185,7 @@ class TestUkrainianRegistrationService(TestCase):
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
             },
         )
+        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService()

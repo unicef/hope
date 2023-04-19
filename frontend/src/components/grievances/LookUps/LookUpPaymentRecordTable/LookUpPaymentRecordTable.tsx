@@ -1,12 +1,13 @@
 import React, { ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   LookUpPaymentRecordsQueryVariables,
-  PaymentRecordNode,
+  PaymentRecordAndPaymentNode,
+  useAllPaymentRecordsAndPaymentsQuery,
   useLookUpPaymentRecordsQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 
@@ -62,7 +63,10 @@ export function LookUpPaymentRecordTable({
   const numSelected = selected.length;
   if (isEditTicket) {
     return (
-      <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
+      <UniversalTable<
+        PaymentRecordAndPaymentNode,
+        LookUpPaymentRecordsQueryVariables
+      >
         headCells={headCells}
         query={useLookUpPaymentRecordsQuery}
         queriedObjectName='allPaymentRecords'
@@ -80,10 +84,13 @@ export function LookUpPaymentRecordTable({
     );
   }
   return (
-    <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
+    <UniversalTable<
+      PaymentRecordAndPaymentNode,
+      LookUpPaymentRecordsQueryVariables
+    >
       headCells={headCells}
-      query={useLookUpPaymentRecordsQuery}
-      queriedObjectName='allPaymentRecords'
+      query={useAllPaymentRecordsAndPaymentsQuery}
+      queriedObjectName='allPaymentRecordsAndPayments'
       initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}

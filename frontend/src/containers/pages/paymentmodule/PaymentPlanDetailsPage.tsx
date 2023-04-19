@@ -18,12 +18,19 @@ import {
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
+import { isPermissionDeniedError } from '../../../utils/utils';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const { data, loading, startPolling, stopPolling } = usePaymentPlanQuery({
+  const {
+    data,
+    loading,
+    startPolling,
+    stopPolling,
+    error,
+  } = usePaymentPlanQuery({
     variables: {
       id,
     },
@@ -44,7 +51,10 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   if (loading && !data) return <LoadingComponent />;
   if (permissions === null || !data) return null;
 
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
+  if (
+    !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
+    isPermissionDeniedError(error)
+  )
     return <PermissionDenied />;
 
   const shouldDisplayEntitlement =
