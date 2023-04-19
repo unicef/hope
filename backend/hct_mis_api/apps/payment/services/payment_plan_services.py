@@ -1,3 +1,4 @@
+import datetime
 import logging
 from decimal import Decimal
 from functools import partial
@@ -20,6 +21,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -267,7 +269,7 @@ class PaymentPlanService:
             self.payment_plan.save()
 
     @staticmethod
-    def _create_payments(payment_plan: PaymentPlan) -> None:
+    def create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
         households = (
             payment_plan.target_population.households.annotate(
@@ -289,7 +291,7 @@ class PaymentPlanService:
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
-                    business_area=payment_plan.business_area,
+                    business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
                     household_id=household["pk"],
@@ -300,8 +302,8 @@ class PaymentPlanService:
             )
         try:
             Payment.objects.bulk_create(payments_to_create)
-        except IntegrityError:
-            raise GraphQLError("Duplicated Households in provided Targeting")
+        except IntegrityError as e:
+            raise GraphQLError("Duplicated Households in provided Targeting") from e
 
     @staticmethod
     def create(input_data: Dict, user: "User") -> PaymentPlan:
@@ -329,10 +331,12 @@ class PaymentPlanService:
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
         start_date = input_data["start_date"]
+        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
         if start_date < target_population.program.start_date:
             raise GraphQLError("Start date cannot be earlier than start date in the program")
 
         end_date = input_data["end_date"]
+        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
         if end_date > target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
@@ -345,18 +349,16 @@ class PaymentPlanService:
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
             status_date=timezone.now(),
-            start_date=start_date,
-            end_date=end_date,
+            start_date=input_data["start_date"],
+            end_date=input_data["end_date"],
+            status=PaymentPlan.Status.PREPARING,
         )
-
-        PaymentPlanService._create_payments(payment_plan)
-        payment_plan.refresh_from_db()
-        payment_plan.update_population_count_fields()
-        payment_plan.update_money_fields()
 
         TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
             status=TargetPopulation.STATUS_ASSIGNED
         )
+
+        prepare_payment_plan_task.delay(payment_plan.id)
 
         return payment_plan
 
@@ -410,20 +412,21 @@ class PaymentPlanService:
             recreate_payments = True
             recalculate_payments = True
 
-        if (
-            input_data.get("start_date")
-            and input_data["start_date"] < self.payment_plan.target_population.program.start_date
-        ):
+        start_date = input_data.get("start_date")
+        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
+        if start_date and start_date < self.payment_plan.target_population.program.start_date:
             raise GraphQLError("Start date cannot be earlier than start date in the program")
 
-        if input_data.get("end_date") and input_data["end_date"] > self.payment_plan.target_population.program.end_date:
+        end_date = input_data.get("end_date")
+        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
+        if end_date and end_date > self.payment_plan.target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
         self.payment_plan.save()
 
         if recreate_payments:
             self.payment_plan.payment_items.all().delete()
-            self._create_payments(self.payment_plan)
+            self.create_payments(self.payment_plan)
 
         if recalculate_payments:
             self.payment_plan.refresh_from_db()

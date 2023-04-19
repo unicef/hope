@@ -254,6 +254,16 @@
   }
 },
 {
+  "model": "household.documenttype",
+  "pk": "6782d559-c2f2-4d89-b8f8-37447c179233",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.291Z",
+    "updated_at": "2022-08-10T14:00:37.291Z",
+    "label": "Bank Statement",
+    "type": "BANK_STATEMENT"
+  }
+},
+{
   "model": "household.document",
   "pk": "0040cb2a-4b86-41b2-82b1-d5ac4d11471d",
   "fields": {
@@ -449,6 +459,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048605899014",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "HEAD",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -542,6 +553,7 @@
     "marital_status": "SINGLE",
     "phone_no": "0048724467321",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "BROTHER_SISTER",
     "household": "20077498-80f0-462a-82e6-866cef92d06a",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -617,6 +629,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048503123555",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "NON_BENEFICIARY",
     "household": null,
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -692,6 +705,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048601123432",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "WIFE_HUSBAND",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -767,6 +781,7 @@
     "marital_status": "SINGLE",
     "phone_no": "0048875012932",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "HEAD",
     "household": "20077498-80f0-462a-82e6-866cef92d06a",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
@@ -842,6 +857,7 @@
     "marital_status": "MARRIED",
     "phone_no": "0048734123423",
     "phone_no_alternative": "",
+    "email": "fake111test@email.com",
     "relationship": "BROTHER_SISTER",
     "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",

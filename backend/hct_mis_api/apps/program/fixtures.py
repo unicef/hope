@@ -5,7 +5,6 @@ from typing import Any
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
-from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
@@ -28,10 +27,9 @@ class ProgramFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     start_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=False,
-        after_now=True,
-        tzinfo=utc,
+        "date_this_decade",
+        before_today=False,
+        after_today=True,
     )
     end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
     description = factory.Faker(
