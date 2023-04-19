@@ -19,6 +19,7 @@ interface ExcludedItemProps {
   onDelete;
   onUndo;
   isDeleted: boolean;
+  isEdit: boolean;
 }
 
 export const ExcludedItem = ({
@@ -26,6 +27,7 @@ export const ExcludedItem = ({
   onDelete,
   onUndo,
   isDeleted,
+  isEdit,
 }: ExcludedItemProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -41,15 +43,16 @@ export const ExcludedItem = ({
       mt={2}
     >
       <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
-      {isDeleted ? (
-        <Button variant='text' color='primary' onClick={onUndo}>
-          {t('Undo')}
-        </Button>
-      ) : (
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      )}
+      {isEdit &&
+        (isDeleted ? (
+          <Button variant='text' color='primary' onClick={onUndo}>
+            {t('Undo')}
+          </Button>
+        ) : (
+          <IconButton onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        ))}
     </StyledBox>
   );
 };
