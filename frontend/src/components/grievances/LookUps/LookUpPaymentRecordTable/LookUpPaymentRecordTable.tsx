@@ -1,14 +1,10 @@
 import React, { ReactElement, useState } from 'react';
-<<<<<<< HEAD
 import { useLocation } from 'react-router-dom';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-=======
->>>>>>> develop
 import {
   LookUpPaymentRecordsQueryVariables,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
+  useLookUpPaymentRecordsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -67,7 +63,10 @@ export function LookUpPaymentRecordTable({
   const numSelected = selected.length;
   if (isEditTicket) {
     return (
-      <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
+      <UniversalTable<
+        PaymentRecordAndPaymentNode,
+        LookUpPaymentRecordsQueryVariables
+      >
         headCells={headCells}
         query={useLookUpPaymentRecordsQuery}
         queriedObjectName='allPaymentRecords'
