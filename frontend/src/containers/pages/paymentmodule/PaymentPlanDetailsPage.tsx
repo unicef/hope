@@ -21,6 +21,7 @@ import { ReconciliationSummary } from '../../../components/paymentmodule/Payment
 import { isPermissionDeniedError } from '../../../utils/utils';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
+  //TODO: Add follow-up payment plan
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
