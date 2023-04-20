@@ -22,14 +22,11 @@ context("RDI", () => {
     })
     cy.verifyDownload('registration_data_import_template.xlsx');
   })
-  it("Registration Data Import with excel and verfify", () => {
-    uploadRDIFile();
-    return;
-  })
-  it("Registration Data Import and merge the data and verify merge file", () => {
+ it("Registration Data Import and merge the data and verify merge file and View Ticket", () => {
     uploadRDIFile();
     mergeRDIFile()
     verifyMergedData()
+    viewTicket()
     return;
   })
   it("Registration Data Import and Refuse the import", () => {
@@ -37,14 +34,7 @@ context("RDI", () => {
     refuseImport()
     return;
   })
-  it('Merged View ticket', () => {
-    uploadRDIFile();
-    mergeRDIFile()
-    cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
-    cy.get('span').contains('View Tickets').click({ force: true })
-    cy.get('h5').should('contain', 'Grievance and Feedback')
-  })
-  it('RDI- Searches by import title', () => {
+it('RDI- Searches by import title', () => {
     cy.createExcel()
     cy.get("h5").contains("Registration Data Import");
     cy.get("span").contains("IMPORT").click({ force: true });
@@ -242,5 +232,12 @@ function refuseImport() {
   cy.reload()
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'REFUSED')
 }
+ function viewTicket()
+ {
+  cy.get("span").contains("Registration Data Import").click();
+  cy.get('[data-cy="status-container"]').eq(0).click({ force: true })
+  cy.get('span').contains('View Tickets').click({ force: true })
+  cy.get('h5').should('contain', 'Grievance and Feedback')
+ }
 
 
