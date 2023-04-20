@@ -19,9 +19,9 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
+import { FollowUpPaymentPlanDetailsHeader } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
 
-export const PaymentPlanDetailsPage = (): React.ReactElement => {
+export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
@@ -69,12 +69,12 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlan } = data;
   return (
     <>
-      <PaymentPlanDetailsHeader
+      <FollowUpPaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         businessArea={businessArea}
         permissions={permissions}
       />
-      <PaymentPlanDetails
+      <FollowUpPaymentPlanDetails
         businessArea={businessArea}
         paymentPlan={paymentPlan}
       />
@@ -82,7 +82,6 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      <ExcludeSection />
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
