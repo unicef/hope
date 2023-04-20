@@ -904,25 +904,11 @@ type DocumentTypeNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   label: String!
-  type: DocumentTypeType!
+  key: String!
   isIdentityDocument: Boolean!
   uniqueForIndividual: Boolean!
   validForDeduplication: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
-}
-
-enum DocumentTypeType {
-  BIRTH_CERTIFICATE
-  DRIVERS_LICENSE
-  ELECTORAL_CARD
-  NATIONAL_ID
-  NATIONAL_PASSPORT
-  TAX_ID
-  RESIDENCE_PERMIT_NO
-  BANK_STATEMENT
-  DISABILITY_CERTIFICATE
-  FOSTER_CHILD
-  OTHER
 }
 
 input EditBankTransferObjectType {
@@ -935,7 +921,7 @@ input EditBankTransferObjectType {
 input EditIndividualDocumentObjectType {
   id: ID!
   country: String!
-  type: String!
+  key: String!
   number: String!
   photo: Arg
   photoraw: Arg
@@ -1660,23 +1646,9 @@ type ImportedDocumentTypeNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   label: String!
-  type: ImportedDocumentTypeType!
+  key: String!
   isIdentityDocument: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
-}
-
-enum ImportedDocumentTypeType {
-  BIRTH_CERTIFICATE
-  DRIVERS_LICENSE
-  ELECTORAL_CARD
-  NATIONAL_ID
-  NATIONAL_PASSPORT
-  TAX_ID
-  RESIDENCE_PERMIT_NO
-  BANK_STATEMENT
-  DISABILITY_CERTIFICATE
-  FOSTER_CHILD
-  OTHER
 }
 
 enum ImportedHouseholdCollectIndividualData {
@@ -2121,7 +2093,7 @@ enum IndividualDisability {
 
 input IndividualDocumentObjectType {
   country: String!
-  type: String!
+  key: String!
   number: String!
   photo: Arg
   photoraw: Arg

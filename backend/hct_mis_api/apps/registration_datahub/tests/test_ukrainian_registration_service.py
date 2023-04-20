@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
@@ -29,7 +30,7 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(self) -> None:
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_TAX_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
         )
         BusinessArea.objects.create(
@@ -173,7 +174,9 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
         self.assertEqual(
-            ImportedDocument.objects.filter(document_number="TESTID", type__type=IDENTIFICATION_TYPE_TAX_ID).count(),
+            ImportedDocument.objects.filter(
+                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+            ).count(),
             1,
         )
 
