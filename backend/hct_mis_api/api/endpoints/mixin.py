@@ -46,7 +46,7 @@ class HouseholdUploadMixin:
             doc_date=doc["doc_date"],
             individual=member,
             country=doc["country"],
-            type=ImportedDocumentType.objects.get(type=doc["type"]),
+            type=ImportedDocumentType.objects.get(key=doc["type"]),
         )
 
     def save_member(

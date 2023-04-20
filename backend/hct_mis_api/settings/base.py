@@ -103,6 +103,7 @@ CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
 CSP_DEFAULT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
 CSP_STYLE_SRC = (
     "'self'",
     "'unsafe-inline'",
@@ -222,11 +223,13 @@ DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
     "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",

@@ -46,6 +46,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 logger = logging.getLogger(__name__)
 
@@ -201,8 +202,8 @@ class RdiMergeTask:
     ) -> Tuple[List, List]:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
-            document_type, _ = DocumentType.objects.get_or_create(
-                type=imported_document.type.type,
+            document_type = DocumentType.objects.get(
+                key=imported_document.type.key,
             )
             document = Document(
                 document_number=imported_document.document_number,
@@ -318,9 +319,6 @@ class RdiMergeTask:
                     id=registration_data_import_id,
                 )
 
-                obj_hct.status = RegistrationDataImport.MERGING
-                obj_hct.save(update_fields=["status"])
-
                 obj_hub = RegistrationDataImportDatahub.objects.get(
                     hct_id=registration_data_import_id,
                 )
@@ -389,7 +387,10 @@ class RdiMergeTask:
                 populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
 
                 if not obj_hct.business_area.postpone_deduplication:
-                    DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
+                    individuals = evaluate_qs(
+                        Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                    )
+                    DeduplicateTask(obj_hct.business_area.slug).deduplicate_individuals_against_population(individuals)
 
                     golden_record_duplicates = Individual.objects.filter(
                         registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE

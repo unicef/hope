@@ -113,7 +113,9 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
 
 
 def handle_add_document(document: Document, individual: Individual) -> Document:
-    type_name = document.get("type")
+    from hct_mis_api.apps.household.models import Document, DocumentType
+
+    document_key = document.get("key")
     country_code = document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
     number = document.get("number")
@@ -121,13 +123,13 @@ def handle_add_document(document: Document, individual: Individual) -> Document:
     photoraw = document.get("photoraw")
     if photo:
         photo = photoraw
-    document_type = DocumentType.objects.get(type=type_name)
+    document_type = DocumentType.objects.get(key=document_key)
 
     document_already_exists = Document.objects.filter(
         document_number=number, type=document_type, country=country
     ).exists()
     if document_already_exists:
-        raise ValidationError(f"Document with number {number} of type {type_name} already exists")
+        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
 
     return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
@@ -135,7 +137,7 @@ def handle_add_document(document: Document, individual: Individual) -> Document:
 def handle_edit_document(document_data: Dict) -> Document:
     updated_document = document_data.get("value", {})
 
-    type_name = updated_document.get("type")
+    document_key = updated_document.get("key")
     country_code = updated_document.get("country")
     country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_document.get("number")
@@ -145,7 +147,7 @@ def handle_edit_document(document_data: Dict) -> Document:
         photo = photoraw
 
     document_id = decode_id_string(updated_document.get("id"))
-    document_type = DocumentType.objects.get(type=type_name)
+    document_type = DocumentType.objects.get(key=document_key)
 
     document_already_exists = (
         Document.objects.exclude(pk=document_id)
@@ -153,7 +155,7 @@ def handle_edit_document(document_data: Dict) -> Document:
         .exists()
     )
     if document_already_exists:
-        raise ValidationError(f"Document with number {number} of type {type_name} already exists")
+        raise ValidationError(f"Document with number {number} of type {document_key} already exists")
 
     document = get_object_or_404(Document.objects.select_for_update(), id=document_id)
 
@@ -237,7 +239,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dic
             "id": encode_id_base64(document.id, "Document"),
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
-            "type": document.type.type,
+            "key": document.type.key,
             "country": document.country.iso_code3,
         }
 
@@ -249,7 +251,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
 
     for document_to_edit in documents_to_edit:
         encoded_id = document_to_edit.get("id")
-        document_type = document_to_edit.get("type")
+        document_key = document_to_edit.get("key")
         country = document_to_edit.get("country")
         document_number = document_to_edit.get("number")
         document_photo = document_to_edit.get("photo")
@@ -265,7 +267,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
                 "approve_status": False,
                 "value": {
                     "id": encoded_id,
-                    "type": document_type,
+                    "key": document_key,
                     "country": country,
                     "number": document_number,
                     "photo": document_photo,
@@ -273,7 +275,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "type": document.type.type,
+                    "key": document.type.key,
                     "country": document.country.iso_code3,
                     "number": document.document_number,
                     "photo": document.photo.name,
