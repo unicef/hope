@@ -921,7 +921,7 @@ input EditBankTransferObjectType {
 input EditIndividualDocumentObjectType {
   id: ID!
   country: String!
-  key: String!
+  type: String!
   number: String!
   photo: Arg
   photoraw: Arg
@@ -2093,7 +2093,7 @@ enum IndividualDisability {
 
 input IndividualDocumentObjectType {
   country: String!
-  key: String!
+  type: String!
   number: String!
   photo: Arg
   photoraw: Arg
