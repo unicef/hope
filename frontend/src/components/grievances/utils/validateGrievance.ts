@@ -333,7 +333,7 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsDocuments[index];
-          if (!doc.country || !doc.type || !doc.number) {
+          if (!doc.country || !doc.key || !doc.number) {
             errors.individualDataUpdateFieldsDocuments =
               'Document country, type and number are required';
           }
@@ -343,7 +343,7 @@ export function validateUsingSteps(
         values.individualDataUpdateFieldsDocumentsToEdit.forEach(
           (el, index) => {
             const doc = values.individualDataUpdateFieldsDocumentsToEdit[index];
-            if (!doc.country || !doc.type || !doc.number) {
+            if (!doc.country || !doc.key || !doc.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
                 'Document country, type and number are required';
             }

@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.registration_datahub.models import (
@@ -16,12 +17,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
     Record,
 )
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
 
 
-class TestUkrainianRegistrationService(TestCase):
+class TestSriLankaRegistrationService(TestCase):
     databases = {
         "default",
         "registration_datahub",
@@ -31,7 +32,7 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(cls) -> None:
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_NATIONAL_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
             label=IDENTIFICATION_TYPE_NATIONAL_ID,
         )
 

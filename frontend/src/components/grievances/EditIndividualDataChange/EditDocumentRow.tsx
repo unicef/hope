@@ -69,7 +69,7 @@ export function EditDocumentRow({
             arrayHelpers.remove({
               id: document.node.id,
               country: document.node.countryIso3,
-              type: document.node.type.type,
+              key: document.node.type.key,
               number: document.node.documentNumber,
               photo: document.node.photo,
             });
@@ -85,7 +85,7 @@ export function EditDocumentRow({
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
-            label={t('ID TYPE1')}
+            label={t('ID TYPE')}
             value={document.node.type.label}
           />
         </DisabledDiv>
@@ -108,6 +108,7 @@ export function EditDocumentRow({
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
+<<<<<<< HEAD
           !isEditTicket && (
             <Box display='flex' align-items='center'>
               <IconButton
@@ -136,6 +137,34 @@ export function EditDocumentRow({
               </IconButton>
             </Box>
           )
+=======
+          <Box display='flex' align-items='center'>
+            <IconButton
+              onClick={() => {
+                setFieldValue(
+                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
+                  document.node.id,
+                );
+              }}
+            >
+              <Delete />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                arrayHelpers.push({
+                  id: document.node.id,
+                  country: document.node.countryIso3,
+                  key: document.node.type.key,
+                  number: document.node.documentNumber,
+                  photo: document.node.photo,
+                });
+                setEdit(true);
+              }}
+            >
+              <Edit />
+            </IconButton>
+          </Box>
+>>>>>>> develop
         ) : (
           <Box display='flex' alignItems='center' height={48} color='red'>
             {t('REMOVED')}

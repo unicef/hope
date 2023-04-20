@@ -61,7 +61,7 @@ export const fakeGrievanceTicket = {
             photo: null,
             type: {
               label: 'National ID',
-              type: 'NATIONAL_ID',
+              key: 'NATIONAL_ID',
               __typename: 'DocumentTypeNode',
             },
             __typename: 'DocumentNode',
@@ -264,7 +264,7 @@ export const fakeGrievanceTicket = {
                     photo: null,
                     type: {
                       label: 'National ID',
-                      type: 'NATIONAL_ID',
+                      key: 'NATIONAL_ID',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
@@ -316,7 +316,7 @@ export const fakeGrievanceTicket = {
                     photo: null,
                     type: {
                       label: 'National ID',
-                      type: 'NATIONAL_ID',
+                      key: 'NATIONAL_ID',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
@@ -405,7 +405,7 @@ export const fakeGrievanceTicket = {
                     photo: null,
                     type: {
                       label: 'National ID',
-                      type: 'NATIONAL_ID',
+                      key: 'NATIONAL_ID',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
