@@ -2,8 +2,12 @@ import abc
 import logging
 from typing import Any, List, Tuple
 
+from django.db.models import Q
+
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
+from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
@@ -22,7 +26,11 @@ class BaseCeleryManager(abc.ABC):
     lookup: str = ""
 
     def create_obj_list(self) -> List[str]:
-        return list(self.model.objects.filter(status=self.model_status).values_list("id", flat=True))
+        return list(
+            self.model.objects.filter(
+                Q(status=self.model_status) | Q(background_action_status=self.model_status)
+            ).values_list("id", flat=True)
+        )
 
     @staticmethod
     def get_celery_tasks() -> Tuple[Any, Any, Any]:
@@ -101,6 +109,21 @@ class SendTPCeleryManager(BaseCeleryManager):
         return send_tp_task_kwargs
 
 
+class XlsxExportingCeleryManager(BaseCeleryManager):
+    model = PaymentPlan
+    model_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    task = create_payment_plan_payment_list_xlsx
+    lookup = "payment_plan_id"
+
+    def create_kwargs(self, ids_to_run: List[str]) -> List:
+        xlsx_exporting_task_kwargs = []
+        for pp_id in ids_to_run:
+            pp = PaymentPlan.objects.get(id=pp_id)
+            xlsx_exporting_task_kwargs.append({"payment_plan_id": str(pp_id), "user_id": pp.created_by_id})
+        return xlsx_exporting_task_kwargs
+
+
 rdi_import_celery_manager = RdiImportCeleryManager()
 rdi_merge_celery_manager = RdiMergeCeleryManager()
 send_tp_celery_manager = SendTPCeleryManager()
+xlsx_exporting_celery_manager = XlsxExportingCeleryManager()

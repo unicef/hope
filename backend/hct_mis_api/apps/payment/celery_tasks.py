@@ -21,6 +21,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
+from hct_mis_api.apps.registration_datahub.celery_tasks import locked_cache
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -406,4 +407,16 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
 
+    return True
+
+
+@app.task
+@sentry_tags
+def check_xlsx_exporting_periodic_task() -> bool:
+    from hct_mis_api.apps.utils.celery_manager import xlsx_exporting_celery_manager
+
+    with locked_cache(key="celery_manager_periodic_task") as locked:
+        if not locked:
+            return True
+        xlsx_exporting_celery_manager.execute()
     return True
