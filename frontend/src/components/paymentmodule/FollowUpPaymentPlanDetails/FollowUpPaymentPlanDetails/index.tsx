@@ -1,0 +1,1 @@
+export { FollowUpPaymentPlanDetails } from './FollowUpPaymentPlanDetails';
