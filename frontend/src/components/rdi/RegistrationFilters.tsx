@@ -1,27 +1,15 @@
-<<<<<<< HEAD
 import { Grid, MenuItem } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
-=======
-import { MenuItem } from '@material-ui/core';
->>>>>>> develop
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
+import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleFilterChange } from '../../utils/utils';
-import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
-=======
-import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
-import { AssigneeAutocomplete } from '../../shared/AssigneeAutocomplete/AssigneeAutocomplete';
-import { createHandleFilterChange } from '../../utils/utils';
-import { ContainerWithBorder } from '../core/ContainerWithBorder';
-import { DatePickerFilter } from '../core/DatePickerFilter';
->>>>>>> develop
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 
@@ -52,7 +40,6 @@ export const RegistrationFilters = ({
     return null;
   }
 
-<<<<<<< HEAD
   const renderTable = (): React.ReactElement => {
     return (
       <Grid container alignItems='flex-end' spacing={3}>
@@ -61,7 +48,7 @@ export const RegistrationFilters = ({
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy='filter-search'
             fullWidth
           />
         </Grid>
@@ -72,7 +59,8 @@ export const RegistrationFilters = ({
             label={t('Imported By')}
             fullWidth
             filter={filter}
-            value={filter.impo}
+            value={filter.importedBy}
+            data-cy='filter-imported-by'
           />
         </Grid>
         <Grid item xs={4}>
@@ -81,48 +69,10 @@ export const RegistrationFilters = ({
             label={t('Status')}
             onChange={(e) => handleFilterChange('status', e.target.value)}
             fullWidth
+            data-cy='filter-status'
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
-=======
-  return (
-    <ContainerWithBorder>
-      <SearchTextField
-        label={t('Search')}
-        value={filter.search}
-        onChange={(e) => handleFilterChange('search', e.target.value)}
-        data-cy='filter-search'
-      />
-      <DatePickerFilter
-        label={t('Import Date')}
-        onChange={(date) =>
-          handleFilterChange('importDate', moment(date).format('YYYY-MM-DD'))
-        }
-        value={filter.importDate}
-        data-cy='filter-import-date'
-      />
-      <AssigneeAutocomplete
-        name='importedBy'
-        value={filter.importedBy}
-        onFilterChange={onFilterChange}
-        filter={filter}
-        label={t('Imported By')}
-        data-cy='filter-imported-by'
-      />
-      <SelectFilter
-        value={filter.status}
-        label={t('Status')}
-        onChange={(e) => handleFilterChange('status', e.target.value)}
-        data-cy='filter-status'
-      >
-        <MenuItem value=''>
-          <em>{t('None')}</em>
-        </MenuItem>
-        {registrationChoicesData.registrationDataStatusChoices.map((item) => {
-          return (
-            <MenuItem key={item.value} value={item.value}>
-              {item.name}
->>>>>>> develop
             </MenuItem>
             {registrationChoicesData.registrationDataStatusChoices.map(
               (item) => {
@@ -144,6 +94,7 @@ export const RegistrationFilters = ({
               placeholder='From'
               icon={<GroupIcon />}
               onChange={(e) => handleFilterChange('sizeMin', e.target.value)}
+              data-cy='filter-size-min'
             />
           </Grid>
           <Grid item xs={6}>
@@ -153,6 +104,7 @@ export const RegistrationFilters = ({
               placeholder='To'
               icon={<GroupIcon />}
               onChange={(e) => handleFilterChange('sizeMax', e.target.value)}
+              data-cy='filter-size-max'
             />
           </Grid>
         </Grid>
@@ -168,6 +120,7 @@ export const RegistrationFilters = ({
                 )
               }
               value={filter.importDateRangeMin}
+              data-cy='filter-import-date-range-min'
             />
           </Grid>
           <Grid item xs={6}>
@@ -180,6 +133,7 @@ export const RegistrationFilters = ({
                 )
               }
               value={filter.importDateRangeMax}
+              data-cy='filter-import-date-range-max'
             />
           </Grid>
         </Grid>
