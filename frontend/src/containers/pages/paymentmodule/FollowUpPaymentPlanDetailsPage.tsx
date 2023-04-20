@@ -1,24 +1,24 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
-import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
-import { FspSection } from '../../../components/paymentmodule/PaymentPlanDetails/FspSection';
-import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import {
   PaymentPlanStatus,
   usePaymentPlanQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
-import { isPermissionDeniedError } from '../../../utils/utils';
-import { FollowUpPaymentPlanDetailsHeader } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { FollowUpPaymentPlanDetails } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
+import { FollowUpPaymentPlanDetailsHeader } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
+import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
+import { FspSection } from '../../../components/paymentmodule/PaymentPlanDetails/FspSection';
+import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
+import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
+import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 
 export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
