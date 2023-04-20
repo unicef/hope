@@ -24,17 +24,17 @@ const StatusWrapper = styled.div`
   margin-left: 30px;
 `;
 
-interface PaymentPlanDetailsHeaderProps {
+interface FollowUpPaymentPlanDetailsHeaderProps {
   businessArea: string;
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const PaymentPlanDetailsHeader = ({
+export const FollowUpPaymentPlanDetailsHeader = ({
   businessArea,
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
+}: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
