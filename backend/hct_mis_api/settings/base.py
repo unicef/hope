@@ -94,6 +94,7 @@ CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
 CSP_DEFAULT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
 CSP_STYLE_SRC = (
     "'self'",
     "'unsafe-inline'",
