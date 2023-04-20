@@ -4,8 +4,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { FspSection } from '../../../components/paymentmodule/PaymentPlanDetails/FspSection';
-import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
-import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -19,8 +17,8 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import { FollowUpPaymentPlanDetailsHeader } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
-import { FollowUpPaymentPlanDetails } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
+import { FollowUpPaymentPlanDetailsHeader } from '../../../components/paymentmodule/FollowUpPaymentPlanDetailsPage/FollowUpPaymentPlanDetailsHeader';
+import { FollowUpPaymentPlanDetails } from '../../../components/paymentmodule/FollowUpPaymentPlanDetailsPage/FollowUpPaymentPlanDetails';
 
 export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
