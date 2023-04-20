@@ -477,8 +477,7 @@ class DeduplicateTask:
         possible_duplicates = []
         original_individuals_ids_duplicates = []
         original_individuals_ids_possible_duplicates = []
-        query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
-        query._index = document._index._name
+        query = document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict)
         results = query.execute()
         results_data = {
             "duplicates": [],
