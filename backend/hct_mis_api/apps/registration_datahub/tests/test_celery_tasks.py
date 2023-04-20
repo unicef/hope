@@ -13,6 +13,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -23,8 +24,6 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
 )
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     automate_rdi_creation_task,
@@ -482,73 +481,6 @@ class TestAutomatingRDICreationTask(TestCase):
         assert rdi.number_of_households == 0
         assert ImportedIndividual.objects.count() == 0
         assert ImportedHousehold.objects.count() == 0
-
-    def test_ukraine_new_registration_form(self) -> None:
-        for document_type in UkraineRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.keys():
-            ImportedDocumentType.objects.get_or_create(type=document_type, label="abc")
-        create_ukraine_business_area()
-        create_record(
-            fields=UKRAINE_NEW_FORM_FIELDS,
-            registration=11,
-            status=Record.STATUS_TO_IMPORT,
-            files=UKRAINE_NEW_FORM_FILES,
-        )
-        records_ids = Record.objects.all().values_list("id", flat=True)
-        rdi = UkraineRegistrationService().create_rdi(None, "ukraine rdi timezone UTC")
-
-        assert Record.objects.count() == 1
-        assert RegistrationDataImport.objects.filter(status=RegistrationDataImport.IMPORTING).count() == 1
-        assert ImportedIndividual.objects.count() == 0
-        assert ImportedHousehold.objects.count() == 0
-
-        process_flex_records_task(rdi.pk, list(records_ids), UkraineRegistrationService.REGISTRATION_ID)
-        rdi.refresh_from_db()
-
-        assert Record.objects.filter(status=Record.STATUS_IMPORTED).count() == 1
-
-        assert rdi.number_of_individuals == 2
-        assert rdi.number_of_households == 1
-        assert ImportedIndividual.objects.count() == 2
-        assert ImportedHousehold.objects.count() == 1
-
-        hh = ImportedHousehold.objects.first()
-        ind_1 = ImportedIndividual.objects.filter(full_name="Pavlo Viktorovich Mok").first()
-        ind_2 = ImportedIndividual.objects.filter(full_name="Stefania Petrovich Bandera").first()
-        doc_ind_1 = ImportedDocument.objects.filter(individual=ind_1).first()
-        doc_ind_2 = ImportedDocument.objects.filter(individual=ind_2).first()
-        bank_acc_info = ImportedBankAccountInfo.objects.filter(individual=ind_1).first()
-
-        assert hh.head_of_household == ind_1
-        assert hh.admin1 == "UA14"
-        assert hh.admin2 == "UA1408"
-        assert hh.admin3 == "UA1408005"
-
-        assert ind_1.birth_date == datetime.date(1990, 11, 11)
-        assert ind_1.disability == NOT_DISABLED
-        assert ind_1.phone_no == "+380952025248"
-        assert ind_1.relationship == HEAD
-        assert ind_1.sex == MALE
-
-        assert ind_2.birth_date == datetime.date(2023, 3, 6)
-        assert ind_2.sex == FEMALE
-        assert ind_2.relationship == SON_DAUGHTER
-        assert ind_2.disability == DISABLED
-
-        assert doc_ind_1.document_number == "123465432321321"
-        assert doc_ind_1.type.type == IDENTIFICATION_TYPE_TAX_ID
-        assert doc_ind_2.document_number == "І-ASD-454511"
-        assert doc_ind_2.type.type == IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
-
-        assert bank_acc_info.bank_account_number == "IBAN1236549879998999"
-        assert bank_acc_info.debit_card_number == "1236549879991999"
-        assert bank_acc_info.bank_name == "Private Bank"
-
-    def test_create_task_for_processing_records_not_implemented_error(self) -> None:
-        class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
-            PROCESS_FLEX_RECORDS_TASK = None
-
-        with self.assertRaises(NotImplementedError):
-            create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), [1])
 
     def test_ukraine_new_registration_form(self) -> None:
         for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
