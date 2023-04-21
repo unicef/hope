@@ -124,7 +124,7 @@ class HouseholdFilter(FilterSet):
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
-            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
 
