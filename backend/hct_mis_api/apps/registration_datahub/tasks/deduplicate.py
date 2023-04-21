@@ -103,7 +103,8 @@ class DeduplicateTask:
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
         wait_until_es_healthy()
-
+        rdi_id = individuals.first().registration_data_import_id
+        log.info(f"RDI:{rdi_id} Deduplicating individuals against population")
         all_duplicates = []
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
@@ -122,9 +123,12 @@ class DeduplicateTask:
             "unicef_id",
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
+        index = 0
         for individual in individual_qs:
             deduplication_result = self._deduplicate_single_individual(individual)
-
+            index += 1
+            if index % 100 == 0:
+                log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
             to_bulk_update_results.append(individual)
 
@@ -134,19 +138,21 @@ class DeduplicateTask:
             all_original_individuals_ids_possible_duplicates.extend(
                 deduplication_result.original_individuals_ids_possible_duplicates
             )
-
+        log.info(f"RDI:{rdi_id} Deduplicated all individuals against population")
         Individual.objects.filter(id__in=all_duplicates + all_original_individuals_ids_duplicates).update(
             deduplication_golden_record_status=DUPLICATE
         )
+        log.info(f"RDI:{rdi_id} Marked all duplicates against population")
         Individual.objects.filter(
             id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
-
+        log.info(f"RDI:{rdi_id} Marked all possible duplicates against population")
         Individual.objects.bulk_update(
             to_bulk_update_results,
             ("deduplication_golden_record_results",),
             batch_size=1000,
         )
+        log.info(f"RDI:{rdi_id} Updated all individuals with deduplication results")
 
     def deduplicate_individuals_from_other_source(self, individuals: QuerySet[Individual]) -> None:
         wait_until_es_healthy()
@@ -477,8 +483,7 @@ class DeduplicateTask:
         possible_duplicates = []
         original_individuals_ids_duplicates = []
         original_individuals_ids_possible_duplicates = []
-        query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
-        query._index = document._index._name
+        query = document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict)
         results = query.execute()
         results_data = {
             "duplicates": [],
@@ -499,7 +504,7 @@ class DeduplicateTask:
                 "full_name": individual_hit.full_name,
                 "score": individual_hit.meta.score,
                 "location": individual_hit.admin2,  # + village
-                "dob": individual_hit.birth_date,
+                "dob": individual_hit.birth_date.strftime("%Y-%m-%d"),
             }
             if score >= duplicate_score:
                 duplicates.append(individual_hit.id)
