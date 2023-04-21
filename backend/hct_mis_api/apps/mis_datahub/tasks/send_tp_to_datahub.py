@@ -8,6 +8,7 @@ from django.utils import timezone
 from hct_mis_api.apps.core.models import CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict, timezone_datetime
 from hct_mis_api.apps.household.models import (
+    STATUS_ACTIVE,
     Document,
     Household,
     Individual,
@@ -115,15 +116,22 @@ class SendTPToDatahubTask:
             self._send_program(program)
             self._send_target_population_object(target_population)
             chunk_size = 1000
+
+            # AB#156327
+            is_clear_withdrawn = (
+                target_population.business_area.custom_fields.get("clear_withdrawn") is True
+                and "clear_withdrawn" in target_population.name.split()
+            )
+
             for household in households_to_sync:
-                dh_household = self._prepare_datahub_object_household(household)
+                dh_household = self._prepare_datahub_object_household(household, is_clear_withdrawn)
                 households_to_bulk_create.append(dh_household)
                 if len(households_to_bulk_create) % chunk_size:
                     dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
                     households_to_bulk_create = []
 
             for individual in individuals_to_sync:
-                dh_individual = self._prepare_datahub_object_individual(individual)
+                dh_individual = self._prepare_datahub_object_individual(individual, is_clear_withdrawn)
                 individuals_to_bulk_create.append(dh_individual)
                 if len(individuals_to_bulk_create) % chunk_size:
                     dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
@@ -253,18 +261,29 @@ class SendTPToDatahubTask:
         dh_target.save()
         return dh_target
 
-    def _prepare_datahub_object_household(self, household: Household) -> dh_mis_models.Household:
+    def _prepare_datahub_object_household(
+        self, household: Household, is_clear_withdrawn: bool = False
+    ) -> dh_mis_models.Household:
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
         if household.country:
             dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
+
+        if is_clear_withdrawn and household.withdrawn:
+            dh_household_args["status"] = STATUS_ACTIVE
 
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.unhcr_id = self._get_unhcr_household_id(household)
         dh_household.session = self.dh_session
         return dh_household
 
-    def _prepare_datahub_object_individual(self, individual: Individual) -> dh_mis_models.Individual:
+    def _prepare_datahub_object_individual(
+        self, individual: Individual, is_clear_withdrawn: bool = False
+    ) -> dh_mis_models.Individual:
         dh_individual_args = build_arg_dict(individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT)
+
+        if is_clear_withdrawn and individual.withdrawn and not individual.duplicate:
+            dh_individual_args["status"] = STATUS_ACTIVE
+
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.unhcr_id = self._get_unhcr_individual_id(individual)
         dh_individual.session = self.dh_session

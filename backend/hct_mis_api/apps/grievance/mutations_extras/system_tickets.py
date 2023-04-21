@@ -7,7 +7,9 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     reassign_roles_on_disable_individual,
 )
 from hct_mis_api.apps.household.models import UNIQUE, UNIQUE_IN_BATCH, Individual
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    HardDocumentDeduplication,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -46,7 +48,7 @@ def _clear_deduplication_individuals_fields(individuals: Iterable[Individual]) -
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
         individual.deduplication_golden_record_results = {}
         individual.deduplication_batch_results = {}
-        DeduplicateTask.hard_deduplicate_documents(individual.documents.all())
+        HardDocumentDeduplication().deduplicate(individual.documents.all())
     Individual.objects.bulk_update(
         individuals,
         [
