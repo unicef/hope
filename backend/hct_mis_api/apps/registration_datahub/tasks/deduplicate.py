@@ -524,6 +524,7 @@ class DeduplicateTask:
         all_original_individuals_ids_duplicates = []
         all_original_individuals_ids_possible_duplicates = []
         to_bulk_update_results = []
+        index = 0
         for individual in individuals:
             (
                 duplicates,
@@ -532,7 +533,9 @@ class DeduplicateTask:
                 original_individuals_ids_possible_duplicates,
                 results_data,
             ) = cls.deduplicate_single_individual(individual)
-
+            index += 1
+            if index % 100 == 0:
+                log.info(f"RDI:{cls.registration_data_import_id} Deduplicated {index} individuals")
             individual.deduplication_golden_record_results = results_data
             to_bulk_update_results.append(individual)
 
@@ -553,13 +556,15 @@ class DeduplicateTask:
     @transaction.atomic
     def deduplicate_individuals(cls, registration_data_import: RegistrationDataImport) -> None:
         wait_until_es_healthy()
+        cls.registration_data_import_id = registration_data_import.id
+        log.info(f"RDI:{cls.registration_data_import_id} Starting deduplication for {registration_data_import}")
         cls.set_thresholds(registration_data_import.business_area)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=registration_data_import)
             .select_for_update()
             .order_by("pk")
         )
-
+        log.info(f"RDI:{cls.registration_data_import_id} Found {len(individuals)} individuals to deduplicate")
         (
             all_duplicates,
             all_possible_duplicates,
