@@ -682,6 +682,7 @@ module.exports = function(webpackEnv) {
       new CspHtmlWebpackPlugin(
         {
           'default-src': "'self'",
+          'frame-ancestors': "'none'",
           'style-src': [
             "'self'",
             "'unsafe-inline'",
