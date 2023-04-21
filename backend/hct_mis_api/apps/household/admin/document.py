@@ -44,5 +44,10 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label",)
+<<<<<<< HEAD
     list_display = ("label", "key")
     list_filter = ("label", "key")
+=======
+    list_display = ("label",)
+    list_filter = ("label",)
+>>>>>>> 9bf3a4646 (merge error problem with initcypress has solved)
