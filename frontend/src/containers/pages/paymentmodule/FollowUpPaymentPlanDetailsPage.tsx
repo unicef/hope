@@ -19,6 +19,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 
 export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -84,7 +85,7 @@ export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
-      {/* <Exclude /> */}
+      <ExcludeSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}
