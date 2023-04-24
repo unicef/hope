@@ -81,7 +81,7 @@ it('RDI- Searches by import title', () => {
     })
   })
 
-  it('RDI-searches Imported by', () => {
+  it('RDI- Searches Imported by', () => {
     cy.get('input[type="text"]').eq(2).type('cypress@cypress.com{downArrow}{enter}')
     cy.reload()
     cy.get('tbody tr').eq(0).each(($tablerows) => {
@@ -92,7 +92,7 @@ it('RDI- Searches by import title', () => {
       })
     })
   })
-  it('RDI-searches by status', () => {
+  it('RDI- Searches by status', () => {
     cy.get('[data-cy="filter-status"]').click()
     cy.get('li[data-value="IN_REVIEW"]').click()
     cy.reload()
@@ -105,7 +105,7 @@ it('RDI- Searches by import title', () => {
     })
   })
 
-  it('registration Data Import Search with all filters', () => {
+  it('RDI - Searches with all filters', () => {
     cy.createExcel()
     const d = new Date()
     cy.get("h5").contains("Registration Data Import");
