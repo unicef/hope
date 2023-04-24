@@ -58,7 +58,6 @@ const CriteriaSetBox = styled.div`
 `;
 
 const CriteriaField = ({ field }): React.ReactElement => {
-  console.log('trol', field);
   const { t } = useTranslation();
   let fieldElement;
   switch (field.comparisonMethod) {
