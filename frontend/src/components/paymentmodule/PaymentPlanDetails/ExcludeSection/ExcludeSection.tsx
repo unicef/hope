@@ -13,12 +13,17 @@ import { StyledTextField } from '../../../../shared/StyledTextField';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+
+interface ExcludeSectionProps {
+  initialOpen?: boolean;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
+}
 
 export const ExcludeSection = ({
   initialOpen = false,
-}: {
-  initialOpen?: boolean;
-}): React.ReactElement => {
+  paymentPlan,
+}: ExcludeSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [value, setValue] = useState('');
