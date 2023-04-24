@@ -807,3 +807,7 @@ export const createHandleFilterChange = (
 
   return handleFilterChange;
 };
+
+export const tomorrow = new Date().setDate(new Date().getDate() + 1);
+export const today = new Date();
+today.setHours(0, 0, 0, 0);
