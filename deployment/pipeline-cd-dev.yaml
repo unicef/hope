@@ -23,6 +23,7 @@ variables:
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "uniappsakshopedev.azurecr.io"
+  Chart.version: "0.1.3"
 
 stages:
   - stage: deploy
@@ -42,7 +43,7 @@ stages:
               kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
               command: package
               updatedependency: true
-              chartPath: 'hct-mis-helm'
+              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -51,7 +52,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: 'hct-mis-helm'
+              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
               releaseName: 'hope'
               install: true
               waitForExecution: false
