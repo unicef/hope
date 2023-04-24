@@ -8,6 +8,7 @@ import {
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
+import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
@@ -32,6 +33,9 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       <>
+        <Box p={2}>
+          <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
+        </Box>
         {!paymentPlan.hasPaymentListExportFile && (
           <Box p={2}>
             <LoadingButton

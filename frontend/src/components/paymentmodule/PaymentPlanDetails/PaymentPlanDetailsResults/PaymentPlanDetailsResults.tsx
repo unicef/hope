@@ -78,7 +78,7 @@ export const PaymentPlanDetailsResults = ({
         <ContentWrapper>
           <Grid container>
             <Grid item xs={4}>
-              <Grid container spacing={0} justify='flex-start'>
+              <Grid container spacing={3} justify='flex-start'>
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
