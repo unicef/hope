@@ -93,9 +93,7 @@ export const MarkAsReleasedPaymentPlan = ({
               maxWidth='md'
             >
               <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title'>
-                  {t('Mark as Released')}
-                </DialogTitle>
+                <DialogTitle>{t('Mark as Released')}</DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogContainer>
