@@ -2,7 +2,7 @@
 
 context("Targeting", () => {
   let programName = "TargetingProgram";
-   beforeEach(() => {
+  beforeEach(() => {
     cy.adminLogin()
     cy.visit("/");
     cy.initScenario("targeting");
@@ -23,14 +23,18 @@ context("Targeting", () => {
       cy.get('[data-cy="input-individualsFiltersBlocks[0].individualBlockFilters[0].value.from"]').type('0')
       cy.get('[data-cy="input-individualsFiltersBlocks[0].individualBlockFilters[0].value.to"]').type('100')
       cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click({ force: true });
+      cy.get('[data-cy="criteria-container"]').should('to.visible')
       cy.get("[data-cy='button-target-population-create']").click({ force: true });
       cy.get('[data-cy="status-container"]').should('contain', "OPEN");
+      cy.get('[data-cy="button-target-population-lock"]').should('to.visible');
+      cy.get('[data-cy="label-Total Number of Households"]').invoke('text').should('not.contain', '0');
+      cy.get('[data-cy="label-Targeted Individuals"]').invoke('text').should('not.contain', '0');
       cy.get('[data-cy="button-target-population-lock"]').click({ force: true });
       cy.get('[data-cy="button-target-population-modal-lock"]').click({ force: true });
       cy.get('[data-cy="status-container"]').should('contain', "LOCKED");
       cy.get('[data-cy="button-target-population-send-to-hope"]').click({ force: true });
       cy.get('[data-cy="button-target-population-modal-send-to-hope"]').click({ force: true });
-      cy.get('[data-cy="status-container"]').should('contain', "READY");
+      cy.get('[data-cy="status-container"]').should('contain', "READY FOR PAYMENT MODULE");
     });
   });
 });
