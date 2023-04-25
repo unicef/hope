@@ -872,3 +872,18 @@ class TestPaymentPlanReconciliation(APITestCase):
                 ]
             )
         )
+
+    # def test_follow_up_pp_entitlements_cannot_be_changed(self):
+    #     pp = PaymentPlanFactory(is_follow_up=True)
+    #     rule = RuleFactory(name="Rule")
+    #     RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
+    #
+    #     with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_engine_rule") as mock:
+    #         self.graphql_request(
+    #             request_string=SET_STEFICON_RULE_MUTATION,
+    #             context={"user": self.user},
+    #             variables={
+    #                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+    #                 "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+    #             },
+    #         )

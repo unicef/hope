@@ -22,6 +22,27 @@ from hct_mis_api.apps.payment.models import (
 )
 
 
+def create_child_payment_plans(pp: PaymentPlan) -> None:
+    PaymentPlanFactory(
+        id="56aca38c-dc16-48a9-ace4-70d88b41d462",
+        dispersion_start_date=datetime(2020, 8, 10),
+        dispersion_end_date=datetime(2020, 12, 10),
+        start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+        end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+        is_follow_up=True,
+        source_payment_plan=pp,
+    )
+    PaymentPlanFactory(
+        id="5b04f7c3-579a-48dd-a232-424daaefffe7",
+        dispersion_start_date=datetime(2020, 8, 10),
+        dispersion_end_date=datetime(2020, 12, 10),
+        start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+        end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+        is_follow_up=True,
+        source_payment_plan=pp,
+    )
+
+
 class TestPaymentPlanQueries(APITestCase):
     PAYMENT_PLAN_STATUS_CHOICES_QUERY = """
     query PaymentPlanStatusChoices{
@@ -95,6 +116,25 @@ class TestPaymentPlanQueries(APITestCase):
     }
     """
 
+    ALL_PAYMENT_PLANS_FILTER_QUERY_2 = """
+        query AllPaymentPlans($businessArea: String!, $isFollowUp: Boolean, $sourcePaymentPlanId: String) {
+            allPaymentPlans(businessArea: $businessArea, isFollowUp: $isFollowUp, sourcePaymentPlanId: $sourcePaymentPlanId) {
+            edges {
+              node {
+                unicefId
+                dispersionStartDate
+                dispersionEndDate
+                isFollowUp
+                sourcePaymentPlan {
+                  unicefId
+                }
+                listOfPaymentPlans
+              }
+            }
+          }
+        }
+        """
+
     ALL_PAYMENTS_QUERY = """
     query AllPayments($paymentPlanId: String!, $businessArea: String!) {
       allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
@@ -143,6 +183,7 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_end_date=datetime(2020, 12, 10),
                 start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
                 end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+                is_follow_up=False,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -278,5 +319,31 @@ class TestPaymentPlanQueries(APITestCase):
             variables={
                 "businessArea": "afghanistan",
                 "paymentPlanId": encode_id_base64(self.pp_conflicted.pk, "PaymentPlan"),
+            },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_filter_payment_plans_with_follow_up_flag(self) -> None:
+        create_child_payment_plans(self.pp)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "isFollowUp": False,
+            },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_filter_payment_plans_with_source_id(self) -> None:
+        create_child_payment_plans(self.pp)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "sourcePaymentPlanId": encode_id_base64(self.pp.id, "PaymentPlan"),
             },
         )
