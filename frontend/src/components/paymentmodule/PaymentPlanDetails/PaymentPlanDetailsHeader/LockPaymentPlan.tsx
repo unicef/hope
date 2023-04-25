@@ -57,9 +57,7 @@ export const LockPaymentPlan = ({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Lock Payment Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Lock Payment Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
