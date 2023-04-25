@@ -330,7 +330,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
         updates = []
         with transaction.atomic():
             payment: Payment
-            for payment in payment_plan.not_excluded_payments:
+            for payment in payment_plan.eligible_payments:
                 # TODO: not sure how will work engine function payment_plan or payment need ??
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
                 payment.entitlement_quantity = result.value

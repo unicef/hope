@@ -80,7 +80,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 Q(parent__start_date__lte=OuterRef("parent__end_date"))
                 & Q(parent__end_date__gte=OuterRef("parent__start_date")),
                 ~Q(parent__status=PaymentPlan.Status.OPEN),
-                Q(household=OuterRef("household")) & Q(excluded=False),
+                Q(household=OuterRef("household")) & Q(conflicted=False),
             )
         )
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)

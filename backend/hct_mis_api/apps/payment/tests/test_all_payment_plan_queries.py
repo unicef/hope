@@ -122,7 +122,7 @@ class TestPaymentPlanQueries(APITestCase):
               paymentPlanStartDate
               paymentPlanEndDate
             }
-            excluded
+            conflicted
           }
         }
       }
@@ -163,7 +163,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
             p2 = PaymentFactory(
                 parent=cls.pp,
-                excluded=True,
+                conflicted=True,
                 household=hh2,
                 head_of_household=hoh2,
                 entitlement_quantity=100.00,
@@ -186,7 +186,7 @@ class TestPaymentPlanQueries(APITestCase):
             PaymentFactory(
                 parent=cls.pp_conflicted,
                 household=p2.household,
-                excluded=False,
+                conflicted=False,
                 entitlement_quantity=100.00,
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
@@ -194,7 +194,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
             PaymentFactory(
                 parent=cls.pp_conflicted,
-                excluded=True,
+                conflicted=True,
                 entitlement_quantity=00.00,
                 entitlement_quantity_usd=00.00,
                 delivered_quantity=00.00,
@@ -271,7 +271,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payments_for_locked_payment_plan(self) -> None:
-        """Conflicting payment are excluded"""
+        """Conflicting payment are conflicted"""
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENTS_QUERY,
             context={"user": self.user},

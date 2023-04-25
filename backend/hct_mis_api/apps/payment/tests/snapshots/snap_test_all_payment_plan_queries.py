@@ -183,7 +183,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
+                        'conflicted': False,
                         'parent': {
                             'unicefId': 'PP-02'
                         },
@@ -213,7 +213,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
+                        'conflicted': False,
                         'parent': {
                             'unicefId': 'PP-01'
                         },
@@ -232,7 +232,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': True,
+                        'conflicted': True,
                         'parent': {
                             'unicefId': 'PP-01'
                         },

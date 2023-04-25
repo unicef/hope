@@ -394,7 +394,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=None,
-            excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
 
@@ -507,7 +506,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             == 1
         )
         assert (
-            payment_plan.not_excluded_payments.filter(
+            payment_plan.eligible_payments.filter(
                 financial_service_provider__isnull=False,
                 delivery_type__isnull=False,
             ).count()
@@ -759,7 +758,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=1000,
             delivered_quantity_usd=99,
             financial_service_provider=None,
-            excluded=False,
         )
         payment_2 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -772,7 +770,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=2000,
             delivered_quantity_usd=500,
             financial_service_provider=None,
-            excluded=False,
         )
         payment_3 = PaymentFactory(
             parent=PaymentPlan.objects.get(id=pp.id),
@@ -785,7 +782,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=3000,
             delivered_quantity_usd=290,
             financial_service_provider=None,
-            excluded=False,
         )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
@@ -864,7 +860,6 @@ class TestPaymentPlanReconciliation(APITestCase):
                 delivered_quantity=999,
                 delivered_quantity_usd=10,
                 financial_service_provider=None,
-                excluded=False,
             )
         payment_plan.status_finished()
         payment_plan.save()
@@ -873,7 +868,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             all(
                 [
                     payment.entitlement_quantity == payment.delivered_quantity
-                    for payment in payment_plan.not_excluded_payments
+                    for payment in payment_plan.eligible_payments
                 ]
             )
         )
