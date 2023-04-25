@@ -33,8 +33,16 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_QUERY = """
-    query AllPaymentPlans($businessArea: String!) {
-      allPaymentPlans(businessArea: $businessArea) {
+    query AllPaymentPlans(
+      $businessArea: String!, 
+      $isFollowUp: Boolean, 
+      $sourcePaymentPlanId: String
+    ) {
+      allPaymentPlans(
+        businessArea: $businessArea
+        isFollowUp: $isFollowUp
+        sourcePaymentPlanId: $sourcePaymentPlanId
+      ) {
         edges {
           node {
             status
@@ -73,6 +81,11 @@ class TestPaymentPlanQueries(APITestCase):
               }
             }
             paymentsConflictsCount
+            isFollowUp
+            sourcePaymentPlan {
+              id
+            }
+            listOfPaymentPlans
           }
         }
       }
@@ -225,6 +238,11 @@ class TestPaymentPlanQueries(APITestCase):
                 cls.pp_conflicted.update_population_count_fields()
                 cls.pp_conflicted.update_money_fields()
 
+        # payment_plan_1 = PaymentPlanFactory(is_follow_up=False)
+        # cls.payment_plan_2 = PaymentPlanFactory(is_follow_up=True, source_payment_plan=payment_plan_1)
+        # cls.payment_plan_3 = PaymentPlanFactory(is_follow_up=True, source_payment_plan=payment_plan_1)
+        # cls.source_payment_plan = payment_plan_1
+
     def test_fetch_payment_plan_status_choices(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_STATUS_CHOICES_QUERY,
@@ -280,3 +298,23 @@ class TestPaymentPlanQueries(APITestCase):
                 "paymentPlanId": encode_id_base64(self.pp_conflicted.pk, "PaymentPlan"),
             },
         )
+
+    # def test_filter_payment_plans_with_follow_up_flag(self) -> None:
+    #     self.snapshot_graphql_request(
+    #         request_string=self.ALL_PAYMENT_PLANS_QUERY,
+    #         context={"user": self.user},
+    #         variables={
+    #             "businessArea": "afghanistan",
+    #             "isFollowUp": False,
+    #         },
+    #     )
+    #
+    # def test_filter_payment_plans_with_source_id(self) -> None:
+    #     self.snapshot_graphql_request(
+    #         request_string=self.ALL_PAYMENT_PLANS_QUERY,
+    #         context={"user": self.user},
+    #         variables={
+    #             "businessArea": "afghanistan",
+    #             "sourcePaymentPlanId": encode_id_base64(self.source_payment_plan.id, "PaymentPlan"),
+    #         },
+    #     )

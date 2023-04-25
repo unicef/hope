@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     ChoiceFilter,
     DateFilter,
@@ -298,6 +299,8 @@ class PaymentPlanFilter(FilterSet):
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    is_follow_up = BooleanFilter(field_name="is_follow_up")
+    source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
 
     class Meta:
         fields = tuple()
@@ -327,10 +330,14 @@ class PaymentPlanFilter(FilterSet):
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
 
+    def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
+
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
+    is_follow_up = BooleanFilter(field_name="is_follow_up")
 
     def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         payment_plan_id = decode_id_string(value)

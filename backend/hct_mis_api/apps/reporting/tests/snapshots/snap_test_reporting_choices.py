@@ -19,8 +19,7 @@ snapshots['TestProgramChoices::test_dashboard_years_choices 1'] = {
 snapshots['TestProgramChoices::test_dashboard_years_choices__no_objects 1'] = {
     'data': {
         'dashboardYearsChoices': [
-            '2021',
-            '2020'
+            '2023'
         ]
     }
 }

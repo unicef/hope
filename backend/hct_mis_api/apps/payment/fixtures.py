@@ -1,3 +1,4 @@
+import random
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
@@ -564,6 +565,8 @@ class PaymentPlanFactory(DjangoModelFactory):
     male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
+    is_follow_up = random.choice([True, False])
+    # source_payment_plan = factory.SubFactory("payment.fixtures.PaymentPlanFactory")
 
 
 class PaymentFactory(DjangoModelFactory):
