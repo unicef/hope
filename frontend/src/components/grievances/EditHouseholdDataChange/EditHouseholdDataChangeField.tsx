@@ -8,9 +8,15 @@ import { FormikDecimalField } from '../../../shared/Formik/FormikDecimalField';
 import { FormikFileField } from '../../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { AllEditHouseholdFieldsQuery } from '../../../__generated__/graphql';
+import {
+  AllEditHouseholdFieldsQuery,
+  useAllAdminAreasLazyQuery,
+} from '../../../__generated__/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
+import { FormikAutocomplete } from '../../../shared/Formik/FormikAutocomplete';
+import { FormikAsyncAutocomplete } from '../../../shared/Formik/FormikAsyncAutocomplete';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export interface EditHouseholdDataChangeField {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
@@ -20,6 +26,7 @@ export const EditHouseholdDataChangeField = ({
   name,
   field,
 }: EditHouseholdDataChangeField): React.ReactElement => {
+  const businessArea = useBusinessArea();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
   let fieldProps;
@@ -45,8 +52,27 @@ export const EditHouseholdDataChangeField = ({
     case 'SELECT_ONE':
       fieldProps = {
         choices: field.choices,
-        component: FormikSelectField,
+        component: FormikAutocomplete,
       };
+      if (field.name === 'admin_area_title') {
+        fieldProps = {
+          component: FormikAsyncAutocomplete,
+          query: useAllAdminAreasLazyQuery,
+          fetchData: (data) =>
+            data?.allAdminAreas?.edges?.map(({ node }) => ({
+              labelEn: `${node.name} - ${node.pCode}`,
+              value: node.pCode,
+            })),
+          variables: {
+            businessArea,
+          },
+        };
+      } else {
+        fieldProps = {
+          choices: field.choices,
+          component: FormikSelectField,
+        };
+      }
       break;
     case 'SELECT_MANY':
       fieldProps = {
