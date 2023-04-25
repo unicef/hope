@@ -107,9 +107,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper data-cy='dialog-import'>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Select File to Import')}
-          </DialogTitle>
+          <DialogTitle>{t('Select File to Import')}</DialogTitle>
           <>
             <DropzoneField
               dontShowFilename={false}
@@ -130,7 +128,8 @@ export const ImportXlsxPaymentPlanPaymentList = ({
                 setFileToImport(file);
               }}
             />
-            {error?.graphQLErrors?.length || xlsxErrors?.length ? (
+            {fileToImport &&
+            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
               <Error data-cy='error-list'>
                 <p>Errors</p>
                 {error
@@ -141,7 +140,13 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             ) : null}
           </>
           <DialogActions>
-            <Button data-cy='close-button' onClick={() => setOpenImport(false)}>
+            <Button
+              data-cy='close-button'
+              onClick={() => {
+                setOpenImport(false);
+                setFileToImport(null);
+              }}
+            >
               CANCEL
             </Button>
             <Button
