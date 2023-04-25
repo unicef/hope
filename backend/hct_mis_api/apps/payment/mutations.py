@@ -1098,6 +1098,9 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
     ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
+        print("*"*10)
+        print(payment_plan.status)
+
         cls.has_permission(info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
