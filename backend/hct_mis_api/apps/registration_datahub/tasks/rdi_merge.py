@@ -349,18 +349,21 @@ class RdiMergeTask:
                 bank_account_infos_to_create = self._prepare_bank_account_info(
                     imported_bank_account_infos, individuals_dict
                 )
+                logger.info(f"RDI:{registration_data_import_id} Creating {len(households_dict)} households")
                 Household.objects.bulk_create(households_dict.values())
                 Individual.objects.bulk_create(individuals_dict.values())
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
                 IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                 BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
-
+                logger.info(f"RDI:{registration_data_import_id} Created {len(households_dict)} households")
                 individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                 household_ids = [str(household.id) for household in households_dict.values()]
 
                 recalculate_population_fields_task(household_ids)
-
+                logger.info(
+                    f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
+                )
                 kobo_submissions = []
                 for imported_household in imported_households:
                     kobo_submission_uuid = imported_household.kobo_submission_uuid
@@ -377,6 +380,7 @@ class RdiMergeTask:
                         kobo_submissions.append(submission)
                 if kobo_submissions:
                     KoboImportedSubmission.objects.bulk_create(kobo_submissions)
+                logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
 
                 # DEDUPLICATION
 
@@ -384,17 +388,19 @@ class RdiMergeTask:
                     Individual.objects.filter(registration_data_import=obj_hct),
                     get_individual_doc(obj_hct.business_area.slug),
                 )
+                logger.info(f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals")
                 populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
-
+                logger.info(f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households")
                 if not obj_hct.business_area.postpone_deduplication:
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
                     DeduplicateTask(obj_hct.business_area.slug).deduplicate_individuals_against_population(individuals)
-
+                    logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
                     golden_record_duplicates = Individual.objects.filter(
                         registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
                     )
+                    logger.info(f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates")
 
                     create_needs_adjudication_tickets(
                         golden_record_duplicates,
@@ -402,10 +408,14 @@ class RdiMergeTask:
                         obj_hct.business_area,
                         registration_data_import=obj_hct,
                     )
+                    logger.info(
+                        f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
+                    )
 
                     needs_adjudication = Individual.objects.filter(
                         registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
                     )
+                    logger.info(f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication")
 
                     create_needs_adjudication_tickets(
                         needs_adjudication,
@@ -413,13 +423,19 @@ class RdiMergeTask:
                         obj_hct.business_area,
                         registration_data_import=obj_hct,
                     )
+                    logger.info(
+                        "RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
+                    )
 
                 # SANCTION LIST CHECK
                 if obj_hct.should_check_against_sanction_list():
+                    logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
                     CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                    logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                 obj_hct.status = RegistrationDataImport.MERGED
                 obj_hct.save()
+                logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                 transaction.on_commit(lambda: deduplicate_documents.delay())
                 log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 

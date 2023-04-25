@@ -106,8 +106,7 @@ class CheckAgainstSanctionListPreMergeTask:
         for individual in individuals:
             for document in documents:
                 query_dict = cls._get_query_dict(individual)
-                query = document.search().from_dict(query_dict)
-                query._index = document._index._name
+                query = document.search().update_from_dict(query_dict)
 
                 results = query.execute()
 
