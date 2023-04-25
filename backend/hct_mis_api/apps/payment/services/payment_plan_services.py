@@ -448,7 +448,7 @@ class PaymentPlanService:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx.delay(self.payment_plan.pk, user.pk)
+        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user.pk)
         return self.payment_plan
 
     def export_xlsx_per_fsp(self, user: "User") -> PaymentPlan:
