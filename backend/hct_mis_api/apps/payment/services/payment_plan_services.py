@@ -119,7 +119,7 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
+        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(conflicted=True)
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -498,7 +498,7 @@ class PaymentPlanService:
                     raise GraphQLError(f"{fsp} cannot accept any volume")
 
                 payments_for_delivery_mechanism = (
-                    self.payment_plan.not_excluded_payments.exclude(
+                    self.payment_plan.eligible_payments.exclude(
                         id__in=[processed_payment.id for processed_payment in processed_payments]
                     )
                     .distinct()
@@ -536,5 +536,5 @@ class PaymentPlanService:
                     delivery_mechanism_per_payment_plan.financial_service_provider = fsp
                     delivery_mechanism_per_payment_plan.save()
 
-            if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
+            if set(processed_payments) != set(self.payment_plan.eligible_payments):
                 raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
