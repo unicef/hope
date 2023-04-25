@@ -1056,7 +1056,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
 
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
@@ -1097,9 +1097,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         cls, root: Any, info: Any, payment_plan_id: str, steficon_rule_id: str
     ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-
-        print("*"*10)
-        print(payment_plan.status)
 
         cls.has_permission(info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area)
 
