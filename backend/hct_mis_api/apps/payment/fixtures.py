@@ -613,6 +613,7 @@ class PaymentFactory(DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
+    conflicted = False
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "Payment":
@@ -953,7 +954,6 @@ def generate_payment_plan() -> None:
     Payment.objects.update_or_create(
         pk=payment_1_pk,
         parent=payment_plan,
-        excluded=False,
         business_area=afghanistan,
         currency="USD",
         household=household_1,
@@ -968,7 +968,6 @@ def generate_payment_plan() -> None:
     Payment.objects.update_or_create(
         pk=payment_2_pk,
         parent=payment_plan,
-        excluded=False,
         business_area=afghanistan,
         currency="USD",
         household=household_2,

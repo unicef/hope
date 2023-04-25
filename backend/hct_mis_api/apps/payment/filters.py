@@ -338,6 +338,7 @@ class PaymentFilter(FilterSet):
         q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             q &= ~Q(excluded=True)
+            q &= ~Q(conflicted=True)
         return qs.filter(q)
 
     class Meta:

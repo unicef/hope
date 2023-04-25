@@ -554,8 +554,9 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, file: io.BytesIO, payment_verification_plan_id: str
     ) -> "ImportXlsxPaymentVerificationPlanFile":
-        id = decode_id_string(payment_verification_plan_id)
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
+        payment_verification_plan = get_object_or_404(
+            PaymentVerificationPlan, id=decode_id_string(payment_verification_plan_id)
+        )
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, payment_verification_plan.business_area)
 
@@ -867,7 +868,7 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if not payment_plan.not_excluded_payments:
+        if not payment_plan.eligible_payments:
             msg = "Export is not impossible because Payment list is empty"
             logger.error(msg)
             raise GraphQLError(msg)
