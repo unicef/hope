@@ -887,7 +887,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
             return float(-1)
         if column_name == "delivery_date" and payment.delivery_date is not None:
-            return payment.delivery_date.replace(tzinfo=None)
+            return str(payment.delivery_date)
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
 
