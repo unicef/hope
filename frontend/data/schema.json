@@ -61371,7 +61371,7 @@
             "defaultValue": null
           },
           {
-            "name": "type",
+            "name": "key",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -61458,7 +61458,7 @@
             "defaultValue": null
           },
           {
-            "name": "type",
+            "name": "key",
             "description": null,
             "type": {
               "kind": "NON_NULL",

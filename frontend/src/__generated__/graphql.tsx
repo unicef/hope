@@ -1367,7 +1367,7 @@ export type EditBankTransferObjectType = {
 export type EditIndividualDocumentObjectType = {
   id: Scalars['ID'],
   country: Scalars['String'],
-  type: Scalars['String'],
+  key: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
   photoraw?: Maybe<Scalars['Arg']>,
@@ -2906,7 +2906,7 @@ export enum IndividualDisability {
 
 export type IndividualDocumentObjectType = {
   country: Scalars['String'],
-  type: Scalars['String'],
+  key: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
   photoraw?: Maybe<Scalars['Arg']>,
