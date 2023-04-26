@@ -19,11 +19,13 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_TAX_ID,
     MALE,
+    ROLE_PRIMARY,
     BankAccountInfo,
     Document,
     DocumentType,
     Household,
     Individual,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -178,6 +180,12 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
 
                         individual.household = household
                         individual.save(update_fields=("household",))
+
+                        IndividualRoleInHousehold.objects.create(
+                            role=ROLE_PRIMARY,
+                            individual=individual,
+                            household=household,
+                        )
 
                         families[family_id] = household.id
 

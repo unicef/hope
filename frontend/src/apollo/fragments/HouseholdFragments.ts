@@ -61,6 +61,7 @@ export const householdDetailed = gql`
     activeIndividualsCount
     countryOrigin
     country
+    zipCode
     femaleAgeGroup05Count
     femaleAgeGroup611Count
     femaleAgeGroup1217Count

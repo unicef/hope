@@ -60,7 +60,8 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     opacity: 0.54,
   },
   drawerPaper: {
-    position: 'relative',
+    height: '100vh',
+    position: 'sticky',
     whiteSpace: 'nowrap',
     width: theme.drawer.width,
     transition: theme.transitions.create('width', {

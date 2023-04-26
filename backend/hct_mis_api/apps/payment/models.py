@@ -372,6 +372,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+        PREPARING = "PREPARING", "Preparing"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -422,12 +423,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()
     dispersion_end_date = models.DateField()
-    female_children_count = models.PositiveSmallIntegerField(default=0)
-    male_children_count = models.PositiveSmallIntegerField(default=0)
-    female_adults_count = models.PositiveSmallIntegerField(default=0)
-    male_adults_count = models.PositiveSmallIntegerField(default=0)
-    total_households_count = models.PositiveSmallIntegerField(default=0)
-    total_individuals_count = models.PositiveSmallIntegerField(default=0)
+    female_children_count = models.PositiveIntegerField(default=0)
+    male_children_count = models.PositiveIntegerField(default=0)
+    female_adults_count = models.PositiveIntegerField(default=0)
+    male_adults_count = models.PositiveIntegerField(default=0)
+    total_households_count = models.PositiveIntegerField(default=0)
+    total_individuals_count = models.PositiveIntegerField(default=0)
     imported_file_date = models.DateTimeField(blank=True, null=True)
     imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     export_file_entitlement = models.ForeignKey(
@@ -640,6 +641,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             PaymentVerificationSummary.objects.create(
                 payment_plan_obj=self,
             )
+
+    @transition(
+        field=status,
+        source=Status.PREPARING,
+        target=Status.OPEN,
+    )
+    def status_open(self) -> None:
+        self.status_date = timezone.now()
 
     @property
     def currency_exchange_date(self) -> datetime:
