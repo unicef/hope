@@ -31,7 +31,7 @@ export const fakeIndividual = {
           photo: null,
           type: {
             label: 'National ID',
-            type: 'NATIONAL_ID',
+            key: 'NATIONAL_ID',
             __typename: 'DocumentTypeNode',
           },
           __typename: 'DocumentNode',

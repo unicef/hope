@@ -612,7 +612,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Electoral Card",
-    "type": "ELECTORAL_CARD"
+    "key": "electoral_card"
   }
 },
 {
@@ -622,7 +622,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "National ID",
-    "type": "NATIONAL_ID"
+    "key": "national_id"
   }
 },
 {
@@ -632,7 +632,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Other",
-    "type": "OTHER"
+    "key": "other"
   }
 },
 {
@@ -642,7 +642,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Driver's License",
-    "type": "DRIVERS_LICENSE"
+    "key": "drivers_license"
   }
 },
 {
@@ -652,7 +652,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Tax Number Identification",
-    "type": "TAX_ID"
+    "key": "tax_id"
   }
 },
 {
@@ -662,7 +662,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "National Passport",
-    "type": "NATIONAL_PASSPORT"
+    "key": "national_passport"
   }
 },
 {
@@ -672,7 +672,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Birth Certificate",
-    "type": "BIRTH_CERTIFICATE"
+    "key": "birth_certificate"
   }
 },
 {
@@ -682,7 +682,7 @@
     "created_at": "2022-08-10T14:00:37.565Z",
     "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Foreigner's Residence Permit",
-    "type": "RESIDENCE_PERMIT_NO"
+    "key": "residence_permit_no"
   }
 },
 {

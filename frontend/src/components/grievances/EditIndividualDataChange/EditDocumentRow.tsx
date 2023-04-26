@@ -69,7 +69,7 @@ export function EditDocumentRow({
             arrayHelpers.remove({
               id: document.node.id,
               country: document.node.countryIso3,
-              type: document.node.type.type,
+              key: document.node.type.key,
               number: document.node.documentNumber,
               photo: document.node.photo,
             });
@@ -85,7 +85,7 @@ export function EditDocumentRow({
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
-            label={t('ID TYPE1')}
+            label={t('ID TYPE')}
             value={document.node.type.label}
           />
         </DisabledDiv>
@@ -125,7 +125,7 @@ export function EditDocumentRow({
                   arrayHelpers.push({
                     id: document.node.id,
                     country: document.node.countryIso3,
-                    type: document.node.type.type,
+                    key: document.node.type.key,
                     number: document.node.documentNumber,
                     photo: document.node.photo,
                   });

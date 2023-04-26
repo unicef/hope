@@ -35,7 +35,7 @@ export function NewDocumentFieldArray({
                 return (
                   <DocumentField
                     id={existingOrNewId}
-                    key={`${existingOrNewId}-${item?.country}-${item?.type}`}
+                    key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
                     onDelete={() =>
                       removeItemById(
                         values.individualDataUpdateFieldsDocuments,
@@ -63,7 +63,7 @@ export function NewDocumentFieldArray({
                     arrayHelpers.push({
                       id: uuidv4(),
                       country: null,
-                      type: null,
+                      key: null,
                       number: '',
                     });
                   }}

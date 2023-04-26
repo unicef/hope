@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -59,7 +60,7 @@ class TestDetails(TestCase):
     def test_filtering_business_area_code_with_tax_id(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
-        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
@@ -108,7 +109,9 @@ class TestDetails(TestCase):
             individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
         )
 
-        imported_document_type = ImportedDocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        imported_document_type = ImportedDocumentTypeFactory(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+        )
         imported_document = ImportedDocumentFactory(individual=imported_individual, type=imported_document_type)
         tax_id = imported_document.document_number
 
@@ -128,7 +131,7 @@ class TestDetails(TestCase):
     def test_getting_individual_with_status_merged_to_population(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
-        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
@@ -142,10 +145,9 @@ class TestDetails(TestCase):
     def test_getting_individual_with_status_targeted(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
-        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
-
         target_popuplation = TargetPopulationFactory(
             business_area=self.business_area,
             created_by=self.user,
@@ -162,7 +164,7 @@ class TestDetails(TestCase):
     def test_getting_individual_with_status_sent_to_cash_assist(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
-        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
@@ -184,7 +186,7 @@ class TestDetails(TestCase):
     def test_getting_individual_with_status_paid(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
-        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
         payment_record = PaymentRecordFactory(household=household)

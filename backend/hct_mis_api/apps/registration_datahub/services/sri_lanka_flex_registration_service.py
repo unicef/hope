@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
@@ -130,7 +131,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return ImportedDocument.objects.create(
             document_number=national_id,
             individual=imported_individual,
-            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID),
+            type=ImportedDocumentType.objects.get(
+                key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+            ),
             country=Country(code="LK"),
         )
 
@@ -143,7 +146,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return ImportedDocument.objects.create(
             document_number=national_id,
             individual=imported_individual,
-            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE),
+            type=ImportedDocumentType.objects.get(
+                key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
+            ),
             country=Country(code="LK"),
         )
 
@@ -158,7 +163,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
         return ImportedDocument.objects.create(
             document_number=bank_account,
             individual=imported_individual,
-            type=ImportedDocumentType.objects.get(type=IDENTIFICATION_TYPE_BANK_STATEMENT),
+            type=ImportedDocumentType.objects.get(
+                key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BANK_STATEMENT]
+            ),
             photo=image,
             country=Country(code="LK"),
         )
