@@ -161,6 +161,7 @@ class IndividualFactory(DjangoModelFactory):
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
+    email = factory.Faker("email")
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -184,9 +185,9 @@ class BankAccountInfoFactory(DjangoModelFactory):
 class DocumentTypeFactory(DjangoModelFactory):
     class Meta:
         model = DocumentType
-        django_get_or_create = ("type",)
+        django_get_or_create = ("key",)
 
-    type = factory.fuzzy.FuzzyChoice([value for value, _ in IDENTIFICATION_TYPE_CHOICE])
+    key = factory.fuzzy.FuzzyChoice([value.lower() for value, _ in IDENTIFICATION_TYPE_CHOICE])
 
 
 class DocumentFactory(DjangoModelFactory):

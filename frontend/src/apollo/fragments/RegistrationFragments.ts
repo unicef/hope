@@ -161,6 +161,7 @@ export const importedIndividualDetailed = gql`
           country
           type {
             label
+            key
           }
           documentNumber
           photo
@@ -196,5 +197,6 @@ export const importedIndividualDetailed = gql`
     phoneNoValid
     phoneNoAlternativeValid
     preferredLanguage
+    email
   }
 `;

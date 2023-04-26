@@ -23,6 +23,7 @@ variables:
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "uniappsakshopedev.azurecr.io"
+  Chart.version: "0.1.3"
 
 stages:
   - stage: deploy
@@ -36,14 +37,6 @@ stages:
           - checkout: self
           - checkout: hct-mis-helm
           - task: HelmDeploy@0
-            displayName: "Update Chart dependencies"
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
-              command: package
-              updatedependency: true
-              chartPath: 'hct-mis-helm'
-          - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
               connectionType: 'Kubernetes Service Connection'
@@ -51,7 +44,7 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: 'hct-mis-helm'
+              chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
               releaseName: 'hope'
               install: true
               waitForExecution: false
@@ -71,7 +64,7 @@ stages:
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
-                postgresql.externalDatabase.password=$(POSTGRES_PASSWORD),\
-                registrationdatahubpostgresql.externalDatabase.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                postgresql.password=$(POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"

@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -181,7 +182,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         cls.household_one = household_one
 
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        )
         cls.national_id = DocumentFactory.create(
             country=country_pl,
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
@@ -237,7 +240,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "role": ROLE_NO_ROLE,
                                 "documents": [
                                     {
-                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                         "country": "POL",
                                         "number": "123-123-UX-321",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
@@ -303,7 +306,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "maritalStatus": SINGLE,
                                 "documents": [
                                     {
-                                        "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
+                                            IDENTIFICATION_TYPE_NATIONAL_PASSPORT
+                                        ],
                                         "country": "POL",
                                         "number": "321-321-XU-987",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
@@ -312,7 +317,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "documentsToEdit": [
                                     {
                                         "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
-                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                                         "country": "POL",
                                         "number": "321-321-XU-123",
                                         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
