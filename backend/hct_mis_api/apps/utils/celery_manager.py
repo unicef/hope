@@ -49,11 +49,12 @@ class BaseCeleryManager(abc.ABC):
         model_name = self.model.__name__
 
         for group in self.get_celery_tasks():
-            for _, task_list in group.items():
-                for task in task_list:
-                    task_name = task["name"].split(".")[-1]
-                    if task_name == self.task.__name__:
-                        celery_ids_list.append(task["kwargs"].get(self.lookup))
+            if group is not None:
+                for _, task_list in group.items():
+                    for task in task_list:
+                        task_name = task.get("name", "").split(".")[-1]
+                        if task_name == self.task.__name__:
+                            celery_ids_list.append(task["kwargs"].get(self.lookup))
 
         ids_to_run = [rdi_id for rdi_id in list_to_check if rdi_id not in celery_ids_list]
         if not ids_to_run:
