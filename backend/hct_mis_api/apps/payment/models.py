@@ -473,6 +473,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def bank_reconciliation_error(self) -> int:
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
+    @property
+    def contains_excluded(self) -> bool:
+        return bool(Payment.objects.filter(Q(parent_id=self.id) & Q(excluded=True)))
+
     @transition(
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
