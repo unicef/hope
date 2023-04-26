@@ -22,17 +22,19 @@ logger = logging.getLogger(__name__)
 class BaseCeleryManager(abc.ABC):
     model: Any = ""
     model_status: str = ""
+    model_status_field: str = "status"
     task: Any = ""
     lookup: str = ""
 
     def create_obj_list(self) -> List[str]:
         try:
-            self.model._meta.get_field("background_action_status")
+            self.model._meta.get_field(self.model_status_field)
             return list(
-                self.model.objects.filter(background_action_status=self.model_status).values_list("id", flat=True)
+                self.model.objects.filter(**{self.model_status_field: self.model_status}).values_list("id", flat=True)
             )
-        except FieldDoesNotExist:
-            return list(self.model.objects.filter(status=self.model_status).values_list("id", flat=True))
+        except FieldDoesNotExist as e:
+            logger.exception(f"Field {self.model_status_field} for model {self.model} does not exists. {e}")
+            raise
 
     @staticmethod
     def get_celery_tasks() -> Tuple[Any, Any, Any]:
@@ -115,6 +117,7 @@ class SendTPCeleryManager(BaseCeleryManager):
 class XlsxExportingCeleryManager(BaseCeleryManager):
     model = PaymentPlan
     model_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    model_status_field = "background_action_status"
     task = create_payment_plan_payment_list_xlsx
     lookup = "payment_plan_id"
 
