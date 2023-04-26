@@ -458,6 +458,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         object_id_field="payment_plan_object_id",
         related_query_name="payment_plan",
     )
+    source_payment_plan = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -657,15 +661,16 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
-    def not_excluded_payments(self) -> QuerySet:
-        return self.payment_items.exclude(excluded=True)
+    def eligible_payments(self) -> QuerySet:
+        # TODO add excluded payments from excluded payments list here
+        return self.payment_items.exclude(conflicted=True)
 
     @property
     def can_be_locked(self) -> bool:
         return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self) -> None:
-        households_ids = self.not_excluded_payments.values_list("household_id", flat=True)
+        households_ids = self.eligible_payments.values_list("household_id", flat=True)
 
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
@@ -699,7 +704,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def update_money_fields(self) -> None:
         self.exchange_rate = self.get_exchange_rate()
-        payments = self.not_excluded_payments.aggregate(
+        payments = self.eligible_payments.aggregate(
             total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
             total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
             total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
@@ -759,8 +764,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def is_reconciled(self) -> bool:
         # TODO what in case of active grievance tickets?
         return (
-            self.not_excluded_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
-            == self.not_excluded_payments.count()
+            self.eligible_payments.exclude(status=GenericPayment.STATUS_PENDING).count()
+            == self.eligible_payments.count()
         )
 
     def remove_export_file(self) -> None:
@@ -1245,6 +1250,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         on_delete=models.CASCADE,
         related_name="payment_items",
     )
+    conflicted = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
@@ -1263,6 +1269,11 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         object_id_field="payment_object_id",
         related_query_name="payment",
     )
+
+    source_payment = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
 
     @property
     def full_name(self) -> str:

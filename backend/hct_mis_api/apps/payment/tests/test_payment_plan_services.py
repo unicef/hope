@@ -201,7 +201,7 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         self.assertEqual(pp.payment_items.count(), 1)
 
         new_targeting = TargetPopulationFactory()
@@ -323,7 +323,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
@@ -356,7 +356,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, household=hh1)
         new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
         new_targeting.program = ProgramFactory(
             start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),

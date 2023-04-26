@@ -382,7 +382,7 @@ def _calculate_volume(
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
     # TODO simple volume calculation
-    payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
+    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
@@ -504,7 +504,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
-        return parent.not_excluded_payments.aggregate(
+        return parent.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
@@ -1313,9 +1313,9 @@ class Query(graphene.ObjectType):
 
     def resolve_all_payment_records_and_payments(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
         """used in Household Page > Payment Records"""
-        qs = ExtendedQuerySetSequence(PaymentRecord.objects.all(), Payment.objects.exclude(excluded=True)).order_by(
-            "-updated_at"
-        )
+        qs = ExtendedQuerySetSequence(
+            PaymentRecord.objects.all(), Payment.objects.exclude(excluded=True, conflicted=True)
+        ).order_by("-updated_at")
 
         qs: Iterable = payment_record_and_payment_filter(qs, **kwargs)  # type: ignore
 
