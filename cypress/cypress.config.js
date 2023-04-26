@@ -18,5 +18,7 @@ module.exports = defineConfig({
       mochaFile: "cypress/results/results-[hash].xml",
       toConsole: true,
     },
+    viewportHeight: 1080,
+    viewportWidth: 1920,
   },
 });
