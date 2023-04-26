@@ -66,4 +66,5 @@ class Command(BaseCommand):
 
         create_fsps()
 
+        call_command("generatedocumenttypes")
         call_command("search_index", "--rebuild", "-f")
