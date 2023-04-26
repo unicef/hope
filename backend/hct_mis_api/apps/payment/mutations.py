@@ -1139,14 +1139,17 @@ class ExcludeHouseholdsMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, payment_plan_id: str, household_unicef_ids: List[str]
     ) -> "ExcludeHouseholdsMutation":
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        from hct_mis_api.apps.household.models import Household
 
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         if payment_plan.excluded_payments:
-            msg = "This payment plan has already excluded payments"
+            msg = "This Payment Plan contains already excluded payments"
             logger.error(msg)
             raise GraphQLError(msg)
 
-        payment_plan.payment_items.filter(household__unicef_id__in=household_unicef_ids).update(excluded=True)
+        household_ids = list(Household.objects.filter(unicef_id__in=household_unicef_ids).values_list("id", flat=True))
+        payment_plan.payment_items.filter(household_id__in=[str(_id) for _id in household_ids]).update(excluded=True)
+
         return cls(payment_plan=payment_plan)
 
 
