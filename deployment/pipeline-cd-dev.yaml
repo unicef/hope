@@ -36,6 +36,12 @@ stages:
         steps:
           - checkout: self
           - checkout: hct-mis-helm
+          - task: Kubernetes@v1
+            inputs:
+              connectionType: 'Kubernetes Service Connection' 
+              kubernetesServiceEndpoint: $(Kubernetes.serviceConnection)
+              command: 'login'
+          - script: kubectl get pods -n ictd-hope-dev
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
