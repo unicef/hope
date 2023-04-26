@@ -3,7 +3,7 @@ import logging
 from base64 import b64decode
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -23,7 +23,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     import_payment_plan_payment_list_from_xlsx,
@@ -1149,7 +1148,7 @@ class ExcludeHouseholdsMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(
-            cls, root: Any, info: Any, payment_plan_id: str, household_ids: List[str]
+        cls, root: Any, info: Any, payment_plan_id: str, household_ids: List[str]
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
