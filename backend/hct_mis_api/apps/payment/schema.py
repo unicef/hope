@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 
 import _decimal
 import graphene
-from graphene import relay
+from graphene import Boolean, relay
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
@@ -456,6 +456,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
+    contains_excluded = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -513,6 +514,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
+
+    def resolve_contains_excluded(self, info: Any) -> Boolean:
+        return self.contains_excluded
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
