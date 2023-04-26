@@ -1341,7 +1341,7 @@ export type DocumentTypeNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
-  type: DocumentTypeType,
+  key: Scalars['String'],
   isIdentityDocument: Scalars['Boolean'],
   uniqueForIndividual: Scalars['Boolean'],
   validForDeduplication: Scalars['Boolean'],
@@ -1357,20 +1357,6 @@ export type DocumentTypeNodeDocumentsArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
-export enum DocumentTypeType {
-  BirthCertificate = 'BIRTH_CERTIFICATE',
-  DriversLicense = 'DRIVERS_LICENSE',
-  ElectoralCard = 'ELECTORAL_CARD',
-  NationalId = 'NATIONAL_ID',
-  NationalPassport = 'NATIONAL_PASSPORT',
-  TaxId = 'TAX_ID',
-  ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
-  BankStatement = 'BANK_STATEMENT',
-  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
-  FosterChild = 'FOSTER_CHILD',
-  Other = 'OTHER'
-}
-
 export type EditBankTransferObjectType = {
   id: Scalars['ID'],
   type: Scalars['String'],
@@ -1381,7 +1367,7 @@ export type EditBankTransferObjectType = {
 export type EditIndividualDocumentObjectType = {
   id: Scalars['ID'],
   country: Scalars['String'],
-  type: Scalars['String'],
+  key: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
   photoraw?: Maybe<Scalars['Arg']>,
@@ -2409,7 +2395,7 @@ export type ImportedDocumentTypeNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   label: Scalars['String'],
-  type: ImportedDocumentTypeType,
+  key: Scalars['String'],
   isIdentityDocument: Scalars['Boolean'],
   documents: ImportedDocumentNodeConnection,
 };
@@ -2422,20 +2408,6 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
 };
-
-export enum ImportedDocumentTypeType {
-  BirthCertificate = 'BIRTH_CERTIFICATE',
-  DriversLicense = 'DRIVERS_LICENSE',
-  ElectoralCard = 'ELECTORAL_CARD',
-  NationalId = 'NATIONAL_ID',
-  NationalPassport = 'NATIONAL_PASSPORT',
-  TaxId = 'TAX_ID',
-  ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
-  BankStatement = 'BANK_STATEMENT',
-  DisabilityCertificate = 'DISABILITY_CERTIFICATE',
-  FosterChild = 'FOSTER_CHILD',
-  Other = 'OTHER'
-}
 
 export enum ImportedHouseholdCollectIndividualData {
   A = 'A_',
@@ -2934,7 +2906,7 @@ export enum IndividualDisability {
 
 export type IndividualDocumentObjectType = {
   country: Scalars['String'],
-  type: Scalars['String'],
+  key: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
   photoraw?: Maybe<Scalars['Arg']>,
@@ -8344,7 +8316,7 @@ export type IndividualMinimalFragment = (
         & Pick<DocumentNode, 'id' | 'country' | 'countryIso3' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'label' | 'type'>
+          & Pick<DocumentTypeNode, 'label' | 'key'>
         ) }
       )> }
     )>> }
@@ -8391,7 +8363,7 @@ export type IndividualDetailedFragment = (
         & Pick<DocumentNode, 'id' | 'country' | 'photo' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'label'>
+          & Pick<DocumentTypeNode, 'label' | 'key'>
         ) }
       )> }
     )>> }
@@ -8550,7 +8522,7 @@ export type ImportedIndividualDetailedFragment = (
         & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
-          & Pick<ImportedDocumentTypeNode, 'label'>
+          & Pick<ImportedDocumentTypeNode, 'label' | 'key'>
         ) }
       )> }
     )>> }
@@ -10926,7 +10898,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'documentNumber'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'type'>
+                & Pick<DocumentTypeNode, 'label' | 'key'>
               ) }
             )> }
           )>> }
@@ -10994,7 +10966,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label'>
+                & Pick<DocumentTypeNode, 'label' | 'key'>
               ) }
             )> }
           )>> }
@@ -11021,7 +10993,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label'>
+                & Pick<DocumentTypeNode, 'label' | 'key'>
               ) }
             )> }
           )>> }
@@ -11048,7 +11020,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label'>
+                & Pick<DocumentTypeNode, 'label' | 'key'>
               ) }
             )> }
           )>> }
@@ -12217,7 +12189,7 @@ export type AllIndividualsQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'countryIso3' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'type'>
+                & Pick<DocumentTypeNode, 'label' | 'key'>
               ) }
             )> }
           )>> }
@@ -13422,7 +13394,7 @@ export const IndividualMinimalFragmentDoc = gql`
         photo
         type {
           label
-          type
+          key
         }
       }
     }
@@ -13600,6 +13572,7 @@ export const IndividualDetailedFragmentDoc = gql`
         photo
         type {
           label
+          key
         }
         documentNumber
       }
@@ -13868,6 +13841,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
         country
         type {
           label
+          key
         }
         documentNumber
         photo
@@ -20168,7 +20142,8 @@ export const GrievanceTicketDocument = gql`
             node {
               id
               type {
-                type
+                label
+                key
               }
               documentNumber
             }
@@ -20243,6 +20218,7 @@ export const GrievanceTicketDocument = gql`
               country
               type {
                 label
+                key
               }
               documentNumber
               photo
@@ -20277,6 +20253,7 @@ export const GrievanceTicketDocument = gql`
               country
               type {
                 label
+                key
               }
               documentNumber
               photo
@@ -20313,6 +20290,7 @@ export const GrievanceTicketDocument = gql`
               country
               type {
                 label
+                key
               }
               documentNumber
               photo
@@ -23095,7 +23073,7 @@ export const AllIndividualsDocument = gql`
               photo
               type {
                 label
-                type
+                key
               }
             }
           }
@@ -26416,7 +26394,6 @@ export type ResolversTypes = {
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
-  DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
   TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
@@ -26515,7 +26492,6 @@ export type ResolversTypes = {
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
-  ImportedDocumentTypeType: ImportedDocumentTypeType,
   ImportedIndividualIdentityNodeConnection: ResolverTypeWrapper<ImportedIndividualIdentityNodeConnection>,
   ImportedIndividualIdentityNodeEdge: ResolverTypeWrapper<ImportedIndividualIdentityNodeEdge>,
   ImportedIndividualIdentityNode: ResolverTypeWrapper<ImportedIndividualIdentityNode>,
@@ -26914,7 +26890,6 @@ export type ResolversParentTypes = {
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
-  DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
   BankAccountInfoNode: BankAccountInfoNode,
   TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
@@ -27013,7 +26988,6 @@ export type ResolversParentTypes = {
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
   ImportedDocumentTypeNode: ImportedDocumentTypeNode,
-  ImportedDocumentTypeType: ImportedDocumentTypeType,
   ImportedIndividualIdentityNodeConnection: ImportedIndividualIdentityNodeConnection,
   ImportedIndividualIdentityNodeEdge: ImportedIndividualIdentityNodeEdge,
   ImportedIndividualIdentityNode: ImportedIndividualIdentityNode,
@@ -27794,7 +27768,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
+  key?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   uniqueForIndividual?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   validForDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -28315,7 +28289,7 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
+  key?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isIdentityDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
 };

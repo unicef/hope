@@ -9,6 +9,7 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -287,7 +288,7 @@ class RdiDiiaCreateTask:
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis, rdi_mis)
         if not rdi_mis.business_area.postpone_deduplication:
-            DeduplicateTask.deduplicate_imported_individuals(
+            DeduplicateTask(registration_data_import_data_hub.business_area_slug).deduplicate_imported_individuals(
                 registration_data_import_datahub=registration_data_import_data_hub
             )
 
@@ -348,20 +349,20 @@ class RdiDiiaCreateTask:
         )
 
     def _get_document_types(self) -> None:
-        self.national_passport_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+        self.national_passport_document_type = ImportedDocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
         )
-        self.birth_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+        self.birth_document_type = ImportedDocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
-        self.other_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            type=IDENTIFICATION_TYPE_OTHER,
+        self.other_document_type = ImportedDocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
         )
-        self.imported_doc_type_for_tax_id, _ = ImportedDocumentType.objects.get_or_create(
-            type=IDENTIFICATION_TYPE_TAX_ID,
+        self.imported_doc_type_for_tax_id = ImportedDocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
-        self.doc_type_for_tax_id, _ = DocumentType.objects.get_or_create(
-            type=IDENTIFICATION_TYPE_TAX_ID,
+        self.doc_type_for_tax_id = DocumentType.objects.get(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
 
     def tax_id_exists(self, tax_id: "UUID") -> bool:
