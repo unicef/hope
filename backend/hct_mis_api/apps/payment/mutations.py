@@ -1003,6 +1003,11 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
+        if payment_plan.is_follow_up:
+            msg = "Entitlements of follow-up payment plan cannot be changed"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
         with transaction.atomic():
             import_service = XlsxPaymentPlanImportService(payment_plan, file)
             import_service.open_workbook()
@@ -1051,7 +1056,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
 
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
@@ -1102,6 +1107,11 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
             msg = "Rule Engine run in progress"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if payment_plan.is_follow_up:
+            msg = "Entitlements of follow-up payment plan cannot be changed"
             logger.error(msg)
             raise GraphQLError(msg)
 
