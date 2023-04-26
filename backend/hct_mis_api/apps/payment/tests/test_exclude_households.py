@@ -43,10 +43,7 @@ class TestExcludeHouseholds(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
-                "householdIds": [
-                    encode_id_base64(household_1.id, "Household"),
-                    encode_id_base64(household_2.id, "Household"),
-                ],
+                "householdIds": [payment_1.unicef_id, payment_2.unicef_id],
             },
         )
 
@@ -56,4 +53,4 @@ class TestExcludeHouseholds(APITestCase):
 
         self.assertEqual(payment_1.excluded, True)
         self.assertEqual(payment_2.excluded, True)
-        self.assertEqual(payment_plan.contains_excluded, True)
+        self.assertEqual(payment_plan.excluded_payments, [payment_1.unicef_id, payment_2.unicef_id])
