@@ -212,6 +212,24 @@ mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Uplo
 }
 """
 
+IMPORT_XLSX_PP_MUTATION = """
+mutation importXlsxPPList($paymentPlanId: ID!, $file: Upload!) {
+importXlsxPaymentPlanPaymentList(
+  paymentPlanId: $paymentPlanId
+  file: $file
+) {
+  paymentPlan {
+    id
+  }
+  errors {
+    sheet
+    coordinates
+    message
+  }
+}
+}
+"""
+
 
 class TestPaymentPlanReconciliation(APITestCase):
     @classmethod
@@ -871,4 +889,29 @@ class TestPaymentPlanReconciliation(APITestCase):
                     for payment in payment_plan.eligible_payments
                 ]
             )
+        )
+
+    def test_follow_up_pp_entitlements_cannot_be_changed_with_steficon_rule(self) -> None:
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+        rule = RuleFactory(name="SomeRule")
+
+        self.snapshot_graphql_request(
+            request_string=SET_STEFICON_RULE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+                "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+            },
+        )
+
+    def test_follow_up_pp_entitlements_cannot_be_changed_with_file_import(self) -> None:
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+
+        self.snapshot_graphql_request(
+            request_string=IMPORT_XLSX_PP_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+                "file": io.BytesIO(),
+            },
         )
