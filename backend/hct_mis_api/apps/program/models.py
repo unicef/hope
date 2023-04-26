@@ -140,7 +140,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False,
         help_text="""
         This boolean decides whether the target population sync will send
-        all individuals of a household thats part of the population or only
+        all individuals of a household that's part of the population or only
         the relevant ones (collectors etc.)""",
     )
 
@@ -169,3 +169,46 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     def __str__(self) -> str:
         return self.name
+
+
+class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "iteration",
+            "status",
+            "start_date",
+            "end_date",
+            "description",
+        ],
+    )
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
+    STATUS_CHOICE = (
+        (ACTIVE, _("Active")),
+        (CLOSED, _("Closed")),
+    )
+
+    iteration = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(1),
+        ],
+        db_index=True,
+        default=1,
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
+    start_date = models.DateField()  # first from program
+    end_date = models.DateField(null=True, blank=True)
+    description = models.CharField(
+        blank=True,
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
+    program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
+
+    class Meta:
+        unique_together = ("iteration", "program")
+        ordering = ["program", "iteration"]
+        verbose_name = "ProgrammeCycle"
+
+    def __str__(self) -> str:
+        return f"{self.program.name} - cycle {self.iteration}"
