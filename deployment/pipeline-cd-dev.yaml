@@ -36,7 +36,7 @@ stages:
         steps:
           - checkout: self
           - checkout: hct-mis-helm
-          - task: Kubernetes@v1
+          - task: Kubernetes@1
             inputs:
               connectionType: 'Kubernetes Service Connection' 
               kubernetesServiceEndpoint: $(Kubernetes.serviceConnection)
