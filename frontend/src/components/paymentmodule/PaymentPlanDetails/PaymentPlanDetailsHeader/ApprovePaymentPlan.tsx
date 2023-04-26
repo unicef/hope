@@ -93,9 +93,7 @@ export const ApprovePaymentPlan = ({
               maxWidth='md'
             >
               <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title'>
-                  {t('Approve Payment Plan')}
-                </DialogTitle>
+                <DialogTitle>{t('Approve Payment Plan')}</DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogContainer>

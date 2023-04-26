@@ -64,7 +64,7 @@ export const LockFspPaymentPlan = ({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>{t('Lock FSP')}</DialogTitle>
+          <DialogTitle>{t('Lock FSP')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
