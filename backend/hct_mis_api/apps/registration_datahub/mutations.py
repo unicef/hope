@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 
 import graphene
 from graphene_file_upload.scalars import Upload
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
