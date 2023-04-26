@@ -18,7 +18,10 @@ from PIL import Image
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import SheetImageLoader
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    SheetImageLoader,
+)
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -102,7 +105,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.business_area = BusinessArea.objects.first()
         ImportedDocumentType.objects.create(
             label="Tax Number Identification",
-            type=IDENTIFICATION_TYPE_TAX_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
         super().setUpTestData()
 
@@ -182,34 +185,14 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         expected = {
             "individual_14_birth_certificate_i_c": {
                 "individual": individual,
-                "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
+                "key": "birth_certificate",
                 "value": value,
             }
         }
+
         self.assertEqual(task.documents, expected)
 
-        # other_id_type_i_c
         number = "CD1247246Q12W"
-        name = "Some Doc"
-        header = "other_id_type_i_c"
-        task._handle_document_fields(
-            name,
-            header,
-            row_num,
-            individual,
-        )
-        expected = {
-            "individual_14_birth_certificate_i_c": {
-                "individual": individual,
-                "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
-                "value": value,
-            },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER"},
-        }
-        self.assertEqual(task.documents, expected)
-        # other_id_no_i_c
         header = "other_id_no_i_c"
         task._handle_document_fields(
             number,
@@ -220,11 +203,10 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         expected = {
             "individual_14_birth_certificate_i_c": {
                 "individual": individual,
-                "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
+                "key": "birth_certificate",
                 "value": value,
             },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER", "value": number},
+            "individual_14_other_id_i_c": {"individual": individual, "key": "other_id", "value": number},
         }
         self.assertEqual(task.documents, expected)
 
@@ -295,13 +277,13 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
             label="Birth Certificate",
-            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
         )
         task.documents = {
             "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
-                "type": "BIRTH_CERTIFICATE",
+                "key": "birth_certificate",
                 "value": "CD1247246Q12W",
                 "issuing_country": Country("AFG"),
                 "photo": create_document_image(),
@@ -392,8 +374,8 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
         )
 
-        document = ImportedDocument.objects.get(individual__row_id=5)
-        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
+        document = ImportedDocument.objects.filter(individual__row_id=5).first()
+        self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         self.assertEqual(document.document_number, "CD1247246Q12W")
 
     def test_import_empty_cell_as_blank_cell(self) -> None:
@@ -434,7 +416,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(ImportedDocumentType(label=label, type=doc_type))
+            document_types.append(ImportedDocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
@@ -709,11 +691,11 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertIsInstance(photo, ImageFieldFile)
         self.assertTrue(photo.name.startswith("signature-14_59_24"))
 
-        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.type
-        national_passport = ImportedDocument.objects.get(document_number=444111123).type.type
+        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.key
+        national_passport = ImportedDocument.objects.get(document_number=444111123).type.key
 
-        self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
-        self.assertEqual(national_passport, "NATIONAL_PASSPORT")
+        self.assertEqual(birth_certificate, "birth_certificate")
+        self.assertEqual(national_passport, "national_passport")
 
     def _generate_huge_file(self) -> None:
         base_form = {

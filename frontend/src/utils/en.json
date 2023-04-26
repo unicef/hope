@@ -800,5 +800,6 @@
   "Assign FSP per Delivery Mechanism": "Assign FSP per Delivery Mechanism",
   "Reconciliation Summary": "Reconciliation Summary",
   "Payment has been marked as failed.": "Payment has been marked as failed.",
-  "Are you sure you would like to mark payment as failed?": "Are you sure you would like to mark payment as failed?"
+  "Are you sure you would like to mark payment as failed?": "Are you sure you would like to mark payment as failed?",
+  "All delivery mechanisms must have a FSP assigned": "All delivery mechanisms must have a FSP assigned"
 }

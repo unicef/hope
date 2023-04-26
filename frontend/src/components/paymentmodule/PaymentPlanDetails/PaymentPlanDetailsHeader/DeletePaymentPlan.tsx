@@ -59,9 +59,7 @@ export const DeletePaymentPlan = ({
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Delete Payment Plan')}
-          </DialogTitle>
+          <DialogTitle>{t('Delete Payment Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>

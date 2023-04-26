@@ -4,9 +4,9 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleFilterChange } from '../../utils/utils';
-import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
@@ -48,7 +48,7 @@ export const RegistrationFilters = ({
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy='filter-search'
             fullWidth
           />
         </Grid>
@@ -59,7 +59,8 @@ export const RegistrationFilters = ({
             label={t('Imported By')}
             fullWidth
             filter={filter}
-            value={filter.impo}
+            value={filter.importedBy}
+            data-cy='filter-imported-by'
           />
         </Grid>
         <Grid item xs={4}>
@@ -68,6 +69,7 @@ export const RegistrationFilters = ({
             label={t('Status')}
             onChange={(e) => handleFilterChange('status', e.target.value)}
             fullWidth
+            data-cy='filter-status'
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -92,6 +94,7 @@ export const RegistrationFilters = ({
               placeholder='From'
               icon={<GroupIcon />}
               onChange={(e) => handleFilterChange('sizeMin', e.target.value)}
+              data-cy='filter-size-min'
             />
           </Grid>
           <Grid item xs={6}>
@@ -101,6 +104,7 @@ export const RegistrationFilters = ({
               placeholder='To'
               icon={<GroupIcon />}
               onChange={(e) => handleFilterChange('sizeMax', e.target.value)}
+              data-cy='filter-size-max'
             />
           </Grid>
         </Grid>
@@ -116,6 +120,7 @@ export const RegistrationFilters = ({
                 )
               }
               value={filter.importDateRangeMin}
+              data-cy='filter-import-date-range-min'
             />
           </Grid>
           <Grid item xs={6}>
@@ -128,6 +133,7 @@ export const RegistrationFilters = ({
                 )
               }
               value={filter.importDateRangeMax}
+              data-cy='filter-import-date-range-max'
             />
           </Grid>
         </Grid>

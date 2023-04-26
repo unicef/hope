@@ -14,7 +14,9 @@ from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    HardDocumentDeduplication,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -68,6 +70,11 @@ def registration_xlsx_import_task(
 
         with configure_scope() as scope:
             scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
+
+            RegistrationDataImport.objects.filter(datahub_id=registration_data_import_id).update(
+                status=RegistrationDataImport.IMPORTING
+            )
+
             RdiXlsxCreateTask().execute(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
@@ -196,8 +203,13 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
         if not locked:
             return True
         try:
+            from hct_mis_api.apps.registration_data.models import RegistrationDataImport
             from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
                 RdiMergeTask,
+            )
+
+            RegistrationDataImport.objects.filter(id=registration_data_import_id).update(
+                status=RegistrationDataImport.MERGING
             )
 
             RdiMergeTask().execute(registration_data_import_id)
@@ -233,7 +245,10 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         with configure_scope() as scope:
             scope.set_tag("business_area", rdi_obj.business_area_slug)
 
-            DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
+            with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+                DeduplicateTask(rdi_obj.business_area_slug).deduplicate_imported_individuals(
+                    registration_data_import_datahub=rdi_obj
+                )
     except Exception as e:
         handle_rdi_exception(registration_data_import_id, e)
         raise self.retry(exc=e)
@@ -480,7 +495,7 @@ def deduplicate_documents() -> bool:
                 documents_query = Document.objects.filter(
                     status=Document.STATUS_PENDING, individual__registration_data_import=rdi
                 )
-                DeduplicateTask.hard_deduplicate_documents(
+                HardDocumentDeduplication().deduplicate(
                     documents_query,
                     registration_data_import=rdi,
                 )
@@ -489,7 +504,7 @@ def deduplicate_documents() -> bool:
             documents_query = Document.objects.filter(
                 status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
             )
-            DeduplicateTask.hard_deduplicate_documents(
+            HardDocumentDeduplication().deduplicate(
                 documents_query,
             )
     return True
