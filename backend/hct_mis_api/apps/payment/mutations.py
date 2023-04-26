@@ -3,7 +3,7 @@ import logging
 from base64 import b64decode
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, List
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -23,6 +23,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
+from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx,
     import_payment_plan_payment_list_from_xlsx,
@@ -1138,6 +1139,26 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class ExcludeHouseholdsMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        household_ids = graphene.List(graphene.ID, required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(
+            cls, root: Any, info: Any, payment_plan_id: str, household_ids: List[str]
+    ) -> "ExcludeHouseholdsMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        decoded_household_ids = [decode_id_string(household_id) for household_id in household_ids]
+        Payment.objects.filter(parent_id=payment_plan.id, household_id__in=decoded_household_ids).update(excluded=True)
+
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
@@ -1169,3 +1190,4 @@ class Mutations(graphene.ObjectType):
     import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
     import_xlsx_payment_plan_payment_list_per_fsp = ImportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
+    exclude_households = ExcludeHouseholdsMutation.Field()
