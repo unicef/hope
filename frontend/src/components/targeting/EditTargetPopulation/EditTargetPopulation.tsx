@@ -7,10 +7,7 @@ import * as Yup from 'yup';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import {
-  getFullNodeFromEdgesById,
-  handleValidationErrors,
-} from '../../../utils/utils';
+import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import {
   ProgramStatus,
   TargetPopulationQuery,
@@ -86,7 +83,7 @@ export const EditTargetPopulation = ({
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
-  const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       await mutate({
         variables: {

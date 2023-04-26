@@ -16,10 +16,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import {
-  getFullNodeFromEdgesById,
-  handleValidationErrors,
-} from '../../../utils/utils';
+import { getFullNodeFromEdgesById } from '../../../utils/utils';
 import {
   ProgramStatus,
   useAllProgramsForChoicesQuery,
@@ -79,7 +76,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
-  const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
