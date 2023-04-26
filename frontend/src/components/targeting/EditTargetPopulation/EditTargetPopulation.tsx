@@ -109,15 +109,7 @@ export const EditTargetPopulation = ({
         historyMethod: 'push',
       });
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'updateTargetPopulation',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while creating Target Population'));
-      }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
