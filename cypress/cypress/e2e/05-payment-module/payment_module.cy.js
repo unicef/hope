@@ -101,33 +101,33 @@ context("Payment", () => {
         cy.get("[data-cy='button-submit']").click({ force: true });
         cy.get('[data-cy="status-container"]').contains("ACCEPTED");
 
-        // //XLSX template - can be used in another spec
-        // cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
-        // cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-        // cy.reload();
-        // cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-        // const nameXlsx = xlsxFileName(paymentPlanUnicefId);
-        // const downloadedFilePathXlsx = `${downloadsFolder}/${nameXlsx}`;
-        // cy.exec(
-        //   `node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePathXlsx}`
-        //   );
-        // cy.get('[data-cy="button-download-template"]').click({ force: true });
-        // const nameTemplate = xlsxFileName(paymentPlanUnicefId);
-        // const filledFilePathTemplate = `out_${nameTemplate}`;
-        // cy.get('[data-cy="button-import"]').click({ force: true });
-        // cy.fixture(filledFilePathTemplate, "base64").then((fileContent) => {
-        //   cy.get('[data-cy="file-input"]').upload({
-        //     fileContent,
-        //     fileName: name,
-        //     mimeType:
-        //       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        //     encoding: "base64",
-        //   });
-        // });
-        // cy.get('[data-cy="button-import-entitlement"').click({ force: true });
-        // cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
-        // cy.reload();
-        // cy.get("td").should("not.contain", "Missing");
+        //XLSX template - can be used in another spec
+        cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
+        cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+        cy.reload();
+        cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+        const nameXlsx = xlsxFileName(paymentPlanUnicefId);
+        const downloadedFilePathXlsx = `${downloadsFolder}/${nameXlsx}`;
+        cy.exec(
+          `node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePathXlsx}`
+          );
+        cy.get('[data-cy="button-download-template"]').click({ force: true });
+        const nameTemplate = xlsxFileName(paymentPlanUnicefId);
+        const filledFilePathTemplate = `out_${nameTemplate}`;
+        cy.get('[data-cy="button-import"]').click({ force: true });
+        cy.fixture(filledFilePathTemplate, "base64").then((fileContent) => {
+          cy.get('[data-cy="file-input"]').upload({
+            fileContent,
+            fileName: name,
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            encoding: "base64",
+          });
+        });
+        cy.get('[data-cy="button-import-entitlement"').click({ force: true });
+        cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+        cy.reload();
+        cy.get("td").should("not.contain", "Missing");
 
         cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
         cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting

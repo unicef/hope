@@ -119,3 +119,4 @@ venv.bak/
 *.DS_Store
 **/.vscode/settings.json
 /HCT-MIS.code-workspace
+cypress-results

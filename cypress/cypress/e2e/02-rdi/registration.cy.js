@@ -56,8 +56,9 @@ it('RDI- Searches by import title', () => {
         });
       });
     });
-    cy.wait(5000)
-    cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+    cy.get('[data-cy="button-import-rdi"]', {
+    timeout: 20000
+    }).should('be.enabled').click({ force: true })
     cy.get("span").contains("Registration Data Import").click();
     cy.reload()
     cy.get('[data-cy="filter-search"]').type(name)
@@ -128,8 +129,9 @@ it('RDI- Searches by import title', () => {
         });
       });
     });
-    cy.wait(5000)
-    cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+    cy.get('[data-cy="button-import-rdi"]', {
+    timeout: 20000
+    }).should('be.enabled').click({ force: true })
     cy.get("span").contains("Registration Data Import").click();
     cy.reload()
     cy.get('[data-cy="filter-search"]').type(name)
@@ -171,8 +173,9 @@ function uploadRDIFile() {
       });
     });
   });
-  cy.wait(5000)
-  cy.get('[data-cy="button-import-rdi"]').click({ force: true })
+  cy.get('[data-cy="button-import-rdi"]', {
+    timeout: 20000
+  }).should('be.enabled').click({ force: true })
   cy.get("span").contains("Registration Data Import").click();
   cy.reload()
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
