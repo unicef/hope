@@ -1,16 +1,10 @@
 import React, { ReactElement, useState } from 'react';
-<<<<<<< HEAD
 import { useLocation } from 'react-router-dom';
-=======
->>>>>>> develop
 import {
   LookUpPaymentRecordsQueryVariables,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
-<<<<<<< HEAD
   useLookUpPaymentRecordsQuery,
-=======
->>>>>>> develop
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
