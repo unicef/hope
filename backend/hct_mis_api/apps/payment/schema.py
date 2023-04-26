@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 
 import _decimal
 import graphene
-from graphene import Boolean, relay, List
+from graphene import List, relay
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
