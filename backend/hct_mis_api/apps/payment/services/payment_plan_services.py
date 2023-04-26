@@ -345,6 +345,7 @@ class PaymentPlanService:
             created_by=user,
             target_population=target_population,
             program=target_population.program,
+            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
             currency=input_data["currency"],
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,

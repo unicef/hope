@@ -401,6 +401,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
 
+    program_cycle = models.ForeignKey("program.ProgramCycle", on_delete=models.CASCADE)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
