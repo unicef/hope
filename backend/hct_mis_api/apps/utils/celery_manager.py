@@ -2,7 +2,7 @@ import abc
 import logging
 from typing import Any, List, Tuple
 
-from django.db.models import Q
+from django.core.exceptions import FieldDoesNotExist
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
@@ -26,11 +26,13 @@ class BaseCeleryManager(abc.ABC):
     lookup: str = ""
 
     def create_obj_list(self) -> List[str]:
-        return list(
-            self.model.objects.filter(
-                Q(status=self.model_status) | Q(background_action_status=self.model_status)
-            ).values_list("id", flat=True)
-        )
+        try:
+            self.model._meta.get_field("background_action_status")
+            return list(
+                self.model.objects.filter(background_action_status=self.model_status).values_list("id", flat=True)
+            )
+        except FieldDoesNotExist:
+            return list(self.model.objects.filter(status=self.model_status).values_list("id", flat=True))
 
     @staticmethod
     def get_celery_tasks() -> Tuple[Any, Any, Any]:
