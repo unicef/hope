@@ -44,10 +44,5 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label",)
-<<<<<<< HEAD
-    list_display = ("label",)
-    list_filter = ("label",)
-=======
     list_display = ("label", "key")
     list_filter = ("label", "key")
->>>>>>> develop
