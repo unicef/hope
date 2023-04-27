@@ -73,11 +73,10 @@ stages:
                 registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
-          - displayName: "TAIL UPGRADE JOB"
-            script: |
+          - script: |
               timeout 120 kubectl logs -l git/sha:$(Build.SourceVersion) -l hope/job:upgrade \ 
               --tail=-1 --prefix | awk '/Upgrade succeeded/{print $0;exit} /.*/{print $0;}'
-          - displayName: "TAIL BACKEND"
-            script: |
+          - script: |
               timeout 120 kubectl logs -l git/sha:$(Build.SourceVersion) -l hope/service:backend \
-              --tail=-1 --prefix| awk '/Worker spawned/{print $0;exit} /.*/{print $0;}'"
+              --tail=-1 --prefix| awk '/Worker spawned/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL BACKEND"
