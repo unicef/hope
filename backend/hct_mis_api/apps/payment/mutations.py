@@ -1139,7 +1139,6 @@ class ExcludeHouseholdsMutation(PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, payment_plan_id: str, household_unicef_ids: List[str]
     ) -> "ExcludeHouseholdsMutation":
-
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         if payment_plan.excluded_payments:
             msg = "This Payment Plan contains already excluded payments"
