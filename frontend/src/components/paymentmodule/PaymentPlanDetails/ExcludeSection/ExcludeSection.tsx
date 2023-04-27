@@ -14,6 +14,7 @@ import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -25,12 +26,17 @@ export const ExcludeSection = ({
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [value, setValue] = useState('');
-  const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [excludedIds, setExcludedIds] = useState<string[]>(
+    paymentPlan?.excludedHouseholdsIds || [],
+  );
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
+
+  const [mutate] = useExcludeHouseholdsMutation();
 
   const handleChange = (event): void => {
     if (event.target.value === '') {
@@ -39,9 +45,22 @@ export const ExcludeSection = ({
     setValue(event.target.value);
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
     console.log('🤪🤪🤪 idsToSave', idsToSave);
+    try {
+      await mutate({
+        variables: {
+          input: {
+            paymentPlanId: paymentPlan,
+            excludedHouseholdsIds: idsToSave,
+          },
+        },
+      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+      return;
+    }
   };
 
   const handleApply = (): void => {
