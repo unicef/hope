@@ -132,13 +132,17 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
 
+        tp_name = input.get("name", "").strip()
+        if TargetPopulation.objects.filter(name=tp_name).exists():
+            raise ValidationError(f"Target population with name {tp_name} already exists")
+
         targeting_criteria_input = input.get("targeting_criteria")
 
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
-            name=input.get("name", "").strip(),
+            name=tp_name,
             created_by=user,
             business_area=business_area,
             excluded_ids=input.get("excluded_ids", "").strip(),
@@ -172,7 +176,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
-        name = input.get("name")
+        name = input.get("name", "").strip()
         program_id_encoded = input.get("program_id")
         vulnerability_score_min = input.get("vulnerability_score_min")
         vulnerability_score_max = input.get("vulnerability_score_max")
@@ -187,6 +191,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
+        if TargetPopulation.objects.filter(name=name).exists():
+            raise ValidationError(f"Target population with name {name} already exists")
         if target_population.is_finalized():
             msg = "Finalized Target Population can't be changed"
             logger.error(msg)
