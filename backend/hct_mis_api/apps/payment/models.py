@@ -829,6 +829,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity", _("Entitlement Quantity")),
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
+        ("delivery_date", _("Delivery Date")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -883,11 +884,14 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity": (payment, "entitlement_quantity"),
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
+            "delivery_date": (payment, "delivery_date"),
         }
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
         if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
             return float(-1)
+        if column_name == "delivery_date" and payment.delivery_date is not None:
+            return str(payment.delivery_date)
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
 
