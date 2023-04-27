@@ -7,6 +7,7 @@ import { MiśTheme } from '../../../../theme';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { PaperContainer } from '../../../targeting/PaperContainer';
+import { FieldBorder } from '../../../core/FieldBorder';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -21,13 +22,6 @@ const Title = styled.div`
 
 const ContentWrapper = styled.div`
   display: flex;
-`;
-
-const FieldBorder = styled.div`
-  padding: 0 ${({ theme }) => theme.spacing(2)}px;
-  border-color: ${(props) => props.color};
-  border-left-width: 2px;
-  border-left-style: solid;
 `;
 
 const SummaryBorder = styled.div`

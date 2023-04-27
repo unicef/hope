@@ -13,7 +13,6 @@ import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
@@ -34,13 +33,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
 import { Missing } from '../../core/Missing';
 import { PermissionDenied } from '../../core/PermissionDenied';
-
-const FieldBorder = styled.div`
-  padding: 0 ${({ theme }) => theme.spacing(2)}px;
-  border-color: ${(props) => props.color};
-  border-left-width: 2px;
-  border-left-style: solid;
-`;
+import { FieldBorder } from '../../core/FieldBorder';
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];

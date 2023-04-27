@@ -216,6 +216,21 @@ export const PAYMENT_PLAN_QUERY = gql`
         numberOfPayments
         reconciled
       }
+      excludedHouseholdsIds
+      isFollowUp
+      followUps {
+        totalCount
+        edges {
+          node {
+            id
+            unicefId
+            createdAt
+            paymentItems {
+              totalCount
+            }
+          }
+        }
+      }
     }
   }
 `;
