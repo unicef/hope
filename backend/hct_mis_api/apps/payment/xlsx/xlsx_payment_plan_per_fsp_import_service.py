@@ -101,12 +101,6 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         cell = row[self.xlsx_headers.index("delivered_quantity")]
         delivered_quantity = cell.value
 
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.info(cell)
-        logger.info(cell.value)
-
         if delivered_quantity is not None and delivered_quantity != "":
             delivered_quantity = to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:  # update value
@@ -223,11 +217,16 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         if delivery_date is None:
             delivery_date = timezone.now()
+            print("delivery_date", delivery_date)
         elif isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
         if delivery_date.tzinfo is None:
             delivery_date = pytz.utc.localize(delivery_date)
+
+        # payment_delivery_date = payment.delivery_date
+        if payment_delivery_date := payment.delivery_date:
+            payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
 
         if delivered_quantity is not None and delivered_quantity != "":
             status, delivered_quantity = self._get_delivered_quantity_status_and_value(
@@ -237,7 +236,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             if (
                 (delivered_quantity != payment.delivered_quantity)
                 or (status != payment.status)
-                or (delivery_date != payment.delivery_date.replace(tzinfo=None))
+                or (delivery_date != payment_delivery_date)
             ):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
