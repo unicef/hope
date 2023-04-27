@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
@@ -14,7 +15,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
 )
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    FlexRegistrationService,
+    UkraineBaseRegistrationService,
 )
 
 
@@ -28,7 +29,7 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(self) -> None:
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_TAX_ID,
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
         )
         BusinessArea.objects.create(
@@ -62,6 +63,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email123@mail.com",
         }
         individual_wit_bank_account_and_tax = {
             "tax_id_no_i_c": "123123123",
@@ -73,6 +75,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email321@mail.com",
         }
         individual_with_no_tax = {
             "tax_id_no_i_c": "",
@@ -84,6 +87,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email111@mail.com",
         }
         individual_without_bank_account = {
             "tax_id_no_i_c": "TESTID",
@@ -95,6 +99,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email222@mail.com",
         }
         individual_with_tax_id_which_is_too_long = {
             "tax_id_no_i_c": "x" * 300,
@@ -106,6 +111,7 @@ class TestUkrainianRegistrationService(TestCase):
             "birth_date": "1991-11-18",
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
+            "email": "email333@mail.com",
         }
         defaults = {
             "registration": 2,
@@ -159,7 +165,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
-        service = FlexRegistrationService()
+        service = UkraineBaseRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)
@@ -167,19 +173,21 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
         self.assertEqual(
-            ImportedDocument.objects.filter(document_number="TESTID", type__type=IDENTIFICATION_TYPE_TAX_ID).count(),
+            ImportedDocument.objects.filter(
+                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+            ).count(),
             1,
         )
 
     def test_import_data_to_datahub_retry(self) -> None:
-        service = FlexRegistrationService()
+        service = UkraineBaseRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids_all = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
-        service = FlexRegistrationService()
+        service = UkraineBaseRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records[:2]]
         service.process_records(rdi.id, records_ids)
@@ -187,7 +195,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
-        service = FlexRegistrationService()
+        service = UkraineBaseRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 
         service.process_records(rdi.id, [x.id for x in self.bad_records])

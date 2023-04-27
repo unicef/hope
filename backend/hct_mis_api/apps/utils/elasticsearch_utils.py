@@ -1,7 +1,7 @@
 import enum
 import logging
 from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 
 from django.db.models import Model
 
@@ -60,7 +60,7 @@ def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
 
 
-def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Document") -> None:
+def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Type[Document]") -> None:
     query_dict = {"query": {"terms": {"id.keyword": [str(_id) for _id in id_list]}}}
     search = Search(index=document.Index.name)
     search.update_from_dict(query_dict)

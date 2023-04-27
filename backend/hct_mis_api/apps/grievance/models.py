@@ -54,6 +54,19 @@ class GrievanceTicketManager(models.Manager):
         )
 
 
+class GenericPaymentTicket(TimeStampedUUIDModel):
+    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    payment_object_id = UUIDField(null=True)
+    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
+
+    class Meta:
+        abstract = True
+
+    @property
+    def payment_record(self) -> Optional[Union[Payment, PaymentRecord]]:
+        return self.payment_obj
+
+
 class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -446,7 +459,7 @@ class TicketNote(TimeStampedUUIDModel):
     )
 
 
-class TicketComplaintDetails(TimeStampedUUIDModel):
+class TicketComplaintDetails(GenericPaymentTicket):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="complaint_ticket_details",
@@ -464,30 +477,13 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = UUIDField(null=True)
-    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
-
-    @property
-    def payment_record(self) -> Optional[Union[Payment, PaymentRecord]]:
-        from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
-
-        if self.payment_object_id:
-            return get_payment_items_sequence_qs().get(id=self.payment_object_id)
-        return None
 
 
-class TicketSensitiveDetails(TimeStampedUUIDModel):
+class TicketSensitiveDetails(GenericPaymentTicket):
     ticket = models.OneToOneField(
         "grievance.GrievanceTicket",
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
-    )
-    payment_record = models.ForeignKey(
-        "payment.PaymentRecord",
-        related_name="sensitive_ticket_details",
-        on_delete=models.CASCADE,
-        null=True,
     )
     household = models.ForeignKey(
         "household.Household",

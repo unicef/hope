@@ -47,15 +47,15 @@ export const fakeImportedIndividualDetailedFragment = {
       {
         node: {
           id:
-            'SW1wb3J0ZWREb2N1bWVudE5vZGU6MDE0NThkYjEtMTJjYS00NzE1LTk0ZTMtNGQwODFiNjMzZmE4',
+            'RG9jdW1lbnROb2RlOjBlYjYwZmY5LWRhMDYtNGYwMC1iMzQwLTFhOTU5Y2NjMjQyMw==',
           country: 'Poland',
+          documentNumber: 'WSH221365',
+          photo: null,
           type: {
             label: 'National ID',
-            country: 'PL',
+            key: 'NATIONAL_ID',
             __typename: 'ImportedDocumentTypeNode',
           },
-          documentNumber: 'BSH221315',
-          photo: null,
           __typename: 'ImportedDocumentNode',
         },
         __typename: 'ImportedDocumentNodeEdge',
