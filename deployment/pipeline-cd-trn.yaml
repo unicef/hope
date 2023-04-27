@@ -35,6 +35,17 @@ stages:
         steps:
           - checkout: self
           - checkout: hct-mis-helm
+<<<<<<< HEAD
+=======
+          - task: HelmDeploy@0
+            displayName: "Update Chart dependencies"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              command: package
+              updatedependency: true
+              chartPath: 'hct-mis-helm'
+>>>>>>> TestingCypress2
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -43,7 +54,11 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
+<<<<<<< HEAD
               chartPath: 'hct-mis-helm/pkg/hope-$(Chart.version).tgz'
+=======
+              chartPath: 'hct-mis-helm'
+>>>>>>> TestingCypress2
               releaseName: 'hope'
               install: true
               waitForExecution: false

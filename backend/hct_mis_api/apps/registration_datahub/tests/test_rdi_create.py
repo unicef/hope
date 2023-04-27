@@ -18,10 +18,14 @@ from PIL import Image
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+<<<<<<< HEAD
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
 )
+=======
+from hct_mis_api.apps.core.utils import SheetImageLoader
+>>>>>>> TestingCypress2
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -374,8 +378,13 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
         )
 
+<<<<<<< HEAD
         document = ImportedDocument.objects.filter(individual__row_id=5).first()
         self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
+=======
+        document = ImportedDocument.objects.get(individual__row_id=5)
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
+>>>>>>> TestingCypress2
         self.assertEqual(document.document_number, "CD1247246Q12W")
 
     def test_import_empty_cell_as_blank_cell(self) -> None:
