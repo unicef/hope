@@ -456,6 +456,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
+    excluded_payments = graphene.List(graphene.String)
 
     class Meta:
         model = PaymentPlan
@@ -513,6 +514,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
+
+    def resolve_excluded_payments(self, info: Any) -> graphene.List:
+        return self.excluded_payments
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
