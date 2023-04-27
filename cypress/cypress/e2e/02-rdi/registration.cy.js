@@ -178,6 +178,7 @@ function uploadRDIFile() {
   }).should('be.enabled').click({ force: true })
   cy.get("span").contains("Registration Data Import").click();
   cy.reload()
+  cy.wait(5000)
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'IN REVIEW')
 }
 function mergeRDIFile() {
