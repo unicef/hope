@@ -3,7 +3,7 @@ import logging
 from base64 import b64decode
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -1127,6 +1127,29 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class ExcludeHouseholdsMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        household_unicef_ids = graphene.List(graphene.String, required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, household_unicef_ids: List[str]
+    ) -> "ExcludeHouseholdsMutation":
+
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        if payment_plan.excluded_payments:
+            msg = "This Payment Plan contains already excluded payments"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        payment_plan.payment_items.filter(household__unicef_id__in=household_unicef_ids).update(excluded=True)
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
@@ -1158,3 +1181,4 @@ class Mutations(graphene.ObjectType):
     import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
     import_xlsx_payment_plan_payment_list_per_fsp = ImportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
+    exclude_households = ExcludeHouseholdsMutation.Field()
