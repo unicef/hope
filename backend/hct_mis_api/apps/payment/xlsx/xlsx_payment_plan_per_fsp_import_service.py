@@ -132,7 +132,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         try:
             if not isinstance(delivery_date, datetime.datetime):
                 delivery_date = parse(delivery_date)
-            if delivery_date != payment.delivery_date.replace(tzinfo=None):
+
+            if not delivery_date.tzinfo:
+                delivery_date = pytz.utc.localize(delivery_date)
+
+            if delivery_date != payment.delivery_date:
                 self.is_updated = True
         except Exception:
             self.errors.append(
@@ -217,14 +221,12 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         if delivery_date is None:
             delivery_date = timezone.now()
-            print("delivery_date", delivery_date)
         elif isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
         if delivery_date.tzinfo is None:
             delivery_date = pytz.utc.localize(delivery_date)
 
-        # payment_delivery_date = payment.delivery_date
         if payment_delivery_date := payment.delivery_date:
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
 
