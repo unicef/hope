@@ -19733,15 +19733,15 @@
             "deprecationReason": null
           },
           {
-            "name": "excludedPayments",
+            "name": "excludedHouseholds",
             "description": null,
             "args": [],
             "type": {
               "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "OBJECT",
+                "name": "HouseholdNode",
                 "ofType": null
               }
             },
@@ -52367,7 +52367,7 @@
             "description": null,
             "args": [
               {
-                "name": "householdUnicefIds",
+                "name": "excludedHouseholdsIds",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",

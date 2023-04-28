@@ -2229,7 +2229,7 @@ type Mutations {
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
-  excludeHouseholds(householdUnicefIds: [String]!, paymentPlanId: ID!): ExcludeHouseholdsMutation
+  excludeHouseholds(excludedHouseholdsIds: [String]!, paymentPlanId: ID!): ExcludeHouseholdsMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2613,7 +2613,7 @@ type PaymentPlanNode implements Node {
   availablePaymentRecordsCount: Int
   reconciliationSummary: ReconciliationSummaryNode
   listOfPaymentPlans: [ID]
-  excludedPayments: [String]
+  excludedHouseholds: [HouseholdNode]
 }
 
 type PaymentPlanNodeConnection {
