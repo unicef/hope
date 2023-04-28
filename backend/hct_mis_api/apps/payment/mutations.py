@@ -1166,7 +1166,7 @@ class CreateFollowUpPaymentPlanMutation(PermissionMutation):
     class Arguments:
         payment_plan_id = graphene.ID(required=True)
         dispersion_start_date = graphene.Date(required=True)
-        dispersion_start_end = graphene.Date(required=True)
+        dispersion_end_date = graphene.Date(required=True)
 
     @classmethod
     @is_authenticated
@@ -1177,14 +1177,14 @@ class CreateFollowUpPaymentPlanMutation(PermissionMutation):
         info: Any,
         payment_plan_id: str,
         dispersion_start_date: date,
-        dispersion_start_end: date,
+        dispersion_end_date: date,
         **kwargs: Any,
     ) -> "CreateFollowUpPaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
 
         PaymentPlanService(payment_plan).create_follow_up(
-            info.context.user, dispersion_start_date, dispersion_start_end
+            info.context.user, dispersion_start_date, dispersion_end_date
         )
 
         return cls(payment_plan)
