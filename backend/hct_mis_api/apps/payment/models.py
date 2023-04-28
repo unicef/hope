@@ -666,8 +666,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def eligible_payments(self) -> QuerySet:
-        # TODO add excluded payments from excluded payments list here
-        return self.payment_items.exclude(conflicted=True)
+        return self.payment_items.eligible()
 
     @property
     def can_be_locked(self) -> bool:

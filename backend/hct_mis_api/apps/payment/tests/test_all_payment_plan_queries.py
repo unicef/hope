@@ -194,7 +194,7 @@ class TestPaymentPlanQueries(APITestCase):
             hh2 = HouseholdFactory(head_of_household=hoh2)
             PaymentFactory(
                 parent=cls.pp,
-                excluded=False,
+                conflicted=False,
                 household=hh1,
                 head_of_household=hoh1,
                 entitlement_quantity=100.00,
