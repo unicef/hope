@@ -603,6 +603,7 @@ class PaymentPlanService:
         source_pp = self.payment_plan
         follow_up_pp = PaymentPlan.objects.create(
             status=PaymentPlan.Status.PREPARING,
+            status_date = timezone.now(),
             is_follow_up=True,
             business_area=source_pp.business_area,
             created_by=user,
