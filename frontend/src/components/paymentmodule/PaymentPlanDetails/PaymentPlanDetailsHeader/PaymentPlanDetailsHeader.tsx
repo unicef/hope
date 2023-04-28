@@ -174,7 +174,8 @@ export const PaymentPlanDetailsHeader = ({
     <PageHeader
       title={
         <Box display='flex' alignItems='center'>
-          {t('Payment Plan')} ID:{' '}
+          {paymentPlan.isFollowUp ? t('Follow-up ') : null} {t('Payment Plan')}{' '}
+          ID:{' '}
           <Box ml={1}>
             <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
           </Box>
