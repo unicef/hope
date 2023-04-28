@@ -6,26 +6,40 @@ import {
   Grid,
   Typography,
 } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/EditRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import EditIcon from '@material-ui/icons/EditRounded';
+import {
+  PaymentPlanQuery,
+  useExcludeHouseholdsPpMutation,
+} from '../../../../__generated__/graphql';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { StyledTextField } from '../../../../shared/StyledTextField';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
 
+interface ExcludeSectionProps {
+  initialOpen?: boolean;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
+}
+
 export const ExcludeSection = ({
   initialOpen = false,
-}: {
-  initialOpen?: boolean;
-}): React.ReactElement => {
+  paymentPlan,
+}: ExcludeSectionProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [value, setValue] = useState('');
-  const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [excludedIds, setExcludedIds] = useState<string[]>(
+    paymentPlan?.excludedHouseholds?.map((el) => el.unicefId) || [],
+  );
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
+
+  const [mutate, { error }] = useExcludeHouseholdsPpMutation();
 
   const handleChange = (event): void => {
     if (event.target.value === '') {
@@ -34,9 +48,21 @@ export const ExcludeSection = ({
     setValue(event.target.value);
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
-    console.log('🤪🤪🤪 idsToSave', idsToSave);
+    try {
+      await mutate({
+        variables: {
+          paymentPlanId: paymentPlan.id,
+          excludedHouseholdsIds: idsToSave,
+        },
+      });
+      if (!error) {
+        showMessage(t('Households excluded from Payment Plan'));
+      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
   };
 
   const handleApply = (): void => {
@@ -220,9 +246,9 @@ export const ExcludeSection = ({
         <Box display='flex' flexDirection='column'>
           {renderInputAndApply()}
           <Grid container item xs={6}>
-            {errors?.map((error) => (
+            {errors?.map((formError) => (
               <Grid item xs={12}>
-                <FormHelperText error>{error}</FormHelperText>
+                <FormHelperText error>{formError}</FormHelperText>
               </Grid>
             ))}
           </Grid>
