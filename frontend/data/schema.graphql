@@ -2219,7 +2219,7 @@ type Mutations {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   actionPaymentPlanMutation(input: ActionPaymentPlanInput!): ActionPaymentPlanMutation
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
-  createFollowUpPaymentPlan(dispersionStartDate: Date!, dispersionStartEnd: Date!, paymentPlanId: ID!): CreateFollowUpPaymentPlanMutation
+  createFollowUpPaymentPlan(dispersionEndDate: Date!, dispersionStartDate: Date!, paymentPlanId: ID!): CreateFollowUpPaymentPlanMutation
   updatePaymentPlan(input: UpdatePaymentPlanInput!): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
   chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
