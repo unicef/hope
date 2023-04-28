@@ -1160,6 +1160,36 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class CreateFollowUpPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+        dispersion_start_date = graphene.Date(required=True)
+        dispersion_end_date = graphene.Date(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        dispersion_start_date: date,
+        dispersion_end_date: date,
+        **kwargs: Any,
+    ) -> "CreateFollowUpPaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+
+        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
+            info.context.user, dispersion_start_date, dispersion_end_date
+        )
+
+        return cls(follow_up_pp)
+
+
 class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
@@ -1181,6 +1211,7 @@ class Mutations(graphene.ObjectType):
     )
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
     create_payment_plan = CreatePaymentPlanMutation.Field()
+    create_follow_up_payment_plan = CreateFollowUpPaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
