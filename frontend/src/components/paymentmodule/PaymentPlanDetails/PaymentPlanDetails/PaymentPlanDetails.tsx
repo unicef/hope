@@ -93,12 +93,10 @@ export const PaymentPlanDetails = ({
             <Grid container direction='column' item xs={3} spacing={6}>
               <Grid item xs={12}>
                 <FieldBorder color='#84A1CA'>
-                  <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-                    <RelatedFollowUpPaymentPlans
-                      followUps={followUps}
-                      businessArea={businessArea}
-                    />
-                  </LabelizedField>
+                  <RelatedFollowUpPaymentPlans
+                    followUps={followUps}
+                    businessArea={businessArea}
+                  />
                 </FieldBorder>
               </Grid>
             </Grid>
