@@ -46,7 +46,7 @@ export const CreateFollowUpPaymentPlan = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [mutate, { loading }] = useCreateFollowUpPpMutation();
+  const [mutate, { error, loading }] = useCreateFollowUpPpMutation();
   const { showMessage } = useSnackbar();
 
   const { id } = paymentPlan;
@@ -90,10 +90,17 @@ export const CreateFollowUpPaymentPlan = ({
           dispersionEndDate: values.dispersionEndDate,
         },
       });
-      showMessage(t('Payment Plan Created'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
-        historyMethod: 'push',
-      });
+      if (
+        !error &&
+        !loading &&
+        res.data.createFollowUpPaymentPlan.paymentPlan.id
+      ) {
+        setDialogOpen(false);
+        showMessage(t('Payment Plan Created'), {
+          pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+          historyMethod: 'push',
+        });
+      }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
