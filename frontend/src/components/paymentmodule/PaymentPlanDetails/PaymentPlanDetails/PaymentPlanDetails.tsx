@@ -10,7 +10,7 @@ import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { FieldBorder } from '../../../core/FieldBorder';
-import RelatedFollowUpPaymentPlans from './RelatedFollowUpPaymentPlans';
+import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 
 interface PaymentPlanDetailsProps {
   businessArea: string;

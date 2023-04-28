@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
-  useCreatePpMutation,
+  useCreateFollowUpPpMutation,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
@@ -28,12 +28,12 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
 import { today, tomorrow } from '../../../utils/utils';
 import { DividerLine } from '../../core/DividerLine';
+import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
 import { Missing } from '../../core/Missing';
 import { PermissionDenied } from '../../core/PermissionDenied';
-import { FieldBorder } from '../../core/FieldBorder';
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -46,7 +46,7 @@ export const CreateFollowUpPaymentPlan = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [mutate, { loading }] = useCreatePpMutation();
+  const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { showMessage } = useSnackbar();
 
   const { id } = paymentPlan;
@@ -106,14 +106,13 @@ export const CreateFollowUpPaymentPlan = ({
     try {
       const res = await mutate({
         variables: {
-          input: {
-            businessAreaSlug: businessArea,
-            ...values,
-          },
+          paymentPlanId: id,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
         },
       });
       showMessage(t('Payment Plan Created'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
+        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {

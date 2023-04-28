@@ -6,15 +6,18 @@ import {
   Grid,
   Typography,
 } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/EditRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import EditIcon from '@material-ui/icons/EditRounded';
+import {
+  PaymentPlanQuery,
+  useExcludeHouseholdsPpMutation,
+} from '../../../../__generated__/graphql';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { StyledTextField } from '../../../../shared/StyledTextField';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -30,13 +33,13 @@ export const ExcludeSection = ({
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [value, setValue] = useState('');
   const [excludedIds, setExcludedIds] = useState<string[]>(
-    paymentPlan?.excludedHouseholdsIds || [],
+    paymentPlan?.excludedHouseholds?.map((el) => el.unicefId) || [],
   );
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
 
-  const [mutate] = useExcludeHouseholdsMutation();
+  const [mutate] = useExcludeHouseholdsPpMutation();
 
   const handleChange = (event): void => {
     if (event.target.value === '') {
@@ -47,19 +50,15 @@ export const ExcludeSection = ({
 
   const handleSave = async (): Promise<void> => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
-    console.log('🤪🤪🤪 idsToSave', idsToSave);
     try {
       await mutate({
         variables: {
-          input: {
-            paymentPlanId: paymentPlan,
-            excludedHouseholdsIds: idsToSave,
-          },
+          paymentPlanId: paymentPlan.id,
+          excludedHouseholdsIds: idsToSave,
         },
       });
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
-      return;
     }
   };
 
