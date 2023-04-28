@@ -415,8 +415,7 @@ CACHES = {
     "default": env.cache(),
 }
 
-SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", True)
-SESSION_COOKIE_HTTPONLY = os.environ.get("SESSION_COOKIE_HTTPONLY", True)
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
@@ -908,10 +907,3 @@ if CYPRESS_TESTING and (ENV != "dev" or IS_PROD or IS_STAGING):
     raise ImproperlyConfigured(
         f"CYPRESS_TESTING can only be used in development env: ENV={ENV} IS_PROD={IS_PROD} IS_STAGING={IS_STAGING}"
     )
-
-CSRF_COOKIE_HTTPONLY = os.environ.get("CSRF_COOKIE_HTTPONLY", True)
-CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", True)
-
-SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get("SECURE_CONTENT_TYPE_NOSNIFF", True)
-SECURE_REFERRER_POLICY = os.environ.get("SECURE_REFERRER_POLICY", "same-origin")
-SECURE_HSTS_SECONDS = os.environ.get("SECURE_HSTS_SECONDS", 3600)
