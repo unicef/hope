@@ -39,7 +39,7 @@ export const ExcludeSection = ({
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
 
-  const [mutate] = useExcludeHouseholdsPpMutation();
+  const [mutate, { error }] = useExcludeHouseholdsPpMutation();
 
   const handleChange = (event): void => {
     if (event.target.value === '') {
@@ -57,6 +57,9 @@ export const ExcludeSection = ({
           excludedHouseholdsIds: idsToSave,
         },
       });
+      if (!error) {
+        showMessage(t('Households excluded from Payment Plan'));
+      }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -243,9 +246,9 @@ export const ExcludeSection = ({
         <Box display='flex' flexDirection='column'>
           {renderInputAndApply()}
           <Grid container item xs={6}>
-            {errors?.map((error) => (
+            {errors?.map((formError) => (
               <Grid item xs={12}>
-                <FormHelperText error>{error}</FormHelperText>
+                <FormHelperText error>{formError}</FormHelperText>
               </Grid>
             ))}
           </Grid>
