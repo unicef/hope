@@ -743,5 +743,6 @@
   "Follow-up Payment Plan might be started just for unsuccessful payments": "Follow-up Payment Plan might be started just for unsuccessful payments",
   "Withdrawn Household cannot be added into follow-up payment plan": "Withdrawn Household cannot be added into follow-up payment plan",
   "Main Payment Plan Details": "Main Payment Plan Details",
-  "Follow-up Payment Plan Details": "Follow-up Payment Plan Details"
+  "Follow-up Payment Plan Details": "Follow-up Payment Plan Details",
+  "Households excluded from Payment Plan": "Households excluded from Payment Plan"
 }

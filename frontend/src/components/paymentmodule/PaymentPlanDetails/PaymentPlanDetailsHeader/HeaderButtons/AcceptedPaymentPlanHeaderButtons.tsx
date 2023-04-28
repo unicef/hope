@@ -38,8 +38,6 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
-        <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
-
         {!paymentPlan.hasPaymentListExportFile && (
           <Box p={2}>
             <LoadingButton
