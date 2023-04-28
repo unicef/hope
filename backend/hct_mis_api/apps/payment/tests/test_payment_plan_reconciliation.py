@@ -1,3 +1,4 @@
+import datetime
 import io
 import os
 import tempfile
@@ -11,6 +12,7 @@ from zipfile import ZipFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
+import pytz
 from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
@@ -643,6 +645,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity_usd)
             self.assertEqual(sheet.cell(row=1, column=10).value, "delivered_quantity")
             self.assertEqual(sheet.cell(row=2, column=10).value, None)
+            self.assertEqual(sheet.cell(row=1, column=11).value, "delivery_date")
+            self.assertEqual(sheet.cell(row=2, column=11).value, str(payment.delivery_date))
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
@@ -806,7 +810,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             received_amount=None,
         )
         import_xlsx_service = XlsxPaymentPlanImportPerFspService(pp, io.BytesIO())
-        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity"]
+        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
+
         import_xlsx_service.payments_dict[str(payment_1.pk)] = payment_1
         import_xlsx_service.payments_dict[str(payment_2.pk)] = payment_2
         import_xlsx_service.payments_dict[str(payment_3.pk)] = payment_3
@@ -817,9 +822,15 @@ class TestPaymentPlanReconciliation(APITestCase):
             ],
         )
 
-        import_xlsx_service._import_row([row(str(payment_1.id)), row(999)], 1)
-        import_xlsx_service._import_row([row(str(payment_2.id)), row(100)], 1)
-        import_xlsx_service._import_row([row(str(payment_3.id)), row(2999)], 1)
+        import_xlsx_service._import_row(
+            [row(str(payment_1.id)), row(999), row(pytz.utc.localize(datetime.datetime(2023, 5, 12)))], 1
+        )
+        import_xlsx_service._import_row(
+            [row(str(payment_2.id)), row(100), row(pytz.utc.localize(datetime.datetime(2022, 12, 14)))], 1
+        )
+        import_xlsx_service._import_row(
+            [row(str(payment_3.id)), row(2999), row(pytz.utc.localize(datetime.datetime(2021, 7, 25)))], 1
+        )
         payment_1.save()
         payment_2.save()
         payment_3.save()
