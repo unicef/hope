@@ -90,17 +90,11 @@ export const CreateFollowUpPaymentPlan = ({
           dispersionEndDate: values.dispersionEndDate,
         },
       });
-      if (
-        !error &&
-        !loading &&
-        res.data.createFollowUpPaymentPlan.paymentPlan.id
-      ) {
-        setDialogOpen(false);
-        showMessage(t('Payment Plan Created'), {
-          pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
-          historyMethod: 'push',
-        });
-      }
+      setDialogOpen(false);
+      showMessage(t('Payment Plan Created'), {
+        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+        historyMethod: 'push',
+      });
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

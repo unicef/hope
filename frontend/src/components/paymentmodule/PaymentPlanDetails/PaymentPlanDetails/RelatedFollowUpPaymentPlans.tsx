@@ -38,7 +38,7 @@ export const RelatedFollowUpPaymentPlans = ({
 
   return (
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-      {followUpLinks}
+      {followUpLinks || '-'}
       {followUps?.edges?.length > 5 && (
         <Button variant='outlined' color='primary' onClick={handleButtonClick}>
           {showAll ? t('Hide') : t('See all')}
