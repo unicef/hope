@@ -10,10 +10,10 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 
 EXCLUDE_HOUSEHOLD_MUTATION = """
-mutation excludeHouseholds($paymentPlanId: ID!, $householdUnicefIds: [String]!) {
+mutation excludeHouseholds($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!) {
   excludeHouseholds(
     paymentPlanId: $paymentPlanId,
-    householdUnicefIds: $householdUnicefIds
+    excludedHouseholdsIds: $excludedHouseholdsIds
 ) {
     paymentPlan {
         id
@@ -54,7 +54,7 @@ class TestExcludeHouseholds(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
-                "householdUnicefIds": [household_unicef_id_1, household_unicef_id_2],
+                "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
             },
         )
 
@@ -66,4 +66,4 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(payment_1.excluded, True)
         self.assertEqual(payment_2.excluded, True)
         self.assertEqual(payment_3.excluded, False)
-        self.assertEqual(set(payment_plan.excluded_payments), {payment_1.unicef_id, payment_2.unicef_id})
+        self.assertEqual(set(payment_plan.excluded_households_ids), {payment_1.household.unicef_id, payment_2.household.unicef_id})
