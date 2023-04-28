@@ -216,7 +216,10 @@ export const PAYMENT_PLAN_QUERY = gql`
         numberOfPayments
         reconciled
       }
-      excludedHouseholdsIds
+      excludedHouseholds {
+        id
+        unicefId
+      }
       isFollowUp
       followUps {
         totalCount
