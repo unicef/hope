@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Union
 
 from django import forms
 from django.conf import settings
@@ -477,6 +477,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def bank_reconciliation_error(self) -> int:
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
+
+    @property
+    def excluded_payments(self) -> List[str]:
+        return list(self.payment_items.filter(excluded=True).values_list("unicef_id", flat=True))
 
     @transition(
         field=background_action_status,
