@@ -424,7 +424,8 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
-        payment_plan.status_locked()
+        payment_plan.status_open()
+        payment_plan.status_lock()
         payment_plan.save(update_fields=("status",))
     except Exception as e:
         logger.exception("Prepare Follow Up Payment Plan Error")

@@ -458,6 +458,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
     list_of_payment_plans = graphene.List(graphene.ID)
     excluded_households = graphene.List(HouseholdNode)
+    can_create_follow_up = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -468,7 +469,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment_verification_plans
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
-        return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
+        return self.payment_items.eligible().filter(payment_plan_hard_conflicted=True).count()
 
     def resolve_currency_name(self, info: Any) -> graphene.String:
         return self.get_currency_display()
@@ -521,6 +522,15 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_excluded_households(self, info: Any) -> graphene.List:
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
+
+    def resolve_can_create_follow_up(self, info: Any) -> graphene.List:
+        return self.payment_items.eligible().filter(
+            status__in=[
+                Payment.STATUS_ERROR,
+                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+            ]
+        ).exists()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
