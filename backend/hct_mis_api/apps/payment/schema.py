@@ -459,6 +459,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     list_of_payment_plans = graphene.List(graphene.ID)
     excluded_households = graphene.List(HouseholdNode)
     can_create_follow_up = graphene.Boolean()
+    total_withdrawn_households_count = graphene.Int()
+
 
     class Meta:
         model = PaymentPlan
@@ -504,6 +506,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                 ):
                     return False
             return True
+
+    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.List:
+         return self.payment_items.eligible().filter(
+        household__withdrawn=True
+    ).count()
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:

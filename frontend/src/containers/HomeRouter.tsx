@@ -48,6 +48,7 @@ import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopula
 import { EditTargetPopulationPage } from './pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { FollowUpPaymentPlanDetailsPage } from './pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -167,6 +168,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
             <PaymentPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
+            <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />
