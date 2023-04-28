@@ -82,8 +82,6 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      {/* //TODO: remove this when exclude is implemented */}
-      <ExcludeSection paymentPlan={paymentPlan} />
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
