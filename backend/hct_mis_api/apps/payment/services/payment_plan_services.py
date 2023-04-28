@@ -584,6 +584,7 @@ class PaymentPlanService:
             Payment(
                 parent=self.payment_plan,
                 source_payment=payment,
+                is_follow_up=True,
                 business_area_id=payment.business_area_id,
                 status=Payment.STATUS_PENDING,
                 status_date=timezone.now(),
@@ -601,10 +602,24 @@ class PaymentPlanService:
         self, user: "User", dispersion_start_date: datetime.date, dispersion_end_date: datetime.date
     ) -> PaymentPlan:
         source_pp = self.payment_plan
+
+        if source_pp.is_follow_up:
+            raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
+
+        if not source_pp.payment_items.eligible().filter(
+            status__in=[
+                Payment.STATUS_ERROR,
+                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+            ]
+        ).exists():
+            raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
+
         follow_up_pp = PaymentPlan.objects.create(
             status=PaymentPlan.Status.PREPARING,
-            status_date = timezone.now(),
+            status_date=timezone.now(),
             is_follow_up=True,
+            source_payment_plan=source_pp,
             business_area=source_pp.business_area,
             created_by=user,
             target_population=source_pp.target_population,
