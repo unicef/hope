@@ -343,8 +343,8 @@ class PaymentFilter(FilterSet):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
-            q &= ~Q(excluded=True)
-            q &= ~Q(conflicted=True)
+            qs = qs.eligible()
+
         return qs.filter(q)
 
     class Meta:
