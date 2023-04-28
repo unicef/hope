@@ -33,9 +33,13 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       <>
-        <Box p={2}>
-          <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
-        </Box>
+        {paymentPlan.canCreateFollowUp && (
+          <Box p={2}>
+            <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
+          </Box>
+        )}
+        <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
+
         {!paymentPlan.hasPaymentListExportFile && (
           <Box p={2}>
             <LoadingButton
