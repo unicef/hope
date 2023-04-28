@@ -56,25 +56,6 @@ export const CreateFollowUpPaymentPlan = ({
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
-    startDate: Yup.date().required(t('Start Date is required')),
-    endDate: Yup.date()
-      .required(t('End Date is required'))
-      .when(
-        'startDate',
-        (startDate: string, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date has to be greater than')} ${moment(startDate).format(
-              'YYYY-MM-DD',
-            )}`,
-          ),
-        '',
-      ),
-    currency: Yup.string()
-      .nullable()
-      .required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -97,8 +78,6 @@ export const CreateFollowUpPaymentPlan = ({
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    paymentPlanId: '',
-
     dispersionStartDate: '',
     dispersionEndDate: '',
   };
@@ -202,7 +181,9 @@ export const CreateFollowUpPaymentPlan = ({
                   <Grid item xs={12}>
                     <DividerLine />
                   </Grid>
-                  <Typography>{t('Set the Dispersion Dates')}</Typography>
+                  <Box mb={3}>
+                    <Typography>{t('Set the Dispersion Dates')}</Typography>
+                  </Box>
                   <Grid container spacing={3}>
                     <Grid item xs={6}>
                       <Field
