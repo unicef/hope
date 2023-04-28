@@ -24,9 +24,6 @@ x-django-envs: &django_envs
     - CYPRESS_TESTING=yes
     - DJANGO_ALLOWED_HOSTS=*
     - SESSION_COOKIE_SECURE=False
-    - CSRF_COOKIE_HTTPONLY=False
-    - CSRF_COOKIE_SECURE=False
-    - SECURE_HSTS_SECONDS=0
 
 services:
   cypress:
