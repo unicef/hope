@@ -17,9 +17,7 @@ import {
   useCreatePpMutation,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+import { today } from '../../../utils/utils';
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -39,7 +37,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   if (loadingTargetPopulations) return <LoadingComponent />;
   if (!allTargetPopulationsData) return null;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({

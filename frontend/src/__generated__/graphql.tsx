@@ -3921,6 +3921,7 @@ export type PaymentPlanNode = Node & {
   listOfPaymentPlans?: Maybe<Array<Maybe<Scalars['ID']>>>,
   excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>,
   canCreateFollowUp?: Maybe<Scalars['Boolean']>,
+  totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -8089,6 +8090,24 @@ export type ChooseDeliveryMechForPaymentPlanMutation = (
   )> }
 );
 
+export type CreateFollowUpPpMutationVariables = {
+  dispersionStartDate: Scalars['Date'],
+  dispersionEndDate: Scalars['Date'],
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type CreateFollowUpPpMutation = (
+  { __typename?: 'Mutations' }
+  & { createFollowUpPaymentPlan: Maybe<(
+    { __typename?: 'CreateFollowUpPaymentPlanMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+    )> }
+  )> }
+);
+
 export type CreatePpMutationVariables = {
   input: CreatePaymentPlanInput
 };
@@ -8133,6 +8152,27 @@ export type UpdatePpMutation = (
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id'>
+    )> }
+  )> }
+);
+
+export type ExcludeHouseholdsPpMutationVariables = {
+  paymentPlanId: Scalars['ID'],
+  excludedHouseholdsIds: Array<Maybe<Scalars['String']>>
+};
+
+
+export type ExcludeHouseholdsPpMutation = (
+  { __typename?: 'Mutations' }
+  & { excludeHouseholds: Maybe<(
+    { __typename?: 'ExcludeHouseholdsMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
+      & { excludedHouseholds: Maybe<Array<Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )>>> }
     )> }
   )> }
 );
@@ -9995,7 +10035,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -10105,13 +10145,30 @@ export type PaymentPlanQuery = (
         { __typename?: 'PaymentNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'PaymentNode' }
-          & Pick<PaymentNode, 'id'>
+          & Pick<PaymentNode, 'id' | 'status'>
         )> }
       )>> }
     ), reconciliationSummary: Maybe<(
       { __typename?: 'ReconciliationSummaryNode' }
       & Pick<ReconciliationSummaryNode, 'deliveredFully' | 'deliveredPartially' | 'notDelivered' | 'unsuccessful' | 'pending' | 'numberOfPayments' | 'reconciled'>
-    )> }
+    )>, excludedHouseholds: Maybe<Array<Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
+    )>>>, followUps: (
+      { __typename?: 'PaymentPlanNodeConnection' }
+      & Pick<PaymentPlanNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentPlanNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentPlanNode' }
+          & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'createdAt'>
+          & { paymentItems: (
+            { __typename?: 'PaymentNodeConnection' }
+            & Pick<PaymentNodeConnection, 'totalCount'>
+          ) }
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -13390,6 +13447,60 @@ export function useChooseDeliveryMechForPaymentPlanMutation(baseOptions?: Apollo
 export type ChooseDeliveryMechForPaymentPlanMutationHookResult = ReturnType<typeof useChooseDeliveryMechForPaymentPlanMutation>;
 export type ChooseDeliveryMechForPaymentPlanMutationResult = ApolloReactCommon.MutationResult<ChooseDeliveryMechForPaymentPlanMutation>;
 export type ChooseDeliveryMechForPaymentPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<ChooseDeliveryMechForPaymentPlanMutation, ChooseDeliveryMechForPaymentPlanMutationVariables>;
+export const CreateFollowUpPpDocument = gql`
+    mutation CreateFollowUpPP($dispersionStartDate: Date!, $dispersionEndDate: Date!, $paymentPlanId: ID!) {
+  createFollowUpPaymentPlan(dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+      unicefId
+    }
+  }
+}
+    `;
+export type CreateFollowUpPpMutationFn = ApolloReactCommon.MutationFunction<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
+export type CreateFollowUpPpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>, 'mutation'>;
+
+    export const CreateFollowUpPpComponent = (props: CreateFollowUpPpComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables> mutation={CreateFollowUpPpDocument} {...props} />
+    );
+    
+export type CreateFollowUpPpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables> & TChildProps;
+export function withCreateFollowUpPp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateFollowUpPpMutation,
+  CreateFollowUpPpMutationVariables,
+  CreateFollowUpPpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables, CreateFollowUpPpProps<TChildProps>>(CreateFollowUpPpDocument, {
+      alias: 'createFollowUpPp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateFollowUpPpMutation__
+ *
+ * To run a mutation, you first call `useCreateFollowUpPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFollowUpPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFollowUpPpMutation, { data, loading, error }] = useCreateFollowUpPpMutation({
+ *   variables: {
+ *      dispersionStartDate: // value for 'dispersionStartDate'
+ *      dispersionEndDate: // value for 'dispersionEndDate'
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useCreateFollowUpPpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>(CreateFollowUpPpDocument, baseOptions);
+      }
+export type CreateFollowUpPpMutationHookResult = ReturnType<typeof useCreateFollowUpPpMutation>;
+export type CreateFollowUpPpMutationResult = ApolloReactCommon.MutationResult<CreateFollowUpPpMutation>;
+export type CreateFollowUpPpMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
 export const CreatePpDocument = gql`
     mutation CreatePP($input: CreatePaymentPlanInput!) {
   createPaymentPlan(input: $input) {
@@ -13544,6 +13655,62 @@ export function useUpdatePpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdatePpMutationHookResult = ReturnType<typeof useUpdatePpMutation>;
 export type UpdatePpMutationResult = ApolloReactCommon.MutationResult<UpdatePpMutation>;
 export type UpdatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePpMutation, UpdatePpMutationVariables>;
+export const ExcludeHouseholdsPpDocument = gql`
+    mutation ExcludeHouseholdsPP($paymentPlanId: ID!, $excludedHouseholdsIds: [String]!) {
+  excludeHouseholds(paymentPlanId: $paymentPlanId, excludedHouseholdsIds: $excludedHouseholdsIds) {
+    paymentPlan {
+      id
+      excludedHouseholds {
+        id
+        unicefId
+      }
+    }
+  }
+}
+    `;
+export type ExcludeHouseholdsPpMutationFn = ApolloReactCommon.MutationFunction<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
+export type ExcludeHouseholdsPpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>, 'mutation'>;
+
+    export const ExcludeHouseholdsPpComponent = (props: ExcludeHouseholdsPpComponentProps) => (
+      <ApolloReactComponents.Mutation<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables> mutation={ExcludeHouseholdsPpDocument} {...props} />
+    );
+    
+export type ExcludeHouseholdsPpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables> & TChildProps;
+export function withExcludeHouseholdsPp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExcludeHouseholdsPpMutation,
+  ExcludeHouseholdsPpMutationVariables,
+  ExcludeHouseholdsPpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables, ExcludeHouseholdsPpProps<TChildProps>>(ExcludeHouseholdsPpDocument, {
+      alias: 'excludeHouseholdsPp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExcludeHouseholdsPpMutation__
+ *
+ * To run a mutation, you first call `useExcludeHouseholdsPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExcludeHouseholdsPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [excludeHouseholdsPpMutation, { data, loading, error }] = useExcludeHouseholdsPpMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      excludedHouseholdsIds: // value for 'excludedHouseholdsIds'
+ *   },
+ * });
+ */
+export function useExcludeHouseholdsPpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>(ExcludeHouseholdsPpDocument, baseOptions);
+      }
+export type ExcludeHouseholdsPpMutationHookResult = ReturnType<typeof useExcludeHouseholdsPpMutation>;
+export type ExcludeHouseholdsPpMutationResult = ApolloReactCommon.MutationResult<ExcludeHouseholdsPpMutation>;
+export type ExcludeHouseholdsPpMutationOptions = ApolloReactCommon.BaseMutationOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
 export const ExportXlsxPpListDocument = gql`
     mutation ExportXlsxPPList($paymentPlanId: ID!) {
   exportXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId) {
@@ -18345,6 +18512,7 @@ export const PaymentPlanDocument = gql`
     id
     unicefId
     status
+    canCreateFollowUp
     backgroundActionStatus
     canCreatePaymentVerificationPlan
     availablePaymentRecordsCount
@@ -18380,6 +18548,7 @@ export const PaymentPlanDocument = gql`
     totalEntitledQuantity
     totalDeliveredQuantity
     totalUndeliveredQuantity
+    totalWithdrawnHouseholdsCount
     approvalProcess {
       totalCount
       edgeCount
@@ -18543,6 +18712,7 @@ export const PaymentPlanDocument = gql`
       edges {
         node {
           id
+          status
         }
       }
     }
@@ -18554,6 +18724,24 @@ export const PaymentPlanDocument = gql`
       pending
       numberOfPayments
       reconciled
+    }
+    excludedHouseholds {
+      id
+      unicefId
+    }
+    isFollowUp
+    followUps {
+      totalCount
+      edges {
+        node {
+          id
+          unicefId
+          createdAt
+          paymentItems {
+            totalCount
+          }
+        }
+      }
     }
   }
 }
@@ -25442,6 +25630,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   listOfPaymentPlans?: Resolver<Maybe<Array<Maybe<ResolversTypes['ID']>>>, ParentType, ContextType>,
   excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>,
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
