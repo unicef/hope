@@ -479,8 +479,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def excluded_payments(self) -> List[str]:
-        return list(self.payment_items.filter(excluded=True).values_list("unicef_id", flat=True))
+    def excluded_households_ids(self) -> List[str]:
+        return list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
 
     @transition(
         field=background_action_status,

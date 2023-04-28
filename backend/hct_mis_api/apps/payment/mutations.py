@@ -1143,20 +1143,20 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
     class Input:
         payment_plan_id = graphene.ID(required=True)
-        household_unicef_ids = graphene.List(graphene.String, required=True)
+        excluded_households_ids = graphene.List(graphene.String, required=True)
 
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, household_unicef_ids: List[str]
+        cls, root: Any, info: Any, payment_plan_id: str, excluded_households_ids: List[str]
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-        if payment_plan.excluded_payments:
+        if payment_plan.excluded_households_ids:
             msg = "This Payment Plan contains already excluded payments"
             logger.error(msg)
             raise GraphQLError(msg)
 
-        payment_plan.payment_items.filter(household__unicef_id__in=household_unicef_ids).update(excluded=True)
+        payment_plan.payment_items.filter(household__unicef_id__in=excluded_households_ids).update(excluded=True)
         return cls(payment_plan=payment_plan)
 
 
