@@ -1,5 +1,10 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {
+  PaymentPlanStatus,
+  usePaymentPlanQuery,
+} from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
@@ -7,19 +12,13 @@ import { FspSection } from '../../../components/paymentmodule/PaymentPlanDetails
 import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
+import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
-import {
-  PaymentPlanStatus,
-  usePaymentPlanQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
+import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
