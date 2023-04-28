@@ -66,4 +66,6 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(payment_1.excluded, True)
         self.assertEqual(payment_2.excluded, True)
         self.assertEqual(payment_3.excluded, False)
-        self.assertEqual(set(payment_plan.excluded_households_ids), {payment_1.household.unicef_id, payment_2.household.unicef_id})
+        self.assertEqual(
+            set(payment_plan.excluded_households_ids), {payment_1.household.unicef_id, payment_2.household.unicef_id}
+        )
