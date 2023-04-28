@@ -1183,11 +1183,11 @@ class CreateFollowUpPaymentPlanMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
 
-        PaymentPlanService(payment_plan).create_follow_up(
+        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
             info.context.user, dispersion_start_date, dispersion_end_date
         )
 
-        return cls(payment_plan)
+        return cls(follow_up_pp)
 
 
 class Mutations(graphene.ObjectType):
