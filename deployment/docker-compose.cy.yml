@@ -33,7 +33,7 @@ x-django-envs: &django_envs
 
 services:
   cypress:
-    image: ${cypress_image}
+    image: ${CYPRESS_IMAGE}
     command: "ci-test"
     depends_on:
       - proxy
@@ -53,7 +53,7 @@ services:
       - frontend
 
   frontend:
-    image: ${frontend_image}
+    image: ${FRONTEND_IMAGE}
 
   redis:
     restart: unless-stopped
@@ -61,7 +61,7 @@ services:
 
   backend:
     <<: *django_envs
-    image: ${backend_image}
+    image: ${BACKEND_IMAGE}
     command: "cy"
     depends_on:
       - db
@@ -94,7 +94,7 @@ services:
 
   celery_worker:
     <<: *django_envs
-    image: ${backend_image}
+    image: ${BACKEND_IMAGE}
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
