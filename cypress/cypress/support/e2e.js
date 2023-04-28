@@ -18,31 +18,18 @@ import "cypress-file-upload";
 import "./commands";
 require('cy-verify-downloads').addCustomCommand();
 
-
-
-
 const uniqueSeed = Date.now();
-
 Cypress.Commands.add("uniqueSeed", () => uniqueSeed);
-
-// const uniqueSeed = Date.now();
-// const getUniqueId = () => Cypress._.uniqueId(uniqueSeed);
 
 Cypress.Commands.add("createExcel", () => {
 cy.uniqueSeed().then((seed) => {
-  cy.log(seed)
   cy.exec(
     `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`,{failOnNonZeroExit: false}
   );
-  
 });
 })
+
 Cypress.Commands.add("adminLogin", () => {
-  // cy.uniqueSeed().then((seed) => {
-  //   cy.exec(
-  //     `yarn run generate-xlsx-files ${Cypress.config().baseUrl} 1 ${seed}`
-  //   );
-  // });
   cy.visit("/api/unicorn/");
   cy.get('input[name="username"]').type(Cypress.env("username"));
   cy.get('input[name="password"]').type(Cypress.env("password"));
