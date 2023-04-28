@@ -35,7 +35,7 @@ ingress:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/appgw-ssl-certificate: cert-ictd-hope-dev-aks-unitst-tls
-  host: pm-hope-dev.unitst.org
+  host: eph-1-hope.unitst.org
 
 #
 # Defaults for postgres databases, applies to ephemerals only
