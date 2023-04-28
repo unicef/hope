@@ -10,6 +10,7 @@ import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { FieldBorder } from '../../../core/FieldBorder';
+import RelatedFollowUpPaymentPlans from './RelatedFollowUpPaymentPlans';
 
 interface PaymentPlanDetailsProps {
   businessArea: string;
@@ -92,18 +93,11 @@ export const PaymentPlanDetails = ({
             <Grid container direction='column' item xs={3} spacing={6}>
               <Grid item xs={12}>
                 <FieldBorder color='#84A1CA'>
-                  {/* Add see all button */}
                   <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-                    {followUps?.edges?.length > 0
-                      ? followUps.edges.map((followUp) => (
-                          <BlackLink
-                            key={followUp?.node?.id}
-                            to={`/${businessArea}/payment-module/payment-plans/${followUp?.node?.id}`}
-                          >
-                            {followUp?.node?.unicefId}
-                          </BlackLink>
-                        ))
-                      : null}
+                    <RelatedFollowUpPaymentPlans
+                      followUps={followUps}
+                      businessArea={businessArea}
+                    />
                   </LabelizedField>
                 </FieldBorder>
               </Grid>
