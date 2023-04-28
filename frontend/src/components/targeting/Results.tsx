@@ -3,14 +3,14 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
 } from '../../__generated__/graphql';
+import { MiśTheme } from '../../theme';
+import { FieldBorder } from '../core/FieldBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
-import { FieldBorder } from '../core/FieldBorder';
 
 const colors = {
   femaleChildren: '#5F02CF',
