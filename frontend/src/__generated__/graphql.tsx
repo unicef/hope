@@ -3921,6 +3921,7 @@ export type PaymentPlanNode = Node & {
   listOfPaymentPlans?: Maybe<Array<Maybe<Scalars['ID']>>>,
   excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>,
   canCreateFollowUp?: Maybe<Scalars['Boolean']>,
+  totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -10034,7 +10035,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'isFollowUp'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -10144,7 +10145,7 @@ export type PaymentPlanQuery = (
         { __typename?: 'PaymentNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'PaymentNode' }
-          & Pick<PaymentNode, 'id'>
+          & Pick<PaymentNode, 'id' | 'status'>
         )> }
       )>> }
     ), reconciliationSummary: Maybe<(
@@ -18511,6 +18512,7 @@ export const PaymentPlanDocument = gql`
     id
     unicefId
     status
+    canCreateFollowUp
     backgroundActionStatus
     canCreatePaymentVerificationPlan
     availablePaymentRecordsCount
@@ -18546,6 +18548,7 @@ export const PaymentPlanDocument = gql`
     totalEntitledQuantity
     totalDeliveredQuantity
     totalUndeliveredQuantity
+    totalWithdrawnHouseholdsCount
     approvalProcess {
       totalCount
       edgeCount
@@ -18709,6 +18712,7 @@ export const PaymentPlanDocument = gql`
       edges {
         node {
           id
+          status
         }
       }
     }
@@ -25626,6 +25630,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   listOfPaymentPlans?: Resolver<Maybe<Array<Maybe<ResolversTypes['ID']>>>, ParentType, ContextType>,
   excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>,
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {

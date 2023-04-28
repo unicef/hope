@@ -6,6 +6,7 @@ import {
   PaymentVerificationPlanVerificationChannel,
   PaymentVerificationPlanSampling,
   FinancialServiceProviderCommunicationChannel,
+  PaymentStatus,
 } from '../../src/__generated__/graphql';
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
@@ -18,6 +19,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   followUps: null,
   backgroundActionStatus: null,
   canCreatePaymentVerificationPlan: false,
+  canCreateFollowUp: false,
   availablePaymentRecordsCount: 0,
   bankReconciliationSuccess: 0,
   bankReconciliationError: 0,
@@ -263,6 +265,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
           id:
             'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
           __typename: 'PaymentNode',
+          status: PaymentStatus.Pending,
         },
         __typename: 'PaymentNodeEdge',
       },
@@ -271,6 +274,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
           id:
             'UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
           __typename: 'PaymentNode',
+          status: PaymentStatus.Pending,
         },
         __typename: 'PaymentNodeEdge',
       },

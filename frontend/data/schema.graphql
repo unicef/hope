@@ -2615,6 +2615,7 @@ type PaymentPlanNode implements Node {
   listOfPaymentPlans: [ID]
   excludedHouseholds: [HouseholdNode]
   canCreateFollowUp: Boolean
+  totalWithdrawnHouseholdsCount: Int
 }
 
 type PaymentPlanNodeConnection {

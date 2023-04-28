@@ -6,6 +6,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       id
       unicefId
       status
+      canCreateFollowUp
       backgroundActionStatus
       canCreatePaymentVerificationPlan
       availablePaymentRecordsCount
@@ -41,6 +42,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       totalEntitledQuantity
       totalDeliveredQuantity
       totalUndeliveredQuantity
+      totalWithdrawnHouseholdsCount
       approvalProcess {
         totalCount
         edgeCount
@@ -204,6 +206,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         edges {
           node {
             id
+            status
           }
         }
       }
