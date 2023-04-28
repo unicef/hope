@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
+  PaymentStatus,
   useCreateFollowUpPpMutation,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
@@ -32,7 +33,6 @@ import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
-import { Missing } from '../../core/Missing';
 import { PermissionDenied } from '../../core/PermissionDenied';
 
 export interface CreateFollowUpPaymentPlanProps {
@@ -46,10 +46,18 @@ export const CreateFollowUpPaymentPlan = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [mutate, { error, loading }] = useCreateFollowUpPpMutation();
+  const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { showMessage } = useSnackbar();
 
-  const { id } = paymentPlan;
+  const { id, paymentItems, totalWithdrawnHouseholdsCount } = paymentPlan;
+
+  const unsuccessfulPaymentsNumber = paymentItems?.edges?.filter((el) =>
+    [
+      PaymentStatus.ForceFailed,
+      PaymentStatus.NotDistributed,
+      PaymentStatus.TransactionErroneous,
+    ].includes(el.node.status),
+  ).length;
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
@@ -132,50 +140,59 @@ export const CreateFollowUpPaymentPlan = ({
               <DialogContainer>
                 <Box p={5}>
                   <Box display='flex' flexDirection='column'>
-                    <Box mb={2}>
-                      <FieldBorder color='#FF0200'>
-                        <GreyText>
-                          {t(
-                            'Follow-up Payment Plan might be started just for unsuccessful payments',
-                          )}
-                        </GreyText>
-                      </FieldBorder>
-                    </Box>
-                    <Box mb={6}>
-                      <FieldBorder color='#FF0200'>
-                        <GreyText>
-                          {t(
-                            'Withdrawn Household cannot be added into follow-up payment plan',
-                          )}
-                        </GreyText>
-                      </FieldBorder>
-                    </Box>
+                    {unsuccessfulPaymentsNumber === 0 && (
+                      <Box mb={2}>
+                        <FieldBorder color='#FF0200'>
+                          <GreyText>
+                            {t(
+                              'Follow-up Payment Plan might be started just for unsuccessful payments',
+                            )}
+                          </GreyText>
+                        </FieldBorder>
+                      </Box>
+                    )}
+                    {totalWithdrawnHouseholdsCount > 0 && (
+                      <Box mb={4}>
+                        <FieldBorder color='#FF0200'>
+                          <GreyText>
+                            {t(
+                              'Withdrawn Household cannot be added into follow-up payment plan',
+                            )}
+                          </GreyText>
+                        </FieldBorder>
+                      </Box>
+                    )}
                   </Box>
-
                   <Grid container spacing={3}>
                     <Grid item xs={6}>
-                      <Typography>{t('Main Payment Plan Details')}</Typography>
+                      <Box mt={2}>
+                        <Typography>
+                          {t('Main Payment Plan Details')}
+                        </Typography>
+                      </Box>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={6} />
+                    {/* //TODO: Figure it out */}
+                    {/* <Grid item xs={6}>
                       <Typography>
                         {t('Follow-up Payment Plan Details')}
                       </Typography>
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={6}>
                       <LabelizedField label={t('Unsuccessful payments')}>
-                        <Missing />
+                        {unsuccessfulPaymentsNumber}
                       </LabelizedField>
                     </Grid>
-                    <Grid item xs={6}>
+                    {/* <Grid item xs={6}>
                       <LabelizedField
                         label={t('Payments in follow-up payment plan')}
                       >
                         <Missing />
                       </LabelizedField>
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={6}>
                       <LabelizedField label={t('Withdrawn Households')}>
-                        <Missing />
+                        {totalWithdrawnHouseholdsCount}
                       </LabelizedField>
                     </Grid>
                   </Grid>
