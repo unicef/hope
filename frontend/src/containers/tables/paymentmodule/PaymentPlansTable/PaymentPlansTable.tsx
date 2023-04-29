@@ -29,6 +29,7 @@ export function PaymentPlansTable({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
+    isFollowUp: filter.isFollowUp,
   };
 
   return (
