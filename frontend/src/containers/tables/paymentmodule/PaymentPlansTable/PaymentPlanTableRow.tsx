@@ -52,7 +52,7 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align='left'>
-        {plan.isFollowUp ? 'Follow-up:' : ''}
+        {plan.isFollowUp ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
