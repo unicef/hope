@@ -100,7 +100,7 @@ export const CreateFollowUpPaymentPlan = ({
       });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+        pathname: `/${businessArea}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
