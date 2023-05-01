@@ -1157,12 +1157,12 @@ class ExcludeHouseholdsMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        payments = list(
+        parent_ids = list(
             Payment.objects.filter(household__unicef_id__in=excluded_households_ids)
             .distinct()
             .values_list("parent_id", flat=True)
         )
-        if not (len(payments) == 1 or str(payments[0]) == payment_plan.id):
+        if not (len(parent_ids) == 1 or str(parent_ids[0]) == payment_plan.id):
             msg = "These Households are not included in this Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
