@@ -606,13 +606,17 @@ class PaymentPlanService:
         if source_pp.is_follow_up:
             raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
 
-        if not source_pp.payment_items.eligible().filter(
-            status__in=[
-                Payment.STATUS_ERROR,
-                Payment.STATUS_NOT_DISTRIBUTED,
-                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
-            ]
-        ).exists():
+        if (
+            not source_pp.payment_items.eligible()
+            .filter(
+                status__in=[
+                    Payment.STATUS_ERROR,
+                    Payment.STATUS_NOT_DISTRIBUTED,
+                    Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+                ]
+            )
+            .exists()
+        ):
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
