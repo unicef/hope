@@ -416,7 +416,7 @@ CACHES = {
 }
 
 # TODO: fix that for E2E
-SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", True) # E2E failed with this one
+SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", True)  # E2E failed with this one
 SESSION_COOKIE_HTTPONLY = os.environ.get("SESSION_COOKIE_HTTPONLY", True)
 SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
