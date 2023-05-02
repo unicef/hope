@@ -1151,8 +1151,19 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         cls, root: Any, info: Any, payment_plan_id: str, excluded_households_ids: List[str]
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
         if payment_plan.excluded_households_ids:
             msg = "This Payment Plan contains already excluded payments"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        parent_ids = list(
+            Payment.objects.filter(household__unicef_id__in=excluded_households_ids)
+            .distinct()
+            .values_list("parent_id", flat=True)
+        )
+        if not (len(parent_ids) == 1 or str(parent_ids[0]) == payment_plan.id):
+            msg = "These Households are not included in this Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 

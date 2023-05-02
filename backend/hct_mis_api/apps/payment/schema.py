@@ -461,7 +461,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
 
-
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
@@ -508,9 +507,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             return True
 
     def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.List:
-         return self.payment_items.eligible().filter(
-        household__withdrawn=True
-    ).count()
+        return self.payment_items.eligible().filter(household__withdrawn=True).count()
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
@@ -531,13 +528,17 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
 
     def resolve_can_create_follow_up(self, info: Any) -> graphene.List:
-        return self.payment_items.eligible().filter(
-            status__in=[
-                Payment.STATUS_ERROR,
-                Payment.STATUS_NOT_DISTRIBUTED,
-                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
-            ]
-        ).exists()
+        return (
+            self.payment_items.eligible()
+            .filter(
+                status__in=[
+                    Payment.STATUS_ERROR,
+                    Payment.STATUS_NOT_DISTRIBUTED,
+                    Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+                ]
+            )
+            .exists()
+        )
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
