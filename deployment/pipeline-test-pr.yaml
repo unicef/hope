@@ -292,9 +292,9 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run cypress ci-test'
               dockerComposeFileArgs: |
-               backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
-               frontend_image=$(Docker.url)/$(Docker.frontend.repository):$(tag)
-               cypress_image=$(Docker.url)/$(Docker.cypress.repository):$(tag)
+               BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
+               FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
+               CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
             condition: always()
