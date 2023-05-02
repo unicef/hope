@@ -45,7 +45,7 @@ DEFAULTS = {
     "SECURE_CONTENT_TYPE_NOSNIFF": (bool, True),
     "SECURE_REFERRER_POLICY": (str, "same-origin"),
     "SESSION_COOKIE_NAME": (str, "sessionid"),
-    "SECURE_HSTS_SECONDS": (int, 3600)
+    "SECURE_HSTS_SECONDS": (int, 3600),
 }
 
 env = Env(**DEFAULTS)
