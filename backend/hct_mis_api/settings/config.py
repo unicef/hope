@@ -38,6 +38,14 @@ DEFAULTS = {
     "CELERY_RESULT_BACKEND": (str, ""),
     "CELERY_TASK_ALWAYS_EAGER": (bool, False),
     "ADMIN_PANEL_URL": (str, "unicorn"),
+    "SESSION_COOKIE_SECURE": (bool, True),
+    "SESSION_COOKIE_HTTPONLY": (bool, True),
+    "CSRF_COOKIE_HTTPONLY": (bool, True),
+    "CSRF_COOKIE_SECURE": (bool, True),
+    "SECURE_CONTENT_TYPE_NOSNIFF": (bool, True),
+    "SECURE_REFERRER_POLICY": (str, "same-origin"),
+    "SESSION_COOKIE_NAME": (str, "sessionid"),
+    "SECURE_HSTS_SECONDS": (int, 3600)
 }
 
 env = Env(**DEFAULTS)
