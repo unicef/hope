@@ -77,6 +77,19 @@ class TestHousehold(TestCase):
         self.assertEqual(household.admin3, self.area3)
         self.assertEqual(household.admin4, None)
 
+        household3, (individual3) = create_household(household_args={"size": 1, "business_area": self.business_area})
+        household3.admin3 = self.area3
+        household3.save()
+
+        household3.set_admin_areas()
+        household3.refresh_from_db()
+
+        self.assertEqual(household3.admin_area, None)
+        self.assertEqual(household3.admin1, self.area1)
+        self.assertEqual(household3.admin2, self.area2)
+        self.assertEqual(household3.admin3, self.area3)
+        self.assertEqual(household3.admin4, None)
+
 
 class TestDocument(TestCase):
     @classmethod

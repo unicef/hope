@@ -519,25 +519,41 @@ class Household(
         return None
 
     def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
-        """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]
 
-        if not new_admin_area:
-            new_admin_area = self.admin_area
-        else:
-            self.admin_area = new_admin_area
+        try:
+            if not new_admin_area and not self.admin_area:
+                # Case when admin_area is not set, but some admin{x} fields are populated
+                for admin_level in reversed(range(2, 5)):
+                    admin = getattr(self, f"admin{admin_level}")
+                    if admin:
+                        for i in reversed(range(1, admin_level)):
+                            parent_admin = admin.parent
+                            if parent_admin:
+                                setattr(self, f"admin{i}", parent_admin)
+                                admin = parent_admin
+                            else:
+                                break
+            else:
+                if not new_admin_area:
+                    new_admin_area = self.admin_area
+                else:
+                    self.admin_area = new_admin_area
 
-        for admin in admins:
-            setattr(self, admin, None)
+                for admin in admins:
+                    setattr(self, admin, None)
 
-        new_admin_area_level = new_admin_area.area_type.area_level
+                new_admin_area_level = new_admin_area.area_type.area_level
 
-        for admin_level in reversed(range(1, new_admin_area_level + 1)):
-            setattr(self, f"admin{admin_level}", new_admin_area)
-            new_admin_area = new_admin_area.parent
+                for admin_level in reversed(range(1, new_admin_area_level + 1)):
+                    setattr(self, f"admin{admin_level}", new_admin_area)
+                    new_admin_area = new_admin_area.parent
 
-        if save:
-            self.save(update_fields=["admin_area"] + admins)
+            if save:
+                self.save(update_fields=["admin_area"] + admins)
+
+        except Exception as e:
+            logger.error(f"Error while updating admin areas: {e}")
 
     @property
     def sanction_list_possible_match(self) -> bool:

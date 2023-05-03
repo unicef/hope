@@ -222,7 +222,7 @@ class ConcurrencyModel(models.Model):
 
 
 class UnicefIdentifiedModel(models.Model):
-    unicef_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    unicef_id: models.CharField = models.CharField(max_length=255, null=True, blank=True, db_index=True)
 
     class Meta:
         abstract = True
