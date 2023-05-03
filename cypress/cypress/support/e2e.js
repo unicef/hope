@@ -16,6 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import "cypress-file-upload";
 import "./commands";
+import 'cypress-mochawesome-reporter/register';
 require('cy-verify-downloads').addCustomCommand();
 
 const uniqueSeed = Date.now();

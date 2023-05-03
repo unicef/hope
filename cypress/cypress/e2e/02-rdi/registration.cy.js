@@ -17,10 +17,8 @@ context("RDI", () => {
     uploadRDIFile();
     mergeRDIFile()
     verifyMergedData()
-   
     return;
   })
-  
 });
 
 function uploadRDIFile() {
@@ -58,12 +56,11 @@ function mergeRDIFile() {
   cy.get("span").contains("Merge").click({ force: true });
   cy.get('strong').should('contain', '1 households and 1 individuals will be merged.')
   cy.get("span").contains("MERGE").click({ force: true })
-
   cy.get("span").contains("Registration Data Import").click();
   cy.reload()
   cy.get('[data-cy="status-container"]').eq(0).should('contain', 'MERGED')
+  cy.re
 }
-
 function verifyMergedData() {
   let householdId;
   let individualId;

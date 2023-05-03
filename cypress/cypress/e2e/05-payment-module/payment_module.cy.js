@@ -179,8 +179,8 @@ function createPaymentPlan(targetPopulationName) {
   cy.uniqueSeed().then(seed => {
     cy.get(`[data-cy="select-option-${targetPopulationName}-${seed}"]`).click();
   });
-  cy.get('[data-cy="input-start-date"]').click().type("2032-12-12");
-  cy.get('[data-cy="input-end-date"]').click().type("2032-12-23");
+  cy.get('[data-cy="input-start-date"]').click().type("2023-12-12");
+  cy.get('[data-cy="input-end-date"]').click().type("2023-12-23");
   cy.get('[data-cy="input-currency"]').click().type("Afghan")
     .type("{downArrow}{enter}");
   cy.get('[data-cy="input-dispersion-start-date"]').click().type("2033-12-12");

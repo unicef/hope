@@ -7,6 +7,7 @@
     "copy": "^0.3.2",
     "cypress": "^12.4.1",
     "cypress-file-upload": "^5.0.8",
+    "cypress-mochawesome-reporter": "^3.4.0",
     "cypress-repeat": "^2.3.3",
     "eslint": "^8.34.0",
     "eslint-plugin-cypress": "^2.12.1",
