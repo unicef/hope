@@ -25,6 +25,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 1
                         },
+                        'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
                         'endDate': '2020-11-10',
@@ -59,6 +60,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 0
                         },
+                        'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
                         'endDate': '2020-11-10',

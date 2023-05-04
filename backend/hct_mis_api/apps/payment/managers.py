@@ -23,6 +23,7 @@ class ArraySubquery(Subquery):
 
 
 class PaymentQuerySet(SoftDeletableQuerySet):
+    # TODO UT follow up payment doesnt have conflicts
     def with_payment_plan_conflicts(self) -> QuerySet:
         from hct_mis_api.apps.payment.models import PaymentPlan
 
