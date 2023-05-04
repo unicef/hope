@@ -1,6 +1,6 @@
 import io
 from decimal import Decimal
-from typing import List, Dict
+from typing import Dict, List
 
 import openpyxl
 from graphql import GraphQLError
@@ -23,7 +23,6 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
         self.current_row = 0
         self.errors: List[XlsxError] = []
-        self.cashplan_payment_verification = cashplan_payment_verification
         payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
         self.payment_record_verifications = payment_record_verification_obj.all()  # .prefetch_related("payment")
         self.payment_record_ids = [str(x.payment_object_id) for x in self.payment_record_verifications]
@@ -35,23 +34,18 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.was_validation_run = False
 
         # Get mandatory column indices as order of columns might be different in each ws
-        self.PAYMENT_RECORD_ID_COLUMN_INDEX = None
-        self.RECEIVED_COLUMN_INDEX = None
-        self.RECEIVED_AMOUNT_COLUMN_INDEX = None
+        self.PAYMENT_RECORD_ID_COLUMN_INDEX = 0
+        self.RECEIVED_COLUMN_INDEX = 0
+        self.RECEIVED_AMOUNT_COLUMN_INDEX = 0
 
-        self.COLUMN_DICT_TYPES = {
-            self.PAYMENT_RECORD_ID_COLUMN_INDEX: "s",
-            self.RECEIVED_COLUMN_INDEX: "s",
-            self.RECEIVED_AMOUNT_COLUMN_INDEX: "n",
-        }
+        self.COLUMN_DICT_TYPES = {}
 
     @staticmethod
     def get_columns_from_worksheet(ws: Worksheet) -> Dict[str, Dict[str, int]]:
         return {
-            cell.value: {
-                'letter': get_column_letter(cell.column),
-                'number': cell.column
-            } for cell in ws[1] if cell.value
+            cell.value: {"letter": get_column_letter(cell.column), "number": cell.column - 1}
+            for cell in ws[1]
+            if cell.value
         }
 
     def open_workbook(self) -> openpyxl.Workbook:
@@ -92,8 +86,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
 
     def _validate_headers(self) -> None:
-        headers_row = self.ws_verifications[1]
-        headers = self.get_columns_from_worksheet(headers_row)
+        headers = self.get_columns_from_worksheet(self.ws_verifications)
 
         for header_name, header_attrs in headers.items():
             if header_name == "payment_record_id":
@@ -119,25 +112,21 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                     message=f"Missing mandatory headers: {' '.join(missing_headers)}",
                 )
             )
+        else:
+            self.COLUMN_DICT_TYPES = {
+                self.PAYMENT_RECORD_ID_COLUMN_INDEX: "s",
+                self.RECEIVED_COLUMN_INDEX: "s",
+                self.RECEIVED_AMOUNT_COLUMN_INDEX: "n",
+            }
 
     def _validate_mandatory_row_types(self, row: Row) -> None:
-        mandatory_column_ids = {
-            self.PAYMENT_RECORD_ID_COLUMN_INDEX,
-            self.RECEIVED_COLUMN_INDEX,
-            self.RECEIVED_AMOUNT_COLUMN_INDEX
-        }
+        mandatory_column_ids = self.COLUMN_DICT_TYPES.keys()
 
         column = 0
         for cell in row:
             if column in mandatory_column_ids:
                 if cell.value is None:
-                    self.errors.append(
-                        XlsxError(
-                            "Payment Verifications",
-                            cell.coordinate,
-                            "Cell value cannot be null"
-                        )
-                    )
+                    self.errors.append(XlsxError("Payment Verifications", cell.coordinate, "Cell value cannot be null"))
                     continue
 
                 if cell.data_type != self.COLUMN_DICT_TYPES[column]:
@@ -152,11 +141,11 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                             f"expected, {XlsxVerificationImportService.TYPES_READABLE_MAPPING[cell.data_type]} given.",
                         )
                     )
-                column += 1
+            column += 1
 
     def _validate_payment_record_id(self, row: Row) -> None:
         cell = row[self.PAYMENT_RECORD_ID_COLUMN_INDEX]
-        if cell and cell.value not in self.payment_record_ids:
+        if cell.value not in self.payment_record_ids:
             self.errors.append(
                 XlsxError(
                     "Payment Verifications",
@@ -166,9 +155,9 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             )
 
     def _validate_row_received(self, row: Row) -> None:
-        valid_received = [None, "YES", "NO"]
+        valid_received = (None, "YES", "NO")
         cell = row[self.RECEIVED_COLUMN_INDEX]
-        if cell and cell.value not in valid_received:
+        if cell.value not in valid_received:
             self.errors.append(
                 XlsxError(
                     "Payment Verifications",
