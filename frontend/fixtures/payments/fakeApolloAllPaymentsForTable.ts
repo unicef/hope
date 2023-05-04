@@ -7,7 +7,8 @@ export const fakeApolloAllPaymentsForTable = [
       variables: {
         businessArea: 'afghanistan',
         paymentPlanId:
-          'UGF5bWVudFBsYW5Ob2RlOmM2ZWYyMzJjLTgyODEtNGM0Yy05MTdhLTdmMWZkYzhhYTI0Ng==',
+          'UGF5bWVudFBsYW5Ob2RlOjZmOTIxYmFlLTljODktNGRkYy1iNTRjLTI4Mzc3ZTA2YjUwNg==',
+
         first: 5,
         orderBy: '-created_at',
       },
@@ -19,29 +20,29 @@ export const fakeApolloAllPaymentsForTable = [
             hasNextPage: false,
             hasPreviousPage: false,
             startCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
-            endCursor: 'YXJyYXljb25uZWN0aW9uOjE=',
+            endCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
             __typename: 'PageInfo',
           },
-          totalCount: 2,
+          totalCount: 1,
           edges: [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
                 id:
-                  'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
-                unicefId: 'RCPT-0060-22-0.000.015',
-                status: 'TRANSACTION_ERRONEOUS',
+                  'UGF5bWVudE5vZGU6YzY4YzMxY2MtNDNkZC00NWI1LWE0ZTMtMTgyMThiMDNjZDli',
+                unicefId: 'RCPT-0060-23-0.000.121',
+                status: 'PENDING',
                 household: {
                   id:
-                    'SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE=',
-                  unicefId: 'HH-21-0000.0003',
-                  size: 4,
+                    'SG91c2Vob2xkTm9kZTozYWI5ZDU3MC04NGI4LTQ2MDYtODg5YS0xNjc3MDBiOTBlMTE=',
+                  unicefId: 'HH-23-0000.0017',
+                  size: 8,
                   admin2: null,
                   __typename: 'HouseholdNode',
                 },
                 entitlementQuantity: null,
                 entitlementQuantityUsd: null,
-                currency: '',
+                currency: 'USD',
                 deliveredQuantity: null,
                 deliveredQuantityUsd: null,
                 paymentPlanHardConflicted: false,
@@ -50,56 +51,11 @@ export const fakeApolloAllPaymentsForTable = [
                 paymentPlanSoftConflictedData: [],
                 collector: {
                   id:
-                    'SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx',
-                  fullName: 'Jan Kowalski',
+                    'SW5kaXZpZHVhbE5vZGU6ZDdhNDgwNWMtMzQ5My00ZTQ3LWIyNGEtMTJkZmU3NmMxMWQ0',
+                  fullName: 'Emily Tracey Walter',
                   __typename: 'IndividualNode',
                 },
-                financialServiceProvider: {
-                  id:
-                    'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
-                  name: 'Test FSP 1',
-                  __typename: 'FinancialServiceProviderNode',
-                },
-                __typename: 'PaymentNode',
-              },
-              __typename: 'PaymentNodeEdge',
-            },
-            {
-              cursor: 'YXJyYXljb25uZWN0aW9uOjE=',
-              node: {
-                id:
-                  'UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
-                unicefId: 'RCPT-0060-22-0.000.016',
-                status: 'TRANSACTION_SUCCESSFUL',
-                household: {
-                  id:
-                    'SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI=',
-                  unicefId: 'HH-21-0000.0004',
-                  size: 4,
-                  admin2: null,
-                  __typename: 'HouseholdNode',
-                },
-                entitlementQuantity: 10,
-                entitlementQuantityUsd: 20,
-                currency: 'PLN',
-                deliveredQuantity: 10,
-                deliveredQuantityUsd: 20,
-                paymentPlanHardConflicted: false,
-                paymentPlanSoftConflicted: false,
-                paymentPlanHardConflictedData: [],
-                paymentPlanSoftConflictedData: [],
-                collector: {
-                  id:
-                    'SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAy',
-                  fullName: 'Adam Nowak',
-                  __typename: 'IndividualNode',
-                },
-                financialServiceProvider: {
-                  id:
-                    'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
-                  name: 'Test FSP 1',
-                  __typename: 'FinancialServiceProviderNode',
-                },
+                financialServiceProvider: null,
                 __typename: 'PaymentNode',
               },
               __typename: 'PaymentNodeEdge',
