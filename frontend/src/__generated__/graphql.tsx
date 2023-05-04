@@ -10169,7 +10169,10 @@ export type PaymentPlanQuery = (
           ) }
         )> }
       )>> }
-    ) }
+    ), sourcePaymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'unicefId'>
+    )> }
   )> }
 );
 
@@ -18745,6 +18748,10 @@ export const PaymentPlanDocument = gql`
           }
         }
       }
+    }
+    sourcePaymentPlan {
+      id
+      unicefId
     }
   }
 }
