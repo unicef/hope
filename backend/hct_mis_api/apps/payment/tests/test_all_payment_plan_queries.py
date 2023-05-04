@@ -94,6 +94,7 @@ class TestPaymentPlanQueries(APITestCase):
               }
             }
             paymentsConflictsCount
+            canCreateFollowUp
           }
         }
       }
@@ -128,7 +129,14 @@ class TestPaymentPlanQueries(APITestCase):
                 sourcePaymentPlan {
                   unicefId
                 }
-                listOfPaymentPlans
+                followUps {
+                  totalCount
+                  edges {
+                      node {
+                          unicefId
+                      }
+                  }
+                }
               }
             }
           }

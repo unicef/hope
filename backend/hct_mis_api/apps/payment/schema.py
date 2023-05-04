@@ -456,7 +456,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
-    list_of_payment_plans = graphene.List(graphene.ID)
     excluded_households = graphene.List(HouseholdNode)
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
@@ -470,7 +469,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment_verification_plans
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
-        return self.payment_items.eligible().filter(payment_plan_hard_conflicted=True).count()
+        return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
 
     def resolve_currency_name(self, info: Any) -> graphene.String:
         return self.get_currency_display()
@@ -520,9 +519,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             number_of_payments=Count("id"),
             reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
         )
-
-    def resolve_list_of_payment_plans(self, info: Any) -> list[Optional[str]]:
-        return list(self.follow_ups.values_list("id", flat=True))
 
     def resolve_excluded_households(self, info: Any) -> graphene.List:
         return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
