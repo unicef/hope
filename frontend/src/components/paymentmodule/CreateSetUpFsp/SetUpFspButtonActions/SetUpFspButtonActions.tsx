@@ -1,8 +1,12 @@
 import { Box, Button } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+<<<<<<< HEAD
 import { Link } from 'react-router-dom';
 import { ButtonTooltip } from '../../../core/ButtonTooltip';
+=======
+import { Link, useLocation } from 'react-router-dom';
+>>>>>>> 979869ffe3c514d0a4f140fd1fdd22a26e3b83c6
 
 interface SetUpFspButtonActionsProps {
   step: number;
@@ -22,6 +26,8 @@ export const SetUpFspButtonActions = ({
   isFspEmpty,
 }: SetUpFspButtonActionsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isFollowUp = location.pathname.indexOf('followup') !== -1;
 
   return (
     <Box pt={3} display='flex'>
@@ -29,9 +35,15 @@ export const SetUpFspButtonActions = ({
         {step === 0 && (
           <ButtonTooltip
             component={Link}
+<<<<<<< HEAD
             title={t('All delivery mechanisms must have a FSP assigned')}
             to={`/${businessArea}/payment-module/payment-plans/${paymentPlanId}`}
             disabled={isFspEmpty}
+=======
+            to={`/${businessArea}/payment-module/${
+              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+            }/${paymentPlanId}`}
+>>>>>>> 979869ffe3c514d0a4f140fd1fdd22a26e3b83c6
           >
             {t('Cancel')}
           </ButtonTooltip>
