@@ -24,6 +24,15 @@ export const FspSection = ({
   const { id } = useParams();
   const { deliveryMechanisms } = paymentPlan;
   const showFspDisplay = deliveryMechanisms.length;
+  const shouldDisableSetUpFsp = (): boolean => {
+    if (paymentPlan.isFollowUp) {
+      return false;
+    }
+    if (!paymentPlan.totalEntitledQuantityUsd) {
+      return true;
+    }
+    return false;
+  };
 
   return showFspDisplay ? (
     <Box m={5}>
@@ -70,7 +79,7 @@ export const FspSection = ({
           <Button
             color='primary'
             variant='contained'
-            disabled={!paymentPlan.totalEntitledQuantityUsd}
+            disabled={shouldDisableSetUpFsp()}
             data-cy='button-set-up-fsp'
             component={Link}
             to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/create`}
