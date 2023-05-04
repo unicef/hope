@@ -46,7 +46,8 @@ export const FollowUpPaymentPlanDetailsHeader = ({
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-  const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
+  //Follow up Payment Plan starts in Locked status
+  const canUnlock = false;
   const canSendForApproval = hasPermissions(
     PERMISSIONS.PM_SEND_FOR_APPROVAL,
     permissions,
@@ -96,7 +97,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canUnlock={canLock}
+          canUnlock={canUnlock}
           permissions={permissions}
         />
       );
