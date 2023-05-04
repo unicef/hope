@@ -598,6 +598,8 @@ class PaymentPlanService:
                 head_of_household_id=payment.head_of_household_id,
                 collector_id=payment.collector_id,
                 currency=payment.currency,
+                entitlement_quantity=payment.entitlement_quantity,
+                entitlement_quantity_usd=payment.entitlement_quantity_usd,
             )
             for payment in payments_to_copy
         ]
