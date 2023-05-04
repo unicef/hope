@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.utils import timezone
 
+from celery.exceptions import TaskError
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
@@ -136,3 +137,7 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str) -> None:
                 tp.save()
         except Exception as e:
             logger.exception(e)
+    else:
+        error_message = f"Form validation failed: {form.errors}."
+        logger.error(error_message)
+        raise TaskError(error_message)
