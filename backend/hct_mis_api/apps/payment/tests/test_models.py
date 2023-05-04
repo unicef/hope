@@ -183,3 +183,50 @@ class TestPaymentModel(TestCase):
                 },
             ],
         )
+
+    def test_manager_annotations__pp_no_conflicts_for_follow_up(self) -> None:
+        pp1 = PaymentPlanFactory()
+
+        # create follow up pps
+        pp2 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.LOCKED,
+            is_follow_up=True,
+            source_payment_plan=pp1,
+        )
+        pp3 = PaymentPlanFactory(
+            start_date=pp1.start_date,
+            end_date=pp1.end_date,
+            status=PaymentPlan.Status.OPEN,
+            is_follow_up=True,
+            source_payment_plan=pp1,
+        )
+        p1 = PaymentFactory(parent=pp1, conflicted=False)
+        p2 = PaymentFactory(
+            parent=pp2,
+            household=p1.household,
+            conflicted=False,
+            is_follow_up=True,
+            source_payment=p1,
+        )
+        p3 = PaymentFactory(
+            parent=pp3,
+            household=p1.household,
+            conflicted=False,
+            is_follow_up=True,
+            source_payment=p1,
+        )
+
+        for _ in [pp1, pp2, pp3, p1, p2, p3]:
+            _.refresh_from_db()  # update unicef_id from trigger
+
+        p2_data = Payment.objects.filter(id=p2.id).values()[0]
+        self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
+        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+        p3_data = Payment.objects.filter(id=p3.id).values()[0]
+        self.assertEqual(p3_data["payment_plan_hard_conflicted"], False)
+        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
+
+        self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
+        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [])
