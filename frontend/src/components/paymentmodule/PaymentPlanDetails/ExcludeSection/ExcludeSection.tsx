@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import {
   PaymentPlanDocument,
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useExcludeHouseholdsPpMutation,
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
@@ -33,6 +34,7 @@ export const ExcludeSection = ({
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
   const permissions = usePermissions();
+  const canEditExclude = paymentPlan.status === PaymentPlanStatus.Locked;
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
   );
@@ -138,40 +140,44 @@ export const ExcludeSection = ({
   );
 
   const renderButtons = (): React.ReactElement => {
-    if (isExclusionsOpen && isEdit) {
+    const noExclusions = numberOfExcluded === 0;
+    const editMode = isExclusionsOpen && isEdit;
+    const previewMode = !isExclusionsOpen && numberOfExcluded > 0;
+    const editAllowed = isExclusionsOpen && !isEdit && canEditExclude;
+
+    const resetExclusions = (): void => {
+      setExclusionsOpen(false);
+      setErrors([]);
+      setValue('');
+      setEdit(false);
+    };
+
+    const saveExclusions = (): void => {
+      handleSave();
+      setExclusionsOpen(false);
+    };
+
+    if (editMode) {
       return (
         <Box display='flex' alignItems='center' justifyContent='center'>
           <Box mr={2}>
-            <Button
-              variant='text'
-              color='primary'
-              onClick={() => {
-                setExclusionsOpen(false);
-                setErrors([]);
-                setExcludedIds([]);
-                setDeletedIds([]);
-                setValue('');
-                setEdit(false);
-              }}
-            >
+            <Button variant='text' color='primary' onClick={resetExclusions}>
               {t('Cancel')}
             </Button>
           </Box>
           <ButtonTooltip
             variant='contained'
             color='primary'
-            disabled={!canExclude}
-            onClick={() => {
-              handleSave();
-              setExclusionsOpen(false);
-            }}
+            disabled={!canExclude || excludedIds.length === 0}
+            onClick={saveExclusions}
           >
             {t('Save')}
           </ButtonTooltip>
         </Box>
       );
     }
-    if (isExclusionsOpen && !isEdit && numberOfExcluded > 0) {
+
+    if (editAllowed) {
       return (
         <Button
           color='primary'
@@ -184,7 +190,7 @@ export const ExcludeSection = ({
       );
     }
 
-    if (!isExclusionsOpen && numberOfExcluded > 0) {
+    if (previewMode) {
       return (
         <Button
           variant='contained'
@@ -198,7 +204,16 @@ export const ExcludeSection = ({
         </Button>
       );
     }
-    if (!isExclusionsOpen && numberOfExcluded === 0) {
+
+    if (isExclusionsOpen) {
+      return (
+        <Button color='primary' onClick={resetExclusions}>
+          {t('Close')}
+        </Button>
+      );
+    }
+
+    if (noExclusions) {
       return (
         <Button
           variant='contained'
@@ -212,6 +227,7 @@ export const ExcludeSection = ({
         </Button>
       );
     }
+
     return null;
   };
 
