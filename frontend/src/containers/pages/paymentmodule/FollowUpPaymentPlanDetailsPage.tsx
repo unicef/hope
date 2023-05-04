@@ -62,6 +62,7 @@ export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
     status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
 
   const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
+  const shouldDisplayExclude = status === PaymentPlanStatus.Locked;
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
@@ -85,7 +86,7 @@ export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
-      <ExcludeSection paymentPlan={paymentPlan} />
+      {shouldDisplayExclude && <ExcludeSection paymentPlan={paymentPlan} />}
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

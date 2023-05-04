@@ -16,8 +16,11 @@ import {
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { StyledTextField } from '../../../../shared/StyledTextField';
 import { GreyText } from '../../../core/GreyText';
+import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ExcludedItem } from './ExcludedItem';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { usePermissions } from '../../../../hooks/usePermissions';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -28,12 +31,16 @@ export const ExcludeSection = ({
   initialOpen = false,
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement => {
+  const permissions = usePermissions();
+  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
+    (el) => el.unicefId,
+  );
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [value, setValue] = useState('');
   const [excludedIds, setExcludedIds] = useState<string[]>(
-    paymentPlan?.excludedHouseholds?.map((el) => el.unicefId) || [],
+    initialExcludedIds || [],
   );
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
@@ -116,6 +123,10 @@ export const ExcludeSection = ({
   };
 
   const numberOfExcluded = excludedIds.length - deletedIds.length;
+  const canExclude = hasPermissions(
+    PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
+    permissions,
+  );
 
   const renderButtons = (): React.ReactElement => {
     if (isExclusionsOpen && isEdit) {
@@ -137,16 +148,17 @@ export const ExcludeSection = ({
               {t('Cancel')}
             </Button>
           </Box>
-          <Button
+          <ButtonTooltip
             variant='contained'
             color='primary'
+            disabled={!canExclude}
             onClick={() => {
               handleSave();
               setExclusionsOpen(false);
             }}
           >
             {t('Save')}
-          </Button>
+          </ButtonTooltip>
         </Box>
       );
     }
