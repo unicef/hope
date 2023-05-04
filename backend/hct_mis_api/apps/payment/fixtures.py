@@ -47,6 +47,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -659,6 +660,7 @@ def create_payment_verification_plan_with_status(
     target_population: "TargetPopulation",
     status: str,
     verification_channel: Optional[str] = None,
+    create_failed_payments: bool = False,
 ) -> PaymentVerificationPlan:
     if not cash_plan.payment_verification_summary.exists():
         PaymentVerificationSummary.objects.create(
@@ -670,7 +672,7 @@ def create_payment_verification_plan_with_status(
         payment_verification_plan.verification_channel = verification_channel
     payment_verification_plan.save(update_fields=("status", "verification_channel"))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    for _ in range(5):
+    for n in range(5):
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
@@ -690,7 +692,27 @@ def create_payment_verification_plan_with_status(
                 parent=cash_plan, household=household, target_population=target_population, currency=currency
             )
         else:
-            payment_record = PaymentFactory(parent=cash_plan, household=household, currency=currency)
+            additional_args = {}
+            if create_failed_payments:  # create only two failed Payments
+                if n == 2:
+                    additional_args = {
+                        "delivered_quantity": to_decimal(0),
+                        "delivered_quantity_usd": to_decimal(0),
+                        "status": Payment.STATUS_NOT_DISTRIBUTED,
+                    }
+                if n == 3:
+                    additional_args = {
+                        "delivered_quantity": None,
+                        "delivered_quantity_usd": None,
+                        "status": Payment.STATUS_ERROR,
+                    }
+
+            payment_record = PaymentFactory(
+                parent=cash_plan,
+                household=household,
+                currency=currency,
+                **additional_args,
+            )
 
         pv = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
@@ -788,6 +810,7 @@ def generate_reconciled_payment_plan() -> None:
         program=tp.program,
         program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
+        is_follow_up=False,
     )[0]
     # update status
     payment_plan.status_finished()
@@ -809,6 +832,7 @@ def generate_reconciled_payment_plan() -> None:
         tp,
         PaymentVerificationPlan.STATUS_ACTIVE,
         PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        True,  # create failed payments
     )
     payment_plan.update_population_count_fields()
 
