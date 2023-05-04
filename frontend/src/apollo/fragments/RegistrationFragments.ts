@@ -161,6 +161,7 @@ export const importedIndividualDetailed = gql`
           country
           type {
             label
+            key
           }
           documentNumber
           photo

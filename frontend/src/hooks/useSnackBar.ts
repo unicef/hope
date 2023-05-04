@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import get from 'lodash/get';
+import { removeBracketsAndQuotes } from '../utils/utils';
 
-export function useSnackbar(): { show; setShow; message; showMessage; dataCy?; } {
+export function useSnackbar(): {
+  show;
+  setShow;
+  message;
+  showMessage;
+  dataCy?;
+} {
   const history = useHistory();
   const location = useLocation();
   const [show, setShow] = useState(
@@ -22,11 +29,20 @@ export function useSnackbar(): { show; setShow; message; showMessage; dataCy?; }
 
   const showMessage = (
     messageContent: string,
-    options?: { pathname?: string; historyMethod?: keyof typeof history, dataCy?: string, },
+    options?: {
+      pathname?: string;
+      historyMethod?: keyof typeof history;
+      dataCy?: string;
+    },
   ): void => {
+    const formattedMessage = removeBracketsAndQuotes(messageContent);
     history[get(options, 'historyMethod', 'replace')]({
       pathname: get(options, 'pathname', history.location.pathname),
-      state: { showSnackbar: true, message: messageContent, dataCy: get(options, 'dataCy') },
+      state: {
+        showSnackbar: true,
+        message: formattedMessage,
+        dataCy: get(options, 'dataCy'),
+      },
     });
   };
 
@@ -35,6 +51,6 @@ export function useSnackbar(): { show; setShow; message; showMessage; dataCy?; }
     setShow,
     message,
     showMessage,
-    dataCy
+    dataCy,
   };
 }
