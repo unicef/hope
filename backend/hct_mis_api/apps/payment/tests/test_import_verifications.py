@@ -138,6 +138,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(TestXlsxVerificationImport.verification, file)
         import_service.open_workbook()
         import_service.validate()
+
         error = import_service.errors[0]
         self.assertListEqual(
             [error.sheet, error.coordinates, error.message],
