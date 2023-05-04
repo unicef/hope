@@ -22,7 +22,7 @@ export const FspSection = ({
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { deliveryMechanisms } = paymentPlan;
+  const { deliveryMechanisms, isFollowUp } = paymentPlan;
   const showFspDisplay = deliveryMechanisms.length;
   const shouldDisableSetUpFsp = (): boolean => {
     if (paymentPlan.isFollowUp) {
@@ -49,7 +49,9 @@ export const FspSection = ({
               color='primary'
               variant='contained'
               component={Link}
-              to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/edit`}
+              to={`/${businessArea}/payment-module/${
+                isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+              }/${id}/setup-fsp/edit`}
             >
               {t('Edit FSP')}
             </Button>
@@ -82,7 +84,9 @@ export const FspSection = ({
             disabled={shouldDisableSetUpFsp()}
             data-cy='button-set-up-fsp'
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/create`}
+            to={`/${businessArea}/payment-module/${
+              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+            }/${id}/setup-fsp/create`}
           >
             {t('Set up FSP')}
           </Button>
