@@ -917,6 +917,7 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   ENTITLEMENT_QUANTITY
   ENTITLEMENT_QUANTITY_USD
   DELIVERED_QUANTITY
+  DELIVERY_DATE
 }
 
 type FinancialServiceProviderXlsxTemplateNode implements Node {
@@ -2612,7 +2613,6 @@ type PaymentPlanNode implements Node {
   canCreatePaymentVerificationPlan: Boolean
   availablePaymentRecordsCount: Int
   reconciliationSummary: ReconciliationSummaryNode
-  listOfPaymentPlans: [ID]
   excludedHouseholds: [HouseholdNode]
   canCreateFollowUp: Boolean
   totalWithdrawnHouseholdsCount: Int

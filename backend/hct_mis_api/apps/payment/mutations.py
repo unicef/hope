@@ -1162,7 +1162,7 @@ class ExcludeHouseholdsMutation(PermissionMutation):
             raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
 
         if payment_plan.excluded_households_ids:
-            msg = "This Payment Plan contains already excluded payments"
+            msg = "This Payment Plan already contains excluded households"
             logger.error(msg)
             raise GraphQLError(msg)
 

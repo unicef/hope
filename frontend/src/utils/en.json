@@ -745,5 +745,6 @@
   "Main Payment Plan Details": "Main Payment Plan Details",
   "Follow-up Payment Plan Details": "Follow-up Payment Plan Details",
   "Households excluded from Payment Plan": "Households excluded from Payment Plan",
-  "Show only Follow-up plans": "Show only Follow-up plans"
+  "Show only Follow-up plans": "Show only Follow-up plans",
+  "All delivery mechanisms must have a FSP assigned": "All delivery mechanisms must have a FSP assigned"
 }

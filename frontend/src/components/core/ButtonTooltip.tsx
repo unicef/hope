@@ -4,7 +4,7 @@ import { Tooltip } from '@material-ui/core';
 
 export const ButtonTooltip = ({
   children,
-  onClick,
+  onClick = () => null,
   title = 'Permission denied',
   disabled,
   ...otherProps
