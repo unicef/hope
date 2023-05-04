@@ -510,25 +510,25 @@ def deduplicate_documents() -> bool:
     return True
 
 
-@app.task
-@sentry_tags
-def check_rdi_import_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import rdi_import_celery_manager
+# @app.task
+# @sentry_tags
+# def check_rdi_import_periodic_task() -> bool:
+#     from hct_mis_api.apps.utils.celery_manager import rdi_import_celery_manager
+#
+#     with locked_cache(key="celery_manager_periodic_task") as locked:
+#         if not locked:
+#             return True
+#         rdi_import_celery_manager.execute()
+#     return True
 
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        rdi_import_celery_manager.execute()
-    return True
 
-
-@app.task
-@sentry_tags
-def check_rdi_merge_periodic_task() -> bool:
-    from hct_mis_api.apps.utils.celery_manager import rdi_merge_celery_manager
-
-    with locked_cache(key="celery_manager_periodic_task") as locked:
-        if not locked:
-            return True
-        rdi_merge_celery_manager.execute()
-    return True
+# @app.task
+# @sentry_tags
+# def check_rdi_merge_periodic_task() -> bool:
+#     from hct_mis_api.apps.utils.celery_manager import rdi_merge_celery_manager
+#
+#     with locked_cache(key="celery_manager_periodic_task") as locked:
+#         if not locked:
+#             return True
+#         rdi_merge_celery_manager.execute()
+#     return True
