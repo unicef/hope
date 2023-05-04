@@ -1,8 +1,8 @@
 import { Box, Button } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { Link, useLocation } from 'react-router-dom';
+import { ButtonTooltip } from '../../../core/ButtonTooltip';
 
 interface SetUpFspButtonActionsProps {
   step: number;
