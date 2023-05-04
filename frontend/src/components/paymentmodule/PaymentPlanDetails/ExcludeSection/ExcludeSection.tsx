@@ -148,14 +148,8 @@ export const ExcludeSection = ({
     const resetExclusions = (): void => {
       setExclusionsOpen(false);
       setErrors([]);
-      setExcludedIds([]);
-      setDeletedIds([]);
       setValue('');
       setEdit(false);
-    };
-
-    const closeExclusions = (): void => {
-      setExclusionsOpen(false);
     };
 
     const saveExclusions = (): void => {
@@ -213,7 +207,7 @@ export const ExcludeSection = ({
 
     if (isExclusionsOpen) {
       return (
-        <Button color='primary' onClick={closeExclusions}>
+        <Button color='primary' onClick={resetExclusions}>
           {t('Close')}
         </Button>
       );
