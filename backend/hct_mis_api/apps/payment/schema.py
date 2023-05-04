@@ -460,7 +460,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     excluded_households = graphene.List(HouseholdNode)
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
-    follow_ups = graphene.List(lambda: PaymentPlanNode)
 
     class Meta:
         model = PaymentPlan
