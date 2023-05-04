@@ -47,6 +47,8 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
+logger = logging.getLogger(__name__)
+
 
 class RdiXlsxCreateTask(RdiBaseCreateTask):
     """
@@ -600,6 +602,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         # households objects have to be created first
         worksheets = (wb["Households"], wb["Individuals"])
+        logger.info("Starting import of %s", registration_data_import.id)
         for sheet in worksheets:
             self.image_loader = SheetImageLoader(sheet)
             self._create_objects(sheet, registration_data_import)
@@ -612,6 +615,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
         if not self.business_area.postpone_deduplication:
+            logger.info("Starting deduplication of %s", registration_data_import.id)
             DeduplicateTask(self.business_area.slug).deduplicate_imported_individuals(
                 registration_data_import_datahub=registration_data_import
             )
+            logger.info("Finished deduplication of %s", registration_data_import.id)
