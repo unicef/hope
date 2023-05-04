@@ -137,7 +137,7 @@ class TestSendTpToDatahub(TestCase):
             document_number="1231231",
             photo="",
             individual=cls.individual_primary,
-            type=DocumentType.objects.filter(type="NATIONAL_ID").first(),
+            type=DocumentType.objects.filter(key="national_id").first(),
         )
         IndividualIdentity.objects.create(
             partner=cls.unhcr,
