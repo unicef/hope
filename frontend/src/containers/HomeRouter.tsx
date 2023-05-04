@@ -172,6 +172,12 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id'>
             <FollowUpPaymentPlanDetailsPage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/create'>
+            <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/followup-payment-plans/:id/setup-fsp/edit'>
+            <EditSetUpFspPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />
           </SentryRoute>
