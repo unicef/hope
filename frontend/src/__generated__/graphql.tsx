@@ -1348,7 +1348,8 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   Currency = 'CURRENCY',
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
   EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
-  DeliveredQuantity = 'DELIVERED_QUANTITY'
+  DeliveredQuantity = 'DELIVERED_QUANTITY',
+  DeliveryDate = 'DELIVERY_DATE'
 }
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -3918,7 +3919,6 @@ export type PaymentPlanNode = Node & {
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
   availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
   reconciliationSummary?: Maybe<ReconciliationSummaryNode>,
-  listOfPaymentPlans?: Maybe<Array<Maybe<Scalars['ID']>>>,
   excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>,
   canCreateFollowUp?: Maybe<Scalars['Boolean']>,
   totalWithdrawnHouseholdsCount?: Maybe<Scalars['Int']>,
@@ -25638,7 +25638,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   reconciliationSummary?: Resolver<Maybe<ResolversTypes['ReconciliationSummaryNode']>, ParentType, ContextType>,
-  listOfPaymentPlans?: Resolver<Maybe<Array<Maybe<ResolversTypes['ID']>>>, ParentType, ContextType>,
   excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>,
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   totalWithdrawnHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

@@ -53,7 +53,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       aria-labelledby='form-dialog-title'
     >
       <DialogTitleWrapper>
-        <DialogTitle id='scroll-dialog-title'>
+        <DialogTitle>
           <Typography variant='h6'>{t('Mark Ready')}</Typography>
         </DialogTitle>
       </DialogTitleWrapper>

@@ -811,3 +811,9 @@ export const createHandleFilterChange = (
 export const tomorrow = new Date().setDate(new Date().getDate() + 1);
 export const today = new Date();
 today.setHours(0, 0, 0, 0);
+
+export const removeBracketsAndQuotes = (str: string): string => {
+  let modifiedStr = str;
+  modifiedStr = modifiedStr.replace(/\[|\]|"|'/g, '');
+  return modifiedStr;
+};

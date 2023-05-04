@@ -19717,22 +19717,6 @@
             "deprecationReason": null
           },
           {
-            "name": "listOfPaymentPlans",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "excludedHouseholds",
             "description": null,
             "args": [],
@@ -32211,6 +32195,12 @@
           },
           {
             "name": "DELIVERED_QUANTITY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DELIVERY_DATE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

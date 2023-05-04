@@ -131,3 +131,14 @@ The following are the code branches and their CI / CD usage.
 | feature/\* or bug/\* | no | n/a |  |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
+
+
+# E2E test run locally
+
+1) Need to create images for **cypress**, **frontend** and **backend** 
+   2) for example for cypress go to directory `cd cypress` and run `docker build -t cy_image_name .`
+   3) `cd backend` and run `docker build -t be_image_name .`
+   4) `cd frontend` and run `docker build -t fe_image_name .`
+       
+2) `cd deployment` 
+3) `FRONTEND_IMAGE=fe_image_name BACKEND_IMAGE=be_image_name CYPRESS_IMAGE=cy_image_name docker-compose -f docker-compose.cy.yml run cypress ci-test`

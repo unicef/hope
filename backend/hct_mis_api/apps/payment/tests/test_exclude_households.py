@@ -97,7 +97,7 @@ class TestExcludeHouseholds(APITestCase):
         assert "errors" in exclude_mutation_response
         self.assertEqual(
             exclude_mutation_response["errors"][0]["message"],
-            "This Payment Plan contains already excluded payments",
+            "This Payment Plan already contains excluded households",
         )
 
     def test_exclude_payment_raises_error_when_payment_not_belongs_to_payment_plan(self) -> None:
