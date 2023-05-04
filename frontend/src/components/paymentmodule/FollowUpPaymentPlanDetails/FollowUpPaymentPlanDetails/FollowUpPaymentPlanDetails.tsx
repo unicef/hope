@@ -1,18 +1,14 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  paymentPlanStatusToColor,
-  renderUserName,
-} from '../../../../utils/utils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { renderUserName } from '../../../../utils/utils';
 import { BlackLink } from '../../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
-import { StatusBox } from '../../../core/StatusBox';
 
 interface FollowUpPaymentPlanDetailsProps {
   businessArea: string;
@@ -32,8 +28,11 @@ export const FollowUpPaymentPlanDetails = ({
     endDate,
     dispersionStartDate,
     dispersionEndDate,
-    id,
-    unicefId,
+    sourcePaymentPlan: {
+      id: sourcePaymentPlanId,
+      unicefId: sourcePaymentPlanUnicefId,
+    },
+    targetPopulation,
   } = paymentPlan;
 
   return (
@@ -45,17 +44,11 @@ export const FollowUpPaymentPlanDetails = ({
         <OverviewContainer>
           <Grid container spacing={6}>
             <Grid item xs={3}>
-              <StatusBox
-                status={paymentPlan.status}
-                statusToColor={paymentPlanStatusToColor}
-              />
-            </Grid>
-            <Grid item xs={3}>
               <LabelizedField label={t('Main Payment Plan')}>
                 <BlackLink
-                  to={`/${businessArea}/payment-module/payment-plans/${id}`}
+                  to={`/${businessArea}/payment-module/payment-plans/${sourcePaymentPlanId}`}
                 >
-                  {unicefId}
+                  {sourcePaymentPlanUnicefId}
                 </BlackLink>
               </LabelizedField>
             </Grid>
@@ -68,6 +61,15 @@ export const FollowUpPaymentPlanDetails = ({
               <LabelizedField label={t('Programme')}>
                 <BlackLink to={`/${businessArea}/programs/${program.id}`}>
                   {program.name}
+                </BlackLink>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label={t('Target Population')}>
+                <BlackLink
+                  to={`/${businessArea}/target-population/${targetPopulation.id}`}
+                >
+                  {targetPopulation.name}
                 </BlackLink>
               </LabelizedField>
             </Grid>
