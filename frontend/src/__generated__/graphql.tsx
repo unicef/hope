@@ -10006,7 +10006,7 @@ export type PaymentQuery = (
       & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'phoneNo' | 'phoneNoValid' | 'phoneNoAlternative' | 'phoneNoAlternativeValid'>
     ), parent: (
       { __typename?: 'PaymentPlanNode' }
-      & Pick<PaymentPlanNode, 'id' | 'status' | 'unicefId'>
+      & Pick<PaymentPlanNode, 'id' | 'status' | 'isFollowUp' | 'unicefId'>
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
@@ -18444,6 +18444,7 @@ export const PaymentDocument = gql`
     parent {
       id
       status
+      isFollowUp
       unicefId
       program {
         id
