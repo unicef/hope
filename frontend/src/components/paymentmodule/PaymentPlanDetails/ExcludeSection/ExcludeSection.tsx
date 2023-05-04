@@ -10,6 +10,7 @@ import EditIcon from '@material-ui/icons/EditRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  PaymentPlanDocument,
   PaymentPlanQuery,
   useExcludeHouseholdsPpMutation,
 } from '../../../../__generated__/graphql';
@@ -63,6 +64,14 @@ export const ExcludeSection = ({
           paymentPlanId: paymentPlan.id,
           excludedHouseholdsIds: idsToSave,
         },
+        refetchQueries: () => [
+          {
+            query: PaymentPlanDocument,
+            variables: { id: paymentPlan.id },
+            fetchPolicy: 'network-only',
+          },
+          'AllPaymentsForTable',
+        ],
       });
       if (!error) {
         showMessage(t('Households excluded from Payment Plan'));
