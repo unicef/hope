@@ -35,7 +35,10 @@ export interface ImportXlsxProps {
   cashOrPaymentPlanId: string;
 }
 
-export function ImportXlsx({ paymentVerificationPlanId, cashOrPaymentPlanId }: ImportXlsxProps): ReactElement {
+export function ImportXlsx({
+  paymentVerificationPlanId,
+  cashOrPaymentPlanId,
+}: ImportXlsxProps): ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -64,7 +67,10 @@ export function ImportXlsx({ paymentVerificationPlanId, cashOrPaymentPlanId }: I
           refetchQueries,
         });
 
-        if (!errors && !data?.importXlsxPaymentVerificationPlanFile?.errors.length) {
+        if (
+          !errors &&
+          !data?.importXlsxPaymentVerificationPlanFile?.errors.length
+        ) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
         }
@@ -116,7 +122,8 @@ export function ImportXlsx({ paymentVerificationPlanId, cashOrPaymentPlanId }: I
                 setFileToImport(file);
               }}
             />
-            {error?.graphQLErrors?.length || xlsxErrors?.length ? (
+            {fileToImport &&
+            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
               <Error>
                 <p>Errors</p>
                 {error
@@ -127,7 +134,14 @@ export function ImportXlsx({ paymentVerificationPlanId, cashOrPaymentPlanId }: I
             ) : null}
           </>
           <DialogActions>
-            <Button onClick={() => setOpenImport(false)}>CANCEL</Button>
+            <Button
+              onClick={() => {
+                setOpenImport(false);
+                setFileToImport(null);
+              }}
+            >
+              CANCEL
+            </Button>
             <Button
               disabled={!fileToImport}
               type='submit'

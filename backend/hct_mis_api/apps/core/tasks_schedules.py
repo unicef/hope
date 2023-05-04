@@ -49,4 +49,8 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.targeting.celery_tasks.check_send_tp_periodic_task",
         "schedule": crontab(minute="*/15"),
     },
+    "check_xlsx_exporting_periodic_task": {
+        "task": "hct_mis_api.apps.payment.celery_tasks.check_xlsx_exporting_periodic_task",
+        "schedule": crontab(minute="*/15"),
+    },
 }

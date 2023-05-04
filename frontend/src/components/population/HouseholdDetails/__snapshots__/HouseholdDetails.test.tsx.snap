@@ -187,6 +187,23 @@ Jameschester, SC 24934
               class="sc-bwzfXH eoWrid"
               color="textSecondary"
             >
+              Zip code
+            </span>
+            <div
+              data-cy="label-Zip code"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
               Administrative Level 1
             </span>
             <div
