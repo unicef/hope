@@ -1138,6 +1138,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+# TODO: Depending on the designation of the Program we can exclude Ind or HH
 class ExcludeHouseholdsMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -1152,22 +1153,34 @@ class ExcludeHouseholdsMutation(PermissionMutation):
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
+        cls.has_permission(info, Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, payment_plan.business_area)
+
+        if not payment_plan.is_follow_up:
+            raise GraphQLError("Excluded action is available only for Follow-up Payment Plan")
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Beneficiary can be excluded only for 'Locked' status of Payment Plan")
+
         if payment_plan.excluded_households_ids:
             msg = "This Payment Plan contains already excluded payments"
             logger.error(msg)
             raise GraphQLError(msg)
 
-        parent_ids = list(
-            Payment.objects.filter(household__unicef_id__in=excluded_households_ids)
-            .distinct()
-            .values_list("parent_id", flat=True)
-        )
-        if not (len(parent_ids) == 1 or str(parent_ids[0]) == payment_plan.id):
+        if not payment_plan.eligible_payments.exists():
+            msg = "There is not at least one beneficiary in the Follow-up Payment Plan that is not excluded"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluded_households_ids)
+
+        if not payments_for_exclude:
             msg = "These Households are not included in this Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
-        payment_plan.payment_items.filter(household__unicef_id__in=excluded_households_ids).update(excluded=True)
+        payments_for_exclude.update(excluded=True)
+
+        payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)
 
 
