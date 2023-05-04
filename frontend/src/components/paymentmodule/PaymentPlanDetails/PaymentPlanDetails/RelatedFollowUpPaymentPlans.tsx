@@ -29,7 +29,7 @@ export const RelatedFollowUpPaymentPlans = ({
     followUpLinks = truncatedFollowUps.map((followUp) => (
       <BlackLink
         key={followUp?.node?.id}
-        to={`/${businessArea}/payment-module/payment-plans/${followUp?.node?.id}`}
+        to={`/${businessArea}/payment-module/followup-payment-plans/${followUp?.node?.id}`}
       >
         {followUp?.node?.unicefId}
       </BlackLink>
