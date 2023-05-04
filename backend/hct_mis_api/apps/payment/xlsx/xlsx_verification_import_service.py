@@ -41,7 +41,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.COLUMN_DICT_TYPES = {}
 
     @staticmethod
-    def get_columns_from_worksheet(ws: Worksheet) -> Dict[str, Dict[str, int]]:
+    def get_columns_from_worksheet(ws: Worksheet) -> Dict:
         return {
             cell.value: {"letter": get_column_letter(cell.column), "number": cell.column - 1}
             for cell in ws[1]
@@ -87,6 +87,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
     def _validate_headers(self) -> None:
         headers = self.get_columns_from_worksheet(self.ws_verifications)
+        # print(headers)
 
         for header_name, header_attrs in headers.items():
             if header_name == "payment_record_id":
@@ -108,8 +109,9 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         if missing_headers:
             self.errors.append(
                 XlsxError(
-                    sheet="Payment Verifications",
-                    message=f"Missing mandatory headers: {' '.join(missing_headers)}",
+                    "Payment Verifications",
+                    None,
+                    f"Missing mandatory headers: {' '.join(missing_headers)}",
                 )
             )
         else:
@@ -120,31 +122,34 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             }
 
     def _validate_mandatory_row_types(self, row: Row) -> None:
-        mandatory_column_ids = self.COLUMN_DICT_TYPES.keys()
+        mandatory_columns = self.COLUMN_DICT_TYPES.keys()
 
         column = 0
         for cell in row:
-            if column in mandatory_column_ids:
-                if cell.value is None:
-                    self.errors.append(XlsxError("Payment Verifications", cell.coordinate, "Cell value cannot be null"))
-                    continue
-
-                if cell.data_type != self.COLUMN_DICT_TYPES[column]:
-                    readable_cell_error = XlsxVerificationImportService.TYPES_READABLE_MAPPING[
-                        self.COLUMN_DICT_TYPES[column]
-                    ]
-                    self.errors.append(
-                        XlsxError(
-                            "Payment Verifications",
-                            cell.coordinate,
-                            f"Wrong type off cell {readable_cell_error} "
-                            f"expected, {XlsxVerificationImportService.TYPES_READABLE_MAPPING[cell.data_type]} given.",
-                        )
+            if cell.value is None:
+                column += 1
+                continue
+            if column in mandatory_columns and cell.data_type != self.COLUMN_DICT_TYPES[column]:
+                readable_cell_error = XlsxVerificationImportService.TYPES_READABLE_MAPPING[
+                    self.COLUMN_DICT_TYPES[column]
+                ]
+                self.errors.append(
+                    XlsxError(
+                        "Payment Verifications",
+                        cell.coordinate,
+                        f"Wrong type off cell {readable_cell_error} "
+                        f"expected, {XlsxVerificationImportService.TYPES_READABLE_MAPPING[cell.data_type]} given.",
                     )
+                )
             column += 1
 
     def _validate_payment_record_id(self, row: Row) -> None:
         cell = row[self.PAYMENT_RECORD_ID_COLUMN_INDEX]
+
+        # print(self.COLUMN_DICT_TYPES)
+        # print(row)
+        # print([cell.value for cell in row])
+
         if cell.value not in self.payment_record_ids:
             self.errors.append(
                 XlsxError(
