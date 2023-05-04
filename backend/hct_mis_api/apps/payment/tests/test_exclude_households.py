@@ -1,5 +1,7 @@
 from freezegun import freeze_time
 
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -29,9 +31,17 @@ class TestExcludeHouseholds(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], cls.business_area
+        )
 
-        cls.payment_plan = PaymentPlanFactory()
+        cls.source_payment_plan = PaymentPlanFactory(is_follow_up=False, status=PaymentPlan.Status.FINISHED)
+
+        cls.payment_plan = PaymentPlanFactory(
+            source_payment_plan=cls.source_payment_plan, is_follow_up=True, status=PaymentPlan.Status.LOCKED
+        )
         cls.another_payment_plan = PaymentPlanFactory()
+        cls.payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
         hoh1 = IndividualFactory(household=None)
         cls.household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", head_of_household=hoh1)
@@ -50,7 +60,7 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
 
     @freeze_time("2020-10-10")
-    def test_exclude_households(self) -> None:
+    def test_exclude_households(self, mock_parent_init: Any) -> None:
         household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
@@ -58,7 +68,7 @@ class TestExcludeHouseholds(APITestCase):
             request_string=EXCLUDE_HOUSEHOLD_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encode_id_base64(self.payment_plan.id, "PaymentPlan"),
+                "paymentPlanId": self.payment_plan_id,
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
             },
         )
@@ -89,7 +99,7 @@ class TestExcludeHouseholds(APITestCase):
             request_string=EXCLUDE_HOUSEHOLD_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encode_id_base64(self.payment_plan.id, "PaymentPlan"),
+                "paymentPlanId": self.payment_plan_id,
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
             },
         )
@@ -108,7 +118,7 @@ class TestExcludeHouseholds(APITestCase):
             request_string=EXCLUDE_HOUSEHOLD_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encode_id_base64(self.payment_plan.id, "PaymentPlan"),
+                "paymentPlanId": self.payment_plan_id,
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_4],
             },
         )
