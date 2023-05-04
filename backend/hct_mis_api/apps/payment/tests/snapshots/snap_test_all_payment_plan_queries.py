@@ -25,6 +25,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 1
                         },
+                        'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
                         'endDate': '2020-11-10',
@@ -59,6 +60,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 0
                         },
+                        'canCreateFollowUp': False,
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
                         'endDate': '2020-11-10',
@@ -307,11 +309,22 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_follow_up_flag
                     'node': {
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
+                        'followUps': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'unicefId': 'PP-0060-20-00000003'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'unicefId': 'PP-0060-20-00000004'
+                                    }
+                                }
+                            ],
+                            'totalCount': 2
+                        },
                         'isFollowUp': False,
-                        'listOfPaymentPlans': [
-                            '56aca38c-dc16-48a9-ace4-70d88b41d462',
-                            '5b04f7c3-579a-48dd-a232-424daaefffe7'
-                        ],
                         'sourcePaymentPlan': None,
                         'unicefId': 'PP-01'
                     }
@@ -320,9 +333,12 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_follow_up_flag
                     'node': {
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
+                        'followUps': {
+                            'edges': [
+                            ],
+                            'totalCount': 0
+                        },
                         'isFollowUp': False,
-                        'listOfPaymentPlans': [
-                        ],
                         'sourcePaymentPlan': None,
                         'unicefId': 'PP-02'
                     }
@@ -340,9 +356,12 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] 
                     'node': {
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
+                        'followUps': {
+                            'edges': [
+                            ],
+                            'totalCount': 0
+                        },
                         'isFollowUp': True,
-                        'listOfPaymentPlans': [
-                        ],
                         'sourcePaymentPlan': {
                             'unicefId': 'PP-01'
                         },
@@ -353,9 +372,12 @@ snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] 
                     'node': {
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
+                        'followUps': {
+                            'edges': [
+                            ],
+                            'totalCount': 0
+                        },
                         'isFollowUp': True,
-                        'listOfPaymentPlans': [
-                        ],
                         'sourcePaymentPlan': {
                             'unicefId': 'PP-01'
                         },
