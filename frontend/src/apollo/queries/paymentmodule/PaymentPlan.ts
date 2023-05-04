@@ -237,6 +237,10 @@ export const PAYMENT_PLAN_QUERY = gql`
           }
         }
       }
+      sourcePaymentPlan {
+        id
+        unicefId
+      }
     }
   }
 `;
