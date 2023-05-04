@@ -60,7 +60,7 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
 
     @freeze_time("2020-10-10")
-    def test_exclude_households(self, mock_parent_init: Any) -> None:
+    def test_exclude_households(self) -> None:
         household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
