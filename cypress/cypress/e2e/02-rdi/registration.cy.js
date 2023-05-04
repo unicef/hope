@@ -13,7 +13,7 @@ context("RDI", () => {
     cy.get('[data-cy="filter-status"]').should('be.visible')
   })
   
- it("Registration Data Import and merge the data and verify merge file and View Ticket", () => {
+ it("Registration Data Import and merge the data and verify merge file", () => {
     uploadRDIFile();
     mergeRDIFile()
     verifyMergedData()
