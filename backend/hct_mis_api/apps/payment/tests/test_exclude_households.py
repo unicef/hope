@@ -30,42 +30,91 @@ class TestExcludeHouseholds(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-    @freeze_time("2020-10-10")
-    def test_exclude_households(self) -> None:
-        payment_plan = PaymentPlanFactory()
+        cls.payment_plan = PaymentPlanFactory()
+        cls.another_payment_plan = PaymentPlanFactory()
 
         hoh1 = IndividualFactory(household=None)
-        household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", head_of_household=hoh1)
-        payment_1 = PaymentFactory(parent=payment_plan, household=household_1, excluded=False)
+        cls.household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", head_of_household=hoh1)
+        cls.payment_1 = PaymentFactory(parent=cls.payment_plan, household=cls.household_1, excluded=False)
 
         hoh2 = IndividualFactory(household=None)
-        household_2 = HouseholdFactory(id="4ccd6a58-d56a-4ad2-9448-dabca4cfcb84", head_of_household=hoh2)
-        payment_2 = PaymentFactory(parent=payment_plan, household=household_2, excluded=False)
+        cls.household_2 = HouseholdFactory(id="4ccd6a58-d56a-4ad2-9448-dabca4cfcb84", head_of_household=hoh2)
+        cls.payment_2 = PaymentFactory(parent=cls.payment_plan, household=cls.household_2, excluded=False)
 
         hoh3 = IndividualFactory(household=None)
-        household_3 = HouseholdFactory(id="e1bdabf2-a54a-40c4-b92d-166b79d10542", head_of_household=hoh3)
-        payment_3 = PaymentFactory(parent=payment_plan, household=household_3, excluded=False)
+        cls.household_3 = HouseholdFactory(id="e1bdabf2-a54a-40c4-b92d-166b79d10542", head_of_household=hoh3)
+        cls.payment_3 = PaymentFactory(parent=cls.payment_plan, household=cls.household_3, excluded=False)
 
-        household_unicef_id_1 = Household.objects.get(id=household_1.id).unicef_id
-        household_unicef_id_2 = Household.objects.get(id=household_2.id).unicef_id
+        hoh4 = IndividualFactory(household=None)
+        cls.household_4 = HouseholdFactory(id="7e14efa4-3ff3-4947-aecc-b517c659ebda", head_of_household=hoh4)
+        cls.payment_4 = PaymentFactory(parent=cls.another_payment_plan, household=cls.household_4, excluded=False)
+
+    @freeze_time("2020-10-10")
+    def test_exclude_households(self) -> None:
+        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
         self.graphql_request(
             request_string=EXCLUDE_HOUSEHOLD_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
+                "paymentPlanId": encode_id_base64(self.payment_plan.id, "PaymentPlan"),
                 "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
             },
         )
 
-        payment_plan.refresh_from_db()
-        payment_1.refresh_from_db()
-        payment_2.refresh_from_db()
-        payment_3.refresh_from_db()
+        self.payment_plan.refresh_from_db()
+        self.payment_1.refresh_from_db()
+        self.payment_2.refresh_from_db()
+        self.payment_3.refresh_from_db()
 
-        self.assertEqual(payment_1.excluded, True)
-        self.assertEqual(payment_2.excluded, True)
-        self.assertEqual(payment_3.excluded, False)
+        self.assertEqual(self.payment_1.excluded, True)
+        self.assertEqual(self.payment_2.excluded, True)
+        self.assertEqual(self.payment_3.excluded, False)
         self.assertEqual(
-            set(payment_plan.excluded_households_ids), {payment_1.household.unicef_id, payment_2.household.unicef_id}
+            set(self.payment_plan.excluded_households_ids),
+            {self.payment_1.household.unicef_id, self.payment_2.household.unicef_id},
+        )
+
+    def test_exclude_payment_raises_error_when_payment_plan_contains_already_excluded_payments(self) -> None:
+        self.payment_1.excluded = True
+        self.payment_2.excluded = True
+        self.payment_1.save()
+        self.payment_2.save()
+
+        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        household_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
+
+        exclude_mutation_response = self.graphql_request(
+            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(self.payment_plan.id, "PaymentPlan"),
+                "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_2],
+            },
+        )
+
+        assert "errors" in exclude_mutation_response
+        self.assertEqual(
+            exclude_mutation_response["errors"][0]["message"],
+            "This Payment Plan contains already excluded payments",
+        )
+
+    def test_exclude_payment_raises_error_when_payment_not_belongs_to_payment_plan(self) -> None:
+        household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
+        household_unicef_id_4 = Household.objects.get(id=self.household_4.id).unicef_id
+
+        exclude_mutation_response = self.graphql_request(
+            request_string=EXCLUDE_HOUSEHOLD_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(self.payment_plan.id, "PaymentPlan"),
+                "excludedHouseholdsIds": [household_unicef_id_1, household_unicef_id_4],
+            },
+        )
+
+        assert "errors" in exclude_mutation_response
+        self.assertEqual(
+            exclude_mutation_response["errors"][0]["message"],
+            "These Households are not included in this Payment Plan",
         )

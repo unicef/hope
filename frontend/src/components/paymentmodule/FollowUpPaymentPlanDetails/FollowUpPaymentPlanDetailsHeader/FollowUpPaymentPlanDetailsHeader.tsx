@@ -11,30 +11,30 @@ import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
-import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
-import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
-import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymentPlanHeaderButtons';
-import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
-import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
+import { AcceptedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { InApprovalPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
+import { InAuthorizationPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
+import { InReviewPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
+import { LockedFspPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
+import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
+import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
   width: 140px;
   margin-left: 30px;
 `;
 
-interface PaymentPlanDetailsHeaderProps {
+interface FollowUpPaymentPlanDetailsHeaderProps {
   businessArea: string;
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const PaymentPlanDetailsHeader = ({
+export const FollowUpPaymentPlanDetailsHeader = ({
   businessArea,
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
+}: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -46,7 +46,8 @@ export const PaymentPlanDetailsHeader = ({
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-  const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
+  //Follow up Payment Plan starts in Locked status
+  const canUnlock = false;
   const canSendForApproval = hasPermissions(
     PERMISSIONS.PM_SEND_FOR_APPROVAL,
     permissions,
@@ -96,7 +97,7 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canUnlock={canLock}
+          canUnlock={canUnlock}
           permissions={permissions}
         />
       );
@@ -174,7 +175,7 @@ export const PaymentPlanDetailsHeader = ({
     <PageHeader
       title={
         <Box display='flex' alignItems='center'>
-          {t('Payment Plan')} ID:{' '}
+          {t('Follow-up Payment Plan')} ID:{' '}
           <Box ml={1}>
             <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
           </Box>

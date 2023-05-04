@@ -6,11 +6,11 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { FollowUpPaymentPlanDetails } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
+import { FollowUpPaymentPlanDetailsHeader } from '../../../components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { FspSection } from '../../../components/paymentmodule/PaymentPlanDetails/FspSection';
-import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
-import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -21,7 +21,7 @@ import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 
-export const PaymentPlanDetailsPage = (): React.ReactElement => {
+export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
@@ -69,12 +69,12 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlan } = data;
   return (
     <>
-      <PaymentPlanDetailsHeader
+      <FollowUpPaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         businessArea={businessArea}
         permissions={permissions}
       />
-      <PaymentPlanDetails
+      <FollowUpPaymentPlanDetails
         businessArea={businessArea}
         paymentPlan={paymentPlan}
       />
@@ -82,10 +82,10 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      {paymentPlan.isFollowUp && <ExcludeSection paymentPlan={paymentPlan} />}
       {shouldDisplayFsp && (
         <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
       )}
+      <ExcludeSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

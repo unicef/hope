@@ -738,5 +738,12 @@
   "Payment has been marked as failed.": "Payment has been marked as failed.",
   "Are you sure you would like to mark payment as failed?": "Are you sure you would like to mark payment as failed?",
   "Households excluded": "Households excluded",
-  "Invalid household id": "Invalid household id"
+  "Invalid household id": "Invalid household id",
+  "Create Follow-up Payment Plan": "Create Follow-up Payment Plan",
+  "Follow-up Payment Plan might be started just for unsuccessful payments": "Follow-up Payment Plan might be started just for unsuccessful payments",
+  "Withdrawn Household cannot be added into follow-up payment plan": "Withdrawn Household cannot be added into follow-up payment plan",
+  "Main Payment Plan Details": "Main Payment Plan Details",
+  "Follow-up Payment Plan Details": "Follow-up Payment Plan Details",
+  "Households excluded from Payment Plan": "Households excluded from Payment Plan",
+  "Show only Follow-up plans": "Show only Follow-up plans"
 }
