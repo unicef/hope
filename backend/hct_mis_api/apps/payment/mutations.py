@@ -1180,6 +1180,9 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
         payments_for_exclude.update(excluded=True)
 
+        payment_plan.update_population_count_fields()
+        payment_plan.update_money_fields()
+
         payment_plan.refresh_from_db()
         return cls(payment_plan=payment_plan)
 

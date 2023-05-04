@@ -737,7 +737,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     @property
     def has_export_file(self) -> bool:
         try:
-            if self.status == PaymentPlan.Status.LOCKED:
+            if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
                 return self.export_file_entitlement is not None
             elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
                 return self.export_file_per_fsp is not None
@@ -748,7 +748,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def payment_list_export_file_link(self) -> Optional[str]:
-        if self.status == PaymentPlan.Status.LOCKED:
+        if self.status == PaymentPlan.Status.LOCKED and not self.is_follow_up:
             return self.export_file_entitlement.file.url
         elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             return self.export_file_per_fsp.file.url
