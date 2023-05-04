@@ -87,7 +87,6 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
     def _validate_headers(self) -> None:
         headers = self.get_columns_from_worksheet(self.ws_verifications)
-        # print(headers)
 
         for header_name, header_attrs in headers.items():
             if header_name == "payment_record_id":
@@ -145,11 +144,6 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
     def _validate_payment_record_id(self, row: Row) -> None:
         cell = row[self.PAYMENT_RECORD_ID_COLUMN_INDEX]
-
-        # print(self.COLUMN_DICT_TYPES)
-        # print(row)
-        # print([cell.value for cell in row])
-
         if cell.value not in self.payment_record_ids:
             self.errors.append(
                 XlsxError(
