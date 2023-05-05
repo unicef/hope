@@ -341,14 +341,34 @@ class TestPaymentPlanQueries(APITestCase):
     def test_filter_payment_plans_with_follow_up_flag(self) -> None:
         create_child_payment_plans(self.pp)
 
-        self.snapshot_graphql_request(
+        resp_data = self.graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
                 "isFollowUp": False,
             },
-        )
+        )["data"]
+
+        pp_query = resp_data["allPaymentPlans"]["edges"]
+
+        assert len(pp_query) == 2
+
+        for parent_pp_id in ["PP-01", "PP-02"]:
+            parent_pp = [pp for pp in pp_query if pp["node"]["unicefId"] == parent_pp_id][0]["node"]
+            assert parent_pp["isFollowUp"] is False
+            assert parent_pp["sourcePaymentPlan"] is None
+
+            # check followUps
+            follow_ups = parent_pp["followUps"]
+
+            if parent_pp_id == "PP-01":
+                assert follow_ups["totalCount"] == 2
+                for unicef_id in ["PP-0060-20-00000003", "PP-0060-20-00000004"]:
+                    assert len([i for i in follow_ups["edges"] if i["node"]["unicefId"] == unicef_id]) == 1
+
+            if parent_pp_id == "PP-02":
+                assert follow_ups["totalCount"] == 0
 
     def test_fetch_payment_plan_status_choices(self) -> None:
         self.snapshot_graphql_request(
