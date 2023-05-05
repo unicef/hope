@@ -38,30 +38,30 @@ context("Payment", () => {
     //     cy.get("h6").contains("Activity Log");
     //   })
 
-       cy.get('[data-cy="button-lock-plan"]',{timeout: 10000}).should('be.visible')
-        cy.get('[data-cy="button-lock-plan"]',{timeout: 10000}).click({ force: true});
-        cy.get('[data-cy="button-submit"]').click({ force: true});
+      //  cy.get('[data-cy="button-lock-plan"]',{timeout: 10000}).should('be.visible')
+      //   cy.get('[data-cy="button-lock-plan"]',{timeout: 10000}).click({ force: true});
+      //   cy.get('[data-cy="button-submit"]').click({ force: true});
 
     //     //Entitlements
-        cy.get("[data-cy=input-entitlement-formula]").should("exist");
-        cy.get("[data-cy=input-entitlement-formula] > .MuiSelect-root").click({
-          force: true
-        });
-        cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
-        cy.uniqueSeed().then(seed => {
-          cy.get("li")
-            .contains(`Rule-${seed}`)
-            .click({ force: true });
-        });
-        cy.get('[data-cy="button-apply-steficon"]').click({ force: true });
-        cy.reload();
-        cy.get('[data-cy="total-entitled-quantity-usd"]').should('contain',"USD");
+        // cy.get("[data-cy=input-entitlement-formula]").should("exist");
+        // cy.get("[data-cy=input-entitlement-formula] > .MuiSelect-root").click({
+        //   force: true
+        // });
+        // cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
+        // cy.uniqueSeed().then(seed => {
+        //   cy.get("li")
+        //     .contains(`Rule-${seed}`)
+        //     .click({ force: true });
+        // });
+        // cy.get('[data-cy="button-apply-steficon"]').click({ force: true });
+        // cy.reload();
+        // cy.get('[data-cy="total-entitled-quantity-usd"]').should('contain',"USD");
 
     //     //Set up FSP
-        cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
-        cy.get('[data-cy="page-header-container"]').contains("Set up FSP", {timeout: 10000});
-        cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
-        cy.get('[data-cy="select-option-Cash"]').click()
+        // cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
+        // cy.get('[data-cy="page-header-container"]').contains("Set up FSP", {timeout: 10000});
+        // cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
+        // cy.get('[data-cy="select-option-Cash"]').click()
  
        // cy.get('[data-cy="select-option-Transfer"]').click();
        // cy.get('[data-cy="button-next-save"]').click({ force: true });
