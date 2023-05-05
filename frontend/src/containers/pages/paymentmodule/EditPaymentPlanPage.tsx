@@ -12,7 +12,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { handleValidationErrors } from '../../../utils/utils';
+import { handleValidationErrors, today } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
@@ -20,9 +20,6 @@ import {
 } from '../../../__generated__/graphql';
 import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
 
 export const EditPaymentPlanPage = (): React.ReactElement => {
   const { id } = useParams();

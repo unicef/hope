@@ -30,6 +30,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
   const paymentPlanStatus = data?.payment?.parent?.status;
+  const paymentPlanIsFollowUp = data?.payment?.parent?.isFollowUp;
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   if (loading || caLoading) return <LoadingComponent />;
@@ -45,8 +46,12 @@ export const PaymentDetailsPage = (): React.ReactElement => {
       to: `/${businessArea}/payment-module/`,
     },
     {
-      title: `Payment Plan ${payment.parent.unicefId}`,
-      to: `/${businessArea}/payment-module/payment-plans/${data.payment.parent.id}/`,
+      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : null} Payment Plan ${
+        payment.parent.unicefId
+      }`,
+      to: `/${businessArea}/payment-module/${
+        paymentPlanIsFollowUp ? 'followup-payment-plans' : 'payment-plans'
+      }/${data.payment.parent.id}/`,
     },
   ];
 

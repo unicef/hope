@@ -331,7 +331,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
         updates = []
         with transaction.atomic():
             payment: Payment
-            for payment in payment_plan.not_excluded_payments:
+            for payment in payment_plan.eligible_payments:
                 # TODO: not sure how will work engine function payment_plan or payment need ??
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
                 payment.entitlement_quantity = result.value
@@ -419,4 +419,29 @@ def check_xlsx_exporting_periodic_task() -> bool:
         if not locked:
             return True
         xlsx_exporting_celery_manager.execute()
+    return True
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.services.payment_plan_services import (
+            PaymentPlanService,
+        )
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
+        payment_plan.refresh_from_db()
+        payment_plan.update_population_count_fields()
+        payment_plan.update_money_fields()
+        payment_plan.status_open()
+        payment_plan.status_lock()
+        payment_plan.save(update_fields=("status",))
+    except Exception as e:
+        logger.exception("Prepare Follow Up Payment Plan Error")
+        raise self.retry(exc=e) from e
+
     return True

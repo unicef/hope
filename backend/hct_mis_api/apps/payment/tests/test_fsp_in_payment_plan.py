@@ -668,7 +668,6 @@ class TestFSPAssignment(APITestCase):
             entitlement_quantity_usd=200000,  # a lot
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -827,7 +826,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
         )
         PaymentFactory(
             parent=self.payment_plan,
@@ -838,7 +836,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             delivery_type=GenericPayment.DELIVERY_TYPE_TRANSFER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            excluded=False,
         )
 
         new_get_volume_by_delivery_mechanism_response = self.graphql_request(
@@ -940,7 +937,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=500,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -951,7 +947,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=500,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -962,7 +957,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=1000,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_1,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -1019,7 +1013,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=1000,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
@@ -1030,7 +1023,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             entitlement_quantity_usd=1000,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
-            excluded=False,
             delivery_type=None,
             financial_service_provider=None,
         )
