@@ -301,53 +301,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_follow_up_flag 1'] = {
-    'data': {
-        'allPaymentPlans': {
-            'edges': [
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-12-10',
-                        'dispersionStartDate': '2020-08-10',
-                        'followUps': {
-                            'edges': [
-                                {
-                                    'node': {
-                                        'unicefId': 'PP-0060-20-00000003'
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'unicefId': 'PP-0060-20-00000004'
-                                    }
-                                }
-                            ],
-                            'totalCount': 2
-                        },
-                        'isFollowUp': False,
-                        'sourcePaymentPlan': None,
-                        'unicefId': 'PP-01'
-                    }
-                },
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'followUps': {
-                            'edges': [
-                            ],
-                            'totalCount': 0
-                        },
-                        'isFollowUp': False,
-                        'sourcePaymentPlan': None,
-                        'unicefId': 'PP-02'
-                    }
-                }
-            ]
-        }
-    }
-}
-
 snapshots['TestPaymentPlanQueries::test_filter_payment_plans_with_source_id 1'] = {
     'data': {
         'allPaymentPlans': {
