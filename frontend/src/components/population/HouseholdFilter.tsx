@@ -5,7 +5,10 @@ import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { createHandleFilterChange } from '../../utils/utils';
+import {
+  createHandleFilterChange,
+  householdStatusToColor,
+} from '../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -141,6 +144,20 @@ export const HouseholdFilters = ({
                 {order.name}
               </MenuItem>
             ))}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
+            label={t('Status')}
+            value={filter.status}
+          >
+            <MenuItem key='active' value='false'>
+              Active
+            </MenuItem>
+            <MenuItem key='inactive' value='true'>
+              Inactive
+            </MenuItem>
           </SelectFilter>
         </Grid>
       </Grid>
