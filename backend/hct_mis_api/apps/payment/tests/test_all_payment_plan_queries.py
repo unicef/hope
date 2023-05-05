@@ -274,12 +274,6 @@ class TestPaymentPlanQueries(APITestCase):
                 cls.pp_conflicted.update_population_count_fields()
                 cls.pp_conflicted.update_money_fields()
 
-    def test_fetch_payment_plan_status_choices(self) -> None:
-        self.snapshot_graphql_request(
-            request_string=self.PAYMENT_PLAN_STATUS_CHOICES_QUERY,
-            context={"user": self.user},
-        )
-
     @freeze_time("2020-10-10")
     def test_fetch_all_payment_plans(self) -> None:
         self.snapshot_graphql_request(
@@ -288,6 +282,14 @@ class TestPaymentPlanQueries(APITestCase):
             variables={
                 "businessArea": "afghanistan",
             },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_fetch_all_payments_for_open_payment_plan(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "paymentPlanId": encode_id_base64(self.pp.pk, "PaymentPlan")},
         )
 
     @freeze_time("2020-10-10")
@@ -311,11 +313,16 @@ class TestPaymentPlanQueries(APITestCase):
             )
 
     @freeze_time("2020-10-10")
-    def test_fetch_all_payments_for_open_payment_plan(self) -> None:
+    def test_filter_payment_plans_with_source_id(self) -> None:
+        create_child_payment_plans(self.pp)
+
         self.snapshot_graphql_request(
-            request_string=self.ALL_PAYMENTS_QUERY,
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
             context={"user": self.user},
-            variables={"businessArea": "afghanistan", "paymentPlanId": encode_id_base64(self.pp.pk, "PaymentPlan")},
+            variables={
+                "businessArea": "afghanistan",
+                "sourcePaymentPlanId": encode_id_base64(self.pp.id, "PaymentPlan"),
+            },
         )
 
     @freeze_time("2020-10-10")
@@ -343,15 +350,8 @@ class TestPaymentPlanQueries(APITestCase):
             },
         )
 
-    @freeze_time("2020-10-10")
-    def test_filter_payment_plans_with_source_id(self) -> None:
-        create_child_payment_plans(self.pp)
-
+    def test_fetch_payment_plan_status_choices(self) -> None:
         self.snapshot_graphql_request(
-            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
+            request_string=self.PAYMENT_PLAN_STATUS_CHOICES_QUERY,
             context={"user": self.user},
-            variables={
-                "businessArea": "afghanistan",
-                "sourcePaymentPlanId": encode_id_base64(self.pp.id, "PaymentPlan"),
-            },
         )
