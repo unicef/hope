@@ -77,7 +77,9 @@ stages:
               timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/job=upgrade \
               --tail=-1 --prefix | awk '/Upgrade succeeded/{print $0;exit} /.*/{print $0;}'
             displayName: "TAIL UPGRADE JOB"
+            condition: always()
           - script: |
               timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/service=backend \
               --tail=-1 --prefix | awk '/Worker spawned/{print $0;exit} /.*/{print $0;}'
             displayName: "TAIL BACKEND"
+            condition: succeeded()
