@@ -114,7 +114,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         class="MuiBox-root MuiBox-root-5"
       >
         <div
-          class="sc-EHOje gBtHDd"
+          class="sc-bZQynM hiBBpC"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6"
@@ -124,7 +124,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
            
         </div>
         <div
-          class="sc-bZQynM kzlsZH"
+          class="sc-gzVnrw tDqEr"
         >
           <div
             class="MuiGrid-root MuiGrid-container"
@@ -133,7 +133,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-gzVnrw gSvbrF"
+                class="sc-EHOje QrCDa"
                 color="#D8E1EE"
               >
                 <div>
@@ -160,7 +160,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-gzVnrw dcTani"
+                class="sc-EHOje eQfrqz"
                 color=" #d8d8d8"
               >
                 <div>
@@ -187,7 +187,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-gzVnrw kUxuIr"
+                class="sc-EHOje eRZRCM"
                 color="#003C8F"
               >
                 <div>

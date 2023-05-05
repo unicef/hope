@@ -2,13 +2,35 @@ from datetime import timedelta
 from random import randint
 from typing import Any
 
+from django.utils.timezone import utc
+
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
+
+
+class ProgramCycleFactory(DjangoModelFactory):
+    class Meta:
+        model = ProgramCycle
+
+    status = ProgramCycle.ACTIVE
+    start_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        after_now=False,
+        tzinfo=utc,
+    )
+    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    description = factory.Faker(
+        "sentence",
+        nb_words=10,
+        variable_nb_words=True,
+        ext_word_list=None,
+    )
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -69,3 +91,10 @@ class ProgramFactory(DjangoModelFactory):
         if extracted:
             for location in extracted:
                 self.locations.add(location)
+
+    @factory.post_generation
+    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+
+        ProgramCycleFactory(program=self)
