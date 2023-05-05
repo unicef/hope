@@ -1,3 +1,6 @@
+from typing import Any
+from unittest import mock
+
 from freezegun import freeze_time
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -110,7 +113,10 @@ class TestExcludeHouseholds(APITestCase):
             "This Payment Plan already contains excluded households",
         )
 
-    def test_exclude_payment_raises_error_when_payment_not_belongs_to_payment_plan(self) -> None:
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_exclude_payment_raises_error_when_payment_not_belongs_to_payment_plan(
+        self, get_exchange_rate_mock: Any
+    ) -> None:
         household_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         household_unicef_id_4 = Household.objects.get(id=self.household_4.id).unicef_id
 
