@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
     class="MuiPaper-root sc-htpNat cNIMpP MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-bxivhb lealwS"
+      class="sc-ifAKCX kJJoCT"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -15,7 +15,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
       </h6>
     </div>
     <div
-      class="sc-ifAKCX WOpjk"
+      class="sc-EHOje fhxHOS"
     >
       <div
         class="MuiGrid-root MuiGrid-container"
@@ -24,13 +24,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
         >
           <div
-            class="MuiGrid-root MuiGrid-container"
+            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
           >
             <div
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-EHOje blZqeH"
+                class="sc-bxivhb ivtTrx"
                 color="#5F02CF"
               >
                 <div>
@@ -57,7 +57,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-EHOje gQmscG"
+                class="sc-bxivhb fjYNWb"
                 color="#DFCCF5"
               >
                 <div>
@@ -84,7 +84,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-EHOje ozjqh"
+                class="sc-bxivhb fGkkog"
                 color="#1D6A64"
               >
                 <div>
@@ -111,7 +111,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-EHOje ljOEoj"
+                class="sc-bxivhb jiWNFG"
                 color="#B1E3E0"
               >
                 <div>
