@@ -55,7 +55,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     ALL_PAYMENT_PLANS_QUERY = """
     query AllPaymentPlans($businessArea: String!) {
-      allPaymentPlans(businessArea: $businessArea) {
+      allPaymentPlans(businessArea: $businessArea, orderBy: "unicef_id") {
         edges {
           node {
             status
@@ -145,7 +145,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     ALL_PAYMENTS_QUERY = """
     query AllPayments($paymentPlanId: String!, $businessArea: String!) {
-      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
+      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id") {
         edgeCount
         totalCount
         edges {
