@@ -33,7 +33,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
-        self.payment_list: QuerySet["Payment"] = payment_plan.not_excluded_payments
+        self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments
         self.file = file
         self.errors: List[XlsxError] = []
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
