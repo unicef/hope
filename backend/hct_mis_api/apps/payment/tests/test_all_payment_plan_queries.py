@@ -119,7 +119,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     ALL_PAYMENT_PLANS_FILTER_QUERY_2 = """
         query AllPaymentPlans($businessArea: String!, $isFollowUp: Boolean, $sourcePaymentPlanId: String) {
-            allPaymentPlans(businessArea: $businessArea, isFollowUp: $isFollowUp, sourcePaymentPlanId: $sourcePaymentPlanId) {
+            allPaymentPlans(businessArea: $businessArea, isFollowUp: $isFollowUp, sourcePaymentPlanId: $sourcePaymentPlanId, orderBy: "unicef_id") {
             edges {
               node {
                 unicefId
