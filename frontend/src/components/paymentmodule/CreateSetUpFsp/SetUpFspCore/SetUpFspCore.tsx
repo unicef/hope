@@ -60,6 +60,7 @@ export const SetUpFspCore = ({
   });
 
   const isEdit = location.pathname.indexOf('edit') !== -1;
+  const isFollowUp = location.pathname.indexOf('followup') !== -1;
 
   const [activeStep, setActiveStep] = useState(isEdit ? 1 : 0);
   // const [warning, setWarning] = useState('');
@@ -152,7 +153,9 @@ export const SetUpFspCore = ({
         },
       });
       showMessage(t('FSPs have been assigned to the delivery mechanisms'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${id}`,
+        pathname: `/${businessArea}/payment-module/${
+          isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+        }/${id}`,
         historyMethod: 'push',
       });
     } catch (e) {

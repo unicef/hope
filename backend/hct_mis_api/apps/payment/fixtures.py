@@ -47,7 +47,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.payment.utils import to_decimal
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -384,6 +385,13 @@ class RealProgramFactory(DjangoModelFactory):
     )
     individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
 
+    @factory.post_generation
+    def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+        if not create:
+            return
+
+        ProgramCycleFactory(program=self)
+
 
 class RealCashPlanFactory(DjangoModelFactory):
     class Meta:
@@ -549,6 +557,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
+    program_cycle = factory.LazyAttribute(lambda o: o.program.cycles.first())
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
@@ -613,6 +622,7 @@ class PaymentFactory(DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
+    conflicted = False
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "Payment":
@@ -650,6 +660,7 @@ def create_payment_verification_plan_with_status(
     target_population: "TargetPopulation",
     status: str,
     verification_channel: Optional[str] = None,
+    create_failed_payments: bool = False,
 ) -> PaymentVerificationPlan:
     if not cash_plan.payment_verification_summary.exists():
         PaymentVerificationSummary.objects.create(
@@ -661,7 +672,7 @@ def create_payment_verification_plan_with_status(
         payment_verification_plan.verification_channel = verification_channel
     payment_verification_plan.save(update_fields=("status", "verification_channel"))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    for _ in range(5):
+    for n in range(5):
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
@@ -681,7 +692,27 @@ def create_payment_verification_plan_with_status(
                 parent=cash_plan, household=household, target_population=target_population, currency=currency
             )
         else:
-            payment_record = PaymentFactory(parent=cash_plan, household=household, currency=currency)
+            additional_args = {}
+            if create_failed_payments:  # create only two failed Payments
+                if n == 2:
+                    additional_args = {
+                        "delivered_quantity": to_decimal(0),
+                        "delivered_quantity_usd": to_decimal(0),
+                        "status": Payment.STATUS_NOT_DISTRIBUTED,
+                    }
+                if n == 3:
+                    additional_args = {
+                        "delivered_quantity": None,
+                        "delivered_quantity_usd": None,
+                        "status": Payment.STATUS_ERROR,
+                    }
+
+            payment_record = PaymentFactory(
+                parent=cash_plan,
+                household=household,
+                currency=currency,
+                **additional_args,
+            )
 
         pv = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
@@ -777,7 +808,9 @@ def generate_reconciled_payment_plan() -> None:
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
         program=tp.program,
+        program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
+        is_follow_up=False,
     )[0]
     # update status
     payment_plan.status_finished()
@@ -799,6 +832,7 @@ def generate_reconciled_payment_plan() -> None:
         tp,
         PaymentVerificationPlan.STATUS_ACTIVE,
         PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        True,  # create failed payments
     )
     payment_plan.update_population_count_fields()
 
@@ -885,6 +919,9 @@ def generate_payment_plan() -> None:
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
     )[0]
+    program_cycle = ProgramCycleFactory(
+        program=program,
+    )
 
     targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
     targeting_criteria = TargetingCriteria.objects.update_or_create(
@@ -932,6 +969,7 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program=program,
+        program_cycle=program_cycle,
     )[0]
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -940,7 +978,12 @@ def generate_payment_plan() -> None:
         name="Test FSP 1",
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        vision_vendor_number=123456789,
     )[0]
+
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+    )
 
     DeliveryMechanismPerPaymentPlanFactory(
         payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
@@ -953,7 +996,6 @@ def generate_payment_plan() -> None:
     Payment.objects.update_or_create(
         pk=payment_1_pk,
         parent=payment_plan,
-        excluded=False,
         business_area=afghanistan,
         currency="USD",
         household=household_1,
@@ -968,7 +1010,6 @@ def generate_payment_plan() -> None:
     Payment.objects.update_or_create(
         pk=payment_2_pk,
         parent=payment_plan,
-        excluded=False,
         business_area=afghanistan,
         currency="USD",
         household=household_2,
